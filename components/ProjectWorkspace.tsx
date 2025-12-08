@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useProjectState } from '../hooks/useProjectState';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Zap, FileText, CheckCircle
+  MessageCircle, ShoppingCart, ShieldCheck
 } from 'lucide-react';
 
 import ProjectGantt from './ProjectGantt';
@@ -11,7 +11,11 @@ import RiskRegister from './RiskRegister';
 import ScopeManagement from './ScopeManagement';
 import StakeholderManagement from './StakeholderManagement';
 import ProcurementManagement from './ProcurementManagement';
-import GenericEnterpriseModule from './GenericEnterpriseModule';
+import QualityManagement from './QualityManagement';
+import CommunicationsManagement from './CommunicationsManagement';
+import ResourceManagement from './ResourceManagement';
+import ProjectIntegrationManagement from './ProjectIntegrationManagement';
+
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -19,7 +23,7 @@ interface ProjectWorkspaceProps {
 
 const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   const { project } = useProjectState(projectId);
-  const [activeArea, setActiveArea] = useState('schedule');
+  const [activeArea, setActiveArea] = useState('integration');
 
   const knowledgeAreas = [
     { id: 'integration', label: 'Integration', icon: Briefcase },
@@ -36,6 +40,8 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
   const renderContent = () => {
     switch (activeArea) {
+      case 'integration':
+        return <ProjectIntegrationManagement projectId={projectId} />;
       case 'scope':
         return <ScopeManagement projectId={projectId} />;
       case 'schedule':
@@ -49,13 +55,13 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       case 'procurement':
         return <ProcurementManagement projectId={projectId} />;
       case 'quality':
-         return <GenericEnterpriseModule title="Quality Management" description="Manage ITPs, non-conformance reports, and quality audits." type="grid" icon={CheckCircle} />;
+         return <QualityManagement projectId={projectId} />;
       case 'communications':
-         return <GenericEnterpriseModule title="Communications Log" description="Track all formal project communications and stakeholder touchpoints." type="grid" icon={MessageCircle} />;
+         return <CommunicationsManagement projectId={projectId} />;
       case 'resources':
-         return <GenericEnterpriseModule title="Resource Management" description="This is a placeholder for project-specific resource assignments." type="grid" icon={Users} />;
+         return <ResourceManagement projectId={projectId} />;
       default:
-        return <GenericEnterpriseModule title={activeArea} description="This is a placeholder for a PMI Knowledge Area module." type="dashboard" icon={Briefcase} />;
+        return <div>Module not found</div>;
     }
   };
 
@@ -86,7 +92,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden p-0">
+      <div className="flex-1 overflow-hidden p-0 bg-white">
         {renderContent()}
       </div>
     </div>

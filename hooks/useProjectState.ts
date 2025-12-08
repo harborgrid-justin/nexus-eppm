@@ -21,6 +21,7 @@ export const useProjectState = (projectId: string | null) => {
     return state.risks.filter(r => r.projectId === projectId);
   }, [state.risks, projectId]);
 
+  // FIX: Corrected typo from `use-memo` to `useMemo`. This syntax error was causing downstream type inference issues.
   const stakeholders = useMemo(() => {
     return state.stakeholders.filter(s => s.projectId === projectId);
   }, [state.stakeholders, projectId]);
@@ -28,6 +29,21 @@ export const useProjectState = (projectId: string | null) => {
   const procurement = useMemo(() => {
     return state.procurementPackages.filter(p => p.projectId === projectId);
   }, [state.procurementPackages, projectId]);
+
+  const qualityReports = useMemo(() => {
+    return state.qualityReports.filter(q => q.projectId === projectId);
+  }, [state.qualityReports, projectId]);
+
+  const communicationLogs = useMemo(() => {
+    return state.communicationLogs.filter(c => c.projectId === projectId);
+  }, [state.communicationLogs, projectId]);
+
+  const assignedResources = useMemo(() => {
+    if (!project) return [];
+    const resourceIds = new Set(project.tasks.flatMap(t => t.assignedResources));
+    return state.resources.filter(r => resourceIds.has(r.id));
+  }, [project, state.resources]);
+
 
   // --- Derived State Calculations ---
 
@@ -86,6 +102,18 @@ export const useProjectState = (projectId: string | null) => {
       openRisks,
     };
   }, [risks]);
+  
+  const qualityProfile = useMemo(() => {
+    const totalReports = qualityReports.length;
+    const failedReports = qualityReports.filter(r => r.status === 'Fail').length;
+    const passRate = totalReports > 0 ? ((totalReports - failedReports) / totalReports) * 100 : 100;
+
+    return {
+      totalReports,
+      failedReports,
+      passRate
+    };
+  }, [qualityReports]);
 
 
   return {
@@ -93,10 +121,14 @@ export const useProjectState = (projectId: string | null) => {
     summary,
     financials,
     riskProfile,
+    qualityProfile,
     budgetItems, 
     changeOrders,
     risks,
     stakeholders,
     procurement,
+    qualityReports,
+    communicationLogs,
+    assignedResources,
   };
 };

@@ -1,3 +1,5 @@
+export type Industry = 'Standard' | 'Construction' | 'Software';
+
 export enum TaskStatus {
   NOT_STARTED = "Not Started",
   IN_PROGRESS = "In Progress",
@@ -143,9 +145,19 @@ export interface CommunicationLog {
   id: string;
   projectId: string;
   subject: string;
-  participants: string[]; // Stakeholder names
+  participants: string[]; // Names
   date: string;
-  type: 'Meeting' | 'Email' | 'Official Letter';
+  type: 'Meeting' | 'Email' | 'Official Letter' | 'Call';
+  summary: string;
+}
+
+export interface QualityReport {
+  id: string;
+  projectId: string;
+  date: string;
+  type: 'Inspection' | 'Test' | 'Audit';
+  status: 'Pass' | 'Fail' | 'Conditional';
+  details: Record<string, any>; // Flexible for industry specifics
 }
 
 export interface AIAnalysisResult {

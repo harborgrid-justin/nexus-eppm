@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { Resource } from '../types';
 import { MOCK_RESOURCES } from '../constants';
-import { User, DollarSign, Briefcase, BarChart2, List } from 'lucide-react';
+import { useProjectState } from '../hooks/useProjectState';
+// FIX: Import the 'Users' icon. 'Users' is the correct icon for a group, which is more fitting for "Resource Management".
+import { User, Users, DollarSign, Briefcase, BarChart2, List } from 'lucide-react';
 
-interface ResourceManagementProps {}
+interface ResourceManagementProps {
+  projectId?: string; // Optional: If provided, filters to project-specific resources
+}
 
-const ResourceManagement: React.FC<ResourceManagementProps> = () => {
+const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) => {
   const [view, setView] = useState<'list' | 'planning'>('list');
+  const projectState = useProjectState(projectId || null);
+
+  const resources = projectId ? projectState.assignedResources : MOCK_RESOURCES;
 
   // Mock data for heatmap
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
@@ -22,13 +29,16 @@ const ResourceManagement: React.FC<ResourceManagementProps> = () => {
     if (percentage <= 120) return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
     return 'bg-red-100 text-red-800 hover:bg-red-200';
   };
+  
+  const title = projectId ? "Project Resource Plan" : "Portfolio Resource Management";
+  const description = projectId ? "Manage resources assigned to this project." : "Optimize workforce allocation and capacity planning.";
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col">
+    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col p-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Resource Management</h1>
-          <p className="text-slate-500">Optimize workforce allocation and capacity planning.</p>
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><Users className="text-nexus-600"/> {title}</h1>
+          <p className="text-slate-500">{description}</p>
         </div>
         <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
            <button 
@@ -69,22 +79,17 @@ const ResourceManagement: React.FC<ResourceManagementProps> = () => {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Capacity (hrs/wk)</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Allocated (hrs/wk)</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
-                  {MOCK_RESOURCES.map((resource) => (
+                  {resources.map((resource) => (
                     <tr key={resource.id} className="hover:bg-slate-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-9 w-9">
-                            {resource.avatar ? (
-                              <img className="h-9 w-9 rounded-full" src={resource.avatar} alt="" />
-                            ) : (
-                              <div className="h-9 w-9 rounded-full bg-nexus-100 flex items-center justify-center text-nexus-700 text-sm font-medium">
+                            <div className="h-9 w-9 rounded-full bg-nexus-100 flex items-center justify-center text-nexus-700 text-sm font-medium">
                                 {resource.name.split(' ').map(n => n[0]).join('')}
-                              </div>
-                            )}
+                            </div>
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-slate-900">{resource.name}</div>
@@ -101,9 +106,6 @@ const ResourceManagement: React.FC<ResourceManagementProps> = () => {
                         ) : (
                           <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Available</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" className="text-nexus-600 hover:text-nexus-900">Edit</a>
                       </td>
                     </tr>
                   ))}
@@ -132,7 +134,7 @@ const ResourceManagement: React.FC<ResourceManagementProps> = () => {
                    </tr>
                  </thead>
                  <tbody className="bg-white divide-y divide-slate-100">
-                   {MOCK_RESOURCES.map(res => (
+                   {resources.map(res => (
                      <tr key={res.id}>
                        <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-medium text-sm text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                          {res.name} <span className="text-xs text-slate-400 font-normal">({res.role})</span>

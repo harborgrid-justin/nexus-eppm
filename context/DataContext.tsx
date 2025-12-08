@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, Document, Extension, Stakeholder, ProcurementPackage } from '../types';
-import { MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, MOCK_PROCUREMENT } from '../constants';
+import { 
+  Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
+  Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog 
+} from '../types';
+import { 
+  MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
+  MOCK_PROCUREMENT, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS 
+} from '../constants';
 
 const MOCK_INTEGRATIONS: Integration[] = [
   { id: 'sap', name: 'SAP S/4HANA', type: 'ERP', status: 'Connected', lastSync: '10 mins ago', logo: 'S' },
@@ -47,6 +53,8 @@ interface DataState {
   extensions: Extension[];
   stakeholders: Stakeholder[];
   procurementPackages: ProcurementPackage[];
+  qualityReports: QualityReport[];
+  communicationLogs: CommunicationLog[];
 }
 
 type Action = 
@@ -72,6 +80,8 @@ const initialState: DataState = {
   extensions: EXTENSIONS_REGISTRY,
   stakeholders: MOCK_STAKEHOLDERS,
   procurementPackages: MOCK_PROCUREMENT,
+  qualityReports: MOCK_QUALITY_REPORTS,
+  communicationLogs: MOCK_COMM_LOGS,
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {

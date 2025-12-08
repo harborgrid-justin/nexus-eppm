@@ -10,8 +10,10 @@ import IntegrationHub from './components/IntegrationHub';
 import ExtensionMarketplace from './components/ExtensionMarketplace';
 import ExtensionEngine from './components/ExtensionEngine';
 import ProjectWorkspace from './components/ProjectWorkspace';
+import IndustrySelector from './components/IndustrySelector';
 import { Sparkles, Layers } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
+import { IndustryProvider } from './context/IndustryContext';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -89,6 +91,7 @@ const AppContent = () => {
            </div>
 
            <div className="flex items-center gap-4">
+              <IndustrySelector />
               <button 
                 onClick={() => setIsAiOpen(!isAiOpen)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -129,7 +132,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <DataProvider>
-      <AppContent />
+      <IndustryProvider>
+        <AppContent />
+      </IndustryProvider>
     </DataProvider>
   );
 };

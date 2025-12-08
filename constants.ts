@@ -1,4 +1,4 @@
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', capacity: 40, allocated: 35 },
@@ -19,6 +19,19 @@ export const MOCK_PROCUREMENT: ProcurementPackage[] = [
   { id: 'PROC-01', projectId: 'P1001', name: 'Structural Steel Supply', vendor: 'Steel Suppliers Inc.', value: 8500000, status: 'Awarded', deliveryDate: '2024-07-15' },
   { id: 'PROC-02', projectId: 'P1001', name: 'Tunnel Boring Machine Lease', vendor: 'Heavy Equipment Co.', value: 12000000, status: 'Bidding', deliveryDate: '2024-08-01' },
   { id: 'PROC-03', projectId: 'P1001', name: 'Signaling System', vendor: '', value: 4200000, status: 'Draft', deliveryDate: '2025-01-20' },
+];
+
+export const MOCK_QUALITY_REPORTS: QualityReport[] = [
+  { id: 'QR-01', projectId: 'P1001', date: '2024-05-10', type: 'Test', status: 'Pass', details: { testType: 'Concrete Cylinder Break', reference: 'ASTM C39', value: '4200 PSI', requirement: '4000 PSI' } },
+  { id: 'QR-02', projectId: 'P1001', date: '2024-05-15', type: 'Inspection', status: 'Fail', details: { inspectionType: 'Rebar Placement', finding: 'Incorrect spacing at grid line C', correctiveAction: 'Adjust spacing per drawing S-101' } },
+  { id: 'QR-03', projectId: 'P1001', date: '2024-05-20', type: 'Audit', status: 'Pass', details: { auditType: 'Safety Compliance', summary: 'All PPE requirements met.' } },
+  { id: 'QR-04', projectId: 'P1001', date: '2024-05-25', type: 'Test', status: 'Pass', details: { testType: 'Soil Compaction', reference: 'Proctor Test', value: '98%', requirement: '>95%' } },
+];
+
+export const MOCK_COMM_LOGS: CommunicationLog[] = [
+  { id: 'CL-01', projectId: 'P1001', date: '2024-06-01', type: 'Meeting', subject: 'Weekly Progress Review', participants: ['Sarah Chen', 'City Transit Authority'], summary: 'Reviewed schedule progress, no major issues. CTA requested update on steel procurement.' },
+  { id: 'CL-02', projectId: 'P1001', date: '2024-06-03', type: 'Email', subject: 'RE: Steel Procurement Status', participants: ['Sarah Chen', 'Louis Litt'], summary: 'Confirmed PO issued and delivery date is on track for July 15.' },
+  { id: 'CL-03', projectId: 'P1001', date: '2024-06-05', type: 'Official Letter', subject: 'Environmental Compliance Report #5', participants: ['Harvey Specter', 'State Environmental Dept.'], summary: 'Submitted monthly dust control and water runoff report.' },
 ];
 
 const MOCK_WBS: WBSNode[] = [
