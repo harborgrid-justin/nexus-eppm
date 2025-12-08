@@ -1,11 +1,11 @@
 import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
-  { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', capacity: 40, allocated: 35 },
-  { id: 'R2', name: 'Mike Ross', role: 'Civil Engineer', capacity: 40, allocated: 42 },
-  { id: 'R3', name: 'Jessica Pearson', role: 'Architect', capacity: 30, allocated: 10 },
-  { id: 'R4', name: 'Harvey Specter', role: 'Legal Counsel', capacity: 20, allocated: 15 },
-  { id: 'R5', name: 'Louis Litt', role: 'Financial Analyst', capacity: 40, allocated: 38 },
+  { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', capacity: 40, allocated: 35, hourlyRate: 150 },
+  { id: 'R2', name: 'Mike Ross', role: 'Civil Engineer', capacity: 40, allocated: 42, hourlyRate: 120 },
+  { id: 'R3', name: 'Jessica Pearson', role: 'Architect', capacity: 30, allocated: 10, hourlyRate: 180 },
+  { id: 'R4', name: 'Harvey Specter', role: 'Legal Counsel', capacity: 20, allocated: 15, hourlyRate: 250 },
+  { id: 'R5', name: 'Louis Litt', role: 'Financial Analyst', capacity: 40, allocated: 38, hourlyRate: 110 },
 ];
 
 export const MOCK_STAKEHOLDERS: Stakeholder[] = [
@@ -35,17 +35,17 @@ export const MOCK_COMM_LOGS: CommunicationLog[] = [
 ];
 
 const MOCK_WBS: WBSNode[] = [
-  { id: 'WBS-1', wbsCode: '1', name: 'Project Management & Design', children: [
-    { id: 'WBS-1.1', wbsCode: '1.1', name: 'Permitting and Environmental', children: [] },
-    { id: 'WBS-1.2', wbsCode: '1.2', name: 'Detailed Design', children: [] },
+  { id: 'WBS-1', wbsCode: '1', name: 'Project Management & Design', description: 'Overall project management, administration, engineering, and design work.', children: [
+    { id: 'WBS-1.1', wbsCode: '1.1', name: 'Permitting and Environmental', description: 'All activities related to securing permits and ensuring environmental compliance.', children: [] },
+    { id: 'WBS-1.2', wbsCode: '1.2', name: 'Detailed Design', description: 'Finalizing architectural and engineering drawings and specifications.', children: [] },
   ]},
-  { id: 'WBS-2', wbsCode: '2', name: 'Site Work', children: [
-    { id: 'WBS-2.1', wbsCode: '2.1', name: 'Excavation', children: [] },
-    { id: 'WBS-2.2', wbsCode: '2.2', name: 'Utilities', children: [] },
+  { id: 'WBS-2', wbsCode: '2', name: 'Site Work', description: 'Preparation of the construction site.', children: [
+    { id: 'WBS-2.1', wbsCode: '2.1', name: 'Excavation', description: 'Earthwork and excavation for the new metro line foundations.', children: [] },
+    { id: 'WBS-2.2', wbsCode: '2.2', name: 'Utilities', description: 'Relocation and installation of all necessary site utilities.', children: [] },
   ]},
-  { id: 'WBS-3', wbsCode: '3', name: 'Construction', children: [
-     { id: 'WBS-3.1', wbsCode: '3.1', name: 'Substructure', children: [] },
-     { id: 'WBS-3.2', wbsCode: '3.2', name: 'Superstructure', children: [] },
+  { id: 'WBS-3', wbsCode: '3', name: 'Construction', description: 'Physical construction of the metro line extension.', children: [
+     { id: 'WBS-3.1', wbsCode: '3.1', name: 'Substructure', description: 'Foundation and below-ground structural work.', children: [] },
+     { id: 'WBS-3.2', wbsCode: '3.2', name: 'Superstructure', description: 'Above-ground structural work, including stations and track.', children: [] },
   ]},
 ];
 
@@ -62,6 +62,20 @@ export const MOCK_PROJECTS: Project[] = [
     endDate: '2025-12-31',
     health: 'Warning',
     wbs: MOCK_WBS,
+    calendar: { id: 'CAL1', name: 'Standard', workingDays: [1, 2, 3, 4, 5], holidays: [] },
+    baselines: [{
+      id: 'BL1',
+      name: 'Initial Baseline',
+      date: '2024-01-15',
+      taskBaselines: {
+        'T1': { baselineStartDate: '2024-01-05', baselineEndDate: '2024-02-15' },
+        'T2': { baselineStartDate: '2024-02-16', baselineEndDate: '2024-03-30' },
+        'T3': { baselineStartDate: '2024-04-01', baselineEndDate: '2024-06-10' }, // Was 10, now 15
+        'T4': { baselineStartDate: '2024-04-10', baselineEndDate: '2024-05-15' }, // Was 15, now 20
+        'T5': { baselineStartDate: '2024-06-11', baselineEndDate: '2024-09-25' },
+        'T6': { baselineStartDate: '2024-08-01', baselineEndDate: '2024-10-15' },
+      }
+    }],
     tasks: [
       {
         id: 'T1',
@@ -69,25 +83,30 @@ export const MOCK_PROJECTS: Project[] = [
         name: 'Environmental Impact Study',
         startDate: '2024-01-05',
         endDate: '2024-02-15',
-        duration: 41,
+        duration: 29, // Working days
         status: TaskStatus.COMPLETED,
         progress: 100,
         assignedResources: ['R2', 'R4'],
-        predecessors: [],
-        critical: true
+        dependencies: [],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Duration',
+        work: 240, // hours
       },
       {
         id: 'T2',
         wbsCode: '1.2',
-        name: 'Foundation Design Approval',
-        startDate: '2024-02-16',
+        name: 'Design Approval Milestone',
+        startDate: '2024-03-30',
         endDate: '2024-03-30',
-        duration: 43,
+        duration: 0,
         status: TaskStatus.COMPLETED,
         progress: 100,
         assignedResources: ['R3', 'R2'],
-        predecessors: ['T1'],
-        critical: true
+        dependencies: [{ targetId: 'T1', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Milestone',
+        effortType: 'Fixed Duration',
       },
       {
         id: 'T3',
@@ -95,12 +114,15 @@ export const MOCK_PROJECTS: Project[] = [
         name: 'Site Preparation & Excavation',
         startDate: '2024-04-01',
         endDate: '2024-06-15',
-        duration: 75,
+        duration: 54, // Working days
         status: TaskStatus.IN_PROGRESS,
         progress: 65,
         assignedResources: ['R2'],
-        predecessors: ['T2'],
-        critical: true
+        dependencies: [{ targetId: 'T2', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 400,
       },
       {
         id: 'T4',
@@ -108,12 +130,15 @@ export const MOCK_PROJECTS: Project[] = [
         name: 'Procurement of Steel',
         startDate: '2024-04-10',
         endDate: '2024-05-20',
-        duration: 40,
+        duration: 29, // Working days
         status: TaskStatus.DELAYED,
         progress: 40,
         assignedResources: ['R5'],
-        predecessors: ['T2'],
-        critical: false
+        dependencies: [{ targetId: 'T2', type: 'FS', lag: 5 }],
+        critical: false,
+        type: 'Task',
+        effortType: 'Fixed Duration',
+        work: 160,
       },
       {
         id: 'T5',
@@ -121,12 +146,15 @@ export const MOCK_PROJECTS: Project[] = [
         name: 'Substructure Construction',
         startDate: '2024-06-16',
         endDate: '2024-09-30',
-        duration: 106,
+        duration: 75, // Working days
         status: TaskStatus.NOT_STARTED,
         progress: 0,
         assignedResources: ['R2', 'R3'],
-        predecessors: ['T3'],
-        critical: true
+        dependencies: [{ targetId: 'T3', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 1200,
       },
        {
         id: 'T6',
@@ -134,12 +162,15 @@ export const MOCK_PROJECTS: Project[] = [
         name: 'Electrical Systems Rough-in',
         startDate: '2024-08-01',
         endDate: '2024-10-15',
-        duration: 75,
+        duration: 54, // Working days
         status: TaskStatus.NOT_STARTED,
         progress: 0,
         assignedResources: ['R2'],
-        predecessors: ['T3'],
-        critical: false
+        dependencies: [{ targetId: 'T3', type: 'FS', lag: 30 }],
+        critical: false,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 600
       }
     ]
   },

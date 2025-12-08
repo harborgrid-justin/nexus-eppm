@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
-  Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog 
+  Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode 
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
@@ -40,6 +40,28 @@ const MOCK_DOCUMENTS: Document[] = [
   { id: 'DOC-003', projectId: 'P1001', name: 'Q1_Budget_Report.xlsx', type: 'XLSX', size: '1.1 MB', uploadedBy: 'Louis Litt', uploadDate: '2024-04-01', version: '1.0', status: 'Final' },
 ];
 
+// --- WBS UTILS ---
+const findAndModifyNode = (nodes: WBSNode[], targetId: string, modification: (node: WBSNode) => WBSNode): WBSNode[] => {
+  return nodes.map(node => {
+    if (node.id === targetId) {
+      return modification(node);
+    }
+    if (node.children && node.children.length > 0) {
+      return { ...node, children: findAndModifyNode(node.children, targetId, modification) };
+    }
+    return node;
+  });
+};
+
+const findAndRemoveNode = (nodes: WBSNode[], targetId: string): WBSNode[] => {
+  return nodes.filter(node => node.id !== targetId).map(node => {
+    if (node.children && node.children.length > 0) {
+      return { ...node, children: findAndRemoveNode(node.children, targetId) };
+    }
+    return node;
+  });
+};
+
 // --- STATE MANAGEMENT ---
 
 interface DataState {
@@ -67,7 +89,11 @@ type Action =
   | { type: 'UPLOAD_DOCUMENT'; payload: Document }
   | { type: 'INSTALL_EXTENSION'; payload: string }
   | { type: 'UNINSTALL_EXTENSION'; payload: string }
-  | { type: 'ACTIVATE_EXTENSION'; payload: string };
+  | { type: 'ACTIVATE_EXTENSION'; payload: string }
+  | { type: 'ADD_WBS_NODE'; payload: { projectId: string; parentId: string | null; newNode: WBSNode } }
+  | { type: 'UPDATE_WBS_NODE'; payload: { projectId: string; nodeId: string; updatedData: Partial<WBSNode> } }
+  | { type: 'DELETE_WBS_NODE'; payload: { projectId: string; nodeId: string } }
+  | { type: 'SET_BASELINE'; payload: { projectId: string; name: string } };
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
@@ -95,6 +121,71 @@ const dataReducer = (state: DataState, action: Action): DataState => {
             : p
         )
       };
+    case 'SET_BASELINE': {
+        const { projectId, name } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                const newBaseline = {
+                    id: `BL${(p.baselines?.length || 0) + 1}`,
+                    name,
+                    date: new Date().toISOString().split('T')[0],
+                    taskBaselines: p.tasks.reduce((acc, task) => {
+                        acc[task.id] = {
+                            baselineStartDate: task.startDate,
+                            baselineEndDate: task.endDate
+                        };
+                        return acc;
+                    }, {} as Record<string, { baselineStartDate: string, baselineEndDate: string }>)
+                };
+                return { ...p, baselines: [...(p.baselines || []), newBaseline] };
+            })
+        };
+    }
+    case 'ADD_WBS_NODE': {
+      const { projectId, parentId, newNode } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map(p => {
+          if (p.id !== projectId) return p;
+          let newWbs = [...(p.wbs || [])];
+          if (parentId) {
+            newWbs = findAndModifyNode(newWbs, parentId, node => ({
+              ...node,
+              children: [...node.children, newNode]
+            }));
+          } else {
+            newWbs.push(newNode);
+          }
+          return { ...p, wbs: newWbs };
+        })
+      };
+    }
+    case 'UPDATE_WBS_NODE': {
+      const { projectId, nodeId, updatedData } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map(p => {
+          if (p.id !== projectId) return p;
+          const newWbs = findAndModifyNode(p.wbs || [], nodeId, node => ({
+            ...node, ...updatedData
+          }));
+          return { ...p, wbs: newWbs };
+        })
+      };
+    }
+    case 'DELETE_WBS_NODE': {
+      const { projectId, nodeId } = action.payload;
+       return {
+        ...state,
+        projects: state.projects.map(p => {
+          if (p.id !== projectId) return p;
+          const newWbs = findAndRemoveNode(p.wbs || [], nodeId);
+          return { ...p, wbs: newWbs };
+        })
+      };
+    }
     case 'ADD_RISK':
       return { ...state, risks: [...state.risks, action.payload] };
     case 'TOGGLE_INTEGRATION':

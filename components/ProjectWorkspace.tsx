@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useProjectState } from '../hooks/useProjectState';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck
+  MessageCircle, ShoppingCart, ShieldCheck, Network
 } from 'lucide-react';
 
 import ProjectGantt from './ProjectGantt';
@@ -15,6 +15,7 @@ import QualityManagement from './QualityManagement';
 import CommunicationsManagement from './CommunicationsManagement';
 import ResourceManagement from './ResourceManagement';
 import ProjectIntegrationManagement from './ProjectIntegrationManagement';
+import NetworkDiagram from './scheduling/NetworkDiagram';
 
 
 interface ProjectWorkspaceProps {
@@ -24,6 +25,7 @@ interface ProjectWorkspaceProps {
 const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   const { project } = useProjectState(projectId);
   const [activeArea, setActiveArea] = useState('integration');
+  const [scheduleView, setScheduleView] = useState<'gantt' | 'network'>('gantt');
 
   const knowledgeAreas = [
     { id: 'integration', label: 'Integration', icon: Briefcase },
@@ -45,7 +47,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       case 'scope':
         return <ScopeManagement projectId={projectId} />;
       case 'schedule':
-        return <ProjectGantt project={project!} />;
+        return scheduleView === 'gantt' ? <ProjectGantt project={project!} /> : <NetworkDiagram project={project!} />;
       case 'cost':
         return <CostManagement projectId={projectId} />;
       case 'risk':
@@ -72,7 +74,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   return (
     <div className="h-full w-full flex flex-col animate-in fade-in duration-300">
       {/* Knowledge Area Navigation */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 overflow-x-auto scrollbar-hide">
+      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 overflow-x-auto scrollbar-hide flex justify-between items-center pr-4">
         <nav className="flex space-x-2 px-4">
           {knowledgeAreas.map(area => (
             <button
@@ -89,6 +91,12 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
             </button>
           ))}
         </nav>
+        {activeArea === 'schedule' && (
+            <div className="flex bg-slate-200 p-0.5 rounded-lg">
+                <button onClick={() => setScheduleView('gantt')} className={`p-1.5 rounded-md ${scheduleView === 'gantt' ? 'bg-white shadow' : ''}`}><GanttChartSquare size={16} /></button>
+                <button onClick={() => setScheduleView('network')} className={`p-1.5 rounded-md ${scheduleView === 'network' ? 'bg-white shadow' : ''}`}><Network size={16} /></button>
+            </div>
+        )}
       </div>
 
       {/* Content Area */}
