@@ -9,7 +9,10 @@ import Reports from './components/Reports';
 import AdminSettings from './components/AdminSettings';
 import RiskRegister from './components/RiskRegister';
 import IntegrationHub from './components/IntegrationHub';
-import { Sparkles } from 'lucide-react';
+import CostManagement from './components/CostManagement';
+import DocumentControl from './components/DocumentControl';
+import GenericEnterpriseModule from './components/GenericEnterpriseModule';
+import { Sparkles, ClipboardList, HardHat, GraduationCap, Archive, Layers, ShieldCheck } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 
 // Inner App component that consumes the Data Context
@@ -45,16 +48,26 @@ const AppContent = () => {
         return <RiskRegister projectId={selectedProject.id} />;
       case 'integrations':
         return <IntegrationHub />;
+      case 'budget':
+      case 'change_orders':
+        return <CostManagement projectId={selectedProject.id} />;
+      case 'documents':
+        return <DocumentControl projectId={selectedProject.id} />;
+      
+      // Scaffolding for "80 Features" via Generic Module
+      case 'daily_logs':
+         return <GenericEnterpriseModule title="Daily Logs" description="Track site activities, weather, and labor hours." type="form" icon={ClipboardList} />;
+      case 'safety':
+         return <GenericEnterpriseModule title="HSE Management" description="Incident reporting, safety observations, and compliance audits." type="dashboard" icon={HardHat} />;
+      case 'quality':
+         return <GenericEnterpriseModule title="Quality Control" description="Manage inspections, punch lists, and non-conformance reports." type="grid" icon={ShieldCheck} />;
+      case 'training':
+         return <GenericEnterpriseModule title="Training & Certifications" description="Track workforce qualifications and mandatory training." type="grid" icon={GraduationCap} />;
+      case 'archive':
+         return <GenericEnterpriseModule title="Project Archive" description="Read-only access to historical project data and artifacts." type="grid" icon={Archive} />;
+      
       default:
-        // Generic placeholder for the "80 other features" in the sidebar
-        return (
-           <div className="flex items-center justify-center h-full text-slate-400">
-              <div className="text-center p-8 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                 <h2 className="text-xl font-bold mb-2 text-slate-600">Module: {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h2>
-                 <p className="max-w-md mx-auto">This enterprise module is initialized in the local platform but requires license activation to access full functionality.</p>
-              </div>
-           </div>
-        );
+        return <GenericEnterpriseModule title={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} description="Enterprise Module" type="grid" icon={Layers} />;
     }
   };
 
@@ -66,8 +79,8 @@ const AppContent = () => {
          {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex justify-between items-center px-6 flex-shrink-0 z-20 shadow-sm">
            <div className="flex items-center gap-4">
-              {/* Only show project dropdown in Schedule and Risk view */}
-              {(activeTab === 'schedule' || activeTab === 'risks') && (
+              {/* Only show project dropdown in specific project-centric views */}
+              {['schedule', 'risks', 'budget', 'change_orders', 'documents', 'daily_logs', 'quality'].includes(activeTab) && (
                  <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-4">
                    <span className="text-sm text-slate-500 font-medium">Project:</span>
                    <select 

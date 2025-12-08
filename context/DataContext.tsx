@@ -1,40 +1,70 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Project, Resource, Risk, Integration, Task } from '../types';
+import { Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, Document } from '../types';
 import { MOCK_PROJECTS, MOCK_RESOURCES } from '../constants';
 
-// Initial Integrations Mock
+// --- MOCK DATA GENERATION FOR SCAFFOLDING ---
+
 const MOCK_INTEGRATIONS: Integration[] = [
   { id: 'sap', name: 'SAP S/4HANA', type: 'ERP', status: 'Connected', lastSync: '10 mins ago', logo: 'S' },
   { id: 'oracle', name: 'Oracle Primavera Cloud', type: 'ERP', status: 'Disconnected', lastSync: '2 days ago', logo: 'O' },
   { id: 'wd', name: 'Workday', type: 'HRIS', status: 'Connected', lastSync: '1 hour ago', logo: 'W' },
   { id: 'sf', name: 'Salesforce', type: 'CRM', status: 'Connected', lastSync: '5 mins ago', logo: 'F' },
+  { id: 'procore', name: 'Procore', type: 'ERP', status: 'Connected', lastSync: '1 hour ago', logo: 'P' },
 ];
 
-// Initial Risks Mock (attached to P1001)
 const MOCK_RISKS: Risk[] = [
   { id: 'RSK-001', projectId: 'P1001', description: 'Supply chain delay for steel', category: 'External', probability: 'High', impact: 'High', status: 'Open', owner: 'Mike Ross', mitigationPlan: 'Source alternative local suppliers.' },
   { id: 'RSK-002', projectId: 'P1001', description: 'Permit approval bottleneck', category: 'Schedule', probability: 'Medium', impact: 'High', status: 'Open', owner: 'Sarah Chen', mitigationPlan: 'Expedite processing with city council.' },
   { id: 'RSK-003', projectId: 'P1001', description: 'Unexpected soil conditions', category: 'Technical', probability: 'Low', impact: 'Medium', status: 'Mitigated', owner: 'Jessica Pearson', mitigationPlan: 'Conduct secondary geo-survey.' },
 ];
 
+const MOCK_CHANGE_ORDERS: ChangeOrder[] = [
+  { id: 'CO-001', projectId: 'P1001', title: 'Additional Foundation Reinforcement', description: 'Required due to soil report findings.', amount: 150000, status: 'Approved', submittedBy: 'Mike Ross', dateSubmitted: '2024-03-10' },
+  { id: 'CO-002', projectId: 'P1001', title: 'Scope Expansion - North Wing', description: 'Client requested addition of 2 floors.', amount: 4500000, status: 'Pending Approval', submittedBy: 'Sarah Chen', dateSubmitted: '2024-06-15' },
+];
+
+const MOCK_BUDGET: BudgetLineItem[] = [
+  { id: 'B-001', projectId: 'P1001', category: 'Labor', planned: 12000000, actual: 4500000, variance: 7500000 },
+  { id: 'B-002', projectId: 'P1001', category: 'Materials', planned: 18000000, actual: 6200000, variance: 11800000 },
+  { id: 'B-003', projectId: 'P1001', category: 'Equipment', planned: 5000000, actual: 1200000, variance: 3800000 },
+  { id: 'B-004', projectId: 'P1001', category: 'Contingency', planned: 4000000, actual: 150000, variance: 3850000 },
+];
+
+const MOCK_DOCUMENTS: Document[] = [
+  { id: 'DOC-001', projectId: 'P1001', name: 'Project_Charter_Signed.pdf', type: 'PDF', size: '2.4 MB', uploadedBy: 'Sarah Chen', uploadDate: '2024-01-02', version: '1.0', status: 'Final' },
+  { id: 'DOC-002', projectId: 'P1001', name: 'Site_Plan_v4.dwg', type: 'DWG', size: '45 MB', uploadedBy: 'Jessica Pearson', uploadDate: '2024-02-15', version: '4.2', status: 'Draft' },
+  { id: 'DOC-003', projectId: 'P1001', name: 'Q1_Budget_Report.xlsx', type: 'XLSX', size: '1.1 MB', uploadedBy: 'Louis Litt', uploadDate: '2024-04-01', version: '1.0', status: 'Final' },
+];
+
+// --- STATE MANAGEMENT ---
+
 interface DataState {
   projects: Project[];
   resources: Resource[];
   integrations: Integration[];
   risks: Risk[];
+  changeOrders: ChangeOrder[];
+  budgetItems: BudgetLineItem[];
+  documents: Document[];
 }
 
 type Action = 
   | { type: 'UPDATE_TASK'; payload: { projectId: string; task: Task } }
   | { type: 'ADD_RISK'; payload: Risk }
   | { type: 'TOGGLE_INTEGRATION'; payload: string }
-  | { type: 'ADD_RESOURCE'; payload: Resource };
+  | { type: 'ADD_RESOURCE'; payload: Resource }
+  | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
+  | { type: 'APPROVE_CHANGE_ORDER'; payload: string } // id
+  | { type: 'UPLOAD_DOCUMENT'; payload: Document };
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
   resources: MOCK_RESOURCES,
   integrations: MOCK_INTEGRATIONS,
   risks: MOCK_RISKS,
+  changeOrders: MOCK_CHANGE_ORDERS,
+  budgetItems: MOCK_BUDGET,
+  documents: MOCK_DOCUMENTS,
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {
@@ -61,6 +91,17 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       };
     case 'ADD_RESOURCE':
       return { ...state, resources: [...state.resources, action.payload] };
+    case 'ADD_CHANGE_ORDER':
+      return { ...state, changeOrders: [...state.changeOrders, action.payload] };
+    case 'APPROVE_CHANGE_ORDER':
+      return {
+        ...state,
+        changeOrders: state.changeOrders.map(co => 
+          co.id === action.payload ? { ...co, status: 'Approved' } : co
+        )
+      };
+    case 'UPLOAD_DOCUMENT':
+      return { ...state, documents: [...state.documents, action.payload] };
     default:
       return state;
   }
@@ -71,6 +112,9 @@ const DataContext = createContext<{
   dispatch: React.Dispatch<Action>;
   getProjectRisks: (projectId: string) => Risk[];
   getTask: (projectId: string, taskId: string) => Task | undefined;
+  getProjectBudget: (projectId: string) => BudgetLineItem[];
+  getProjectChanges: (projectId: string) => ChangeOrder[];
+  getProjectDocs: (projectId: string) => Document[];
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -83,8 +127,20 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return project?.tasks.find(t => t.id === taskId);
   };
 
+  const getProjectBudget = (projectId: string) => state.budgetItems.filter(b => b.projectId === projectId);
+  const getProjectChanges = (projectId: string) => state.changeOrders.filter(c => c.projectId === projectId);
+  const getProjectDocs = (projectId: string) => state.documents.filter(d => d.projectId === projectId);
+
   return (
-    <DataContext.Provider value={{ state, dispatch, getProjectRisks, getTask }}>
+    <DataContext.Provider value={{ 
+      state, 
+      dispatch, 
+      getProjectRisks, 
+      getTask,
+      getProjectBudget,
+      getProjectChanges,
+      getProjectDocs
+    }}>
       {children}
     </DataContext.Provider>
   );

@@ -67,6 +67,38 @@ export interface Integration {
   logo: string;
 }
 
+export interface ChangeOrder {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  amount: number;
+  status: 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
+  submittedBy: string;
+  dateSubmitted: string;
+}
+
+export interface BudgetLineItem {
+  id: string;
+  projectId: string;
+  category: 'Labor' | 'Materials' | 'Equipment' | 'Subcontractor' | 'Contingency';
+  planned: number;
+  actual: number;
+  variance: number; // Calculated
+}
+
+export interface Document {
+  id: string;
+  projectId: string;
+  name: string;
+  type: 'PDF' | 'DWG' | 'XLSX' | 'DOCX' | 'IMG';
+  size: string;
+  uploadedBy: string;
+  uploadDate: string;
+  version: string;
+  status: 'Draft' | 'Final' | 'Archived';
+}
+
 export interface AIAnalysisResult {
   summary: string;
   risks: string[];

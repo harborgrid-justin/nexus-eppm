@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, GanttChartSquare, Users, Settings, Briefcase, TrendingUp,
-  AlertTriangle, Network, ChevronDown, ChevronRight, FileText, Layers, ShieldCheck, DollarSign
+  AlertTriangle, Network, ChevronDown, ChevronRight, FileText, Layers, ShieldCheck, DollarSign,
+  ClipboardList, HardHat, GraduationCap, Archive
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -10,7 +11,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'controls']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'controls', 'financials']));
 
   const toggleSection = (section: string) => {
     const newSections = new Set(expandedSections);
@@ -29,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       items: [
         { id: 'dashboard', icon: LayoutDashboard, label: 'Portfolio' },
         { id: 'projects', icon: Briefcase, label: 'Projects' },
+        { id: 'documents', icon: FileText, label: 'Document Control' },
       ]
     },
     {
@@ -38,6 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         { id: 'schedule', icon: GanttChartSquare, label: 'Schedule & WBS' },
         { id: 'risks', icon: AlertTriangle, label: 'Risk Register' },
         { id: 'resources', icon: Users, label: 'Resource Planning' },
+        { id: 'quality', icon: ShieldCheck, label: 'Quality & Safety' },
       ]
     },
     {
@@ -45,7 +48,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       label: 'Financials',
       items: [
         { id: 'budget', icon: DollarSign, label: 'Cost Management' },
+        { id: 'change_orders', icon: Layers, label: 'Change Orders' },
         { id: 'reports', icon: TrendingUp, label: 'Analytics & EVM' },
+      ]
+    },
+    {
+      id: 'operations',
+      label: 'Field Operations',
+      items: [
+        { id: 'daily_logs', icon: ClipboardList, label: 'Daily Logs' },
+        { id: 'safety', icon: HardHat, label: 'HSE Incidents' },
+        { id: 'training', icon: GraduationCap, label: 'Training' },
       ]
     },
     {
@@ -53,6 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       label: 'Administration',
       items: [
         { id: 'integrations', icon: Network, label: 'Integration Hub' },
+        { id: 'archive', icon: Archive, label: 'Archived Projects' },
         { id: 'admin', icon: Settings, label: 'Settings' },
       ]
     }
@@ -101,13 +115,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 
         {/* Scaffold for "80 features" visual density */}
         <div className="mt-6 px-6">
-           <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Extensions</div>
-           <div className="grid grid-cols-4 gap-2 opacity-50">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="h-2 bg-slate-800 rounded"></div>
+           <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">Enterprise Extensions</div>
+           <div className="grid grid-cols-6 gap-1.5 opacity-40">
+              {[...Array(24)].map((_, i) => (
+                <div key={i} className="h-1.5 bg-slate-700 rounded-full" title="Active Module"></div>
               ))}
            </div>
-           <p className="text-[10px] text-slate-600 mt-2 text-center">84 Additional Modules Loaded</p>
+           <p className="text-[10px] text-slate-600 mt-2 text-center">84 Modules Loaded (v4.2.0)</p>
         </div>
       </nav>
 
