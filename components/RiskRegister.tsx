@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { AlertTriangle, Plus, Filter, ArrowUpRight, ArrowDownRight, Minus, Search, ShieldCheck } from 'lucide-react';
 import { Risk } from '../types';
+import { useProjectState } from '../hooks/useProjectState';
 
 interface RiskRegisterProps {
   projectId: string;
 }
 
 const RiskRegister: React.FC<RiskRegisterProps> = ({ projectId }) => {
-  const { getProjectRisks, dispatch } = useData();
-  const risks = getProjectRisks(projectId);
+  const { risks, riskProfile } = useProjectState(projectId);
   const [filter, setFilter] = useState('All');
 
   const getImpactScore = (p: string, i: string) => {
@@ -22,6 +22,10 @@ const RiskRegister: React.FC<RiskRegisterProps> = ({ projectId }) => {
     if (score >= 3) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     return 'bg-green-100 text-green-800 border-green-200';
   };
+
+  if (!risks || !riskProfile) {
+    return <div>Loading risk register...</div>;
+  }
 
   return (
     <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-300">
@@ -41,15 +45,15 @@ const RiskRegister: React.FC<RiskRegisterProps> = ({ projectId }) => {
        <div className="grid grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500">Total Risks</div>
-             <div className="text-2xl font-bold text-slate-900">{risks.length}</div>
+             <div className="text-2xl font-bold text-slate-900">{riskProfile.totalRisks}</div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500">High Priority</div>
-             <div className="text-2xl font-bold text-red-600">{risks.filter(r => getImpactScore(r.probability, r.impact) >= 6).length}</div>
+             <div className="text-2xl font-bold text-red-600">{riskProfile.highImpactRisks}</div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500">Open</div>
-             <div className="text-2xl font-bold text-nexus-600">{risks.filter(r => r.status === 'Open').length}</div>
+             <div className="text-2xl font-bold text-nexus-600">{riskProfile.openRisks}</div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500">Mitigated</div>

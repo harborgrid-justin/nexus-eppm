@@ -4,23 +4,19 @@ import { DollarSign, TrendingUp, AlertTriangle, FileText, CheckCircle, Plus, Pie
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
+import { useProjectState } from '../hooks/useProjectState';
 
 interface CostManagementProps {
   projectId: string;
 }
 
 const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
-  const { getProjectBudget, getProjectChanges } = useData();
+  const { project, financials, budgetItems, changeOrders } = useProjectState(projectId);
   const [view, setView] = useState<'budget' | 'changes'>('budget');
   
-  const budgetItems = getProjectBudget(projectId);
-  const changeOrders = getProjectChanges(projectId);
-
-  const totalPlanned = budgetItems.reduce((acc, item) => acc + item.planned, 0);
-  const totalActual = budgetItems.reduce((acc, item) => acc + item.actual, 0);
-  const totalVariance = budgetItems.reduce((acc, item) => acc + item.variance, 0);
-
-  const pendingCOAmount = changeOrders.filter(co => co.status === 'Pending Approval').reduce((acc, co) => acc + co.amount, 0);
+  if (!project || !financials) {
+    return <div>Loading project financial data...</div>;
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col">
@@ -50,22 +46,22 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
        {/* KPIs */}
        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-             <div className="text-sm text-slate-500 mb-1">Total Budget</div>
-             <div className="text-2xl font-bold text-slate-900">${(totalPlanned / 1000000).toFixed(2)}M</div>
+             <div className="text-sm text-slate-500 mb-1">Revised Budget</div>
+             <div className="text-2xl font-bold text-slate-900">${(financials.revisedBudget / 1000000).toFixed(2)}M</div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500 mb-1">Actual Spend</div>
-             <div className="text-2xl font-bold text-blue-600">${(totalActual / 1000000).toFixed(2)}M</div>
-             <div className="text-xs text-slate-400 mt-1">{((totalActual/totalPlanned)*100).toFixed(1)}% utilized</div>
+             <div className="text-2xl font-bold text-blue-600">${(financials.totalActual / 1000000).toFixed(2)}M</div>
+             <div className="text-xs text-slate-400 mt-1">{financials.budgetUtilization.toFixed(1)}% utilized</div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500 mb-1">Variance</div>
-             <div className="text-2xl font-bold text-green-600">${(totalVariance / 1000000).toFixed(2)}M</div>
+             <div className="text-2xl font-bold text-green-600">${(financials.variance / 1000000).toFixed(2)}M</div>
              <div className="text-xs text-slate-400 mt-1">Under Budget</div>
           </div>
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-sm text-slate-500 mb-1">Pending Changes</div>
-             <div className="text-2xl font-bold text-amber-500">${(pendingCOAmount / 1000).toFixed(1)}k</div>
+             <div className="text-2xl font-bold text-amber-500">${(financials.pendingCOAmount / 1000).toFixed(1)}k</div>
              <div className="text-xs text-slate-400 mt-1">{changeOrders.filter(co => co.status === 'Pending Approval').length} requests</div>
           </div>
        </div>

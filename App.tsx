@@ -1,73 +1,59 @@
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
-import ProjectGantt from './components/ProjectGantt';
 import ProjectList from './components/ProjectList';
 import AiAssistant from './components/AiAssistant';
 import ResourceManagement from './components/ResourceManagement';
 import Reports from './components/Reports';
 import AdminSettings from './components/AdminSettings';
-import RiskRegister from './components/RiskRegister';
 import IntegrationHub from './components/IntegrationHub';
-import CostManagement from './components/CostManagement';
-import DocumentControl from './components/DocumentControl';
-import GenericEnterpriseModule from './components/GenericEnterpriseModule';
-import { Sparkles, ClipboardList, HardHat, GraduationCap, Archive, Layers, ShieldCheck } from 'lucide-react';
+import ExtensionMarketplace from './components/ExtensionMarketplace';
+import ExtensionEngine from './components/ExtensionEngine';
+import ProjectWorkspace from './components/ProjectWorkspace';
+import { Sparkles, Layers } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 
-// Inner App component that consumes the Data Context
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>('P1001'); // Default to a project for workspace
   const [isAiOpen, setIsAiOpen] = useState(false);
   const { state } = useData();
 
-  // Default to first project if none selected but we are in schedule view
   const selectedProject = state.projects.find(p => p.id === selectedProjectId) || state.projects[0];
 
   const handleProjectSelect = (id: string) => {
     setSelectedProjectId(id);
-    setActiveTab('schedule');
+    setActiveTab('projectWorkspace');
   };
 
   const renderContent = () => {
+    const activeExtension = state.extensions.find(ext => ext.id === activeTab);
+    if (activeExtension) {
+      return <ExtensionEngine extension={activeExtension} />;
+    }
+
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard projects={state.projects} />;
-      case 'projects':
-        return <ProjectList projects={state.projects} onSelectProject={handleProjectSelect} />;
-      case 'schedule':
-        return <ProjectGantt project={selectedProject} />;
+        return <Dashboard />;
+      case 'projectList':
+        return <ProjectList onSelectProject={handleProjectSelect} />;
+      case 'projectWorkspace':
+        if (!selectedProjectId) {
+            return <div className="text-center p-8">Please select a project from the Project List to view its workspace.</div>
+        }
+        return <ProjectWorkspace projectId={selectedProjectId} />;
+      case 'marketplace':
+        return <ExtensionMarketplace />;
       case 'resources':
         return <ResourceManagement />;
       case 'reports':
         return <Reports projects={state.projects} />;
       case 'admin':
         return <AdminSettings />;
-      case 'risks':
-        return <RiskRegister projectId={selectedProject.id} />;
       case 'integrations':
         return <IntegrationHub />;
-      case 'budget':
-      case 'change_orders':
-        return <CostManagement projectId={selectedProject.id} />;
-      case 'documents':
-        return <DocumentControl projectId={selectedProject.id} />;
-      
-      // Scaffolding for "80 Features" via Generic Module
-      case 'daily_logs':
-         return <GenericEnterpriseModule title="Daily Logs" description="Track site activities, weather, and labor hours." type="form" icon={ClipboardList} />;
-      case 'safety':
-         return <GenericEnterpriseModule title="HSE Management" description="Incident reporting, safety observations, and compliance audits." type="dashboard" icon={HardHat} />;
-      case 'quality':
-         return <GenericEnterpriseModule title="Quality Control" description="Manage inspections, punch lists, and non-conformance reports." type="grid" icon={ShieldCheck} />;
-      case 'training':
-         return <GenericEnterpriseModule title="Training & Certifications" description="Track workforce qualifications and mandatory training." type="grid" icon={GraduationCap} />;
-      case 'archive':
-         return <GenericEnterpriseModule title="Project Archive" description="Read-only access to historical project data and artifacts." type="grid" icon={Archive} />;
-      
       default:
-        return <GenericEnterpriseModule title={activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} description="Enterprise Module" type="grid" icon={Layers} />;
+        return <div>Select a module</div>;
     }
   };
 
@@ -79,8 +65,7 @@ const AppContent = () => {
          {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex justify-between items-center px-6 flex-shrink-0 z-20 shadow-sm">
            <div className="flex items-center gap-4">
-              {/* Only show project dropdown in specific project-centric views */}
-              {['schedule', 'risks', 'budget', 'change_orders', 'documents', 'daily_logs', 'quality'].includes(activeTab) && (
+              {activeTab === 'projectWorkspace' ? (
                  <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-4">
                    <span className="text-sm text-slate-500 font-medium">Project:</span>
                    <select 
@@ -94,10 +79,13 @@ const AppContent = () => {
                       ))}
                    </select>
                  </div>
+              ) : (
+                <h2 className="text-lg font-semibold text-slate-800">
+                  {
+                    {'dashboard': 'Portfolio Dashboard', 'projectList': 'Project Master List'}[activeTab] || 'Nexus PPM'
+                  }
+                </h2>
               )}
-              {activeTab === 'dashboard' && <h2 className="text-lg font-semibold text-slate-800">Executive Dashboard</h2>}
-              {activeTab === 'projects' && <h2 className="text-lg font-semibold text-slate-800">Portfolio Master List</h2>}
-              {activeTab === 'integrations' && <h2 className="text-lg font-semibold text-slate-800">Enterprise Connectors</h2>}
            </div>
 
            <div className="flex items-center gap-4">
@@ -121,8 +109,10 @@ const AppContent = () => {
         </header>
 
         {/* Main Workspace */}
-        <main className="flex-1 overflow-hidden p-6 relative">
-           {renderContent()}
+        <main className="flex-1 overflow-hidden p-6 relative bg-slate-100">
+           <div className="h-full w-full bg-slate-50 rounded-xl">
+             {renderContent()}
+           </div>
         </main>
       </div>
 

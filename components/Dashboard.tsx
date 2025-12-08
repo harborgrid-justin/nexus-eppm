@@ -1,30 +1,12 @@
 import React from 'react';
-import { Project } from '../types';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import { TrendingDown, TrendingUp, AlertOctagon, DollarSign } from 'lucide-react';
+import { usePortfolioState } from '../hooks/usePortfolioState';
 
-interface DashboardProps {
-  projects: Project[];
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
-  const totalBudget = projects.reduce((acc, p) => acc + p.budget, 0);
-  const totalSpent = projects.reduce((acc, p) => acc + p.spent, 0);
-  const budgetUtilization = (totalSpent / totalBudget) * 100;
-  
-  const healthData = [
-    { name: 'Good', value: projects.filter(p => p.health === 'Good').length, color: '#22c55e' },
-    { name: 'Warning', value: projects.filter(p => p.health === 'Warning').length, color: '#eab308' },
-    { name: 'Critical', value: projects.filter(p => p.health === 'Critical').length, color: '#ef4444' },
-  ];
-
-  const budgetData = projects.map(p => ({
-    name: p.code,
-    Budget: p.budget,
-    Spent: p.spent
-  }));
+const Dashboard: React.FC = () => {
+  const { summary, healthDataForChart, budgetDataForChart } = usePortfolioState();
 
   const StatCard = ({ title, value, subtext, icon: Icon, trend }: any) => (
     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -57,21 +39,21 @@ const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard 
           title="Total Portfolio Value" 
-          value={`$${(totalBudget / 1000000).toFixed(1)}M`}
-          subtext="Across 2 active projects"
+          value={`$${(summary.totalBudget / 1000000).toFixed(1)}M`}
+          subtext={`Across ${summary.totalProjects} active projects`}
           icon={DollarSign}
           trend="up"
         />
         <StatCard 
           title="Budget Utilization" 
-          value={`${budgetUtilization.toFixed(1)}%`}
+          value={`${summary.budgetUtilization.toFixed(1)}%`}
           subtext="Within expected variance"
           icon={TrendingUp}
           trend="up"
         />
         <StatCard 
           title="Critical Issues" 
-          value="3"
+          value={summary.healthCounts.critical}
           subtext="Requires immediate attention"
           icon={AlertOctagon}
           trend="down"
@@ -90,7 +72,7 @@ const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
           <h3 className="text-lg font-bold text-slate-900 mb-6">Budget vs Actuals by Project</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={budgetData}>
+              <BarChart data={budgetDataForChart}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" tick={{fontSize: 12}} />
                 <YAxis tick={{fontSize: 12}} tickFormatter={(value) => `$${value/1000000}M`} />
@@ -108,7 +90,7 @@ const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={healthData}
+                  data={healthDataForChart}
                   cx="50%"
                   cy="50%"
                   innerRadius={80}
@@ -116,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {healthData.map((entry, index) => (
+                  {healthDataForChart.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -125,7 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ projects }) => {
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center gap-6 mt-[-20px]">
-            {healthData.map(d => (
+            {healthDataForChart.map(d => (
               <div key={d.name} className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ background: d.color }}></div>
                 <span className="text-sm text-slate-600">{d.name} ({d.value})</span>

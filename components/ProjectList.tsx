@@ -1,19 +1,15 @@
 import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { calculateProjectProgress } from '../utils/calculations';
+import { usePortfolioState } from '../hooks/usePortfolioState';
 
 interface ProjectListProps {
-  projects: Project[];
   onSelectProject: (projectId: string) => void;
 }
 
-const ProjectList: React.FC<ProjectListProps> = ({ projects, onSelectProject }) => {
-  const calculateProgress = (project: Project) => {
-    if (project.tasks.length === 0) return 0;
-    const totalDuration = project.tasks.reduce((acc, t) => acc + t.duration, 0);
-    const completedDuration = project.tasks.reduce((acc, t) => acc + (t.duration * (t.progress / 100)), 0);
-    return Math.round((completedDuration / totalDuration) * 100);
-  };
+const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
+  const { projects } = usePortfolioState();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col">
@@ -60,7 +56,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onSelectProject }) 
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
               {projects.map((project) => {
-                const progress = calculateProgress(project);
+                const progress = calculateProjectProgress(project);
                 return (
                   <tr 
                     key={project.id} 

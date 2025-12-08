@@ -44,6 +44,13 @@ export interface Risk {
   mitigationPlan: string;
 }
 
+export interface WBSNode {
+  id: string;
+  wbsCode: string;
+  name: string;
+  children: WBSNode[];
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -56,6 +63,7 @@ export interface Project {
   tasks: Task[];
   health: 'Good' | 'Warning' | 'Critical';
   risks?: Risk[];
+  wbs?: WBSNode[];
 }
 
 export interface Integration {
@@ -97,6 +105,47 @@ export interface Document {
   uploadDate: string;
   version: string;
   status: 'Draft' | 'Final' | 'Archived';
+}
+
+export interface Extension {
+  id: string;
+  name: string;
+  description: string;
+  category: 'Construction' | 'Financials' | 'Operations' | 'Compliance' | 'Design' | 'Analytics';
+  icon: string; // Lucide icon name or emoji
+  status: 'Active' | 'Installed' | 'Available';
+  version: string;
+  installedDate?: string;
+  viewType: 'dashboard' | 'grid' | 'map' | 'viewer3d' | 'form';
+}
+
+export interface Stakeholder {
+  id: string;
+  projectId: string;
+  name: string;
+  role: string;
+  interest: 'Low' | 'Medium' | 'High';
+  influence: 'Low' | 'Medium' | 'High';
+  engagementStrategy: string;
+}
+
+export interface ProcurementPackage {
+  id: string;
+  projectId: string;
+  name: string;
+  vendor: string;
+  value: number;
+  status: 'Draft' | 'Bidding' | 'Awarded' | 'Complete';
+  deliveryDate: string;
+}
+
+export interface CommunicationLog {
+  id: string;
+  projectId: string;
+  subject: string;
+  participants: string[]; // Stakeholder names
+  date: string;
+  type: 'Meeting' | 'Email' | 'Official Letter';
 }
 
 export interface AIAnalysisResult {

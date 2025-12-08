@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, Document } from '../types';
-import { MOCK_PROJECTS, MOCK_RESOURCES } from '../constants';
-
-// --- MOCK DATA GENERATION FOR SCAFFOLDING ---
+import { Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, Document, Extension, Stakeholder, ProcurementPackage } from '../types';
+import { MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, MOCK_PROCUREMENT } from '../constants';
 
 const MOCK_INTEGRATIONS: Integration[] = [
   { id: 'sap', name: 'SAP S/4HANA', type: 'ERP', status: 'Connected', lastSync: '10 mins ago', logo: 'S' },
@@ -46,6 +44,9 @@ interface DataState {
   changeOrders: ChangeOrder[];
   budgetItems: BudgetLineItem[];
   documents: Document[];
+  extensions: Extension[];
+  stakeholders: Stakeholder[];
+  procurementPackages: ProcurementPackage[];
 }
 
 type Action = 
@@ -54,8 +55,11 @@ type Action =
   | { type: 'TOGGLE_INTEGRATION'; payload: string }
   | { type: 'ADD_RESOURCE'; payload: Resource }
   | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
-  | { type: 'APPROVE_CHANGE_ORDER'; payload: string } // id
-  | { type: 'UPLOAD_DOCUMENT'; payload: Document };
+  | { type: 'APPROVE_CHANGE_ORDER'; payload: string } 
+  | { type: 'UPLOAD_DOCUMENT'; payload: Document }
+  | { type: 'INSTALL_EXTENSION'; payload: string }
+  | { type: 'UNINSTALL_EXTENSION'; payload: string }
+  | { type: 'ACTIVATE_EXTENSION'; payload: string };
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
@@ -65,6 +69,9 @@ const initialState: DataState = {
   changeOrders: MOCK_CHANGE_ORDERS,
   budgetItems: MOCK_BUDGET,
   documents: MOCK_DOCUMENTS,
+  extensions: EXTENSIONS_REGISTRY,
+  stakeholders: MOCK_STAKEHOLDERS,
+  procurementPackages: MOCK_PROCUREMENT,
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {
@@ -102,6 +109,29 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       };
     case 'UPLOAD_DOCUMENT':
       return { ...state, documents: [...state.documents, action.payload] };
+    case 'INSTALL_EXTENSION':
+      return {
+        ...state,
+        extensions: state.extensions.map(ext => 
+          ext.id === action.payload 
+             ? { ...ext, status: 'Installed', installedDate: new Date().toISOString().split('T')[0] } 
+             : ext
+        )
+      };
+    case 'UNINSTALL_EXTENSION':
+      return {
+        ...state,
+        extensions: state.extensions.map(ext => 
+          ext.id === action.payload ? { ...ext, status: 'Available', installedDate: undefined } : ext
+        )
+      };
+     case 'ACTIVATE_EXTENSION':
+      return {
+        ...state,
+        extensions: state.extensions.map(ext => 
+          ext.id === action.payload ? { ...ext, status: 'Active' } : ext
+        )
+      };
     default:
       return state;
   }
@@ -110,37 +140,19 @@ const dataReducer = (state: DataState, action: Action): DataState => {
 const DataContext = createContext<{
   state: DataState;
   dispatch: React.Dispatch<Action>;
-  getProjectRisks: (projectId: string) => Risk[];
   getTask: (projectId: string, taskId: string) => Task | undefined;
-  getProjectBudget: (projectId: string) => BudgetLineItem[];
-  getProjectChanges: (projectId: string) => ChangeOrder[];
-  getProjectDocs: (projectId: string) => Document[];
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(dataReducer, initialState);
-
-  const getProjectRisks = (projectId: string) => state.risks.filter(r => r.projectId === projectId);
   
   const getTask = (projectId: string, taskId: string) => {
     const project = state.projects.find(p => p.id === projectId);
     return project?.tasks.find(t => t.id === taskId);
   };
 
-  const getProjectBudget = (projectId: string) => state.budgetItems.filter(b => b.projectId === projectId);
-  const getProjectChanges = (projectId: string) => state.changeOrders.filter(c => c.projectId === projectId);
-  const getProjectDocs = (projectId: string) => state.documents.filter(d => d.projectId === projectId);
-
   return (
-    <DataContext.Provider value={{ 
-      state, 
-      dispatch, 
-      getProjectRisks, 
-      getTask,
-      getProjectBudget,
-      getProjectChanges,
-      getProjectDocs
-    }}>
+    <DataContext.Provider value={{ state, dispatch, getTask }}>
       {children}
     </DataContext.Provider>
   );
