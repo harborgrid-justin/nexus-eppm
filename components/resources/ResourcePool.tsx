@@ -1,28 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Resource } from '../../types';
-import { useData } from '../../context/DataContext';
 import { Plus, Filter } from 'lucide-react';
 
 interface ResourcePoolProps {
-  projectId: string;
+  resources: Resource[] | undefined;
 }
 
-const ResourcePool: React.FC<ResourcePoolProps> = ({ projectId }) => {
-  const { state } = useData();
-  
-  const resources = useMemo(() => {
-    const project = state.projects.find(p => p.id === projectId);
-    if (!project) return [];
-    
-    // For a resource pool, we might want to show all enterprise resources,
-    // but for this implementation, we'll show resources *assigned* to this project.
-    // A toggle could be added to switch between project/enterprise scope.
-    const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
-    return state.resources.filter(r => resourceIds.has(r.id));
-  }, [state.projects, state.resources, projectId]);
-
+const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
   if (!resources) {
-    return <div>Loading resources...</div>;
+    return <div className="p-4">Loading resources...</div>;
   }
 
   return (

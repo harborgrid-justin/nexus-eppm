@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import React, 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
+import { useQualityData } from '../hooks/useQualityData';
+import ErrorBoundary from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
 import QualityControlLog from './quality/QualityControlLog';
@@ -12,26 +13,23 @@ interface QualityManagementProps {
 }
 
 const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
-  const [activeView, setActiveView] = useState('dashboard');
-  const { project } = useProjectState(projectId);
+  const {
+    project,
+    activeView,
+    qualityProfile,
+    qualityReports,
+    setActiveView,
+    navItems,
+  } = useQualityData(projectId);
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'plan', label: 'Plan', icon: FileText },
-    { id: 'standards', label: 'Standards', icon: BadgeCheck },
-    { id: 'control', label: 'Control Log', icon: ClipboardList },
-    { id: 'defects', label: 'Defects', icon: Bug },
-    { id: 'supplier', label: 'Supplier', icon: Truck },
-  ];
-  
   const renderContent = () => {
-    switch(activeView) {
+    switch (activeView) {
       case 'dashboard':
-        return <QualityDashboard projectId={projectId} />;
+        return <QualityDashboard qualityProfile={qualityProfile} />;
       case 'plan':
         return <QualityPlanEditor projectId={projectId} />;
       case 'control':
-        return <QualityControlLog projectId={projectId} />;
+        return <QualityControlLog qualityReports={qualityReports} />;
       case 'defects':
         return <DefectTracking projectId={projectId} />;
       case 'standards':
@@ -39,7 +37,7 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
       case 'supplier':
         return <GenericEnterpriseModule title="Supplier Quality" description="Track incoming material inspections and supplier performance." type="grid" icon={Truck} />;
       default:
-        return <QualityDashboard projectId={projectId} />;
+        return <QualityDashboard qualityProfile={qualityProfile} />;
     }
   };
 
@@ -74,7 +72,9 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
           </nav>
         </div>
         <div className="flex-1 overflow-hidden">
-          {renderContent()}
+          <ErrorBoundary>
+            {renderContent()}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

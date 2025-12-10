@@ -22,11 +22,9 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
   }
 
+  // FIX: Use this.props and this.state directly to avoid potential 'this' context issues with destructuring in some environments.
   public render() {
-    // FIX: Destructuring 'this.state' and 'this.props' improves readability and avoids potential 'this' context issues in more complex scenarios.
-    const { hasError } = this.state;
-    const { children } = this.props;
-    if (hasError) {
+    if (this.state.hasError) {
       return (
         <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-700 m-4">
            <div className="flex items-center gap-2">
@@ -38,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return children;
+    return this.props.children;
   }
 }
 

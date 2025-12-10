@@ -1,15 +1,12 @@
 import React from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
-import { useIndustry } from '../../context/IndustryContext';
 import { ShieldCheck, Plus, CheckCircle, XCircle, AlertCircle, ClipboardList } from 'lucide-react';
 import { QualityReport } from '../../types';
 
 interface QualityControlLogProps {
-  projectId: string;
+  qualityReports: QualityReport[] | undefined;
 }
 
-const QualityControlLog: React.FC<QualityControlLogProps> = ({ projectId }) => {
-  const { qualityReports } = useProjectState(projectId);
+const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports }) => {
 
   const getStatusChip = (status: QualityReport['status']) => {
     switch(status) {
@@ -42,7 +39,7 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ projectId }) => {
                 </tr>
              </thead>
              <tbody className="bg-white divide-y divide-slate-100">
-               {qualityReports.map(report => (
+               {qualityReports && qualityReports.map(report => (
                  <tr key={report.id} className="hover:bg-slate-50">
                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{report.id}</td>
                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{report.type}</td>

@@ -150,11 +150,11 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                           {reportData.slice(0, 50).map((row, idx) => ( // limit to 50 for preview
+                           {/* FIX: Explicitly type 'row' to avoid it being treated as 'unknown' in strict mode, which prevents property access. */}
+                           {reportData.slice(0, 50).map((row: Record<string, any>, idx) => ( // limit to 50 for preview
                                <tr key={idx} className="hover:bg-slate-50">
                                    {Array.from(selectedColumns).map(colId => (
-                                       // FIX: The type of 'row' is 'any', which can cause issues with indexing. Casting to 'Record<string, any>' provides better type safety.
-                                       <td key={colId} className="px-4 py-2 text-slate-700 whitespace-nowrap">{String((row as Record<string, any>)[colId] ?? '')}</td>
+                                       <td key={colId} className="px-4 py-2 text-slate-700 whitespace-nowrap">{String(row[colId] ?? '')}</td>
                                    ))}
                                </tr>
                            ))}

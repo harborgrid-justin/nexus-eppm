@@ -1,24 +1,12 @@
-import React, { useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
+import { Resource } from '../../types';
 import { Sliders, Check, AlertTriangle } from 'lucide-react';
 
 interface ResourceLevelingProps {
-    projectId: string;
+    overAllocatedResources: Resource[] | undefined;
 }
 
-const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ projectId }) => {
-    const { state } = useData();
-
-    const overAllocatedResources = useMemo(() => {
-        const project = state.projects.find(p => p.id === projectId);
-        if (!project) return [];
-
-        // This is a simplified check. A real implementation would aggregate
-        // allocation over time periods (daily/weekly).
-        const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
-        
-        return state.resources.filter(r => resourceIds.has(r.id) && r.allocated > r.capacity);
-    }, [state.projects, state.resources, projectId]);
+const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResources }) => {
     
     return (
         <div className="h-full flex flex-col">
@@ -29,7 +17,7 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ projectId }) => {
                 </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {overAllocatedResources.length > 0 ? overAllocatedResources.map(res => (
+                {overAllocatedResources && overAllocatedResources.length > 0 ? overAllocatedResources.map(res => (
                     <div key={res.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                         <div className="flex justify-between items-center mb-3">
                             <div>

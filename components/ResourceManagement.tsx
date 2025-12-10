@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import React from 'react';
 import { Users, FileText, BarChart2, Sliders } from 'lucide-react';
+import { useResourceData } from '../hooks/useResourceData';
+import ErrorBoundary from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';
 import ResourceLeveling from './resources/ResourceLeveling';
@@ -11,28 +12,27 @@ interface ResourceManagementProps {
 }
 
 const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) => {
-  const [activeView, setActiveView] = useState('pool');
-  const { project } = useProjectState(projectId);
+  const {
+    project,
+    activeView,
+    projectResources,
+    overAllocatedResources,
+    setActiveView,
+    navItems,
+  } = useResourceData(projectId);
 
-  const navItems = [
-    { id: 'plan', label: 'Resource Plan', icon: FileText },
-    { id: 'pool', label: 'Resource Pool', icon: Users },
-    { id: 'capacity', label: 'Capacity Planning', icon: BarChart2 },
-    { id: 'leveling', label: 'Leveling', icon: Sliders },
-  ];
-  
   const renderContent = () => {
     switch(activeView) {
       case 'plan':
         return <ResourcePlanEditor projectId={projectId} />;
       case 'pool':
-        return <ResourcePool projectId={projectId} />;
+        return <ResourcePool resources={projectResources} />;
       case 'capacity':
-        return <ResourceCapacity projectId={projectId} />;
+        return <ResourceCapacity projectResources={projectResources} />;
       case 'leveling':
-        return <ResourceLeveling projectId={projectId} />;
+        return <ResourceLeveling overAllocatedResources={overAllocatedResources} />;
       default:
-        return <ResourcePool projectId={projectId} />;
+        return <ResourcePool resources={projectResources} />;
     }
   };
 
@@ -67,7 +67,9 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
           </nav>
         </div>
         <div className="flex-1 overflow-hidden">
-          {renderContent()}
+          <ErrorBoundary>
+            {renderContent()}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

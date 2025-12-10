@@ -1,20 +1,12 @@
-import React, { useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
+import { Resource } from '../../types';
 
 interface ResourceCapacityProps {
-  projectId: string;
+  projectResources: Resource[] | undefined;
 }
 
-const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectId }) => {
-  const { state } = useData();
+const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources }) => {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-
-  const projectResources = useMemo(() => {
-    const project = state.projects.find(p => p.id === projectId);
-    if (!project) return [];
-    const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
-    return state.resources.filter(r => resourceIds.has(r.id));
-  }, [state.projects, state.resources, projectId]);
 
   // Mock allocation logic for demonstration
   const getMockAllocation = (resId: string, monthIdx: number) => {
@@ -27,6 +19,8 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectId }) => {
     if (percentage <= 120) return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
     return 'bg-red-100 text-red-800 hover:bg-red-200';
   };
+  
+  if (!projectResources) return <div>Loading capacity data...</div>;
 
   return (
     <div className="h-full flex flex-col">

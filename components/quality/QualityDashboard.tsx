@@ -1,9 +1,9 @@
 import React from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
+import { useProjectState } from '../../hooks/useProjectState';
 
 interface QualityDashboardProps {
-  projectId: string;
+  qualityProfile: ReturnType<typeof useProjectState>['qualityProfile'];
 }
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ElementType }> = ({ title, value, icon: Icon }) => (
@@ -16,10 +16,8 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.El
     </div>
 );
 
-const QualityDashboard: React.FC<QualityDashboardProps> = ({ projectId }) => {
-  const { qualityProfile } = useProjectState(projectId);
-
-  if (!qualityProfile) return null;
+const QualityDashboard: React.FC<QualityDashboardProps> = ({ qualityProfile }) => {
+  if (!qualityProfile) return <div className="p-4">Loading quality data...</div>;
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
