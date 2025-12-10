@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { FileText, Download, MoreHorizontal, Upload, Search, Folder, Filter } from 'lucide-react';
+import { Download, MoreHorizontal, Upload, Search, Folder, Filter } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface DocumentControlProps {
@@ -98,7 +97,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                    {['Specifications', 'Contracts', 'RFI Responses', 'Safety Reports', 'Photos'].map((folder, i) => (
                       <div key={i} className={`flex items-center gap-3 p-3 border ${theme.colors.border} rounded-lg hover:bg-slate-50 cursor-pointer`}>
-                         <Folder className="text-nexus-200 fill-nexus-200" size={24} />
+                         <Folder className="text-yellow-400" size={24} />
                          <span className="text-sm font-medium text-slate-700">{folder}</span>
                       </div>
                    ))}

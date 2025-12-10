@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { Briefcase, ArrowRight, TrendingUp, AlertTriangle, FolderOpen } from 'lucide-react';
@@ -104,7 +103,7 @@ const ProgramManager: React.FC = () => {
                    {programProjects.map(p => (
                       <div key={p.id} className={`flex items-center justify-between p-3 border ${theme.colors.border} rounded-lg hover:bg-slate-50`}>
                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-12 bg-nexus-500 rounded-full"></div>
+                            <div className={`w-2 h-12 rounded-full ${getHealthColorClass(p.health).replace('bg-', '').split(' ')[0]}`}></div>
                             <div>
                                <p className="font-semibold text-slate-900">{p.name}</p>
                                <p className="text-xs text-slate-500">{p.manager} • {p.health}</p>

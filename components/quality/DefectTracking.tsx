@@ -1,7 +1,6 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { NonConformanceReport } from '../../types';
-import { Bug, Plus, Filter } from 'lucide-react';
+import { Bug, Plus } from 'lucide-react';
 import { useProjectState } from '../../hooks';
 
 interface DefectTrackingProps {

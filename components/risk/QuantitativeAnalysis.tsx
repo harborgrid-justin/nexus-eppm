@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BarChart2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

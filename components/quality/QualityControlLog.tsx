@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Plus, CheckCircle, XCircle, AlertCircle, ClipboardList } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, AlertCircle, ClipboardList } from 'lucide-react';
 import { QualityReport } from '../../types';
 
 interface QualityControlLogProps {

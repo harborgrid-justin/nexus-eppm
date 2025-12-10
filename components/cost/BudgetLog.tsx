@@ -1,7 +1,6 @@
-
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
-import { Landmark, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -14,7 +13,7 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
 
     const budgetSummary = useMemo(() => {
         if (!project) return null;
-        const approvedChanges = project.budgetLog?.filter(i => i.status === 'Approved' && i.description !== 'Initial funding release').reduce((sum, i) => sum + i.amount, 0) || 0;
+        const approvedChanges = project.budgetLog?.filter(i => i.status === 'Approved' && i.source !== 'Initial').reduce((sum, i) => sum + i.amount, 0) || 0;
         const pendingChanges = project.budgetLog?.filter(i => i.status === 'Pending').reduce((sum, i) => sum + i.amount, 0) || 0;
         const currentBudget = project.originalBudget + approvedChanges;
         const proposedBudget = currentBudget + pendingChanges;

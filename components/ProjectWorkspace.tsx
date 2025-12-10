@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Layout
+  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder
 } from 'lucide-react';
 
 import ProjectGantt from './ProjectGantt';
@@ -19,6 +18,7 @@ import ResourceManagement from './ResourceManagement';
 import ProjectIntegrationManagement from './ProjectIntegrationManagement';
 import NetworkDiagram from './scheduling/NetworkDiagram';
 import ErrorBoundary from './ErrorBoundary';
+import DocumentControl from './DocumentControl';
 
 
 interface ProjectWorkspaceProps {
@@ -35,12 +35,12 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       id: 'overview',
       label: 'Overview',
       items: [
-        { id: 'integration', label: 'Integration', icon: Briefcase }
+        { id: 'integration', label: 'Dashboard', icon: Briefcase }
       ]
     },
     {
-      id: 'performance',
-      label: 'Performance',
+      id: 'planning',
+      label: 'Planning & Performance',
       items: [
         { id: 'scope', label: 'Scope', icon: Sliders },
         { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
@@ -49,21 +49,22 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       ]
     },
     {
-      id: 'people',
-      label: 'People & Comms',
+      id: 'execution',
+      label: 'Execution',
       items: [
         { id: 'resources', label: 'Resources', icon: Users },
-        { id: 'stakeholder', label: 'Stakeholders', icon: Users },
-        { id: 'communications', label: 'Communications', icon: MessageCircle },
+        { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
+        { id: 'documents', label: 'Documents', icon: Folder },
       ]
     },
     {
-      id: 'controls',
-      label: 'Controls',
+      id: 'monitoring',
+      label: 'Monitoring & Control',
       items: [
         { id: 'risk', label: 'Risk', icon: AlertTriangle },
         { id: 'issues', label: 'Issues', icon: FileWarning },
-        { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
+        { id: 'stakeholder', label: 'Stakeholders', icon: Users },
+        { id: 'communications', label: 'Communications', icon: MessageCircle },
       ]
     }
   ], []);
@@ -101,6 +102,8 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
          return <CommunicationsManagement projectId={projectId} />;
       case 'resources':
          return <ResourceManagement projectId={projectId} />;
+      case 'documents':
+        return <DocumentControl projectId={projectId} />;
       default:
         return <div>Module not found</div>;
     }
@@ -111,66 +114,52 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   }
 
   return (
-    <div className="h-full w-full flex flex-col animate-in fade-in duration-300">
+    <div className="h-full w-full flex bg-slate-50 animate-in fade-in duration-300">
       {/* Level 1 Navigation (Groups) */}
-      <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 pt-2">
-        <div className="flex gap-8">
-          {navStructure.map(group => {
-            const isActiveGroup = activeGroup.id === group.id;
-            return (
-              <button
-                key={group.id}
-                onClick={() => setActiveArea(group.items[0].id)}
-                className={`
-                  pb-3 text-sm font-semibold transition-all relative
-                  ${isActiveGroup ? 'text-nexus-700' : 'text-slate-500 hover:text-slate-700'}
-                `}
-              >
-                {group.label}
-                {isActiveGroup && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-nexus-600 rounded-t-full" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      <div className="w-56 bg-white border-r border-slate-200 flex flex-col">
+          <div className="p-4 border-b border-slate-200">
+             <h2 className="text-sm font-semibold text-slate-800">Knowledge Areas</h2>
+             <p className="text-xs text-slate-500">PMBOK Guide</p>
+          </div>
+          <nav className="flex-1 p-2">
+            {navStructure.map(group => (
+              <div key={group.id} className="mb-2">
+                 <h3 className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">{group.label}</h3>
+                 <div className="space-y-1">
+                  {group.items.map(area => {
+                    const isActive = activeArea === area.id;
+                    return (
+                        <button
+                          key={area.id}
+                          onClick={() => setActiveArea(area.id)}
+                          className={`
+                              w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200
+                              ${isActive 
+                              ? 'bg-nexus-50 text-nexus-700' 
+                              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+                              }
+                          `}
+                        >
+                          <area.icon size={16} className={isActive ? 'text-nexus-600' : 'text-slate-400'} strokeWidth={2} />
+                          <span className="whitespace-nowrap">{area.label}</span>
+                        </button>
+                    );
+                  })}
+                 </div>
+              </div>
+            ))}
+          </nav>
       </div>
 
-      {/* Level 2 Navigation (Specific Modules) */}
-      <div className="flex-shrink-0 bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center gap-4 z-10 shadow-sm relative min-h-[52px]">
-        <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-1 flex-1 min-w-0">
-          {activeGroup.items.map(area => {
-            const isActive = activeArea === area.id;
-            return (
-                <button
-                key={area.id}
-                onClick={() => setActiveArea(area.id)}
-                className={`
-                    flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border flex-shrink-0
-                    ${isActive 
-                    ? 'bg-white border-nexus-200 text-nexus-700 shadow-sm ring-1 ring-nexus-100' 
-                    : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-200/50 hover:text-slate-700'
-                    }
-                `}
-                >
-                <area.icon size={16} className={isActive ? 'text-nexus-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
-                <span className="whitespace-nowrap">{area.label}</span>
-                </button>
-            );
-          })}
-        </nav>
-        
+      {/* Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {activeArea === 'schedule' && (
-            <div className="flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0">
+            <div className="absolute top-4 right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30">
                 <button onClick={() => setScheduleView('gantt')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><GanttChartSquare size={16} /></button>
                 <button onClick={() => setScheduleView('network')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><Network size={16} /></button>
             </div>
         )}
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 overflow-hidden p-0 bg-slate-50 relative">
-        <ErrorBoundary>
+        <ErrorBoundary name={`${activeArea} Module`}>
           {renderContent()}
         </ErrorBoundary>
       </div>

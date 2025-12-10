@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
 import { useProjectState } from '../../hooks';

@@ -27,6 +27,10 @@ export const useProjectState = (projectId: string | null) => {
     return state.risks.filter(r => r.projectId === projectId);
   }, [state.risks, projectId]);
 
+  const issues = useMemo(() => {
+    return state.issues.filter(i => i.projectId === projectId);
+  }, [state.issues, projectId]);
+
   const stakeholders = useMemo(() => {
     return state.stakeholders.filter(s => s.projectId === projectId);
   }, [state.stakeholders, projectId]);
@@ -166,6 +170,7 @@ export const useProjectState = (projectId: string | null) => {
     budgetItems, 
     changeOrders,
     risks,
+    issues,
     stakeholders,
     procurement,
     purchaseOrders,

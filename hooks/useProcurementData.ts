@@ -1,7 +1,6 @@
-
 import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { LayoutDashboard, FileText, ShoppingCart, Users, Briefcase, FileCheck, DollarSign, Award, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, FileText, ShoppingCart, Users, Briefcase, DollarSign, Award } from 'lucide-react';
 
 export const useProcurementData = (projectId: string) => {
   const { state } = useData();

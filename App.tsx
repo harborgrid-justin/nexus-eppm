@@ -1,10 +1,6 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
-import ProjectList from './components/ProjectList';
 import AiAssistant from './components/AiAssistant';
-import ResourceManagement from './components/ResourceManagement';
-import Reports from './components/Reports';
 import AdminSettings from './components/AdminSettings';
 import IntegrationHub from './components/IntegrationHub';
 import ExtensionMarketplace from './components/ExtensionMarketplace';
@@ -14,7 +10,8 @@ import IndustrySelector from './components/IndustrySelector';
 import DataExchange from './components/DataExchange';
 import PortfolioManager from './components/PortfolioManager';
 import ProgramManager from './components/ProgramManager';
-import { Sparkles, Layers } from 'lucide-react';
+import ProjectList from './components/ProjectList';
+import { Sparkles } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -54,16 +51,12 @@ const AppContent = () => {
         return <ExtensionMarketplace />;
       case 'dataExchange':
         return <DataExchange />;
-      case 'resources':
-        return <ResourceManagement />;
-      case 'reports':
-        return <Reports projects={state.projects} />;
       case 'admin':
         return <AdminSettings />;
       case 'integrations':
         return <IntegrationHub />;
       default:
-        return <div>Select a module</div>;
+        return <PortfolioManager />;
     }
   };
 
@@ -95,7 +88,11 @@ const AppContent = () => {
                     {
                       'portfolio': 'Enterprise Portfolio',
                       'programs': 'Program Management',
-                      'projectList': 'Project Master List'
+                      'projectList': 'Project Master List',
+                      'dataExchange': 'Data Exchange Center',
+                      'marketplace': 'App Marketplace',
+                      'integrations': 'Integration Hub',
+                      'admin': 'Administration'
                     }[activeTab] || 'Nexus PPM'
                   }
                 </h2>
@@ -124,19 +121,21 @@ const AppContent = () => {
         </header>
 
         {/* Main Workspace */}
-        <main className="flex-1 overflow-hidden p-6 relative bg-slate-100">
-           <div className="h-full w-full bg-slate-50 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <main className="flex-1 overflow-hidden relative bg-slate-100">
+           <div className="h-full w-full overflow-hidden">
              {renderContent()}
            </div>
         </main>
       </div>
 
       {/* AI Sidebar Overlay */}
-      <AiAssistant 
-         project={selectedProject} 
-         isOpen={isAiOpen} 
-         onClose={() => setIsAiOpen(false)} 
-      />
+      {selectedProject && (
+        <AiAssistant 
+          project={selectedProject} 
+          isOpen={isAiOpen} 
+          onClose={() => setIsAiOpen(false)} 
+        />
+      )}
     </div>
   );
 };

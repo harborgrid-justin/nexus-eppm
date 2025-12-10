@@ -2,22 +2,12 @@ import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { calculateProjectProgress } from '../../utils/calculations';
 import { getDaysDiff } from '../../utils/dateUtils';
-import { BarChart2, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import StatCard from '../shared/StatCard';
 
 interface EarnedValueProps {
   projectId: string;
-}
-
-const StatCard: React.FC<{ title: string; value: string | number; subtext: string; trend?: 'up' | 'down' | 'neutral' }> = ({ title, value, subtext, trend }) => {
-    const trendColor = trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-slate-600';
-    return (
-        <div className="p-4 bg-white rounded-lg border border-slate-200">
-            <p className="text-sm font-medium text-slate-500">{title}</p>
-            <p className={`text-2xl font-bold ${trendColor}`}>{value}</p>
-            <p className="text-xs text-slate-400">{subtext}</p>
-        </div>
-    );
 }
 
 const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
@@ -56,15 +46,13 @@ const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
   if (!evm) return null;
   const { pv, ev, ac, sv, cv, spi, cpi, bac, eac, etc, vac } = evm;
 
-  const chartData = [ { name: 'Metrics', PV: pv, EV: ev, AC: ac } ];
-
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard title="SPI" value={spi} subtext="Schedule Performance" trend={parseFloat(spi) >= 1 ? 'up' : 'down'} />
-          <StatCard title="CPI" value={cpi} subtext="Cost Performance" trend={parseFloat(cpi) >= 1 ? 'up' : 'down'} />
-          <StatCard title="Schedule Variance" value={`$${(sv / 1000).toFixed(0)}k`} subtext="EV - PV" trend={sv >= 0 ? 'up' : 'down'} />
-          <StatCard title="Cost Variance" value={`$${(cv / 1000).toFixed(0)}k`} subtext="EV - AC" trend={cv >= 0 ? 'up' : 'down'} />
+          <StatCard title="SPI" value={spi} subtext="Schedule Performance" trend={parseFloat(spi) >= 1 ? 'up' : 'down'} icon={BarChart2}/>
+          <StatCard title="CPI" value={cpi} subtext="Cost Performance" trend={parseFloat(cpi) >= 1 ? 'up' : 'down'} icon={BarChart2}/>
+          <StatCard title="Schedule Variance" value={`$${(sv / 1000).toFixed(0)}k`} subtext="EV - PV" trend={sv >= 0 ? 'up' : 'down'} icon={BarChart2}/>
+          <StatCard title="Cost Variance" value={`$${(cv / 1000).toFixed(0)}k`} subtext="EV - AC" trend={cv >= 0 ? 'up' : 'down'} icon={BarChart2}/>
        </div>
 
        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -88,10 +76,10 @@ const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <h3 className="font-bold text-slate-800 mb-4">Forecasting</h3>
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard title="BAC" value={`$${(bac / 1000).toFixed(0)}k`} subtext="Budget at Completion" trend="neutral" />
-              <StatCard title="EAC" value={isFinite(eac) ? `$${(eac / 1000).toFixed(0)}k` : 'N/A'} subtext="Estimate at Completion" trend="neutral" />
-              <StatCard title="ETC" value={isFinite(etc) ? `$${(etc / 1000).toFixed(0)}k` : 'N/A'} subtext="Estimate to Complete" trend="neutral" />
-              <StatCard title="VAC" value={isFinite(vac) ? `$${(vac / 1000).toFixed(0)}k` : 'N/A'} subtext="Variance at Completion" trend={!isFinite(vac) || vac >=0 ? 'up' : 'down'}/>
+              <StatCard title="BAC" value={`$${(bac / 1000).toFixed(0)}k`} subtext="Budget at Completion" icon={BarChart2}/>
+              <StatCard title="EAC" value={isFinite(eac) ? `$${(eac / 1000).toFixed(0)}k` : 'N/A'} subtext="Estimate at Completion" icon={BarChart2}/>
+              <StatCard title="ETC" value={isFinite(etc) ? `$${(etc / 1000).toFixed(0)}k` : 'N/A'} subtext="Estimate to Complete" icon={BarChart2}/>
+              <StatCard title="VAC" value={isFinite(vac) ? `$${(vac / 1000).toFixed(0)}k` : 'N/A'} subtext="Variance at Completion" trend={!isFinite(vac) || vac >=0 ? 'up' : 'down'} icon={BarChart2}/>
            </div>
        </div>
     </div>

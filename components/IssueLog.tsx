@@ -1,18 +1,17 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { Issue } from '../types';
 import { Plus, Filter, Search, FileWarning, ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useProjectState } from '../hooks';
 
 interface IssueLogProps {
   projectId: string;
 }
 
 const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
-  const { state } = useData();
-  const project = state.projects.find(p => p.id === projectId);
-  const issues = state.issues.filter(i => i.projectId === projectId);
+  // FIX: The useProjectState hook was updated to return 'issues'.
+  const { project, issues } = useProjectState(projectId);
   const theme = useTheme();
   const taskMap = useMemo(() => {
     return new Map(project?.tasks.map(t => [t.id, t.name]));
@@ -27,8 +26,8 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
-      <div className={`${theme.layout.header} mb-6`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
           <h1 className={theme.typography.h1}>
             <FileWarning className="text-yellow-500"/> Issue Log

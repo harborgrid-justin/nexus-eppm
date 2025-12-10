@@ -1,9 +1,8 @@
-
 import { 
-    Project, Task, BudgetLineItem, Risk, PurchaseOrder, 
-    NonConformanceReport, TaskStatus, Resource, Expense
+    Project, BudgetLineItem, Risk, PurchaseOrder, 
+    NonConformanceReport, Resource, Issue
 } from '../types';
-import { getDaysDiff } from './dateUtils';
+import { getDaysDiff, calculateProjectProgress } from './calculations';
 
 /**
  * OPPORTUNITY 1: Schedule & Cost (EVM Integration)
@@ -14,32 +13,26 @@ export const calculateEVM = (
     budgetItems: BudgetLineItem[]
 ): { pv: number, ev: number, ac: number, spi: number, cpi: number } => {
     
-    // 1. Calculate Planned Value (PV)
-    // In a real system, this uses time-phased budget. Here we approximate linearly.
+    const today = new Date();
     const projectStart = new Date(project.startDate);
     const projectEnd = new Date(project.endDate);
-    const today = new Date();
+
+    if(projectStart > today) {
+        return { pv: 0, ev: 0, ac: project.spent, spi: 1, cpi: 1 };
+    }
+    
+    // 1. Calculate Planned Value (PV)
+    // In a real system, this uses time-phased budget. Here we approximate linearly.
     const totalDuration = getDaysDiff(projectStart, projectEnd);
     const elapsed = getDaysDiff(projectStart, today);
-    const percentTime = Math.min(1, Math.max(0, elapsed / totalDuration));
+    const percentTime = totalDuration > 0 ? Math.min(1, Math.max(0, elapsed / totalDuration)) : 0;
     
-    const totalBudget = budgetItems.reduce((sum, b) => sum + b.planned, 0);
+    const totalBudget = project.originalBudget;
     const pv = totalBudget * percentTime;
 
     // 2. Calculate Earned Value (EV)
-    // EV = sum(Task Budget * Task % Complete)
-    // NOTE: This assumes budgetItems are mapped to tasks or we use project-level aggregation.
-    // For this implementation, we distribute budget proportional to task duration for weighted progress.
-    const totalTaskDuration = project.tasks.reduce((sum, t) => sum + t.duration, 0);
-    let ev = 0;
-    
-    if (totalTaskDuration > 0) {
-        project.tasks.forEach(task => {
-            const taskWeight = task.duration / totalTaskDuration;
-            const taskBudget = totalBudget * taskWeight;
-            ev += taskBudget * (task.progress / 100);
-        });
-    }
+    const overallProgress = calculateProjectProgress(project) / 100;
+    const ev = totalBudget * overallProgress;
 
     // 3. Actual Cost (AC) from Project State
     const ac = project.spent;
@@ -57,8 +50,9 @@ export const calculateEVM = (
  */
 export const calculateCommittedCost = (
     purchaseOrders: PurchaseOrder[], 
-    budgetLineId: string
+    budgetLineId: string | undefined
 ): number => {
+    if(!budgetLineId) return 0;
     return purchaseOrders
         .filter(po => po.linkedBudgetLineItemId === budgetLineId && po.status !== 'Draft' && po.status !== 'Closed')
         .reduce((sum, po) => sum + po.amount, 0);
@@ -88,7 +82,7 @@ export const canCompleteTask = (
  * OPPORTUNITY 2: Resource & Cost (Labor Forecasting)
  * Calculates the 'Actual Cost' contribution of a task based on resource assignments and rates.
  */
-export const calculateTaskLaborCost = (task: Task, resources: Resource[]): number => {
+export const calculateTaskLaborCost = (task: { duration: number, assignments: { resourceId: string, units: number }[] }, resources: Resource[]): number => {
     let cost = 0;
     task.assignments.forEach(assign => {
         const resource = resources.find(r => r.id === assign.resourceId);
@@ -114,8 +108,6 @@ export const calculateRiskExposure = (risks: Risk[]): number => {
             const probMap = [0, 0.1, 0.3, 0.5, 0.7, 0.9]; 
             const probFactor = probMap[r.probabilityValue] || 0;
             
-            // Assume impactValue maps to a cost magnitude (in a real app, Risk would have `estimatedCostImpact`)
-            // Here we assume a base unit cost for calculation
             const estimatedImpact = (r.responseActions.reduce((sum, act) => sum + (act.costImpact || 0), 0)) || (r.impactValue * 10000); 
             
             return total + (estimatedImpact * probFactor);
@@ -143,7 +135,7 @@ export const checkFundingSolvency = (
  * Identifies tasks that need schedule buffers based on risk association.
  */
 export const identifyRiskyTasks = (
-    tasks: Task[], 
+    tasks: { id: string }[], 
     risks: Risk[]
 ): { taskId: string, riskScore: number }[] => {
     const taskRiskMap = new Map<string, number>();
@@ -166,7 +158,7 @@ export const identifyRiskyTasks = (
  */
 export const calculateResourceLoadFromIssues = (
     resourceId: string, 
-    issues: { assignedTo: string, status: string }[]
+    issues: Issue[]
 ): number => {
     // Assumption: An open issue takes ~20% of capacity/day until resolved
     const openIssues = issues.filter(i => i.assignedTo === resourceId && i.status !== 'Closed');

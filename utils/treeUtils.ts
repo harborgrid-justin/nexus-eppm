@@ -1,4 +1,3 @@
-
 export type TreeNode = {
   id: string;
   children: TreeNode[];
@@ -61,7 +60,6 @@ export const findAndModifyNode = <T extends TreeNode>(
       return modification(node);
     }
     if (node.children && node.children.length > 0) {
-      // The type assertion is safe here because T has children of type T[]
       const newChildren = findAndModifyNode(node.children as T[], targetId, modification);
       return { ...node, children: newChildren };
     }
@@ -128,9 +126,7 @@ export const findAndReparentNode = <T extends TreeNode>(
     return currentNodes.map(node => {
       if (node.id === newParentId) {
         parentFound = true;
-        // Ensure children array exists
         const children = node.children ? [...node.children] : [];
-        // Prevent duplicates just in case
         if (!children.find(c => c.id === movedNode!.id)) {
              children.push(movedNode!);
         }

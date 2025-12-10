@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
@@ -13,8 +12,8 @@ const Dashboard: React.FC = () => {
   const theme = useTheme();
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <div className={theme.layout.header}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={`${theme.layout.header} mb-6`}>
         <div>
           <h1 className={theme.typography.h1}>Portfolio Overview</h1>
           <p className={theme.typography.small}>Welcome back, Sarah. Here's what's happening today.</p>

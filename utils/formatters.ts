@@ -1,4 +1,3 @@
-
 // 1. Standard Currency ($1,234.56)
 export const formatCurrency = (amount: number): string => 
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -18,13 +17,18 @@ export const formatPercentage = (value: number, decimals = 0): string =>
 // 5. Standard Date (Oct 24, 2024)
 export const formatDate = (date: string | Date | undefined): string => {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const d = new Date(date);
+  // Adjust for timezone offset to prevent off-by-one day errors
+  const userTimezoneOffset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() + userTimezoneOffset).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
 // 6. Short Date (10/24)
 export const formatShortDate = (date: string | Date | undefined): string => {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+  const d = new Date(date);
+  const userTimezoneOffset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() + userTimezoneOffset).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
 };
 
 // 7. Date Time (Oct 24, 2024, 10:00 AM)
@@ -144,7 +148,3 @@ export const slugify = (text: string): string =>
 // 29. Validate Email
 export const isValidEmail = (email: string): boolean => 
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-// 30. Calculate Variance
-export const calculateVariance = (planned: number, actual: number): number => 
-  planned - actual;

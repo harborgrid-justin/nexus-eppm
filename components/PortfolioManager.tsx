@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, PieChart, Layers } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers } from 'lucide-react';
 import Dashboard from './Dashboard';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
@@ -97,14 +96,6 @@ const PortfolioManager: React.FC = () => {
 
   return (
     <div className={`${theme.layout.pageContainer}`}>
-      {/* Header */}
-      <div className={`flex-shrink-0 border-b border-slate-200 bg-white px-6 py-4 flex justify-between items-center`}>
-         <div>
-            <h1 className="text-2xl font-bold text-slate-900">Portfolio Management</h1>
-            <p className="text-slate-500 text-sm">Enterprise-wide visibility and strategic alignment.</p>
-         </div>
-      </div>
-
       {/* Tabs */}
       <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 px-6">
         <nav className="flex space-x-6">

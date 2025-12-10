@@ -14,27 +14,32 @@ interface State {
 }
 
 class ErrorBoundary extends React.Component<Props, State> {
+  // FIX: Added explicit 'public' access modifier.
   public state: State = {
     hasError: false,
     error: null,
     errorInfo: null,
   };
 
+  // FIX: Added explicit 'public' access modifier.
   public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error, errorInfo: null };
   }
 
+  // FIX: Added explicit 'public' access modifier.
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
     this.setState({ errorInfo });
     // In a real app, log to service like Sentry
   }
 
+  // FIX: Added explicit 'private' access modifier.
   private handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
+  // FIX: Added explicit 'public' access modifier.
   public render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {

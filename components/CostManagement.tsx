@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
@@ -12,6 +11,7 @@ import BudgetLog from './cost/BudgetLog';
 import ProjectFunding from './cost/ProjectFunding';
 import EarnedValue from './cost/EarnedValue';
 import { useTheme } from '../context/ThemeContext';
+import ErrorBoundary from './ErrorBoundary';
 
 interface CostManagementProps {
   projectId: string;
@@ -91,7 +91,9 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
           </nav>
         </div>
         <div className="flex-1 overflow-hidden">
-          {renderContent()}
+          <ErrorBoundary name="Cost Module">
+            {renderContent()}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

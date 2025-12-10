@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  LayoutDashboard, Users, Settings, Briefcase, Network, ChevronDown, ChevronRight, FileText, Layers, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe
+  Users, Settings, Briefcase, Network, ChevronDown, ChevronRight, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers3
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -20,7 +19,7 @@ const iconMap: Record<string, any> = {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useData();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'extensions']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'extensions', 'admin']));
 
   const toggleSection = (section: string) => {
     const newSections = new Set(expandedSections);
@@ -39,9 +38,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       id: 'core',
       label: 'Core Modules',
       items: [
-        { id: 'portfolio', icon: Globe, label: 'Portfolio Management' },
-        { id: 'programs', icon: Layers, label: 'Program Management' },
-        { id: 'projectList', icon: Briefcase, label: 'Project Management' },
+        { id: 'portfolio', icon: Globe, label: 'Portfolio' },
+        { id: 'programs', icon: Layers3, label: 'Programs' },
+        { id: 'projectList', icon: Briefcase, label: 'Projects' },
       ]
     },
     {
@@ -49,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       label: 'Installed Engines',
       items: activeExtensions.map(ext => ({
         id: ext.id,
-        icon: iconMap[ext.icon] || Layers,
+        icon: iconMap[ext.icon] || Layers3,
         label: ext.name
       }))
     },
@@ -95,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       className={`w-full flex items-center gap-3 px-6 py-2.5 text-sm font-medium transition-all border-l-4 ${
-                        activeTab === item.id 
+                        activeTab === item.id || (activeTab === 'projectWorkspace' && item.id === 'projectList')
                           ? 'bg-slate-800 text-nexus-400 border-nexus-500' 
                           : 'border-transparent hover:bg-slate-800/50 hover:text-white text-slate-400'
                       }`}
