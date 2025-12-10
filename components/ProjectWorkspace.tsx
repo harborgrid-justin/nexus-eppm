@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning
+  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Layout
 } from 'lucide-react';
 
 import ProjectGantt from './ProjectGantt';
@@ -29,19 +30,47 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   const [activeArea, setActiveArea] = useState('integration');
   const [scheduleView, setScheduleView] = useState<'gantt' | 'network'>('gantt');
 
-  const knowledgeAreas = [
-    { id: 'integration', label: 'Integration', icon: Briefcase },
-    { id: 'scope', label: 'Scope', icon: Sliders },
-    { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
-    { id: 'cost', label: 'Cost', icon: DollarSign },
-    { id: 'quality', label: 'Quality', icon: ShieldCheck },
-    { id: 'resources', label: 'Resources', icon: Users },
-    { id: 'communications', label: 'Communications', icon: MessageCircle },
-    { id: 'risk', label: 'Risk', icon: AlertTriangle },
-    { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
-    { id: 'stakeholder', label: 'Stakeholder', icon: Users },
-    { id: 'issues', label: 'Issues', icon: FileWarning },
-  ];
+  const navStructure = useMemo(() => [
+    {
+      id: 'overview',
+      label: 'Overview',
+      items: [
+        { id: 'integration', label: 'Integration', icon: Briefcase }
+      ]
+    },
+    {
+      id: 'performance',
+      label: 'Performance',
+      items: [
+        { id: 'scope', label: 'Scope', icon: Sliders },
+        { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
+        { id: 'cost', label: 'Cost', icon: DollarSign },
+        { id: 'quality', label: 'Quality', icon: ShieldCheck },
+      ]
+    },
+    {
+      id: 'people',
+      label: 'People & Comms',
+      items: [
+        { id: 'resources', label: 'Resources', icon: Users },
+        { id: 'stakeholder', label: 'Stakeholders', icon: Users },
+        { id: 'communications', label: 'Communications', icon: MessageCircle },
+      ]
+    },
+    {
+      id: 'controls',
+      label: 'Controls',
+      items: [
+        { id: 'risk', label: 'Risk', icon: AlertTriangle },
+        { id: 'issues', label: 'Issues', icon: FileWarning },
+        { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
+      ]
+    }
+  ], []);
+
+  const activeGroup = useMemo(() => 
+    navStructure.find(g => g.items.some(i => i.id === activeArea)) || navStructure[0]
+  , [navStructure, activeArea]);
 
   const renderContent = () => {
     if (!project) {
@@ -83,34 +112,64 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
   return (
     <div className="h-full w-full flex flex-col animate-in fade-in duration-300">
-      {/* Knowledge Area Navigation */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 flex justify-between items-center pr-4">
-        <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
-          {knowledgeAreas.map(area => (
-            <button
-              key={area.id}
-              onClick={() => setActiveArea(area.id)}
-              className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
-                activeArea === area.id
-                  ? 'border-nexus-600 text-nexus-600'
-                  : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-              }`}
-            >
-              <area.icon size={16} />
-              <span>{area.label}</span>
-            </button>
-          ))}
+      {/* Level 1 Navigation (Groups) */}
+      <div className="flex-shrink-0 bg-white border-b border-slate-200 px-6 pt-2">
+        <div className="flex gap-8">
+          {navStructure.map(group => {
+            const isActiveGroup = activeGroup.id === group.id;
+            return (
+              <button
+                key={group.id}
+                onClick={() => setActiveArea(group.items[0].id)}
+                className={`
+                  pb-3 text-sm font-semibold transition-all relative
+                  ${isActiveGroup ? 'text-nexus-700' : 'text-slate-500 hover:text-slate-700'}
+                `}
+              >
+                {group.label}
+                {isActiveGroup && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-nexus-600 rounded-t-full" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Level 2 Navigation (Specific Modules) */}
+      <div className="flex-shrink-0 bg-slate-50 border-b border-slate-200 px-4 py-2 flex justify-between items-center gap-4 z-10 shadow-sm relative min-h-[52px]">
+        <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-1 flex-1 min-w-0">
+          {activeGroup.items.map(area => {
+            const isActive = activeArea === area.id;
+            return (
+                <button
+                key={area.id}
+                onClick={() => setActiveArea(area.id)}
+                className={`
+                    flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border flex-shrink-0
+                    ${isActive 
+                    ? 'bg-white border-nexus-200 text-nexus-700 shadow-sm ring-1 ring-nexus-100' 
+                    : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-200/50 hover:text-slate-700'
+                    }
+                `}
+                >
+                <area.icon size={16} className={isActive ? 'text-nexus-600' : 'text-slate-400'} strokeWidth={isActive ? 2.5 : 2} />
+                <span className="whitespace-nowrap">{area.label}</span>
+                </button>
+            );
+          })}
         </nav>
+        
         {activeArea === 'schedule' && (
-            <div className="flex bg-slate-200 p-0.5 rounded-lg">
-                <button onClick={() => setScheduleView('gantt')} className={`p-1.5 rounded-md ${scheduleView === 'gantt' ? 'bg-white shadow' : ''}`}><GanttChartSquare size={16} /></button>
-                <button onClick={() => setScheduleView('network')} className={`p-1.5 rounded-md ${scheduleView === 'network' ? 'bg-white shadow' : ''}`}><Network size={16} /></button>
+            <div className="flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0">
+                <button onClick={() => setScheduleView('gantt')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><GanttChartSquare size={16} /></button>
+                <button onClick={() => setScheduleView('network')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><Network size={16} /></button>
             </div>
         )}
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden p-0 bg-slate-50">
+      <div className="flex-1 overflow-hidden p-0 bg-slate-50 relative">
         <ErrorBoundary>
           {renderContent()}
         </ErrorBoundary>
