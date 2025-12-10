@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Database, UploadCloud, Download, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { DataJob } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 const DataExchange: React.FC = () => {
     const { state } = useData();
+    const theme = useTheme();
 
     const getStatusIcon = (status: DataJob['status']) => {
         switch(status) {
@@ -15,31 +18,31 @@ const DataExchange: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col p-6">
-            <div className="flex justify-between items-center">
+        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+            <div className={theme.layout.header}>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <h1 className={theme.typography.h1}>
                         <Database className="text-nexus-600" /> Data Exchange Center
                     </h1>
-                    <p className="text-slate-500">Import and export data from external systems like P6 and Microsoft Project.</p>
+                    <p className={theme.typography.small}>Import and export data from external systems like P6 and Microsoft Project.</p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
                 {/* Import */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6`}>
+                    <h2 className={`${theme.typography.h2} mb-4 flex items-center gap-2`}>
                         <UploadCloud size={20} className="text-nexus-500" /> Import Data
                     </h2>
-                    <div className="border-2 border-dashed border-slate-200 rounded-lg p-10 text-center cursor-pointer hover:border-nexus-400 hover:bg-slate-50/50">
+                    <div className={`border-2 border-dashed ${theme.colors.border} rounded-lg p-10 text-center cursor-pointer hover:border-nexus-400 hover:bg-slate-50/50`}>
                         <UploadCloud size={32} className="mx-auto text-slate-400 mb-2" />
                         <p className="font-semibold text-slate-700">Drag & drop files here</p>
                         <p className="text-xs text-slate-500">Supported formats: P6 XML, XER, MPP, CSV</p>
                     </div>
                 </div>
                 {/* Export */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h2 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6`}>
+                    <h2 className={`${theme.typography.h2} mb-4 flex items-center gap-2`}>
                         <Download size={20} className="text-nexus-500" /> Export Data
                     </h2>
                     <div className="space-y-3">
@@ -57,16 +60,16 @@ const DataExchange: React.FC = () => {
                                 <option>Microsoft Project MPP</option>
                             </select>
                         </div>
-                        <button className="w-full py-2 bg-nexus-600 text-white font-semibold rounded-lg hover:bg-nexus-700">
+                        <button className={`w-full py-2 ${theme.colors.accentBg} text-white font-semibold rounded-lg hover:bg-nexus-700`}>
                             Export
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-slate-200">
-                    <h2 className="font-bold text-slate-800">Job History</h2>
+            <div className={theme.layout.panelContainer}>
+                <div className={`p-4 ${theme.layout.headerBorder}`}>
+                    <h2 className={theme.typography.h2}>Job History</h2>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     <table className="min-w-full divide-y divide-slate-200">

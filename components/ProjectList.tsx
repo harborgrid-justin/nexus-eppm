@@ -5,6 +5,7 @@ import { ChevronRight, MoreHorizontal, Calendar, DollarSign, TrendingUp, AlertCi
 import { calculateProjectProgress } from '../utils/calculations';
 import { usePortfolioState } from '../hooks';
 import { formatCompactCurrency, formatDate, formatPercentage, getHealthColorClass, formatInitials } from '../utils/formatters';
+import { useTheme } from '../context/ThemeContext';
 
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;
@@ -12,23 +13,24 @@ interface ProjectListProps {
 
 const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
   const { projects } = usePortfolioState();
+  const theme = useTheme();
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col">
-      <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
-          <p className="text-slate-500">Manage and monitor all active projects across the enterprise.</p>
+          <h1 className={theme.typography.h1}>Projects</h1>
+          <p className={theme.typography.small}>Manage and monitor all active projects across the enterprise.</p>
         </div>
         <div className="flex gap-2">
            <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Filter</button>
-           <button className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">Create Project</button>
+           <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700`}>Create Project</button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
+      <div className={theme.layout.panelContainer}>
         {/* Toolbar */}
-        <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+        <div className={`p-4 ${theme.layout.headerBorder} bg-slate-50 flex justify-between items-center`}>
           <div className="flex items-center gap-2">
              <span className="text-sm font-semibold text-slate-600">View:</span>
              <select className="bg-white border border-slate-300 text-slate-700 text-sm rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-nexus-500">
@@ -120,7 +122,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
         </div>
         
         {/* Footer Pagination (Mock) */}
-        <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+        <div className={`bg-slate-50 ${theme.layout.headerBorder} border-t px-6 py-3 flex items-center justify-between`}>
            <span className="text-xs text-slate-500">Showing 1 to {projects.length} of {projects.length} projects</span>
            <div className="flex gap-1">
               <button className="px-2 py-1 border border-slate-300 bg-white rounded text-xs text-slate-600 disabled:opacity-50" disabled>Previous</button>

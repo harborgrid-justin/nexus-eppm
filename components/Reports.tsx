@@ -1,7 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
 import { Project, Task, Risk } from '../types';
 import { useData } from '../context/DataContext';
 import { FileText, Eye, Download, Play, ListFilter, Columns } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ReportsProps {
   projects: Project[];
@@ -41,6 +43,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
   const [subjectArea, setSubjectArea] = useState<SubjectArea>('Projects');
   const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set(['code', 'name', 'manager', 'health']));
   const [reportData, setReportData] = useState<any[] | null>(null);
+  const theme = useTheme();
 
   const availableColumns = ALL_FIELDS[subjectArea];
 
@@ -69,20 +72,20 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
   };
 
   return (
-    <div className="animate-in fade-in duration-500 h-full overflow-hidden flex flex-col p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
+      <div className={`${theme.layout.header} mb-6`}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className={theme.typography.h1}>
             <FileText size={24}/> Report Builder
           </h1>
-          <p className="text-slate-500">Create, run, and save custom tabular reports.</p>
+          <p className={theme.typography.small}>Create, run, and save custom tabular reports.</p>
         </div>
       </div>
       
-      <div className="flex-1 grid grid-cols-[350px_1fr] gap-6 overflow-hidden">
+      <div className={`flex-1 grid grid-cols-[350px_1fr] ${theme.layout.gridGap} overflow-hidden`}>
         {/* Config Panel */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-slate-200">
+        <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} flex flex-col overflow-hidden`}>
+            <div className={`p-4 ${theme.layout.headerBorder}`}>
                 <h2 className="font-bold text-slate-800">Report Configuration</h2>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -120,10 +123,10 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                     </button>
                 </div>
             </div>
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex gap-2">
+            <div className={`p-4 ${theme.layout.headerBorder} border-t bg-slate-50 flex gap-2`}>
                 <button 
                   onClick={handleGeneratePreview}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-nexus-600 text-white rounded-lg text-sm font-medium hover:bg-nexus-700"
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}
                 >
                     <Play size={14}/> Run Preview
                 </button>
@@ -134,8 +137,8 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
         </div>
         
         {/* Preview Panel */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-             <div className="p-4 border-b border-slate-200 flex justify-between items-center">
+        <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} flex flex-col overflow-hidden`}>
+             <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center`}>
                 <h2 className="font-bold text-slate-800 flex items-center gap-2"><Eye size={16}/> Report Preview</h2>
                 {reportData && <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm text-slate-600 hover:bg-slate-50"><Download size={14}/> Export</button>}
             </div>

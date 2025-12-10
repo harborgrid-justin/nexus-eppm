@@ -1,19 +1,22 @@
+
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
+import { useTheme } from '../context/ThemeContext';
 
 const IntegrationHub: React.FC = () => {
   const { state, dispatch } = useData();
+  const theme = useTheme();
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 p-6">
-       <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+       <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <Network className="text-nexus-600" /> Integration Hub
             </h1>
-            <p className="text-slate-500">Manage connections to external enterprise systems.</p>
+            <p className={theme.typography.small}>Manage connections to external enterprise systems.</p>
           </div>
           <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-sm text-sm font-medium">
              <RefreshCw size={16} /> Sync All
@@ -21,9 +24,9 @@ const IntegrationHub: React.FC = () => {
        </div>
 
       <ErrorBoundary>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {state.integrations.map((integration) => (
-              <div key={integration.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm relative group hover:shadow-md transition-all">
+              <div key={integration.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm relative group hover:shadow-md transition-all`}>
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center text-xl font-bold text-slate-700 border border-slate-100">
                         {integration.logo}
@@ -36,8 +39,8 @@ const IntegrationHub: React.FC = () => {
                     </div>
                   </div>
                   
-                  <h3 className="text-lg font-bold text-slate-900">{integration.name}</h3>
-                  <p className="text-sm text-slate-500 mb-6">{integration.type} Platform</p>
+                  <h3 className={theme.typography.h3}>{integration.name}</h3>
+                  <p className={`${theme.typography.body} text-slate-500 mb-6`}>{integration.type} Platform</p>
                   
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-xs text-slate-400">Last synced: {integration.lastSync}</span>
@@ -61,7 +64,7 @@ const IntegrationHub: React.FC = () => {
             ))}
 
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-center text-slate-400 hover:border-nexus-300 hover:bg-nexus-50/50 transition-all cursor-pointer">
+              <div key={i} className={`border-2 border-dashed ${theme.colors.border} rounded-xl p-6 flex flex-col items-center justify-center text-center text-slate-400 hover:border-nexus-300 hover:bg-nexus-50/50 transition-all cursor-pointer`}>
                   <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
                     <Network size={20} className="opacity-50" />
                   </div>

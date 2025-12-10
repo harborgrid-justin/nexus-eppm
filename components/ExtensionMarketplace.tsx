@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { 
@@ -7,6 +8,7 @@ import {
   PieChart, Users, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain,
   AlertOctagon, PenTool, LayoutGrid, Filter
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const iconMap: Record<string, any> = {
   Box, Radio, Calculator, Receipt, Banknote, TrendingUp, ShoppingCart, 
@@ -19,6 +21,7 @@ const ExtensionMarketplace: React.FC = () => {
   const { state, dispatch } = useData();
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const theme = useTheme();
 
   const categories = ['All', ...Array.from(new Set(state.extensions.map(e => e.category)))];
 
@@ -30,13 +33,13 @@ const ExtensionMarketplace: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col">
-      <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className={theme.typography.h1}>
             <LayoutGrid className="text-nexus-600" /> Extension Marketplace
           </h1>
-          <p className="text-slate-500">Discover and install powerful engines to expand your platform.</p>
+          <p className={theme.typography.small}>Discover and install powerful engines to expand your platform.</p>
         </div>
         <div className="relative">
              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -58,7 +61,7 @@ const ExtensionMarketplace: React.FC = () => {
             onClick={() => setCategoryFilter(cat)}
             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
               categoryFilter === cat 
-                ? 'bg-nexus-600 text-white' 
+                ? `${theme.colors.accentBg} text-white` 
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
@@ -74,7 +77,7 @@ const ExtensionMarketplace: React.FC = () => {
             const isInstalled = ext.status === 'Installed' || ext.status === 'Active';
 
             return (
-              <div key={ext.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group">
+              <div key={ext.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group`}>
                  <div className="flex justify-between items-start mb-4">
                     <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-nexus-600 group-hover:bg-nexus-50 transition-colors">
                        <IconComponent size={24} />
@@ -90,8 +93,8 @@ const ExtensionMarketplace: React.FC = () => {
                     )}
                  </div>
                  
-                 <h3 className="font-bold text-slate-900 mb-1">{ext.name}</h3>
-                 <p className="text-sm text-slate-500 mb-4 line-clamp-2 min-h-[40px]">{ext.description}</p>
+                 <h3 className={`${theme.typography.h3} mb-1 text-base`}>{ext.name}</h3>
+                 <p className={`${theme.typography.body} text-slate-500 mb-4 line-clamp-2 min-h-[40px]`}>{ext.description}</p>
                  
                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{ext.category}</span>

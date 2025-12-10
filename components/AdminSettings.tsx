@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote, Edit3 } from 'lucide-react';
 import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
@@ -6,11 +7,13 @@ import IssueCodeSettings from './admin/IssueCodeSettings';
 import ExpenseCategorySettings from './admin/ExpenseCategorySettings';
 import FundingSourceSettings from './admin/FundingSourceSettings';
 import UdfSettings from './admin/UdfSettings';
+import { useTheme } from '../context/ThemeContext';
 
 interface AdminSettingsProps {}
 
 const AdminSettings: React.FC<AdminSettingsProps> = () => {
   const [activeSection, setActiveSection] = useState('general');
+  const theme = useTheme();
 
   const navItems = [
     { id: 'general', icon: Settings, label: 'General' },
@@ -95,42 +98,44 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
   };
 
   return (
-    <div className="flex h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden animate-in fade-in duration-500">
-      {/* Settings Sidebar */}
-      <div className="w-64 bg-slate-50 border-r border-slate-200 flex flex-col">
-        <div className="p-6 border-b border-slate-200">
-          <h2 className="text-lg font-bold text-slate-900">Settings</h2>
-          <p className="text-xs text-slate-500 mt-1">Manage workspace preferences</p>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
+      <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} overflow-hidden flex h-full`}>
+        {/* Settings Sidebar */}
+        <div className={`w-64 bg-slate-50 border-r ${theme.colors.border} flex flex-col`}>
+          <div className={`p-6 ${theme.layout.headerBorder}`}>
+            <h2 className={theme.typography.h2}>Settings</h2>
+            <p className={theme.typography.small}>Manage workspace preferences</p>
+          </div>
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeSection === item.id 
+                    ? `bg-white ${theme.colors.primary} shadow-sm ring-1 ring-slate-200` 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                <item.icon size={18} />
+                {item.label}
+              </button>
+            ))}
+          </nav>
         </div>
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeSection === item.id 
-                  ? 'bg-white text-nexus-600 shadow-sm ring-1 ring-slate-200' 
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <item.icon size={18} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-         <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-white">
-            <h1 className="text-xl font-bold text-slate-900">{navItems.find(n => n.id === activeSection)?.label}</h1>
-            <button className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm">
-              Save Changes
-            </button>
-         </div>
-         <div className="flex-1 overflow-y-auto p-8">
-            {renderContent()}
-         </div>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 bg-white">
+           <div className={`p-6 ${theme.layout.headerBorder} flex justify-between items-center`}>
+              <h1 className="text-xl font-bold text-slate-900">{navItems.find(n => n.id === activeSection)?.label}</h1>
+              <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm`}>
+                Save Changes
+              </button>
+           </div>
+           <div className="flex-1 overflow-y-auto p-8">
+              {renderContent()}
+           </div>
+        </div>
       </div>
     </div>
   );
