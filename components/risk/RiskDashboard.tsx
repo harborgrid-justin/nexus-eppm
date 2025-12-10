@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProjectState } from '../../hooks/useProjectState';
-import { AlertTriangle, ShieldCheck, TrendingUp, List } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -9,20 +9,11 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
+import StatCard from '../shared/StatCard';
 
 interface RiskDashboardProps {
   projectId: string;
 }
-
-const StatCard: React.FC<{ title: string; value: string | number; icon: React.ElementType }> = ({ title, value, icon: Icon }) => (
-    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-      <div className="flex justify-between items-center mb-1">
-        <h4 className="text-sm font-medium text-slate-500">{title}</h4>
-        <Icon size={20} className="text-slate-400" />
-      </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-    </div>
-);
 
 const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
@@ -49,9 +40,9 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
     <div className="h-full overflow-y-auto p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Total Risks" value={risks.length} icon={List} />
-            <StatCard title="Open Risks" value={risks.filter(r => r.status === 'Open').length} icon={AlertTriangle} />
-            <StatCard title="Mitigated / Closed" value={risks.filter(r => r.status !== 'Open').length} icon={ShieldCheck} />
-            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingUp} />
+            <StatCard title="Open Risks" value={risks.filter(r => r.status === 'Open').length} icon={AlertTriangle} trend="down" />
+            <StatCard title="Mitigated / Closed" value={risks.filter(r => r.status !== 'Open').length} icon={ShieldCheck} trend="up" />
+            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingDown} trend="down" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

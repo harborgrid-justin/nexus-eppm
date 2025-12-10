@@ -1,5 +1,6 @@
 import React from 'react';
 import { useProjectState } from '../hooks/useProjectState';
+import { useData } from '../context/DataContext';
 import { ShoppingCart, Plus, CheckCircle, Clock } from 'lucide-react';
 import { ProcurementPackage } from '../types';
 
@@ -9,9 +10,8 @@ interface ProcurementManagementProps {
 
 const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId }) => {
   const { procurement } = useProjectState(projectId);
+  const { state } = useData();
   
-  // FIX: Updated the switch statement to handle all valid statuses for a ProcurementPackage
-  // and removed the invalid 'Bidding' case. The default now shows the actual status.
   const getStatusChip = (status: ProcurementPackage['status']) => {
     switch (status) {
       case 'Awarded':
@@ -55,16 +55,23 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
                    </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
-                   {procurement.map(pkg => (
-                      <tr key={pkg.id} className="hover:bg-slate-50">
-                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{pkg.id}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{pkg.name}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{(pkg as any).vendor || <span className="italic text-slate-400">Not Awarded</span>}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-semibold text-right">${(pkg as any).value.toLocaleString()}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-center">{getStatusChip(pkg.status)}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{(pkg as any).deliveryDate}</td>
-                      </tr>
-                   ))}
+                   {procurement.map(pkg => {
+                      const contract = state.contracts.find(c => c.id === pkg.contractId);
+                      const vendor = contract ? state.vendors.find(v => v.id === contract.vendorId) : null;
+                      const deliveryDate = contract ? contract.endDate : 'TBD';
+                      const value = contract ? contract.contractValue : pkg.budget;
+
+                      return (
+                         <tr key={pkg.id} className="hover:bg-slate-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{pkg.id}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{pkg.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{vendor ? vendor.name : <span className="italic text-slate-400">Not Awarded</span>}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-semibold text-right">${value.toLocaleString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">{getStatusChip(pkg.status)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{deliveryDate}</td>
+                         </tr>
+                      );
+                   })}
                 </tbody>
              </table>
           </div>

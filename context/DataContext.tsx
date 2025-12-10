@@ -2,12 +2,14 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
-  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus
+  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
+  ProcurementPlan, Vendor, Solicitation, Contract
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
-  MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES
+  MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES,
+  MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
 
@@ -69,6 +71,10 @@ interface DataState {
   expenseCategories: ExpenseCategory[];
   expenses: Expense[];
   fundingSources: FundingSource[];
+  procurementPlans: ProcurementPlan[];
+  vendors: Vendor[];
+  solicitations: Solicitation[];
+  contracts: Contract[];
 }
 
 type Action = 
@@ -119,6 +125,10 @@ const initialState: DataState = {
   expenseCategories: MOCK_EXPENSE_CATEGORIES,
   expenses: MOCK_EXPENSES,
   fundingSources: MOCK_FUNDING_SOURCES,
+  procurementPlans: MOCK_PROCUREMENT_PLANS,
+  vendors: MOCK_VENDORS,
+  solicitations: MOCK_SOLICITATIONS,
+  contracts: MOCK_CONTRACTS,
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {

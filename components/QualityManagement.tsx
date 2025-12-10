@@ -1,4 +1,4 @@
-import React, 'react';
+import React from 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
 import { useQualityData } from '../hooks/useQualityData';
 import ErrorBoundary from './ErrorBoundary';
@@ -54,7 +54,7 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
 
       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
-          <nav className="flex space-x-2 px-4">
+          <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
             {navItems.map(item => (
               <button
                 key={item.id}

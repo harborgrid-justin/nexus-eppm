@@ -23,7 +23,8 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  public render() {
+  // FIX: Explicitly adding the return type to the render method to help with type inference.
+  public render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-700 m-4">
@@ -35,8 +36,9 @@ class ErrorBoundary extends Component<Props, State> {
         </div>
       );
     }
-
-    return this.props.children;
+    // FIX: Destructure children from this.props to improve readability and potentially resolve obscure typing issues.
+    const { children } = this.props;
+    return children;
   }
 }
 

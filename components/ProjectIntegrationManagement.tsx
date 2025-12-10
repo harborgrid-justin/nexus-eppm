@@ -32,9 +32,9 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard title="Overall Progress" value={`${summary.overallProgress}%`} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={GanttChartSquare} />
-        <StatCard title="Budget Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext={`${financials.budgetUtilization.toFixed(0)}% of budget spent`} icon={DollarSign} />
-        <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={AlertTriangle} />
-        <StatCard title="Quality Score" value={`${qualityProfile.passRate.toFixed(0)}%`} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} />
+        <StatCard title="Budget Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext={`${financials.budgetUtilization.toFixed(0)}% of budget spent`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
+        <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
+        <StatCard title="Quality Score" value={`${qualityProfile.passRate.toFixed(0)}%`} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>
 
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">

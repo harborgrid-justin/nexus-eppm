@@ -36,47 +36,49 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
           </button>
        </div>
 
-       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-         <h3 className="font-bold text-lg text-slate-900 mb-4">Interest / Influence Matrix</h3>
-         <div className="relative grid grid-cols-[auto_1fr_1fr] grid-rows-[auto_1fr_1fr] gap-1 h-full">
-            {/* Y Axis Label */}
-            <div className="flex items-center justify-center -rotate-90 row-span-2">
-               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Influence</span>
-               <ArrowUp size={14} className="ml-1" />
-            </div>
-            {/* X Axis Label */}
-            <div className="col-span-2 flex items-center justify-center">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Interest</span>
-                <ArrowRight size={14} className="ml-1" />
-            </div>
-
-            {/* Matrix Quadrants */}
-            <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('High', 'Low')}`}>
-               <h4 className="font-bold">Keep Satisfied</h4>
-               <p className="text-xs opacity-70">Low Interest / High Influence</p>
-            </div>
-            <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('High', 'High')}`}>
-               <h4 className="font-bold">Manage Closely</h4>
-               <p className="text-xs opacity-70">High Interest / High Influence</p>
-            </div>
-            <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('Low', 'Low')}`}>
-               <h4 className="font-bold">Monitor</h4>
-               <p className="text-xs opacity-70">Low Interest / Low Influence</p>
-            </div>
-            <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('Low', 'High')}`}>
-               <h4 className="font-bold">Keep Informed</h4>
-               <p className="text-xs opacity-70">High Interest / Low Influence</p>
-            </div>
-            
-            {/* Stakeholder Bubbles */}
-            {stakeholders.map(s => (
-              <div key={s.id} className={`absolute m-8 ${getGridPosition(s.influence, s.interest)} z-10`} title={s.engagementStrategy}>
-                <div className="px-3 py-2 bg-white rounded-lg shadow-lg border border-slate-200 cursor-pointer hover:scale-105 transition-transform">
-                   <p className="font-semibold text-sm text-slate-900">{s.name}</p>
-                   <p className="text-xs text-slate-500">{s.role}</p>
+       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+         <div className="h-full overflow-y-auto p-6">
+            <h3 className="font-bold text-lg text-slate-900 mb-4">Interest / Influence Matrix</h3>
+            <div className="relative grid grid-cols-[auto_1fr_1fr] grid-rows-[auto_1fr_1fr] gap-1">
+                {/* Y Axis Label */}
+                <div className="flex items-center justify-center -rotate-90 row-span-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Influence</span>
+                <ArrowUp size={14} className="ml-1" />
                 </div>
-              </div>
-            ))}
+                {/* X Axis Label */}
+                <div className="col-span-2 flex items-center justify-center">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Interest</span>
+                    <ArrowRight size={14} className="ml-1" />
+                </div>
+
+                {/* Matrix Quadrants */}
+                <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('High', 'Low')}`}>
+                <h4 className="font-bold">Keep Satisfied</h4>
+                <p className="text-xs opacity-70">Low Interest / High Influence</p>
+                </div>
+                <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('High', 'High')}`}>
+                <h4 className="font-bold">Manage Closely</h4>
+                <p className="text-xs opacity-70">High Interest / High Influence</p>
+                </div>
+                <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('Low', 'Low')}`}>
+                <h4 className="font-bold">Monitor</h4>
+                <p className="text-xs opacity-70">Low Interest / Low Influence</p>
+                </div>
+                <div className={`p-4 rounded-lg min-h-[200px] ${getStrategyColor('Low', 'High')}`}>
+                <h4 className="font-bold">Keep Informed</h4>
+                <p className="text-xs opacity-70">High Interest / Low Influence</p>
+                </div>
+                
+                {/* Stakeholder Bubbles */}
+                {stakeholders.map(s => (
+                <div key={s.id} className={`absolute m-8 ${getGridPosition(s.influence, s.interest)} z-10`} title={s.engagementStrategy}>
+                    <div className="px-3 py-2 bg-white rounded-lg shadow-lg border border-slate-200 cursor-pointer hover:scale-105 transition-transform">
+                    <p className="font-semibold text-sm text-slate-900">{s.name}</p>
+                    <p className="text-xs text-slate-500">{s.role}</p>
+                    </div>
+                </div>
+                ))}
+            </div>
          </div>
        </div>
     </div>

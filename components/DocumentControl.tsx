@@ -20,7 +20,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col">
+    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col p-6">
        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">

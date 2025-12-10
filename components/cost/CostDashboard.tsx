@@ -1,21 +1,11 @@
 import React from 'react';
 import { useProjectState } from '../../hooks/useProjectState';
 import { DollarSign, TrendingUp, TrendingDown, Layers, LineChart as LineChartIcon } from 'lucide-react';
+import StatCard from '../shared/StatCard';
 
 interface CostDashboardProps {
   projectId: string;
 }
-
-const StatCard: React.FC<{ title: string; value: string; subtext: string; icon: React.ElementType }> = ({ title, value, subtext, icon: Icon }) => (
-    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-      <div className="flex justify-between items-center mb-1">
-        <h4 className="text-sm font-medium text-slate-500">{title}</h4>
-        <Icon size={20} className="text-slate-400" />
-      </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-      <div className="text-xs text-slate-500 mt-1">{subtext}</div>
-    </div>
-);
 
 const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
   const { financials } = useProjectState(projectId);
@@ -27,7 +17,7 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Revised Budget" value={`$${(financials.revisedBudget / 1000000).toFixed(2)}M`} subtext="Original + Approved Changes" icon={DollarSign} />
             <StatCard title="Actuals (Cost)" value={`$${(financials.totalActual / 1000000).toFixed(2)}M`} subtext={`${financials.budgetUtilization.toFixed(1)}% Utilized`} icon={TrendingUp} />
-            <StatCard title="Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext="Under budget" icon={TrendingDown} />
+            <StatCard title="Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext={financials.variance >= 0 ? "Under budget" : "Over budget"} icon={TrendingDown} trend={financials.variance >= 0 ? 'up' : 'down'} />
             <StatCard title="Estimate at Completion" value="$48.2M" subtext="Forecasted total cost" icon={Layers} />
         </div>
 

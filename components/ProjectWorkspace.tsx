@@ -105,7 +105,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden p-0 bg-white">
+      <div className="flex-1 overflow-hidden p-0 bg-slate-50">
         <ErrorBoundary>
           {renderContent()}
         </ErrorBoundary>

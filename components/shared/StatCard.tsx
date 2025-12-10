@@ -5,16 +5,24 @@ interface StatCardProps {
     value: string | number;
     subtext: string;
     icon: React.ElementType;
+    trend?: 'up' | 'down';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon }) => (
-    <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-200 shadow-sm">
-      <div className="flex justify-between items-center mb-1">
-        <h4 className="text-sm font-medium text-slate-500">{title}</h4>
-        <Icon size={20} className="text-slate-400" />
+const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon, trend }) => (
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500">{title}</p>
+          <h3 className="text-2xl font-bold text-slate-900 mt-1">{value}</h3>
+        </div>
+        <div className={`p-2 rounded-lg ${
+            !trend ? 'bg-blue-50 text-blue-600' :
+            trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+        }`}>
+          <Icon size={20} />
+        </div>
       </div>
-      <div className="text-2xl font-bold text-slate-900">{value}</div>
-      <div className="text-xs text-slate-500 mt-1">{subtext}</div>
+      <p className="text-xs text-slate-500">{subtext}</p>
     </div>
 );
 

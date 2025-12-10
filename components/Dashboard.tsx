@@ -4,27 +4,13 @@ import {
 } from 'recharts';
 import { TrendingDown, TrendingUp, AlertOctagon, DollarSign } from 'lucide-react';
 import { usePortfolioState } from '../hooks/usePortfolioState';
+import StatCard from './shared/StatCard';
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart, budgetDataForChart } = usePortfolioState();
 
-  const StatCard = ({ title, value, subtext, icon: Icon, trend }: any) => (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-900 mt-1">{value}</h3>
-        </div>
-        <div className={`p-2 rounded-lg ${trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-          <Icon size={20} />
-        </div>
-      </div>
-      <p className="text-xs text-slate-500">{subtext}</p>
-    </div>
-  );
-
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="p-6 space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Portfolio Overview</h1>
@@ -42,7 +28,6 @@ const Dashboard: React.FC = () => {
           value={`$${(summary.totalBudget / 1000000).toFixed(1)}M`}
           subtext={`Across ${summary.totalProjects} active projects`}
           icon={DollarSign}
-          trend="up"
         />
         <StatCard 
           title="Budget Utilization" 
