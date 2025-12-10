@@ -1,8 +1,52 @@
-const deepClone = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
 type TreeNode = {
   id: string;
   children: TreeNode[];
+  [key: string]: any;
+};
+
+export const deepClone = <T,>(obj: T): T => {
+  try {
+    return JSON.parse(JSON.stringify(obj));
+  } catch (e) {
+    console.error("Deep clone failed", e);
+    throw new Error("Failed to clone object: Possible circular reference.");
+  }
+};
+
+/**
+ * Checks if moving targetId to newParentId would create a circular dependency.
+ * A cycle exists if newParentId is a descendant of targetId or is targetId itself.
+ */
+export const detectCircularDependency = <T extends TreeNode>(
+  nodes: T[],
+  targetId: string,
+  newParentId: string | null
+): boolean => {
+  if (newParentId === null) return false; // Moving to root is always safe regarding cycles
+  if (targetId === newParentId) return true; // Cannot be own parent
+
+  const targetNode = findNodeById(nodes, targetId);
+  if (!targetNode) return false; // Node doesn't exist?
+
+  // Check if newParentId is a child of targetNode
+  const isDescendant = findNodeById(targetNode.children as T[], newParentId);
+  return !!isDescendant;
+};
+
+export const findNodeById = <T extends TreeNode>(nodes: T[], nodeId: string): T | null => {
+  for (const node of nodes) {
+    if (node.id === nodeId) {
+      return node;
+    }
+    if (node.children) {
+      const found = findNodeById(node.children as T[], nodeId);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
 };
 
 export const findAndModifyNode = <T extends TreeNode>(
@@ -40,10 +84,20 @@ export const findAndReparentNode = <T extends TreeNode>(
   nodes: T[], 
   targetId: string, 
   newParentId: string | null
-): { newNodes: T[], movedNode: T | null } => {
+): { newNodes: T[], movedNode: T | null, error?: string } => {
+  
+  // Validation: Check for circular dependency
+  if (detectCircularDependency(nodes, targetId, newParentId)) {
+    console.error(`Circular dependency detected: Cannot move ${targetId} into ${newParentId}`);
+    return { newNodes: nodes, movedNode: null, error: "Circular dependency detected" };
+  }
+
   let movedNode: T | null = null;
+  
+  // Create a deep copy to ensure immutability
   const tempNodes = deepClone(nodes);
 
+  // Helper to remove the node from its current position
   const removeNode = (currentNodes: T[]): T[] => {
     return currentNodes.filter(node => {
       if (node.id === targetId) {
@@ -59,37 +113,37 @@ export const findAndReparentNode = <T extends TreeNode>(
   
   const nodesWithoutTarget = removeNode(tempNodes);
 
-  if (!movedNode) return { newNodes: nodes, movedNode: null };
+  if (!movedNode) return { newNodes: nodes, movedNode: null, error: "Node not found" };
 
   if (newParentId === null) { // Dropped on root
     return { newNodes: [...nodesWithoutTarget, movedNode], movedNode };
   }
 
+  // Helper to insert the node at the new position
+  let parentFound = false;
   const addNode = (currentNodes: T[]): T[] => {
     return currentNodes.map(node => {
       if (node.id === newParentId) {
-        node.children = [...(node.children || []), movedNode!];
+        parentFound = true;
+        // Ensure children array exists
+        const children = node.children ? [...node.children] : [];
+        // Prevent duplicates just in case
+        if (!children.find(c => c.id === movedNode!.id)) {
+             children.push(movedNode!);
+        }
+        return { ...node, children };
       } else if (node.children) {
-        node.children = addNode(node.children as T[]);
+        return { ...node, children: addNode(node.children as T[]) };
       }
       return node;
     });
   };
 
-  return { newNodes: addNode(nodesWithoutTarget), movedNode };
-};
+  const finalNodes = addNode(nodesWithoutTarget);
 
-export const findNodeById = <T extends TreeNode>(nodes: T[], nodeId: string): T | null => {
-  for (const node of nodes) {
-    if (node.id === nodeId) {
-      return node;
-    }
-    if (node.children) {
-      const found = findNodeById(node.children as T[], nodeId);
-      if (found) {
-        return found;
-      }
-    }
+  if (newParentId !== null && !parentFound) {
+      return { newNodes: nodes, movedNode: null, error: "Target parent node not found" };
   }
-  return null;
+
+  return { newNodes: finalNodes, movedNode };
 };

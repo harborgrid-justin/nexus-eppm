@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import RBSNode from './RBSNode';
+import { detectCircularDependency } from '../../utils/treeUtils';
 
 interface RiskBreakdownStructureProps {
   projectId: string;
@@ -10,32 +12,19 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   const { state, dispatch } = useData();
   const { rbs } = state;
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
-  // A simple check to prevent dropping a node onto one of its own children
-  const isDropTargetValid = (draggedId: string, targetId: string | null): boolean => {
-      if (!targetId || !draggedId) return true;
-      let invalid = false;
-      const findInChildren = (nodes: any[], parentId: string) => {
-          for(const node of nodes) {
-              if (node.id === parentId) {
-                  invalid = true;
-                  break;
-              }
-              if (node.children) findInChildren(node.children, parentId);
-          }
-      };
-      
-      const draggedNode = rbs.find(n => n.id === draggedId); // Simplified find
-      if(draggedNode) {
-        findInChildren(draggedNode.children, targetId);
-      }
-      return !invalid;
-  };
-
   const handleDrop = (newParentId: string | null) => {
-    if (draggedNodeId && isDropTargetValid(draggedNodeId, newParentId)) {
-        dispatch({ type: 'UPDATE_RBS_NODE_PARENT', payload: { nodeId: draggedNodeId, newParentId } });
+    if (!draggedNodeId) return;
+
+    if (detectCircularDependency(rbs, draggedNodeId, newParentId)) {
+        setError(`Cannot move node. Circular dependency detected.`);
+        setTimeout(() => setError(null), 3000);
+        setDraggedNodeId(null);
+        return;
     }
+
+    dispatch({ type: 'UPDATE_RBS_NODE_PARENT', payload: { nodeId: draggedNodeId, newParentId } });
     setDraggedNodeId(null);
   };
 
@@ -44,7 +33,12 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+        {error && (
+            <div className="absolute top-2 right-2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded z-50 shadow-md">
+                {error}
+            </div>
+        )}
         <div className="p-4 border-b border-slate-200 bg-slate-50/50">
             <h3 className="font-semibold text-slate-800">Risk Breakdown Structure (RBS)</h3>
         </div>

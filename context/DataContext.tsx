@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+
+import React, { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
@@ -50,7 +51,7 @@ const MOCK_DOCUMENTS: Document[] = [
 
 // --- STATE MANAGEMENT ---
 
-interface DataState {
+export interface DataState {
   projects: Project[];
   resources: Resource[];
   integrations: Integration[];
@@ -75,9 +76,10 @@ interface DataState {
   vendors: Vendor[];
   solicitations: Solicitation[];
   contracts: Contract[];
+  errors: string[]; // Global error tracking
 }
 
-type Action = 
+export type Action = 
   | { type: 'UPDATE_TASK'; payload: { projectId: string; task: Task } }
   | { type: 'ADD_RISK'; payload: Risk }
   | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
@@ -101,7 +103,8 @@ type Action =
   | { type: 'DELETE_ACTIVITY_CODE'; payload: string }
   | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
   | { type: 'LINK_ISSUE_TO_TASK'; payload: { projectId: string; taskId: string; issueId: string } }
-  | { type: 'CREATE_ISSUE_FROM_QUALITY_FAIL'; payload: { qualityReport: QualityReport } };
+  | { type: 'CREATE_ISSUE_FROM_QUALITY_FAIL'; payload: { qualityReport: QualityReport } }
+  | { type: 'CLEAR_ERRORS' };
 
 
 const initialState: DataState = {
@@ -129,249 +132,276 @@ const initialState: DataState = {
   vendors: MOCK_VENDORS,
   solicitations: MOCK_SOLICITATIONS,
   contracts: MOCK_CONTRACTS,
+  errors: [],
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {
-  switch (action.type) {
-    case 'UPDATE_TASK':
-      return {
-        ...state,
-        projects: state.projects.map(p => 
-          p.id === action.payload.projectId 
-            ? { ...p, tasks: p.tasks.map(t => t.id === action.payload.task.id ? action.payload.task : t) }
-            : p
-        )
-      };
-    case 'SET_BASELINE': {
-        const { projectId, name } = action.payload;
+  try {
+    switch (action.type) {
+      case 'CLEAR_ERRORS':
+        return { ...state, errors: [] };
+      
+      case 'UPDATE_TASK':
         return {
-            ...state,
-            projects: state.projects.map(p => {
-                if (p.id !== projectId) return p;
-                const newBaseline = {
-                    id: `BL${(p.baselines?.length || 0) + 1}`,
-                    name,
-                    date: new Date().toISOString().split('T')[0],
-                    taskBaselines: p.tasks.reduce((acc, task) => {
-                        acc[task.id] = {
-                            baselineStartDate: task.startDate,
-                            baselineEndDate: task.endDate
-                        };
-                        return acc;
-                    }, {} as Record<string, { baselineStartDate: string, baselineEndDate: string }>)
-                };
-                return { ...p, baselines: [...(p.baselines || []), newBaseline] };
-            })
+          ...state,
+          projects: state.projects.map(p => 
+            p.id === action.payload.projectId 
+              ? { ...p, tasks: p.tasks.map(t => t.id === action.payload.task.id ? action.payload.task : t) }
+              : p
+          )
         };
-    }
-    case 'ADD_WBS_NODE': {
-      const { projectId, parentId, newNode } = action.payload;
-      return {
-        ...state,
-        projects: state.projects.map(p => {
-          if (p.id !== projectId || !p.wbs) return p;
-          let newWbs = [...p.wbs];
-          if (parentId) {
-            newWbs = findAndModifyNode(newWbs, parentId, node => ({
-              ...node,
-              children: [...node.children, newNode]
-            }));
-          } else {
-            newWbs.push(newNode);
-          }
-          // INTEGRATION: Automatically create a summary task for the new WBS node
-          const newSummaryTask: Task = {
-            id: `T-${newNode.id}`, wbsCode: newNode.wbsCode, name: newNode.name, startDate: p.startDate, endDate: p.endDate, duration: 0, status: TaskStatus.NOT_STARTED, progress: 0, dependencies: [], critical: false, type: 'Summary', effortType: 'Fixed Duration', resourceRequirements: [], assignments: []
+      case 'SET_BASELINE': {
+          const { projectId, name } = action.payload;
+          return {
+              ...state,
+              projects: state.projects.map(p => {
+                  if (p.id !== projectId) return p;
+                  const newBaseline = {
+                      id: `BL${(p.baselines?.length || 0) + 1}`,
+                      name,
+                      date: new Date().toISOString().split('T')[0],
+                      taskBaselines: p.tasks.reduce((acc, task) => {
+                          acc[task.id] = {
+                              baselineStartDate: task.startDate,
+                              baselineEndDate: task.endDate
+                          };
+                          return acc;
+                      }, {} as Record<string, { baselineStartDate: string, baselineEndDate: string }>)
+                  };
+                  return { ...p, baselines: [...(p.baselines || []), newBaseline] };
+              })
           };
-          return { ...p, wbs: newWbs, tasks: [...p.tasks, newSummaryTask] };
-        })
-      };
-    }
-    case 'UPDATE_WBS_NODE': {
-      const { projectId, nodeId, updatedData } = action.payload;
-      return {
-        ...state,
-        projects: state.projects.map(p => {
-          if (p.id !== projectId || !p.wbs) return p;
-          const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({
-            ...node, ...updatedData
-          }));
-          return { ...p, wbs: newWbs };
-        })
-      };
-    }
-    case 'UPDATE_WBS_NODE_SHAPE': {
-      const { projectId, nodeId, shape } = action.payload;
-      return {
-        ...state,
-        projects: state.projects.map(p => {
-          if (p.id !== projectId || !p.wbs) return p;
-          const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({ ...node, shape }));
-          return { ...p, wbs: newWbs };
-        })
-      };
-    }
-    case 'UPDATE_WBS_NODE_PARENT': {
-      const { projectId, nodeId, newParentId } = action.payload;
-      if (nodeId === newParentId) return state; // Prevent dropping on self
-      return {
-        ...state,
-        projects: state.projects.map(p => {
-          if (p.id !== projectId || !p.wbs) return p;
-          const { newNodes } = findAndReparentNode(p.wbs, nodeId, newParentId);
-          return { ...p, wbs: newNodes };
-        })
-      };
-    }
-    case 'DELETE_WBS_NODE': {
-      const { projectId, nodeId } = action.payload;
-       return {
-        ...state,
-        projects: state.projects.map(p => {
-          if (p.id !== projectId || !p.wbs) return p;
-          const newWbs = findAndRemoveNode(p.wbs, nodeId);
-          return { ...p, wbs: newWbs };
-        })
-      };
-    }
-    case 'ADD_RISK':
-      return { ...state, risks: [...state.risks, action.payload] };
-    case 'UPDATE_RISK':
-      return {
-        ...state,
-        risks: state.risks.map(r => r.id === action.payload.risk.id ? action.payload.risk : r)
-      };
-    case 'UPDATE_RISK_PLAN':
-      return {
-        ...state,
-        riskPlans: state.riskPlans.map(p => 
-          p.projectId === action.payload.projectId
-            ? { ...p, ...action.payload.plan }
-            : p
-        )
-      };
-    case 'UPDATE_RBS_NODE_PARENT': {
-      const { nodeId, newParentId } = action.payload;
-      if (nodeId === newParentId) return state;
-      const { newNodes } = findAndReparentNode(state.rbs, nodeId, newParentId);
-      return { ...state, rbs: newNodes };
-    }
-    case 'ADD_ACTIVITY_CODE':
-      return { ...state, activityCodes: [...state.activityCodes, action.payload] };
-    case 'UPDATE_ACTIVITY_CODE':
-      return {
-        ...state,
-        activityCodes: state.activityCodes.map(ac =>
-          ac.id === action.payload.id ? action.payload : ac
-        )
-      };
-    case 'DELETE_ACTIVITY_CODE':
-      return {
-        ...state,
-        activityCodes: state.activityCodes.filter(ac => ac.id !== action.payload)
-      };
-    case 'TOGGLE_INTEGRATION':
-      return {
-        ...state,
-        integrations: state.integrations.map(i => 
-          i.id === action.payload 
-            ? { ...i, status: i.status === 'Connected' ? 'Disconnected' : 'Connected', lastSync: 'Just now' } 
-            : i
-        )
-      };
-    case 'ADD_RESOURCE':
-      return { ...state, resources: [...state.resources, action.payload] };
-    case 'ADD_CHANGE_ORDER':
-      return { ...state, changeOrders: [...state.changeOrders, action.payload] };
-    case 'APPROVE_CHANGE_ORDER': {
-        const { projectId, changeOrderId } = action.payload;
-        const co = state.changeOrders.find(c => c.id === changeOrderId);
-        if (!co) return state;
+      }
+      case 'ADD_WBS_NODE': {
+        const { projectId, parentId, newNode } = action.payload;
+        return {
+          ...state,
+          projects: state.projects.map(p => {
+            if (p.id !== projectId || !p.wbs) return p;
+            let newWbs = [...p.wbs];
+            if (parentId) {
+              newWbs = findAndModifyNode(newWbs, parentId, node => ({
+                ...node,
+                children: [...node.children, newNode]
+              }));
+            } else {
+              newWbs.push(newNode);
+            }
+            // Automatically create a summary task for the new WBS node
+            const newSummaryTask: Task = {
+              id: `T-${newNode.id}`, wbsCode: newNode.wbsCode, name: newNode.name, startDate: p.startDate, endDate: p.endDate, duration: 0, status: TaskStatus.NOT_STARTED, progress: 0, dependencies: [], critical: false, type: 'Summary', effortType: 'Fixed Duration', resourceRequirements: [], assignments: []
+            };
+            return { ...p, wbs: newWbs, tasks: [...p.tasks, newSummaryTask] };
+          })
+        };
+      }
+      case 'UPDATE_WBS_NODE': {
+        const { projectId, nodeId, updatedData } = action.payload;
+        return {
+          ...state,
+          projects: state.projects.map(p => {
+            if (p.id !== projectId || !p.wbs) return p;
+            const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({
+              ...node, ...updatedData
+            }));
+            return { ...p, wbs: newWbs };
+          })
+        };
+      }
+      case 'UPDATE_WBS_NODE_SHAPE': {
+        const { projectId, nodeId, shape } = action.payload;
+        return {
+          ...state,
+          projects: state.projects.map(p => {
+            if (p.id !== projectId || !p.wbs) return p;
+            const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({ ...node, shape }));
+            return { ...p, wbs: newWbs };
+          })
+        };
+      }
+      case 'UPDATE_WBS_NODE_PARENT': {
+        const { projectId, nodeId, newParentId } = action.payload;
+        if (nodeId === newParentId) {
+            console.warn("Attempted to move node into itself");
+            return state; 
+        }
+        
+        let error: string | undefined;
+        const newProjects = state.projects.map(p => {
+            if (p.id !== projectId || !p.wbs) return p;
+            const result = findAndReparentNode(p.wbs, nodeId, newParentId);
+            if (result.error) {
+                error = result.error;
+                return p;
+            }
+            return { ...p, wbs: result.newNodes };
+        });
 
-        const newLogItem: BudgetLogItem = {
-            id: `BLI-${Date.now()}`,
-            projectId,
-            date: new Date().toISOString().split('T')[0],
-            description: `Approved Change Order: ${co.title}`,
-            amount: co.amount,
-            status: 'Approved',
-            submittedBy: 'System',
-            source: 'Change Order',
+        if (error) {
+             return { ...state, errors: [...state.errors, `WBS Move Failed: ${error}`] };
+        }
+        return { ...state, projects: newProjects };
+      }
+      case 'DELETE_WBS_NODE': {
+        const { projectId, nodeId } = action.payload;
+         return {
+          ...state,
+          projects: state.projects.map(p => {
+            if (p.id !== projectId || !p.wbs) return p;
+            const newWbs = findAndRemoveNode(p.wbs, nodeId);
+            return { ...p, wbs: newWbs };
+          })
         };
+      }
+      case 'ADD_RISK':
+        return { ...state, risks: [...state.risks, action.payload] };
+      case 'UPDATE_RISK':
+        return {
+          ...state,
+          risks: state.risks.map(r => r.id === action.payload.risk.id ? action.payload.risk : r)
+        };
+      case 'UPDATE_RISK_PLAN':
+        return {
+          ...state,
+          riskPlans: state.riskPlans.map(p => 
+            p.projectId === action.payload.projectId
+              ? { ...p, ...action.payload.plan }
+              : p
+          )
+        };
+      case 'UPDATE_RBS_NODE_PARENT': {
+        const { nodeId, newParentId } = action.payload;
+        if (nodeId === newParentId) return state;
+        
+        const { newNodes, error } = findAndReparentNode(state.rbs, nodeId, newParentId);
+        
+        if (error) {
+            return { ...state, errors: [...state.errors, `RBS Move Failed: ${error}`] };
+        }
+        
+        return { ...state, rbs: newNodes };
+      }
+      case 'ADD_ACTIVITY_CODE':
+        return { ...state, activityCodes: [...state.activityCodes, action.payload] };
+      case 'UPDATE_ACTIVITY_CODE':
+        return {
+          ...state,
+          activityCodes: state.activityCodes.map(ac =>
+            ac.id === action.payload.id ? action.payload : ac
+          )
+        };
+      case 'DELETE_ACTIVITY_CODE':
+        return {
+          ...state,
+          activityCodes: state.activityCodes.filter(ac => ac.id !== action.payload)
+        };
+      case 'TOGGLE_INTEGRATION':
+        return {
+          ...state,
+          integrations: state.integrations.map(i => 
+            i.id === action.payload 
+              ? { ...i, status: i.status === 'Connected' ? 'Disconnected' : 'Connected', lastSync: 'Just now' } 
+              : i
+          )
+        };
+      case 'ADD_RESOURCE':
+        return { ...state, resources: [...state.resources, action.payload] };
+      case 'ADD_CHANGE_ORDER':
+        return { ...state, changeOrders: [...state.changeOrders, action.payload] };
+      case 'APPROVE_CHANGE_ORDER': {
+          const { projectId, changeOrderId } = action.payload;
+          const co = state.changeOrders.find(c => c.id === changeOrderId);
+          if (!co) return state;
 
+          const newLogItem: BudgetLogItem = {
+              id: `BLI-${Date.now()}`,
+              projectId,
+              date: new Date().toISOString().split('T')[0],
+              description: `Approved Change Order: ${co.title}`,
+              amount: co.amount,
+              status: 'Approved',
+              submittedBy: 'System',
+              source: 'Change Order',
+          };
+
+          return {
+              ...state,
+              changeOrders: state.changeOrders.map(c => c.id === changeOrderId ? { ...c, status: 'Approved' } : c),
+              projects: state.projects.map(p => {
+                  if (p.id !== projectId) return p;
+                  return {
+                      ...p,
+                      budget: p.budget + co.amount,
+                      budgetLog: [...(p.budgetLog || []), newLogItem]
+                  };
+              })
+          };
+      }
+      case 'UPLOAD_DOCUMENT':
+        return { ...state, documents: [...state.documents, action.payload] };
+      case 'INSTALL_EXTENSION':
         return {
-            ...state,
-            changeOrders: state.changeOrders.map(c => c.id === changeOrderId ? { ...c, status: 'Approved' } : c),
-            projects: state.projects.map(p => {
-                if (p.id !== projectId) return p;
-                return {
-                    ...p,
-                    budget: p.budget + co.amount,
-                    budgetLog: [...(p.budgetLog || []), newLogItem]
-                };
-            })
+          ...state,
+          extensions: state.extensions.map(ext => 
+            ext.id === action.payload 
+               ? { ...ext, status: 'Installed', installedDate: new Date().toISOString().split('T')[0] } 
+               : ext
+          )
         };
-    }
-    case 'UPLOAD_DOCUMENT':
-      return { ...state, documents: [...state.documents, action.payload] };
-    case 'INSTALL_EXTENSION':
-      return {
-        ...state,
-        extensions: state.extensions.map(ext => 
-          ext.id === action.payload 
-             ? { ...ext, status: 'Installed', installedDate: new Date().toISOString().split('T')[0] } 
-             : ext
-        )
-      };
-    case 'UNINSTALL_EXTENSION':
-      return {
-        ...state,
-        extensions: state.extensions.map(ext => 
-          ext.id === action.payload ? { ...ext, status: 'Available', installedDate: undefined } : ext
-        )
-      };
-     case 'ACTIVATE_EXTENSION':
-      return {
-        ...state,
-        extensions: state.extensions.map(ext => 
-          ext.id === action.payload ? { ...ext, status: 'Active' } : ext
-        )
-      };
-    case 'LINK_ISSUE_TO_TASK': {
-        const { projectId, taskId, issueId } = action.payload;
+      case 'UNINSTALL_EXTENSION':
         return {
-            ...state,
-            projects: state.projects.map(p => 
-                p.id === projectId ? { ...p, tasks: p.tasks.map(t => 
-                    t.id === taskId ? { ...t, issueIds: [...(t.issueIds || []), issueId] } : t
-                )} : p
-            ),
-            issues: state.issues.map(i => 
-                i.id === issueId ? { ...i, activityId: taskId } : i
-            )
+          ...state,
+          extensions: state.extensions.map(ext => 
+            ext.id === action.payload ? { ...ext, status: 'Available', installedDate: undefined } : ext
+          )
         };
-    }
-    case 'CREATE_ISSUE_FROM_QUALITY_FAIL': {
-        const { qualityReport } = action.payload;
-        const newIssue: Issue = {
-            id: `ISS-${Date.now()}`,
-            projectId: qualityReport.projectId,
-            priority: 'Medium',
-            status: 'Open',
-            description: `Quality Failure: ${qualityReport.details.finding || qualityReport.type}`,
-            assignedTo: 'Unassigned',
-            dateIdentified: new Date().toISOString().split('T')[0],
-        };
+       case 'ACTIVATE_EXTENSION':
         return {
-            ...state,
-            issues: [...state.issues, newIssue],
-            qualityReports: state.qualityReports.map(qr => 
-                qr.id === qualityReport.id ? { ...qr, linkedIssueId: newIssue.id } : qr
-            )
+          ...state,
+          extensions: state.extensions.map(ext => 
+            ext.id === action.payload ? { ...ext, status: 'Active' } : ext
+          )
         };
+      case 'LINK_ISSUE_TO_TASK': {
+          const { projectId, taskId, issueId } = action.payload;
+          return {
+              ...state,
+              projects: state.projects.map(p => 
+                  p.id === projectId ? { ...p, tasks: p.tasks.map(t => 
+                      t.id === taskId ? { ...t, issueIds: [...(t.issueIds || []), issueId] } : t
+                  )} : p
+              ),
+              issues: state.issues.map(i => 
+                  i.id === issueId ? { ...i, activityId: taskId } : i
+              )
+          };
+      }
+      case 'CREATE_ISSUE_FROM_QUALITY_FAIL': {
+          const { qualityReport } = action.payload;
+          const newIssue: Issue = {
+              id: `ISS-${Date.now()}`,
+              projectId: qualityReport.projectId,
+              priority: 'Medium',
+              status: 'Open',
+              description: `Quality Failure: ${qualityReport.details.finding || qualityReport.type}`,
+              assignedTo: 'Unassigned',
+              dateIdentified: new Date().toISOString().split('T')[0],
+          };
+          return {
+              ...state,
+              issues: [...state.issues, newIssue],
+              qualityReports: state.qualityReports.map(qr => 
+                  qr.id === qualityReport.id ? { ...qr, linkedIssueId: newIssue.id } : qr
+              )
+          };
+      }
+      default:
+        return state;
     }
-    default:
-      return state;
+  } catch (error) {
+    console.error("Reducer Error:", error);
+    // Return current state but append error message
+    return { ...state, errors: [...state.errors, "Internal System Error occurred during action processing."] };
   }
 };
 
@@ -388,6 +418,13 @@ const DataContext = createContext<{
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(dataReducer, initialState);
   
+  // Large dataset warning check
+  useMemo(() => {
+     if (state.projects.reduce((acc, p) => acc + p.tasks.length, 0) > 2000) {
+        console.warn("Large dataset detected. Performance degradation may occur.");
+     }
+  }, [state.projects]);
+
   const getTask = (projectId: string, taskId: string) => {
     const project = state.projects.find(p => p.id === projectId);
     return project?.tasks.find(t => t.id === taskId);

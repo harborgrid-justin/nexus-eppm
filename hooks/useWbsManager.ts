@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { WBSNode, WBSNodeShape } from '../types';
@@ -11,8 +12,6 @@ export const useWbsManager = (projectId: string) => {
 
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     const [openNodes, setOpenNodes] = useState<Set<string>>(new Set());
-    const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-    const [editingName, setEditingName] = useState('');
     const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
     const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, nodeId: '' });
 
@@ -61,7 +60,6 @@ export const useWbsManager = (projectId: string) => {
         }
     }, [dispatch, projectId]);
 
-    // FIX: The 'React' namespace is not available unless 'React' is imported.
     const handleDragStart = useCallback((e: React.DragEvent, nodeId: string) => {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', nodeId);
@@ -72,7 +70,6 @@ export const useWbsManager = (projectId: string) => {
         setDraggedNodeId(null);
     }, []);
     
-    // FIX: The 'React' namespace is not available unless 'React' is imported.
     const handleDrop = useCallback((e: React.DragEvent, newParentId: string | null) => {
         e.preventDefault();
         e.stopPropagation();
@@ -83,13 +80,11 @@ export const useWbsManager = (projectId: string) => {
         setDraggedNodeId(null);
     }, [dispatch, projectId]);
     
-    // FIX: The 'React' namespace is not available unless 'React' is imported.
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
     }, []);
 
-    // FIX: The 'React' namespace is not available unless 'React' is imported.
     const handleContextMenu = useCallback((e: React.MouseEvent, nodeId: string) => {
         e.preventDefault();
         e.stopPropagation();

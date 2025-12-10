@@ -1,0 +1,176 @@
+
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { Project, Task, TaskStatus } from '../types';
+import { useData } from '../context/DataContext';
+import { calculateCriticalPath } from '../utils/scheduling';
+import { toISODateString, addWorkingDays, getWorkingDaysDiff } from '../utils/dateUtils';
+
+export const DAY_WIDTH = 28;
+
+export const useGantt = (initialProject: Project) => {
+  const { dispatch } = useData();
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTraceLogicOpen, setIsTraceLogicOpen] = useState(false);
+  const [showCriticalPath, setShowCriticalPath] = useState(true);
+  const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject.baselines?.[0]?.id || null);
+  const [showResources, setShowResources] = useState(false);
+  
+  const ganttContainerRef = useRef<HTMLDivElement>(null);
+  const [draggingTask, setDraggingTask] = useState<{ task: Task, startX: number, type: 'move' | 'resize-end' | 'progress' } | null>(null);
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
+
+  // Memoize project calculation with critical path
+  const project = useMemo(() => {
+    if (!initialProject.calendar) {
+        console.warn("Project calendar is missing. Critical path calculation skipped.");
+        return initialProject;
+    }
+    try {
+      const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, initialProject.calendar);
+      return { ...initialProject, tasks: tasksWithCriticalPath };
+    } catch (error) {
+      console.error("Critical Path Calculation Failed", error);
+      return initialProject;
+    }
+  }, [initialProject]);
+  
+  const toggleNode = useCallback((nodeId: string) => {
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) newSet.delete(nodeId);
+      else newSet.add(nodeId);
+      return newSet;
+    });
+  }, []);
+
+  const projectStart = useMemo(() => {
+      if (project.tasks.length === 0) return new Date();
+      const minDate = new Date(project.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, project.tasks[0].startDate));
+      minDate.setDate(minDate.getDate() - 7);
+      return minDate;
+  }, [project.tasks]);
+
+  const projectEnd = useMemo(() => {
+      if (project.tasks.length === 0) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 30);
+          return endDate;
+      }
+      const maxDate = new Date(project.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, project.tasks[0].endDate));
+      maxDate.setDate(maxDate.getDate() + 30);
+      return maxDate;
+  }, [project.tasks]);
+
+  const timelineHeaders = useMemo(() => {
+    const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as { date: Date; isWorking: boolean }[] };
+    if (!project.calendar) return headers;
+
+    let current = new Date(projectStart);
+    let dayIndex = 0;
+    while (current <= projectEnd) {
+        const isWorking = project.calendar.workingDays.includes(current.getDay());
+        const monthYear = current.toLocaleString('default', { month: 'long', year: 'numeric' });
+        if(!headers.months.has(monthYear)){
+            headers.months.set(monthYear, { start: dayIndex * DAY_WIDTH, width: 0 });
+        }
+        const monthData = headers.months.get(monthYear);
+        if (monthData) {
+            monthData.width += DAY_WIDTH;
+        }
+
+        headers.days.push({ date: new Date(current), isWorking });
+        current.setDate(current.getDate() + 1);
+        if(isWorking || !isWorking) dayIndex++; // Simply increment for grid, refinement on working days logic depends on view requirement
+    }
+    return headers;
+  }, [projectStart, projectEnd, project.calendar]);
+
+  const getStatusColor = (status: TaskStatus) => {
+    switch (status) {
+      case TaskStatus.COMPLETED: return 'bg-green-500 border-green-600';
+      case TaskStatus.IN_PROGRESS: return 'bg-blue-500 border-blue-600';
+      case TaskStatus.DELAYED: return 'bg-red-500 border-red-600';
+      default: return 'bg-slate-400 border-slate-500';
+    }
+  };
+
+  const handleMouseDown = useCallback((e: React.MouseEvent, task: Task, type: 'move' | 'resize-end' | 'progress') => {
+    e.stopPropagation();
+    document.body.style.cursor = type === 'move' ? 'grabbing' : 'ew-resize';
+    setDraggingTask({ task, startX: e.clientX, type });
+  }, []);
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!draggingTask || !ganttContainerRef.current || !project.calendar) return;
+
+    const dx = e.clientX - draggingTask.startX;
+    const daysMoved = Math.round(dx / DAY_WIDTH);
+
+    if (daysMoved !== 0) {
+      let updatedTask = { ...draggingTask.task };
+      const calendar = project.calendar;
+
+      try {
+        if (draggingTask.type === 'move') {
+          const newStartDate = addWorkingDays(new Date(draggingTask.task.startDate), daysMoved, calendar);
+          updatedTask.startDate = toISODateString(newStartDate);
+          updatedTask.endDate = toISODateString(addWorkingDays(newStartDate, updatedTask.duration, calendar));
+        } else if (draggingTask.type === 'resize-end') {
+          const newDuration = updatedTask.duration + daysMoved;
+          updatedTask.duration = Math.max(1, newDuration);
+          updatedTask.endDate = toISODateString(addWorkingDays(new Date(updatedTask.startDate), updatedTask.duration, calendar));
+        } else if (draggingTask.type === 'progress') {
+            const barWidth = updatedTask.duration * DAY_WIDTH;
+            const currentProgressWidth = barWidth * (updatedTask.progress / 100);
+            const newProgressWidth = currentProgressWidth + dx;
+            updatedTask.progress = Math.max(0, Math.min(100, (newProgressWidth / barWidth) * 100));
+        }
+        
+        setDraggingTask({ ...draggingTask, startX: e.clientX });
+        dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: updatedTask } });
+      } catch (err) {
+        console.error("Error updating task during drag", err);
+      }
+    }
+  }, [draggingTask, project.id, project.calendar, dispatch]);
+
+  const handleMouseUp = useCallback(() => {
+    document.body.style.cursor = 'default';
+    setDraggingTask(null);
+  }, []);
+
+  useEffect(() => {
+    if (draggingTask) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [draggingTask, handleMouseMove, handleMouseUp]);
+
+  return {
+      project,
+      viewMode,
+      setViewMode,
+      selectedTask,
+      setSelectedTask,
+      isTraceLogicOpen,
+      setIsTraceLogicOpen,
+      showCriticalPath,
+      setShowCriticalPath,
+      activeBaselineId,
+      setActiveBaselineId,
+      showResources,
+      setShowResources,
+      ganttContainerRef,
+      expandedNodes,
+      toggleNode,
+      timelineHeaders,
+      projectStart,
+      getStatusColor,
+      handleMouseDown
+  };
+};

@@ -1,20 +1,19 @@
-import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
-import { Project, Task, TaskStatus, WBSNode } from '../types';
+
+import React from 'react';
+import { Project, Task, WBSNode } from '../types';
 import TaskDetailModal from './TaskDetailModal';
 import TraceLogic from './scheduling/TraceLogic';
-import { useData } from '../context/DataContext';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageView from './scheduling/ResourceUsageView';
-import { calculateCriticalPath } from '../utils/scheduling';
-import { toISODateString, addWorkingDays, getWorkingDaysDiff } from '../utils/dateUtils';
-import { Diamond, AlertTriangle, CheckCircle2, Circle, Clock, ChevronRight, ChevronDown, GripVertical } from 'lucide-react';
+import { getWorkingDaysDiff } from '../utils/dateUtils';
+import { Diamond, ChevronRight, ChevronDown } from 'lucide-react';
+import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 
 interface ProjectGanttProps {
   project: Project;
 }
 
 const ROW_HEIGHT = 44;
-const DAY_WIDTH = 28;
 
 // Hierarchical Row Renderer
 const WbsGanttRow: React.FC<{
@@ -85,143 +84,28 @@ const WbsGanttRow: React.FC<{
 
 
 const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) => {
-  const { dispatch } = useData();
-  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [isTraceLogicOpen, setIsTraceLogicOpen] = useState(false);
-  const [showCriticalPath, setShowCriticalPath] = useState(true);
-  const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject.baselines?.[0]?.id || null);
-  const [showResources, setShowResources] = useState(false);
-  
-  const ganttContainerRef = useRef<HTMLDivElement>(null);
-  const [draggingTask, setDraggingTask] = useState<{ task: Task, startX: number, type: 'move' | 'resize-end' | 'progress' } | null>(null);
-  const [linkCreation, setLinkCreation] = useState<{ fromTask: Task, fromHandle: 'start' | 'end' } | null>(null);
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
-
-  const project = useMemo(() => {
-    if (!initialProject.calendar) {
-        console.error("Project calendar is missing. Cannot calculate critical path.");
-        return initialProject;
-    }
-    const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, initialProject.calendar);
-    return { ...initialProject, tasks: tasksWithCriticalPath };
-  }, [initialProject]);
-  
-  const toggleNode = (nodeId: string) => {
-    setExpandedNodes(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(nodeId)) newSet.delete(nodeId);
-      else newSet.add(nodeId);
-      return newSet;
-    });
-  };
-
-  const projectStart = useMemo(() => {
-      if (project.tasks.length === 0) return new Date();
-      const minDate = new Date(project.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, project.tasks[0].startDate));
-      minDate.setDate(minDate.getDate() - 7);
-      return minDate;
-  }, [project.tasks]);
-
-  const projectEnd = useMemo(() => {
-      if (project.tasks.length === 0) {
-          const endDate = new Date();
-          endDate.setDate(endDate.getDate() + 30);
-          return endDate;
-      }
-      const maxDate = new Date(project.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, project.tasks[0].endDate));
-      maxDate.setDate(maxDate.getDate() + 30);
-      return maxDate;
-  }, [project.tasks]);
-
-  const totalDays = project.calendar ? getWorkingDaysDiff(projectStart, projectEnd, project.calendar) : 0;
-  
-  const timelineHeaders = useMemo(() => {
-    const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as { date: Date; isWorking: boolean }[] };
-    if (!project.calendar) return headers;
-
-    let current = new Date(projectStart);
-    let dayIndex = 0;
-    while (current <= projectEnd) {
-        const isWorking = project.calendar.workingDays.includes(current.getDay());
-        const monthYear = current.toLocaleString('default', { month: 'long', year: 'numeric' });
-        if(!headers.months.has(monthYear)){
-            headers.months.set(monthYear, { start: dayIndex * DAY_WIDTH, width: 0 });
-        }
-        const monthData = headers.months.get(monthYear);
-        if (monthData) {
-            monthData.width += DAY_WIDTH;
-        }
-
-        headers.days.push({ date: new Date(current), isWorking });
-        current.setDate(current.getDate() + 1);
-        if(isWorking) dayIndex++;
-    }
-    return headers;
-  }, [projectStart, projectEnd, viewMode, project.calendar]);
-
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case TaskStatus.COMPLETED: return 'bg-green-500 border-green-600';
-      case TaskStatus.IN_PROGRESS: return 'bg-blue-500 border-blue-600';
-      case TaskStatus.DELAYED: return 'bg-red-500 border-red-600';
-      default: return 'bg-slate-400 border-slate-500';
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent, task: Task, type: 'move' | 'resize-end' | 'progress') => {
-    e.stopPropagation();
-    document.body.style.cursor = type === 'move' ? 'grabbing' : 'ew-resize';
-    setDraggingTask({ task, startX: e.clientX, type });
-  };
-  
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!draggingTask || !ganttContainerRef.current || !project.calendar) return;
-
-    const dx = e.clientX - draggingTask.startX;
-    const daysMoved = Math.round(dx / DAY_WIDTH);
-
-    if (daysMoved !== 0) {
-      let updatedTask = { ...draggingTask.task };
-      const calendar = project.calendar;
-
-      if (draggingTask.type === 'move') {
-        const newStartDate = addWorkingDays(new Date(draggingTask.task.startDate), daysMoved, calendar);
-        updatedTask.startDate = toISODateString(newStartDate);
-        updatedTask.endDate = toISODateString(addWorkingDays(newStartDate, updatedTask.duration, calendar));
-      } else if (draggingTask.type === 'resize-end') {
-        const newDuration = updatedTask.duration + daysMoved;
-        updatedTask.duration = Math.max(1, newDuration);
-        updatedTask.endDate = toISODateString(addWorkingDays(new Date(updatedTask.startDate), updatedTask.duration, calendar));
-      } else if (draggingTask.type === 'progress') {
-          const barWidth = updatedTask.duration * DAY_WIDTH;
-          const currentProgressWidth = barWidth * (updatedTask.progress / 100);
-          const newProgressWidth = currentProgressWidth + dx;
-          updatedTask.progress = Math.max(0, Math.min(100, (newProgressWidth / barWidth) * 100));
-      }
-      
-      setDraggingTask({ ...draggingTask, startX: e.clientX });
-      dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: updatedTask } });
-    }
-  }, [draggingTask, project.id, project.calendar, dispatch]);
-
-  const handleMouseUp = useCallback(() => {
-    document.body.style.cursor = 'default';
-    setDraggingTask(null);
-  }, []);
-
-  useEffect(() => {
-    if (draggingTask) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [draggingTask, handleMouseMove, handleMouseUp]);
-
-  const activeBaseline = project.baselines?.find(b => b.id === activeBaselineId);
+  const {
+      project,
+      viewMode,
+      setViewMode,
+      selectedTask,
+      setSelectedTask,
+      isTraceLogicOpen,
+      setIsTraceLogicOpen,
+      showCriticalPath,
+      setShowCriticalPath,
+      activeBaselineId,
+      setActiveBaselineId,
+      showResources,
+      setShowResources,
+      ganttContainerRef,
+      expandedNodes,
+      toggleNode,
+      timelineHeaders,
+      projectStart,
+      getStatusColor,
+      handleMouseDown
+  } = useGantt(initialProject);
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden relative">
@@ -272,7 +156,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
            </div>
           
            <svg className="absolute top-[50px] left-0 w-full h-full pointer-events-none z-10" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px` }}>
-               {/* Dependency Lines */}
+               {/* Dependency Lines could be rendered here */}
            </svg>
 
 
