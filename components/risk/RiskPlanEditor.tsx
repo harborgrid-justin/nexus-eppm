@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { useData } from '../../context/DataContext';
 import { FileText, Save, Book } from 'lucide-react';
 

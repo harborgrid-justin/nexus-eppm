@@ -150,7 +150,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                           {/* FIX: Explicitly type 'row' to avoid it being treated as 'unknown' in strict mode, which prevents property access. */}
+                           {/* FIX: Explicitly typing 'row' as Record<string, any> allows it to be indexed by a string without TypeScript errors. */}
                            {reportData.slice(0, 50).map((row: Record<string, any>, idx) => ( // limit to 50 for preview
                                <tr key={idx} className="hover:bg-slate-50">
                                    {Array.from(selectedColumns).map(colId => (

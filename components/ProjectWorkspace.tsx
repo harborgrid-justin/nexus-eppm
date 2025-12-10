@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
   MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning
@@ -44,13 +44,18 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   ];
 
   const renderContent = () => {
+    if (!project) {
+        return <div className="p-6">Loading project details...</div>;
+    }
     switch (activeArea) {
       case 'integration':
         return <ProjectIntegrationManagement projectId={projectId} />;
       case 'scope':
         return <ScopeManagement projectId={projectId} />;
       case 'schedule':
-        return scheduleView === 'gantt' ? <ProjectGantt project={project!} /> : <NetworkDiagram project={project!} />;
+        return scheduleView === 'gantt' 
+            ? <ProjectGantt project={project} /> 
+            : <NetworkDiagram project={project} />;
       case 'cost':
         return <CostManagement projectId={projectId} />;
       case 'risk':

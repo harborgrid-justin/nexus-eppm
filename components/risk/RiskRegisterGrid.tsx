@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { Plus, Filter, Search, AlertTriangle, ShieldCheck } from 'lucide-react';
 import RiskDetailModal from './RiskDetailModal';
 

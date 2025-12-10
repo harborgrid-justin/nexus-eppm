@@ -4,14 +4,16 @@ import { Project, AIAnalysisResult } from '../types';
 const getAiClient = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    console.warn("API_KEY is not set in process.env");
+    // In a real enterprise app, this would log to a monitoring service
+    console.warn("API_KEY is not set in process.env. AI features will not work.");
   }
+  // Return a new instance for each call to ensure latest config/key is used.
   return new GoogleGenAI({ apiKey: apiKey || '' });
 };
 
 export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisResult> => {
   const ai = getAiClient();
-  const model = "gemini-2.5-flash"; // Using fast model for quick UI feedback
+  const model = "gemini-2.5-flash";
 
   const prompt = `
     You are an expert Project Management Consultant similar to a master scheduler using Oracle P6.
@@ -27,7 +29,8 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
       status: t.status,
       progress: t.progress,
       critical: t.critical,
-      assigned: t.assignments
+      startDate: t.startDate,
+      endDate: t.endDate
     })))}
   `;
 
@@ -54,22 +57,29 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
       }
     });
 
-    if (response.text) {
-      return JSON.parse(response.text) as AIAnalysisResult;
+    const textResponse = response.text;
+    if (textResponse) {
+      // Safely parse JSON
+      return JSON.parse(textResponse) as AIAnalysisResult;
     }
-    // FIX: An empty response from the AI was throwing an error. Now, it returns a default object.
+    
+    console.warn("AI analysis returned an empty response.");
     return {
-      summary: "Could not generate analysis at this time.",
-      risks: ["System error during analysis."],
-      recommendations: ["Check API configuration."]
+      summary: "AI analysis could not be completed at this time.",
+      risks: ["No response from the analysis engine."],
+      recommendations: ["Please try again later."]
     };
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error analyzing project:", error);
+    let errorMessage = "An unknown error occurred during analysis.";
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    }
     return {
-      summary: "Could not generate analysis at this time.",
-      risks: ["System error during analysis."],
-      recommendations: ["Check API configuration."]
+      summary: "Could not generate analysis due to a system error.",
+      risks: [`Error: ${errorMessage}`],
+      recommendations: ["Check the application logs and API configuration."]
     };
   }
 };
@@ -85,23 +95,26 @@ export const chatWithProjectData = async (project: Project, userMessage: string,
      Answer questions about schedule, budget, and resources concisely.
    `;
 
-   // Construct history for context (simplified)
-   // In a real app, use proper ChatSession history
-   const chat = ai.chats.create({
-     model,
-     config: { systemInstruction }
-   });
-
-   // Simulate history injection by sending previous turns if needed, or just relying on system instruction for context in this stateless turn
-   // For this scaffold, we will just send the message directly to a fresh chat initialized with system context.
-   
-   const result = await chat.sendMessage({ message: userMessage });
-   return result.text || "I couldn't process that request.";
+   try {
+     const chat = ai.chats.create({
+       model,
+       config: { systemInstruction }
+     });
+     
+     const result = await chat.sendMessage({ message: userMessage });
+     return result.text || "I couldn't process that request at the moment. Please try again.";
+   } catch (error: unknown) {
+     console.error("Error in chatWithProjectData:", error);
+     if (error instanceof Error) {
+         return `Sorry, an error occurred: ${error.message}`;
+     }
+     return "Sorry, an unknown error occurred while processing your request.";
+   }
 };
 
 export const generatePortfolioReport = async (projects: Project[]): Promise<string> => {
   const ai = getAiClient();
-  const model = "gemini-3-pro-preview"; // Using a more capable model for comprehensive reports
+  const model = "gemini-3-pro-preview";
 
   const prompt = `
     You are an expert Portfolio Analyst for Nexus PPM. Your task is to generate a comprehensive executive summary report for the following portfolio of projects.
@@ -142,11 +155,13 @@ export const generatePortfolioReport = async (projects: Project[]): Promise<stri
       },
     });
 
-    return response.text || "Failed to generate portfolio report.";
+    return response.text || "Failed to generate portfolio report: empty response from model.";
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error generating portfolio report:", error);
-    // FIX: The type of 'error' is 'unknown'. Cast it to 'any' to access the 'message' property.
-    return `An error occurred while generating the portfolio report: ${(error as any).message}`;
+    if (error instanceof Error) {
+        return `An error occurred while generating the portfolio report: ${error.message}`;
+    }
+    return "An unknown error occurred while generating the portfolio report.";
   }
 };

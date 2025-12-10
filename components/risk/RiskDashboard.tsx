@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import {
   Bar,

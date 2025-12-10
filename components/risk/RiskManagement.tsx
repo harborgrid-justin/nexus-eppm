@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { AlertTriangle, LayoutDashboard, FileText, List, Columns, BarChart2, Sigma } from 'lucide-react';
 import ErrorBoundary from '../ErrorBoundary';
 import RiskDashboard from './RiskDashboard';

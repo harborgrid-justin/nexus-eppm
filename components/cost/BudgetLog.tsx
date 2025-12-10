@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { Landmark, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
 

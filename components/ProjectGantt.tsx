@@ -99,7 +99,10 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
 
   const project = useMemo(() => {
-    if (!initialProject.calendar) return initialProject;
+    if (!initialProject.calendar) {
+        console.error("Project calendar is missing. Cannot calculate critical path.");
+        return initialProject;
+    }
     const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, initialProject.calendar);
     return { ...initialProject, tasks: tasksWithCriticalPath };
   }, [initialProject]);
@@ -114,30 +117,41 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
   };
 
   const projectStart = useMemo(() => {
-      const minDate = new Date(project.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, project.tasks[0]?.startDate || new Date().toISOString()));
+      if (project.tasks.length === 0) return new Date();
+      const minDate = new Date(project.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, project.tasks[0].startDate));
       minDate.setDate(minDate.getDate() - 7);
       return minDate;
   }, [project.tasks]);
 
   const projectEnd = useMemo(() => {
-      const maxDate = new Date(project.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, project.tasks[0]?.endDate || new Date().toISOString()));
+      if (project.tasks.length === 0) {
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + 30);
+          return endDate;
+      }
+      const maxDate = new Date(project.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, project.tasks[0].endDate));
       maxDate.setDate(maxDate.getDate() + 30);
       return maxDate;
   }, [project.tasks]);
 
-  const totalDays = getWorkingDaysDiff(projectStart, projectEnd, project.calendar!);
+  const totalDays = project.calendar ? getWorkingDaysDiff(projectStart, projectEnd, project.calendar) : 0;
   
   const timelineHeaders = useMemo(() => {
-    const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as any[] };
+    const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as { date: Date; isWorking: boolean }[] };
+    if (!project.calendar) return headers;
+
     let current = new Date(projectStart);
     let dayIndex = 0;
     while (current <= projectEnd) {
-        const isWorking = project.calendar?.workingDays.includes(current.getDay());
+        const isWorking = project.calendar.workingDays.includes(current.getDay());
         const monthYear = current.toLocaleString('default', { month: 'long', year: 'numeric' });
         if(!headers.months.has(monthYear)){
             headers.months.set(monthYear, { start: dayIndex * DAY_WIDTH, width: 0 });
         }
-        headers.months.get(monthYear)!.width += DAY_WIDTH;
+        const monthData = headers.months.get(monthYear);
+        if (monthData) {
+            monthData.width += DAY_WIDTH;
+        }
 
         headers.days.push({ date: new Date(current), isWorking });
         current.setDate(current.getDate() + 1);
@@ -162,14 +176,14 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
   };
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!draggingTask || !ganttContainerRef.current) return;
+    if (!draggingTask || !ganttContainerRef.current || !project.calendar) return;
 
     const dx = e.clientX - draggingTask.startX;
     const daysMoved = Math.round(dx / DAY_WIDTH);
 
     if (daysMoved !== 0) {
       let updatedTask = { ...draggingTask.task };
-      const calendar = project.calendar!;
+      const calendar = project.calendar;
 
       if (draggingTask.type === 'move') {
         const newStartDate = addWorkingDays(new Date(draggingTask.task.startDate), daysMoved, calendar);
@@ -267,7 +281,8 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
               {timelineHeaders.days.map(({date, isWorking}, i) => <div key={`grid-${i}`} className={`absolute top-0 bottom-0 border-l ${isWorking ? 'border-slate-100' : 'bg-slate-100/70 border-slate-200'}`} style={{ left: `${i * DAY_WIDTH}px` }} />)}
 
               {project.tasks.map((task, idx) => {
-                const offsetDays = getWorkingDaysDiff(projectStart, new Date(task.startDate), project.calendar!);
+                if (!project.calendar) return null;
+                const offsetDays = getWorkingDaysDiff(projectStart, new Date(task.startDate), project.calendar);
                 const width = task.type === 'Milestone' ? DAY_WIDTH : Math.max(task.duration * DAY_WIDTH, 2);
                 
                 return (
@@ -291,7 +306,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
         </div>
       </div>
       
-      {showResources && <ResourceUsageView project={project} dayWidth={DAY_WIDTH} projectStartDate={projectStart} />}
+      {showResources && project.calendar && <ResourceUsageView project={project} dayWidth={DAY_WIDTH} projectStartDate={projectStart} />}
       
       {selectedTask && !isTraceLogicOpen && <TaskDetailModal task={selectedTask} project={project} onClose={() => setSelectedTask(null)} />}
       {isTraceLogicOpen && selectedTask && <TraceLogic startTask={selectedTask} project={project} onClose={() => setIsTraceLogicOpen(false)} />}

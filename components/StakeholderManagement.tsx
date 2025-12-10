@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { Users, Plus, ArrowRight, ArrowUp } from 'lucide-react';
 
 interface StakeholderManagementProps {

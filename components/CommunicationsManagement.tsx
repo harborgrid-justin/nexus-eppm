@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { MessageCircle, Plus, Mail, Users, Phone } from 'lucide-react';
 
 interface CommunicationsManagementProps {

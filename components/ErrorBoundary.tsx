@@ -9,7 +9,6 @@ interface State {
   hasError: boolean;
 }
 
-// FIX: Use this.props and this.state directly to avoid potential 'this' context issues with destructuring in some environments.
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false
@@ -23,7 +22,6 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  // FIX: Explicitly adding the return type to the render method to help with type inference.
   public render(): ReactNode {
     if (this.state.hasError) {
       return (
@@ -36,7 +34,7 @@ class ErrorBoundary extends Component<Props, State> {
         </div>
       );
     }
-    // FIX: To resolve issues with `this.props` access, we now return `this.props.children` directly instead of destructuring.
+    // FIX: Directly access `this.props.children`. The `props` property is inherited from `React.Component` and should be accessed via `this`.
     return this.props.children;
   }
 }

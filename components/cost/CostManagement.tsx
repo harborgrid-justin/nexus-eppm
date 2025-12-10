@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote } from 'lucide-react';
 import CostDashboard from './CostDashboard';
 import CostPlanEditor from './CostPlanEditor';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sliders, Plus } from 'lucide-react';
-import { useWbsManager } from '../hooks/useWbsManager';
+import { useWbsManager } from '../hooks';
 import WBSNodeComponent from './scope/WBSNodeComponent';
 import { WBSNode } from '../types';
 

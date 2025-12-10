@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import StatCard from '../shared/StatCard';
 
 interface QualityDashboardProps {

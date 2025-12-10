@@ -44,7 +44,8 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
   const handleResponseActionChange = (index: number, field: keyof RiskResponseAction, value: string) => {
     if(risk) {
         const newActions = [...risk.responseActions];
-        (newActions[index] as any)[field] = value;
+        const actionToUpdate = { ...newActions[index], [field]: value };
+        newActions[index] = actionToUpdate;
         handleChange('responseActions', newActions);
     }
   };
@@ -104,8 +105,10 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
              <div>
                 <h3 className="font-semibold mb-2 flex items-center gap-2"><LinkIcon size={16}/> Linked Risks</h3>
                 <select multiple className="w-full p-2 border border-slate-300 rounded-md h-24 text-sm" value={risk.linkedRiskIds || []} onChange={(e) => {
-                  // FIX: The type of 'option' was not being inferred correctly. Explicitly setting it to 'HTMLOptionElement' resolves the issue.
-                  const selectedValues = Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value);
+                  const selectedOptions = Array.from(e.target.options as unknown as HTMLOptionElement[]);
+                  const selectedValues = selectedOptions
+                    .filter(option => option.selected)
+                    .map(option => option.value);
                   handleChange('linkedRiskIds', selectedValues);
                 }}>
                     {state.risks.filter(r => r.id !== risk.id).map(r => (

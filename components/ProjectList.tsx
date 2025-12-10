@@ -2,7 +2,7 @@ import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { calculateProjectProgress } from '../utils/calculations';
-import { usePortfolioState } from '../hooks/usePortfolioState';
+import { usePortfolioState } from '../hooks';
 
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { useData } from '../context/DataContext';
 import { ShoppingCart, Plus, CheckCircle, Clock } from 'lucide-react';
 import { ProcurementPackage } from '../types';
