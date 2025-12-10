@@ -6,7 +6,8 @@ import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
 import QualityControlLog from './quality/QualityControlLog';
 import DefectTracking from './quality/DefectTracking';
-import GenericEnterpriseModule from './GenericEnterpriseModule';
+import QualityStandards from './quality/QualityStandards';
+import SupplierQuality from './quality/SupplierQuality';
 import { useTheme } from '../context/ThemeContext';
 
 interface QualityManagementProps {
@@ -55,7 +56,8 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
-        return <QualityDashboard qualityProfile={qualityProfile} />;
+        // FIX: Pass projectId to QualityDashboard instead of qualityProfile for better data encapsulation.
+        return <QualityDashboard projectId={projectId} />;
       case 'plan':
         return <QualityPlanEditor projectId={projectId} />;
       case 'control':
@@ -63,11 +65,11 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
       case 'defects':
         return <DefectTracking projectId={projectId} />;
       case 'standards':
-        return <GenericEnterpriseModule title="Standards & Compliance" description="Manage organizational and project-specific quality standards." type="grid" icon={BadgeCheck} />;
+        return <QualityStandards />;
       case 'supplier':
-        return <GenericEnterpriseModule title="Supplier Quality" description="Track incoming material inspections and supplier performance." type="grid" icon={Truck} />;
+        return <SupplierQuality />;
       default:
-        return <QualityDashboard qualityProfile={qualityProfile} />;
+        return <QualityDashboard projectId={projectId} />;
     }
   };
 

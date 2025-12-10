@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Project } from '../../types';
+import { Project, TaskStatus } from '../../types';
 import { Calendar, AlertTriangle, Layers, Users, ZoomIn, ZoomOut, Save, Filter, Share2 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
@@ -15,6 +16,8 @@ interface GanttToolbarProps {
   setShowResources: (show: boolean) => void;
   onTraceLogic: () => void;
   isTaskSelected: boolean;
+  taskFilter: string;
+  setTaskFilter: (filter: string) => void;
 }
 
 const GanttToolbar: React.FC<GanttToolbarProps> = ({
@@ -28,7 +31,9 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
   showResources,
   setShowResources,
   onTraceLogic,
-  isTaskSelected
+  isTaskSelected,
+  taskFilter,
+  setTaskFilter,
 }) => {
   const { dispatch } = useData();
 
@@ -55,10 +60,19 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
             </button>
           ))}
         </div>
-        <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-300 bg-white">
-          <Filter size={14} />
-          <span>Filter</span>
-        </button>
+        <div className="relative">
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select 
+                value={taskFilter}
+                onChange={e => setTaskFilter(e.target.value)}
+                className="pl-8 pr-4 py-1.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-nexus-500"
+            >
+                <option value="all">All Tasks</option>
+                <option value="critical">Critical</option>
+                <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
+                <option value={TaskStatus.DELAYED}>Delayed</option>
+            </select>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <button 

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Project, Task, WBSNode } from '../types';
 import TaskDetailModal from './TaskDetailModal';
 import TraceLogic from './scheduling/TraceLogic';
@@ -14,74 +14,6 @@ interface ProjectGanttProps {
 }
 
 const ROW_HEIGHT = 44;
-
-// Hierarchical Row Renderer
-const WbsGanttRow: React.FC<{
-  node: WBSNode;
-  project: Project;
-  level: number;
-  expandedNodes: Set<string>;
-  toggleNode: (id: string) => void;
-  onSelectTask: (task: Task) => void;
-  showCriticalPath: boolean;
-}> = ({ node, project, level, expandedNodes, toggleNode, onSelectTask, showCriticalPath }) => {
-  const isExpanded = expandedNodes.has(node.id);
-  const tasksForNode = project.tasks.filter(t => t.wbsCode === node.wbsCode);
-
-  return (
-    <>
-      {/* WBS Node Row */}
-      <div 
-        className="group h-[44px] flex items-center px-4 border-b border-slate-200 hover:bg-slate-50 text-sm cursor-pointer font-bold bg-slate-50/70"
-        style={{ paddingLeft: `${level * 20 + 16}px` }}
-        onClick={() => toggleNode(node.id)}
-      >
-        <div className="flex-1 text-slate-800 truncate pr-2 flex items-center gap-2">
-          <button onClick={(e) => { e.stopPropagation(); toggleNode(node.id); }} className="p-1 -ml-6 mr-1">
-            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
-          <span className="font-mono text-xs text-slate-500 w-16">{node.wbsCode}</span>
-          {node.name}
-        </div>
-      </div>
-      
-      {/* Child Rows (Tasks and Sub-WBS) */}
-      {isExpanded && (
-        <>
-          {tasksForNode.map(task => (
-            <div 
-              key={task.id}
-              onClick={() => onSelectTask(task)}
-              className="group h-[44px] flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm cursor-pointer"
-              style={{ paddingLeft: `${(level + 1) * 20 + 16 + 24}px` }}
-            >
-              <div className="flex-1 font-medium text-slate-700 truncate pr-2 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
-                 {task.type === 'Milestone' ? <Diamond size={10} className="text-nexus-600 fill-current" /> : (showCriticalPath && task.critical) && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Critical Path"></span>}
-                <span className="font-mono text-xs text-slate-500 w-16">{task.wbsCode}</span>
-                {task.name}
-              </div>
-              <div className="w-20 text-center text-slate-500">{task.duration > 0 ? `${task.duration}d` : '-'}</div>
-            </div>
-          ))}
-
-          {node.children.map(childNode => (
-            <WbsGanttRow
-              key={childNode.id}
-              node={childNode}
-              project={project}
-              level={level + 1}
-              expandedNodes={expandedNodes}
-              toggleNode={toggleNode}
-              onSelectTask={onSelectTask}
-              showCriticalPath={showCriticalPath}
-            />
-          ))}
-        </>
-      )}
-    </>
-  );
-};
-
 
 const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) => {
   const {
@@ -104,8 +36,39 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
       timelineHeaders,
       projectStart,
       getStatusColor,
-      handleMouseDown
+      handleMouseDown,
+      taskFilter,
+      setTaskFilter
   } = useGantt(initialProject);
+
+  const flatRenderList = useMemo(() => {
+    const list: ({ type: 'wbs', node: WBSNode, level: number } | { type: 'task', task: Task, level: number })[] = [];
+    const traverse = (nodes: WBSNode[], level: number) => {
+        nodes.forEach(node => {
+            list.push({ type: 'wbs', node, level });
+            if (expandedNodes.has(node.id)) {
+                project.tasks
+                  .filter(t => t.wbsCode === node.wbsCode)
+                  .forEach(task => {
+                    list.push({ type: 'task', task, level: level + 1 });
+                });
+                traverse(node.children, level + 1);
+            }
+        });
+    };
+    traverse(project.wbs || [], 0);
+    return list;
+  }, [project.wbs, project.tasks, expandedNodes]);
+
+  const taskRowMap = useMemo(() => {
+      const map = new Map<string, number>();
+      flatRenderList.forEach((item, index) => {
+          if (item.type === 'task') {
+              map.set(item.task.id, index);
+          }
+      });
+      return map;
+  }, [flatRenderList]);
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden relative">
@@ -121,28 +84,57 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
         setShowResources={setShowResources}
         onTraceLogic={() => setIsTraceLogicOpen(true)}
         isTaskSelected={!!selectedTask}
+        taskFilter={taskFilter}
+        setTaskFilter={setTaskFilter}
       />
 
       <div className="flex flex-1 overflow-hidden">
+        {/* Task List (Left Panel) */}
         <div className="w-[450px] flex-shrink-0 border-r border-slate-200 flex flex-col bg-white overflow-y-auto z-10">
           <div className="sticky top-0 z-20 bg-slate-100 border-b border-slate-200 h-[50px] flex items-center px-4 font-semibold text-xs text-slate-600 uppercase tracking-wider">
             <div className="flex-1">Task Name</div>
             <div className="w-20 text-center">Duration</div>
           </div>
-          {project.wbs?.map(node => (
-             <WbsGanttRow
-                key={node.id}
-                node={node}
-                project={project}
-                level={0}
-                expandedNodes={expandedNodes}
-                toggleNode={toggleNode}
-                onSelectTask={setSelectedTask}
-                showCriticalPath={showCriticalPath}
-             />
-          ))}
+          {flatRenderList.map(item => {
+            if (item.type === 'wbs') {
+                return (
+                    <div 
+                        key={item.node.id}
+                        className="group h-[44px] flex items-center px-4 border-b border-slate-200 hover:bg-slate-50 text-sm cursor-pointer font-bold bg-slate-50/70"
+                        style={{ paddingLeft: `${item.level * 20 + 16}px` }}
+                        onClick={() => toggleNode(item.node.id)}
+                    >
+                        <div className="flex-1 text-slate-800 truncate pr-2 flex items-center gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); toggleNode(item.node.id); }} className="p-1 -ml-6 mr-1">
+                                {expandedNodes.has(item.node.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                            </button>
+                            <span className="font-mono text-xs text-slate-500 w-16">{item.node.wbsCode}</span>
+                            {item.node.name}
+                        </div>
+                    </div>
+                );
+            } else {
+                const task = item.task;
+                return (
+                    <div 
+                      key={task.id}
+                      onClick={() => setSelectedTask(task)}
+                      className="group h-[44px] flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm cursor-pointer"
+                      style={{ paddingLeft: `${item.level * 20 + 24}px` }}
+                    >
+                      <div className="flex-1 font-medium text-slate-700 truncate pr-2 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
+                         {task.type === 'Milestone' ? <Diamond size={10} className="text-nexus-600 fill-current" /> : (showCriticalPath && task.critical) && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Critical Path"></span>}
+                        <span className="font-mono text-xs text-slate-500 w-16">{task.wbsCode}</span>
+                        {task.name}
+                      </div>
+                      <div className="w-20 text-center text-slate-500">{task.duration > 0 ? `${task.duration}d` : '-'}</div>
+                    </div>
+                );
+            }
+          })}
         </div>
 
+        {/* Timeline (Right Panel) */}
         <div className="flex-1 overflow-auto relative bg-white" id="gantt-timeline" ref={ganttContainerRef}>
            <div className="sticky top-0 left-0 z-10 bg-slate-100 border-b border-slate-200 h-[50px] whitespace-nowrap" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px` }}>
              {Array.from(timelineHeaders.months.entries()).map(([monthYear, {start, width}]) => (
@@ -155,36 +147,60 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
              ))}
            </div>
           
-           <svg className="absolute top-[50px] left-0 w-full h-full pointer-events-none z-10" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px` }}>
-               {/* Dependency Lines could be rendered here */}
+           <svg className="absolute top-[50px] left-0 pointer-events-none z-[5]" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px`, height: `${flatRenderList.length * ROW_HEIGHT}px` }}>
+              <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" /></marker>
+              </defs>
+              {flatRenderList.map((item) => {
+                  if (item.type !== 'task') return null;
+                  const task = item.task;
+                  return task.dependencies.map(dep => {
+                      const predRowIndex = taskRowMap.get(dep.targetId);
+                      const succRowIndex = taskRowMap.get(task.id);
+                      if (predRowIndex === undefined || succRowIndex === undefined || !project.calendar) return null;
+
+                      const predTask = project.tasks.find(t => t.id === dep.targetId)!;
+
+                      const startOffset = getWorkingDaysDiff(projectStart, new Date(predTask.endDate), project.calendar);
+                      const startX = startOffset * DAY_WIDTH + (predTask.duration * DAY_WIDTH);
+                      const startY = predRowIndex * ROW_HEIGHT + (ROW_HEIGHT / 2);
+
+                      const endOffset = getWorkingDaysDiff(projectStart, new Date(task.startDate), project.calendar);
+                      const endX = endOffset * DAY_WIDTH;
+                      const endY = succRowIndex * ROW_HEIGHT + (ROW_HEIGHT / 2);
+
+                      return <path key={`${task.id}-${dep.targetId}`} d={`M ${startX} ${startY} L ${endX} ${endY}`} stroke="#64748b" strokeWidth="1" fill="none" markerEnd="url(#arrow)" />;
+                  });
+              })}
            </svg>
 
 
-           <div className="relative pt-0" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px`, height: `${project.tasks.length * ROW_HEIGHT}px` }}>
+           <div className="relative pt-0" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px`, height: `${flatRenderList.length * ROW_HEIGHT}px` }}>
               {/* Grid Lines */}
               {timelineHeaders.days.map(({date, isWorking}, i) => <div key={`grid-${i}`} className={`absolute top-0 bottom-0 border-l ${isWorking ? 'border-slate-100' : 'bg-slate-100/70 border-slate-200'}`} style={{ left: `${i * DAY_WIDTH}px` }} />)}
 
-              {project.tasks.map((task, idx) => {
-                if (!project.calendar) return null;
-                const offsetDays = getWorkingDaysDiff(projectStart, new Date(task.startDate), project.calendar);
-                const width = task.type === 'Milestone' ? DAY_WIDTH : Math.max(task.duration * DAY_WIDTH, 2);
-                
-                return (
-                  <div key={`bar-${task.id}`} className="h-[44px] flex items-center absolute w-full" style={{ top: `${idx * ROW_HEIGHT}px` }}>
-                    <div
-                      onMouseDown={(e) => handleMouseDown(e, task, 'move')}
-                      onClick={() => setSelectedTask(task)}
-                      className={`h-6 rounded-sm border shadow-sm relative group cursor-grab transition-all ${getStatusColor(task.status)} ${showCriticalPath && task.critical ? 'ring-2 ring-offset-1 ring-red-500' : ''}`}
-                      style={{ left: `${offsetDays * DAY_WIDTH}px`, width: `${width}px` }}
-                    >
-                      <div className="absolute h-full w-full left-0 top-0 flex items-center">
-                        <div className="h-full bg-black/20 rounded-l-sm" style={{ width: `${task.progress}%` }} />
+              {flatRenderList.map((item, idx) => {
+                  if (item.type !== 'task' || !project.calendar) return <div key={idx} className="h-[44px]"></div>;
+                  const task = item.task;
+                  const offsetDays = getWorkingDaysDiff(projectStart, new Date(task.startDate), project.calendar);
+                  const width = task.type === 'Milestone' ? DAY_WIDTH : Math.max(task.duration * DAY_WIDTH, 2);
+                  
+                  return (
+                    <div key={`bar-${task.id}`} className="h-[44px] flex items-center absolute w-full" style={{ top: `${idx * ROW_HEIGHT}px` }}>
+                      <div
+                        onMouseDown={(e) => handleMouseDown(e, task, 'move')}
+                        onClick={() => setSelectedTask(task)}
+                        className={`h-6 rounded-sm border shadow-sm relative group cursor-grab transition-all ${getStatusColor(task.status)} ${showCriticalPath && task.critical ? 'ring-2 ring-offset-1 ring-red-500' : ''}`}
+                        style={{ left: `${offsetDays * DAY_WIDTH}px`, width: `${width}px` }}
+                      >
+                        <div className="absolute h-full w-full left-0 top-0 flex items-center">
+                          <div className="h-full bg-black/20 rounded-l-sm" style={{ width: `${task.progress}%` }} />
+                        </div>
+                        <span className="text-white text-xs font-medium absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none truncate pr-2">{task.name}</span>
+                         {task.type === 'Milestone' && <Diamond size={16} className="absolute -right-2 top-1/2 -translate-y-1/2 text-white fill-slate-800" />}
                       </div>
-                      <span className="text-white text-xs font-medium absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none truncate pr-2">{task.name}</span>
-                       {task.type === 'Milestone' && <Diamond size={16} className="absolute -right-2 top-1/2 -translate-y-1/2 text-white fill-slate-800" />}
                     </div>
-                  </div>
-                );
+                  );
               })}
            </div>
         </div>

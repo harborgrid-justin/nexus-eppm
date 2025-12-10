@@ -65,7 +65,7 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
                  </tr>
               </thead>
               <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
-                 {issues.map(issue => (
+                 {(issues || []).map(issue => (
                    <tr key={issue.id} className="hover:bg-slate-50 cursor-pointer">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{issue.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">

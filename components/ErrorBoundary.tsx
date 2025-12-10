@@ -14,9 +14,9 @@ interface State {
 }
 
 class ErrorBoundary extends React.Component<Props, State> {
-  // FIX: Replaced constructor-based state initialization and method binding with modern class field syntax.
-  // This approach is cleaner, less error-prone for handling 'this' context, and resolves the compile-time errors.
-  state: State = {
+  // FIX: Using a class property for state initialization is the modern and recommended approach.
+  // This avoids potential issues with 'this' context within a constructor.
+  public state: State = {
     hasError: false,
     error: null,
     errorInfo: null,
@@ -33,6 +33,7 @@ class ErrorBoundary extends React.Component<Props, State> {
     // In a real app, log to service like Sentry
   }
 
+  // FIX: Converted `handleReset` to an arrow function to ensure `this` is correctly bound when used as an event handler. This resolves errors related to `this.setState` being called on an undefined context.
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   }

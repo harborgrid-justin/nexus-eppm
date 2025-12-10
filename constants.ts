@@ -1,5 +1,5 @@
 
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -116,10 +116,10 @@ export const MOCK_QUALITY_REPORTS: QualityReport[] = [
 ];
 
 export const MOCK_DEFECTS: NonConformanceReport[] = [
-    { id: 'NCR-001', projectId: 'P1001', date: '2024-06-10', description: 'Incorrect rebar spacing at grid C', severity: 'Major', status: 'Open', assignedTo: 'Mike Ross', linkedDeliverable: 'T5' },
-    { id: 'NCR-002', projectId: 'P1001', date: '2024-06-12', description: 'UI button misaligned on login screen', severity: 'Minor', status: 'In Progress', assignedTo: 'Dev Team', linkedDeliverable: 'T-UI-101' },
-    { id: 'NCR-003', projectId: 'P1001', date: '2024-06-15', description: 'API returns 500 error on invalid input', severity: 'Critical', status: 'Open', assignedTo: 'Backend Team', linkedDeliverable: 'T-API-5' },
-    { id: 'NCR-004', projectId: 'P1001', date: '2024-06-05', description: 'Typo in user documentation section 4.1', severity: 'Minor', status: 'Closed', assignedTo: 'Tech Writer', linkedDeliverable: 'DOC-001' },
+    { id: 'NCR-001', projectId: 'P1001', date: '2024-06-10', description: 'Incorrect rebar spacing at grid C', severity: 'Major', status: 'Open', assignedTo: 'Mike Ross', linkedDeliverable: 'T5', category: 'Construction Defect', vendorId: 'V-003' },
+    { id: 'NCR-002', projectId: 'P1001', date: '2024-06-12', description: 'UI button misaligned on login screen', severity: 'Minor', status: 'In Progress', assignedTo: 'Dev Team', linkedDeliverable: 'T-UI-101', category: 'Software Bug' },
+    { id: 'NCR-003', projectId: 'P1001', date: '2024-06-15', description: 'API returns 500 error on invalid input', severity: 'Critical', status: 'Open', assignedTo: 'Backend Team', linkedDeliverable: 'T-API-5', category: 'Software Bug' },
+    { id: 'NCR-004', projectId: 'P1001', date: '2024-06-05', description: 'Typo in user documentation section 4.1', severity: 'Minor', status: 'Closed', assignedTo: 'Tech Writer', linkedDeliverable: 'DOC-001', category: 'Documentation' },
 ];
 
 export const MOCK_COMM_LOGS: CommunicationLog[] = [
@@ -320,6 +320,11 @@ const MOCK_TASKS: Task[] = [
       }
     ];
 
+const MOCK_COST_ESTIMATES: CostEstimate[] = [
+    { id: 'EST-01', wbsId: 'WBS-1.1', amount: 15000, basisOfEstimate: 'Based on historical data from similar permitting processes.', type: 'Preliminary', confidence: 'Medium' },
+    { id: 'EST-02', wbsId: 'WBS-2.1', amount: 1200000, basisOfEstimate: 'Quote from vendor Heavy Equipment Co. and estimate of 400 man-hours.', type: 'Definitive', confidence: 'High' },
+];
+
 // --- MOCK PROCUREMENT DATA ---
 export const MOCK_PROCUREMENT_PLANS: ProcurementPlan[] = [
   { id: 'PP-P1001', projectId: 'P1001', objectives: 'To acquire all necessary materials and subcontractors in a timely and cost-effective manner.', scope: 'Covers all external procurement for the Metro Line Extension.', approach: 'Competitive bidding for major packages, RFQs for commodities.', procurementMethods: ['RFP', 'RFQ'], status: 'Approved', version: 2 }
@@ -406,6 +411,7 @@ export const MOCK_PROJECTS: Project[] = [
     issues: MOCK_ISSUES,
     budgetLog: MOCK_BUDGET_LOG,
     funding: MOCK_PROJECT_FUNDING,
+    costEstimates: MOCK_COST_ESTIMATES,
     calendar: { id: 'CAL1', name: 'Standard', workingDays: [1, 2, 3, 4, 5], holidays: [] },
     baselines: [{
       id: 'BL1',

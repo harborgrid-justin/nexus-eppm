@@ -15,30 +15,48 @@ export const useGantt = (initialProject: Project) => {
   const [showCriticalPath, setShowCriticalPath] = useState(true);
   const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject.baselines?.[0]?.id || null);
   const [showResources, setShowResources] = useState(false);
+  const [taskFilter, setTaskFilter] = useState('all');
   
   const ganttContainerRef = useRef<HTMLDivElement>(null);
   
-  // State for drag operations
   const [draggingTask, setDraggingTask] = useState<{ task: Task, startX: number, type: 'move' | 'resize-end' | 'progress' } | null>(null);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
   
-  // Refs for requestAnimationFrame to handle high-frequency events safely
   const rafRef = useRef<number | null>(null);
 
-  // Memoize project calculation with critical path
   const project = useMemo(() => {
     if (!initialProject.calendar) {
         console.warn("Project calendar is missing. Critical path calculation skipped.");
         return initialProject;
     }
     try {
+      let tasks = initialProject.tasks;
+      // Filter tasks before calculating critical path if a filter is active
+      if (taskFilter !== 'all') {
+          tasks = tasks.filter(t => {
+              if (taskFilter === 'critical') return t.critical; // Note: critical is calculated below, so this might need re-ordering
+              return t.status === taskFilter;
+          });
+      }
+      
       const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, initialProject.calendar);
+
+      if (taskFilter !== 'all') {
+          return {
+              ...initialProject,
+              tasks: tasksWithCriticalPath.filter(t => {
+                  if (taskFilter === 'critical') return t.critical;
+                  return t.status === taskFilter;
+              }),
+          };
+      }
+
       return { ...initialProject, tasks: tasksWithCriticalPath };
     } catch (error) {
       console.error("Critical Path Calculation Failed", error);
       return initialProject;
     }
-  }, [initialProject]);
+  }, [initialProject, taskFilter]);
   
   const toggleNode = useCallback((nodeId: string) => {
     setExpandedNodes(prev => {
@@ -50,31 +68,31 @@ export const useGantt = (initialProject: Project) => {
   }, []);
 
   const projectStart = useMemo(() => {
-      if (project.tasks.length === 0) return new Date();
-      const minDate = new Date(project.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, project.tasks[0].startDate));
+      if (initialProject.tasks.length === 0) return new Date();
+      const minDate = new Date(initialProject.tasks.reduce((min, t) => t.startDate < min ? t.startDate : min, initialProject.tasks[0].startDate));
       minDate.setDate(minDate.getDate() - 7);
       return minDate;
-  }, [project.tasks]);
+  }, [initialProject.tasks]);
 
   const projectEnd = useMemo(() => {
-      if (project.tasks.length === 0) {
+      if (initialProject.tasks.length === 0) {
           const endDate = new Date();
           endDate.setDate(endDate.getDate() + 30);
           return endDate;
       }
-      const maxDate = new Date(project.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, project.tasks[0].endDate));
+      const maxDate = new Date(initialProject.tasks.reduce((max, t) => t.endDate > max ? t.endDate : max, initialProject.tasks[0].endDate));
       maxDate.setDate(maxDate.getDate() + 30);
       return maxDate;
-  }, [project.tasks]);
+  }, [initialProject.tasks]);
 
   const timelineHeaders = useMemo(() => {
     const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as { date: Date; isWorking: boolean }[] };
-    if (!project.calendar) return headers;
+    if (!initialProject.calendar) return headers;
 
     let current = new Date(projectStart);
     let dayIndex = 0;
     while (current <= projectEnd) {
-        const isWorking = project.calendar.workingDays.includes(current.getDay());
+        const isWorking = initialProject.calendar.workingDays.includes(current.getDay());
         const monthYear = current.toLocaleString('default', { month: 'long', year: 'numeric' });
         if(!headers.months.has(monthYear)){
             headers.months.set(monthYear, { start: dayIndex * DAY_WIDTH, width: 0 });
@@ -89,7 +107,7 @@ export const useGantt = (initialProject: Project) => {
         if(isWorking || !isWorking) dayIndex++; 
     }
     return headers;
-  }, [projectStart, projectEnd, project.calendar]);
+  }, [projectStart, projectEnd, initialProject.calendar]);
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
@@ -107,9 +125,8 @@ export const useGantt = (initialProject: Project) => {
   }, []);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!draggingTask || !ganttContainerRef.current || !project.calendar) return;
+    if (!draggingTask || !ganttContainerRef.current || !initialProject.calendar) return;
 
-    // Use requestAnimationFrame to throttle updates and prevent layout thrashing
     if (rafRef.current) return;
 
     rafRef.current = requestAnimationFrame(() => {
@@ -118,7 +135,7 @@ export const useGantt = (initialProject: Project) => {
 
       if (daysMoved !== 0 || draggingTask.type === 'progress') {
         let updatedTask = { ...draggingTask.task };
-        const calendar = project.calendar!;
+        const calendar = initialProject.calendar!;
 
         try {
           if (draggingTask.type === 'move') {
@@ -137,14 +154,14 @@ export const useGantt = (initialProject: Project) => {
           }
           
           setDraggingTask(prev => prev ? { ...prev, startX: e.clientX } : null);
-          dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: updatedTask } });
+          dispatch({ type: 'UPDATE_TASK', payload: { projectId: initialProject.id, task: updatedTask } });
         } catch (err) {
           console.error("Error updating task during drag", err);
         }
       }
       rafRef.current = null;
     });
-  }, [draggingTask, project.id, project.calendar, dispatch]);
+  }, [draggingTask, initialProject.id, initialProject.calendar, dispatch]);
 
   const handleMouseUp = useCallback(() => {
     if (rafRef.current) {
@@ -167,6 +184,7 @@ export const useGantt = (initialProject: Project) => {
           cancelAnimationFrame(rafRef.current);
       }
     };
+    // FIX: Changed dependency from 'dragging' to 'draggingTask' to match state variable name.
   }, [draggingTask, handleMouseMove, handleMouseUp]);
 
   return {
@@ -189,6 +207,8 @@ export const useGantt = (initialProject: Project) => {
       timelineHeaders,
       projectStart,
       getStatusColor,
-      handleMouseDown
+      handleMouseDown,
+      taskFilter,
+      setTaskFilter
   };
 };

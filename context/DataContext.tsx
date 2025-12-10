@@ -4,7 +4,7 @@ import {
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
   RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
-  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport
+  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
@@ -110,6 +110,7 @@ export type Action =
   | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
   | { type: 'LINK_ISSUE_TO_TASK'; payload: { projectId: string; taskId: string; issueId: string } }
   | { type: 'CREATE_ISSUE_FROM_QUALITY_FAIL'; payload: { qualityReport: QualityReport } }
+  | { type: 'ADD_OR_UPDATE_COST_ESTIMATE'; payload: { projectId: string; estimate: CostEstimate } }
   | { type: 'CLEAR_ERRORS' };
 
 
@@ -405,6 +406,23 @@ const dataReducer = (state: DataState, action: Action): DataState => {
                   qr.id === qualityReport.id ? { ...qr, linkedIssueId: newIssue.id } : qr
               )
           };
+      }
+      case 'ADD_OR_UPDATE_COST_ESTIMATE': {
+        const { projectId, estimate } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                const newEstimates = [...(p.costEstimates || [])];
+                const existingIndex = newEstimates.findIndex(e => e.wbsId === estimate.wbsId);
+                if (existingIndex > -1) {
+                    newEstimates[existingIndex] = estimate;
+                } else {
+                    newEstimates.push({ ...estimate, id: `EST-${Date.now()}` });
+                }
+                return { ...p, costEstimates: newEstimates };
+            })
+        };
       }
       default:
         return state;

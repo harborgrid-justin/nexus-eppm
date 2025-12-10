@@ -322,6 +322,8 @@ export interface NonConformanceReport {
   rootCause?: string;
   correctiveAction?: string;
   linkedDeliverable: string; // Task ID - CROSS-INTEGRATION
+  category: string;
+  vendorId?: string;
 }
 
 export interface QualityActivity {
@@ -476,6 +478,7 @@ export interface Project {
   procurementPlanId?: string;
   qualityPlanId?: string;
   costPlanId?: string;
+  costEstimates?: CostEstimate[];
   budgetLog?: BudgetLogItem[];
   funding?: ProjectFunding[];
   udfValues?: Record<string, any>; // { [udfId]: value }

@@ -1,21 +1,22 @@
 
-import React from 'react';
-import { Sliders, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sliders, Plus, Save } from 'lucide-react';
 import { useWbsManager } from '../hooks';
 import WBSNodeComponent from './scope/WBSNodeComponent';
 import { WBSNode } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { useData } from '../context/DataContext';
 
 interface ScopeManagementProps {
   projectId: string;
 }
 
 const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
+  const { dispatch } = useData();
   const {
     project,
     wbsTree,
     selectedNode,
-    associatedTasks,
     openNodes,
     draggedNodeId,
     contextMenu,
@@ -31,6 +32,28 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
     handleShapeChange
   } = useWbsManager(projectId);
   const theme = useTheme();
+
+  const [editedNode, setEditedNode] = useState<Partial<WBSNode> | null>(null);
+
+  useEffect(() => {
+    if (selectedNode) {
+        setEditedNode({ ...selectedNode });
+    }
+  }, [selectedNode]);
+
+  const handleFieldChange = (field: keyof WBSNode, value: string) => {
+    if (editedNode) {
+        setEditedNode({ ...editedNode, [field]: value });
+    }
+  };
+
+  const handleSave = () => {
+    if (editedNode && editedNode.id) {
+        dispatch({ type: 'UPDATE_WBS_NODE', payload: { projectId, nodeId: editedNode.id, updatedData: editedNode } });
+        alert('WBS Element Saved!');
+    }
+  };
+
 
   const renderTree = (nodes: WBSNode[], level: number) => {
     return nodes.map(node => (
@@ -101,21 +124,34 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
 
         {/* WBS Dictionary Panel */}
         <div className="w-1/2 flex flex-col">
-          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}`}>
+          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background} flex justify-between items-center`}>
             <h3 className="font-semibold text-slate-800">WBS Dictionary</h3>
+            {selectedNode && (
+                <button onClick={handleSave} className={`px-3 py-1.5 text-sm font-medium ${theme.colors.accentBg} text-white rounded-md flex items-center gap-2 hover:bg-nexus-700`}>
+                    <Save size={14}/> Save Changes
+                </button>
+            )}
           </div>
           <div className="flex-1 overflow-auto p-6">
-            {selectedNode ? (
+            {selectedNode && editedNode ? (
               <div className="space-y-6">
                 <div>
                   <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md">{selectedNode.wbsCode}</span>
-                  <h2 className="text-xl font-bold text-slate-900 mt-2">{selectedNode.name}</h2>
+                   <input
+                        type="text"
+                        value={editedNode.name || ''}
+                        onChange={e => handleFieldChange('name', e.target.value)}
+                        className="text-xl font-bold text-slate-900 mt-2 w-full p-1 -ml-1 border border-transparent focus:border-slate-300 rounded-lg focus:ring-1 focus:ring-nexus-500"
+                    />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Statement of Work</h4>
-                  <p className={`text-sm text-slate-600 bg-slate-50 p-3 rounded-md border ${theme.colors.border} min-h-[80px]`}>
-                    {selectedNode.description || <span className="italic text-slate-400">No description provided.</span>}
-                  </p>
+                  <textarea
+                    value={editedNode.description || ''}
+                    onChange={e => handleFieldChange('description', e.target.value)}
+                    className={`text-sm text-slate-600 bg-slate-50 p-3 rounded-md border ${theme.colors.border} min-h-[120px] w-full focus:ring-1 focus:ring-nexus-500 focus:border-nexus-500`}
+                    placeholder="Add a detailed description for this work package..."
+                  />
                 </div>
               </div>
             ) : (
