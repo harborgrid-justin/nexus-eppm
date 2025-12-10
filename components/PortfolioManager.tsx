@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LayoutDashboard, TrendingUp, BarChart2, Layers } from 'lucide-react';
 import Dashboard from './Dashboard';
 import { useTheme } from '../context/ThemeContext';
@@ -7,16 +7,35 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { formatCompactCurrency } from '../utils/formatters';
 
 const PortfolioManager: React.FC = () => {
+  const [activeGroup, setActiveGroup] = useState('dashboards');
   const [activeTab, setActiveTab] = useState('overview');
   const theme = useTheme();
   const { state } = useData();
 
-  const navItems = [
-    { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
-    { id: 'financials', label: 'Financial Performance', icon: TrendingUp },
-    { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
-    { id: 'roadmap', label: 'Strategic Roadmap', icon: Layers },
-  ];
+  const navStructure = useMemo(() => [
+    { id: 'dashboards', label: 'Dashboards', items: [
+      { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard }
+    ]},
+    { id: 'performance', label: 'Performance', items: [
+      { id: 'financials', label: 'Financial Performance', icon: TrendingUp },
+      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 }
+    ]},
+    { id: 'strategy', label: 'Strategy', items: [
+      { id: 'roadmap', label: 'Strategic Roadmap', icon: Layers }
+    ]}
+  ], []);
+
+  const handleGroupChange = (groupId: string) => {
+    const newGroup = navStructure.find(g => g.id === groupId);
+    if (newGroup?.items.length) {
+      setActiveGroup(groupId);
+      setActiveTab(newGroup.items[0].id);
+    }
+  };
+
+  const activeGroupItems = useMemo(() => {
+    return navStructure.find(g => g.id === activeGroup)?.items || [];
+  }, [activeGroup, navStructure]);
 
   // Financial Data Aggregation
   const financialData = state.projects.map(p => ({
@@ -95,15 +114,30 @@ const PortfolioManager: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer}`}>
-      {/* Tabs */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 px-6">
-        <nav className="flex space-x-6">
-          {navItems.map(item => (
+    <div className="h-full w-full flex flex-col bg-slate-100">
+      {/* Horizontal Tab Navigation */}
+      <div className="flex-shrink-0 border-b border-slate-200 bg-white shadow-sm z-10">
+        <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
+            {navStructure.map(group => (
+                <button
+                    key={group.id}
+                    onClick={() => handleGroupChange(group.id)}
+                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                        activeGroup === group.id
+                        ? 'bg-nexus-600 text-white shadow-sm'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                >
+                    {group.label}
+                </button>
+            ))}
+        </div>
+        <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
+          {activeGroupItems.map(item => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
                 activeTab === item.id 
                   ? 'border-nexus-600 text-nexus-600' 
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
@@ -117,7 +151,7 @@ const PortfolioManager: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden bg-slate-100">
+      <div className="flex-1 overflow-hidden">
          {renderContent()}
       </div>
     </div>

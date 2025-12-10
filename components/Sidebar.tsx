@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  Users, Settings, Briefcase, Network, ChevronDown, ChevronRight, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
+  Users, Settings, Briefcase, Network, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
   Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers3
 } from 'lucide-react';
 
@@ -19,17 +19,7 @@ const iconMap: Record<string, any> = {
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useData();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'extensions', 'admin']));
-
-  const toggleSection = (section: string) => {
-    const newSections = new Set(expandedSections);
-    if (newSections.has(section)) {
-      newSections.delete(section);
-    } else {
-      newSections.add(section);
-    }
-    setExpandedSections(newSections);
-  };
+  const [activeGroup, setActiveGroup] = useState<string>('core');
 
   const activeExtensions = state.extensions.filter(ext => ext.status === 'Active' || ext.status === 'Installed');
 
@@ -37,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     {
       id: 'core',
       label: 'Core Modules',
+      icon: Globe,
       items: [
         { id: 'portfolio', icon: Globe, label: 'Portfolio' },
         { id: 'programs', icon: Layers3, label: 'Programs' },
@@ -46,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     {
       id: 'extensions',
       label: 'Installed Engines',
+      icon: Package,
       items: activeExtensions.map(ext => ({
         id: ext.id,
         icon: iconMap[ext.icon] || Layers3,
@@ -55,6 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     {
       id: 'admin',
       label: 'Administration',
+      icon: Settings,
       items: [
         { id: 'dataExchange', icon: Database, label: 'Data Exchange' },
         { id: 'marketplace', icon: LayoutGrid, label: 'App Marketplace' },
@@ -63,6 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       ]
     }
   ];
+
+  const activeGroupItems = navGroups.find(g => g.id === activeGroup)?.items || [];
 
   return (
     <div className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 flex-shrink-0 select-none">
@@ -73,41 +68,47 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         </div>
       </div>
 
-      <nav className="flex-1 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+      {/* Pill Navigation */}
+      <div className="p-4 space-y-2 border-b border-slate-800">
         {navGroups.map((group) => {
-           if (group.items.length === 0) return null; 
+           if (group.items.length === 0) return null;
+           const GroupIcon = group.icon;
 
            return (
-            <div key={group.id} className="mb-2">
-              <button 
-                onClick={() => toggleSection(group.id)}
-                className="w-full flex items-center justify-between px-6 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider hover:text-slate-400"
-              >
-                {group.label}
-                {expandedSections.has(group.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              </button>
-              
-              {expandedSections.has(group.id) && (
-                <div className="mt-1 space-y-0.5">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-6 py-2.5 text-sm font-medium transition-all border-l-4 ${
-                        activeTab === item.id || (activeTab === 'projectWorkspace' && item.id === 'projectList')
-                          ? 'bg-slate-800 text-nexus-400 border-nexus-500' 
-                          : 'border-transparent hover:bg-slate-800/50 hover:text-white text-slate-400'
-                      }`}
-                    >
-                      <item.icon size={18} />
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <button
+              key={group.id}
+              onClick={() => setActiveGroup(group.id)}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors ${
+                activeGroup === group.id
+                  ? 'bg-nexus-600/20 text-nexus-300'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <GroupIcon size={18} />
+              {group.label}
+            </button>
           );
         })}
+      </div>
+
+      {/* Sub-menu Navigation */}
+      <nav className="flex-1 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+        <div className="space-y-0.5 px-4">
+          {activeGroupItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-all ${
+                activeTab === item.id || (activeTab === 'projectWorkspace' && item.id === 'projectList')
+                  ? 'bg-slate-800 text-white' 
+                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+              }`}
+            >
+              <item.icon size={18} />
+              {item.label}
+            </button>
+          ))}
+        </div>
       </nav>
 
       <div className="p-4 border-t border-slate-800 bg-slate-900 z-10">

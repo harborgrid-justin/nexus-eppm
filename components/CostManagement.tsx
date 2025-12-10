@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
@@ -19,43 +19,54 @@ interface CostManagementProps {
 
 const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   const { project } = useProjectState(projectId);
+  const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
   const theme = useTheme();
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'plan', label: 'Plan', icon: FileText },
-    { id: 'budgetLog', label: 'Budget Log', icon: Landmark },
-    { id: 'funding', label: 'Funding', icon: Banknote },
-    { id: 'estimating', label: 'Estimating', icon: Calculator },
-    { id: 'cbs', label: 'Budget (CBS)', icon: BarChart2 },
-    { id: 'expenses', label: 'Expenses', icon: Receipt },
-    { id: 'changes', label: 'Change Orders', icon: FileDiff },
-    { id: 'evm', label: 'Earned Value', icon: BarChart2 },
-  ];
+  const navStructure = useMemo(() => [
+    { id: 'overview', label: 'Overview', items: [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ]},
+    { id: 'planning', label: 'Planning & Setup', items: [
+        { id: 'plan', label: 'Cost Plan', icon: FileText },
+        { id: 'estimating', label: 'Estimating', icon: Calculator },
+        { id: 'cbs', label: 'Budget View', icon: BarChart2 },
+    ]},
+    { id: 'control', label: 'Control & Execution', items: [
+        { id: 'budgetLog', label: 'Budget Log', icon: Landmark },
+        { id: 'funding', label: 'Funding', icon: Banknote },
+        { id: 'expenses', label: 'Expenses', icon: Receipt },
+        { id: 'changes', label: 'Change Orders', icon: FileDiff },
+    ]},
+    { id: 'analysis', label: 'Analysis', items: [
+        { id: 'evm', label: 'Earned Value', icon: BarChart2 },
+    ]},
+  ], []);
+
+  const handleGroupChange = (groupId: string) => {
+    const newGroup = navStructure.find(g => g.id === groupId);
+    if (newGroup?.items.length) {
+      setActiveGroup(groupId);
+      setActiveView(newGroup.items[0].id);
+    }
+  };
+
+  const activeGroupItems = useMemo(() => {
+    return navStructure.find(g => g.id === activeGroup)?.items || [];
+  }, [activeGroup, navStructure]);
 
   const renderContent = () => {
     switch(activeView) {
-      case 'dashboard':
-        return <CostDashboard projectId={projectId} />;
-      case 'plan':
-        return <CostPlanEditor projectId={projectId} />;
-      case 'budgetLog':
-        return <BudgetLog projectId={projectId} />;
-      case 'funding':
-        return <ProjectFunding projectId={projectId} />;
-      case 'estimating':
-        return <CostEstimating projectId={projectId} />;
-      case 'cbs':
-        return <CostBudgetView projectId={projectId} />;
-      case 'expenses':
-        return <CostExpenses projectId={projectId} />;
-      case 'changes':
-        return <CostChangeOrders projectId={projectId} />;
-      case 'evm':
-        return <EarnedValue projectId={projectId} />;
-      default:
-        return <CostDashboard projectId={projectId} />;
+      case 'dashboard': return <CostDashboard projectId={projectId} />;
+      case 'plan': return <CostPlanEditor projectId={projectId} />;
+      case 'budgetLog': return <BudgetLog projectId={projectId} />;
+      case 'funding': return <ProjectFunding projectId={projectId} />;
+      case 'estimating': return <CostEstimating projectId={projectId} />;
+      case 'cbs': return <CostBudgetView projectId={projectId} />;
+      case 'expenses': return <CostExpenses projectId={projectId} />;
+      case 'changes': return <CostChangeOrders projectId={projectId} />;
+      case 'evm': return <EarnedValue projectId={projectId} />;
+      default: return <CostDashboard projectId={projectId} />;
     }
   };
 
@@ -71,24 +82,38 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
       </div>
 
       <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 ${theme.layout.headerBorder} ${theme.colors.background}`}>
-          <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveView(item.id)}
-                className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
-                  activeView === item.id
-                    ? `${theme.colors.border.replace('slate-200', 'nexus-600')} text-nexus-600`
-                    : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-                }`}
-                style={{ borderColor: activeView === item.id ? '#0284c7' : 'transparent' }}
-              >
-                <item.icon size={16} />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>
+            <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
+                {navStructure.map(group => (
+                    <button
+                        key={group.id}
+                        onClick={() => handleGroupChange(group.id)}
+                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                            activeGroup === group.id
+                            ? 'bg-nexus-600 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        {group.label}
+                    </button>
+                ))}
+            </div>
+            <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
+                {activeGroupItems.map(item => (
+                <button
+                    key={item.id}
+                    onClick={() => setActiveView(item.id)}
+                    className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
+                    activeView === item.id
+                        ? 'border-nexus-600 text-nexus-600'
+                        : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                    }`}
+                >
+                    <item.icon size={16} />
+                    <span>{item.label}</span>
+                </button>
+                ))}
+            </nav>
         </div>
         <div className="flex-1 overflow-hidden">
           <ErrorBoundary name="Cost Module">
