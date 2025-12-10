@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import { Issue } from '../types';
 import { Plus, Filter, Search, FileWarning, ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useProjectState } from '../hooks';
+import { useProjectState } from '../hooks/useProjectState';
 
 interface IssueLogProps {
   projectId: string;

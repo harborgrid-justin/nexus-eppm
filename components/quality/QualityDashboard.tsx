@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, ComposedChart, Bar as RechartsBar, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { NonConformanceReport, QualityReport } from '../../types';

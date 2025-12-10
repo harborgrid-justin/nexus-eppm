@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 import { DollarSign, TrendingUp, TrendingDown, Layers, LineChart as LineChartIcon } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../utils/formatters';

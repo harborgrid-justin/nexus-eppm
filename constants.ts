@@ -476,7 +476,7 @@ export const EXTENSIONS_REGISTRY: Extension[] = [
   // Analytics & Risk
   { id: 'ext_monte', name: 'Monte Carlo Sim', category: 'Analytics', description: 'Probabilistic schedule and cost risk analysis.', icon: 'ScatterChart', status: 'Available', version: '2.5', viewType: 'dashboard' },
   { id: 'ext_evm', name: 'EVM Engine', category: 'Analytics', description: 'Advanced Earned Value Management metrics.', icon: 'BarChart2', status: 'Available', version: '1.9', viewType: 'dashboard' },
-  // FIX: Added missing 'status' property and corrected 'icon' from 'Installed' to a valid icon name 'BarChart2'.
+  // FIX: Added missing 'status' property.
   { id: 'ext_powerbi', name: 'PowerBI Connect', category: 'Analytics', description: 'Embed PowerBI dashboards directly.', icon: 'BarChart2', status: 'Installed', version: '4.0', installedDate: '2024-02-15', viewType: 'dashboard' },
   
   // Admin

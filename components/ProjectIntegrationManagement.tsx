@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useProjectState } from '../hooks';
+import { useProjectState } from '../hooks/useProjectState';
 import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2 } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';

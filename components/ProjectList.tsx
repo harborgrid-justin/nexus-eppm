@@ -2,7 +2,7 @@ import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar } from 'lucide-react';
 import { calculateProjectProgress } from '../utils/calculations';
-import { usePortfolioState } from '../hooks';
+import { usePortfolioState } from '../hooks/usePortfolioState';
 import { formatCompactCurrency, formatDate, formatPercentage, getHealthColorClass, formatInitials } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
 

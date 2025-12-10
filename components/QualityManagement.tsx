@@ -1,6 +1,7 @@
+
 import React, { useState, useMemo } from 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
-import { useQualityData } from '../hooks';
+import { useQualityData } from '../hooks/useQualityData';
 import ErrorBoundary from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 import { useData } from '../../context/DataContext';
 import { Plus, CheckCircle } from 'lucide-react';
 

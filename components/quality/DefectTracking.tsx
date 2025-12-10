@@ -1,7 +1,7 @@
 import React from 'react';
 import { NonConformanceReport } from '../../types';
 import { Bug, Plus } from 'lucide-react';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 
 interface DefectTrackingProps {
     projectId: string;

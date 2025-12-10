@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Users, FileText, BarChart2, Sliders } from 'lucide-react';
-import { useResourceData } from '../hooks';
+import { useResourceData } from '../hooks/useResourceData';
 import ErrorBoundary from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';

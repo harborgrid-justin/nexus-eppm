@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 import { useData } from '../../context/DataContext';
 import { ArrowRight, ArrowUp } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

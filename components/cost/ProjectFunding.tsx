@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { useProjectState } from '../../hooks';
+import { useProjectState } from '../../hooks/useProjectState';
 import { Banknote, Plus, PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
