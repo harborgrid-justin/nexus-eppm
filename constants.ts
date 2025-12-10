@@ -1,11 +1,91 @@
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
-  { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', capacity: 40, allocated: 35, hourlyRate: 150 },
-  { id: 'R2', name: 'Mike Ross', role: 'Civil Engineer', capacity: 40, allocated: 42, hourlyRate: 120 },
-  { id: 'R3', name: 'Jessica Pearson', role: 'Architect', capacity: 30, allocated: 10, hourlyRate: 180 },
-  { id: 'R4', name: 'Harvey Specter', role: 'Legal Counsel', capacity: 20, allocated: 15, hourlyRate: 250 },
-  { id: 'R5', name: 'Louis Litt', role: 'Financial Analyst', capacity: 40, allocated: 38, hourlyRate: 110 },
+  { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
+  { id: 'R2', name: 'Mike Ross', role: 'Civil Engineer', type: 'Human', status: 'Active', capacity: 40, allocated: 42, hourlyRate: 120, skills: [], costRates: [], calendarId: 'CAL_R2' },
+  { id: 'R3', name: 'Jessica Pearson', role: 'Architect', type: 'Human', status: 'Active', capacity: 30, allocated: 10, hourlyRate: 180, skills: [], costRates: [], calendarId: 'CAL_R3' },
+  { id: 'R4', name: 'Harvey Specter', role: 'Legal Counsel', type: 'Human', status: 'Active', capacity: 20, allocated: 15, hourlyRate: 250, skills: [], costRates: [], calendarId: 'CAL_R4' },
+  { id: 'R5', name: 'Louis Litt', role: 'Financial Analyst', type: 'Human', status: 'Active', capacity: 40, allocated: 38, hourlyRate: 110, skills: [], costRates: [], calendarId: 'CAL_R5' },
+  { id: 'EQ1', name: 'Excavator EX-250', role: 'Heavy Equipment', type: 'Equipment', status: 'Active', capacity: 40, allocated: 40, hourlyRate: 300, skills: [], costRates: [], calendarId: 'CAL_EQ1' },
+];
+
+export const MOCK_ACTIVITY_CODES: ActivityCode[] = [
+  {
+    id: 'AC_GLOBAL_DISCIPLINE',
+    name: 'Discipline',
+    scope: 'Global',
+    values: [
+      { id: 'ACV_DISC_CIVIL', value: 'Civil', color: '#3b82f6' },
+      { id: 'ACV_DISC_MECH', value: 'Mechanical', color: '#f97316' },
+      { id: 'ACV_DISC_ELEC', value: 'Electrical', color: '#eab308' },
+    ]
+  },
+  {
+    id: 'AC_GLOBAL_RESP',
+    name: 'Responsibility',
+    scope: 'Global',
+    values: [
+      { id: 'ACV_RESP_CONTRACTOR', value: 'Contractor' },
+      { id: 'ACV_RESP_CLIENT', value: 'Client' },
+      { id: 'ACV_RESP_ENGINEER', value: 'Engineer' },
+    ]
+  },
+  {
+    id: 'AC_PROJ_P1001_AREA',
+    name: 'Station Area',
+    scope: 'Project',
+    projectId: 'P1001',
+    values: [
+      { id: 'ACV_AREA_NORTH', value: 'North Station' },
+      { id: 'ACV_AREA_CENTRAL', value: 'Central Tunnel' },
+      { id: 'ACV_AREA_SOUTH', value: 'South Station' },
+    ]
+  }
+];
+
+export const MOCK_ISSUE_CODES: IssueCode[] = [
+  {
+    id: 'IC_GLOBAL_SEVERITY', name: 'Severity', scope: 'Global', values: [
+      { id: 'ICV_SEV_HIGH', value: 'High', description: 'Immediate action required.' },
+      { id: 'ICV_SEV_MED', value: 'Medium', description: 'Action required before next phase.' },
+      { id: 'ICV_SEV_LOW', value: 'Low', description: 'Monitor and address when possible.' },
+    ]
+  }
+];
+
+export const MOCK_ISSUES: Issue[] = [
+  { id: 'ISS-001', projectId: 'P1001', activityId: 'T4', priority: 'High', status: 'Open', description: 'Steel supplier has indicated potential for a 2-week delivery delay.', assignedTo: 'Louis Litt', dateIdentified: '2024-05-18' },
+  { id: 'ISS-002', projectId: 'P1001', activityId: 'T3', priority: 'Medium', status: 'In Progress', description: 'Unexpected groundwater encountered during excavation, requiring additional dewatering.', assignedTo: 'Mike Ross', dateIdentified: '2024-05-22' }
+];
+
+export const MOCK_EXPENSE_CATEGORIES: ExpenseCategory[] = [
+    { id: 'EC_TRAVEL', name: 'Travel & Accommodation', scope: 'Global' },
+    { id: 'EC_TRAINING', name: 'Training & Certification', scope: 'Global' },
+    { id: 'EC_MATERIALS', name: 'Consumable Materials', scope: 'Global' },
+    { id: 'EC_PERMITS', name: 'Permits & Fees', scope: 'Project', projectId: 'P1001' },
+];
+
+export const MOCK_EXPENSES: Expense[] = [
+    { id: 'EXP-001', activityId: 'T1', categoryId: 'EC_PERMITS', description: 'Environmental Impact Study Filing Fee', budgetedCost: 5000, actualCost: 5250, remainingCost: 0, atCompletionCost: 5250, budgetedUnits: 1, actualUnits: 1, remainingUnits: 0, atCompletionUnits: 1 },
+    { id: 'EXP-002', activityId: 'T3', categoryId: 'EC_MATERIALS', description: 'Site Signage & Safety Barriers', budgetedCost: 2000, actualCost: 1800, remainingCost: 200, atCompletionCost: 2000, budgetedUnits: 1, actualUnits: 0, remainingUnits: 1, atCompletionUnits: 1 },
+];
+
+export const MOCK_BUDGET_LOG: BudgetLogItem[] = [
+  { id: 'BLI-01', projectId: 'P1001', date: '2024-02-10', description: 'Initial funding release', amount: 42000000, status: 'Approved', submittedBy: 'System' },
+  { id: 'BLI-02', projectId: 'P1001', date: '2024-04-05', description: 'Contingency release for soil conditions', amount: 3000000, status: 'Approved', submittedBy: 'Sarah Chen' },
+  { id: 'BLI-03', projectId: 'P1001', date: '2024-06-20', description: 'Additional scope for North Wing (pending)', amount: 4500000, status: 'Pending', submittedBy: 'Sarah Chen' },
+];
+
+export const MOCK_FUNDING_SOURCES: FundingSource[] = [
+    { id: 'FS-01', name: 'Federal Transportation Grant' },
+    { id: 'FS-02', name: 'State Infrastructure Bond' },
+    { id: 'FS-03', name: 'Municipal Capital Fund' },
+];
+
+export const MOCK_PROJECT_FUNDING: ProjectFunding[] = [
+    { id: 'PF-01', projectId: 'P1001', fundingSourceId: 'FS-01', amount: 25000000 },
+    { id: 'PF-02', projectId: 'P1001', fundingSourceId: 'FS-02', amount: 15000000 },
+    { id: 'PF-03', projectId: 'P1001', fundingSourceId: 'FS-03', amount: 5150000 },
 ];
 
 export const MOCK_STAKEHOLDERS: Stakeholder[] = [
@@ -34,6 +114,49 @@ export const MOCK_COMM_LOGS: CommunicationLog[] = [
   { id: 'CL-03', projectId: 'P1001', date: '2024-06-05', type: 'Official Letter', subject: 'Environmental Compliance Report #5', participants: ['Harvey Specter', 'State Environmental Dept.'], summary: 'Submitted monthly dust control and water runoff report.' },
 ];
 
+export const MOCK_RISK_PLAN: RiskManagementPlan = {
+  id: 'RMP-P1001',
+  projectId: 'P1001',
+  objectives: 'To proactively identify, analyze, and manage risks to ensure project objectives are met within budget and schedule.',
+  scope: 'This plan covers all technical, external, organizational, and project management risks for the duration of the Metro Line Extension - Phase 2 project.',
+  approach: 'A combination of qualitative and quantitative analysis will be used. Risk reviews will be held bi-weekly with the project core team.',
+  riskCategories: [
+    { id: 'cat-tech', name: 'Technical' },
+    { id: 'cat-ext', name: 'External' },
+    { id: 'cat-org', name: 'Organizational' },
+    { id: 'cat-pm', name: 'Project Management' },
+  ],
+  probabilityImpactScale: {
+    levels: [
+      { label: 'Very Low', value: 1, description: 'Negligible impact' },
+      { label: 'Low', value: 2, description: 'Minor impact' },
+      { label: 'Medium', value: 3, description: 'Moderate impact' },
+      { label: 'High', value: 4, description: 'Significant impact' },
+      { label: 'Very High', value: 5, description: 'Critical impact' },
+    ]
+  },
+  thresholds: {
+    low: 5,
+    medium: 12,
+    high: 20
+  },
+  version: 1,
+  status: 'Approved'
+};
+
+export const MOCK_RBS: RiskBreakdownStructureNode[] = [
+  { id: 'rbs-1', code: '1', name: 'Technical', children: [
+    { id: 'rbs-1.1', code: '1.1', name: 'Requirements', children: [] },
+    { id: 'rbs-1.2', code: '1.2', name: 'Technology & Design', children: [] },
+  ]},
+  { id: 'rbs-2', code: '2', name: 'External', children: [
+    { id: 'rbs-2.1', code: '2.1', name: 'Regulatory', children: [] },
+    { id: 'rbs-2.2', code: '2.2', name: 'Market', children: [] },
+    { id: 'rbs-2.3', code: '2.3', name: 'Suppliers', children: [] },
+  ]},
+];
+
+
 const MOCK_WBS: WBSNode[] = [
   { id: 'WBS-1', wbsCode: '1', name: 'Project Management & Design', description: 'Overall project management, administration, engineering, and design work.', children: [
     { id: 'WBS-1.1', wbsCode: '1.1', name: 'Permitting and Environmental', description: 'All activities related to securing permits and ensuring environmental compliance.', children: [] },
@@ -49,6 +172,129 @@ const MOCK_WBS: WBSNode[] = [
   ]},
 ];
 
+const MOCK_TASKS: Task[] = [
+      {
+        id: 'T1',
+        wbsCode: '1.1',
+        name: 'Environmental Impact Study',
+        startDate: '2024-01-05',
+        endDate: '2024-02-15',
+        duration: 29, // Working days
+        status: TaskStatus.COMPLETED,
+        progress: 100,
+        assignments: [{ resourceId: 'R2', units: 50 }, { resourceId: 'R4', units: 50 }],
+        dependencies: [],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Duration',
+        work: 240, // hours
+        resourceRequirements: [],
+        activityCodeAssignments: {
+          'AC_GLOBAL_DISCIPLINE': 'ACV_DISC_CIVIL',
+          'AC_GLOBAL_RESP': 'ACV_RESP_ENGINEER'
+        },
+        expenseIds: ['EXP-001'],
+        primaryConstraint: { type: 'Start On or After', date: '2024-01-05' },
+      },
+      {
+        id: 'T2',
+        wbsCode: '1.2',
+        name: 'Design Approval Milestone',
+        startDate: '2024-03-30',
+        endDate: '2024-03-30',
+        duration: 0,
+        status: TaskStatus.COMPLETED,
+        progress: 100,
+        assignments: [{ resourceId: 'R3', units: 100 }, { resourceId: 'R2', units: 100 }],
+        dependencies: [{ targetId: 'T1', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Milestone',
+        effortType: 'Fixed Duration',
+        resourceRequirements: [],
+        primaryConstraint: { type: 'Mandatory Finish', date: '2024-03-30' },
+      },
+      {
+        id: 'T3',
+        wbsCode: '2.1',
+        name: 'Site Preparation & Excavation',
+        startDate: '2024-04-01',
+        endDate: '2024-06-15',
+        duration: 54, // Working days
+        status: TaskStatus.IN_PROGRESS,
+        progress: 65,
+        assignments: [{ resourceId: 'R2', units: 100 }, { resourceId: 'EQ1', units: 100 }],
+        dependencies: [{ targetId: 'T2', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 400,
+        resourceRequirements: [],
+        activityCodeAssignments: {
+          'AC_GLOBAL_DISCIPLINE': 'ACV_DISC_CIVIL',
+          'AC_GLOBAL_RESP': 'ACV_RESP_CONTRACTOR',
+          'AC_PROJ_P1001_AREA': 'ACV_AREA_NORTH'
+        },
+        issueIds: ['ISS-002'],
+        expenseIds: ['EXP-002'],
+      },
+      {
+        id: 'T4',
+        wbsCode: '2.2',
+        name: 'Procurement of Steel',
+        startDate: '2024-04-10',
+        endDate: '2024-05-20',
+        duration: 29, // Working days
+        status: TaskStatus.DELAYED,
+        progress: 40,
+        assignments: [{ resourceId: 'R5', units: 100 }],
+        dependencies: [{ targetId: 'T2', type: 'FS', lag: 5, comment: "Client review period before procurement can start." }],
+        critical: false,
+        type: 'Task',
+        effortType: 'Fixed Duration',
+        work: 160,
+        resourceRequirements: [],
+        issueIds: ['ISS-001'],
+      },
+      {
+        id: 'T5',
+        wbsCode: '3.1',
+        name: 'Substructure Construction',
+        startDate: '2024-06-16',
+        endDate: '2024-09-30',
+        duration: 75, // Working days
+        status: TaskStatus.NOT_STARTED,
+        progress: 0,
+        assignments: [{ resourceId: 'R2', units: 100 }, { resourceId: 'R3', units: 25 }],
+        dependencies: [{ targetId: 'T3', type: 'FS', lag: 0 }],
+        critical: true,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 1200,
+        resourceRequirements: [],
+      },
+       {
+        id: 'T6',
+        wbsCode: '3.2',
+        name: 'Electrical Systems Rough-in',
+        startDate: '2024-08-01',
+        endDate: '2024-10-15',
+        duration: 54, // Working days
+        status: TaskStatus.NOT_STARTED,
+        progress: 0,
+        assignments: [{ resourceId: 'R2', units: 75 }],
+        dependencies: [{ targetId: 'T3', type: 'FS', lag: 30 }],
+        critical: false,
+        type: 'Task',
+        effortType: 'Fixed Work',
+        work: 600,
+        resourceRequirements: [],
+        activityCodeAssignments: {
+          'AC_GLOBAL_DISCIPLINE': 'ACV_DISC_ELEC',
+          'AC_GLOBAL_RESP': 'ACV_RESP_CONTRACTOR',
+          'AC_PROJ_P1001_AREA': 'ACV_AREA_CENTRAL'
+        }
+      }
+    ];
 
 export const MOCK_PROJECTS: Project[] = [
   {
@@ -56,12 +302,16 @@ export const MOCK_PROJECTS: Project[] = [
     name: 'Metro Line Extension - Phase 2',
     code: 'NY-MET-002',
     manager: 'Sarah Chen',
+    originalBudget: 42000000,
     budget: 45000000,
     spent: 12500000,
     startDate: '2024-01-01',
     endDate: '2025-12-31',
     health: 'Warning',
     wbs: MOCK_WBS,
+    issues: MOCK_ISSUES,
+    budgetLog: MOCK_BUDGET_LOG,
+    funding: MOCK_PROJECT_FUNDING,
     calendar: { id: 'CAL1', name: 'Standard', workingDays: [1, 2, 3, 4, 5], holidays: [] },
     baselines: [{
       id: 'BL1',
@@ -76,109 +326,14 @@ export const MOCK_PROJECTS: Project[] = [
         'T6': { baselineStartDate: '2024-08-01', baselineEndDate: '2024-10-15' },
       }
     }],
-    tasks: [
-      {
-        id: 'T1',
-        wbsCode: '1.1',
-        name: 'Environmental Impact Study',
-        startDate: '2024-01-05',
-        endDate: '2024-02-15',
-        duration: 29, // Working days
-        status: TaskStatus.COMPLETED,
-        progress: 100,
-        assignedResources: ['R2', 'R4'],
-        dependencies: [],
-        critical: true,
-        type: 'Task',
-        effortType: 'Fixed Duration',
-        work: 240, // hours
-      },
-      {
-        id: 'T2',
-        wbsCode: '1.2',
-        name: 'Design Approval Milestone',
-        startDate: '2024-03-30',
-        endDate: '2024-03-30',
-        duration: 0,
-        status: TaskStatus.COMPLETED,
-        progress: 100,
-        assignedResources: ['R3', 'R2'],
-        dependencies: [{ targetId: 'T1', type: 'FS', lag: 0 }],
-        critical: true,
-        type: 'Milestone',
-        effortType: 'Fixed Duration',
-      },
-      {
-        id: 'T3',
-        wbsCode: '2.1',
-        name: 'Site Preparation & Excavation',
-        startDate: '2024-04-01',
-        endDate: '2024-06-15',
-        duration: 54, // Working days
-        status: TaskStatus.IN_PROGRESS,
-        progress: 65,
-        assignedResources: ['R2'],
-        dependencies: [{ targetId: 'T2', type: 'FS', lag: 0 }],
-        critical: true,
-        type: 'Task',
-        effortType: 'Fixed Work',
-        work: 400,
-      },
-      {
-        id: 'T4',
-        wbsCode: '2.2',
-        name: 'Procurement of Steel',
-        startDate: '2024-04-10',
-        endDate: '2024-05-20',
-        duration: 29, // Working days
-        status: TaskStatus.DELAYED,
-        progress: 40,
-        assignedResources: ['R5'],
-        dependencies: [{ targetId: 'T2', type: 'FS', lag: 5 }],
-        critical: false,
-        type: 'Task',
-        effortType: 'Fixed Duration',
-        work: 160,
-      },
-      {
-        id: 'T5',
-        wbsCode: '3.1',
-        name: 'Substructure Construction',
-        startDate: '2024-06-16',
-        endDate: '2024-09-30',
-        duration: 75, // Working days
-        status: TaskStatus.NOT_STARTED,
-        progress: 0,
-        assignedResources: ['R2', 'R3'],
-        dependencies: [{ targetId: 'T3', type: 'FS', lag: 0 }],
-        critical: true,
-        type: 'Task',
-        effortType: 'Fixed Work',
-        work: 1200,
-      },
-       {
-        id: 'T6',
-        wbsCode: '3.2',
-        name: 'Electrical Systems Rough-in',
-        startDate: '2024-08-01',
-        endDate: '2024-10-15',
-        duration: 54, // Working days
-        status: TaskStatus.NOT_STARTED,
-        progress: 0,
-        assignedResources: ['R2'],
-        dependencies: [{ targetId: 'T3', type: 'FS', lag: 30 }],
-        critical: false,
-        type: 'Task',
-        effortType: 'Fixed Work',
-        work: 600
-      }
-    ]
+    tasks: MOCK_TASKS
   },
   {
     id: 'P1002',
     name: 'Downtown Commercial Hub',
     code: 'CHI-COM-088',
     manager: 'David Lee',
+    originalBudget: 12000000,
     budget: 12000000,
     spent: 500000,
     startDate: '2024-05-01',

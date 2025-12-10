@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode } from '../types';
 import { useData } from '../context/DataContext';
-import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit } from 'lucide-react';
+import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit, Tag } from 'lucide-react';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -10,11 +10,25 @@ interface TaskDetailModalProps {
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClose }) => {
-  const { state, dispatch } = useData();
+  const { state, dispatch, getActivityCodesForProject } = useData();
   const [localTask, setLocalTask] = useState<Task>(task);
   
+  const applicableCodes = useMemo(() => {
+    return getActivityCodesForProject(project.id);
+  }, [getActivityCodesForProject, project.id]);
+
   const handleUpdate = <K extends keyof Task>(key: K, value: Task[K]) => {
     setLocalTask(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleCodeAssignmentChange = (codeId: string, valueId: string) => {
+    const newAssignments = { ...(localTask.activityCodeAssignments || {}) };
+    if (valueId) {
+        newAssignments[codeId] = valueId;
+    } else {
+        delete newAssignments[codeId]; // unassign if empty value is selected
+    }
+    handleUpdate('activityCodeAssignments', newAssignments);
   };
 
   const handleSave = () => {
@@ -51,6 +65,32 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                         className="w-full bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-700 leading-relaxed min-h-[120px] focus:outline-none focus:ring-1 focus:ring-nexus-500"
                         placeholder="Add a detailed description..."
                       />
+                   </section>
+
+                   <section>
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <Tag size={16} className="text-nexus-500"/> Activity Codes
+                      </h3>
+                      <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                          {applicableCodes.map(code => (
+                              <div key={code.id} className="grid grid-cols-[150px_1fr] items-center">
+                                  <label className="text-sm font-medium text-slate-600">{code.name}</label>
+                                  <select
+                                      value={localTask.activityCodeAssignments?.[code.id] || ''}
+                                      onChange={(e) => handleCodeAssignmentChange(code.id, e.target.value)}
+                                      className="w-full mt-1 p-2 text-sm border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-nexus-500"
+                                  >
+                                      <option value="">-- Not Assigned --</option>
+                                      {code.values.map(val => (
+                                          <option key={val.id} value={val.id}>{val.value}</option>
+                                      ))}
+                                  </select>
+                              </div>
+                          ))}
+                          {applicableCodes.length === 0 && (
+                              <p className="text-sm text-slate-400 italic">No activity codes defined for this project.</p>
+                          )}
+                      </div>
                    </section>
 
                    <section>
@@ -111,16 +151,29 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                           <input type="date" value={localTask.endDate} onChange={e => handleUpdate('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"/>
                         </div>
                       </div>
+                       {/* FIX: The `constraintType` property does not exist on the `Task` type.
+This has been updated to use `primaryConstraint`, which is an object containing the constraint type and date.
+The option values have also been corrected to match the `ConstraintType` enum. */}
                        <div>
                           <label className="text-xs text-slate-500">Constraint</label>
                           <select 
-                            value={localTask.constraintType || ''}
-                            onChange={(e) => handleUpdate('constraintType', e.target.value as ConstraintType)}
+                            value={localTask.primaryConstraint?.type || ''}
+                            onChange={(e) => {
+                                const newType = e.target.value as ConstraintType | '';
+                                if (newType) {
+                                    handleUpdate('primaryConstraint', {
+                                        type: newType,
+                                        date: newType.startsWith('Start') ? localTask.startDate : localTask.endDate,
+                                    });
+                                } else {
+                                    handleUpdate('primaryConstraint', undefined);
+                                }
+                            }}
                             className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"
                            >
                               <option value="">None</option>
-                              <option value="Start No Earlier Than">Start No Earlier Than</option>
-                              <option value="Finish No Later Than">Finish No Later Than</option>
+                              <option value="Start On or After">Start No Earlier Than</option>
+                              <option value="Finish On or Before">Finish No Later Than</option>
                            </select>
                        </div>
                    </div>

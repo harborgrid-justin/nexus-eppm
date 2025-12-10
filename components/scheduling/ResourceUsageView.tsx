@@ -17,8 +17,9 @@ const ResourceUsageView: React.FC<ResourceUsageViewProps> = ({ project, dayWidth
     const allocations: Record<string, number[]> = {};
     const totalDays = getDaysDiff(projectStartDate, new Date(project.endDate));
 
+    // FIX: Property 'assignedResources' does not exist on type 'Task'. Use 'assignments'.
     const projectResources = state.resources.filter(r => 
-        project.tasks.some(t => t.assignedResources.includes(r.id))
+        project.tasks.some(t => t.assignments.some(a => a.resourceId === r.id))
     );
 
     projectResources.forEach(res => {
@@ -30,10 +31,11 @@ const ResourceUsageView: React.FC<ResourceUsageViewProps> = ({ project, dayWidth
       const endDay = getDaysDiff(projectStartDate, new Date(task.endDate));
 
       for (let i = startDay; i <= endDay; i++) {
-        task.assignedResources.forEach(resId => {
-          if (allocations[resId]) {
+        // FIX: Property 'assignedResources' does not exist on type 'Task'. Use 'assignments'.
+        task.assignments.forEach(assignment => {
+          if (allocations[assignment.resourceId]) {
             // Assuming 8 hours/day for simplicity
-            allocations[resId][i] += 8 / task.assignedResources.length; 
+            allocations[assignment.resourceId][i] += 8 / task.assignments.length; 
           }
         });
       }

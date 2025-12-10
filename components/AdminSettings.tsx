@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { Settings, Users, Server, Database, Shield, Bell, CreditCard } from 'lucide-react';
+import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote } from 'lucide-react';
+import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
+import ActivityCodeSettings from './admin/ActivityCodeSettings';
+import IssueCodeSettings from './admin/IssueCodeSettings';
+import ExpenseCategorySettings from './admin/ExpenseCategorySettings';
+import FundingSourceSettings from './admin/FundingSourceSettings';
 
 interface AdminSettingsProps {}
 
@@ -9,6 +14,11 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
   const navItems = [
     { id: 'general', icon: Settings, label: 'General' },
     { id: 'users', icon: Users, label: 'Users & Roles' },
+    { id: 'activityCodes', icon: Tag, label: 'Activity Codes' },
+    { id: 'issueCodes', icon: FileWarning, label: 'Issue Codes' },
+    { id: 'expenseCategories', icon: Receipt, label: 'Expense Categories' },
+    { id: 'fundingSources', icon: Banknote, label: 'Funding Sources' },
+    { id: 'resources', icon: UserCog, label: 'Resource Settings'},
     { id: 'security', icon: Shield, label: 'Security' },
     { id: 'integrations', icon: Server, label: 'Integrations' },
     { id: 'billing', icon: CreditCard, label: 'Billing' },
@@ -57,6 +67,16 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
             </div>
           </div>
         );
+      case 'activityCodes':
+        return <ActivityCodeSettings />;
+      case 'issueCodes':
+        return <IssueCodeSettings />;
+      case 'expenseCategories':
+        return <ExpenseCategorySettings />;
+      case 'fundingSources':
+        return <FundingSourceSettings />;
+      case 'resources':
+        return <EnterpriseResourceSettings />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">

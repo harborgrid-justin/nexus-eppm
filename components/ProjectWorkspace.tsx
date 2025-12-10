@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useProjectState } from '../hooks/useProjectState';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Network
+  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning
 } from 'lucide-react';
 
 import ProjectGantt from './ProjectGantt';
 import CostManagement from './CostManagement';
-import RiskRegister from './RiskRegister';
+import RiskManagement from './RiskManagement';
+import IssueLog from './IssueLog';
 import ScopeManagement from './ScopeManagement';
 import StakeholderManagement from './StakeholderManagement';
 import ProcurementManagement from './ProcurementManagement';
@@ -38,6 +39,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
     { id: 'risk', label: 'Risk', icon: AlertTriangle },
     { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
     { id: 'stakeholder', label: 'Stakeholder', icon: Users },
+    { id: 'issues', label: 'Issues', icon: FileWarning },
   ];
 
   const renderContent = () => {
@@ -51,7 +53,9 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       case 'cost':
         return <CostManagement projectId={projectId} />;
       case 'risk':
-        return <RiskRegister projectId={projectId} />;
+        return <RiskManagement projectId={projectId} />;
+      case 'issues':
+        return <IssueLog projectId={projectId} />;
       case 'stakeholder':
         return <StakeholderManagement projectId={projectId} />;
       case 'procurement':

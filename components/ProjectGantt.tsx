@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Project, Task, TaskStatus, WBSNode } from '../types';
 import TaskDetailModal from './TaskDetailModal';
+import TraceLogic from './scheduling/TraceLogic';
 import { useData } from '../context/DataContext';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageView from './scheduling/ResourceUsageView';
@@ -52,6 +53,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
   const { dispatch } = useData();
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTraceLogicOpen, setIsTraceLogicOpen] = useState(false);
   const [showCriticalPath, setShowCriticalPath] = useState(true);
   const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject.baselines?.[0]?.id || null);
   const [showResources, setShowResources] = useState(false);
@@ -220,6 +222,8 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
         setActiveBaselineId={setActiveBaselineId}
         showResources={showResources}
         setShowResources={setShowResources}
+        onTraceLogic={() => setIsTraceLogicOpen(true)}
+        isTaskSelected={!!selectedTask}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -299,7 +303,8 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
       
       {showResources && <ResourceUsageView project={project} dayWidth={DAY_WIDTH} projectStartDate={projectStart} />}
       
-      {selectedTask && <TaskDetailModal task={selectedTask} project={project} onClose={() => setSelectedTask(null)} />}
+      {selectedTask && !isTraceLogicOpen && <TaskDetailModal task={selectedTask} project={project} onClose={() => setSelectedTask(null)} />}
+      {isTraceLogicOpen && selectedTask && <TraceLogic startTask={selectedTask} project={project} onClose={() => setIsTraceLogicOpen(false)} />}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Project } from '../../types';
-import { Calendar, AlertTriangle, Layers, Users, ZoomIn, ZoomOut, Save } from 'lucide-react';
+import { Calendar, AlertTriangle, Layers, Users, ZoomIn, ZoomOut, Save, Filter, Share2 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
 interface GanttToolbarProps {
@@ -13,6 +13,8 @@ interface GanttToolbarProps {
   setActiveBaselineId: (id: string | null) => void;
   showResources: boolean;
   setShowResources: (show: boolean) => void;
+  onTraceLogic: () => void;
+  isTaskSelected: boolean;
 }
 
 const GanttToolbar: React.FC<GanttToolbarProps> = ({
@@ -24,7 +26,9 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
   activeBaselineId,
   setActiveBaselineId,
   showResources,
-  setShowResources
+  setShowResources,
+  onTraceLogic,
+  isTaskSelected
 }) => {
   const { dispatch } = useData();
 
@@ -37,7 +41,7 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
 
   return (
     <div className="flex-shrink-0 h-[52px] bg-slate-50 border-b border-slate-200 flex items-center justify-between px-4 z-20">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-lg p-0.5">
           {(['day', 'week', 'month'] as const).map(mode => (
             <button
@@ -51,8 +55,20 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
             </button>
           ))}
         </div>
+        <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-300 bg-white">
+          <Filter size={14} />
+          <span>Filter</span>
+        </button>
       </div>
       <div className="flex items-center gap-4">
+        <button 
+            onClick={onTraceLogic}
+            disabled={!isTaskSelected}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+         >
+           <Share2 size={16} /> Trace Logic
+        </button>
+        <div className="h-6 w-px bg-slate-200" />
         <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
            <AlertTriangle size={16} className="text-red-500" />
            <span className="font-medium">Critical Path</span>

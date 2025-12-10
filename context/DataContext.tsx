@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
-  Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode 
+  Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
+  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
-  MOCK_PROCUREMENT, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS 
+  MOCK_PROCUREMENT, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
+  MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES
 } from '../constants';
 
 const MOCK_INTEGRATIONS: Integration[] = [
@@ -17,10 +19,12 @@ const MOCK_INTEGRATIONS: Integration[] = [
 ];
 
 const MOCK_RISKS: Risk[] = [
-  { id: 'RSK-001', projectId: 'P1001', description: 'Supply chain delay for steel', category: 'External', probability: 'High', impact: 'High', status: 'Open', owner: 'Mike Ross', mitigationPlan: 'Source alternative local suppliers.' },
-  { id: 'RSK-002', projectId: 'P1001', description: 'Permit approval bottleneck', category: 'Schedule', probability: 'Medium', impact: 'High', status: 'Open', owner: 'Sarah Chen', mitigationPlan: 'Expedite processing with city council.' },
-  { id: 'RSK-003', projectId: 'P1001', description: 'Unexpected soil conditions', category: 'Technical', probability: 'Low', impact: 'Medium', status: 'Mitigated', owner: 'Jessica Pearson', mitigationPlan: 'Conduct secondary geo-survey.' },
+  { id: 'RSK-001', projectId: 'P1001', description: 'Supply chain delay for structural steel', category: 'External', probability: 'High', impact: 'High', probabilityValue: 4, impactValue: 5, score: 20, status: 'Open', owner: 'Mike Ross', rbsNodeId: 'rbs-2.3', dateIdentified: '2024-02-20', responseStrategy: 'Mitigate', responseActions: [{ id: 'RA-001', description: 'Source alternative local suppliers and place backup PO.', ownerId: 'R5', dueDate: '2024-03-15', status: 'In Progress' }] },
+  { id: 'RSK-002', projectId: 'P1001', description: 'Permit approval bottleneck from city council', category: 'External', probability: 'Medium', impact: 'High', probabilityValue: 3, impactValue: 4, score: 12, status: 'Open', owner: 'Sarah Chen', rbsNodeId: 'rbs-2.1', dateIdentified: '2024-01-15', responseStrategy: 'Mitigate', responseActions: [{ id: 'RA-002', description: 'Expedite processing with city council via legal counsel.', ownerId: 'R4', dueDate: '2024-02-28', status: 'Complete' }] },
+  { id: 'RSK-003', projectId: 'P1001', description: 'Unexpected soil conditions during excavation', category: 'Technical', probability: 'Low', impact: 'Medium', probabilityValue: 2, impactValue: 3, score: 6, status: 'Mitigated', owner: 'Jessica Pearson', rbsNodeId: 'rbs-1.2', dateIdentified: '2024-03-01', responseStrategy: 'Mitigate', responseActions: [{ id: 'RA-003', description: 'Conduct secondary geo-survey and have contingency foundation design ready.', ownerId: 'R2', dueDate: '2024-04-01', status: 'Complete' }], residualProbabilityValue: 1, residualImpactValue: 3 },
+  { id: 'RSK-004', projectId: 'P1001', description: 'Key engineer resigns', category: 'Organizational', probability: 'Low', impact: 'High', probabilityValue: 2, impactValue: 4, score: 8, status: 'Open', owner: 'Sarah Chen', rbsNodeId: 'rbs-1', dateIdentified: '2024-05-10', responseStrategy: 'Accept', responseActions: [] },
 ];
+
 
 const MOCK_CHANGE_ORDERS: ChangeOrder[] = [
   { id: 'CO-001', projectId: 'P1001', title: 'Additional Foundation Reinforcement', description: 'Required due to soil report findings.', amount: 150000, status: 'Approved', submittedBy: 'Mike Ross', dateSubmitted: '2024-03-10' },
@@ -77,11 +81,21 @@ interface DataState {
   procurementPackages: ProcurementPackage[];
   qualityReports: QualityReport[];
   communicationLogs: CommunicationLog[];
+  riskPlans: RiskManagementPlan[];
+  rbs: RiskBreakdownStructureNode[];
+  activityCodes: ActivityCode[];
+  issueCodes: IssueCode[];
+  issues: Issue[];
+  expenseCategories: ExpenseCategory[];
+  expenses: Expense[];
+  fundingSources: FundingSource[];
 }
 
 type Action = 
   | { type: 'UPDATE_TASK'; payload: { projectId: string; task: Task } }
   | { type: 'ADD_RISK'; payload: Risk }
+  | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
+  | { type: 'UPDATE_RISK_PLAN'; payload: { projectId: string; plan: Partial<RiskManagementPlan> } }
   | { type: 'TOGGLE_INTEGRATION'; payload: string }
   | { type: 'ADD_RESOURCE'; payload: Resource }
   | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
@@ -93,7 +107,10 @@ type Action =
   | { type: 'ADD_WBS_NODE'; payload: { projectId: string; parentId: string | null; newNode: WBSNode } }
   | { type: 'UPDATE_WBS_NODE'; payload: { projectId: string; nodeId: string; updatedData: Partial<WBSNode> } }
   | { type: 'DELETE_WBS_NODE'; payload: { projectId: string; nodeId: string } }
-  | { type: 'SET_BASELINE'; payload: { projectId: string; name: string } };
+  | { type: 'SET_BASELINE'; payload: { projectId: string; name: string } }
+  | { type: 'ADD_ACTIVITY_CODE'; payload: ActivityCode }
+  | { type: 'UPDATE_ACTIVITY_CODE'; payload: ActivityCode }
+  | { type: 'DELETE_ACTIVITY_CODE'; payload: string };
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
@@ -108,6 +125,14 @@ const initialState: DataState = {
   procurementPackages: MOCK_PROCUREMENT,
   qualityReports: MOCK_QUALITY_REPORTS,
   communicationLogs: MOCK_COMM_LOGS,
+  riskPlans: [MOCK_RISK_PLAN],
+  rbs: MOCK_RBS,
+  activityCodes: MOCK_ACTIVITY_CODES,
+  issueCodes: MOCK_ISSUE_CODES,
+  issues: MOCK_ISSUES,
+  expenseCategories: MOCK_EXPENSE_CATEGORIES,
+  expenses: MOCK_EXPENSES,
+  fundingSources: MOCK_FUNDING_SOURCES,
 };
 
 const dataReducer = (state: DataState, action: Action): DataState => {
@@ -188,6 +213,34 @@ const dataReducer = (state: DataState, action: Action): DataState => {
     }
     case 'ADD_RISK':
       return { ...state, risks: [...state.risks, action.payload] };
+    case 'UPDATE_RISK':
+      return {
+        ...state,
+        risks: state.risks.map(r => r.id === action.payload.risk.id ? action.payload.risk : r)
+      };
+    case 'UPDATE_RISK_PLAN':
+      return {
+        ...state,
+        riskPlans: state.riskPlans.map(p => 
+          p.projectId === action.payload.projectId
+            ? { ...p, ...action.payload.plan }
+            : p
+        )
+      };
+    case 'ADD_ACTIVITY_CODE':
+      return { ...state, activityCodes: [...state.activityCodes, action.payload] };
+    case 'UPDATE_ACTIVITY_CODE':
+      return {
+        ...state,
+        activityCodes: state.activityCodes.map(ac =>
+          ac.id === action.payload.id ? action.payload : ac
+        )
+      };
+    case 'DELETE_ACTIVITY_CODE':
+      return {
+        ...state,
+        activityCodes: state.activityCodes.filter(ac => ac.id !== action.payload)
+      };
     case 'TOGGLE_INTEGRATION':
       return {
         ...state,
@@ -242,6 +295,10 @@ const DataContext = createContext<{
   state: DataState;
   dispatch: React.Dispatch<Action>;
   getTask: (projectId: string, taskId: string) => Task | undefined;
+  getRiskPlan: (projectId: string) => RiskManagementPlan | undefined;
+  getRBS: () => RiskBreakdownStructureNode[];
+  getProjectDocs: (projectId: string) => Document[];
+  getActivityCodesForProject: (projectId: string) => ActivityCode[];
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -251,9 +308,25 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const project = state.projects.find(p => p.id === projectId);
     return project?.tasks.find(t => t.id === taskId);
   };
+  
+  const getRiskPlan = (projectId: string) => {
+    return state.riskPlans.find(p => p.projectId === projectId);
+  };
+  
+  const getRBS = () => {
+    return state.rbs;
+  };
+
+  const getProjectDocs = (projectId: string) => {
+    return state.documents.filter(d => d.projectId === projectId);
+  };
+
+  const getActivityCodesForProject = (projectId: string) => {
+    return state.activityCodes.filter(ac => ac.scope === 'Global' || (ac.scope === 'Project' && ac.projectId === projectId));
+  };
 
   return (
-    <DataContext.Provider value={{ state, dispatch, getTask }}>
+    <DataContext.Provider value={{ state, dispatch, getTask, getProjectDocs, getRiskPlan, getRBS, getActivityCodesForProject }}>
       {children}
     </DataContext.Provider>
   );

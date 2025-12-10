@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
-import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote } from 'lucide-react';
-import CostDashboard from './cost/CostDashboard';
-import CostPlanEditor from './cost/CostPlanEditor';
-import CostEstimating from './cost/CostEstimating';
-import CostBudgetView from './cost/CostBudgetView';
-import CostChangeOrders from './cost/CostChangeOrders';
-import CostExpenses from './cost/CostExpenses';
-import BudgetLog from './cost/BudgetLog';
-import ProjectFunding from './cost/ProjectFunding';
-import EarnedValue from './cost/EarnedValue';
-
+import { useProjectState } from '../../hooks/useProjectState';
+import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt } from 'lucide-react';
+import CostDashboard from './CostDashboard';
+import CostPlanEditor from './CostPlanEditor';
+import CostEstimating from './CostEstimating';
+import CostBudgetView from './CostBudgetView';
+import CostChangeOrders from './CostChangeOrders';
+import CostExpenses from './CostExpenses';
 
 interface CostManagementProps {
   projectId: string;
@@ -23,13 +19,10 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'plan', label: 'Plan', icon: FileText },
-    { id: 'budgetLog', label: 'Budget Log', icon: Landmark },
-    { id: 'funding', label: 'Funding', icon: Banknote },
     { id: 'estimating', label: 'Estimating', icon: Calculator },
-    { id: 'cbs', label: 'Budget (CBS)', icon: BarChart2 },
+    { id: 'budget', label: 'Budget (CBS)', icon: Landmark },
     { id: 'expenses', label: 'Expenses', icon: Receipt },
     { id: 'changes', label: 'Change Orders', icon: FileDiff },
-    { id: 'evm', label: 'Earned Value', icon: BarChart2 },
   ];
 
   const renderContent = () => {
@@ -38,20 +31,14 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
         return <CostDashboard projectId={projectId} />;
       case 'plan':
         return <CostPlanEditor projectId={projectId} />;
-      case 'budgetLog':
-        return <BudgetLog projectId={projectId} />;
-      case 'funding':
-        return <ProjectFunding projectId={projectId} />;
       case 'estimating':
         return <CostEstimating projectId={projectId} />;
-      case 'cbs':
+      case 'budget':
         return <CostBudgetView projectId={projectId} />;
       case 'expenses':
         return <CostExpenses projectId={projectId} />;
       case 'changes':
         return <CostChangeOrders projectId={projectId} />;
-      case 'evm':
-        return <EarnedValue projectId={projectId} />;
       default:
         return <CostDashboard projectId={projectId} />;
     }
@@ -70,7 +57,7 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
 
       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
         <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
-          <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
+          <nav className="flex space-x-2 px-4">
             {navItems.map(item => (
               <button
                 key={item.id}

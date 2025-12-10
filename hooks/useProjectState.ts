@@ -3,11 +3,15 @@ import { useData } from '../context/DataContext';
 import { TaskStatus } from '../types';
 
 export const useProjectState = (projectId: string | null) => {
-  const { state } = useData();
+  const { state, getRiskPlan } = useData();
 
   const project = useMemo(() => {
     return state.projects.find(p => p.id === projectId);
   }, [state.projects, projectId]);
+
+  const riskPlan = useMemo(() => {
+    return projectId ? getRiskPlan(projectId) : undefined;
+  }, [getRiskPlan, projectId]);
 
   const budgetItems = useMemo(() => {
      return state.budgetItems.filter(b => b.projectId === projectId);
@@ -40,7 +44,8 @@ export const useProjectState = (projectId: string | null) => {
 
   const assignedResources = useMemo(() => {
     if (!project) return [];
-    const resourceIds = new Set(project.tasks.flatMap(t => t.assignedResources));
+    // FIX: Property 'assignedResources' does not exist on type 'Task'. Use 'assignments' and map to resourceId.
+    const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
     return state.resources.filter(r => resourceIds.has(r.id));
   }, [project, state.resources]);
 
@@ -122,6 +127,7 @@ export const useProjectState = (projectId: string | null) => {
     financials,
     riskProfile,
     qualityProfile,
+    riskPlan,
     budgetItems, 
     changeOrders,
     risks,
