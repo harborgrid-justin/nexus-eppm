@@ -17,8 +17,13 @@ export const useGantt = (initialProject: Project) => {
   const [showResources, setShowResources] = useState(false);
   
   const ganttContainerRef = useRef<HTMLDivElement>(null);
+  
+  // State for drag operations
   const [draggingTask, setDraggingTask] = useState<{ task: Task, startX: number, type: 'move' | 'resize-end' | 'progress' } | null>(null);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
+  
+  // Refs for requestAnimationFrame to handle high-frequency events safely
+  const rafRef = useRef<number | null>(null);
 
   // Memoize project calculation with critical path
   const project = useMemo(() => {
@@ -81,7 +86,7 @@ export const useGantt = (initialProject: Project) => {
 
         headers.days.push({ date: new Date(current), isWorking });
         current.setDate(current.getDate() + 1);
-        if(isWorking || !isWorking) dayIndex++; // Simply increment for grid, refinement on working days logic depends on view requirement
+        if(isWorking || !isWorking) dayIndex++; 
     }
     return headers;
   }, [projectStart, projectEnd, project.calendar]);
@@ -104,38 +109,48 @@ export const useGantt = (initialProject: Project) => {
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!draggingTask || !ganttContainerRef.current || !project.calendar) return;
 
-    const dx = e.clientX - draggingTask.startX;
-    const daysMoved = Math.round(dx / DAY_WIDTH);
+    // Use requestAnimationFrame to throttle updates and prevent layout thrashing
+    if (rafRef.current) return;
 
-    if (daysMoved !== 0) {
-      let updatedTask = { ...draggingTask.task };
-      const calendar = project.calendar;
+    rafRef.current = requestAnimationFrame(() => {
+      const dx = e.clientX - draggingTask.startX;
+      const daysMoved = Math.round(dx / DAY_WIDTH);
 
-      try {
-        if (draggingTask.type === 'move') {
-          const newStartDate = addWorkingDays(new Date(draggingTask.task.startDate), daysMoved, calendar);
-          updatedTask.startDate = toISODateString(newStartDate);
-          updatedTask.endDate = toISODateString(addWorkingDays(newStartDate, updatedTask.duration, calendar));
-        } else if (draggingTask.type === 'resize-end') {
-          const newDuration = updatedTask.duration + daysMoved;
-          updatedTask.duration = Math.max(1, newDuration);
-          updatedTask.endDate = toISODateString(addWorkingDays(new Date(updatedTask.startDate), updatedTask.duration, calendar));
-        } else if (draggingTask.type === 'progress') {
-            const barWidth = updatedTask.duration * DAY_WIDTH;
-            const currentProgressWidth = barWidth * (updatedTask.progress / 100);
-            const newProgressWidth = currentProgressWidth + dx;
-            updatedTask.progress = Math.max(0, Math.min(100, (newProgressWidth / barWidth) * 100));
+      if (daysMoved !== 0 || draggingTask.type === 'progress') {
+        let updatedTask = { ...draggingTask.task };
+        const calendar = project.calendar!;
+
+        try {
+          if (draggingTask.type === 'move') {
+            const newStartDate = addWorkingDays(new Date(draggingTask.task.startDate), daysMoved, calendar);
+            updatedTask.startDate = toISODateString(newStartDate);
+            updatedTask.endDate = toISODateString(addWorkingDays(newStartDate, updatedTask.duration, calendar));
+          } else if (draggingTask.type === 'resize-end') {
+            const newDuration = updatedTask.duration + daysMoved;
+            updatedTask.duration = Math.max(1, newDuration);
+            updatedTask.endDate = toISODateString(addWorkingDays(new Date(updatedTask.startDate), updatedTask.duration, calendar));
+          } else if (draggingTask.type === 'progress') {
+              const barWidth = updatedTask.duration * DAY_WIDTH;
+              const currentProgressWidth = barWidth * (updatedTask.progress / 100);
+              const newProgressWidth = currentProgressWidth + dx;
+              updatedTask.progress = Math.max(0, Math.min(100, (newProgressWidth / barWidth) * 100));
+          }
+          
+          setDraggingTask(prev => prev ? { ...prev, startX: e.clientX } : null);
+          dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: updatedTask } });
+        } catch (err) {
+          console.error("Error updating task during drag", err);
         }
-        
-        setDraggingTask({ ...draggingTask, startX: e.clientX });
-        dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: updatedTask } });
-      } catch (err) {
-        console.error("Error updating task during drag", err);
       }
-    }
+      rafRef.current = null;
+    });
   }, [draggingTask, project.id, project.calendar, dispatch]);
 
   const handleMouseUp = useCallback(() => {
+    if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+    }
     document.body.style.cursor = 'default';
     setDraggingTask(null);
   }, []);
@@ -148,6 +163,9 @@ export const useGantt = (initialProject: Project) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      if (rafRef.current) {
+          cancelAnimationFrame(rafRef.current);
+      }
     };
   }, [draggingTask, handleMouseMove, handleMouseUp]);
 

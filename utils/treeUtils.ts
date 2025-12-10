@@ -1,5 +1,5 @@
 
-type TreeNode = {
+export type TreeNode = {
   id: string;
   children: TreeNode[];
   [key: string]: any;
@@ -35,11 +35,13 @@ export const detectCircularDependency = <T extends TreeNode>(
 };
 
 export const findNodeById = <T extends TreeNode>(nodes: T[], nodeId: string): T | null => {
+  if (!nodes || !Array.isArray(nodes)) return null;
+  
   for (const node of nodes) {
     if (node.id === nodeId) {
       return node;
     }
-    if (node.children) {
+    if (node.children && node.children.length > 0) {
       const found = findNodeById(node.children as T[], nodeId);
       if (found) {
         return found;
@@ -88,8 +90,9 @@ export const findAndReparentNode = <T extends TreeNode>(
   
   // Validation: Check for circular dependency
   if (detectCircularDependency(nodes, targetId, newParentId)) {
-    console.error(`Circular dependency detected: Cannot move ${targetId} into ${newParentId}`);
-    return { newNodes: nodes, movedNode: null, error: "Circular dependency detected" };
+    const errorMsg = `Circular dependency detected: Cannot move ${targetId} into ${newParentId}`;
+    console.error(errorMsg);
+    return { newNodes: nodes, movedNode: null, error: errorMsg };
   }
 
   let movedNode: T | null = null;

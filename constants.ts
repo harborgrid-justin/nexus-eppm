@@ -1,4 +1,5 @@
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract } from './types';
+
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -318,10 +319,10 @@ export const MOCK_PROCUREMENT_PLANS: ProcurementPlan[] = [
 ];
 
 export const MOCK_VENDORS: Vendor[] = [
-  { id: 'V-001', name: 'Steel Suppliers Inc.', category: 'Materials', status: 'Active', performanceScore: 88, riskLevel: 'Medium', contact: { name: 'John Doe', email: 'j.doe@steelinc.com', phone: '123-456-7890' }},
-  { id: 'V-002', name: 'Heavy Equipment Co.', category: 'Equipment', status: 'Preferred', performanceScore: 95, riskLevel: 'Low', contact: { name: 'Jane Smith', email: 'j.smith@heavyco.com', phone: '123-456-7891' }},
-  { id: 'V-003', name: 'Concrete Experts LLC', category: 'Subcontractor', status: 'Prequalified', performanceScore: 91, riskLevel: 'Low', contact: { name: 'Peter Jones', email: 'p.jones@concrete.com', phone: '123-456-7892' }},
-  { id: 'V-004', name: 'Faulty Wiring Corp', category: 'Subcontractor', status: 'Blacklisted', performanceScore: 32, riskLevel: 'High', contact: { name: 'Bad Actor', email: 'bad@actor.com', phone: '111-222-3333' }}
+  { id: 'V-001', name: 'Steel Suppliers Inc.', category: 'Materials', status: 'Active', performanceScore: 88, riskLevel: 'Medium', contact: { name: 'John Doe', email: 'j.doe@steelinc.com', phone: '123-456-7890' }, location: 'Pittsburgh, PA', lastAudit: '2023-11-10' },
+  { id: 'V-002', name: 'Heavy Equipment Co.', category: 'Equipment', status: 'Preferred', performanceScore: 95, riskLevel: 'Low', contact: { name: 'Jane Smith', email: 'j.smith@heavyco.com', phone: '123-456-7891' }, location: 'Chicago, IL', lastAudit: '2024-01-15' },
+  { id: 'V-003', name: 'Concrete Experts LLC', category: 'Subcontractor', status: 'Prequalified', performanceScore: 91, riskLevel: 'Low', contact: { name: 'Peter Jones', email: 'p.jones@concrete.com', phone: '123-456-7892' }, location: 'New York, NY', lastAudit: '2023-09-01' },
+  { id: 'V-004', name: 'Faulty Wiring Corp', category: 'Subcontractor', status: 'Blacklisted', performanceScore: 32, riskLevel: 'High', contact: { name: 'Bad Actor', email: 'bad@actor.com', phone: '111-222-3333' }, location: 'Unknown', lastAudit: '2022-05-20' }
 ];
 
 export const MOCK_PROCUREMENT_PACKAGES: ProcurementPackage[] = [
@@ -336,7 +337,20 @@ export const MOCK_SOLICITATIONS: Solicitation[] = [
 ];
 
 export const MOCK_CONTRACTS: Contract[] = [
-    { id: 'CTR-01', projectId: 'P1001', vendorId: 'V-001', solicitationId: 'SOL-01', contractValue: 8250000, status: 'Active', startDate: '2024-04-15', endDate: '2025-04-14' }
+    { id: 'CTR-01', projectId: 'P1001', title: 'Master Service Agreement - Steel', vendorId: 'V-001', solicitationId: 'SOL-01', contractValue: 8250000, status: 'Active', startDate: '2024-04-15', endDate: '2025-04-14', type: 'Fixed Price' }
+];
+
+export const MOCK_PURCHASE_ORDERS: PurchaseOrder[] = [
+    { id: 'PO-1001', projectId: 'P1001', contractId: 'CTR-01', vendorId: 'V-001', number: 'PO-24-001', status: 'Issued', amount: 2500000, issueDate: '2024-04-20', description: 'Initial steel batch delivery' },
+    { id: 'PO-1002', projectId: 'P1001', contractId: 'CTR-01', vendorId: 'V-001', number: 'PO-24-055', status: 'Draft', amount: 1500000, issueDate: '2024-06-01', description: 'Second batch - Columns' }
+];
+
+export const MOCK_SUPPLIER_REVIEWS: SupplierPerformanceReview[] = [
+    { id: 'SPR-01', vendorId: 'V-001', projectId: 'P1001', date: '2024-05-30', rating: 4, reviewer: 'Sarah Chen', comments: 'Delivery was on time, documentation was slightly delayed but acceptable.' }
+];
+
+export const MOCK_CLAIMS: ProcurementClaim[] = [
+    { id: 'CLM-01', projectId: 'P1001', contractId: 'CTR-01', title: 'Force Majeure - Port Strike Delay', description: 'Vendor claiming 2 week extension due to port strikes.', status: 'Under Review', amount: 0, filingDate: '2024-05-10', filedBy: 'Vendor' }
 ];
 
 // --- END MOCK PROCUREMENT DATA ---

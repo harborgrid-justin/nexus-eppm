@@ -1,3 +1,4 @@
+
 export type Industry = 'Standard' | 'Construction' | 'Software';
 
 export enum TaskStatus {
@@ -580,6 +581,18 @@ export interface Vendor {
   performanceScore: number; // 0-100
   riskLevel: 'Low' | 'Medium' | 'High';
   contact: { name: string; email: string; phone: string };
+  location?: string;
+  lastAudit?: string;
+}
+
+export interface SupplierPerformanceReview {
+  id: string;
+  vendorId: string;
+  projectId: string;
+  date: string;
+  rating: number; // 1-5
+  reviewer: string;
+  comments: string;
 }
 
 // --- Solicitation & Bidding ---
@@ -610,12 +623,26 @@ export interface Contract {
   id: string;
   projectId: string;
   vendorId: string;
-  solicitationId: string;
+  solicitationId?: string;
+  title: string;
   contractValue: number;
   status: 'Draft' | 'Negotiation' | 'Pending Signature' | 'Active' | 'Expired' | 'Terminated';
   startDate: string;
   endDate: string;
   renewalDate?: string;
+  type: 'Fixed Price' | 'Time & Materials' | 'Cost Plus';
+}
+
+export interface ProcurementClaim {
+  id: string;
+  projectId: string;
+  contractId: string;
+  title: string;
+  description: string;
+  status: 'Open' | 'Under Review' | 'Resolved' | 'Disputed';
+  amount: number;
+  filingDate: string;
+  filedBy: 'Owner' | 'Vendor';
 }
 
 export interface ProcurementPackage {
@@ -629,6 +656,18 @@ export interface ProcurementPackage {
   assignedBuyer: string; // Resource ID
   solicitationId?: string;
   contractId?: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  projectId: string;
+  contractId?: string;
+  vendorId: string;
+  number: string;
+  status: 'Draft' | 'Issued' | 'Partially Received' | 'received' | 'Closed';
+  amount: number;
+  issueDate: string;
+  description: string;
 }
 
 

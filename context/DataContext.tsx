@@ -4,13 +4,14 @@ import {
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
   RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
-  ProcurementPlan, Vendor, Solicitation, Contract
+  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES,
-  MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS
+  MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS,
+  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
 
@@ -76,6 +77,9 @@ export interface DataState {
   vendors: Vendor[];
   solicitations: Solicitation[];
   contracts: Contract[];
+  purchaseOrders: PurchaseOrder[];
+  supplierReviews: SupplierPerformanceReview[];
+  claims: ProcurementClaim[];
   errors: string[]; // Global error tracking
 }
 
@@ -132,6 +136,9 @@ const initialState: DataState = {
   vendors: MOCK_VENDORS,
   solicitations: MOCK_SOLICITATIONS,
   contracts: MOCK_CONTRACTS,
+  purchaseOrders: MOCK_PURCHASE_ORDERS,
+  supplierReviews: MOCK_SUPPLIER_REVIEWS,
+  claims: MOCK_CLAIMS,
   errors: [],
 };
 
