@@ -79,8 +79,8 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   return (
     <div className="h-full w-full flex flex-col animate-in fade-in duration-300">
       {/* Knowledge Area Navigation */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 overflow-x-auto scrollbar-hide flex justify-between items-center pr-4">
-        <nav className="flex space-x-2 px-4">
+      <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50 flex justify-between items-center pr-4">
+        <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
           {knowledgeAreas.map(area => (
             <button
               key={area.id}
