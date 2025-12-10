@@ -113,9 +113,14 @@ export interface Task {
   dependencies: Dependency[];
   critical: boolean; // This will now be calculated
   description?: string;
-  riskIds?: string[]; // Linked risks
-  issueIds?: string[]; // Linked issues
-  expenseIds?: string[]; // Linked expenses
+  
+  // --- INTEGRATION FIELDS ---
+  riskIds?: string[];
+  issueIds?: string[];
+  documentIds?: string[];
+  // --- END INTEGRATION FIELDS ---
+
+  expenseIds?: string[];
   activityCodeAssignments?: Record<string, string>; // { [activityCodeId]: activityCodeValueId }
   udfValues?: Record<string, any>; // { [udfId]: value }
   auditTrail?: AuditEntry[];
@@ -414,6 +419,7 @@ export interface BudgetLogItem {
   amount: number;
   status: 'Pending' | 'Approved' | 'Not Approved';
   submittedBy: string;
+  source?: 'Initial' | 'Change Order' | 'Contingency';
 }
 
 export interface FundingSource {
@@ -473,6 +479,10 @@ export interface ChangeOrder {
   status: 'Draft' | 'Pending Approval' | 'Approved' | 'Rejected';
   submittedBy: string;
   dateSubmitted: string;
+  impacts?: {
+    scheduleImpactDays?: number;
+    budgetImpact?: number;
+  };
 }
 
 export interface BudgetLineItem {
@@ -526,6 +536,7 @@ export interface ProcurementPackage {
   value: number;
   status: 'Draft' | 'Bidding' | 'Awarded' | 'Complete';
   deliveryDate: string;
+  linkedTaskId?: string; // INTEGRATION POINT
 }
 
 export interface CommunicationLog {
@@ -545,6 +556,7 @@ export interface QualityReport {
   type: 'Inspection' | 'Test' | 'Audit';
   status: 'Pass' | 'Fail' | 'Conditional';
   details: Record<string, any>; // Flexible for industry specifics
+  linkedIssueId?: string; // INTEGRATION POINT
 }
 
 export interface AIAnalysisResult {

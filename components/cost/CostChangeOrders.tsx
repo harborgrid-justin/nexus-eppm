@@ -1,6 +1,7 @@
 import React from 'react';
 import { useProjectState } from '../../hooks/useProjectState';
-import { Plus } from 'lucide-react';
+import { useData } from '../../context/DataContext';
+import { Plus, CheckCircle } from 'lucide-react';
 
 interface CostChangeOrdersProps {
   projectId: string;
@@ -8,6 +9,13 @@ interface CostChangeOrdersProps {
 
 const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
   const { changeOrders } = useProjectState(projectId);
+  const { dispatch } = useData();
+
+  const handleApprove = (changeOrderId: string) => {
+    if (window.confirm('Are you sure you want to approve this change order? This will update the project budget.')) {
+      dispatch({ type: 'APPROVE_CHANGE_ORDER', payload: { projectId, changeOrderId } });
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -26,11 +34,12 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Submitted By</th>
+              <th className="px-6 py-3 w-28"></th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-100">
             {changeOrders.map(co => (
-              <tr key={co.id} className="hover:bg-slate-50 cursor-pointer">
+              <tr key={co.id} className="hover:bg-slate-50">
                 <td className="px-6 py-4 text-sm font-mono text-slate-500">{co.id}</td>
                 <td className="px-6 py-4">
                   <div className="text-sm font-medium text-slate-900">{co.title}</div>
@@ -48,6 +57,16 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
                 <td className="px-6 py-4 text-right text-sm font-bold text-slate-900">${co.amount.toLocaleString()}</td>
                 <td className="px-6 py-4 text-sm text-slate-600">
                   {co.submittedBy} on {co.dateSubmitted}
+                </td>
+                <td className="px-6 py-4">
+                  {co.status === 'Pending Approval' && (
+                    <button 
+                      onClick={() => handleApprove(co.id)}
+                      className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs font-semibold hover:bg-green-200"
+                    >
+                      <CheckCircle size={12}/> Approve
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

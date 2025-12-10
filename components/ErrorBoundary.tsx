@@ -9,7 +9,8 @@ interface State {
   hasError: boolean;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+// FIX: Use this.props and this.state directly to avoid potential 'this' context issues with destructuring in some environments.
+class ErrorBoundary extends React.Component<Props, State> {
   public state: State = {
     hasError: false
   };
@@ -22,7 +23,6 @@ class ErrorBoundary extends Component<Props, State> {
     console.error("Uncaught error:", error, errorInfo);
   }
 
-  // FIX: Use this.props and this.state directly to avoid potential 'this' context issues with destructuring in some environments.
   public render() {
     if (this.state.hasError) {
       return (

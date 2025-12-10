@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
-  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape
+  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
@@ -79,7 +79,7 @@ type Action =
   | { type: 'TOGGLE_INTEGRATION'; payload: string }
   | { type: 'ADD_RESOURCE'; payload: Resource }
   | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
-  | { type: 'APPROVE_CHANGE_ORDER'; payload: string } 
+  | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string, changeOrderId: string } } 
   | { type: 'UPLOAD_DOCUMENT'; payload: Document }
   | { type: 'INSTALL_EXTENSION'; payload: string }
   | { type: 'UNINSTALL_EXTENSION'; payload: string }
@@ -93,7 +93,10 @@ type Action =
   | { type: 'ADD_ACTIVITY_CODE'; payload: ActivityCode }
   | { type: 'UPDATE_ACTIVITY_CODE'; payload: ActivityCode }
   | { type: 'DELETE_ACTIVITY_CODE'; payload: string }
-  | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } };
+  | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
+  | { type: 'LINK_ISSUE_TO_TASK'; payload: { projectId: string; taskId: string; issueId: string } }
+  | { type: 'CREATE_ISSUE_FROM_QUALITY_FAIL'; payload: { qualityReport: QualityReport } };
+
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
@@ -166,7 +169,11 @@ const dataReducer = (state: DataState, action: Action): DataState => {
           } else {
             newWbs.push(newNode);
           }
-          return { ...p, wbs: newWbs };
+          // INTEGRATION: Automatically create a summary task for the new WBS node
+          const newSummaryTask: Task = {
+            id: `T-${newNode.id}`, wbsCode: newNode.wbsCode, name: newNode.name, startDate: p.startDate, endDate: p.endDate, duration: 0, status: TaskStatus.NOT_STARTED, progress: 0, dependencies: [], critical: false, type: 'Summary', effortType: 'Fixed Duration', resourceRequirements: [], assignments: []
+          };
+          return { ...p, wbs: newWbs, tasks: [...p.tasks, newSummaryTask] };
         })
       };
     }
@@ -266,13 +273,35 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       return { ...state, resources: [...state.resources, action.payload] };
     case 'ADD_CHANGE_ORDER':
       return { ...state, changeOrders: [...state.changeOrders, action.payload] };
-    case 'APPROVE_CHANGE_ORDER':
-      return {
-        ...state,
-        changeOrders: state.changeOrders.map(co => 
-          co.id === action.payload ? { ...co, status: 'Approved' } : co
-        )
-      };
+    case 'APPROVE_CHANGE_ORDER': {
+        const { projectId, changeOrderId } = action.payload;
+        const co = state.changeOrders.find(c => c.id === changeOrderId);
+        if (!co) return state;
+
+        const newLogItem: BudgetLogItem = {
+            id: `BLI-${Date.now()}`,
+            projectId,
+            date: new Date().toISOString().split('T')[0],
+            description: `Approved Change Order: ${co.title}`,
+            amount: co.amount,
+            status: 'Approved',
+            submittedBy: 'System',
+            source: 'Change Order',
+        };
+
+        return {
+            ...state,
+            changeOrders: state.changeOrders.map(c => c.id === changeOrderId ? { ...c, status: 'Approved' } : c),
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                return {
+                    ...p,
+                    budget: p.budget + co.amount,
+                    budgetLog: [...(p.budgetLog || []), newLogItem]
+                };
+            })
+        };
+    }
     case 'UPLOAD_DOCUMENT':
       return { ...state, documents: [...state.documents, action.payload] };
     case 'INSTALL_EXTENSION':
@@ -298,6 +327,39 @@ const dataReducer = (state: DataState, action: Action): DataState => {
           ext.id === action.payload ? { ...ext, status: 'Active' } : ext
         )
       };
+    case 'LINK_ISSUE_TO_TASK': {
+        const { projectId, taskId, issueId } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => 
+                p.id === projectId ? { ...p, tasks: p.tasks.map(t => 
+                    t.id === taskId ? { ...t, issueIds: [...(t.issueIds || []), issueId] } : t
+                )} : p
+            ),
+            issues: state.issues.map(i => 
+                i.id === issueId ? { ...i, activityId: taskId } : i
+            )
+        };
+    }
+    case 'CREATE_ISSUE_FROM_QUALITY_FAIL': {
+        const { qualityReport } = action.payload;
+        const newIssue: Issue = {
+            id: `ISS-${Date.now()}`,
+            projectId: qualityReport.projectId,
+            priority: 'Medium',
+            status: 'Open',
+            description: `Quality Failure: ${qualityReport.details.finding || qualityReport.type}`,
+            assignedTo: 'Unassigned',
+            dateIdentified: new Date().toISOString().split('T')[0],
+        };
+        return {
+            ...state,
+            issues: [...state.issues, newIssue],
+            qualityReports: state.qualityReports.map(qr => 
+                qr.id === qualityReport.id ? { ...qr, linkedIssueId: newIssue.id } : qr
+            )
+        };
+    }
     default:
       return state;
   }
