@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Risk, RiskResponseAction } from '../../types';
 import { useData } from '../../context/DataContext';
-import { X, Plus, Trash2, Link as LinkIcon, Save, AlertTriangle } from 'lucide-react';
+import { X, Plus, Trash2, Link as LinkIcon, Save, AlertTriangle, Calendar } from 'lucide-react';
 
 interface RiskDetailModalProps {
   riskId: string;
@@ -13,6 +14,9 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
   const { state, dispatch } = useData();
   const [risk, setRisk] = useState<Risk | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Get tasks for the current project for integration linkage
+  const projectTasks = state.projects.find(p => p.id === projectId)?.tasks || [];
 
   useEffect(() => {
     const foundRisk = state.risks.find(r => r.id === riskId);
@@ -84,9 +88,28 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
                     <label className="text-sm font-medium text-slate-700">Description</label>
                     <textarea value={risk.description} onChange={(e) => handleChange('description', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md"/>
                  </div>
-                 <div>
-                    <label className="text-sm font-medium text-slate-700">Category</label>
-                    <input type="text" value={risk.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md"/>
+                 <div className="space-y-4">
+                    <div>
+                        <label className="text-sm font-medium text-slate-700">Category</label>
+                        <input type="text" value={risk.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md"/>
+                    </div>
+                    {/* INTEGRATION POINT: Link Risk to Task */}
+                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                        <label className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-1">
+                            <Calendar size={14} /> Schedule Impact (Task Link)
+                        </label>
+                        <select 
+                            value={risk.linkedTaskId || ''} 
+                            onChange={(e) => handleChange('linkedTaskId', e.target.value || undefined)}
+                            className="w-full p-2 text-sm border border-blue-200 rounded-md bg-white focus:ring-blue-500"
+                        >
+                            <option value="">-- No Schedule Impact --</option>
+                            {projectTasks.map(t => (
+                                <option key={t.id} value={t.id}>{t.wbsCode} - {t.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-blue-600 mt-1">Linking a risk to a task allows for Monte Carlo simulation on the critical path.</p>
+                    </div>
                  </div>
              </div>
              

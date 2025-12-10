@@ -1,7 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
-import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode, Issue, Expense } from '../types';
+import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode, Issue, Expense, NonConformanceReport, Risk, TaskStatus } from '../types';
 import { useData } from '../context/DataContext';
-import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt } from 'lucide-react';
+import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { canCompleteTask } from '../utils/integrationUtils';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -27,8 +29,28 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
     return state.expenses.filter(expense => localTask.expenseIds?.includes(expense.id));
   }, [state.expenses, localTask.expenseIds]);
 
+  // INTEGRATION: Quality & Schedule
+  const projectNCRs = useMemo(() => state.nonConformanceReports.filter(n => n.projectId === project.id), [state.nonConformanceReports, project.id]);
+  const { canComplete, blockingNCRs } = useMemo(() => canCompleteTask(localTask.id, projectNCRs), [localTask.id, projectNCRs]);
+
+  // INTEGRATION: Risk & Schedule
+  const linkedRisks: Risk[] = useMemo(() => {
+      return state.risks.filter(r => r.linkedTaskId === localTask.id);
+  }, [state.risks, localTask.id]);
+
   const handleUpdate = <K extends keyof Task>(key: K, value: Task[K]) => {
     setLocalTask(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleStatusChange = (newStatus: TaskStatus) => {
+      if (newStatus === TaskStatus.COMPLETED && !canComplete) {
+          alert(`Cannot complete task. There are ${blockingNCRs.length} blocking Non-Conformance Reports (Critical/Major) linked to this activity.`);
+          return;
+      }
+      handleUpdate('status', newStatus);
+      if (newStatus === TaskStatus.COMPLETED) {
+          handleUpdate('progress', 100);
+      }
   };
 
   const handleCodeAssignmentChange = (codeId: string, valueId: string) => {
@@ -58,6 +80,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                   onChange={(e) => handleUpdate('name', e.target.value)}
                   className="text-2xl font-bold text-slate-900 bg-transparent -ml-2 px-2 py-1 rounded-lg border border-transparent hover:border-slate-300 focus:border-nexus-500 focus:ring-1 focus:ring-nexus-500"
                 />
+                <div className="mt-1 flex items-center gap-2">
+                    <span className="text-xs font-mono bg-slate-200 px-2 py-0.5 rounded text-slate-600">{localTask.wbsCode}</span>
+                    {!canComplete && (
+                        <span className="text-xs font-bold text-red-600 flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                            <ShieldAlert size={12} /> Quality Gate Locked
+                        </span>
+                    )}
+                </div>
              </div>
              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
                 <X size={20} />
@@ -65,6 +95,25 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
           </div>
 
           <div className="flex-1 overflow-y-auto p-6">
+             {/* Quality Gate Warning */}
+             {!canComplete && (
+                 <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                     <AlertTriangle className="text-red-600 shrink-0 mt-0.5" size={20} />
+                     <div>
+                         <h4 className="text-sm font-bold text-red-800">Completion Blocked by Quality Control</h4>
+                         <p className="text-sm text-red-700 mt-1">The following Non-Conformance Reports must be closed before this task can be marked as Complete:</p>
+                         <ul className="mt-2 space-y-1">
+                             {blockingNCRs.map(ncr => (
+                                 <li key={ncr.id} className="text-xs font-medium text-red-800 flex items-center gap-2">
+                                     <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                                     {ncr.id}: {ncr.description} ({ncr.severity})
+                                 </li>
+                             ))}
+                         </ul>
+                     </div>
+                 </div>
+             )}
+
              <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-2 space-y-6">
                    <section>
@@ -130,19 +179,52 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                       </div>
                    </section>
                    
-                   {linkedIssues.length > 0 && (
-                     <section>
-                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2"><FileWarning size={16} className="text-yellow-500"/> Linked Issues</h3>
-                        <div className="space-y-2">
-                           {linkedIssues.map(issue => (
-                             <div key={issue.id} className="p-3 border border-slate-200 rounded-md text-sm bg-slate-50">
-                               <p className="font-medium text-slate-700">{issue.description}</p>
-                               <p className="text-xs text-slate-500 mt-1">Status: {issue.status} | Priority: {issue.priority}</p>
-                             </div>
-                           ))}
-                        </div>
-                     </section>
-                   )}
+                   {/* INTEGRATED MODULES SECTION */}
+                   <div className="grid grid-cols-2 gap-4">
+                       {/* RISKS */}
+                       <div className="bg-orange-50 border border-orange-100 rounded-lg p-3">
+                           <h3 className="text-xs font-bold text-orange-800 uppercase mb-2 flex items-center gap-2">
+                               <AlertTriangle size={14}/> Associated Risks
+                           </h3>
+                           {linkedRisks.length > 0 ? (
+                               <div className="space-y-2">
+                                   {linkedRisks.map(risk => (
+                                       <div key={risk.id} className="bg-white p-2 rounded border border-orange-200 text-xs shadow-sm">
+                                           <div className="flex justify-between">
+                                               <span className="font-semibold text-slate-800">{risk.id}</span>
+                                               <span className="font-bold text-orange-600">Score: {risk.score}</span>
+                                           </div>
+                                           <p className="text-slate-600 mt-1 line-clamp-2">{risk.description}</p>
+                                       </div>
+                                   ))}
+                               </div>
+                           ) : (
+                               <p className="text-xs text-orange-400 italic">No risks linked directly to this task.</p>
+                           )}
+                       </div>
+
+                       {/* ISSUES */}
+                       <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+                           <h3 className="text-xs font-bold text-yellow-800 uppercase mb-2 flex items-center gap-2">
+                               <FileWarning size={14}/> Active Issues
+                           </h3>
+                           {linkedIssues.length > 0 ? (
+                               <div className="space-y-2">
+                                   {linkedIssues.map(issue => (
+                                       <div key={issue.id} className="bg-white p-2 rounded border border-yellow-200 text-xs shadow-sm">
+                                           <div className="flex justify-between">
+                                               <span className="font-semibold text-slate-800">{issue.id}</span>
+                                               <span className="text-slate-500">{issue.priority}</span>
+                                           </div>
+                                           <p className="text-slate-600 mt-1 line-clamp-2">{issue.description}</p>
+                                       </div>
+                                   ))}
+                               </div>
+                           ) : (
+                               <p className="text-xs text-yellow-400 italic">No open issues linked.</p>
+                           )}
+                       </div>
+                   </div>
 
                     {linkedExpenses.length > 0 && (
                      <section>
@@ -164,6 +246,27 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
 
                 <div className="space-y-6">
                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                      {/* Status Control */}
+                      <div>
+                          <label className="text-xs text-slate-500 font-bold uppercase mb-1 block">Task Status</label>
+                          <select 
+                            value={localTask.status}
+                            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
+                            className={`w-full p-2 text-sm border rounded-md font-semibold ${
+                                !canComplete && localTask.status !== TaskStatus.COMPLETED 
+                                    ? 'border-orange-300 focus:ring-orange-500' 
+                                    : 'border-slate-200 focus:ring-nexus-500'
+                            }`}
+                          >
+                              <option value={TaskStatus.NOT_STARTED}>Not Started</option>
+                              <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
+                              <option value={TaskStatus.COMPLETED} disabled={!canComplete}>Completed {!canComplete ? '(Blocked)' : ''}</option>
+                              <option value={TaskStatus.DELAYED}>Delayed</option>
+                          </select>
+                      </div>
+
+                      <div className="h-px bg-slate-100 my-2"></div>
+
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-xs text-slate-500 flex items-center gap-1"><BrainCircuit size={12}/> Effort Type</label>
