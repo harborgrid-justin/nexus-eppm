@@ -1,4 +1,4 @@
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -105,12 +105,6 @@ export const MOCK_STAKEHOLDERS: Stakeholder[] = [
   { id: 'STK-02', projectId: 'P1001', name: 'State Environmental Dept.', role: 'Regulator', interest: 'Medium', influence: 'High', engagementStrategy: 'Keep Satisfied - Monthly compliance reports.' },
   { id: 'STK-03', projectId: 'P1001', name: 'Local Community Board', role: 'End User Rep', interest: 'High', influence: 'Medium', engagementStrategy: 'Keep Informed - Bi-weekly newsletters.' },
   { id: 'STK-04', projectId: 'P1001', name: 'Steel Suppliers Inc.', role: 'Vendor', interest: 'Low', influence: 'Low', engagementStrategy: 'Monitor - Regular PO follow-ups.' },
-];
-
-export const MOCK_PROCUREMENT: ProcurementPackage[] = [
-  { id: 'PROC-01', projectId: 'P1001', name: 'Structural Steel Supply', vendor: 'Steel Suppliers Inc.', value: 8500000, status: 'Awarded', deliveryDate: '2024-07-15' },
-  { id: 'PROC-02', projectId: 'P1001', name: 'Tunnel Boring Machine Lease', vendor: 'Heavy Equipment Co.', value: 12000000, status: 'Bidding', deliveryDate: '2024-08-01' },
-  { id: 'PROC-03', projectId: 'P1001', name: 'Signaling System', vendor: '', value: 4200000, status: 'Draft', deliveryDate: '2025-01-20' },
 ];
 
 export const MOCK_QUALITY_REPORTS: QualityReport[] = [
@@ -318,6 +312,35 @@ const MOCK_TASKS: Task[] = [
       }
     ];
 
+// --- MOCK PROCUREMENT DATA ---
+export const MOCK_PROCUREMENT_PLANS: ProcurementPlan[] = [
+  { id: 'PP-P1001', projectId: 'P1001', objectives: 'To acquire all necessary materials and subcontractors in a timely and cost-effective manner.', scope: 'Covers all external procurement for the Metro Line Extension.', approach: 'Competitive bidding for major packages, RFQs for commodities.', procurementMethods: ['RFP', 'RFQ'], status: 'Approved', version: 2 }
+];
+
+export const MOCK_VENDORS: Vendor[] = [
+  { id: 'V-001', name: 'Steel Suppliers Inc.', category: 'Materials', status: 'Active', performanceScore: 88, riskLevel: 'Medium', contact: { name: 'John Doe', email: 'j.doe@steelinc.com', phone: '123-456-7890' }},
+  { id: 'V-002', name: 'Heavy Equipment Co.', category: 'Equipment', status: 'Preferred', performanceScore: 95, riskLevel: 'Low', contact: { name: 'Jane Smith', email: 'j.smith@heavyco.com', phone: '123-456-7891' }},
+  { id: 'V-003', name: 'Concrete Experts LLC', category: 'Subcontractor', status: 'Prequalified', performanceScore: 91, riskLevel: 'Low', contact: { name: 'Peter Jones', email: 'p.jones@concrete.com', phone: '123-456-7892' }},
+  { id: 'V-004', name: 'Faulty Wiring Corp', category: 'Subcontractor', status: 'Blacklisted', performanceScore: 32, riskLevel: 'High', contact: { name: 'Bad Actor', email: 'bad@actor.com', phone: '111-222-3333' }}
+];
+
+export const MOCK_PROCUREMENT_PACKAGES: ProcurementPackage[] = [
+  { id: 'PKG-01', projectId: 'P1001', name: 'Structural Steel Supply', description: 'Supply of all structural steel beams and columns per spec S-01.', wbsId: 'WBS-3.2', budget: 8500000, status: 'Awarded', assignedBuyer: 'R5', solicitationId: 'SOL-01', contractId: 'CTR-01' },
+  { id: 'PKG-02', projectId: 'P1001', name: 'Tunnel Boring Machine Lease', description: 'Lease of one TBM for a duration of 12 months.', wbsId: 'WBS-2.1', budget: 12000000, status: 'Sourcing', assignedBuyer: 'R5', solicitationId: 'SOL-02' },
+  { id: 'PKG-03', projectId: 'P1001', name: 'Signaling System', description: 'Design and install of the complete signaling system.', wbsId: 'WBS-3.2', budget: 4200000, status: 'Planned', assignedBuyer: 'R5' },
+];
+
+export const MOCK_SOLICITATIONS: Solicitation[] = [
+    { id: 'SOL-01', projectId: 'P1001', packageId: 'PKG-01', type: 'RFP', title: 'RFP for Structural Steel Supply', issueDate: '2024-03-01', deadline: '2024-03-30', status: 'Awarded', invitedVendorIds: ['V-001'] },
+    { id: 'SOL-02', projectId: 'P1001', packageId: 'PKG-02', type: 'RFP', title: 'RFP for TBM Lease', issueDate: '2024-05-15', deadline: '2024-06-15', status: 'Bidding', invitedVendorIds: ['V-002'] }
+];
+
+export const MOCK_CONTRACTS: Contract[] = [
+    { id: 'CTR-01', projectId: 'P1001', vendorId: 'V-001', solicitationId: 'SOL-01', contractValue: 8250000, status: 'Active', startDate: '2024-04-15', endDate: '2025-04-14' }
+];
+
+// --- END MOCK PROCUREMENT DATA ---
+
 export const MOCK_PROJECTS: Project[] = [
   {
     id: 'P1001',
@@ -397,7 +420,8 @@ export const EXTENSIONS_REGISTRY: Extension[] = [
   // Analytics & Risk
   { id: 'ext_monte', name: 'Monte Carlo Sim', category: 'Analytics', description: 'Probabilistic schedule and cost risk analysis.', icon: 'ScatterChart', status: 'Available', version: '2.5', viewType: 'dashboard' },
   { id: 'ext_evm', name: 'EVM Engine', category: 'Analytics', description: 'Advanced Earned Value Management metrics.', icon: 'BarChart2', status: 'Available', version: '1.9', viewType: 'dashboard' },
-  { id: 'ext_powerbi', name: 'PowerBI Connect', category: 'Analytics', description: 'Embed PowerBI dashboards directly.', icon: 'PieChart', status: 'Installed', version: '4.0', installedDate: '2024-02-15', viewType: 'dashboard' },
+  // FIX: Added missing 'status' property and corrected 'icon' from 'Installed' to a valid icon name 'BarChart2'.
+  { id: 'ext_powerbi', name: 'PowerBI Connect', category: 'Analytics', description: 'Embed PowerBI dashboards directly.', icon: 'BarChart2', status: 'Installed', version: '4.0', installedDate: '2024-02-15', viewType: 'dashboard' },
   
   // Admin
   { id: 'ext_meet', name: 'Meeting Minutes', category: 'Operations', description: 'Track meeting items and assign action items.', icon: 'Users', status: 'Available', version: '1.1', viewType: 'grid' },

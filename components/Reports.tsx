@@ -154,7 +154,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                            {reportData.slice(0, 50).map((row: Record<string, any>, idx) => ( // limit to 50 for preview
                                <tr key={idx} className="hover:bg-slate-50">
                                    {Array.from(selectedColumns).map(colId => (
-                                       <td key={colId} className="px-4 py-2 text-slate-700 whitespace-nowrap">{String(row[colId] ?? '')}</td>
+                                       <td key={colId} className="px-4 py-2 text-slate-700 whitespace-nowrap">{String((row as any)[colId] ?? '')}</td>
                                    ))}
                                </tr>
                            ))}

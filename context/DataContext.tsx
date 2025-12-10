@@ -6,7 +6,7 @@ import {
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
-  MOCK_PROCUREMENT, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
+  MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
@@ -108,7 +108,7 @@ const initialState: DataState = {
   documents: MOCK_DOCUMENTS,
   extensions: EXTENSIONS_REGISTRY,
   stakeholders: MOCK_STAKEHOLDERS,
-  procurementPackages: MOCK_PROCUREMENT,
+  procurementPackages: MOCK_PROCUREMENT_PACKAGES,
   qualityReports: MOCK_QUALITY_REPORTS,
   communicationLogs: MOCK_COMM_LOGS,
   riskPlans: [MOCK_RISK_PLAN],

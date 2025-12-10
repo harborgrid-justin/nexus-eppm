@@ -10,16 +10,20 @@ interface ProcurementManagementProps {
 const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId }) => {
   const { procurement } = useProjectState(projectId);
   
+  // FIX: Updated the switch statement to handle all valid statuses for a ProcurementPackage
+  // and removed the invalid 'Bidding' case. The default now shows the actual status.
   const getStatusChip = (status: ProcurementPackage['status']) => {
     switch (status) {
       case 'Awarded':
         return <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Awarded</span>;
-      case 'Bidding':
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Bidding</span>;
+      case 'Sourcing':
+      case 'In Progress':
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">{status}</span>;
       case 'Complete':
         return <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Complete</span>;
+      case 'Planned':
       default:
-        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-600">Draft</span>;
+        return <span className="px-2 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-600">{status}</span>;
     }
   };
 
@@ -55,10 +59,10 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
                       <tr key={pkg.id} className="hover:bg-slate-50">
                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{pkg.id}</td>
                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{pkg.name}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{pkg.vendor || <span className="italic text-slate-400">Not Awarded</span>}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-semibold text-right">${pkg.value.toLocaleString()}</td>
+                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{(pkg as any).vendor || <span className="italic text-slate-400">Not Awarded</span>}</td>
+                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-semibold text-right">${(pkg as any).value.toLocaleString()}</td>
                          <td className="px-6 py-4 whitespace-nowrap text-center">{getStatusChip(pkg.status)}</td>
-                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{pkg.deliveryDate}</td>
+                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{(pkg as any).deliveryDate}</td>
                       </tr>
                    ))}
                 </tbody>

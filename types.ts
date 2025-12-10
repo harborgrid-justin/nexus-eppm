@@ -271,14 +271,6 @@ export interface ProjectCalendar {
   holidays: string[]; // ISO date strings
 }
 
-export interface ResourcePlan {
-  id: string;
-  projectId: string;
-  content: string; // Rich text or markdown content
-  assumptions: string;
-  constraints: string;
-}
-
 // --- QUALITY MANAGEMENT TYPES ---
 
 export interface QualityPlan {
@@ -453,7 +445,7 @@ export interface Project {
   wbs?: WBSNode[];
   baselines?: ProjectBaseline[];
   calendar?: ProjectCalendar;
-  resourcePlanId?: string;
+  procurementPlanId?: string;
   qualityPlanId?: string;
   costPlanId?: string;
   budgetLog?: BudgetLogItem[];
@@ -528,17 +520,6 @@ export interface Stakeholder {
   engagementStrategy: string;
 }
 
-export interface ProcurementPackage {
-  id: string;
-  projectId: string;
-  name: string;
-  vendor: string;
-  value: number;
-  status: 'Draft' | 'Bidding' | 'Awarded' | 'Complete';
-  deliveryDate: string;
-  linkedTaskId?: string; // INTEGRATION POINT
-}
-
 export interface CommunicationLog {
   id: string;
   projectId: string;
@@ -558,6 +539,98 @@ export interface QualityReport {
   details: Record<string, any>; // Flexible for industry specifics
   linkedIssueId?: string; // INTEGRATION POINT
 }
+
+// =================================================================
+// --- ENTERPRISE PROCUREMENT MODULE TYPES ---
+// =================================================================
+
+// --- Planning ---
+export interface ProcurementPlan {
+  id: string;
+  projectId: string;
+  objectives: string;
+  scope: string;
+  approach: string;
+  procurementMethods: ('RFP' | 'RFQ' | 'Sole Source')[];
+  status: 'Draft' | 'In Review' | 'Approved';
+  version: number;
+}
+
+export interface ProcurementPlanTemplate {
+  id: string;
+  name: string;
+  content: Omit<ProcurementPlan, 'id' | 'projectId' | 'status' | 'version'>;
+}
+
+// --- Requirements & Vendor Management ---
+export interface MakeOrBuyAnalysis {
+  id: string;
+  projectId: string;
+  wbsId: string;
+  decision: 'Make' | 'Buy';
+  rationale: string;
+  decisionDate: string;
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  category: string;
+  status: 'Prequalified' | 'Preferred' | 'Active' | 'Probationary' | 'Blacklisted';
+  performanceScore: number; // 0-100
+  riskLevel: 'Low' | 'Medium' | 'High';
+  contact: { name: string; email: string; phone: string };
+}
+
+// --- Solicitation & Bidding ---
+export interface Solicitation {
+  id: string;
+  projectId: string;
+  packageId: string;
+  type: 'RFI' | 'RFP' | 'RFQ';
+  title: string;
+  issueDate: string;
+  deadline: string;
+  status: 'Draft' | 'Issued' | 'Bidding' | 'Closed' | 'Awarded';
+  invitedVendorIds: string[];
+}
+
+export interface BidSubmission {
+  id: string;
+  solicitationId: string;
+  vendorId: string;
+  submissionDate: string;
+  technicalScore?: number;
+  commercialScore?: number;
+  totalValue: number;
+}
+
+// --- Contract Management ---
+export interface Contract {
+  id: string;
+  projectId: string;
+  vendorId: string;
+  solicitationId: string;
+  contractValue: number;
+  status: 'Draft' | 'Negotiation' | 'Pending Signature' | 'Active' | 'Expired' | 'Terminated';
+  startDate: string;
+  endDate: string;
+  renewalDate?: string;
+}
+
+export interface ProcurementPackage {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string;
+  wbsId: string;
+  budget: number;
+  status: 'Planned' | 'Sourcing' | 'Awarded' | 'In Progress' | 'Complete';
+  assignedBuyer: string; // Resource ID
+  solicitationId?: string;
+  contractId?: string;
+}
+
 
 export interface AIAnalysisResult {
   summary: string;

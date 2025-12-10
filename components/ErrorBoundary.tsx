@@ -10,7 +10,7 @@ interface State {
 }
 
 // FIX: Use this.props and this.state directly to avoid potential 'this' context issues with destructuring in some environments.
-class ErrorBoundary extends React.Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
