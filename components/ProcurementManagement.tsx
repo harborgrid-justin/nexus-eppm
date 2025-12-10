@@ -7,6 +7,7 @@ import VendorRegistry from './procurement/VendorRegistry';
 import ContractLifecycle from './procurement/ContractLifecycle';
 import GenericEnterpriseModule from './GenericEnterpriseModule';
 import { ShoppingCart, FileText, DollarSign, Award } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ProcurementManagementProps {
   projectId: string;
@@ -14,6 +15,7 @@ interface ProcurementManagementProps {
 
 const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId }) => {
   const { activeView, setActiveView, navItems } = useProcurementData(projectId);
+  const theme = useTheme();
 
   const renderContent = () => {
     switch (activeView) {
@@ -37,18 +39,18 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col p-6">
-       <div className="flex justify-between items-center flex-shrink-0">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+       <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <ShoppingCart className="text-nexus-600" /> Procurement Management
             </h1>
-            <p className="text-slate-500">End-to-end procurement lifecycle from planning to performance.</p>
+            <p className={theme.typography.small}>End-to-end procurement lifecycle from planning to performance.</p>
           </div>
        </div>
 
-       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-          <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
+       <div className={theme.layout.panelContainer}>
+          <div className={`flex-shrink-0 ${theme.layout.headerBorder} ${theme.colors.background}`}>
             <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
                 {navItems.map(item => (
                 <button
@@ -56,9 +58,10 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
                     onClick={() => setActiveView(item.id)}
                     className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                     activeView === item.id
-                        ? 'border-nexus-600 text-nexus-600'
+                        ? `${theme.colors.border.replace('slate-200', 'nexus-600')} text-nexus-600`
                         : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
                     }`}
+                    style={{ borderColor: activeView === item.id ? '#0284c7' : 'transparent' }}
                 >
                     <item.icon size={16} />
                     <span>{item.label}</span>

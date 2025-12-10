@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { useProjectState } from '../hooks';
 import { MessageCircle, Plus, Mail, Users, Phone } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface CommunicationsManagementProps {
   projectId: string;
@@ -8,6 +10,7 @@ interface CommunicationsManagementProps {
 
 const CommunicationsManagement: React.FC<CommunicationsManagementProps> = ({ projectId }) => {
   const { communicationLogs } = useProjectState(projectId);
+  const theme = useTheme();
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -19,23 +22,23 @@ const CommunicationsManagement: React.FC<CommunicationsManagementProps> = ({ pro
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col p-6">
-       <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+       <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <MessageCircle className="text-nexus-600" /> Communications Log
             </h1>
-            <p className="text-slate-500">Record and track all formal project communications.</p>
+            <p className={theme.typography.small}>Record and track all formal project communications.</p>
           </div>
-          <button className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
              <Plus size={16} /> New Log Entry
           </button>
        </div>
 
-       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
+       <div className={theme.layout.panelContainer}>
           <div className="flex-1 overflow-auto">
              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50 sticky top-0">
+                <thead className={`${theme.colors.background} sticky top-0`}>
                    <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Date</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Type</th>
@@ -43,7 +46,7 @@ const CommunicationsManagement: React.FC<CommunicationsManagementProps> = ({ pro
                       <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Participants</th>
                    </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-100">
+                <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
                   {communicationLogs.map(log => (
                     <tr key={log.id} className="hover:bg-slate-50">
                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{log.date}</td>

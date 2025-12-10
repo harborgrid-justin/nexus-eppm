@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Sliders, Plus } from 'lucide-react';
 import { useWbsManager } from '../hooks';
 import WBSNodeComponent from './scope/WBSNodeComponent';
 import { WBSNode } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface ScopeManagementProps {
   projectId: string;
@@ -28,6 +30,7 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
     closeContextMenu,
     handleShapeChange
   } = useWbsManager(projectId);
+  const theme = useTheme();
 
   const renderTree = (nodes: WBSNode[], level: number) => {
     return nodes.map(node => (
@@ -54,13 +57,13 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
     ));
   };
   
-  if (!project) return <div>Loading scope...</div>;
+  if (!project) return <div className={theme.layout.pagePadding}>Loading scope...</div>;
 
   return (
-    <div className="animate-in fade-in duration-300 h-full flex flex-col" onContextMenu={(e) => e.preventDefault()} onClick={closeContextMenu}>
+    <div className={`${theme.layout.pageContainer}`} onContextMenu={(e) => e.preventDefault()} onClick={closeContextMenu}>
       {contextMenu.visible && (
         <div 
-          className="absolute z-50 bg-white shadow-lg rounded-md border border-slate-200 py-1"
+          className={`absolute z-50 ${theme.colors.surface} shadow-lg rounded-md border ${theme.colors.border} py-1`}
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <div className="px-3 py-1 text-xs font-semibold text-slate-400">Change Shape</div>
@@ -69,22 +72,22 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
           <button onClick={() => handleShapeChange('hexagon')} className="block w-full text-left px-3 py-1 text-sm hover:bg-slate-100">Hexagon</button>
         </div>
       )}
-      <div className="flex justify-between items-center p-6 border-b border-slate-200">
+      <div className={`${theme.layout.header} ${theme.layout.headerBorder} ${theme.layout.pagePadding}`}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className={theme.typography.h1}>
             <Sliders className="text-nexus-600" /> Scope Management
           </h1>
-          <p className="text-slate-500">Define and manage the project's Work Breakdown Structure (WBS).</p>
+          <p className={theme.typography.small}>Define and manage the project's Work Breakdown Structure (WBS).</p>
         </div>
-        <button onClick={() => handleAddNode(null)} className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+        <button onClick={() => handleAddNode(null)} className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
           <Plus size={16} /> Add WBS Element
         </button>
       </div>
       
       <div className="flex-1 flex overflow-hidden">
         {/* WBS Tree Panel */}
-        <div className="w-1/2 border-r border-slate-200 flex flex-col">
-          <div className="p-4 border-b border-slate-200 bg-slate-50">
+        <div className={`w-1/2 border-r ${theme.colors.border} flex flex-col`}>
+          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}`}>
             <h3 className="font-semibold text-slate-800">Work Breakdown Structure</h3>
           </div>
           <div 
@@ -98,7 +101,7 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
 
         {/* WBS Dictionary Panel */}
         <div className="w-1/2 flex flex-col">
-          <div className="p-4 border-b border-slate-200 bg-slate-50">
+          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}`}>
             <h3 className="font-semibold text-slate-800">WBS Dictionary</h3>
           </div>
           <div className="flex-1 overflow-auto p-6">
@@ -110,7 +113,7 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Statement of Work</h4>
-                  <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-md border border-slate-100 min-h-[80px]">
+                  <p className={`text-sm text-slate-600 bg-slate-50 p-3 rounded-md border ${theme.colors.border} min-h-[80px]`}>
                     {selectedNode.description || <span className="italic text-slate-400">No description provided.</span>}
                   </p>
                 </div>

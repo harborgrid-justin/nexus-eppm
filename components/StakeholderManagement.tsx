@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { useProjectState } from '../hooks';
 import { Users, Plus, ArrowRight, ArrowUp } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface StakeholderManagementProps {
   projectId: string;
@@ -8,6 +10,7 @@ interface StakeholderManagementProps {
 
 const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId }) => {
   const { stakeholders } = useProjectState(projectId);
+  const theme = useTheme();
 
   const getGridPosition = (influence: string, interest: string) => {
     const influenceMap = { 'Low': 'row-start-2', 'High': 'row-start-1' };
@@ -23,22 +26,22 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col p-6">
-       <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+       <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <Users className="text-nexus-600" /> Stakeholder Management
             </h1>
-            <p className="text-slate-500">Analyze and plan engagement for all project stakeholders.</p>
+            <p className={theme.typography.small}>Analyze and plan engagement for all project stakeholders.</p>
           </div>
-          <button className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
              <Plus size={16} /> Add Stakeholder
           </button>
        </div>
 
-       <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+       <div className={theme.layout.panelContainer}>
          <div className="h-full overflow-y-auto p-6">
-            <h3 className="font-bold text-lg text-slate-900 mb-4">Interest / Influence Matrix</h3>
+            <h3 className={`${theme.typography.h3} mb-4`}>Interest / Influence Matrix</h3>
             <div className="relative grid grid-cols-[auto_1fr_1fr] grid-rows-[auto_1fr_1fr] gap-1">
                 {/* Y Axis Label */}
                 <div className="flex items-center justify-center -rotate-90 row-span-2">
@@ -72,7 +75,7 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
                 {/* Stakeholder Bubbles */}
                 {stakeholders.map(s => (
                 <div key={s.id} className={`absolute m-8 ${getGridPosition(s.influence, s.interest)} z-10`} title={s.engagementStrategy}>
-                    <div className="px-3 py-2 bg-white rounded-lg shadow-lg border border-slate-200 cursor-pointer hover:scale-105 transition-transform">
+                    <div className={`px-3 py-2 ${theme.colors.surface} rounded-lg shadow-lg border ${theme.colors.border} cursor-pointer hover:scale-105 transition-transform`}>
                     <p className="font-semibold text-sm text-slate-900">{s.name}</p>
                     <p className="text-xs text-slate-500">{s.role}</p>
                     </div>

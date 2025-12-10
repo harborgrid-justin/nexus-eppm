@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProjectState } from '../hooks/useProjectState';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote } from 'lucide-react';
@@ -10,7 +11,7 @@ import CostExpenses from './cost/CostExpenses';
 import BudgetLog from './cost/BudgetLog';
 import ProjectFunding from './cost/ProjectFunding';
 import EarnedValue from './cost/EarnedValue';
-
+import { useTheme } from '../context/ThemeContext';
 
 interface CostManagementProps {
   projectId: string;
@@ -19,6 +20,7 @@ interface CostManagementProps {
 const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   const { project } = useProjectState(projectId);
   const [activeView, setActiveView] = useState('dashboard');
+  const theme = useTheme();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,19 +59,19 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
     }
   };
 
-  if (!project) return <div>Loading cost module...</div>;
+  if (!project) return <div className={theme.layout.pagePadding}>Loading cost module...</div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col p-6">
-      <div className="flex justify-between items-center flex-shrink-0">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><DollarSign className="text-green-600"/> Cost Management</h1>
-          <p className="text-slate-500">Plan, estimate, and control project costs with precision.</p>
+          <h1 className={theme.typography.h1}><DollarSign className="text-green-600"/> Cost Management</h1>
+          <p className={theme.typography.small}>Plan, estimate, and control project costs with precision.</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 ${theme.layout.headerBorder} ${theme.colors.background}`}>
           <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
             {navItems.map(item => (
               <button
@@ -77,9 +79,10 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
                 onClick={() => setActiveView(item.id)}
                 className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                   activeView === item.id
-                    ? 'border-nexus-600 text-nexus-600'
+                    ? `${theme.colors.border.replace('slate-200', 'nexus-600')} text-nexus-600`
                     : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
+                style={{ borderColor: activeView === item.id ? '#0284c7' : 'transparent' }}
               >
                 <item.icon size={16} />
                 <span>{item.label}</span>

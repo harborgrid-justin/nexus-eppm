@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
@@ -5,24 +6,26 @@ import {
 import { TrendingDown, TrendingUp, AlertOctagon, DollarSign } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
 import StatCard from './shared/StatCard';
+import { useTheme } from '../context/ThemeContext';
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart, budgetDataForChart } = usePortfolioState();
+  const theme = useTheme();
 
   return (
-    <div className="p-6 space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Portfolio Overview</h1>
-          <p className="text-slate-500">Welcome back, Sarah. Here's what's happening today.</p>
+          <h1 className={theme.typography.h1}>Portfolio Overview</h1>
+          <p className={theme.typography.small}>Welcome back, Sarah. Here's what's happening today.</p>
         </div>
         <div className="flex gap-2">
            <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Download Report</button>
-           <button className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">New Project</button>
+           <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700`}>New Project</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
         <StatCard 
           title="Total Portfolio Value" 
           value={`$${(summary.totalBudget / 1000000).toFixed(1)}M`}
@@ -52,9 +55,9 @@ const Dashboard: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Budget vs Actuals by Project</h3>
+      <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
+        <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
+          <h3 className={`${theme.typography.h3} mb-6`}>Budget vs Actuals by Project</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={budgetDataForChart}>
@@ -69,8 +72,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Portfolio Health Distribution</h3>
+        <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
+          <h3 className={`${theme.typography.h3} mb-6`}>Portfolio Health Distribution</h3>
           <div className="h-[300px] w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

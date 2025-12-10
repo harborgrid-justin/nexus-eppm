@@ -1,7 +1,9 @@
+
 import React, { useState, useMemo } from 'react';
-import { useData } from '../../context/DataContext';
-import { Issue } from '../../types';
+import { useData } from '../context/DataContext';
+import { Issue } from '../types';
 import { Plus, Filter, Search, FileWarning, ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface IssueLogProps {
   projectId: string;
@@ -11,6 +13,7 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
   const { state } = useData();
   const project = state.projects.find(p => p.id === projectId);
   const issues = state.issues.filter(i => i.projectId === projectId);
+  const theme = useTheme();
   const taskMap = useMemo(() => {
     return new Map(project?.tasks.map(t => [t.id, t.name]));
   }, [project?.tasks]);
@@ -24,21 +27,21 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
   };
 
   return (
-    <div className="h-full flex flex-col p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
+      <div className={`${theme.layout.header} mb-6`}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className={theme.typography.h1}>
             <FileWarning className="text-yellow-500"/> Issue Log
           </h1>
-          <p className="text-slate-500">Track and resolve project impediments and action items.</p>
+          <p className={theme.typography.small}>Track and resolve project impediments and action items.</p>
         </div>
-        <button className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+        <button className={`px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
              <Plus size={16} /> Add Issue
         </button>
       </div>
       
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
+      <div className={theme.layout.panelContainer}>
+        <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center ${theme.colors.background}/50 flex-shrink-0`}>
            <div className="flex items-center gap-2">
               <div className="relative">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -52,7 +55,7 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
         
         <div className="flex-1 overflow-auto">
            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50 sticky top-0">
+              <thead className={`${theme.colors.background} sticky top-0`}>
                  <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Priority</th>
@@ -62,7 +65,7 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Activity</th>
                  </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-100">
+              <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
                  {issues.map(issue => (
                    <tr key={issue.id} className="hover:bg-slate-50 cursor-pointer">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{issue.id}</td>

@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { FileText, Download, MoreHorizontal, Upload, Search, Folder, Filter } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface DocumentControlProps {
   projectId: string;
@@ -9,6 +11,7 @@ interface DocumentControlProps {
 const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
   const { getProjectDocs } = useData();
   const docs = getProjectDocs(projectId);
+  const theme = useTheme();
 
   const getIcon = (type: string) => {
      switch(type) {
@@ -20,22 +23,22 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 h-full flex flex-col p-6">
-       <div className="flex justify-between items-center">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+       <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <Folder className="text-nexus-500" /> Document Control
             </h1>
-            <p className="text-slate-500">Central repository for all project specifications, drawings, and reports.</p>
+            <p className={theme.typography.small}>Central repository for all project specifications, drawings, and reports.</p>
           </div>
-          <button className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
              <Upload size={16} /> Upload Document
           </button>
        </div>
 
-       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
+       <div className={theme.layout.panelContainer}>
           {/* Toolbar */}
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background} flex justify-between items-center`}>
              <div className="flex gap-4">
                  <div className="relative">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -59,7 +62,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
              <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Recent Uploads</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {docs.map(doc => (
-                   <div key={doc.id} className="p-4 border border-slate-200 rounded-lg hover:border-nexus-300 hover:shadow-md transition-all bg-white group cursor-pointer relative">
+                   <div key={doc.id} className={`p-4 border ${theme.colors.border} rounded-lg hover:border-nexus-300 hover:shadow-md transition-all ${theme.colors.surface} group cursor-pointer relative`}>
                       <div className="flex justify-between items-start mb-3">
                          {getIcon(doc.type)}
                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -84,7 +87,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
                 ))}
                 
                 {/* Upload Placeholder */}
-                <div className="border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center p-6 text-slate-400 hover:border-nexus-400 hover:text-nexus-500 hover:bg-nexus-50/30 transition-all cursor-pointer">
+                <div className={`border-2 border-dashed ${theme.colors.border} rounded-lg flex flex-col items-center justify-center p-6 text-slate-400 hover:border-nexus-400 hover:text-nexus-500 hover:bg-nexus-50/30 transition-all cursor-pointer`}>
                    <Upload size={24} className="mb-2 opacity-50" />
                    <span className="text-sm font-medium">Drop files here</span>
                 </div>
@@ -94,7 +97,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
                 <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Folders</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                    {['Specifications', 'Contracts', 'RFI Responses', 'Safety Reports', 'Photos'].map((folder, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <div key={i} className={`flex items-center gap-3 p-3 border ${theme.colors.border} rounded-lg hover:bg-slate-50 cursor-pointer`}>
                          <Folder className="text-nexus-200 fill-nexus-200" size={24} />
                          <span className="text-sm font-medium text-slate-700">{folder}</span>
                       </div>
