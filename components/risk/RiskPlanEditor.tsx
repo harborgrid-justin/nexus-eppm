@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useProjectState } from '../../hooks/useProjectState';
 import { useData } from '../../context/DataContext';
-import { FileText, Save, Book, CheckCircle } from 'lucide-react';
+import { FileText, Save, Book } from 'lucide-react';
 
 interface RiskPlanEditorProps {
     projectId: string;
@@ -11,6 +11,7 @@ const RiskPlanEditor: React.FC<RiskPlanEditorProps> = ({ projectId }) => {
     const { riskPlan } = useProjectState(projectId);
     const { dispatch } = useData();
     const [planData, setPlanData] = useState(riskPlan);
+    const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         setPlanData(riskPlan);
@@ -19,11 +20,12 @@ const RiskPlanEditor: React.FC<RiskPlanEditorProps> = ({ projectId }) => {
     const handleSave = () => {
         if (planData) {
             dispatch({ type: 'UPDATE_RISK_PLAN', payload: { projectId, plan: planData } });
-            // Here you'd show a success toast
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 2000);
         }
     };
     
-    if (!planData) return <div>Loading plan...</div>;
+    if (!planData) return <div className="p-4">Loading plan...</div>;
 
     return (
         <div className="h-full flex flex-col">
@@ -35,8 +37,8 @@ const RiskPlanEditor: React.FC<RiskPlanEditorProps> = ({ projectId }) => {
                     <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
                         <Book size={14}/> Apply Template
                     </button>
-                    <button onClick={handleSave} className="flex items-center gap-2 px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">
-                        <Save size={14}/> Save Plan
+                    <button onClick={handleSave} className="flex items-center justify-center gap-2 px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 w-28">
+                        {isSaved ? "Saved!" : <><Save size={14}/> Save Plan</>}
                     </button>
                 </div>
             </div>

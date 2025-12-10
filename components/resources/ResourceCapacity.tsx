@@ -1,8 +1,22 @@
-import React from 'react';
-import { MOCK_RESOURCES } from '../../constants';
+import React, { useMemo } from 'react';
+import { useData } from '../../context/DataContext';
 
-const ResourceCapacity: React.FC = () => {
+interface ResourceCapacityProps {
+  projectId: string;
+}
+
+const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectId }) => {
+  const { state } = useData();
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+
+  const projectResources = useMemo(() => {
+    const project = state.projects.find(p => p.id === projectId);
+    if (!project) return [];
+    const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
+    return state.resources.filter(r => resourceIds.has(r.id));
+  }, [state.projects, state.resources, projectId]);
+
+  // Mock allocation logic for demonstration
   const getMockAllocation = (resId: string, monthIdx: number) => {
     const base = resId.charCodeAt(0) + resId.charCodeAt(1) + monthIdx * 15;
     return base % 140; 
@@ -35,7 +49,7 @@ const ResourceCapacity: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-100">
-            {MOCK_RESOURCES.map(res => (
+            {projectResources.map(res => (
               <tr key={res.id}>
                 <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-medium text-sm text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   {res.name}

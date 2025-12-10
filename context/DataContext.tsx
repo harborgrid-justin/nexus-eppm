@@ -2,13 +2,15 @@ import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
-  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource
+  RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES
 } from '../constants';
+import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
+
 
 const MOCK_INTEGRATIONS: Integration[] = [
   { id: 'sap', name: 'SAP S/4HANA', type: 'ERP', status: 'Connected', lastSync: '10 mins ago', logo: 'S' },
@@ -43,28 +45,6 @@ const MOCK_DOCUMENTS: Document[] = [
   { id: 'DOC-002', projectId: 'P1001', name: 'Site_Plan_v4.dwg', type: 'DWG', size: '45 MB', uploadedBy: 'Jessica Pearson', uploadDate: '2024-02-15', version: '4.2', status: 'Draft' },
   { id: 'DOC-003', projectId: 'P1001', name: 'Q1_Budget_Report.xlsx', type: 'XLSX', size: '1.1 MB', uploadedBy: 'Louis Litt', uploadDate: '2024-04-01', version: '1.0', status: 'Final' },
 ];
-
-// --- WBS UTILS ---
-const findAndModifyNode = (nodes: WBSNode[], targetId: string, modification: (node: WBSNode) => WBSNode): WBSNode[] => {
-  return nodes.map(node => {
-    if (node.id === targetId) {
-      return modification(node);
-    }
-    if (node.children && node.children.length > 0) {
-      return { ...node, children: findAndModifyNode(node.children, targetId, modification) };
-    }
-    return node;
-  });
-};
-
-const findAndRemoveNode = (nodes: WBSNode[], targetId: string): WBSNode[] => {
-  return nodes.filter(node => node.id !== targetId).map(node => {
-    if (node.children && node.children.length > 0) {
-      return { ...node, children: findAndRemoveNode(node.children, targetId) };
-    }
-    return node;
-  });
-};
 
 // --- STATE MANAGEMENT ---
 
@@ -106,11 +86,14 @@ type Action =
   | { type: 'ACTIVATE_EXTENSION'; payload: string }
   | { type: 'ADD_WBS_NODE'; payload: { projectId: string; parentId: string | null; newNode: WBSNode } }
   | { type: 'UPDATE_WBS_NODE'; payload: { projectId: string; nodeId: string; updatedData: Partial<WBSNode> } }
+  | { type: 'UPDATE_WBS_NODE_SHAPE'; payload: { projectId: string; nodeId: string; shape: WBSNodeShape } }
   | { type: 'DELETE_WBS_NODE'; payload: { projectId: string; nodeId: string } }
+  | { type: 'UPDATE_WBS_NODE_PARENT'; payload: { projectId: string; nodeId: string; newParentId: string | null } }
   | { type: 'SET_BASELINE'; payload: { projectId: string; name: string } }
   | { type: 'ADD_ACTIVITY_CODE'; payload: ActivityCode }
   | { type: 'UPDATE_ACTIVITY_CODE'; payload: ActivityCode }
-  | { type: 'DELETE_ACTIVITY_CODE'; payload: string };
+  | { type: 'DELETE_ACTIVITY_CODE'; payload: string }
+  | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } };
 
 const initialState: DataState = {
   projects: MOCK_PROJECTS,
@@ -173,8 +156,8 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       return {
         ...state,
         projects: state.projects.map(p => {
-          if (p.id !== projectId) return p;
-          let newWbs = [...(p.wbs || [])];
+          if (p.id !== projectId || !p.wbs) return p;
+          let newWbs = [...p.wbs];
           if (parentId) {
             newWbs = findAndModifyNode(newWbs, parentId, node => ({
               ...node,
@@ -192,11 +175,34 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       return {
         ...state,
         projects: state.projects.map(p => {
-          if (p.id !== projectId) return p;
-          const newWbs = findAndModifyNode(p.wbs || [], nodeId, node => ({
+          if (p.id !== projectId || !p.wbs) return p;
+          const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({
             ...node, ...updatedData
           }));
           return { ...p, wbs: newWbs };
+        })
+      };
+    }
+    case 'UPDATE_WBS_NODE_SHAPE': {
+      const { projectId, nodeId, shape } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map(p => {
+          if (p.id !== projectId || !p.wbs) return p;
+          const newWbs = findAndModifyNode(p.wbs, nodeId, node => ({ ...node, shape }));
+          return { ...p, wbs: newWbs };
+        })
+      };
+    }
+    case 'UPDATE_WBS_NODE_PARENT': {
+      const { projectId, nodeId, newParentId } = action.payload;
+      if (nodeId === newParentId) return state; // Prevent dropping on self
+      return {
+        ...state,
+        projects: state.projects.map(p => {
+          if (p.id !== projectId || !p.wbs) return p;
+          const { newNodes } = findAndReparentNode(p.wbs, nodeId, newParentId);
+          return { ...p, wbs: newNodes };
         })
       };
     }
@@ -205,8 +211,8 @@ const dataReducer = (state: DataState, action: Action): DataState => {
        return {
         ...state,
         projects: state.projects.map(p => {
-          if (p.id !== projectId) return p;
-          const newWbs = findAndRemoveNode(p.wbs || [], nodeId);
+          if (p.id !== projectId || !p.wbs) return p;
+          const newWbs = findAndRemoveNode(p.wbs, nodeId);
           return { ...p, wbs: newWbs };
         })
       };
@@ -227,6 +233,12 @@ const dataReducer = (state: DataState, action: Action): DataState => {
             : p
         )
       };
+    case 'UPDATE_RBS_NODE_PARENT': {
+      const { nodeId, newParentId } = action.payload;
+      if (nodeId === newParentId) return state;
+      const { newNodes } = findAndReparentNode(state.rbs, nodeId, newParentId);
+      return { ...state, rbs: newNodes };
+    }
     case 'ADD_ACTIVITY_CODE':
       return { ...state, activityCodes: [...state.activityCodes, action.payload] };
     case 'UPDATE_ACTIVITY_CODE':

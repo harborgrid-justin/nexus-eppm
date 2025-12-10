@@ -1,9 +1,24 @@
-import React from 'react';
-import { MOCK_RESOURCES } from '../../constants';
+import React, { useMemo } from 'react';
+import { useData } from '../../context/DataContext';
 import { Sliders, Check, AlertTriangle } from 'lucide-react';
 
-const ResourceLeveling: React.FC = () => {
-    const overAllocatedResources = MOCK_RESOURCES.filter(r => r.allocated > r.capacity);
+interface ResourceLevelingProps {
+    projectId: string;
+}
+
+const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ projectId }) => {
+    const { state } = useData();
+
+    const overAllocatedResources = useMemo(() => {
+        const project = state.projects.find(p => p.id === projectId);
+        if (!project) return [];
+
+        // This is a simplified check. A real implementation would aggregate
+        // allocation over time periods (daily/weekly).
+        const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
+        
+        return state.resources.filter(r => resourceIds.has(r.id) && r.allocated > r.capacity);
+    }, [state.projects, state.resources, projectId]);
     
     return (
         <div className="h-full flex flex-col">
@@ -40,7 +55,7 @@ const ResourceLeveling: React.FC = () => {
                     <div className="flex flex-col items-center justify-center h-full text-slate-400">
                         <Check size={48} className="text-green-500 mb-4" />
                         <h3 className="font-bold text-slate-600">All Resources Leveled</h3>
-                        <p className="text-sm">No over-allocation conflicts detected.</p>
+                        <p className="text-sm">No over-allocation conflicts detected for this project.</p>
                     </div>
                 )}
             </div>

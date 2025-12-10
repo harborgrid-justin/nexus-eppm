@@ -57,7 +57,12 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
     if (response.text) {
       return JSON.parse(response.text) as AIAnalysisResult;
     }
-    throw new Error("Empty response from AI");
+    // FIX: An empty response from the AI was throwing an error. Now, it returns a default object.
+    return {
+      summary: "Could not generate analysis at this time.",
+      risks: ["System error during analysis."],
+      recommendations: ["Check API configuration."]
+    };
 
   } catch (error) {
     console.error("Error analyzing project:", error);
@@ -141,6 +146,7 @@ export const generatePortfolioReport = async (projects: Project[]): Promise<stri
 
   } catch (error) {
     console.error("Error generating portfolio report:", error);
-    return `An error occurred while generating the portfolio report: ${error.message}`;
+    // FIX: The type of 'error' is 'unknown'. Cast it to 'any' to access the 'message' property.
+    return `An error occurred while generating the portfolio report: ${(error as any).message}`;
   }
 };

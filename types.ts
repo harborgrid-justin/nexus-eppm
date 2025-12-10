@@ -79,6 +79,28 @@ export interface ActivityCode {
   values: ActivityCodeValue[];
 }
 
+// --- USER DEFINED FIELDS (UDFs) ---
+export type UDFSubjectArea = 'Projects' | 'Tasks' | 'Resources' | 'Risks';
+export type UDFDataType = 'Text' | 'Number' | 'Date' | 'List';
+
+export interface UserDefinedField {
+  id: string;
+  subjectArea: UDFSubjectArea;
+  title: string;
+  dataType: UDFDataType;
+  listValues?: string[]; // Only for 'List' dataType
+}
+
+// --- AUDIT TRAIL ---
+export interface AuditEntry {
+  timestamp: string;
+  user: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
+}
+
+
 export interface Task {
   id: string;
   wbsCode: string;
@@ -95,6 +117,8 @@ export interface Task {
   issueIds?: string[]; // Linked issues
   expenseIds?: string[]; // Linked expenses
   activityCodeAssignments?: Record<string, string>; // { [activityCodeId]: activityCodeValueId }
+  udfValues?: Record<string, any>; // { [udfId]: value }
+  auditTrail?: AuditEntry[];
   
   // Advanced Scheduling & Resource Fields
   type: TaskType;
@@ -178,6 +202,8 @@ export interface RiskBreakdownStructureNode {
   code: string;
   name: string;
   children: RiskBreakdownStructureNode[];
+  shape?: 'rectangle' | 'oval' | 'hexagon';
+  links?: { targetId: string; type: 'dependency' | 'related' }[];
 }
 
 export interface RiskResponseAction {
@@ -210,8 +236,11 @@ export interface Risk {
   residualProbabilityValue?: number;
   residualImpactValue?: number;
   secondaryRisks?: string[];
+  linkedRiskIds?: string[];
   dateIdentified: string;
 }
+
+export type WBSNodeShape = 'rectangle' | 'oval' | 'hexagon';
 
 export interface WBSNode {
   id: string;
@@ -219,6 +248,8 @@ export interface WBSNode {
   name: string;
   description?: string;
   children: WBSNode[];
+  shape?: WBSNodeShape;
+  links?: { targetId: string; type: 'dependency' | 'related' }[];
 }
 
 export interface ProjectBaseline {
@@ -421,6 +452,7 @@ export interface Project {
   costPlanId?: string;
   budgetLog?: BudgetLogItem[];
   funding?: ProjectFunding[];
+  udfValues?: Record<string, any>; // { [udfId]: value }
 }
 
 export interface Integration {
@@ -519,4 +551,14 @@ export interface AIAnalysisResult {
   summary: string;
   risks: string[];
   recommendations: string[];
+}
+
+export interface DataJob {
+  id: string;
+  type: 'Import' | 'Export';
+  format: 'P6 XML' | 'CSV' | 'MPP';
+  status: 'Completed' | 'In Progress' | 'Failed';
+  submittedBy: string;
+  timestamp: string;
+  details: string;
 }

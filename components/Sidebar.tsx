@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   LayoutDashboard, Users, Settings, Briefcase, Network, ChevronDown, ChevronRight, FileText, Layers, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -56,6 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       id: 'admin',
       label: 'Administration',
       items: [
+        { id: 'dataExchange', icon: Database, label: 'Data Exchange' },
         { id: 'marketplace', icon: LayoutGrid, label: 'App Marketplace' },
         { id: 'integrations', icon: Network, label: 'Integration Hub' },
         { id: 'admin', icon: Settings, label: 'Settings' },

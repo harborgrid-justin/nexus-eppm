@@ -7,7 +7,7 @@ import {
 
 import ProjectGantt from './ProjectGantt';
 import CostManagement from './CostManagement';
-import RiskManagement from './RiskManagement';
+import RiskManagement from './risk/RiskManagement';
 import IssueLog from './IssueLog';
 import ScopeManagement from './ScopeManagement';
 import StakeholderManagement from './StakeholderManagement';
@@ -17,6 +17,7 @@ import CommunicationsManagement from './CommunicationsManagement';
 import ResourceManagement from './ResourceManagement';
 import ProjectIntegrationManagement from './ProjectIntegrationManagement';
 import NetworkDiagram from './scheduling/NetworkDiagram';
+import ErrorBoundary from './ErrorBoundary';
 
 
 interface ProjectWorkspaceProps {
@@ -105,7 +106,9 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden p-0 bg-white">
-        {renderContent()}
+        <ErrorBoundary>
+          {renderContent()}
+        </ErrorBoundary>
       </div>
     </div>
   );

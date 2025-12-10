@@ -26,13 +26,13 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
       case 'plan':
         return <ResourcePlanEditor projectId={projectId} />;
       case 'pool':
-        return <ResourcePool />;
+        return <ResourcePool projectId={projectId} />;
       case 'capacity':
-        return <ResourceCapacity />;
+        return <ResourceCapacity projectId={projectId} />;
       case 'leveling':
-        return <ResourceLeveling />;
+        return <ResourceLeveling projectId={projectId} />;
       default:
-        return <ResourcePool />;
+        return <ResourcePool projectId={projectId} />;
     }
   };
 

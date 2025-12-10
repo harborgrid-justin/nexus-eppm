@@ -1,4 +1,4 @@
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -41,6 +41,18 @@ export const MOCK_ACTIVITY_CODES: ActivityCode[] = [
       { id: 'ACV_AREA_SOUTH', value: 'South Station' },
     ]
   }
+];
+
+export const MOCK_UDFS: UserDefinedField[] = [
+    { id: 'UDF_TASK_CAPEX', subjectArea: 'Tasks', title: 'Capex ID', dataType: 'Text' },
+    { id: 'UDF_TASK_PHASE', subjectArea: 'Tasks', title: 'Funding Phase', dataType: 'List', listValues: ['Phase 1', 'Phase 2', 'Phase 3'] },
+    { id: 'UDF_PROJ_PRIORITY', subjectArea: 'Projects', title: 'Strategic Priority', dataType: 'Number' },
+];
+
+export const MOCK_DATA_JOBS: DataJob[] = [
+    { id: 'DJ-001', type: 'Import', format: 'P6 XML', status: 'Completed', submittedBy: 'Sarah Chen', timestamp: '2024-07-10 10:05 AM', details: 'Imported P1002 from legacy system.' },
+    { id: 'DJ-002', type: 'Export', format: 'CSV', status: 'Completed', submittedBy: 'Louis Litt', timestamp: '2024-07-09 03:20 PM', details: 'Exported task list for P1001.' },
+    { id: 'DJ-003', type: 'Import', format: 'MPP', status: 'Failed', submittedBy: 'Sarah Chen', timestamp: '2024-07-08 11:00 AM', details: 'Validation Error: Unsupported calendar type.' },
 ];
 
 export const MOCK_ISSUE_CODES: IssueCode[] = [
@@ -254,6 +266,16 @@ const MOCK_TASKS: Task[] = [
         work: 160,
         resourceRequirements: [],
         issueIds: ['ISS-001'],
+        udfValues: {
+          'UDF_TASK_CAPEX': 'CAPEX-2024-07B',
+          'UDF_TASK_PHASE': 'Phase 1'
+        },
+        auditTrail: [
+          { timestamp: '2024-05-18 09:00 AM', user: 'Sarah Chen', field: 'Status', oldValue: 'In Progress', newValue: 'Delayed' },
+          { timestamp: '2024-05-18 09:00 AM', user: 'Sarah Chen', field: 'End Date', oldValue: '2024-05-15', newValue: '2024-05-20' },
+          { timestamp: '2024-04-10 08:30 AM', user: 'Scheduler', field: 'Status', oldValue: 'Not Started', newValue: 'In Progress' },
+          { timestamp: '2024-02-15 02:10 PM', user: 'System', field: 'Task', oldValue: '', newValue: 'Created' },
+        ]
       },
       {
         id: 'T5',

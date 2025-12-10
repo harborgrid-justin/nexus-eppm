@@ -11,6 +11,7 @@ import ExtensionMarketplace from './components/ExtensionMarketplace';
 import ExtensionEngine from './components/ExtensionEngine';
 import ProjectWorkspace from './components/ProjectWorkspace';
 import IndustrySelector from './components/IndustrySelector';
+import DataExchange from './components/DataExchange';
 import { Sparkles, Layers } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';
@@ -46,6 +47,8 @@ const AppContent = () => {
         return <ProjectWorkspace projectId={selectedProjectId} />;
       case 'marketplace':
         return <ExtensionMarketplace />;
+      case 'dataExchange':
+        return <DataExchange />;
       case 'resources':
         return <ResourceManagement />;
       case 'reports':

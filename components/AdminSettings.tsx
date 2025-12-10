@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote } from 'lucide-react';
+import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote, Edit3 } from 'lucide-react';
 import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
 import ActivityCodeSettings from './admin/ActivityCodeSettings';
 import IssueCodeSettings from './admin/IssueCodeSettings';
 import ExpenseCategorySettings from './admin/ExpenseCategorySettings';
 import FundingSourceSettings from './admin/FundingSourceSettings';
+import UdfSettings from './admin/UdfSettings';
 
 interface AdminSettingsProps {}
 
@@ -15,6 +16,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
     { id: 'general', icon: Settings, label: 'General' },
     { id: 'users', icon: Users, label: 'Users & Roles' },
     { id: 'activityCodes', icon: Tag, label: 'Activity Codes' },
+    { id: 'udfs', icon: Edit3, label: 'User-Defined Fields' },
     { id: 'issueCodes', icon: FileWarning, label: 'Issue Codes' },
     { id: 'expenseCategories', icon: Receipt, label: 'Expense Categories' },
     { id: 'fundingSources', icon: Banknote, label: 'Funding Sources' },
@@ -69,6 +71,8 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
         );
       case 'activityCodes':
         return <ActivityCodeSettings />;
+      case 'udfs':
+        return <UdfSettings />;
       case 'issueCodes':
         return <IssueCodeSettings />;
       case 'expenseCategories':

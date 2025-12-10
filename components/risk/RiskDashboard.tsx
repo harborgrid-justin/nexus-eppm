@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProjectState } from '../../hooks/useProjectState';
-import { AlertTriangle, ShieldCheck, BarChart, TrendingUp, List } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingUp, List } from 'lucide-react';
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Cell
 } from 'recharts';
 
 interface RiskDashboardProps {
@@ -28,6 +27,10 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.El
 const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
 
+  if (!risks) {
+    return <div className="p-4">Loading risk data...</div>;
+  }
+
   const riskCategories = Array.from(new Set(risks.map(r => r.category)));
   const categoryData = riskCategories.map(cat => ({
     name: cat,
@@ -40,7 +43,7 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
     return '#22c55e'; // green
   };
 
-  if (!risks) return null;
+  const avgRiskScore = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "N/A";
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
@@ -48,7 +51,7 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
             <StatCard title="Total Risks" value={risks.length} icon={List} />
             <StatCard title="Open Risks" value={risks.filter(r => r.status === 'Open').length} icon={AlertTriangle} />
             <StatCard title="Mitigated / Closed" value={risks.filter(r => r.status !== 'Open').length} icon={ShieldCheck} />
-            <StatCard title="Avg. Risk Score" value={ (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) } icon={TrendingUp} />
+            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingUp} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -59,7 +62,7 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
                         <RechartsBarChart data={categoryData} layout="vertical">
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
-                            <Tooltip />
+                            <Tooltip cursor={{ fill: '#f1f5f9' }} />
                             <Bar dataKey="count" fill="#0ea5e9" radius={[0, 4, 4, 0]} barSize={20} />
                         </RechartsBarChart>
                     </ResponsiveContainer>

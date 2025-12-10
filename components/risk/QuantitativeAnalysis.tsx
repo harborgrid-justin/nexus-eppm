@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart2, AlertTriangle, HelpCircle } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
 
 interface QuantitativeAnalysisProps {
   projectId: string;
