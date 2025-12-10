@@ -1,8 +1,10 @@
+
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectState } from '../../hooks';
 import { Banknote, Plus, PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatCurrency } from '../../utils/formatters';
 
 interface ProjectFundingProps {
     projectId: string;
@@ -49,14 +51,14 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
                                 {fundingData.map((item, index) => (
                                     <tr key={index}>
                                         <td className="px-4 py-3 text-sm font-medium text-slate-800">{item.name}</td>
-                                        <td className="px-4 py-3 text-sm font-semibold text-right text-slate-600">${item.value.toLocaleString()}</td>
+                                        <td className="px-4 py-3 text-sm font-semibold text-right text-slate-600">{formatCurrency(item.value)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                             <tfoot className="bg-slate-100">
                                 <tr>
                                     <td className="px-4 py-2 text-sm font-bold text-slate-800">Total Funding</td>
-                                    <td className="px-4 py-2 text-sm font-bold text-right text-slate-800">${totalFunding.toLocaleString()}</td>
+                                    <td className="px-4 py-2 text-sm font-bold text-right text-slate-800">{formatCurrency(totalFunding)}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -69,7 +71,7 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
                             <Pie data={fundingData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5}>
                                 {fundingData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                             </Pie>
-                            <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+                            <Tooltip formatter={(value: number) => formatCurrency(value)} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>

@@ -1,5 +1,5 @@
 
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -355,9 +355,37 @@ export const MOCK_CLAIMS: ProcurementClaim[] = [
 
 // --- END MOCK PROCUREMENT DATA ---
 
+export const MOCK_PROGRAMS: Program[] = [
+  {
+    id: 'PRG-001',
+    name: 'Metropolitan Transit Expansion',
+    manager: 'Sarah Chen',
+    description: 'A multi-year initiative to expand the city public transit network, including rail extensions and station upgrades.',
+    startDate: '2023-01-01',
+    endDate: '2028-12-31',
+    budget: 500000000,
+    benefits: 'Increase rider capacity by 40% and reduce congestion.',
+    status: 'Active',
+    health: 'Warning'
+  },
+  {
+    id: 'PRG-002',
+    name: 'Smart City Infrastructure',
+    manager: 'David Lee',
+    description: 'Deployment of IoT sensors and fiber optic networks across downtown districts.',
+    startDate: '2024-01-01',
+    endDate: '2026-06-30',
+    budget: 150000000,
+    benefits: 'Real-time traffic management and improved energy efficiency.',
+    status: 'Active',
+    health: 'Good'
+  }
+];
+
 export const MOCK_PROJECTS: Project[] = [
   {
     id: 'P1001',
+    programId: 'PRG-001',
     name: 'Metro Line Extension - Phase 2',
     code: 'NY-MET-002',
     manager: 'Sarah Chen',
@@ -389,6 +417,7 @@ export const MOCK_PROJECTS: Project[] = [
   },
   {
     id: 'P1002',
+    programId: 'PRG-001',
     name: 'Downtown Commercial Hub',
     code: 'CHI-COM-088',
     manager: 'David Lee',

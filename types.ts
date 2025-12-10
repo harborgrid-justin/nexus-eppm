@@ -428,9 +428,22 @@ export interface ProjectFunding {
   amount: number;
 }
 
+export interface Program {
+  id: string;
+  name: string;
+  manager: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  budget: number;
+  benefits: string;
+  status: 'Active' | 'Planned' | 'Closed';
+  health: 'Good' | 'Warning' | 'Critical';
+}
 
 export interface Project {
   id:string;
+  programId?: string; // Link to Program
   name: string;
   code: string;
   manager: string;

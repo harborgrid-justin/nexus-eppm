@@ -5,6 +5,7 @@ import StatCard from '../shared/StatCard';
 import { DollarSign, Briefcase, AlertTriangle, CheckCircle, BarChart2 } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+import { formatCompactCurrency } from '../../utils/formatters';
 
 interface ProcurementDashboardProps {
   projectId: string;
@@ -27,9 +28,9 @@ const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({ projectId }
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
-            <StatCard title="Committed Spend" value={`$${(totalContractValue/1000000).toFixed(2)}M`} subtext="Total Contract Value" icon={DollarSign} />
+            <StatCard title="Committed Spend" value={formatCompactCurrency(totalContractValue)} subtext="Total Contract Value" icon={DollarSign} />
             <StatCard title="Active Contracts" value={activeContracts} subtext="Currently in execution" icon={Briefcase} />
-            <StatCard title="PO Spend" value={`$${(totalPOSpend/1000000).toFixed(2)}M`} subtext="Issued against contracts" icon={CheckCircle} />
+            <StatCard title="PO Spend" value={formatCompactCurrency(totalPOSpend)} subtext="Issued against contracts" icon={CheckCircle} />
             <StatCard title="Open Claims" value={openClaims} subtext="Disputes requiring attention" icon={AlertTriangle} trend={openClaims > 0 ? 'down' : undefined} />
         </div>
 
@@ -40,7 +41,7 @@ const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({ projectId }
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={spendData}>
                             <XAxis dataKey="name" tick={{fontSize: 12}} />
-                            <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} cursor={{fill: 'transparent'}} />
+                            <Tooltip formatter={(value: number) => formatCompactCurrency(value)} cursor={{fill: 'transparent'}} />
                             <Bar dataKey="val" fill="#0ea5e9" radius={[4, 4, 0, 0]} barSize={40} />
                         </BarChart>
                     </ResponsiveContainer>

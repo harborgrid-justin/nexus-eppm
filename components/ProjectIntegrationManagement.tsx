@@ -4,6 +4,7 @@ import { useProjectState } from '../hooks';
 import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2 } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
+import { formatCompactCurrency, formatCurrency, formatDate, formatPercentage } from '../utils/formatters';
 
 interface ProjectIntegrationManagementProps {
   projectId: string;
@@ -34,10 +35,10 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
       </div>
       
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
-        <StatCard title="Overall Progress" value={`${summary.overallProgress}%`} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={GanttChartSquare} />
-        <StatCard title="Budget Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext={`${financials.budgetUtilization.toFixed(0)}% of budget spent`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
+        <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={GanttChartSquare} />
+        <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`${formatPercentage(financials.budgetUtilization)} of budget spent`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
         <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
-        <StatCard title="Quality Score" value={`${qualityProfile.passRate.toFixed(0)}%`} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
+        <StatCard title="Quality Score" value={formatPercentage(qualityProfile.passRate)} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>
 
       <div className={`mt-8 grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
@@ -46,10 +47,10 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
            <h3 className={`${theme.typography.h3} mb-4`}>Project Charter</h3>
            <dl className="space-y-3 text-sm">
              <div className="flex"><dt className="w-32 font-medium text-slate-500">Project Manager</dt><dd className="text-slate-800 font-semibold">{project.manager}</dd></div>
-             <div className="flex"><dt className="w-32 font-medium text-slate-500">Start Date</dt><dd className="text-slate-800">{project.startDate}</dd></div>
-             <div className="flex"><dt className="w-32 font-medium text-slate-500">End Date</dt><dd className="text-slate-800">{project.endDate}</dd></div>
-             <div className="flex"><dt className="w-32 font-medium text-slate-500">Original Budget</dt><dd className="text-slate-800">${financials.totalPlanned.toLocaleString()}</dd></div>
-             <div className="flex"><dt className="w-32 font-medium text-slate-500">Revised Budget</dt><dd className="text-slate-800 font-bold">${financials.revisedBudget.toLocaleString()}</dd></div>
+             <div className="flex"><dt className="w-32 font-medium text-slate-500">Start Date</dt><dd className="text-slate-800">{formatDate(project.startDate)}</dd></div>
+             <div className="flex"><dt className="w-32 font-medium text-slate-500">End Date</dt><dd className="text-slate-800">{formatDate(project.endDate)}</dd></div>
+             <div className="flex"><dt className="w-32 font-medium text-slate-500">Original Budget</dt><dd className="text-slate-800">{formatCurrency(financials.totalPlanned)}</dd></div>
+             <div className="flex"><dt className="w-32 font-medium text-slate-500">Revised Budget</dt><dd className="text-slate-800 font-bold">{formatCurrency(financials.revisedBudget)}</dd></div>
            </dl>
         </div>
         
@@ -59,11 +60,11 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
             <div className="space-y-4">
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                  <span className="font-medium text-green-800">Approved Changes</span>
-                 <span className="font-bold text-green-800">${financials.approvedCOAmount.toLocaleString()}</span>
+                 <span className="font-bold text-green-800">{formatCurrency(financials.approvedCOAmount)}</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                  <span className="font-medium text-yellow-800">Pending Changes</span>
-                 <span className="font-bold text-yellow-800">${financials.pendingCOAmount.toLocaleString()}</span>
+                 <span className="font-bold text-yellow-800">{formatCurrency(financials.pendingCOAmount)}</span>
               </div>
             </div>
         </div>

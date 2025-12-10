@@ -3,6 +3,7 @@ import React from 'react';
 import { useProcurementData } from '../../hooks/useProcurementData';
 import { Plus, FileText, AlertOctagon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 interface ContractLifecycleProps {
   projectId: string;
@@ -44,15 +45,15 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm pt-4 border-t border-slate-100">
                             <div>
                                 <p className="text-slate-500 text-xs uppercase tracking-wide font-semibold mb-1">Contract Value</p>
-                                <p className="font-bold text-slate-900 text-lg">${contract.contractValue.toLocaleString()}</p>
+                                <p className="font-bold text-slate-900 text-lg">{formatCurrency(contract.contractValue)}</p>
                             </div>
                             <div>
                                 <p className="text-slate-500 text-xs uppercase tracking-wide font-semibold mb-1">Start Date</p>
-                                <p className="font-medium text-slate-700">{contract.startDate}</p>
+                                <p className="font-medium text-slate-700">{formatDate(contract.startDate)}</p>
                             </div>
                             <div>
                                 <p className="text-slate-500 text-xs uppercase tracking-wide font-semibold mb-1">End Date</p>
-                                <p className="font-medium text-slate-700">{contract.endDate}</p>
+                                <p className="font-medium text-slate-700">{formatDate(contract.endDate)}</p>
                             </div>
                             <div>
                                 <p className="text-slate-500 text-xs uppercase tracking-wide font-semibold mb-1">Claims</p>
@@ -66,7 +67,7 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                                 {claims.map(claim => (
                                     <div key={claim.id} className="flex justify-between text-sm text-red-900 mb-1 last:mb-0 pl-4 border-l-2 border-red-200">
                                         <span>{claim.title} ({claim.status})</span>
-                                        <span className="font-mono font-semibold">${claim.amount.toLocaleString()}</span>
+                                        <span className="font-mono font-semibold">{formatCurrency(claim.amount)}</span>
                                     </div>
                                 ))}
                             </div>

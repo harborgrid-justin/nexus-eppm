@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { useProjectState } from '../../hooks';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../utils/formatters';
 
 interface CostBudgetViewProps {
   projectId: string;
@@ -18,8 +20,8 @@ const CostBudgetView: React.FC<CostBudgetViewProps> = ({ projectId }) => {
           <BarChart data={budgetItems}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="category" tick={{fontSize: 12}} />
-            <YAxis tick={{fontSize: 12}} tickFormatter={(val) => `$${val/1000000}M`} />
-            <Tooltip formatter={(val: number) => `$${val.toLocaleString()}`} />
+            <YAxis tick={{fontSize: 12}} tickFormatter={(val) => formatCompactCurrency(val)} />
+            <Tooltip formatter={(val: number) => formatCompactCurrency(val)} />
             <Bar dataKey="planned" name="Planned" fill="#94a3b8" radius={[4, 4, 0, 0]} />
             <Bar dataKey="actual" name="Actual" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -40,10 +42,10 @@ const CostBudgetView: React.FC<CostBudgetViewProps> = ({ projectId }) => {
           {budgetItems.map(item => (
             <tr key={item.id} className="hover:bg-slate-50">
               <td className="px-6 py-4 text-sm font-medium text-slate-900">{item.category}</td>
-              <td className="px-6 py-4 text-right text-sm text-slate-500">${item.planned.toLocaleString()}</td>
-              <td className="px-6 py-4 text-right text-sm text-slate-900">${item.actual.toLocaleString()}</td>
-              <td className="px-6 py-4 text-right text-sm font-semibold text-green-600">${item.variance.toLocaleString()}</td>
-              <td className="px-6 py-4 text-right text-sm text-slate-500">{((item.actual/item.planned)*100).toFixed(1)}%</td>
+              <td className="px-6 py-4 text-right text-sm text-slate-500">{formatCurrency(item.planned)}</td>
+              <td className="px-6 py-4 text-right text-sm text-slate-900">{formatCurrency(item.actual)}</td>
+              <td className="px-6 py-4 text-right text-sm font-semibold text-green-600">{formatCurrency(item.variance)}</td>
+              <td className="px-6 py-4 text-right text-sm text-slate-500">{formatPercentage((item.actual/item.planned) * 100, 1)}</td>
             </tr>
           ))}
         </tbody>

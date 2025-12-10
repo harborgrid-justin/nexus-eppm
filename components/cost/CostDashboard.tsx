@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { useProjectState } from '../../hooks';
 import { DollarSign, TrendingUp, TrendingDown, Layers, LineChart as LineChartIcon } from 'lucide-react';
 import StatCard from '../shared/StatCard';
+import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../utils/formatters';
 
 interface CostDashboardProps {
   projectId: string;
@@ -15,10 +17,10 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <StatCard title="Revised Budget" value={`$${(financials.revisedBudget / 1000000).toFixed(2)}M`} subtext="Original + Approved Changes" icon={DollarSign} />
-            <StatCard title="Actuals (Cost)" value={`$${(financials.totalActual / 1000000).toFixed(2)}M`} subtext={`${financials.budgetUtilization.toFixed(1)}% Utilized`} icon={TrendingUp} />
-            <StatCard title="Variance" value={`$${(financials.variance / 1000).toFixed(0)}k`} subtext={financials.variance >= 0 ? "Under budget" : "Over budget"} icon={TrendingDown} trend={financials.variance >= 0 ? 'up' : 'down'} />
-            <StatCard title="Estimate at Completion" value="$48.2M" subtext="Forecasted total cost" icon={Layers} />
+            <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Original + Approved Changes" icon={DollarSign} />
+            <StatCard title="Actuals (Cost)" value={formatCompactCurrency(financials.totalActual)} subtext={`${formatPercentage(financials.budgetUtilization, 1)} Utilized`} icon={TrendingUp} />
+            <StatCard title="Variance" value={formatCurrency(financials.variance)} subtext={financials.variance >= 0 ? "Under budget" : "Over budget"} icon={TrendingDown} trend={financials.variance >= 0 ? 'up' : 'down'} />
+            <StatCard title="Estimate at Completion" value={formatCompactCurrency(48200000)} subtext="Forecasted total cost" icon={Layers} />
         </div>
 
         <div className="grid grid-cols-1 gap-6">

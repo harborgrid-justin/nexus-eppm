@@ -31,7 +31,7 @@ class ErrorBoundary extends Component<Props, State> {
     // In a real app, log to service like Sentry
   }
 
-  public handleReset = () => {
+  private handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   };
 

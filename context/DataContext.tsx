@@ -4,14 +4,14 @@ import {
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
   RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
-  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim
+  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES,
   MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS,
-  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS
+  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
 
@@ -53,6 +53,7 @@ const MOCK_DOCUMENTS: Document[] = [
 // --- STATE MANAGEMENT ---
 
 export interface DataState {
+  programs: Program[];
   projects: Project[];
   resources: Resource[];
   integrations: Integration[];
@@ -112,6 +113,7 @@ export type Action =
 
 
 const initialState: DataState = {
+  programs: MOCK_PROGRAMS,
   projects: MOCK_PROJECTS,
   resources: MOCK_RESOURCES,
   integrations: MOCK_INTEGRATIONS,

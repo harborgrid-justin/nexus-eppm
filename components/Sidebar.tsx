@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   LayoutDashboard, Users, Settings, Briefcase, Network, ChevronDown, ChevronRight, FileText, Layers, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,9 +39,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       id: 'core',
       label: 'Core Modules',
       items: [
-        { id: 'dashboard', icon: LayoutDashboard, label: 'Portfolio Dashboard' },
-        { id: 'projectList', icon: Briefcase, label: 'Project List' },
-        { id: 'projectWorkspace', icon: Layers, label: 'Project Workspace' },
+        { id: 'portfolio', icon: Globe, label: 'Portfolio Management' },
+        { id: 'programs', icon: Layers, label: 'Program Management' },
+        { id: 'projectList', icon: Briefcase, label: 'Project Management' },
       ]
     },
     {

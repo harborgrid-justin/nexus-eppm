@@ -1,7 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { Landmark, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
+import { formatCurrency } from '../../utils/formatters';
 
 interface BudgetLogProps {
     projectId: string;
@@ -34,19 +36,19 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
             <div className="p-4 border-b border-slate-200 grid grid-cols-4 gap-4 bg-slate-50/50">
                 <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <p className="text-xs font-medium text-slate-500">Original Budget</p>
-                    <p className="text-lg font-bold text-slate-800">${project.originalBudget.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-slate-800">{formatCurrency(project.originalBudget)}</p>
                 </div>
                  <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <p className="text-xs font-medium text-slate-500">Net Changes</p>
-                    <p className="text-lg font-bold text-green-600">${budgetSummary.approvedChanges.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-green-600">{formatCurrency(budgetSummary.approvedChanges)}</p>
                 </div>
                  <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <p className="text-xs font-medium text-slate-500">Current Budget</p>
-                    <p className="text-lg font-bold text-slate-800">${budgetSummary.currentBudget.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-slate-800">{formatCurrency(budgetSummary.currentBudget)}</p>
                 </div>
                  <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     <p className="text-xs font-medium text-yellow-700">Proposed Budget</p>
-                    <p className="text-lg font-bold text-yellow-800">${budgetSummary.proposedBudget.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-yellow-800">{formatCurrency(budgetSummary.proposedBudget)}</p>
                 </div>
             </div>
             <div className="p-4 border-b border-slate-200 flex justify-end items-center">
@@ -76,7 +78,7 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                                         {getStatusIcon(item.status)} {item.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm font-semibold text-right text-slate-800">${item.amount.toLocaleString()}</td>
+                                <td className="px-6 py-4 text-sm font-semibold text-right text-slate-800">{formatCurrency(item.amount)}</td>
                             </tr>
                         ))}
                     </tbody>

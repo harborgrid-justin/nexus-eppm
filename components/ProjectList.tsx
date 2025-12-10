@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { calculateProjectProgress } from '../utils/calculations';
 import { usePortfolioState } from '../hooks';
+import { formatCompactCurrency, formatDate, formatPercentage, getHealthColorClass, formatInitials } from '../utils/formatters';
 
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;
@@ -64,11 +66,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                     onClick={() => onSelectProject(project.id)}
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                         project.health === 'Good' ? 'bg-green-100 text-green-800 border-green-200' :
-                         project.health === 'Warning' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                         'bg-red-100 text-red-800 border-red-200'
-                       }`}>
+                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getHealthColorClass(project.health)}`}>
                          {project.health}
                        </span>
                     </td>
@@ -81,21 +79,21 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                     <td className="px-6 py-4 whitespace-nowrap">
                        <div className="flex items-center gap-2">
                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                            {project.manager.split(' ').map(n => n[0]).join('')}
+                            {formatInitials(project.manager)}
                          </div>
                          <span className="text-sm text-slate-700">{project.manager}</span>
                        </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col text-sm text-slate-600">
-                        <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400"/> {new Date(project.startDate).toLocaleDateString()}</span>
-                        <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400"/> {new Date(project.endDate).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400"/> {formatDate(project.startDate)}</span>
+                        <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400"/> {formatDate(project.endDate)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 align-middle">
                       <div className="w-full">
                         <div className="flex justify-between text-xs mb-1">
-                          <span className="font-medium text-slate-700">{progress}% Complete</span>
+                          <span className="font-medium text-slate-700">{formatPercentage(progress)} Complete</span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                           <div 
@@ -106,8 +104,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                       <div className="text-sm font-medium text-slate-900">${(project.budget / 1000000).toFixed(1)}M</div>
-                       <div className="text-xs text-slate-500">${(project.spent / 1000000).toFixed(1)}M spent</div>
+                       <div className="text-sm font-medium text-slate-900">{formatCompactCurrency(project.budget)}</div>
+                       <div className="text-xs text-slate-500">{formatCompactCurrency(project.spent)} spent</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-slate-400">
                        <button className="p-1 hover:bg-slate-200 rounded text-slate-500">

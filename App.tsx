@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
 import ProjectList from './components/ProjectList';
 import AiAssistant from './components/AiAssistant';
 import ResourceManagement from './components/ResourceManagement';
@@ -13,13 +12,15 @@ import ExtensionEngine from './components/ExtensionEngine';
 import ProjectWorkspace from './components/ProjectWorkspace';
 import IndustrySelector from './components/IndustrySelector';
 import DataExchange from './components/DataExchange';
+import PortfolioManager from './components/PortfolioManager';
+import ProgramManager from './components/ProgramManager';
 import { Sparkles, Layers } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';
 import { ThemeProvider } from './context/ThemeContext';
 
 const AppContent = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('portfolio');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>('P1001'); // Default to a project for workspace
   const [isAiOpen, setIsAiOpen] = useState(false);
   const { state } = useData();
@@ -38,8 +39,10 @@ const AppContent = () => {
     }
 
     switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard />;
+      case 'portfolio':
+        return <PortfolioManager />;
+      case 'programs':
+        return <ProgramManager />;
       case 'projectList':
         return <ProjectList onSelectProject={handleProjectSelect} />;
       case 'projectWorkspace':
@@ -89,7 +92,11 @@ const AppContent = () => {
               ) : (
                 <h2 className="text-lg font-semibold text-slate-800">
                   {
-                    {'dashboard': 'Portfolio Dashboard', 'projectList': 'Project Master List'}[activeTab] || 'Nexus PPM'
+                    {
+                      'portfolio': 'Enterprise Portfolio',
+                      'programs': 'Program Management',
+                      'projectList': 'Project Master List'
+                    }[activeTab] || 'Nexus PPM'
                   }
                 </h2>
               )}
@@ -118,7 +125,7 @@ const AppContent = () => {
 
         {/* Main Workspace */}
         <main className="flex-1 overflow-hidden p-6 relative bg-slate-100">
-           <div className="h-full w-full bg-slate-50 rounded-xl">
+           <div className="h-full w-full bg-slate-50 rounded-xl shadow-sm border border-slate-200 overflow-hidden">
              {renderContent()}
            </div>
         </main>

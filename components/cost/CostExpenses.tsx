@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { useData } from '../../context/DataContext';
 import { Plus, Filter, Search } from 'lucide-react';
+import { formatCurrency } from '../../utils/formatters';
 
 interface CostExpensesProps {
     projectId: string;
@@ -48,9 +50,9 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                                   <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{tasks.find(t=>t.id===exp.activityId)?.wbsCode}</span> 
                                   {taskMap.get(exp.activityId)}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">${exp.budgetedCost.toLocaleString()}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">${exp.actualCost.toLocaleString()}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">${exp.remainingCost.toLocaleString()}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">{formatCurrency(exp.budgetedCost)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">{formatCurrency(exp.actualCost)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">{formatCurrency(exp.remainingCost)}</td>
                             </tr>
                         ))}
                     </tbody>
