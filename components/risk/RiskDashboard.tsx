@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useProjectState } from '../../hooks';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
@@ -10,6 +11,7 @@ import {
   Tooltip,
 } from 'recharts';
 import StatCard from '../shared/StatCard';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskDashboardProps {
   projectId: string;
@@ -17,9 +19,10 @@ interface RiskDashboardProps {
 
 const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
+  const theme = useTheme();
 
   if (!risks) {
-    return <div className="p-4">Loading risk data...</div>;
+    return <div className={theme.layout.pagePadding}>Loading risk data...</div>;
   }
 
   const riskCategories = Array.from(new Set(risks.map(r => r.category)));
@@ -37,17 +40,17 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   const avgRiskScore = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "N/A";
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Total Risks" value={risks.length} icon={List} />
             <StatCard title="Open Risks" value={risks.filter(r => r.status === 'Open').length} icon={AlertTriangle} trend="down" />
             <StatCard title="Mitigated / Closed" value={risks.filter(r => r.status !== 'Open').length} icon={ShieldCheck} trend="up" />
             <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingDown} trend="down" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Risk Exposure by Category</h3>
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
+            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
+                <h3 className={`${theme.typography.h3} mb-4`}>Risk Exposure by Category</h3>
                 <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                         <RechartsBarChart data={categoryData} layout="vertical">
@@ -59,8 +62,8 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
                     </ResponsiveContainer>
                 </div>
             </div>
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Top 5 Risks by Score</h3>
+            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
+                <h3 className={`${theme.typography.h3} mb-4`}>Top 5 Risks by Score</h3>
                 <ul className="space-y-3">
                     {risks.sort((a,b) => b.score - a.score).slice(0, 5).map(risk => (
                         <li key={risk.id} className="flex items-center gap-3">

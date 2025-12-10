@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { useProjectState } from '../../hooks';
 import { useData } from '../../context/DataContext';
 import { ArrowRight, ArrowUp } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskMatrixProps {
   projectId: string;
@@ -10,6 +12,7 @@ interface RiskMatrixProps {
 const RiskMatrix: React.FC<RiskMatrixProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
   const { dispatch } = useData();
+  const theme = useTheme();
 
   const scale = [1, 2, 3, 4, 5];
   const labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High'];
@@ -46,11 +49,11 @@ const RiskMatrix: React.FC<RiskMatrixProps> = ({ projectId }) => {
     }
   };
 
-  if (!risks) return <div className="p-4">Loading risks...</div>;
+  if (!risks) return <div className={theme.layout.pagePadding}>Loading risks...</div>;
 
   return (
-    <div className="h-full overflow-auto p-6">
-        <h3 className="font-bold text-lg text-slate-900 mb-4">Probability-Impact Matrix</h3>
+    <div className={`h-full overflow-auto ${theme.layout.pagePadding}`}>
+        <h3 className={`${theme.typography.h3} mb-4`}>Probability-Impact Matrix</h3>
         <div className="flex items-center justify-center">
             {/* Y Axis Label */}
             <div className="flex items-center justify-center -rotate-90 -ml-8 mr-2">

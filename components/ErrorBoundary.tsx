@@ -1,4 +1,4 @@
-import React, { ErrorInfo, ReactNode } from "react";
+import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -13,32 +13,29 @@ interface State {
   errorInfo: ErrorInfo | null;
 }
 
-class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    };
-  }
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+    errorInfo: null,
+  };
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error, errorInfo: null };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
     this.setState({ errorInfo });
     // In a real app, log to service like Sentry
   }
 
-  handleReset = () => {
+  public handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   };
 
-  render(): ReactNode {
+  public render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;

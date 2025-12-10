@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import RBSNode from './RBSNode';
 import { detectCircularDependency } from '../../utils/treeUtils';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskBreakdownStructureProps {
   projectId: string;
@@ -13,6 +14,7 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   const { rbs } = state;
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const theme = useTheme();
   
   const handleDrop = (newParentId: string | null) => {
     if (!draggedNodeId) return;
@@ -29,7 +31,7 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   };
 
   if(!rbs) {
-    return <div className="p-4">No RBS defined for this context.</div>;
+    return <div className={theme.layout.pagePadding}>No RBS defined for this context.</div>;
   }
 
   return (
@@ -39,7 +41,7 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
                 {error}
             </div>
         )}
-        <div className="p-4 border-b border-slate-200 bg-slate-50/50">
+        <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}/50`}>
             <h3 className="font-semibold text-slate-800">Risk Breakdown Structure (RBS)</h3>
         </div>
         <div 

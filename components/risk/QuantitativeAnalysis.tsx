@@ -1,28 +1,32 @@
+
 import React from 'react';
 import { BarChart2 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface QuantitativeAnalysisProps {
   projectId: string;
 }
 
 const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }) => {
+  const theme = useTheme();
+
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+        <div className={theme.layout.header}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className={theme.typography.h1}>
               <BarChart2 className="text-nexus-600" /> Quantitative Risk Analysis
             </h1>
-            <p className="text-slate-500">Model the combined effect of risks on project objectives.</p>
+            <p className={theme.typography.small}>Model the combined effect of risks on project objectives.</p>
           </div>
-          <button className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
              Run Simulation
           </button>
        </div>
 
-       <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden relative">
-          <div className="absolute inset-0 bg-slate-50/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center text-center p-8">
-             <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-slate-200 flex items-center justify-center mb-4">
+       <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} flex-1 flex flex-col overflow-hidden relative`}>
+          <div className={`absolute inset-0 ${theme.colors.background}/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center text-center p-8`}>
+             <div className={`w-16 h-16 ${theme.colors.surface} rounded-full shadow-sm border ${theme.colors.border} flex items-center justify-center mb-4`}>
                 <BarChart2 size={32} className="text-slate-400" />
              </div>
              <h2 className="text-xl font-bold text-slate-800 mb-2">Module Provisioned</h2>
@@ -31,7 +35,7 @@ const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }
              </p>
              <div className="flex gap-3">
                 <button className="px-4 py-2 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700">View Documentation</button>
-                <button className="px-4 py-2 bg-nexus-600 rounded-md text-sm font-medium text-white">Configure Engine</button>
+                <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-md text-sm font-medium text-white`}>Configure Engine</button>
              </div>
           </div>
 

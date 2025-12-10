@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -15,6 +16,7 @@ import DataExchange from './components/DataExchange';
 import { Sparkles, Layers } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -134,11 +136,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <DataProvider>
-      <IndustryProvider>
-        <AppContent />
-      </IndustryProvider>
-    </DataProvider>
+    <ThemeProvider>
+      <DataProvider>
+        <IndustryProvider>
+          <AppContent />
+        </IndustryProvider>
+      </DataProvider>
+    </ThemeProvider>
   );
 };
 

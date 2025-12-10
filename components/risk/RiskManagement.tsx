@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProjectState } from '../../hooks';
 import { AlertTriangle, LayoutDashboard, FileText, List, Columns, BarChart2, Sigma } from 'lucide-react';
@@ -8,6 +9,7 @@ import RiskRegisterGrid from './RiskRegisterGrid';
 import RiskBreakdownStructure from './RiskBreakdownStructure';
 import RiskMatrix from './RiskMatrix';
 import QuantitativeAnalysis from './QuantitativeAnalysis';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskManagementProps {
   projectId: string;
@@ -16,6 +18,7 @@ interface RiskManagementProps {
 const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
   const [activeView, setActiveView] = useState('dashboard');
   const { project } = useProjectState(projectId);
+  const theme = useTheme();
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,7 +31,7 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
   
   const renderContent = () => {
     if (!project) {
-        return <div className="p-6 text-slate-500">Loading project data...</div>;
+        return <div className={theme.layout.pagePadding + " text-slate-500"}>Loading project data...</div>;
     }
 
     switch(activeView) {
@@ -43,16 +46,16 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 h-full overflow-hidden flex flex-col p-6">
-      <div className="flex justify-between items-center flex-shrink-0">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <div className={theme.layout.header}>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><AlertTriangle className="text-red-500"/> Risk Management</h1>
-          <p className="text-slate-500">Identify, analyze, and respond to project uncertainty.</p>
+          <h1 className={theme.typography.h1}><AlertTriangle className="text-red-500"/> Risk Management</h1>
+          <p className={theme.typography.small}>Identify, analyze, and respond to project uncertainty.</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-        <div className="flex-shrink-0 border-b border-slate-200 bg-slate-50">
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 ${theme.layout.headerBorder} ${theme.colors.background}`}>
           <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
             {navItems.map(item => (
               <button
@@ -60,9 +63,10 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
                 onClick={() => setActiveView(item.id)}
                 className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                   activeView === item.id
-                    ? 'border-nexus-600 text-nexus-600'
+                    ? `${theme.colors.border.replace('slate-200', 'nexus-600')} text-nexus-600` // fallback trick or use theme color logic
                     : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
                 }`}
+                style={{ borderColor: activeView === item.id ? '#0284c7' : 'transparent' }}
               >
                 <item.icon size={16} />
                 <span>{item.label}</span>

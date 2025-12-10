@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { useProjectState } from '../../hooks';
 import { Plus, Filter, Search, AlertTriangle, ShieldCheck } from 'lucide-react';
 import RiskDetailModal from './RiskDetailModal';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskRegisterGridProps {
   projectId: string;
@@ -10,6 +12,7 @@ interface RiskRegisterGridProps {
 const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
+  const theme = useTheme();
 
   const getScoreColor = (score: number) => {
     if (score >= 15) return 'bg-red-100 text-red-800 border-red-200';
@@ -17,12 +20,12 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
     return 'bg-green-100 text-green-800 border-green-200';
   };
 
-  if (!risks) return <div>Loading risks...</div>;
+  if (!risks) return <div className={theme.layout.pagePadding}>Loading risks...</div>;
 
   return (
     <>
       <div className="h-full flex flex-col">
-        <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
+        <div className={`p-4 ${theme.layout.headerBorder} ${theme.layout.header} ${theme.colors.background}/50`}>
           <div className="flex items-center gap-2">
               <div className="relative">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -32,14 +35,14 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
                   <Filter size={14} /> Filter
               </button>
           </div>
-          <button className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+          <button className={`px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
               <Plus size={16} /> Add Risk
           </button>
         </div>
         
         <div className="flex-1 overflow-auto">
           <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50 sticky top-0">
+              <thead className={`${theme.colors.background} sticky top-0`}>
                 <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
@@ -50,7 +53,7 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-100">
+              <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
                 {risks.map(risk => (
                   <tr key={risk.id} onClick={() => setSelectedRiskId(risk.id)} className="hover:bg-slate-50 cursor-pointer">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{risk.id}</td>
