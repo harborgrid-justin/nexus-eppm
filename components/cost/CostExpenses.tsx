@@ -10,10 +10,11 @@ interface CostExpensesProps {
 
 const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
     const { state } = useData();
-    // In a real app, you'd filter expenses by projectId
-    const expenses = state.expenses;
     const tasks = state.projects.find(p => p.id === projectId)?.tasks || [];
     const taskMap = new Map(tasks.map(t => [t.id, t.name]));
+    
+    // Filter expenses associated with tasks in the current project
+    const expenses = state.expenses.filter(e => tasks.some(t => t.id === e.activityId));
 
     return (
         <div className="h-full flex flex-col">
@@ -42,7 +43,7 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-100">
-                        {expenses.map(exp => (
+                        {expenses.length > 0 ? expenses.map(exp => (
                             <tr key={exp.id} className="hover:bg-slate-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{exp.description}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{state.expenseCategories.find(c=>c.id === exp.categoryId)?.name}</td>
@@ -54,7 +55,11 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">{formatCurrency(exp.actualCost)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">{formatCurrency(exp.remainingCost)}</td>
                             </tr>
-                        ))}
+                        )) : (
+                            <tr>
+                                <td colSpan={6} className="px-6 py-10 text-center text-sm text-slate-500">No expenses found for this project.</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

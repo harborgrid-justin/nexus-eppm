@@ -1,16 +1,28 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { DollarSign, TrendingUp, TrendingDown, Layers, LineChart as LineChartIcon } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../utils/formatters';
+import { calculateProjectProgress } from '../../utils/calculations';
 
 interface CostDashboardProps {
   projectId: string;
 }
 
 const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
-  const { financials } = useProjectState(projectId);
+  const { project, financials } = useProjectState(projectId);
+
+  const eac = useMemo(() => {
+      if (!project || !financials) return 0;
+      // Calculate EVM metrics for EAC
+      const ev = project.originalBudget * (calculateProjectProgress(project) / 100);
+      const ac = project.spent;
+      const cpi = ac > 0 ? (ev / ac) : 1;
+      
+      // BAC / CPI = EAC
+      return cpi > 0 ? project.originalBudget / cpi : project.originalBudget;
+  }, [project, financials]);
 
   if (!financials) return null;
 
@@ -20,7 +32,7 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
             <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Original + Approved Changes" icon={DollarSign} />
             <StatCard title="Actuals (Cost)" value={formatCompactCurrency(financials.totalActual)} subtext={`${formatPercentage(financials.budgetUtilization, 1)} Utilized`} icon={TrendingUp} />
             <StatCard title="Variance" value={formatCurrency(financials.variance)} subtext={financials.variance >= 0 ? "Under budget" : "Over budget"} icon={TrendingDown} trend={financials.variance >= 0 ? 'up' : 'down'} />
-            <StatCard title="Estimate at Completion" value={formatCompactCurrency(48200000)} subtext="Forecasted total cost" icon={Layers} />
+            <StatCard title="Estimate at Completion" value={formatCompactCurrency(eac)} subtext="Forecasted total cost (EAC)" icon={Layers} />
         </div>
 
         <div className="grid grid-cols-1 gap-6">

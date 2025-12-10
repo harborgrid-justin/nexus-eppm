@@ -4,14 +4,14 @@ import {
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
   RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
-  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program
+  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES,
   MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS,
-  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS
+  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS, MOCK_DEFECTS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
 
@@ -65,6 +65,7 @@ export interface DataState {
   stakeholders: Stakeholder[];
   procurementPackages: ProcurementPackage[];
   qualityReports: QualityReport[];
+  nonConformanceReports: NonConformanceReport[];
   communicationLogs: CommunicationLog[];
   riskPlans: RiskManagementPlan[];
   rbs: RiskBreakdownStructureNode[];
@@ -125,6 +126,7 @@ const initialState: DataState = {
   stakeholders: MOCK_STAKEHOLDERS,
   procurementPackages: MOCK_PROCUREMENT_PACKAGES,
   qualityReports: MOCK_QUALITY_REPORTS,
+  nonConformanceReports: MOCK_DEFECTS,
   communicationLogs: MOCK_COMM_LOGS,
   riskPlans: [MOCK_RISK_PLAN],
   rbs: MOCK_RBS,

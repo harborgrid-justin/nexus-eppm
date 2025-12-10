@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
 import { useProjectState } from '../../hooks';
@@ -14,9 +15,9 @@ const QualityDashboard: React.FC<QualityDashboardProps> = ({ qualityProfile }) =
     <div className="h-full overflow-y-auto p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Overall Quality Score" value={`${qualityProfile.passRate.toFixed(1)}%`} icon={ShieldCheck} trend="up" />
-            <StatCard title="Open Non-Conformances" value={5} icon={AlertTriangle} trend="down" />
+            <StatCard title="Open Non-Conformances" value={qualityProfile.openDefects} icon={AlertTriangle} trend="down" />
             <StatCard title="Total Inspections" value={qualityProfile.totalReports} icon={CheckCircle} />
-            <StatCard title="Open Defects" value={12} icon={Bug} trend="down" />
+            <StatCard title="Total Defects Logged" value={qualityProfile.totalDefects} icon={Bug} trend="down" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

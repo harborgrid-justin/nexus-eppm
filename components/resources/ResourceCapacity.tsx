@@ -1,19 +1,74 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { Resource } from '../../types';
+import { useData } from '../../context/DataContext';
+import { getDaysDiff, addWorkingDays } from '../../utils/dateUtils';
 
 interface ResourceCapacityProps {
   projectResources: Resource[] | undefined;
 }
 
 const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources }) => {
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+  const { state } = useData();
+  
+  // Define time range (e.g., current year months)
+  const currentYear = new Date().getFullYear();
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Mock allocation logic for demonstration
-  const getMockAllocation = (resId: string, monthIdx: number) => {
-    const base = resId.charCodeAt(0) + resId.charCodeAt(1) + monthIdx * 15;
-    return base % 140; 
-  };
+  // Calculate allocations dynamically
+  const allocationData = useMemo(() => {
+      const data: Record<string, number[]> = {};
+      
+      if (!projectResources) return {};
+
+      // Initialize zero allocation for all resources for 12 months
+      projectResources.forEach(res => {
+          data[res.id] = new Array(12).fill(0);
+      });
+
+      // Iterate over ALL projects to get enterprise-wide view for these resources
+      state.projects.forEach(project => {
+          project.tasks.forEach(task => {
+              if (task.assignments && task.assignments.length > 0) {
+                  const startDate = new Date(task.startDate);
+                  const endDate = new Date(task.endDate);
+                  
+                  // Simple monthly bucketing logic
+                  // Iterate through months between start and end date
+                  let iterDate = new Date(startDate);
+                  while (iterDate <= endDate) {
+                      if (iterDate.getFullYear() === currentYear) {
+                          const monthIndex = iterDate.getMonth();
+                          
+                          task.assignments.forEach(assignment => {
+                              if (data[assignment.resourceId]) {
+                                  // Add allocation % to the month bucket. 
+                                  // In a real system, this would be: (Hours Assigned in Month / Total Working Hours in Month) * 100
+                                  // Here we approximate: If task is active in this month, add assignment units. 
+                                  // To avoid over-counting if task spans multiple months, we assume uniform distribution or just checking presence.
+                                  // Better approach for visualization: Add the 'units' value (e.g. 100 for full time) 
+                                  // If a resource has 2 overlapping tasks at 50% each, they are 100% allocated.
+                                  
+                                  // We take the max allocation seen in the month for simplicity in this heatmap view, 
+                                  // or add them up if concurrent. Let's add them up to show over-allocation.
+                                  data[assignment.resourceId][monthIndex] += assignment.units; 
+                              }
+                          });
+                      }
+                      // Move to next month
+                      iterDate.setMonth(iterDate.getMonth() + 1);
+                      iterDate.setDate(1); // Start of next month
+                  }
+              }
+          });
+      });
+      
+      // Normalize or cap? No, we want to see over-allocation (e.g. 150%)
+      return data;
+  }, [projectResources, state.projects, currentYear]);
+
   const getCellColor = (percentage: number) => {
+    if (percentage === 0) return 'bg-white text-slate-300';
     if (percentage < 80) return 'bg-green-100 text-green-800 hover:bg-green-200';
     if (percentage <= 100) return 'bg-nexus-100 text-nexus-800 hover:bg-nexus-200';
     if (percentage <= 120) return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
@@ -25,7 +80,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-700 text-sm">Resource Allocation Heatmap</h3>
+        <h3 className="font-semibold text-slate-700 text-sm">Resource Allocation Heatmap ({currentYear})</h3>
         <div className="flex items-center gap-2 text-xs">
           <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-100 border border-green-200 rounded"></span> Under</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 bg-nexus-100 border border-nexus-200 rounded"></span> Optimal</span>
@@ -38,7 +93,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 w-64 sticky left-0 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Resource</th>
               {months.map(m => (
-                <th key={m} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200">{m} 2024</th>
+                <th key={m} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200">{m}</th>
               ))}
             </tr>
           </thead>
@@ -48,12 +103,12 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
                 <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-medium text-sm text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   {res.name}
                 </td>
-                {months.map((m, idx) => {
-                  const alloc = getMockAllocation(res.id, idx);
+                {months.map((_, idx) => {
+                  const alloc = allocationData[res.id] ? allocationData[res.id][idx] : 0;
                   return (
                     <td key={idx} className="p-1 h-12">
                       <div className={`w-full h-full rounded flex items-center justify-center text-xs font-semibold cursor-pointer transition-colors ${getCellColor(alloc)}`}>
-                        {alloc}%
+                        {alloc > 0 ? `${alloc}%` : '-'}
                       </div>
                     </td>
                   );

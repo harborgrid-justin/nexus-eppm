@@ -1,5 +1,5 @@
 
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -113,6 +113,13 @@ export const MOCK_QUALITY_REPORTS: QualityReport[] = [
   { id: 'QR-02', projectId: 'P1001', date: '2024-05-15', type: 'Inspection', status: 'Fail', details: { inspectionType: 'Rebar Placement', finding: 'Incorrect spacing at grid line C', correctiveAction: 'Adjust spacing per drawing S-101' } },
   { id: 'QR-03', projectId: 'P1001', date: '2024-05-20', type: 'Audit', status: 'Pass', details: { auditType: 'Safety Compliance', summary: 'All PPE requirements met.' } },
   { id: 'QR-04', projectId: 'P1001', date: '2024-05-25', type: 'Test', status: 'Pass', details: { testType: 'Soil Compaction', reference: 'Proctor Test', value: '98%', requirement: '>95%' } },
+];
+
+export const MOCK_DEFECTS: NonConformanceReport[] = [
+    { id: 'NCR-001', projectId: 'P1001', date: '2024-06-10', description: 'Incorrect rebar spacing at grid C', severity: 'Major', status: 'Open', assignedTo: 'Mike Ross', linkedDeliverable: 'T5' },
+    { id: 'NCR-002', projectId: 'P1001', date: '2024-06-12', description: 'UI button misaligned on login screen', severity: 'Minor', status: 'In Progress', assignedTo: 'Dev Team', linkedDeliverable: 'T-UI-101' },
+    { id: 'NCR-003', projectId: 'P1001', date: '2024-06-15', description: 'API returns 500 error on invalid input', severity: 'Critical', status: 'Open', assignedTo: 'Backend Team', linkedDeliverable: 'T-API-5' },
+    { id: 'NCR-004', projectId: 'P1001', date: '2024-06-05', description: 'Typo in user documentation section 4.1', severity: 'Minor', status: 'Closed', assignedTo: 'Tech Writer', linkedDeliverable: 'DOC-001' },
 ];
 
 export const MOCK_COMM_LOGS: CommunicationLog[] = [

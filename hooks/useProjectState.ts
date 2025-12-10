@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { TaskStatus } from '../types';
@@ -46,6 +47,10 @@ export const useProjectState = (projectId: string | null) => {
     const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
     return state.resources.filter(r => resourceIds.has(r.id));
   }, [project, state.resources]);
+
+  const nonConformanceReports = useMemo(() => {
+    return state.nonConformanceReports.filter(n => n.projectId === projectId);
+  }, [state.nonConformanceReports, projectId]);
 
 
   // --- Derived State Calculations ---
@@ -110,13 +115,19 @@ export const useProjectState = (projectId: string | null) => {
     const totalReports = qualityReports.length;
     const failedReports = qualityReports.filter(r => r.status === 'Fail').length;
     const passRate = totalReports > 0 ? ((totalReports - failedReports) / totalReports) * 100 : 100;
+    
+    // Derived defects from non-conformance reports
+    const openDefects = nonConformanceReports.filter(d => d.status === 'Open' || d.status === 'In Progress').length;
+    const totalDefects = nonConformanceReports.length;
 
     return {
       totalReports,
       failedReports,
-      passRate
+      passRate,
+      openDefects,
+      totalDefects
     };
-  }, [qualityReports]);
+  }, [qualityReports, nonConformanceReports]);
 
 
   return {
@@ -134,5 +145,6 @@ export const useProjectState = (projectId: string | null) => {
     qualityReports,
     communicationLogs,
     assignedResources,
+    nonConformanceReports,
   };
 };
