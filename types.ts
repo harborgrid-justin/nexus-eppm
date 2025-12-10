@@ -46,6 +46,8 @@ export interface ResourceRequirement {
 export interface ResourceAssignment {
   resourceId: string;
   units: number; // % allocation, e.g., 100 for full-time
+  actualUnits?: number; // Actual effort spent
+  remainingUnits?: number; // Estimate to complete
 }
 
 export interface ThreePointEstimate {
@@ -116,9 +118,11 @@ export interface Task {
   description?: string;
   
   // --- INTEGRATION FIELDS ---
-  riskIds?: string[];
-  issueIds?: string[];
-  documentIds?: string[];
+  riskIds?: string[]; // CROSS-INTEGRATION: Risk
+  issueIds?: string[]; // CROSS-INTEGRATION: Issues
+  documentIds?: string[]; // CROSS-INTEGRATION: Documents
+  procurementPackageIds?: string[]; // CROSS-INTEGRATION: Procurement
+  budgetLineItemId?: string; // CROSS-INTEGRATION: Cost (Direct Link for EVM)
   // --- END INTEGRATION FIELDS ---
 
   expenseIds?: string[];
@@ -218,6 +222,8 @@ export interface RiskResponseAction {
   ownerId: string; // resourceId
   dueDate: string;
   status: 'Planned' | 'In Progress' | 'Complete';
+  costImpact?: number; // CROSS-INTEGRATION: Direct cost of mitigation
+  scheduleImpactDays?: number; // CROSS-INTEGRATION: Days added to schedule
 }
 
 export interface Risk {
@@ -244,6 +250,10 @@ export interface Risk {
   secondaryRisks?: string[];
   linkedRiskIds?: string[];
   dateIdentified: string;
+  
+  // CROSS-INTEGRATION
+  linkedTaskId?: string; // Link to specific schedule activity
+  linkedBudgetLineItemId?: string; // Link to contingency fund
 }
 
 export type WBSNodeShape = 'rectangle' | 'oval' | 'hexagon';
@@ -256,6 +266,7 @@ export interface WBSNode {
   children: WBSNode[];
   shape?: WBSNodeShape;
   links?: { targetId: string; type: 'dependency' | 'related' }[];
+  associatedCostCode?: string; // CROSS-INTEGRATION: WBS to CBS mapping
 }
 
 export interface ProjectBaseline {
@@ -310,7 +321,7 @@ export interface NonConformanceReport {
   assignedTo: string;
   rootCause?: string;
   correctiveAction?: string;
-  linkedDeliverable: string; // Task ID
+  linkedDeliverable: string; // Task ID - CROSS-INTEGRATION
 }
 
 export interface QualityActivity {
@@ -355,6 +366,8 @@ export interface Expense {
   actualUnits: number;
   remainingUnits: number;
   atCompletionUnits: number;
+  
+  purchaseOrderId?: string; // CROSS-INTEGRATION: Link expense to procurement
 }
 
 
@@ -413,6 +426,7 @@ export interface BudgetLogItem {
   status: 'Pending' | 'Approved' | 'Not Approved';
   submittedBy: string;
   source?: 'Initial' | 'Change Order' | 'Contingency';
+  linkedChangeOrderId?: string; // CROSS-INTEGRATION
 }
 
 export interface FundingSource {
@@ -488,15 +502,17 @@ export interface ChangeOrder {
   impacts?: {
     scheduleImpactDays?: number;
     budgetImpact?: number;
+    wbsNodesAdded?: WBSNode[]; // CROSS-INTEGRATION: Scope change
   };
 }
 
 export interface BudgetLineItem {
   id: string;
   projectId: string;
-  category: 'Labor' | 'Materials' | 'Equipment' | 'Subcontractor' | 'Contingency';
+  category: 'Labor' | 'Materials' | 'Equipment' | 'Subcontractor' | 'Contingency' | 'Indirect';
   planned: number;
   actual: number;
+  committed?: number; // CROSS-INTEGRATION: From POs
   variance: number; // Calculated
 }
 
@@ -542,6 +558,7 @@ export interface CommunicationLog {
   date: string;
   type: 'Meeting' | 'Email' | 'Official Letter' | 'Call';
   summary: string;
+  linkedIssueId?: string; // CROSS-INTEGRATION
 }
 
 export interface QualityReport {
@@ -644,6 +661,7 @@ export interface Contract {
   endDate: string;
   renewalDate?: string;
   type: 'Fixed Price' | 'Time & Materials' | 'Cost Plus';
+  linkedBudgetLineItemId?: string; // CROSS-INTEGRATION: Contract value hits specific budget
 }
 
 export interface ProcurementClaim {
@@ -681,6 +699,7 @@ export interface PurchaseOrder {
   amount: number;
   issueDate: string;
   description: string;
+  linkedBudgetLineItemId?: string; // CROSS-INTEGRATION: Committed cost
 }
 
 

@@ -2,6 +2,7 @@
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { TaskStatus } from '../types';
+import { calculateEVM, calculateCommittedCost, calculateRiskExposure, checkFundingSolvency } from '../utils/integrationUtils';
 
 export const useProjectState = (projectId: string | null) => {
   const { state, getRiskPlan } = useData();
@@ -34,6 +35,10 @@ export const useProjectState = (projectId: string | null) => {
     return state.procurementPackages.filter(p => p.projectId === projectId);
   }, [state.procurementPackages, projectId]);
 
+  const purchaseOrders = useMemo(() => {
+      return state.purchaseOrders.filter(po => po.projectId === projectId);
+  }, [state.purchaseOrders, projectId]);
+
   const qualityReports = useMemo(() => {
     return state.qualityReports.filter(q => q.projectId === projectId);
   }, [state.qualityReports, projectId]);
@@ -53,7 +58,7 @@ export const useProjectState = (projectId: string | null) => {
   }, [state.nonConformanceReports, projectId]);
 
 
-  // --- Derived State Calculations ---
+  // --- Derived State Calculations (Integration Logic Applied) ---
 
   const summary = useMemo(() => {
     if (!project) return null;
@@ -75,9 +80,19 @@ export const useProjectState = (projectId: string | null) => {
   }, [project]);
 
   const financials = useMemo(() => {
+    if (!project) return null;
+
+    // Opportunity 1: EVM Integration
+    const evmMetrics = calculateEVM(project, budgetItems);
+
     const totalPlanned = budgetItems.reduce((acc, item) => acc + item.planned, 0);
     const totalActual = budgetItems.reduce((acc, item) => acc + item.actual, 0);
     
+    // Opportunity 4: Committed Cost from POs
+    const totalCommitted = budgetItems.reduce((acc, item) => {
+        return acc + calculateCommittedCost(purchaseOrders, item.id);
+    }, 0);
+
     const approvedCOAmount = changeOrders
       .filter(co => co.status === 'Approved')
       .reduce((acc, co) => acc + co.amount, 0);
@@ -87,27 +102,38 @@ export const useProjectState = (projectId: string | null) => {
       .reduce((acc, co) => acc + co.amount, 0);
 
     const revisedBudget = (project?.originalBudget || 0) + approvedCOAmount;
-    const budgetUtilization = revisedBudget > 0 ? (totalActual / revisedBudget) * 100 : 0;
+    const budgetUtilization = revisedBudget > 0 ? ((totalActual + totalCommitted) / revisedBudget) * 100 : 0;
+
+    // Opportunity 15: Solvency
+    const totalFunding = project.funding?.reduce((sum, f) => sum + f.amount, 0) || 0;
+    const solvency = checkFundingSolvency(totalActual, totalCommitted, totalFunding);
 
     return {
       totalPlanned,
       totalActual,
-      variance: revisedBudget - totalActual,
+      totalCommitted, // New Metric
+      variance: revisedBudget - (totalActual + totalCommitted), // Updated to include commitments
       approvedCOAmount,
       pendingCOAmount,
       revisedBudget,
       budgetUtilization,
+      evm: evmMetrics, // EVM Data
+      solvency // Cash Flow Check
     };
-  }, [budgetItems, changeOrders, project?.originalBudget]);
+  }, [budgetItems, changeOrders, project, purchaseOrders]);
   
   const riskProfile = useMemo(() => {
     const highImpactRisks = risks.filter(r => r.impact === 'High' || r.probability === 'High').length;
     const openRisks = risks.filter(r => r.status === 'Open').length;
     
+    // Opportunity 6: Risk Cost Exposure
+    const exposure = calculateRiskExposure(risks);
+
     return {
       totalRisks: risks.length,
       highImpactRisks,
       openRisks,
+      exposure // Monetary value of risk
     };
   }, [risks]);
   
@@ -142,6 +168,7 @@ export const useProjectState = (projectId: string | null) => {
     risks,
     stakeholders,
     procurement,
+    purchaseOrders,
     qualityReports,
     communicationLogs,
     assignedResources,
