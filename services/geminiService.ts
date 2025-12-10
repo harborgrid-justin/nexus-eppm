@@ -27,7 +27,6 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
       status: t.status,
       progress: t.progress,
       critical: t.critical,
-      // FIX: Property 'assignedResources' does not exist on type 'Task'. Correct property is 'assignments'.
       assigned: t.assignments
     })))}
   `;

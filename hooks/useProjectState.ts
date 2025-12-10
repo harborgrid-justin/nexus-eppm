@@ -25,7 +25,6 @@ export const useProjectState = (projectId: string | null) => {
     return state.risks.filter(r => r.projectId === projectId);
   }, [state.risks, projectId]);
 
-  // FIX: Corrected typo from `use-memo` to `useMemo`. This syntax error was causing downstream type inference issues.
   const stakeholders = useMemo(() => {
     return state.stakeholders.filter(s => s.projectId === projectId);
   }, [state.stakeholders, projectId]);
@@ -44,7 +43,6 @@ export const useProjectState = (projectId: string | null) => {
 
   const assignedResources = useMemo(() => {
     if (!project) return [];
-    // FIX: Property 'assignedResources' does not exist on type 'Task'. Use 'assignments' and map to resourceId.
     const resourceIds = new Set(project.tasks.flatMap(t => t.assignments.map(a => a.resourceId)));
     return state.resources.filter(r => resourceIds.has(r.id));
   }, [project, state.resources]);
@@ -83,19 +81,19 @@ export const useProjectState = (projectId: string | null) => {
       .filter(co => co.status === 'Pending Approval')
       .reduce((acc, co) => acc + co.amount, 0);
 
-    const revisedBudget = totalPlanned + approvedCOAmount;
+    const revisedBudget = (project?.originalBudget || 0) + approvedCOAmount;
     const budgetUtilization = revisedBudget > 0 ? (totalActual / revisedBudget) * 100 : 0;
 
     return {
       totalPlanned,
       totalActual,
-      variance: totalPlanned - totalActual,
+      variance: revisedBudget - totalActual,
       approvedCOAmount,
       pendingCOAmount,
       revisedBudget,
       budgetUtilization,
     };
-  }, [budgetItems, changeOrders]);
+  }, [budgetItems, changeOrders, project?.originalBudget]);
   
   const riskProfile = useMemo(() => {
     const highImpactRisks = risks.filter(r => r.impact === 'High' || r.probability === 'High').length;

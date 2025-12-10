@@ -16,38 +16,73 @@ interface ProjectGanttProps {
 const ROW_HEIGHT = 44;
 const DAY_WIDTH = 28;
 
-const GanttTaskRow: React.FC<{
-  task: Task;
+// Hierarchical Row Renderer
+const WbsGanttRow: React.FC<{
+  node: WBSNode;
+  project: Project;
   level: number;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onSelect: () => void;
-  hasChildren: boolean;
-  isCritical: boolean;
+  expandedNodes: Set<string>;
+  toggleNode: (id: string) => void;
+  onSelectTask: (task: Task) => void;
   showCriticalPath: boolean;
-}> = ({ task, level, isExpanded, onToggle, onSelect, hasChildren, isCritical, showCriticalPath }) => {
+}> = ({ node, project, level, expandedNodes, toggleNode, onSelectTask, showCriticalPath }) => {
+  const isExpanded = expandedNodes.has(node.id);
+  const tasksForNode = project.tasks.filter(t => t.wbsCode === node.wbsCode);
+
   return (
-    <div 
-      onClick={onSelect}
-      className="group h-[44px] flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm cursor-pointer"
-      style={{ paddingLeft: `${level * 20 + 16}px` }}
-    >
-      <div className="flex-1 font-medium text-slate-700 truncate pr-2 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
-        {hasChildren ? (
-          <button onClick={(e) => { e.stopPropagation(); onToggle(); }} className="p-1 -ml-6 mr-1">
+    <>
+      {/* WBS Node Row */}
+      <div 
+        className="group h-[44px] flex items-center px-4 border-b border-slate-200 hover:bg-slate-50 text-sm cursor-pointer font-bold bg-slate-50/70"
+        style={{ paddingLeft: `${level * 20 + 16}px` }}
+        onClick={() => toggleNode(node.id)}
+      >
+        <div className="flex-1 text-slate-800 truncate pr-2 flex items-center gap-2">
+          <button onClick={(e) => { e.stopPropagation(); toggleNode(node.id); }} className="p-1 -ml-6 mr-1">
             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
-        ) : (
-          <div className="w-6 h-6 -ml-6 mr-1"></div>
-        )}
-        {task.type === 'Milestone' ? <Diamond size={10} className="text-nexus-600 fill-current" /> : (showCriticalPath && isCritical) && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Critical Path"></span>}
-        <span className="font-mono text-xs text-slate-500 w-16">{task.wbsCode}</span>
-        {task.name}
+          <span className="font-mono text-xs text-slate-500 w-16">{node.wbsCode}</span>
+          {node.name}
+        </div>
       </div>
-      <div className="w-20 text-center text-slate-500">{task.duration > 0 ? `${task.duration}d` : '-'}</div>
-    </div>
+      
+      {/* Child Rows (Tasks and Sub-WBS) */}
+      {isExpanded && (
+        <>
+          {tasksForNode.map(task => (
+            <div 
+              key={task.id}
+              onClick={() => onSelectTask(task)}
+              className="group h-[44px] flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm cursor-pointer"
+              style={{ paddingLeft: `${(level + 1) * 20 + 16 + 24}px` }}
+            >
+              <div className="flex-1 font-medium text-slate-700 truncate pr-2 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
+                 {task.type === 'Milestone' ? <Diamond size={10} className="text-nexus-600 fill-current" /> : (showCriticalPath && task.critical) && <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="Critical Path"></span>}
+                <span className="font-mono text-xs text-slate-500 w-16">{task.wbsCode}</span>
+                {task.name}
+              </div>
+              <div className="w-20 text-center text-slate-500">{task.duration > 0 ? `${task.duration}d` : '-'}</div>
+            </div>
+          ))}
+
+          {node.children.map(childNode => (
+            <WbsGanttRow
+              key={childNode.id}
+              node={childNode}
+              project={project}
+              level={level + 1}
+              expandedNodes={expandedNodes}
+              toggleNode={toggleNode}
+              onSelectTask={onSelectTask}
+              showCriticalPath={showCriticalPath}
+            />
+          ))}
+        </>
+      )}
+    </>
   );
 };
+
 
 const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) => {
   const { dispatch } = useData();
@@ -69,42 +104,6 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
     return { ...initialProject, tasks: tasksWithCriticalPath };
   }, [initialProject]);
   
-  const { flattenedTasks, taskWbsMap } = useMemo(() => {
-    const taskMap = new Map(project.tasks.map(t => [t.id, t]));
-    const wbsMap = new Map<string, WBSNode>();
-    const taskWbsMap = new Map<string, WBSNode>();
-
-    const traverseWbs = (nodes: WBSNode[], parent: WBSNode | null) => {
-      nodes.forEach(node => {
-        wbsMap.set(node.id, node);
-        project.tasks.forEach(task => {
-            if (task.wbsCode === node.wbsCode) {
-                taskWbsMap.set(task.id, node);
-            }
-        });
-        if(node.children) traverseWbs(node.children, node);
-      });
-    };
-    if (project.wbs) traverseWbs(project.wbs, null);
-
-    const flattened: { task: Task; level: number; hasChildren: boolean }[] = [];
-    const buildFlat = (wbsNodes: WBSNode[], level: number) => {
-        wbsNodes.forEach(node => {
-            if (expandedNodes.has(node.id)) {
-                const childTasks = project.tasks.filter(t => t.wbsCode === node.wbsCode);
-                childTasks.forEach(t => flattened.push({task: t, level, hasChildren: false}))
-                if(node.children) {
-                    buildFlat(node.children, level + 1);
-                }
-            }
-        });
-    };
-    if(project.wbs) buildFlat(project.wbs, 0);
-
-    return { flattenedTasks: flattened, taskWbsMap };
-
-  }, [project.tasks, project.wbs, expandedNodes]);
-
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
@@ -232,26 +231,17 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
             <div className="flex-1">Task Name</div>
             <div className="w-20 text-center">Duration</div>
           </div>
-          {project.wbs && project.wbs.map(node => (
-             <div key={node.id}>
-                <div onClick={() => toggleNode(node.id)} className="font-bold text-slate-800 bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center gap-2 cursor-pointer">
-                  {expandedNodes.has(node.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  {node.name}
-                </div>
-                {expandedNodes.has(node.id) && project.tasks.filter(t => t.wbsCode.startsWith(node.wbsCode)).map(task => (
-                   <GanttTaskRow 
-                     key={task.id}
-                     task={task}
-                     level={task.wbsCode.split('.').length -1}
-                     isExpanded={true} // child tasks dont expand
-                     onToggle={() => {}}
-                     onSelect={() => setSelectedTask(task)}
-                     hasChildren={false}
-                     isCritical={task.critical}
-                     showCriticalPath={showCriticalPath}
-                   />
-                ))}
-             </div>
+          {project.wbs?.map(node => (
+             <WbsGanttRow
+                key={node.id}
+                node={node}
+                project={project}
+                level={0}
+                expandedNodes={expandedNodes}
+                toggleNode={toggleNode}
+                onSelectTask={setSelectedTask}
+                showCriticalPath={showCriticalPath}
+             />
           ))}
         </div>
 

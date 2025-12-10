@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode } from '../types';
+import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode, Issue, Expense } from '../types';
 import { useData } from '../context/DataContext';
-import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit, Tag } from 'lucide-react';
+import { X, Calendar, User, FileText, AlertTriangle, Paperclip, CheckSquare, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt } from 'lucide-react';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -16,6 +16,16 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
   const applicableCodes = useMemo(() => {
     return getActivityCodesForProject(project.id);
   }, [getActivityCodesForProject, project.id]);
+
+  const linkedIssues: Issue[] = useMemo(() => {
+    if (!localTask.issueIds) return [];
+    return state.issues.filter(issue => localTask.issueIds?.includes(issue.id));
+  }, [state.issues, localTask.issueIds]);
+
+  const linkedExpenses: Expense[] = useMemo(() => {
+    if (!localTask.expenseIds) return [];
+    return state.expenses.filter(expense => localTask.expenseIds?.includes(expense.id));
+  }, [state.expenses, localTask.expenseIds]);
 
   const handleUpdate = <K extends keyof Task>(key: K, value: Task[K]) => {
     setLocalTask(prev => ({ ...prev, [key]: value }));
@@ -119,6 +129,37 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                          </button>
                       </div>
                    </section>
+                   
+                   {linkedIssues.length > 0 && (
+                     <section>
+                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2"><FileWarning size={16} className="text-yellow-500"/> Linked Issues</h3>
+                        <div className="space-y-2">
+                           {linkedIssues.map(issue => (
+                             <div key={issue.id} className="p-3 border border-slate-200 rounded-md text-sm bg-slate-50">
+                               <p className="font-medium text-slate-700">{issue.description}</p>
+                               <p className="text-xs text-slate-500 mt-1">Status: {issue.status} | Priority: {issue.priority}</p>
+                             </div>
+                           ))}
+                        </div>
+                     </section>
+                   )}
+
+                    {linkedExpenses.length > 0 && (
+                     <section>
+                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2"><Receipt size={16} className="text-green-500"/> Linked Expenses</h3>
+                        <div className="space-y-2">
+                           {linkedExpenses.map(expense => (
+                             <div key={expense.id} className="p-3 border border-slate-200 rounded-md text-sm bg-slate-50 flex justify-between items-center">
+                               <div>
+                                   <p className="font-medium text-slate-700">{expense.description}</p>
+                                   <p className="text-xs text-slate-500 mt-1">Category: {state.expenseCategories.find(c => c.id === expense.categoryId)?.name}</p>
+                               </div>
+                               <p className="font-semibold text-slate-800">${expense.actualCost.toLocaleString()}</p>
+                             </div>
+                           ))}
+                        </div>
+                     </section>
+                   )}
                 </div>
 
                 <div className="space-y-6">
@@ -151,9 +192,6 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                           <input type="date" value={localTask.endDate} onChange={e => handleUpdate('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"/>
                         </div>
                       </div>
-                       {/* FIX: The `constraintType` property does not exist on the `Task` type.
-This has been updated to use `primaryConstraint`, which is an object containing the constraint type and date.
-The option values have also been corrected to match the `ConstraintType` enum. */}
                        <div>
                           <label className="text-xs text-slate-500">Constraint</label>
                           <select 
@@ -163,7 +201,7 @@ The option values have also been corrected to match the `ConstraintType` enum. *
                                 if (newType) {
                                     handleUpdate('primaryConstraint', {
                                         type: newType,
-                                        date: newType.startsWith('Start') ? localTask.startDate : localTask.endDate,
+                                        date: newType.includes('Start') ? localTask.startDate : localTask.endDate,
                                     });
                                 } else {
                                     handleUpdate('primaryConstraint', undefined);
@@ -172,8 +210,12 @@ The option values have also been corrected to match the `ConstraintType` enum. *
                             className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"
                            >
                               <option value="">None</option>
-                              <option value="Start On or After">Start No Earlier Than</option>
-                              <option value="Finish On or Before">Finish No Later Than</option>
+                              <option value="Start On or After">Start On or After</option>
+                              <option value="Finish On or Before">Finish On or Before</option>
+                              <option value="Start On">Start On</option>
+                              <option value="Finish On">Finish On</option>
+                              <option value="Mandatory Start">Mandatory Start</option>
+                              <option value="Mandatory Finish">Mandatory Finish</option>
                            </select>
                        </div>
                    </div>

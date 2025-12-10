@@ -11,6 +11,7 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
     // In a real app, you'd filter expenses by projectId
     const expenses = state.expenses;
     const tasks = state.projects.find(p => p.id === projectId)?.tasks || [];
+    const taskMap = new Map(tasks.map(t => [t.id, t.name]));
 
     return (
         <div className="h-full flex flex-col">
@@ -43,7 +44,10 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                             <tr key={exp.id} className="hover:bg-slate-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{exp.description}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{state.expenseCategories.find(c=>c.id === exp.categoryId)?.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{tasks.find(t=>t.id === exp.activityId)?.name}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(exp.activityId)}>
+                                  <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{tasks.find(t=>t.id===exp.activityId)?.wbsCode}</span> 
+                                  {taskMap.get(exp.activityId)}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">${exp.budgetedCost.toLocaleString()}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">${exp.actualCost.toLocaleString()}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">${exp.remainingCost.toLocaleString()}</td>

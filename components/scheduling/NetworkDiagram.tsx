@@ -6,7 +6,6 @@ interface NetworkDiagramProps {
   project: Project;
 }
 
-// FIX: Define a specific type for tasks within the network diagram to ensure type safety.
 interface NodeTask extends Task {
   children: string[];
   level: number;

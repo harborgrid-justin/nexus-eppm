@@ -8,9 +8,7 @@ interface TraceLogicProps {
   onClose: () => void;
 }
 
-// FIX: Moved NodeCard outside of TraceLogic for performance and to resolve TSX key prop issue.
-// Added onNavigate prop to handle clicks and removed unused isSuccessor prop.
-const NodeCard = ({ task, relationship, onNavigate }: { task: Task; relationship?: Dependency | null; onNavigate: (task: Task) => void }) => (
+const NodeCard: React.FC<{ task: Task; relationship?: Dependency | null; onNavigate: (task: Task) => void }> = React.memo(({ task, relationship, onNavigate }) => (
     <button 
         onClick={() => onNavigate(task)}
         className={`w-full p-3 rounded-lg text-left transition-all hover:shadow-lg hover:border-nexus-400
@@ -25,7 +23,7 @@ const NodeCard = ({ task, relationship, onNavigate }: { task: Task; relationship
             </div>
         )}
     </button>
-);
+));
 
 
 const TraceLogic: React.FC<TraceLogicProps> = ({ startTask, project, onClose }) => {
@@ -68,7 +66,6 @@ const TraceLogic: React.FC<TraceLogicProps> = ({ startTask, project, onClose }) 
                 {/* Predecessors */}
                 <div className="flex flex-col gap-2 overflow-y-auto pr-2">
                     <h3 className="font-semibold text-slate-500 text-center sticky top-0 bg-slate-100 py-1">Predecessors</h3>
-                    {/* FIX: Removed unnecessary conditional and passed onNavigate prop. */}
                     {predecessors.map(p => <NodeCard key={p.task.id} task={p.task} relationship={p.relationship} onNavigate={handleNavigate} />)}
                 </div>
 
@@ -88,7 +85,6 @@ const TraceLogic: React.FC<TraceLogicProps> = ({ startTask, project, onClose }) 
                 {/* Successors */}
                  <div className="flex flex-col gap-2 overflow-y-auto pr-2">
                     <h3 className="font-semibold text-slate-500 text-center sticky top-0 bg-slate-100 py-1">Successors</h3>
-                    {/* FIX: Removed unnecessary conditional and passed onNavigate prop. */}
                     {successors.map(s => <NodeCard key={s.task.id} task={s.task} relationship={s.relationship} onNavigate={handleNavigate} />)}
                 </div>
               </div>

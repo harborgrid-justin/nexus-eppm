@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useData } from '../context/DataContext';
-import { Issue } from '../types';
+import React, { useState, useMemo } from 'react';
+import { useData } from '../../context/DataContext';
+import { Issue } from '../../types';
 import { Plus, Filter, Search, FileWarning, ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react';
 
 interface IssueLogProps {
@@ -9,7 +9,11 @@ interface IssueLogProps {
 
 const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
   const { state } = useData();
+  const project = state.projects.find(p => p.id === projectId);
   const issues = state.issues.filter(i => i.projectId === projectId);
+  const taskMap = useMemo(() => {
+    return new Map(project?.tasks.map(t => [t.id, t.name]));
+  }, [project?.tasks]);
 
   const getPriorityIcon = (priority: Issue['priority']) => {
     switch (priority) {
@@ -70,7 +74,10 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
                       <td className="px-6 py-4 text-sm font-medium text-slate-900 max-w-md truncate">{issue.description}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.status}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.assignedTo}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">{issue.activityId}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(issue.activityId || '')}>
+                        <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{project?.tasks.find(t=>t.id===issue.activityId)?.wbsCode}</span> 
+                        {taskMap.get(issue.activityId || '')}
+                      </td>
                    </tr>
                  ))}
               </tbody>

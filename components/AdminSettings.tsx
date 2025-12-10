@@ -81,7 +81,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
         return (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">
              <div className="p-4 bg-slate-50 rounded-full mb-4">
-               {navItems.find(n => n.id === activeSection)?.icon({ size: 32 })}
+               {React.createElement(navItems.find(n => n.id === activeSection)!.icon, { size: 32 })}
              </div>
              <h3 className="text-lg font-medium text-slate-900">Configuration Section</h3>
              <p>This settings module is currently being provisioned.</p>
