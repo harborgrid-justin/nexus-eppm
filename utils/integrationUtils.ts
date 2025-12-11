@@ -1,6 +1,9 @@
+
 import { 
     Project, BudgetLineItem, Risk, PurchaseOrder, 
-    NonConformanceReport, Resource, Issue
+    NonConformanceReport, Resource, Issue, Task, 
+    ChangeOrder, ProcurementPackage, FundingSource,
+    ProjectFunding
 } from '../types';
 import { getDaysDiff, calculateProjectProgress } from './calculations';
 
