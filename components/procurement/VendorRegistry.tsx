@@ -1,7 +1,10 @@
 import React from 'react';
 import { useProcurementData } from '../../hooks';
-import { Search, Filter, ShieldCheck, AlertCircle, Ban, Plus } from 'lucide-react';
+import { Filter, ShieldCheck, AlertCircle, Ban, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 
 interface VendorRegistryProps {
   projectId: string;
@@ -13,10 +16,10 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
 
   const getStatusBadge = (status: string) => {
       switch(status) {
-          case 'Preferred': return <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1"><ShieldCheck size={12}/> Preferred</span>;
-          case 'Blacklisted': return <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1"><Ban size={12}/> Blacklisted</span>;
-          case 'Probationary': return <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold flex items-center gap-1"><AlertCircle size={12}/> Probation</span>;
-          default: return <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-bold">{status}</span>;
+          case 'Preferred': return <Badge variant="success" icon={ShieldCheck}>Preferred</Badge>;
+          case 'Blacklisted': return <Badge variant="danger" icon={Ban}>Blacklisted</Badge>;
+          case 'Probationary': return <Badge variant="warning" icon={AlertCircle}>Probation</Badge>;
+          default: return <Badge variant="neutral">{status}</Badge>;
       }
   };
 
@@ -24,15 +27,10 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
     <div className="h-full flex flex-col">
         <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}/50 flex justify-between items-center`}>
             <div className="flex gap-2">
-                <div className="relative">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Search vendors..." className="pl-9 pr-4 py-1.5 border border-slate-300 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500" />
-                </div>
-                <button className="px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm flex items-center gap-2 hover:bg-slate-50 text-slate-700"><Filter size={14}/> Status</button>
+                <Input isSearch placeholder="Search vendors..." className="w-64" />
+                <Button variant="secondary" size="md" icon={Filter}>Status</Button>
             </div>
-            <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-nexus-700 shadow-sm`}>
-                <Plus size={16} /> Add Vendor
-            </button>
+            <Button variant="primary" size="md" icon={Plus}>Add Vendor</Button>
         </div>
         <div className="flex-1 overflow-auto">
             <table className="min-w-full divide-y divide-slate-200">

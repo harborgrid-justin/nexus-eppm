@@ -4,6 +4,8 @@ import TaskDetailModal from './TaskDetailModal';
 import TraceLogic from './scheduling/TraceLogic';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageView from './scheduling/ResourceUsageView';
+import GanttTaskBar from './scheduling/GanttTaskBar';
+import DependencyLines from './scheduling/DependencyLines';
 import { getWorkingDaysDiff } from '../utils/dateUtils';
 import { Diamond, ChevronRight, ChevronDown } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
@@ -13,8 +15,6 @@ interface ProjectGanttProps {
 }
 
 const ROW_HEIGHT = 44;
-
-// --- Sub-components for Memoization ---
 
 const GanttGridLines = React.memo(({ days, height }: { days: any[], height: number }) => (
   <div className="absolute top-0 left-0 pointer-events-none" style={{ width: `${days.length * DAY_WIDTH}px`, height: `${height}px` }}>
@@ -27,76 +27,6 @@ const GanttGridLines = React.memo(({ days, height }: { days: any[], height: numb
     ))}
   </div>
 ));
-
-const DependencyLines = React.memo(({ 
-  renderList, 
-  taskRowMap, 
-  projectTasks, 
-  projectStart, 
-  calendar, 
-  timelineWidth 
-}: any) => {
-  return (
-    <svg className="absolute top-[50px] left-0 pointer-events-none z-[5]" style={{ width: `${timelineWidth}px`, height: `${renderList.length * ROW_HEIGHT}px` }}>
-      <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" /></marker>
-      </defs>
-      {renderList.map((item: any) => {
-          if (item.type !== 'task') return null;
-          const task = item.task;
-          return task.dependencies.map((dep: any) => {
-              const predRowIndex = taskRowMap.get(dep.targetId);
-              const succRowIndex = taskRowMap.get(task.id);
-              if (predRowIndex === undefined || succRowIndex === undefined || !calendar) return null;
-
-              const predTask = projectTasks.find((t: Task) => t.id === dep.targetId)!;
-
-              const startOffset = getWorkingDaysDiff(projectStart, new Date(predTask.endDate), calendar);
-              const startX = startOffset * DAY_WIDTH + (predTask.duration * DAY_WIDTH);
-              const startY = predRowIndex * ROW_HEIGHT + (ROW_HEIGHT / 2);
-
-              const endOffset = getWorkingDaysDiff(projectStart, new Date(task.startDate), calendar);
-              const endX = endOffset * DAY_WIDTH;
-              const endY = succRowIndex * ROW_HEIGHT + (ROW_HEIGHT / 2);
-
-              return <path key={`${task.id}-${dep.targetId}`} d={`M ${startX} ${startY} L ${endX} ${endY}`} stroke="#64748b" strokeWidth="1" fill="none" markerEnd="url(#arrow)" />;
-          });
-      })}
-    </svg>
-  );
-});
-
-const GanttTaskBar = React.memo(({ 
-  task, 
-  rowIndex, 
-  offsetDays, 
-  width, 
-  showCriticalPath, 
-  getStatusColor, 
-  onMouseDown, 
-  onSelect 
-}: any) => {
-  return (
-    <div className="h-[44px] flex items-center absolute w-full" style={{ top: `${rowIndex * ROW_HEIGHT}px` }}>
-      <div
-        onMouseDown={(e) => onMouseDown(e, task, 'move')}
-        onClick={() => onSelect(task)}
-        className={`h-6 rounded-sm border shadow-sm relative group cursor-grab transition-all ${getStatusColor(task.status)} ${showCriticalPath && task.critical ? 'ring-2 ring-offset-1 ring-red-500' : ''}`}
-        style={{ left: `${offsetDays * DAY_WIDTH}px`, width: `${width}px` }}
-        role="button"
-        aria-label={`Task ${task.name}, Status ${task.status}, Progress ${task.progress}%`}
-      >
-        <div className="absolute h-full w-full left-0 top-0 flex items-center">
-          <div className="h-full bg-black/20 rounded-l-sm" style={{ width: `${task.progress}%` }} />
-        </div>
-        <span className="text-white text-xs font-medium absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none truncate pr-2">{task.name}</span>
-          {task.type === 'Milestone' && <Diamond size={16} className="absolute -right-2 top-1/2 -translate-y-1/2 text-white fill-slate-800" />}
-      </div>
-    </div>
-  );
-});
-
-// --- Main Component ---
 
 const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) => {
   const {
@@ -178,7 +108,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
             <div className="flex-1">Task Name</div>
             <div className="w-20 text-center">Duration</div>
           </div>
-          {flatRenderList.map(item => {
+          {flatRenderList.map((item, idx) => {
             if (item.type === 'wbs') {
                 return (
                     <button 
@@ -237,7 +167,9 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
               projectTasks={project.tasks} 
               projectStart={projectStart} 
               calendar={project.calendar}
-              timelineWidth={timelineHeaders.days.length * DAY_WIDTH} 
+              timelineWidth={timelineHeaders.days.length * DAY_WIDTH}
+              dayWidth={DAY_WIDTH}
+              rowHeight={ROW_HEIGHT}
            />
 
            <div className="relative pt-0" style={{ width: `${timelineHeaders.days.length * DAY_WIDTH}px`, height: `${flatRenderList.length * ROW_HEIGHT}px` }}>
@@ -256,10 +188,13 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
                       rowIndex={idx}
                       offsetDays={offsetDays}
                       width={width}
+                      dayWidth={DAY_WIDTH}
+                      rowHeight={ROW_HEIGHT}
                       showCriticalPath={showCriticalPath}
                       getStatusColor={getStatusColor}
                       onMouseDown={handleMouseDown}
                       onSelect={setSelectedTask}
+                      isSelected={selectedTask?.id === task.id}
                     />
                   );
               })}

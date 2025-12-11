@@ -2,17 +2,18 @@ import React from 'react';
 import { Extension } from '../types';
 import { 
   LayoutDashboard, Map, Database, Box, FileText, Settings, 
-  MoreVertical, Filter, Download, Plus, RefreshCw, Layers
+  MoreVertical, Filter, Plus, RefreshCw, Layers
 } from 'lucide-react';
 import { 
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import ErrorBoundary from './ErrorBoundary';
 
 interface ExtensionEngineProps {
   extension: Extension;
 }
 
-const ExtensionEngine: React.FC<ExtensionEngineProps> = ({ extension }) => {
+const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) => {
   // --- Renderers based on viewType ---
   
   const renderToolbar = () => (
@@ -152,5 +153,11 @@ const ExtensionEngine: React.FC<ExtensionEngineProps> = ({ extension }) => {
     </div>
   );
 };
+
+const ExtensionEngine: React.FC<ExtensionEngineProps> = (props) => (
+    <ErrorBoundary name={`Extension: ${props.extension.name}`}>
+        <ExtensionEngineContent {...props} />
+    </ErrorBoundary>
+);
 
 export default ExtensionEngine;
