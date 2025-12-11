@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React, { ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -13,7 +13,10 @@ interface State {
   errorInfo: ErrorInfo | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+// FIX: Changed the class to extend `React.Component` directly.
+// This resolves TypeScript errors where 'props' and 'setState' were not found on the component type,
+// likely due to an issue with how the named 'Component' export was being resolved.
+class ErrorBoundary extends React.Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
@@ -25,7 +28,6 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Added a backtick to fix the template literal syntax error.
     console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
     this.setState({ errorInfo });
   }
