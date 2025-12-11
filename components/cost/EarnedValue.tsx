@@ -1,6 +1,5 @@
-
 import React, { useMemo } from 'react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useProjectState } from '../../hooks';
 import { calculateProjectProgress } from '../../utils/calculations';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { BarChart2 } from 'lucide-react';

@@ -1,20 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import AiAssistant from './components/AiAssistant';
-import AdminSettings from './components/AdminSettings';
-import IntegrationHub from './components/IntegrationHub';
-import ExtensionMarketplace from './components/ExtensionMarketplace';
-import ExtensionEngine from './components/ExtensionEngine';
-import ProjectWorkspace from './components/ProjectWorkspace';
-import IndustrySelector from './components/IndustrySelector';
-import DataExchange from './components/DataExchange';
-import PortfolioManager from './components/PortfolioManager';
-import ProgramManager from './components/ProgramManager';
-import ProjectList from './components/ProjectList';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';
 import { ThemeProvider } from './context/ThemeContext';
+import IndustrySelector from './components/IndustrySelector';
+
+// Lazy load major components
+const AdminSettings = lazy(() => import('./components/AdminSettings'));
+const IntegrationHub = lazy(() => import('./components/IntegrationHub'));
+const ExtensionMarketplace = lazy(() => import('./components/ExtensionMarketplace'));
+const ExtensionEngine = lazy(() => import('./components/ExtensionEngine'));
+const ProjectWorkspace = lazy(() => import('./components/ProjectWorkspace'));
+const DataExchange = lazy(() => import('./components/DataExchange'));
+const PortfolioManager = lazy(() => import('./components/PortfolioManager'));
+const ProgramManager = lazy(() => import('./components/ProgramManager'));
+const ProjectList = lazy(() => import('./components/ProjectList'));
+
+
+const SuspenseFallback = () => (
+  <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-500">
+    <Loader2 className="animate-spin mr-2" />
+    Loading Module...
+  </div>
+);
 
 const AppContent = () => {
   const [activeTab, setActiveTab] = useState('portfolio');
@@ -114,16 +124,18 @@ const AppContent = () => {
                  <Sparkles size={16} className={isAiOpen ? 'text-nexus-600' : 'text-yellow-500'} />
                  AI Assistant
               </button>
-              <div className="h-8 w-8 rounded-full bg-slate-200 border border-slate-300 overflow-hidden cursor-pointer hover:ring-2 hover:ring-slate-400 transition-all">
+              <button aria-label="Open User Profile Menu" className="h-8 w-8 rounded-full bg-slate-200 border border-slate-300 overflow-hidden cursor-pointer hover:ring-2 hover:ring-slate-400 transition-all">
                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="User Profile" />
-              </div>
+              </button>
            </div>
         </header>
 
         {/* Main Workspace */}
         <main className="flex-1 overflow-hidden relative bg-slate-100">
            <div className="h-full w-full overflow-hidden">
-             {renderContent()}
+             <Suspense fallback={<SuspenseFallback />}>
+               {renderContent()}
+             </Suspense>
            </div>
         </main>
       </div>

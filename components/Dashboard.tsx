@@ -3,7 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
 import { TrendingDown, TrendingUp, AlertOctagon, DollarSign } from 'lucide-react';
-import { usePortfolioState } from '../hooks/usePortfolioState';
+import { usePortfolioState } from '../hooks';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 

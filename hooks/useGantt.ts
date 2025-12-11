@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Project, Task, TaskStatus } from '../types';
 import { useData } from '../context/DataContext';
@@ -184,7 +183,6 @@ export const useGantt = (initialProject: Project) => {
           cancelAnimationFrame(rafRef.current);
       }
     };
-    // FIX: Changed dependency from 'dragging' to 'draggingTask' to match state variable name.
   }, [draggingTask, handleMouseMove, handleMouseUp]);
 
   return {

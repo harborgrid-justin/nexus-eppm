@@ -1,16 +1,14 @@
 import React, { useMemo } from 'react';
-import { useData } from '../context/DataContext';
 import { Issue } from '../types';
 import { Plus, Filter, Search, FileWarning, ArrowUp, ArrowDown, ChevronsUp } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 
 interface IssueLogProps {
   projectId: string;
 }
 
 const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
-  // FIX: The useProjectState hook was updated to return 'issues'.
   const { project, issues } = useProjectState(projectId);
   const theme = useTheme();
   const taskMap = useMemo(() => {

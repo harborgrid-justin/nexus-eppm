@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProcurementData } from '../../hooks/useProcurementData';
+import { useProcurementData } from '../../hooks';
 import { Search, Filter, ShieldCheck, AlertCircle, Ban, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 

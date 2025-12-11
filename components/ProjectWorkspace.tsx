@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
   MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder

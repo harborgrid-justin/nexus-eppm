@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
-import { useQualityData } from '../hooks/useQualityData';
+import { useQualityData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
@@ -57,7 +56,6 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
-        // FIX: Pass projectId to QualityDashboard instead of qualityProfile for better data encapsulation.
         return <QualityDashboard projectId={projectId} />;
       case 'plan':
         return <QualityPlanEditor projectId={projectId} />;

@@ -120,7 +120,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
             <p className="text-sm font-medium text-white truncate">Sarah Chen</p>
             <p className="text-xs text-slate-500 truncate">Global Admin</p>
           </div>
-          <Settings size={16} className="text-slate-500 hover:text-white cursor-pointer" />
+          <button aria-label="User Settings" className="text-slate-500 hover:text-white cursor-pointer">
+            <Settings size={16} />
+          </button>
         </div>
       </div>
     </div>

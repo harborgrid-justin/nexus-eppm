@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useWbsManager } from '../../hooks/useWbsManager';
+import { useWbsManager } from '../../hooks';
 import { CostEstimate, WBSNode } from '../../types';
 import { useData } from '../../context/DataContext';
 import { Save } from 'lucide-react';

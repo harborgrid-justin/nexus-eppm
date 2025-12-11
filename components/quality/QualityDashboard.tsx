@@ -1,7 +1,6 @@
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ShieldCheck, Bug, CheckCircle, BarChart, AlertTriangle } from 'lucide-react';
-import { useProjectState } from '../../hooks/useProjectState';
+import { useQualityData } from '../../hooks';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, ComposedChart, Bar as RechartsBar, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { NonConformanceReport, QualityReport } from '../../types';
@@ -11,46 +10,11 @@ interface QualityDashboardProps {
 }
 
 const QualityDashboard: React.FC<QualityDashboardProps> = ({ projectId }) => {
-  const { qualityProfile, nonConformanceReports, qualityReports } = useProjectState(projectId);
+  const { qualityProfile, paretoData, trendData } = useQualityData(projectId);
 
-  const paretoData = useMemo(() => {
-    if (!nonConformanceReports) return [];
-    // FIX: Explicitly typed the accumulator to ensure correct type inference for `categoryCounts`.
-    const categoryCounts = nonConformanceReports.reduce((acc: Record<string, number>, defect: NonConformanceReport) => {
-        acc[defect.category] = (acc[defect.category] || 0) + 1;
-        return acc;
-    }, {});
-
-    const sorted = Object.entries(categoryCounts)
-        // FIX: Explicitly type array destructuring to ensure `a` and `b` are numbers.
-        .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
-        .map(([name, count]) => ({ name, count }));
-
-    const total = sorted.reduce((sum, item) => sum + item.count, 0);
-    let cumulative = 0;
-    return sorted.map(item => {
-        cumulative += item.count;
-        return { ...item, cumulative: total > 0 ? (cumulative / total) * 100 : 0 };
-    });
-  }, [nonConformanceReports]);
-
-  const trendData = useMemo(() => {
-    if (!qualityReports) return [];
-    // FIX: Explicitly typed the accumulator to ensure correct type inference for `monthly`.
-    const monthly = qualityReports.reduce((acc: Record<string, { month: string; Pass: number; Fail: number }>, report: QualityReport) => {
-        const month = new Date(report.date).toLocaleString('default', { month: 'short', year: 'numeric' });
-        if (!acc[month]) acc[month] = { month, Pass: 0, Fail: 0 };
-        if (report.status === 'Pass') acc[month].Pass++;
-        if (report.status === 'Fail') acc[month].Fail++;
-        return acc;
-    }, {});
-    
-    // FIX: With `acc` correctly typed, `a` and `b` are no longer `unknown`, allowing property access.
-    return Object.values(monthly).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
-  }, [qualityReports]);
-
-
-  if (!qualityProfile) return <div className="p-4">Loading quality data...</div>;
+  if (!qualityProfile || !paretoData || !trendData) {
+    return <div className="p-4">Loading quality data...</div>;
+  }
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
@@ -82,7 +46,7 @@ const QualityDashboard: React.FC<QualityDashboardProps> = ({ projectId }) => {
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Inspection Pass/Fail Trend</h3>
                  <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBar data={trendData}>
+                        <RechartsBar data={trendData} barSize={20}>
                             <XAxis dataKey="month" />
                             <YAxis />
                             <Tooltip />

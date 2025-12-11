@@ -1,26 +1,52 @@
 import { useState, useMemo } from 'react';
 import { useProjectState } from './useProjectState';
-import { LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
+import { NonConformanceReport, QualityReport } from '../types';
 
 export const useQualityData = (projectId: string) => {
-  const [activeView, setActiveView] = useState('dashboard');
-  const { project, qualityProfile, qualityReports } = useProjectState(projectId);
+  const { project, qualityProfile, qualityReports, nonConformanceReports } = useProjectState(projectId);
 
-  const navItems = useMemo(() => [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'plan', label: 'Plan', icon: FileText },
-    { id: 'standards', label: 'Standards', icon: BadgeCheck },
-    { id: 'control', label: 'Control Log', icon: ClipboardList },
-    { id: 'defects', label: 'Defects', icon: Bug },
-    { id: 'supplier', label: 'Supplier', icon: Truck },
-  ], []);
+  const paretoData = useMemo(() => {
+    if (!nonConformanceReports) return [];
+    // FIX: Add explicit type to initial value of reduce to ensure correct type inference for `acc`.
+    const categoryCounts = nonConformanceReports.reduce((acc: Record<string, number>, defect: NonConformanceReport) => {
+        acc[defect.category] = (acc[defect.category] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const sorted = Object.entries(categoryCounts)
+        // FIX: Simplified sort syntax for clarity.
+        .sort(([, a], [, b]) => b - a)
+        .map(([name, count]) => ({ name, count }));
+
+    const total = sorted.reduce((sum, item) => sum + item.count, 0);
+    let cumulative = 0;
+    return sorted.map(item => {
+        cumulative += item.count;
+        return { ...item, cumulative: total > 0 ? (cumulative / total) * 100 : 0 };
+    });
+  }, [nonConformanceReports]);
+
+  const trendData = useMemo(() => {
+    if (!qualityReports) return [];
+    // FIX: Add explicit type to initial value of reduce to ensure correct type inference for `acc`.
+    const monthly = qualityReports.reduce((acc, report: QualityReport) => {
+        const month = new Date(report.date).toLocaleString('default', { month: 'short', year: 'numeric' });
+        if (!acc[month]) acc[month] = { month, Pass: 0, Fail: 0 };
+        if (report.status === 'Pass') acc[month].Pass++;
+        if (report.status === 'Fail') acc[month].Fail++;
+        return acc;
+    }, {} as Record<string, { month: string; Pass: number; Fail: number }>);
+    
+    return Object.values(monthly).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  }, [qualityReports]);
+
 
   return {
     project,
-    activeView,
     qualityProfile,
     qualityReports,
-    setActiveView,
-    navItems,
+    nonConformanceReports,
+    paretoData,
+    trendData,
   };
 };

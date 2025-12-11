@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useProcurementData } from '../hooks/useProcurementData';
+import { useProcurementData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import ProcurementDashboard from './procurement/ProcurementDashboard';
 import VendorRegistry from './procurement/VendorRegistry';

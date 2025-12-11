@@ -67,7 +67,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
           <Sparkles className="text-yellow-400" size={20} />
           <h2 className="font-bold">Nexus AI Consultant</h2>
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-white">
+        <button onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close AI Assistant">
           <X size={20} />
         </button>
       </div>
@@ -165,6 +165,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
           <button 
             onClick={handleSendChat}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-nexus-600 text-white rounded-md hover:bg-nexus-700 transition-colors"
+            aria-label="Send chat message"
           >
             <Send size={16} />
           </button>

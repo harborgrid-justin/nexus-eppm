@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProcurementData } from '../../hooks/useProcurementData';
+import { useProcurementData } from '../../hooks';
 import StatCard from '../shared/StatCard';
 import { DollarSign, Briefcase, AlertTriangle, CheckCircle, BarChart2 } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from 'recharts';

@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { useProjectState } from '../hooks/useProjectState';
+import { useProjectState } from '../hooks';
 import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2 } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
@@ -36,7 +35,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
       
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
         <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={GanttChartSquare} />
-        <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`${formatPercentage(financials.budgetUtilization)} of budget spent`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
+        <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`${formatPercentage(financials.budgetUtilization, 1)} of budget spent`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
         <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
         <StatCard title="Quality Score" value={formatPercentage(qualityProfile.passRate)} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>

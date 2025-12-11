@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, ActivityCode, Issue, Expense, NonConformanceReport, Risk, TaskStatus } from '../types';
 import { useData } from '../context/DataContext';
@@ -89,7 +88,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                     )}
                 </div>
              </div>
-             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
+             <button onClick={onClose} aria-label="Close Task Detail Modal" className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
                 <X size={20} />
              </button>
           </div>

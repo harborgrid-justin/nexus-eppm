@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Project, Task, Risk } from '../types';
 import { useData } from '../context/DataContext';
@@ -42,7 +41,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
   const { state } = useData();
   const [subjectArea, setSubjectArea] = useState<SubjectArea>('Projects');
   const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set(['code', 'name', 'manager', 'health']));
-  const [reportData, setReportData] = useState<any[] | null>(null);
+  const [reportData, setReportData] = useState<Record<string, any>[] | null>(null);
   const theme = useTheme();
 
   const availableColumns = ALL_FIELDS[subjectArea];
@@ -58,14 +57,12 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
   };
   
   const handleGeneratePreview = () => {
-    // Mock data generation
     let data: any[] = [];
     if (subjectArea === 'Projects') {
       data = projects;
     } else if (subjectArea === 'Tasks') {
         data = state.projects.flatMap(p => p.tasks);
     } else if (subjectArea === 'Risks') {
-        // @ts-ignore
         data = state.risks;
     }
     setReportData(data);
@@ -153,7 +150,6 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                           {/* FIX: Explicitly typing 'row' as Record<string, any> allows it to be indexed by a string without TypeScript errors. */}
                            {reportData.slice(0, 50).map((row: Record<string, any>, idx) => ( // limit to 50 for preview
                                <tr key={idx} className="hover:bg-slate-50">
                                    {Array.from(selectedColumns).map((colId: string) => (

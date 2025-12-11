@@ -1,5 +1,5 @@
 import React from 'react';
-import { useProcurementData } from '../../hooks/useProcurementData';
+import { useProcurementData } from '../../hooks';
 import { Plus, FileText, AlertOctagon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';

@@ -57,7 +57,7 @@ const TraceLogic: React.FC<TraceLogicProps> = ({ startTask, project, onClose }) 
               
               <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white">
                  <h2 className="text-lg font-bold text-slate-800">Trace Logic: <span className="text-nexus-600">{currentTask.name}</span></h2>
-                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2 rounded-full">
+                 <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-2 rounded-full" aria-label="Close Trace Logic">
                     <X size={20} />
                  </button>
               </div>

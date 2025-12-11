@@ -70,4 +70,4 @@ const WBSNodeComponent: React.FC<WBSNodeComponentProps> = ({
   );
 };
 
-export default WBSNodeComponent;
+export default React.memo(WBSNodeComponent);
