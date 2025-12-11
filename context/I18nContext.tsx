@@ -6,27 +6,49 @@ import { Logger } from '../services/Logger';
 const dictionaries: Record<string, Record<string, string>> = {
   'en-US': {
     'app.title': 'Nexus PPM',
+    // Navigation
+    'nav.core_modules': 'Core Modules',
+    'nav.installed_engines': 'Installed Engines',
+    'nav.administration': 'Administration',
     'nav.portfolio': 'Portfolio',
     'nav.programs': 'Programs',
     'nav.projects': 'Projects',
-    'nav.admin': 'Administration',
-    'status.active': 'Active',
-    'status.closed': 'Closed',
+    'nav.data_exchange': 'Data Exchange',
+    'nav.marketplace': 'App Marketplace',
+    'nav.integrations': 'Integration Hub',
+    'nav.settings': 'Settings',
+    'nav.workbench': 'Component Workbench',
+    // Common
+    'common.project': 'Project',
     'common.save': 'Save Changes',
     'common.cancel': 'Cancel',
     'common.loading': 'Loading...',
+    'common.welcome': 'Welcome back',
+    'status.active': 'Active',
+    'status.closed': 'Closed',
   },
   'es-ES': {
     'app.title': 'Nexus PPM',
+    // Navigation
+    'nav.core_modules': 'Módulos Principales',
+    'nav.installed_engines': 'Motores Instalados',
+    'nav.administration': 'Administración',
     'nav.portfolio': 'Portafolio',
     'nav.programs': 'Programas',
     'nav.projects': 'Proyectos',
-    'nav.admin': 'Administración',
-    'status.active': 'Activo',
-    'status.closed': 'Cerrado',
+    'nav.data_exchange': 'Intercambio de Datos',
+    'nav.marketplace': 'Mercado de Aplicaciones',
+    'nav.integrations': 'Centro de Integración',
+    'nav.settings': 'Configuración',
+    'nav.workbench': 'Banco de Componentes',
+    // Common
+    'common.project': 'Proyecto',
     'common.save': 'Guardar Cambios',
     'common.cancel': 'Cancelar',
     'common.loading': 'Cargando...',
+    'common.welcome': 'Bienvenido de nuevo',
+    'status.active': 'Activo',
+    'status.closed': 'Cerrado',
   }
 };
 
@@ -47,7 +69,10 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const dict = dictionaries[locale] || dictionaries['en-US'];
     const text = dict[key];
     if (!text) {
-      Logger.warn(`Missing translation for key: ${key}`, { locale });
+      // Don't warn in production to avoid console noise
+      if (process.env.NODE_ENV !== 'production') {
+        Logger.warn(`Missing translation for key: ${key}`, { locale, component: 'I18nProvider' });
+      }
       return fallback || key;
     }
     return text;
@@ -55,6 +80,7 @@ export const I18nProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const formatDate = (date: string | Date): string => {
     if (!date) return '-';
+    // Ensure locale-aware formatting
     return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(date));
   };
 

@@ -1,5 +1,5 @@
 
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AiAssistant from './components/AiAssistant';
 import { Sparkles, Loader2, WifiOff } from 'lucide-react';
@@ -10,6 +10,7 @@ import { I18nProvider, useI18n } from './context/I18nContext';
 import { FeatureFlagProvider, useFeatureFlag } from './context/FeatureFlagContext';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
 import IndustrySelector from './components/IndustrySelector';
+import { Logger } from './services/Logger';
 
 // Lazy load major components
 const AdminSettings = lazy(() => import('./components/AdminSettings'));
@@ -41,6 +42,16 @@ const AppContent = () => {
   const enableAi = useFeatureFlag('enableAi');
 
   const selectedProject = state.projects.find(p => p.id === selectedProjectId) || state.projects[0];
+
+  // Structured Logging: Track Route Changes
+  useEffect(() => {
+    Logger.setGlobalContext({
+        route: activeTab,
+        projectId: selectedProjectId || 'none',
+        user: 'Sarah Chen' // Mock user
+    });
+    Logger.info(`Navigation: ${activeTab}`, { component: 'AppRouter' });
+  }, [activeTab, selectedProjectId]);
 
   const handleProjectSelect = (id: string) => {
     setSelectedProjectId(id);
@@ -111,8 +122,15 @@ const AppContent = () => {
                  </div>
               ) : (
                 <h2 className="text-lg font-semibold text-slate-800">
-                  {/* Basic map for header titles, ideally moved to i18n */}
-                  {activeTab === 'workbench' ? 'Component Workbench' : 
+                  {/* Basic map for header titles, ideally moved to i18n completely in future pass */}
+                  {activeTab === 'workbench' ? t('nav.workbench') : 
+                   activeTab === 'projectList' ? t('nav.projects') :
+                   activeTab === 'dataExchange' ? t('nav.data_exchange') :
+                   activeTab === 'marketplace' ? t('nav.marketplace') :
+                   activeTab === 'integrations' ? t('nav.integrations') :
+                   activeTab === 'admin' ? t('nav.settings') :
+                   activeTab === 'portfolio' ? t('nav.portfolio') :
+                   activeTab === 'programs' ? t('nav.programs') :
                    activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/([A-Z])/g, ' $1').trim()}
                 </h2>
               )}
@@ -121,16 +139,20 @@ const AppContent = () => {
            <div className="flex items-center gap-4">
               <IndustrySelector />
               
-              {/* Language Switcher Stub */}
+              {/* Language Switcher */}
               <select 
                 value={locale} 
-                onChange={(e) => setLocale(e.target.value)}
-                className="text-xs border border-slate-300 rounded px-2 py-1"
+                onChange={(e) => {
+                    setLocale(e.target.value);
+                    Logger.info(`Locale changed to ${e.target.value}`);
+                }}
+                className="text-xs border border-slate-300 rounded px-2 py-1 bg-white"
               >
                 <option value="en-US">EN</option>
                 <option value="es-ES">ES</option>
               </select>
 
+              {/* Feature Flag: AI Assistant */}
               {enableAi && (
                 <button 
                     onClick={() => setIsAiOpen(!isAiOpen)}
@@ -162,7 +184,7 @@ const AppContent = () => {
         </main>
       </div>
 
-      {/* AI Sidebar Overlay */}
+      {/* AI Sidebar Overlay - Only rendered if Feature Flag is ON */}
       {selectedProject && enableAi && (
         <AiAssistant 
           project={selectedProject} 

@@ -8,12 +8,13 @@ interface LogContext {
   action?: string;
   userId?: string;
   projectId?: string;
+  route?: string;
   [key: string]: any;
 }
 
 class LoggerService {
   private static instance: LoggerService;
-  private defaultContext: LogContext = {};
+  private globalContext: LogContext = {};
 
   private constructor() {}
 
@@ -24,13 +25,22 @@ class LoggerService {
     return LoggerService.instance;
   }
 
-  public setContext(context: LogContext) {
-    this.defaultContext = { ...this.defaultContext, ...context };
+  /**
+   * Sets global context attributes that apply to all subsequent logs 
+   * (e.g., User ID, Current Route, Tenant ID).
+   */
+  public setGlobalContext(context: LogContext) {
+    this.globalContext = { ...this.globalContext, ...context };
   }
 
   private log(level: LogLevel, message: string, context?: LogContext) {
     const timestamp = new Date().toISOString();
-    const mergedContext = { ...this.defaultContext, ...context };
+    
+    // Merge global context with call-specific context
+    const mergedContext = { 
+      ...this.globalContext, 
+      ...context 
+    };
     
     const payload = {
       timestamp,
@@ -42,6 +52,7 @@ class LoggerService {
     };
 
     // In production, this would dispatch to Datadog/Sentry/Splunk
+    // Example: DatadogLogs.logger.info(message, payload);
     if (ConfigService.isProduction && level === 'debug') return;
 
     const style = {

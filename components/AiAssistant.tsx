@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Project, AIAnalysisResult } from '../types';
 import { analyzeProjectRisks, chatWithProjectData } from '../services/geminiService';
 import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2 } from 'lucide-react';
+import { sanitizeInput } from '../utils/security';
 
 interface AiAssistantProps {
   project: Project;
@@ -43,14 +45,18 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
 
   const handleSendChat = async () => {
     if (!chatInput.trim()) return;
-    const userMsg = chatInput;
+    
+    // SECURITY: Sanitize input before processing state or sending to API
+    const safeInput = sanitizeInput(chatInput);
+    if (!safeInput) return;
+
     setChatInput("");
-    setChatHistory(prev => [...prev, { role: 'user', text: userMsg }]);
+    setChatHistory(prev => [...prev, { role: 'user', text: safeInput }]);
 
     // Optimistic UI update
     
     try {
-      const response = await chatWithProjectData(project, userMsg, chatHistory.map(m => m.text));
+      const response = await chatWithProjectData(project, safeInput, chatHistory.map(m => m.text));
       setChatHistory(prev => [...prev, { role: 'model', text: response }]);
     } catch (e) {
       setChatHistory(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error." }]);

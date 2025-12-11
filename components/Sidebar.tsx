@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const [activeGroup, setActiveGroup] = useState<string>('core');
   const { t } = useI18n();
   // Example feature flag usage: Hide workbench in production if flag is off
-  const showWorkbench = useFeatureFlag('enableAdvancedAnalytics'); // Reusing a flag for demo purposes
+  const showWorkbench = useFeatureFlag('enableAdvancedAnalytics'); 
 
   useEffect(() => {
     Logger.debug('Sidebar Mounted', { activeGroup, activeTab });
@@ -62,12 +62,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       label: t('nav.administration', 'Administration'),
       icon: Settings,
       items: [
-        { id: 'dataExchange', icon: Database, label: 'Data Exchange' },
-        { id: 'marketplace', icon: LayoutGrid, label: 'App Marketplace' },
-        { id: 'integrations', icon: Network, label: 'Integration Hub' },
-        { id: 'admin', icon: Settings, label: 'Settings' },
+        { id: 'dataExchange', icon: Database, label: t('nav.data_exchange', 'Data Exchange') },
+        { id: 'marketplace', icon: LayoutGrid, label: t('nav.marketplace', 'App Marketplace') },
+        { id: 'integrations', icon: Network, label: t('nav.integrations', 'Integration Hub') },
+        { id: 'admin', icon: Settings, label: t('nav.settings', 'Settings') },
         // Conditionally render Workbench based on flag/environment
-        ...(showWorkbench ? [{ id: 'workbench', icon: TestTube, label: 'Component Workbench' }] : [])
+        ...(showWorkbench ? [{ id: 'workbench', icon: TestTube, label: t('nav.workbench', 'Component Workbench') }] : [])
       ]
     }
   ], [activeExtensions, t, showWorkbench]);
