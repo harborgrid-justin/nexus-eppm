@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Users, Settings, Briefcase, Network, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
@@ -21,9 +21,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useData();
   const [activeGroup, setActiveGroup] = useState<string>('core');
 
-  const activeExtensions = state.extensions.filter(ext => ext.status === 'Active' || ext.status === 'Installed');
+  const activeExtensions = useMemo(() => 
+    state.extensions.filter(ext => ext.status === 'Active' || ext.status === 'Installed'), 
+  [state.extensions]);
 
-  const navGroups = [
+  const navGroups = useMemo(() => [
     {
       id: 'core',
       label: 'Core Modules',
@@ -55,9 +57,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         { id: 'admin', icon: Settings, label: 'Settings' },
       ]
     }
-  ];
+  ], [activeExtensions]);
 
-  const activeGroupItems = navGroups.find(g => g.id === activeGroup)?.items || [];
+  const activeGroupItems = useMemo(() => 
+    navGroups.find(g => g.id === activeGroup)?.items || [], 
+  [navGroups, activeGroup]);
 
   return (
     <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-full border-r border-slate-800 flex-shrink-0 select-none" aria-label="Main Navigation">

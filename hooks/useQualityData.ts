@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useProjectState } from './useProjectState';
 import { NonConformanceReport, QualityReport } from '../types';
 
@@ -7,16 +7,15 @@ export const useQualityData = (projectId: string) => {
 
   const paretoData = useMemo(() => {
     if (!nonConformanceReports) return [];
-    // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
+    
     const categoryCounts = nonConformanceReports.reduce<Record<string, number>>((acc, defect: NonConformanceReport) => {
         acc[defect.category] = (acc[defect.category] || 0) + 1;
         return acc;
     }, {});
 
     const sorted = Object.entries(categoryCounts)
-        // FIX: Simplified sort syntax for clarity.
-        .sort(([, a], [, b]) => b - a)
-        .map(([name, count]) => ({ name, count }));
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .map(([name, count]) => ({ name, count: count as number }));
 
     const total = sorted.reduce((sum, item) => sum + item.count, 0);
     let cumulative = 0;
@@ -28,7 +27,7 @@ export const useQualityData = (projectId: string) => {
 
   const trendData = useMemo(() => {
     if (!qualityReports) return [];
-    // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
+    
     const monthly = qualityReports.reduce<Record<string, { month: string; Pass: number; Fail: number }>>((acc, report: QualityReport) => {
         const month = new Date(report.date).toLocaleString('default', { month: 'short', year: 'numeric' });
         if (!acc[month]) acc[month] = { month, Pass: 0, Fail: 0 };
@@ -37,7 +36,11 @@ export const useQualityData = (projectId: string) => {
         return acc;
     }, {});
     
-    return Object.values(monthly).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+    return Object.values(monthly).sort((a, b) => {
+        const itemA = a as { month: string };
+        const itemB = b as { month: string };
+        return new Date(itemA.month).getTime() - new Date(itemB.month).getTime();
+    });
   }, [qualityReports]);
 
 

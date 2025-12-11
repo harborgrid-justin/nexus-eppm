@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import {
@@ -20,15 +20,26 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
   const theme = useTheme();
 
-  if (!risks) {
-    return <div className={theme.layout.pagePadding}>Loading risk data...</div>;
-  }
+  const { categoryData, avgRiskScore, openRisksCount, mitigatedCount } = useMemo(() => {
+    if (!risks) return { categoryData: [], avgRiskScore: "N/A", openRisksCount: 0, mitigatedCount: 0 };
 
-  const riskCategories = Array.from(new Set(risks.map(r => r.category)));
-  const categoryData = riskCategories.map(cat => ({
-    name: cat,
-    count: risks.filter(r => r.category === cat).length
-  }));
+    const riskCategories = Array.from(new Set(risks.map(r => r.category)));
+    const data = riskCategories.map(cat => ({
+        name: cat,
+        count: risks.filter(r => r.category === cat).length
+    }));
+
+    const avg = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "N/A";
+    const open = risks.filter(r => r.status === 'Open').length;
+    const mitigated = risks.filter(r => r.status !== 'Open').length;
+
+    return { categoryData: data, avgRiskScore: avg, openRisksCount: open, mitigatedCount: mitigated };
+  }, [risks]);
+
+  const topRisks = useMemo(() => {
+      if (!risks) return [];
+      return [...risks].sort((a,b) => b.score - a.score).slice(0, 5);
+  }, [risks]);
 
   const getScoreColor = (score: number) => {
     if (score >= 15) return '#ef4444'; // red
@@ -36,14 +47,16 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
     return '#22c55e'; // green
   };
 
-  const avgRiskScore = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "N/A";
+  if (!risks) {
+    return <div className={theme.layout.pagePadding}>Loading risk data...</div>;
+  }
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Total Risks" value={risks.length} icon={List} />
-            <StatCard title="Open Risks" value={risks.filter(r => r.status === 'Open').length} icon={AlertTriangle} trend="down" />
-            <StatCard title="Mitigated / Closed" value={risks.filter(r => r.status !== 'Open').length} icon={ShieldCheck} trend="up" />
+            <StatCard title="Open Risks" value={openRisksCount} icon={AlertTriangle} trend="down" />
+            <StatCard title="Mitigated / Closed" value={mitigatedCount} icon={ShieldCheck} trend="up" />
             <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingDown} trend="down" />
         </div>
 
@@ -64,7 +77,7 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className={`${theme.typography.h3} mb-4`}>Top 5 Risks by Score</h3>
                 <ul className="space-y-3">
-                    {risks.sort((a,b) => b.score - a.score).slice(0, 5).map(risk => (
+                    {topRisks.map(risk => (
                         <li key={risk.id} className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-lg" style={{backgroundColor: getScoreColor(risk.score)}}>
                                 {risk.score}

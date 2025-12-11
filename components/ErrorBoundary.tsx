@@ -14,27 +14,21 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    };
-  }
+  public state: State = {
+    hasError: false,
+    error: null,
+    errorInfo: null,
+  };
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
     this.setState({ errorInfo });
-    // In a real app, log to service like Sentry
   }
 
-  // FIX: Converted to an arrow function to ensure `this` is correctly bound without needing a constructor.
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   }
