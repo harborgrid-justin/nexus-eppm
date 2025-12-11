@@ -1,16 +1,17 @@
-import React, { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
+
+import React, { createContext, useContext, useReducer, ReactNode, useMemo, useCallback } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
   Document, Extension, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, WBSNode,
   RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, FundingSource, WBSNodeShape, BudgetLogItem, TaskStatus,
-  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate
+  ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate, Benefit, PortfolioRisk
 } from '../types';
 import { 
   MOCK_PROJECTS, MOCK_RESOURCES, EXTENSIONS_REGISTRY, MOCK_STAKEHOLDERS, 
   MOCK_PROCUREMENT_PACKAGES, MOCK_QUALITY_REPORTS, MOCK_COMM_LOGS, MOCK_RISK_PLAN, MOCK_RBS, MOCK_ACTIVITY_CODES,
   MOCK_ISSUE_CODES, MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_FUNDING_SOURCES,
   MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, MOCK_SOLICITATIONS, MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS,
-  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS, MOCK_DEFECTS
+  MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS, MOCK_DEFECTS, MOCK_BENEFITS, MOCK_PORTFOLIO_RISKS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
 import { addWbsNodeToProject, reparentWbsNodeInProject, approveChangeOrderInState } from '../utils/domainLogic';
@@ -82,6 +83,8 @@ export interface DataState {
   purchaseOrders: PurchaseOrder[];
   supplierReviews: SupplierPerformanceReview[];
   claims: ProcurementClaim[];
+  benefits: Benefit[];
+  portfolioRisks: PortfolioRisk[];
   errors: string[]; // Global error tracking
 }
 
@@ -144,6 +147,8 @@ const initialState: DataState = {
   purchaseOrders: MOCK_PURCHASE_ORDERS,
   supplierReviews: MOCK_SUPPLIER_REVIEWS,
   claims: MOCK_CLAIMS,
+  benefits: MOCK_BENEFITS,
+  portfolioRisks: MOCK_PORTFOLIO_RISKS,
   errors: [],
 };
 
@@ -412,28 +417,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
      }
   }, [state.projects]);
 
-  const getTask = (projectId: string, taskId: string) => {
+  const getTask = useCallback((projectId: string, taskId: string) => {
     const project = state.projects.find(p => p.id === projectId);
     return project?.tasks.find(t => t.id === taskId);
-  };
+  }, [state.projects]);
   
-  const getRiskPlan = (projectId: string) => {
+  const getRiskPlan = useCallback((projectId: string) => {
     return state.riskPlans.find(p => p.projectId === projectId);
-  };
+  }, [state.riskPlans]);
   
-  const getRBS = () => {
+  const getRBS = useCallback(() => {
     return state.rbs;
-  };
+  }, [state.rbs]);
 
-  const getProjectDocs = (projectId: string) => {
+  const getProjectDocs = useCallback((projectId: string) => {
     return state.documents.filter(d => d.projectId === projectId);
-  };
+  }, [state.documents]);
 
-  const getActivityCodesForProject = (projectId: string) => {
+  const getActivityCodesForProject = useCallback((projectId: string) => {
     return state.activityCodes.filter(ac => ac.scope === 'Global' || (ac.scope === 'Project' && ac.projectId === projectId));
-  };
+  }, [state.activityCodes]);
 
-  // Memoize the context value to prevent unnecessary re-renders
+  // Memoize the context value to prevent unnecessary re-renders of all consumers
   const contextValue = useMemo(() => ({
     state,
     dispatch,
@@ -442,7 +447,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getRiskPlan,
     getRBS,
     getActivityCodesForProject
-  }), [state]);
+  }), [state, getTask, getProjectDocs, getRiskPlan, getRBS, getActivityCodesForProject]);
 
   return (
     <DataContext.Provider value={contextValue}>

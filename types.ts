@@ -444,6 +444,35 @@ export interface ProjectFunding {
   amount: number;
 }
 
+// --- NEW PORTFOLIO TYPES ---
+export interface Benefit {
+  id: string;
+  componentId: string; // Project or Program ID
+  description: string;
+  type: 'Financial' | 'Non-Financial';
+  value: number; // Monetary value or a score
+  metric: string; // e.g., 'Annual Revenue Increase', 'Customer Satisfaction Score'
+  targetDate: string;
+  status: 'Planned' | 'In Progress' | 'Realized';
+  realizedValue?: number;
+}
+
+export interface PortfolioRisk {
+  id: string;
+  description: string;
+  category: 'Systemic' | 'Resource' | 'Strategic';
+  probability: 'Low' | 'Medium' | 'High';
+  impact: 'Low' | 'Medium' | 'High';
+  score: number;
+  owner: string;
+  status: 'Open' | 'Mitigated' | 'Closed';
+  mitigationPlan: string;
+}
+
+export type PortfolioComponentCategory = 'Innovation & Growth' | 'Operational Efficiency' | 'Regulatory & Compliance' | 'Keep the Lights On';
+// --- END NEW PORTFOLIO TYPES ---
+
+
 export interface Program {
   id: string;
   name: string;
@@ -455,6 +484,13 @@ export interface Program {
   benefits: string;
   status: 'Active' | 'Planned' | 'Closed';
   health: 'Good' | 'Warning' | 'Critical';
+  // Portfolio Fields
+  strategicImportance: number; // 1-10
+  financialValue: number; // 1-10 (e.g., NPV/ROI score)
+  riskScore: number; // 1-10 (lower is better)
+  calculatedPriorityScore: number; // 0-100
+  category: PortfolioComponentCategory;
+  businessCase: string;
 }
 
 export interface Project {
@@ -482,6 +518,14 @@ export interface Project {
   budgetLog?: BudgetLogItem[];
   funding?: ProjectFunding[];
   udfValues?: Record<string, any>; // { [udfId]: value }
+  // Portfolio Fields
+  strategicImportance: number; // 1-10
+  financialValue: number; // 1-10
+  riskScore: number; // 1-10
+  resourceFeasibility: number; // 1-10
+  calculatedPriorityScore: number; // 0-100
+  category: PortfolioComponentCategory;
+  businessCase: string;
 }
 
 export interface Integration {

@@ -1,91 +1,17 @@
+
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, Layers } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw } from 'lucide-react';
 import Dashboard from './Dashboard';
-import { useTheme } from '../context/ThemeContext';
+import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
+import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
+import PortfolioBalancing from './portfolio/PortfolioBalancing';
+import PortfolioBenefits from './portfolio/PortfolioBenefits';
+import PortfolioRisks from './portfolio/PortfolioRisks';
+import PortfolioCapacity from './portfolio/PortfolioCapacity';
+import PortfolioFinancials from './portfolio/PortfolioFinancials';
+import PortfolioCommunications from './portfolio/PortfolioCommunications';
+import PortfolioOptimization from './portfolio/PortfolioOptimization';
 import { useData } from '../context/DataContext';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { formatCompactCurrency } from '../utils/formatters';
-import { Project } from '../types';
-
-// --- Sub-Components ---
-
-const PortfolioFinancials: React.FC<{ projects: Project[] }> = ({ projects }) => {
-  const financialData = useMemo(() => projects.map(p => ({
-    name: p.code,
-    Budget: p.budget,
-    Actuals: p.spent,
-    Variance: p.budget - p.spent
-  })), [projects]);
-
-  const stats = useMemo(() => {
-    const totalBudget = projects.reduce((acc, p) => acc + p.budget, 0);
-    const totalSpent = projects.reduce((acc, p) => acc + p.spent, 0);
-    const remaining = totalBudget - totalSpent;
-    return { totalBudget, totalSpent, remaining };
-  }, [projects]);
-
-  return (
-    <div className="p-6 h-full overflow-y-auto space-y-6 animate-in fade-in duration-300">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Total Portfolio Budget</h3>
-            <p className="text-3xl font-bold text-slate-900">{formatCompactCurrency(stats.totalBudget)}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Total Actuals</h3>
-            <p className="text-3xl font-bold text-slate-900">{formatCompactCurrency(stats.totalSpent)}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Remaining</h3>
-            <p className="text-3xl font-bold text-green-600">{formatCompactCurrency(stats.remaining)}</p>
-        </div>
-      </div>
-      
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-96">
-        <h3 className="text-lg font-bold text-slate-800 mb-6">Budget vs Actuals by Project</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={financialData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" />
-            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
-            <Tooltip formatter={(val: number) => formatCompactCurrency(val)} />
-            <Legend />
-            <Bar dataKey="Budget" fill="#94a3b8" />
-            <Bar dataKey="Actuals" fill="#0ea5e9" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
-
-const PortfolioRoadmap: React.FC<{ projects: Project[] }> = ({ projects }) => {
-  return (
-    <div className="p-6 h-full overflow-y-auto animate-in fade-in duration-300">
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Strategic Timeline</h3>
-          <div className="space-y-4 min-w-[800px]">
-            {projects.map(p => (
-                <div key={p.id} className="flex items-center gap-4">
-                  <div className="w-48 text-sm font-medium text-slate-700 truncate">{p.name}</div>
-                  <div className="flex-1 h-8 bg-slate-100 rounded-full relative">
-                      {/* Mock logic for timeline bars to show visual variation */}
-                      <div 
-                        className={`absolute top-1 bottom-1 rounded-full ${p.health === 'Critical' ? 'bg-red-400' : p.health === 'Warning' ? 'bg-yellow-400' : 'bg-nexus-400'}`}
-                        style={{ left: `${(Math.random() * 20)}%`, width: `${30 + (Math.random() * 40)}%` }}
-                      >
-                        <span className="absolute left-2 text-xs text-white font-bold leading-6 truncate px-1">{p.code}</span>
-                      </div>
-                  </div>
-                </div>
-            ))}
-          </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Main Component ---
 
 const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
@@ -97,11 +23,20 @@ const PortfolioManager: React.FC = () => {
       { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard }
     ]},
     { id: 'performance', label: 'Performance', items: [
-      { id: 'financials', label: 'Financial Performance', icon: TrendingUp },
-      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 }
-    ]},
-    { id: 'strategy', label: 'Strategy', items: [
+      { id: 'financials', label: 'Financial Management', icon: TrendingUp },
+      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
+      { id: 'communications', label: 'Communications', icon: MessageCircle },
+      { id: 'optimization', label: 'Review & Optimize', icon: RefreshCw },
       { id: 'roadmap', label: 'Strategic Roadmap', icon: Layers }
+    ]},
+    { id: 'strategy', label: 'Strategy & Selection', items: [
+      { id: 'framework', label: 'Strategic Framework', icon: BookOpen },
+      { id: 'prioritization', label: 'Prioritization', icon: ListOrdered },
+      { id: 'balancing', label: 'Balancing', icon: PieChart },
+    ]},
+    { id: 'monitoring', label: 'Monitoring & Control', items: [
+      { id: 'benefits', label: 'Benefits Register', icon: Star },
+      { id: 'risks', label: 'Portfolio Risks', icon: ShieldAlert },
     ]}
   ], []);
 
@@ -123,8 +58,25 @@ const PortfolioManager: React.FC = () => {
         return <Dashboard />;
       case 'financials':
         return <PortfolioFinancials projects={state.projects} />;
+      case 'capacity':
+        return <PortfolioCapacity />;
+      case 'communications':
+        return <PortfolioCommunications />;
+      case 'optimization':
+        return <PortfolioOptimization />;
       case 'roadmap':
-        return <PortfolioRoadmap projects={state.projects} />;
+        // Placeholder for existing roadmap or can be expanded later
+        return <div className="p-6 text-slate-500">Roadmap View (Placeholder)</div>;
+      case 'framework':
+        return <PortfolioStrategyFramework />;
+      case 'prioritization':
+        return <PortfolioPrioritization />;
+      case 'balancing':
+        return <PortfolioBalancing />;
+      case 'benefits':
+        return <PortfolioBenefits />;
+      case 'risks':
+        return <PortfolioRisks />;
       default:
         return <div className="p-6 text-slate-500">Module under construction</div>;
     }

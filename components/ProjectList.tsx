@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { memo } from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar } from 'lucide-react';
 import { calculateProjectProgress } from '../utils/calculations';
@@ -9,6 +10,84 @@ import { useTheme } from '../context/ThemeContext';
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;
 }
+
+// Memoize the row component to prevent unnecessary re-renders of the entire list
+const ProjectRow = memo(({ project, onSelect }: { project: Project, onSelect: (id: string) => void }) => {
+  const progress = calculateProjectProgress(project);
+  
+  return (
+    <tr 
+      className="hover:bg-slate-50 group transition-colors cursor-pointer"
+      onClick={() => onSelect(project.id)}
+      role="row"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onSelect(project.id);
+        }
+      }}
+    >
+      <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getHealthColorClass(project.health)}`}>
+            {project.health}
+          </span>
+      </td>
+      <td className="px-6 py-4">
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-slate-900 group-hover:text-nexus-700 transition-colors">{project.name}</span>
+          <span className="text-xs text-slate-500 font-mono">{project.code}</span>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600" aria-hidden="true">
+              {formatInitials(project.manager)}
+            </div>
+            <span className="text-sm text-slate-700">{project.manager}</span>
+          </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex flex-col text-sm text-slate-600">
+          <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.startDate)}</span>
+          <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.endDate)}</span>
+        </div>
+      </td>
+      <td className="px-6 py-4 align-middle">
+        <div className="w-full">
+          <div className="flex justify-between text-xs mb-1">
+            <span className="font-medium text-slate-700">{formatPercentage(progress)} Complete</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div 
+              className={`h-2 rounded-full transition-all duration-500 ${getHealthColorClass(project.health).replace('bg-','').replace('-100','-500').replace('text-','bg-').replace('-800','')}`}
+              style={{ width: `${progress}%` }}
+              role="progressbar"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            ></div>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right">
+          <div className="text-sm font-medium text-slate-900">{formatCompactCurrency(project.budget)}</div>
+          <div className="text-xs text-slate-500">{formatCompactCurrency(project.spent)} spent</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-slate-400">
+          <button 
+            className="p-1 hover:bg-slate-200 rounded text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400" 
+            aria-label="Options"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click
+              // Add option menu logic here
+            }}
+          >
+            <MoreHorizontal size={16} />
+          </button>
+      </td>
+    </tr>
+  );
+});
 
 const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
   const { projects } = usePortfolioState();
@@ -48,69 +127,9 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
-                  {projects.map((project) => {
-                    const progress = calculateProjectProgress(project);
-                    return (
-                      <tr 
-                        key={project.id} 
-                        className="hover:bg-slate-50 group transition-colors"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getHealthColorClass(project.health)}`}>
-                             {project.health}
-                           </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button onClick={() => onSelectProject(project.id)} className="text-left w-full focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded p-1 -m-1 cursor-pointer">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-semibold text-slate-900 group-hover:text-nexus-700 transition-colors">{project.name}</span>
-                              <span className="text-xs text-slate-500 font-mono">{project.code}</span>
-                            </div>
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                           <div className="flex items-center gap-2">
-                             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600" aria-hidden="true">
-                                {formatInitials(project.manager)}
-                             </div>
-                             <span className="text-sm text-slate-700">{project.manager}</span>
-                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-col text-sm text-slate-600">
-                            <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.startDate)}</span>
-                            <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.endDate)}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 align-middle">
-                          <div className="w-full">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="font-medium text-slate-700">{formatPercentage(progress)} Complete</span>
-                            </div>
-                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                              <div 
-                                className={`h-2 rounded-full transition-all duration-500 ${getHealthColorClass(project.health).replace('bg-','').replace('-100','-500').replace('text-','bg-').replace('-800','')}`}
-                                style={{ width: `${progress}%` }}
-                                role="progressbar"
-                                aria-valuenow={progress}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                              ></div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                           <div className="text-sm font-medium text-slate-900">{formatCompactCurrency(project.budget)}</div>
-                           <div className="text-xs text-slate-500">{formatCompactCurrency(project.spent)} spent</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-slate-400">
-                           <button className="p-1 hover:bg-slate-200 rounded text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Options">
-                             <MoreHorizontal size={16} />
-                           </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {projects.map((project) => (
+                    <ProjectRow key={project.id} project={project} onSelect={onSelectProject} />
+                  ))}
                 </tbody>
               </table>
             </div>

@@ -1,5 +1,5 @@
 
-import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate } from './types';
+import { Project, TaskStatus, Resource, Extension, WBSNode, Stakeholder, ProcurementPackage, QualityReport, CommunicationLog, Task, RiskManagementPlan, RiskBreakdownStructureNode, ActivityCode, IssueCode, Issue, ExpenseCategory, Expense, BudgetLogItem, FundingSource, ProjectFunding, UserDefinedField, DataJob, ProcurementPlan, Vendor, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, Program, NonConformanceReport, CostEstimate, Benefit, PortfolioRisk } from './types';
 
 export const MOCK_RESOURCES: Resource[] = [
   { id: 'R1', name: 'Sarah Chen', role: 'Project Manager', type: 'Human', status: 'Active', capacity: 40, allocated: 35, hourlyRate: 150, skills: [], costRates: [], calendarId: 'CAL_R1' },
@@ -367,6 +367,22 @@ export const MOCK_CLAIMS: ProcurementClaim[] = [
 
 // --- END MOCK PROCUREMENT DATA ---
 
+// --- NEW PORTFOLIO MOCK DATA ---
+export const MOCK_PORTFOLIO_RISKS: PortfolioRisk[] = [
+    { id: 'PRSK-01', description: 'System-wide resource bottleneck in Q4 for Civil Engineers', category: 'Resource', probability: 'High', impact: 'Medium', score: 12, owner: 'Sarah Chen', status: 'Open', mitigationPlan: 'Cross-train junior engineers and approve overtime budget.' },
+    { id: 'PRSK-02', description: 'New federal environmental regulations could impact all active construction projects', category: 'Strategic', probability: 'Medium', impact: 'High', score: 12, owner: 'Harvey Specter', status: 'Open', mitigationPlan: 'Engage legal counsel to analyze impact and prepare compliance checklists.'},
+    { id: 'PRSK-03', description: 'Economic downturn reduces available capital for growth initiatives', category: 'Strategic', probability: 'Low', impact: 'High', score: 8, owner: 'Louis Litt', status: 'Mitigated', mitigationPlan: 'Secured multi-year credit line. Continue monitoring economic indicators.'},
+];
+
+export const MOCK_BENEFITS: Benefit[] = [
+    { id: 'BEN-001', componentId: 'P1001', description: 'Increased Rider Capacity', type: 'Non-Financial', value: 40, metric: '% Increase', targetDate: '2026-01-31', status: 'Planned' },
+    { id: 'BEN-002', componentId: 'P1001', description: 'Reduced Traffic Congestion', type: 'Non-Financial', value: 15, metric: '% Reduction', targetDate: '2026-06-30', status: 'Planned' },
+    { id: 'BEN-003', componentId: 'P1002', description: 'New Commercial Lease Revenue', type: 'Financial', value: 2500000, metric: 'Annual Revenue ($)', targetDate: '2026-03-31', status: 'Planned' },
+    { id: 'BEN-004', componentId: 'PRG-002', description: 'City-wide Energy Savings', type: 'Financial', value: 5000000, metric: 'Annual Savings ($)', targetDate: '2026-12-31', status: 'Planned' },
+];
+// --- END NEW PORTFOLIO MOCK DATA ---
+
+
 export const MOCK_PROGRAMS: Program[] = [
   {
     id: 'PRG-001',
@@ -378,7 +394,13 @@ export const MOCK_PROGRAMS: Program[] = [
     budget: 500000000,
     benefits: 'Increase rider capacity by 40% and reduce congestion.',
     status: 'Active',
-    health: 'Warning'
+    health: 'Warning',
+    strategicImportance: 9,
+    financialValue: 7,
+    riskScore: 6,
+    calculatedPriorityScore: 82,
+    category: 'Innovation & Growth',
+    businessCase: 'Expand transit to underserved areas to foster economic growth and reduce emissions.',
   },
   {
     id: 'PRG-002',
@@ -390,7 +412,13 @@ export const MOCK_PROGRAMS: Program[] = [
     budget: 150000000,
     benefits: 'Real-time traffic management and improved energy efficiency.',
     status: 'Active',
-    health: 'Good'
+    health: 'Good',
+    strategicImportance: 8,
+    financialValue: 8,
+    riskScore: 4,
+    calculatedPriorityScore: 81,
+    category: 'Innovation & Growth',
+    businessCase: 'Modernize city infrastructure to improve efficiency and resident services.',
   }
 ];
 
@@ -426,7 +454,14 @@ export const MOCK_PROJECTS: Project[] = [
         'T6': { baselineStartDate: '2024-08-01', baselineEndDate: '2024-10-15' },
       }
     }],
-    tasks: MOCK_TASKS
+    tasks: MOCK_TASKS,
+    strategicImportance: 9,
+    financialValue: 7,
+    riskScore: 7,
+    resourceFeasibility: 6,
+    calculatedPriorityScore: 78,
+    category: 'Innovation & Growth',
+    businessCase: 'Phase 2 of the Metro Line expansion is critical for meeting the program\'s core objectives of increasing rider capacity.',
   },
   {
     id: 'P1002',
@@ -440,7 +475,14 @@ export const MOCK_PROJECTS: Project[] = [
     startDate: '2024-05-01',
     endDate: '2026-02-28',
     health: 'Good',
-    tasks: []
+    tasks: [],
+    strategicImportance: 6,
+    financialValue: 8,
+    riskScore: 3,
+    resourceFeasibility: 8,
+    calculatedPriorityScore: 69,
+    category: 'Operational Efficiency',
+    businessCase: 'Develop a new downtown commercial hub to centralize city services and generate lease revenue.',
   }
 ];
 

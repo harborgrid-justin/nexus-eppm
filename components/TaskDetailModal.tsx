@@ -1,10 +1,9 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, TaskStatus } from '../types';
-import { useData } from '../context/DataContext';
-import { X, Calendar, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle } from 'lucide-react';
-import { canCompleteTask } from '../utils/integrationUtils';
+import React, { useEffect, useRef } from 'react';
+import { Task, Project, ConstraintType, EffortType, TaskStatus } from '../types';
+import { X, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { Button } from './ui/Button';
+import { useTaskForm } from '../hooks/useTaskForm';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -12,76 +11,10 @@ interface TaskDetailModalProps {
   onClose: () => void;
 }
 
-// --- Custom Hook for Form Logic ---
-const useTaskForm = (task: Task, project: Project, onClose: () => void) => {
-  const { state, dispatch, getActivityCodesForProject } = useData();
-  const [localTask, setLocalTask] = useState<Task>(JSON.parse(JSON.stringify(task))); // Deep clone for local edits
-
-  const applicableCodes = useMemo(() => 
-    getActivityCodesForProject(project.id), 
-  [getActivityCodesForProject, project.id]);
-
-  const linkedIssues = useMemo(() => 
-    localTask.issueIds ? state.issues.filter(i => localTask.issueIds?.includes(i.id)) : [], 
-  [state.issues, localTask.issueIds]);
-
-  const linkedExpenses = useMemo(() => 
-    localTask.expenseIds ? state.expenses.filter(e => localTask.expenseIds?.includes(e.id)) : [], 
-  [state.expenses, localTask.expenseIds]);
-
-  const projectNCRs = useMemo(() => 
-    state.nonConformanceReports.filter(n => n.projectId === project.id), 
-  [state.nonConformanceReports, project.id]);
-
-  const { canComplete, blockingNCRs } = useMemo(() => 
-    canCompleteTask(localTask.id, projectNCRs), 
-  [localTask.id, projectNCRs]);
-
-  const linkedRisks = useMemo(() => 
-    state.risks.filter(r => r.linkedTaskId === localTask.id), 
-  [state.risks, localTask.id]);
-
-  const updateField = <K extends keyof Task>(key: K, value: Task[K]) => {
-    setLocalTask(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleStatusChange = (newStatus: TaskStatus) => {
-    if (newStatus === TaskStatus.COMPLETED && !canComplete) {
-        alert(`Cannot complete task. There are ${blockingNCRs.length} blocking Non-Conformance Reports.`);
-        return;
-    }
-    updateField('status', newStatus);
-    if (newStatus === TaskStatus.COMPLETED) {
-        updateField('progress', 100);
-    }
-  };
-
-  const saveChanges = () => {
-    dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: localTask } });
-    onClose();
-  };
-
-  return {
-    localTask,
-    updateField,
-    handleStatusChange,
-    saveChanges,
-    applicableCodes,
-    linkedIssues,
-    linkedExpenses,
-    linkedRisks,
-    canComplete,
-    blockingNCRs,
-    state // Expose state for categories lookup
-  };
-};
-
-// --- Component ---
-
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClose }) => {
   const {
     localTask, updateField, handleStatusChange, saveChanges,
-    applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs, state
+    applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs, expenseCategories
   } = useTaskForm(task, project, onClose);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -240,7 +173,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                              <div key={expense.id} className="p-3 border border-slate-200 rounded-md text-sm bg-slate-50 flex justify-between items-center">
                                <div>
                                    <p className="font-medium text-slate-700">{expense.description}</p>
-                                   <p className="text-xs text-slate-500 mt-1">Cat: {state.expenseCategories.find(c => c.id === expense.categoryId)?.name}</p>
+                                   <p className="text-xs text-slate-500 mt-1">Cat: {expenseCategories.find(c => c.id === expense.categoryId)?.name}</p>
                                </div>
                                <p className="font-semibold text-slate-800">${expense.actualCost.toLocaleString()}</p>
                              </div>
