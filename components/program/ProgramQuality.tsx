@@ -1,0 +1,103 @@
+
+import React from 'react';
+import { useProgramData } from '../../hooks/useProgramData';
+import { ShieldCheck, Book, ClipboardList, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { Badge } from '../ui/Badge';
+
+interface ProgramQualityProps {
+  programId: string;
+}
+
+const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
+  const { qualityStandards, assuranceReviews } = useProgramData(programId);
+  const theme = useTheme();
+
+  return (
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+        <div className="flex items-center gap-2 mb-2">
+            <ShieldCheck className="text-nexus-600" size={24}/>
+            <h2 className={theme.typography.h2}>Program Quality Assurance Framework</h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Standards */}
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
+                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><Book size={18} className="text-nexus-500"/> Program Standards</h3>
+                </div>
+                <div className="flex-1 overflow-auto p-4 space-y-3">
+                    {qualityStandards.map(std => (
+                        <div key={std.id} className="p-3 border border-slate-200 rounded-lg hover:shadow-sm transition-shadow">
+                            <div className="flex justify-between items-start mb-1">
+                                <h4 className="font-bold text-sm text-slate-900">{std.category} Standard</h4>
+                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                                    std.enforcementLevel === 'Mandatory' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+                                }`}>{std.enforcementLevel}</span>
+                            </div>
+                            <p className="text-sm text-slate-600">{std.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Assurance Reviews */}
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
+                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><ClipboardList size={18} className="text-green-500"/> Assurance Log</h3>
+                </div>
+                <div className="flex-1 overflow-auto">
+                    <table className="min-w-full divide-y divide-slate-200">
+                        <thead className="bg-white">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Review Date</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Type / Scope</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {assuranceReviews.map(review => (
+                                <tr key={review.id} className="hover:bg-slate-50">
+                                    <td className="px-4 py-3 text-sm font-mono text-slate-600">{review.date}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="text-sm font-medium text-slate-900">{review.type}</div>
+                                        <div className="text-xs text-slate-500">{review.scope}</div>
+                                        <div className="text-xs text-slate-600 mt-1 italic">"{review.findings}"</div>
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                        <Badge variant={review.status === 'Pass' ? 'success' : review.status === 'Fail' ? 'danger' : 'warning'}>
+                                            {review.status}
+                                        </Badge>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {/* Continuous Improvement */}
+        <div className="p-6 bg-blue-50 border border-blue-100 rounded-xl">
+            <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2"><CheckCircle size={18}/> Continuous Improvement</h3>
+            <p className="text-sm text-blue-800 mb-4">Lessons learned are aggregated quarterly and applied to the Program Quality Standards to reduce rework across all component projects.</p>
+            <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="text-xs text-slate-500 uppercase font-bold">Defect Reduction</div>
+                    <div className="text-lg font-bold text-green-600">-15% YoY</div>
+                </div>
+                <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="text-xs text-slate-500 uppercase font-bold">Standard Adoption</div>
+                    <div className="text-lg font-bold text-blue-600">92%</div>
+                </div>
+                <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="text-xs text-slate-500 uppercase font-bold">Review Velocity</div>
+                    <div className="text-lg font-bold text-slate-700">4.5 Days</div>
+                </div>
+            </div>
+        </div>
+    </div>
+  );
+};
+
+export default ProgramQuality;

@@ -14,7 +14,7 @@ interface CostBudgetViewProps {
 const CostBudgetView: React.FC<CostBudgetViewProps> = ({ projectId }) => {
   const { budgetItems, purchaseOrders } = useProjectState(projectId);
 
-  // Transform data to include Committed Cost from Procurement Module
+  // Transform data to include Committed Cost from Procurement Module (Opportunity #2)
   const extendedBudgetItems = budgetItems.map(item => {
       const committed = calculateCommittedCost(purchaseOrders, item.id);
       const totalExposure = item.actual + committed;
@@ -30,7 +30,7 @@ const CostBudgetView: React.FC<CostBudgetViewProps> = ({ projectId }) => {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="h-72 mb-8 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-900 mb-4">Budget Consumption</h3>
+        <h3 className="text-lg font-bold text-slate-900 mb-4">Budget Consumption (Actuals + Commitments)</h3>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={extendedBudgetItems}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />

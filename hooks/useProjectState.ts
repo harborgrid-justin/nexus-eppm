@@ -92,7 +92,7 @@ export const useProjectState = (projectId: string | null) => {
     const totalPlanned = budgetItems.reduce((acc, item) => acc + item.planned, 0);
     const totalActual = budgetItems.reduce((acc, item) => acc + item.actual, 0);
     
-    // Opportunity 4: Committed Cost from POs
+    // Opportunity 2: Committed Cost from POs
     const totalCommitted = budgetItems.reduce((acc, item) => {
         return acc + calculateCommittedCost(purchaseOrders, item.id);
     }, 0);
@@ -108,15 +108,15 @@ export const useProjectState = (projectId: string | null) => {
     const revisedBudget = (project?.originalBudget || 0) + approvedCOAmount;
     const budgetUtilization = revisedBudget > 0 ? ((totalActual + totalCommitted) / revisedBudget) * 100 : 0;
 
-    // Opportunity 15: Solvency
+    // Opportunity 11: Solvency
     const totalFunding = project.funding?.reduce((sum, f) => sum + f.amount, 0) || 0;
     const solvency = checkFundingSolvency(totalActual, totalCommitted, totalFunding);
 
     return {
       totalPlanned,
       totalActual,
-      totalCommitted, // New Metric
-      variance: revisedBudget - (totalActual + totalCommitted), // Updated to include commitments
+      totalCommitted, // New Integrated Metric
+      variance: revisedBudget - (totalActual + totalCommitted), 
       approvedCOAmount,
       pendingCOAmount,
       revisedBudget,
@@ -130,7 +130,7 @@ export const useProjectState = (projectId: string | null) => {
     const highImpactRisks = risks.filter(r => r.impact === 'High' || r.probability === 'High').length;
     const openRisks = risks.filter(r => r.status === 'Open').length;
     
-    // Opportunity 6: Risk Cost Exposure
+    // Opportunity 4: Risk Cost Exposure
     const exposure = calculateRiskExposure(risks);
 
     return {

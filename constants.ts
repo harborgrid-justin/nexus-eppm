@@ -487,6 +487,10 @@ export const MOCK_PROJECTS: Project[] = [
 ];
 
 export const EXTENSIONS_REGISTRY: Extension[] = [
+  // --- DoD & Government Suites (NEW) ---
+  { id: 'dod_suite', name: 'DoD Acquisition Suite', category: 'Compliance', description: 'DoD 5000.02 Lifecycle, EVMS-748, and Defense-grade Risk.', icon: 'Shield', status: 'Available', version: '1.0', viewType: 'dashboard' },
+  { id: 'gov_budget', name: 'US Gov Budgeting (PPBE)', category: 'Financials', description: 'Planning, Programming, Budgeting, Execution & Funds Control.', icon: 'Banknote', status: 'Available', version: '1.0', viewType: 'dashboard' },
+
   // Construction Tech
   { id: 'ext_bim', name: 'BIM 360 Viewer', category: 'Construction', description: 'Interactive 3D model viewer and clash detection.', icon: 'Box', status: 'Available', version: '2.1', viewType: 'viewer3d' },
   { id: 'ext_drones', name: 'Drone Deploy', category: 'Construction', description: 'Aerial site surveys and photogrammetry integration.', icon: 'Plane', status: 'Available', version: '1.4', viewType: 'map' },

@@ -1,9 +1,11 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Task, Project, ConstraintType, EffortType, TaskStatus } from '../types';
-import { X, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { X, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle, MessageCircle, Truck } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTaskForm } from '../hooks/useTaskForm';
+import { useData } from '../context/DataContext';
+import { checkMaterialAvailability, checkOpenRFIsForTask } from '../utils/integrationUtils';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -12,12 +14,17 @@ interface TaskDetailModalProps {
 }
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClose }) => {
+  const { state } = useData();
   const {
     localTask, updateField, handleStatusChange, saveChanges,
     applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs, expenseCategories
   } = useTaskForm(task, project, onClose);
 
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Phase 2 Checks (Integration Opportunities)
+  const materialCheck = checkMaterialAvailability(localTask, state.purchaseOrders);
+  const rfiCheck = checkOpenRFIsForTask(localTask.id, state.communicationLogs);
 
   // Focus trap for accessibility
   useEffect(() => {
@@ -57,6 +64,11 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                             <ShieldAlert size={12} aria-hidden="true" /> Quality Gate Locked
                         </span>
                     )}
+                    {rfiCheck.blocked && (
+                        <span className="text-xs font-bold text-orange-600 flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
+                            <MessageCircle size={12} aria-hidden="true" /> RFI Pending
+                        </span>
+                    )}
                 </div>
              </div>
              <button onClick={onClose} aria-label="Close Modal" className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-nexus-500">
@@ -65,24 +77,51 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
           </div>
 
           <div className="flex-1 overflow-y-auto p-6">
-             {/* Quality Gate Warning */}
-             {!canComplete && (
-                 <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3" role="alert">
-                     <AlertTriangle className="text-red-600 shrink-0 mt-0.5" size={20} aria-hidden="true" />
-                     <div>
-                         <h4 className="text-sm font-bold text-red-800">Completion Blocked by Quality Control</h4>
-                         <p className="text-sm text-red-700 mt-1">Resolve the following NCRs before marking complete:</p>
-                         <ul className="mt-2 space-y-1">
-                             {blockingNCRs.map(ncr => (
-                                 <li key={ncr.id} className="text-xs font-medium text-red-800 flex items-center gap-2">
-                                     <span className="w-1.5 h-1.5 bg-red-600 rounded-full" aria-hidden="true"></span>
-                                     {ncr.id}: {ncr.description}
-                                 </li>
-                             ))}
-                         </ul>
-                     </div>
-                 </div>
-             )}
+             {/* ALERTS SECTION */}
+             <div className="space-y-3 mb-6">
+                {/* Quality Gate Warning */}
+                {!canComplete && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3" role="alert">
+                        <AlertTriangle className="text-red-600 shrink-0 mt-0.5" size={20} aria-hidden="true" />
+                        <div>
+                            <h4 className="text-sm font-bold text-red-800">Completion Blocked by Quality Control</h4>
+                            <p className="text-sm text-red-700 mt-1">Resolve the following NCRs before marking complete:</p>
+                            <ul className="mt-2 space-y-1">
+                                {blockingNCRs.map(ncr => (
+                                    <li key={ncr.id} className="text-xs font-medium text-red-800 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full" aria-hidden="true"></span>
+                                        {ncr.id}: {ncr.description}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+                {/* Material Delay Warning */}
+                {materialCheck.hasShortfall && (
+                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-start gap-3" role="alert">
+                        <Truck className="text-orange-600 shrink-0 mt-0.5" size={20} aria-hidden="true" />
+                        <div>
+                            <h4 className="text-sm font-bold text-orange-800">Supply Chain Constraint Detected</h4>
+                            <p className="text-sm text-orange-700 mt-1">
+                                Material delivery is expected {materialCheck.delayDays} days after current start date.
+                            </p>
+                        </div>
+                    </div>
+                )}
+                {/* RFI Warning */}
+                {rfiCheck.blocked && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3" role="alert">
+                        <MessageCircle className="text-blue-600 shrink-0 mt-0.5" size={20} aria-hidden="true" />
+                        <div>
+                            <h4 className="text-sm font-bold text-blue-800">Pending Technical Clarifications</h4>
+                            <p className="text-sm text-blue-700 mt-1">
+                                There are {rfiCheck.count} open RFIs linked to this task.
+                            </p>
+                        </div>
+                    </div>
+                )}
+             </div>
 
              <div className="grid grid-cols-3 gap-6">
                 <div className="col-span-2 space-y-6">
@@ -193,14 +232,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                             value={localTask.status}
                             onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
                             className={`w-full p-2 text-sm border rounded-md font-semibold ${
-                                !canComplete && localTask.status !== TaskStatus.COMPLETED 
+                                (!canComplete || rfiCheck.blocked) && localTask.status !== TaskStatus.COMPLETED 
                                     ? 'border-orange-300 focus:ring-orange-500' 
                                     : 'border-slate-200 focus:ring-nexus-500'
                             }`}
                           >
                               <option value={TaskStatus.NOT_STARTED}>Not Started</option>
                               <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
-                              <option value={TaskStatus.COMPLETED} disabled={!canComplete}>Completed {!canComplete ? '(Blocked)' : ''}</option>
+                              <option value={TaskStatus.COMPLETED} disabled={!canComplete || rfiCheck.blocked}>Completed {(!canComplete || rfiCheck.blocked) ? '(Blocked)' : ''}</option>
                               <option value={TaskStatus.DELAYED}>Delayed</option>
                           </select>
                       </div>

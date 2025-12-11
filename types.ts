@@ -472,6 +472,239 @@ export interface PortfolioRisk {
 export type PortfolioComponentCategory = 'Innovation & Growth' | 'Operational Efficiency' | 'Regulatory & Compliance' | 'Keep the Lights On';
 // --- END NEW PORTFOLIO TYPES ---
 
+// --- PROGRAM MANAGEMENT EXTENSIONS ---
+
+export interface GovernanceRole {
+  id: string;
+  role: 'Sponsor' | 'Steering Committee' | 'Program Manager' | 'Project Manager' | 'Advisor';
+  name: string;
+  authorityLevel: 'High' | 'Medium' | 'Low';
+  responsibilities: string;
+}
+
+export interface GovernanceEvent {
+  id: string;
+  name: string;
+  type: 'Gate Review' | 'Steering Committee' | 'Checkpoint';
+  frequency: 'Weekly' | 'Monthly' | 'Quarterly' | 'Ad-hoc';
+  nextDate: string;
+  status: 'Scheduled' | 'Completed' | 'Overdue';
+}
+
+export interface StrategicGoal {
+  id: string;
+  name: string;
+  description: string;
+  programs: string[]; // Program IDs
+}
+
+export interface ProgramObjective {
+  id: string;
+  description: string;
+  linkedStrategicGoalId: string;
+  linkedProjectIds: string[];
+}
+
+export interface ProgramDependency {
+  id: string;
+  sourceProjectId: string;
+  targetProjectId: string;
+  description: string;
+  type: 'Technical' | 'Resource' | 'Deliverable';
+  status: 'Critical' | 'Manageable' | 'Resolved';
+}
+
+// --- NEW PROGRAM TYPES FOR EXPANSION ---
+
+export interface ProgramOutcome {
+  id: string;
+  description: string;
+  targetDate: string;
+  status: 'On Track' | 'At Risk' | 'Achieved';
+  linkedProjectIds: string[]; // Traceability
+}
+
+export interface ProgramChangeRequest {
+  id: string;
+  title: string;
+  description: string;
+  submittedBy: string;
+  submittedDate: string;
+  status: 'Pending PCCB' | 'Approved' | 'Rejected' | 'Deferred';
+  impact: {
+    benefits: string; // Narrative
+    cost: number;
+    schedule: number; // days
+    risk: 'Low' | 'Medium' | 'High';
+  };
+}
+
+export interface ProgramRisk {
+  id: string;
+  description: string;
+  category: 'Governance' | 'Integration' | 'External' | 'Resource' | 'Benefit';
+  probability: 'Low' | 'Medium' | 'High';
+  impact: 'Low' | 'Medium' | 'High';
+  score: number;
+  owner: string;
+  status: 'Open' | 'Mitigated' | 'Closed';
+  mitigationPlan: string;
+}
+
+export interface ProgramBudgetAllocation {
+  projectId: string; // or 'Unallocated' for reserve
+  allocated: number;
+  spent: number;
+  forecast: number; // Cost to Complete
+}
+
+export interface ProgramFundingGate {
+  id: string;
+  name: string;
+  amount: number;
+  releaseDate: string;
+  status: 'Released' | 'Pending' | 'Locked';
+  milestoneTrigger: string;
+}
+
+// --- STAKEHOLDER & COMMUNICATION TYPES ---
+export interface ProgramStakeholder {
+  id: string;
+  name: string;
+  role: string;
+  category: 'Strategic' | 'Operational' | 'Delivery';
+  engagementLevel: 'Supportive' | 'Neutral' | 'Resistant' | 'Leading';
+  influence: 'High' | 'Medium' | 'Low';
+  interest: 'High' | 'Medium' | 'Low';
+}
+
+export interface ProgramCommunicationItem {
+  id: string;
+  audience: string;
+  content: string;
+  frequency: string;
+  channel: string;
+  owner: string;
+}
+
+// --- QUALITY & CLOSURE TYPES ---
+export interface ProgramQualityStandard {
+  id: string;
+  category: 'Compliance' | 'Architecture' | 'Process' | 'Security';
+  description: string;
+  enforcementLevel: 'Mandatory' | 'Guideline';
+}
+
+export interface ProgramAssuranceReview {
+  id: string;
+  date: string;
+  type: 'Gate Review' | 'Health Check' | 'Audit';
+  scope: string;
+  findings: string;
+  status: 'Pass' | 'Conditional' | 'Fail';
+}
+
+export interface ProgramTransitionItem {
+  id: string;
+  category: 'Training' | 'Documentation' | 'Support' | 'Contract';
+  description: string;
+  owner: string;
+  status: 'Planned' | 'In Progress' | 'Complete';
+  dueDate: string;
+}
+
+// --- ARCHITECTURE & TRADEOFF TYPES ---
+export interface ProgramArchitectureStandard {
+  id: string;
+  category: 'Integration' | 'Data' | 'Security' | 'Platform';
+  title: string;
+  description: string;
+  status: 'Draft' | 'Baseline' | 'Retired';
+}
+
+export interface ProgramArchitectureReview {
+  id: string;
+  gate: string;
+  date: string;
+  status: 'Scheduled' | 'Completed' | 'Delayed';
+  notes: string;
+}
+
+export interface TradeoffScenario {
+  id: string;
+  name: string;
+  description: string;
+  benefitValue: number;
+  costImpact: number;
+  riskScore: number;
+  recommendation?: 'Proceed' | 'Reject' | 'Analyze';
+}
+
+export interface ProgramIssue {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  status: 'Open' | 'In Review' | 'Escalated' | 'Resolved';
+  impactedProjectIds: string[];
+  owner: string;
+  resolutionPath: string;
+}
+
+// --- STAGE GATES (NEW) ---
+export interface GateCriterion {
+  id: string;
+  description: string;
+  status: 'Met' | 'Not Met' | 'Waived';
+  notes?: string;
+}
+
+export interface ProgramStageGate {
+  id: string;
+  name: string;
+  type: 'Funding' | 'Scope' | 'Architecture' | 'Benefit';
+  plannedDate: string;
+  actualDate?: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Conditional';
+  criteria: GateCriterion[];
+  approvers: string[];
+  decisionNotes?: string;
+}
+
+// --- INTEGRATED CHANGE (NEW) ---
+export interface OCMReadiness {
+  stakeholderGroup: string;
+  awareness: number; // 0-100
+  desire: number;
+  knowledge: number;
+  ability: number;
+  reinforcement: number;
+}
+
+export interface IntegratedChangeRequest {
+  id: string;
+  title: string;
+  description: string;
+  type: 'Organizational' | 'Technical' | 'Hybrid';
+  impactAreas: ('Roles' | 'Processes' | 'Governance' | 'Systems' | 'Data')[];
+  severity: 'Low' | 'Medium' | 'High';
+  status: 'Draft' | 'Assessing' | 'Approved' | 'Implemented';
+  readinessImpact?: OCMReadiness[];
+  linkedTechnicalChangeId?: string; // Link to project ChangeOrder
+}
+
+// --- PROGRAM VENDORS (NEW) ---
+export interface ProgramVendorSummary {
+  vendorId: string;
+  name: string;
+  totalContractValue: number;
+  activeContractsCount: number;
+  avgPerformanceScore: number;
+  criticalIssuesCount: number;
+  strategicAlignment: 'High' | 'Medium' | 'Low';
+}
+
+// --- END PROGRAM MANAGEMENT EXTENSIONS ---
 
 export interface Program {
   id: string;
@@ -603,9 +836,10 @@ export interface CommunicationLog {
   subject: string;
   participants: string[]; // Names
   date: string;
-  type: 'Meeting' | 'Email' | 'Official Letter' | 'Call';
+  type: 'Meeting' | 'Email' | 'Official Letter' | 'Call' | 'RFI';
   summary: string;
   linkedIssueId?: string; // CROSS-INTEGRATION
+  status?: 'Open' | 'Closed' | 'Draft'; // For RFIs
 }
 
 export interface QualityReport {
@@ -745,6 +979,7 @@ export interface PurchaseOrder {
   status: 'Draft' | 'Issued' | 'Partially Received' | 'received' | 'Closed';
   amount: number;
   issueDate: string;
+  expectedDeliveryDate?: string; // INTEGRATION: Material constraints
   description: string;
   linkedBudgetLineItemId?: string; // CROSS-INTEGRATION: Committed cost
 }

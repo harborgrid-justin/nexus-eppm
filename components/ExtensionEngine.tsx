@@ -1,20 +1,43 @@
-import React from 'react';
+
+import React, { lazy, Suspense } from 'react';
 import { Extension } from '../types';
 import { 
   LayoutDashboard, Map, Database, Box, FileText, Settings, 
-  MoreVertical, Filter, Plus, RefreshCw, Layers
+  MoreVertical, Filter, Plus, RefreshCw, Layers, Loader2
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import ErrorBoundary from './ErrorBoundary';
 
+// Lazy load specialized suites
+const DoDSuite = lazy(() => import('./engines/DoDSuite'));
+const GovBudgetSuite = lazy(() => import('./engines/GovBudgetSuite'));
+
 interface ExtensionEngineProps {
   extension: Extension;
 }
 
 const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) => {
-  // --- Renderers based on viewType ---
+  
+  // --- SPECIALIZED SUITE ROUTING ---
+  if (extension.id === 'dod_suite') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <DoDSuite />
+          </Suspense>
+      );
+  }
+
+  if (extension.id === 'gov_budget') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <GovBudgetSuite />
+          </Suspense>
+      );
+  }
+
+  // --- GENERIC RENDERERS based on viewType ---
   
   const renderToolbar = () => (
     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
