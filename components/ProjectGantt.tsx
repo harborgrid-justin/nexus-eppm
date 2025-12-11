@@ -98,28 +98,28 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
           {flatRenderList.map(item => {
             if (item.type === 'wbs') {
                 return (
-                    <div 
+                    <button 
                         key={item.node.id}
-                        className="group h-[44px] flex items-center px-4 border-b border-slate-200 hover:bg-slate-50 text-sm cursor-pointer font-bold bg-slate-50/70"
+                        className="group h-[44px] w-full flex items-center px-4 border-b border-slate-200 hover:bg-slate-50 text-sm text-left font-bold bg-slate-50/70"
                         style={{ paddingLeft: `${item.level * 20 + 16}px` }}
                         onClick={() => toggleNode(item.node.id)}
                     >
                         <div className="flex-1 text-slate-800 truncate pr-2 flex items-center gap-2">
-                            <button onClick={(e) => { e.stopPropagation(); toggleNode(item.node.id); }} className="p-1 -ml-6 mr-1">
+                            <span className="p-1 -ml-6 mr-1">
                                 {expandedNodes.has(item.node.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                            </button>
+                            </span>
                             <span className="font-mono text-xs text-slate-500 w-16">{item.node.wbsCode}</span>
                             {item.node.name}
                         </div>
-                    </div>
+                    </button>
                 );
             } else {
                 const task = item.task;
                 return (
-                    <div 
+                    <button 
                       key={task.id}
                       onClick={() => setSelectedTask(task)}
-                      className="group h-[44px] flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm cursor-pointer"
+                      className="group h-[44px] w-full flex items-center px-4 border-b border-slate-100 hover:bg-slate-50 text-sm text-left"
                       style={{ paddingLeft: `${item.level * 20 + 24}px` }}
                     >
                       <div className="flex-1 font-medium text-slate-700 truncate pr-2 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
@@ -128,7 +128,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
                         {task.name}
                       </div>
                       <div className="w-20 text-center text-slate-500">{task.duration > 0 ? `${task.duration}d` : '-'}</div>
-                    </div>
+                    </button>
                 );
             }
           })}

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useProjectState } from './useProjectState';
 import { NonConformanceReport, QualityReport } from '../types';
@@ -7,11 +8,11 @@ export const useQualityData = (projectId: string) => {
 
   const paretoData = useMemo(() => {
     if (!nonConformanceReports) return [];
-    // FIX: Add explicit type to initial value of reduce to ensure correct type inference for `acc`.
+    // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
     const categoryCounts = nonConformanceReports.reduce((acc: Record<string, number>, defect: NonConformanceReport) => {
         acc[defect.category] = (acc[defect.category] || 0) + 1;
         return acc;
-    }, {} as Record<string, number>);
+    }, {});
 
     const sorted = Object.entries(categoryCounts)
         // FIX: Simplified sort syntax for clarity.
@@ -28,14 +29,14 @@ export const useQualityData = (projectId: string) => {
 
   const trendData = useMemo(() => {
     if (!qualityReports) return [];
-    // FIX: Add explicit type to initial value of reduce to ensure correct type inference for `acc`.
-    const monthly = qualityReports.reduce((acc, report: QualityReport) => {
+    // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
+    const monthly = qualityReports.reduce((acc: Record<string, { month: string; Pass: number; Fail: number }>, report: QualityReport) => {
         const month = new Date(report.date).toLocaleString('default', { month: 'short', year: 'numeric' });
         if (!acc[month]) acc[month] = { month, Pass: 0, Fail: 0 };
         if (report.status === 'Pass') acc[month].Pass++;
         if (report.status === 'Fail') acc[month].Fail++;
         return acc;
-    }, {} as Record<string, { month: string; Pass: number; Fail: number }>);
+    }, {});
     
     return Object.values(monthly).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
   }, [qualityReports]);

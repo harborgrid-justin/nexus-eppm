@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar } from 'lucide-react';
@@ -53,8 +54,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                     return (
                       <tr 
                         key={project.id} 
-                        className="hover:bg-slate-50 group cursor-pointer transition-colors"
-                        onClick={() => onSelectProject(project.id)}
+                        className="hover:bg-slate-50 group transition-colors"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getHealthColorClass(project.health)}`}>
@@ -62,10 +62,12 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                            </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-slate-900 group-hover:text-nexus-700 transition-colors">{project.name}</span>
-                            <span className="text-xs text-slate-500 font-mono">{project.code}</span>
-                          </div>
+                          <button onClick={() => onSelectProject(project.id)} className="text-left w-full focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded p-1 -m-1 cursor-pointer">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-slate-900 group-hover:text-nexus-700 transition-colors">{project.name}</span>
+                              <span className="text-xs text-slate-500 font-mono">{project.code}</span>
+                            </div>
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                            <div className="flex items-center gap-2">

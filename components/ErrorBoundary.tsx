@@ -1,3 +1,4 @@
+
 import React, { ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -20,12 +21,6 @@ class ErrorBoundary extends React.Component<Props, State> {
     errorInfo: null,
   };
 
-  // FIX: Added a constructor to explicitly bind the 'this' context for the handleReset method.
-  constructor(props: Props) {
-    super(props);
-    this.handleReset = this.handleReset.bind(this);
-  }
-
   static getDerivedStateFromError(error: Error): Partial<State> {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
@@ -37,8 +32,8 @@ class ErrorBoundary extends React.Component<Props, State> {
     // In a real app, log to service like Sentry
   }
 
-  // FIX: Converted from a class property arrow function to a standard method.
-  handleReset() {
+  // FIX: Converted to an arrow function to ensure `this` is correctly bound without needing a constructor.
+  handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
   }
 
