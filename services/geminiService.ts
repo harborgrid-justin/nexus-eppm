@@ -84,7 +84,7 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
   }
 };
 
-export const chatWithProjectData = async (project: Project, userMessage: string, history: string[]): Promise<string> => {
+export const chatWithProjectData = async (project: Project, userMessage: string): Promise<string> => {
    const ai = getAiClient();
    const model = "gemini-2.5-flash";
 

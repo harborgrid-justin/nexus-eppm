@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Project, AIAnalysisResult } from '../types';
 import { analyzeProjectRisks, chatWithProjectData } from '../services/geminiService';
@@ -49,13 +48,12 @@ export const useAiAssistant = (project: Project, isOpen: boolean) => {
 
     try {
       // Optimistic UI handled, now fetch
-      const historyText = chatHistory.map(m => m.text);
-      const response = await chatWithProjectData(project, safeInput, historyText);
+      const response = await chatWithProjectData(project, safeInput);
       setChatHistory(prev => [...prev, { role: 'model', text: response }]);
     } catch (e) {
       setChatHistory(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error." }]);
     }
-  }, [chatInput, chatHistory, project]);
+  }, [chatInput, project]);
 
   return {
     analysis,

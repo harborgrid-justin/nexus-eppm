@@ -1,10 +1,14 @@
-import { Project, WBSNode, Task, TaskStatus, Risk, BudgetLogItem, ChangeOrder } from '../types';
-import { findAndModifyNode, findAndReparentNode, findAndRemoveNode } from './treeUtils';
+import { Project, WBSNode, Task, TaskStatus, ChangeOrder, BudgetLogItem } from '../types';
+import { findAndModifyNode, findAndReparentNode } from './treeUtils';
 
 // --- WBS Logic ---
 
+/**
+ * Adds a new WBS node to a project's WBS tree.
+ * Also creates an associated summary task.
+ */
 export const addWbsNodeToProject = (project: Project, parentId: string | null, newNode: WBSNode): Project => {
-  if (!project.wbs) return project;
+  if (!project.wbs) return { ...project, wbs: [newNode] };
   
   let newWbs = [...project.wbs];
   if (parentId) {
@@ -16,13 +20,18 @@ export const addWbsNodeToProject = (project: Project, parentId: string | null, n
     newWbs.push(newNode);
   }
 
-  // Auto-create summary task
+  // Auto-create summary task (if it doesn't already exist from a previous operation)
+  const taskExists = project.tasks.some(t => t.id === `T-${newNode.id}`);
+  if (taskExists) {
+      return { ...project, wbs: newWbs };
+  }
+
   const newSummaryTask: Task = {
     id: `T-${newNode.id}`,
     wbsCode: newNode.wbsCode,
     name: newNode.name,
-    startDate: project.startDate,
-    endDate: project.endDate,
+    startDate: project.startDate, // Should be calculated based on children later
+    endDate: project.endDate, // Should be calculated based on children later
     duration: 0,
     status: TaskStatus.NOT_STARTED,
     progress: 0,
@@ -41,22 +50,29 @@ export const addWbsNodeToProject = (project: Project, parentId: string | null, n
   };
 };
 
+/**
+ * Moves a WBS node to a new parent within a project's WBS tree.
+ */
 export const reparentWbsNodeInProject = (project: Project, nodeId: string, newParentId: string | null): { project: Project, error?: string } => {
-  if (!project.wbs) return { project };
+  if (!project.wbs) return { project, error: "Project has no WBS tree." };
   
-  const result = findAndReparentNode(project.wbs, nodeId, newParentId);
+  const { newNodes, error } = findAndReparentNode(project.wbs, nodeId, newParentId);
   
-  if (result.error) {
-    return { project, error: result.error };
+  if (error) {
+    return { project, error };
   }
   
+  // Note: WBS code recalculation would happen here in a real system.
   return { 
-    project: { ...project, wbs: result.newNodes } 
+    project: { ...project, wbs: newNodes } 
   };
 };
 
 // --- Change Order Logic ---
 
+/**
+ * Approves a change order and updates the corresponding project budget and log.
+ */
 export const approveChangeOrderInState = (
   projects: Project[], 
   changeOrders: ChangeOrder[], 
@@ -64,13 +80,18 @@ export const approveChangeOrderInState = (
   changeOrderId: string
 ): { updatedProjects: Project[], updatedChangeOrders: ChangeOrder[] } => {
   
-  const co = changeOrders.find(c => c.id === changeOrderId);
-  if (!co) return { updatedProjects: projects, updatedChangeOrders: changeOrders };
+  const co = changeOrders.find(c => c.id === changeOrderId && c.projectId === projectId);
+  if (!co || co.status !== 'Pending Approval') {
+    // Return original state if CO not found or not in a state to be approved
+    return { updatedProjects: projects, updatedChangeOrders: changeOrders };
+  }
 
+  // Update the status of the specific change order
   const updatedChangeOrders = changeOrders.map(c => 
     c.id === changeOrderId ? { ...c, status: 'Approved' as const } : c
   );
 
+  // Create a corresponding budget log item for the audit trail
   const newLogItem: BudgetLogItem = {
     id: `BLI-${Date.now()}`,
     projectId,
@@ -78,10 +99,12 @@ export const approveChangeOrderInState = (
     description: `Approved Change Order: ${co.title}`,
     amount: co.amount,
     status: 'Approved',
-    submittedBy: 'System',
+    submittedBy: 'System', // Or could be a user from context
     source: 'Change Order',
+    linkedChangeOrderId: co.id,
   };
 
+  // Update the budget and log for the specific project
   const updatedProjects = projects.map(p => {
     if (p.id !== projectId) return p;
     return {
@@ -92,10 +115,4 @@ export const approveChangeOrderInState = (
   });
 
   return { updatedProjects, updatedChangeOrders };
-};
-
-// --- Risk Logic ---
-
-export const calculateRiskScore = (risk: Risk): number => {
-  return risk.probabilityValue * risk.impactValue;
 };

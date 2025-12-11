@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
@@ -187,12 +186,10 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       }
       case 'ADD_WBS_NODE': {
         const { projectId, parentId, newNode } = action.payload;
-        return {
-          ...state,
-          projects: state.projects.map(p => 
-            p.id === projectId ? addWbsNodeToProject(p, parentId, newNode) : p
-          )
-        };
+        const updatedProjects = state.projects.map(p => 
+          p.id === projectId ? addWbsNodeToProject(p, parentId, newNode) : p
+        );
+        return { ...state, projects: updatedProjects };
       }
       case 'UPDATE_WBS_NODE': {
         const { projectId, nodeId, updatedData } = action.payload;
@@ -222,21 +219,17 @@ const dataReducer = (state: DataState, action: Action): DataState => {
         const { projectId, nodeId, newParentId } = action.payload;
         if (nodeId === newParentId) return state;
         
-        let error: string | undefined;
-        const newProjects = state.projects.map(p => {
-            if (p.id !== projectId) return p;
-            const result = reparentWbsNodeInProject(p, nodeId, newParentId);
-            if (result.error) {
-                error = result.error;
-                return p;
-            }
-            return result.project;
-        });
+        const projectToUpdate = state.projects.find(p => p.id === projectId);
+        if (!projectToUpdate) return state;
+
+        const { project: updatedProject, error } = reparentWbsNodeInProject(projectToUpdate, nodeId, newParentId);
 
         if (error) {
              return { ...state, errors: [...state.errors, `WBS Move Failed: ${error}`] };
         }
-        return { ...state, projects: newProjects };
+        
+        const updatedProjects = state.projects.map(p => p.id === projectId ? updatedProject : p);
+        return { ...state, projects: updatedProjects };
       }
       case 'DELETE_WBS_NODE': {
         const { projectId, nodeId } = action.payload;
@@ -449,7 +442,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getRiskPlan,
     getRBS,
     getActivityCodesForProject
-  }), [state, dispatch]);
+  }), [state]);
 
   return (
     <DataContext.Provider value={contextValue}>

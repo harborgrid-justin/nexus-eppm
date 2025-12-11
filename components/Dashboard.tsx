@@ -1,25 +1,86 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
-import { TrendingDown, TrendingUp, AlertOctagon, DollarSign } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
+import { generatePortfolioReport } from '../services/geminiService';
 
 const Dashboard: React.FC = () => {
-  const { summary, healthDataForChart, budgetDataForChart } = usePortfolioState();
+  const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const theme = useTheme();
+
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportContent, setReportContent] = useState('');
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  const handleGenerateReport = async () => {
+    setIsGeneratingReport(true);
+    setReportContent('');
+    try {
+      const report = await generatePortfolioReport(projects);
+      setReportContent(report);
+      setIsReportModalOpen(true);
+    } catch (error) {
+      console.error("Failed to generate report:", error);
+      setReportContent("Sorry, there was an error generating the report.");
+      setIsReportModalOpen(true);
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
+  const ReportModal = () => (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+         <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 flex-shrink-0">
+           <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><Sparkles size={18} className="text-nexus-500" /> AI Portfolio Analysis</h3>
+           <button onClick={() => setIsReportModalOpen(false)} className="p-1 rounded-full hover:bg-slate-200"><X size={20} /></button>
+         </div>
+         <div className="p-6 overflow-y-auto">
+           {reportContent.split('\n').filter(line => line.trim() !== '').map((line, i) => {
+               if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-semibold mt-4 mb-1 text-slate-800">{line.substring(4)}</h3>;
+               if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold mt-6 mb-2 text-slate-900 border-b pb-1">{line.substring(3)}</h2>;
+               if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-extrabold mt-2 mb-4 text-slate-900">{line.substring(2)}</h1>;
+               if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return (
+                   <div key={i} className="flex items-start my-1 pl-4">
+                     <span className="text-nexus-500 mr-2 mt-1 font-bold">•</span>
+                     <p className="text-sm text-slate-700 flex-1">{line.trim().substring(2)}</p>
+                   </div>
+               );
+               if (line.match(/^\d+\./)) return (
+                  <div key={i} className="flex items-start my-1 pl-4">
+                     <span className="text-slate-600 mr-2 mt-1 font-semibold">{line.match(/^\d+\./)![0]}</span>
+                     <p className="text-sm text-slate-700 flex-1">{line.replace(/^\d+\.\s*/, '')}</p>
+                   </div>
+               );
+               return <p key={i} className="text-sm text-slate-600 my-3 leading-relaxed">{line}</p>;
+           })}
+        </div>
+       </div>
+    </div>
+  );
+
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      {isReportModalOpen && <ReportModal />}
       <div className={`${theme.layout.header} mb-6`}>
         <div>
           <h1 className={theme.typography.h1}>Portfolio Overview</h1>
           <p className={theme.typography.small}>Welcome back, Sarah. Here's what's happening today.</p>
         </div>
         <div className="flex gap-2">
-           <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Download Report</button>
+           <button 
+             onClick={handleGenerateReport}
+             disabled={isGeneratingReport}
+             className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50"
+           >
+            {isGeneratingReport ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} className="text-yellow-500"/>}
+            {isGeneratingReport ? 'Generating...' : 'Generate AI Summary'}
+           </button>
            <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700`}>New Project</button>
         </div>
       </div>

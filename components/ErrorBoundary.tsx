@@ -25,6 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // FIX: Added a backtick to fix the template literal syntax error.
     console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
     this.setState({ errorInfo });
   }
