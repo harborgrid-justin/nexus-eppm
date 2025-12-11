@@ -8,8 +8,8 @@ interface StatCardProps {
     trend?: 'up' | 'down';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon, trend }) => (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+const StatCard: React.FC<StatCardProps> = React.memo(({ title, value, subtext, icon: Icon, trend }) => (
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -24,6 +24,6 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, subtext, icon: Icon, 
       </div>
       <p className="text-xs text-slate-500">{subtext}</p>
     </div>
-);
+));
 
 export default StatCard;

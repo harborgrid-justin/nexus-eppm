@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
@@ -14,6 +13,7 @@ import {
   MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PROGRAMS, MOCK_DEFECTS
 } from '../constants';
 import { findAndModifyNode, findAndRemoveNode, findAndReparentNode } from '../utils/treeUtils';
+import { addWbsNodeToProject, reparentWbsNodeInProject, approveChangeOrderInState } from '../utils/domainLogic';
 
 
 const MOCK_INTEGRATIONS: Integration[] = [
@@ -188,23 +188,9 @@ const dataReducer = (state: DataState, action: Action): DataState => {
         const { projectId, parentId, newNode } = action.payload;
         return {
           ...state,
-          projects: state.projects.map(p => {
-            if (p.id !== projectId || !p.wbs) return p;
-            let newWbs = [...p.wbs];
-            if (parentId) {
-              newWbs = findAndModifyNode(newWbs, parentId, node => ({
-                ...node,
-                children: [...node.children, newNode]
-              }));
-            } else {
-              newWbs.push(newNode);
-            }
-            // Automatically create a summary task for the new WBS node
-            const newSummaryTask: Task = {
-              id: `T-${newNode.id}`, wbsCode: newNode.wbsCode, name: newNode.name, startDate: p.startDate, endDate: p.endDate, duration: 0, status: TaskStatus.NOT_STARTED, progress: 0, dependencies: [], critical: false, type: 'Summary', effortType: 'Fixed Duration', resourceRequirements: [], assignments: []
-            };
-            return { ...p, wbs: newWbs, tasks: [...p.tasks, newSummaryTask] };
-          })
+          projects: state.projects.map(p => 
+            p.id === projectId ? addWbsNodeToProject(p, parentId, newNode) : p
+          )
         };
       }
       case 'UPDATE_WBS_NODE': {
@@ -233,20 +219,17 @@ const dataReducer = (state: DataState, action: Action): DataState => {
       }
       case 'UPDATE_WBS_NODE_PARENT': {
         const { projectId, nodeId, newParentId } = action.payload;
-        if (nodeId === newParentId) {
-            console.warn("Attempted to move node into itself");
-            return state; 
-        }
+        if (nodeId === newParentId) return state;
         
         let error: string | undefined;
         const newProjects = state.projects.map(p => {
-            if (p.id !== projectId || !p.wbs) return p;
-            const result = findAndReparentNode(p.wbs, nodeId, newParentId);
+            if (p.id !== projectId) return p;
+            const result = reparentWbsNodeInProject(p, nodeId, newParentId);
             if (result.error) {
                 error = result.error;
                 return p;
             }
-            return { ...p, wbs: result.newNodes };
+            return result.project;
         });
 
         if (error) {
@@ -322,32 +305,13 @@ const dataReducer = (state: DataState, action: Action): DataState => {
         return { ...state, changeOrders: [...state.changeOrders, action.payload] };
       case 'APPROVE_CHANGE_ORDER': {
           const { projectId, changeOrderId } = action.payload;
-          const co = state.changeOrders.find(c => c.id === changeOrderId);
-          if (!co) return state;
-
-          const newLogItem: BudgetLogItem = {
-              id: `BLI-${Date.now()}`,
-              projectId,
-              date: new Date().toISOString().split('T')[0],
-              description: `Approved Change Order: ${co.title}`,
-              amount: co.amount,
-              status: 'Approved',
-              submittedBy: 'System',
-              source: 'Change Order',
-          };
-
-          return {
-              ...state,
-              changeOrders: state.changeOrders.map(c => c.id === changeOrderId ? { ...c, status: 'Approved' } : c),
-              projects: state.projects.map(p => {
-                  if (p.id !== projectId) return p;
-                  return {
-                      ...p,
-                      budget: p.budget + co.amount,
-                      budgetLog: [...(p.budgetLog || []), newLogItem]
-                  };
-              })
-          };
+          const { updatedProjects, updatedChangeOrders } = approveChangeOrderInState(
+            state.projects, 
+            state.changeOrders, 
+            projectId, 
+            changeOrderId
+          );
+          return { ...state, projects: updatedProjects, changeOrders: updatedChangeOrders };
       }
       case 'UPLOAD_DOCUMENT':
         return { ...state, documents: [...state.documents, action.payload] };

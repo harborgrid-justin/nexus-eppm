@@ -1,9 +1,11 @@
-
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
 import { useTheme } from '../context/ThemeContext';
+import { Card } from './ui/Card';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
 
 const IntegrationHub: React.FC = () => {
   const { state, dispatch } = useData();
@@ -18,25 +20,23 @@ const IntegrationHub: React.FC = () => {
             </h1>
             <p className={theme.typography.small}>Manage connections to external enterprise systems.</p>
           </div>
-          <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-sm text-sm font-medium">
-             <RefreshCw size={16} /> Sync All
-          </button>
+          <Button variant="secondary" icon={RefreshCw}>Sync All</Button>
        </div>
 
       <ErrorBoundary>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {state.integrations.map((integration) => (
-              <div key={integration.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm relative group hover:shadow-md transition-all`}>
+              <Card key={integration.id} className="p-6 relative group">
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center text-xl font-bold text-slate-700 border border-slate-100">
                         {integration.logo}
                     </div>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
-                        integration.status === 'Connected' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                        {integration.status === 'Connected' ? <CheckCircle2 size={12}/> : <XCircle size={12}/>}
-                        {integration.status}
-                    </div>
+                    <Badge 
+                      variant={integration.status === 'Connected' ? 'success' : 'neutral'}
+                      icon={integration.status === 'Connected' ? CheckCircle2 : XCircle}
+                    >
+                      {integration.status}
+                    </Badge>
                   </div>
                   
                   <h3 className={theme.typography.h3}>{integration.name}</h3>
@@ -45,22 +45,18 @@ const IntegrationHub: React.FC = () => {
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-xs text-slate-400">Last synced: {integration.lastSync}</span>
                     <div className="flex gap-2">
-                        <button className="p-2 text-slate-400 hover:text-nexus-600 bg-slate-50 rounded-lg">
-                          <Settings size={16} />
-                        </button>
-                        <button 
+                        <Button variant="ghost" size="sm" className="p-2"><Settings size={16} /></Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className={integration.status === 'Connected' ? 'text-red-500 hover:text-red-600' : 'text-green-500 hover:text-green-600'}
                           onClick={() => dispatch({ type: 'TOGGLE_INTEGRATION', payload: integration.id })}
-                          className={`p-2 rounded-lg transition-colors ${
-                            integration.status === 'Connected' 
-                                ? 'text-red-500 hover:bg-red-50' 
-                                : 'text-green-500 hover:bg-green-50'
-                          }`}
                         >
                           <Power size={16} />
-                        </button>
+                        </Button>
                     </div>
                   </div>
-              </div>
+              </Card>
             ))}
 
             {[...Array(2)].map((_, i) => (
