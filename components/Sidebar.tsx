@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Users, Settings, Briefcase, Network, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers3
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers3, TestTube
 } from 'lucide-react';
+import { useI18n } from '../context/I18nContext';
+import { useFeatureFlag } from '../context/FeatureFlagContext';
+import { Logger } from '../services/Logger';
 
 interface SidebarProps {
   activeTab: string;
@@ -20,6 +24,13 @@ const iconMap: Record<string, any> = {
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useData();
   const [activeGroup, setActiveGroup] = useState<string>('core');
+  const { t } = useI18n();
+  // Example feature flag usage: Hide workbench in production if flag is off
+  const showWorkbench = useFeatureFlag('enableAdvancedAnalytics'); // Reusing a flag for demo purposes
+
+  useEffect(() => {
+    Logger.debug('Sidebar Mounted', { activeGroup, activeTab });
+  }, []); // Log only on mount
 
   const activeExtensions = useMemo(() => 
     state.extensions.filter(ext => ext.status === 'Active' || ext.status === 'Installed'), 
@@ -28,17 +39,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const navGroups = useMemo(() => [
     {
       id: 'core',
-      label: 'Core Modules',
+      label: t('nav.core_modules', 'Core Modules'),
       icon: Globe,
       items: [
-        { id: 'portfolio', icon: Globe, label: 'Portfolio' },
-        { id: 'programs', icon: Layers3, label: 'Programs' },
-        { id: 'projectList', icon: Briefcase, label: 'Projects' },
+        { id: 'portfolio', icon: Globe, label: t('nav.portfolio', 'Portfolio') },
+        { id: 'programs', icon: Layers3, label: t('nav.programs', 'Programs') },
+        { id: 'projectList', icon: Briefcase, label: t('nav.projects', 'Projects') },
       ]
     },
     {
       id: 'extensions',
-      label: 'Installed Engines',
+      label: t('nav.installed_engines', 'Installed Engines'),
       icon: Package,
       items: activeExtensions.map(ext => ({
         id: ext.id,
@@ -48,16 +59,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     },
     {
       id: 'admin',
-      label: 'Administration',
+      label: t('nav.administration', 'Administration'),
       icon: Settings,
       items: [
         { id: 'dataExchange', icon: Database, label: 'Data Exchange' },
         { id: 'marketplace', icon: LayoutGrid, label: 'App Marketplace' },
         { id: 'integrations', icon: Network, label: 'Integration Hub' },
         { id: 'admin', icon: Settings, label: 'Settings' },
+        // Conditionally render Workbench based on flag/environment
+        ...(showWorkbench ? [{ id: 'workbench', icon: TestTube, label: 'Component Workbench' }] : [])
       ]
     }
-  ], [activeExtensions]);
+  ], [activeExtensions, t, showWorkbench]);
 
   const activeGroupItems = useMemo(() => 
     navGroups.find(g => g.id === activeGroup)?.items || [], 
@@ -83,7 +96,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
              return (
               <li key={group.id}>
                 <button
-                  onClick={() => setActiveGroup(group.id)}
+                  onClick={() => {
+                    setActiveGroup(group.id);
+                    Logger.info(`Nav Group Switched: ${group.id}`);
+                  }}
                   aria-current={isActive ? 'true' : undefined}
                   className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors focus:outline-none focus:ring-2 focus:ring-nexus-500 ${
                     isActive

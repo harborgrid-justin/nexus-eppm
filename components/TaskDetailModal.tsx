@@ -1,8 +1,10 @@
+
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Task, Project, TaskType, ConstraintType, Dependency, EffortType, DependencyType, TaskStatus } from '../types';
 import { useData } from '../context/DataContext';
 import { X, Calendar, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { canCompleteTask } from '../utils/integrationUtils';
+import { Button } from './ui/Button';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -327,8 +329,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
           </div>
 
           <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-             <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-500">Cancel</button>
-             <button onClick={saveChanges} className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-nexus-500">Save Changes</button>
+             <Button variant="secondary" onClick={onClose}>Cancel</Button>
+             <Button variant="primary" onClick={saveChanges}>Save Changes</Button>
           </div>
        </div>
     </div>

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useReducer, ReactNode, useMemo } from 'react';
 import { 
   Project, Resource, Risk, Integration, Task, ChangeOrder, BudgetLineItem, 
@@ -439,8 +440,19 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return state.activityCodes.filter(ac => ac.scope === 'Global' || (ac.scope === 'Project' && ac.projectId === projectId));
   };
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    state,
+    dispatch,
+    getTask,
+    getProjectDocs,
+    getRiskPlan,
+    getRBS,
+    getActivityCodesForProject
+  }), [state, dispatch]);
+
   return (
-    <DataContext.Provider value={{ state, dispatch, getTask, getProjectDocs, getRiskPlan, getRBS, getActivityCodesForProject }}>
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );

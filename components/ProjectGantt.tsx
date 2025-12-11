@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+
+import React, { useMemo, useCallback } from 'react';
 import { Project, Task, WBSNode } from '../types';
 import TaskDetailModal from './TaskDetailModal';
 import TraceLogic from './scheduling/TraceLogic';
@@ -83,6 +84,11 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
       return map;
   }, [flatRenderList]);
 
+  // Stable handlers to prevent inline arrow functions in render
+  const handleTraceLogicOpen = useCallback(() => setIsTraceLogicOpen(true), [setIsTraceLogicOpen]);
+  const handleTraceLogicClose = useCallback(() => setIsTraceLogicOpen(false), [setIsTraceLogicOpen]);
+  const handleTaskDetailClose = useCallback(() => setSelectedTask(null), [setSelectedTask]);
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden relative">
       <GanttToolbar 
@@ -95,7 +101,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
         setActiveBaselineId={setActiveBaselineId}
         showResources={showResources}
         setShowResources={setShowResources}
-        onTraceLogic={() => setIsTraceLogicOpen(true)}
+        onTraceLogic={handleTraceLogicOpen}
         isTaskSelected={!!selectedTask}
         taskFilter={taskFilter}
         setTaskFilter={setTaskFilter}
@@ -204,8 +210,8 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
       
       {showResources && project.calendar && <ResourceUsageView project={project} dayWidth={DAY_WIDTH} projectStartDate={projectStart} />}
       
-      {selectedTask && !isTraceLogicOpen && <TaskDetailModal task={selectedTask} project={project} onClose={() => setSelectedTask(null)} />}
-      {isTraceLogicOpen && selectedTask && <TraceLogic startTask={selectedTask} project={project} onClose={() => setIsTraceLogicOpen(false)} />}
+      {selectedTask && !isTraceLogicOpen && <TaskDetailModal task={selectedTask} project={project} onClose={handleTaskDetailClose} />}
+      {isTraceLogicOpen && selectedTask && <TraceLogic startTask={selectedTask} project={project} onClose={handleTraceLogicClose} />}
     </div>
   );
 };
