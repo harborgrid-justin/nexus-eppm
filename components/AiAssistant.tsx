@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Project, AIAnalysisResult } from '../types';
-import { analyzeProjectRisks, chatWithProjectData } from '../services/geminiService';
+import React from 'react';
+import { Project } from '../types';
 import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2 } from 'lucide-react';
-import { sanitizeInput } from '../utils/security';
+import { useAiAssistant } from '../hooks/useAiAssistant';
 
 interface AiAssistantProps {
   project: Project;
@@ -12,68 +11,36 @@ interface AiAssistantProps {
 }
 
 const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) => {
-  const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', text: string}[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Auto-analyze when opened for a new project
-  useEffect(() => {
-    if (isOpen && !analysis) {
-      handleAnalyze();
-    }
-  }, [isOpen, project.id]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [chatHistory]);
-
-  const handleAnalyze = async () => {
-    setIsLoading(true);
-    try {
-      const result = await analyzeProjectRisks(project);
-      setAnalysis(result);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendChat = async () => {
-    if (!chatInput.trim()) return;
-    
-    // SECURITY: Sanitize input before processing state or sending to API
-    const safeInput = sanitizeInput(chatInput);
-    if (!safeInput) return;
-
-    setChatInput("");
-    setChatHistory(prev => [...prev, { role: 'user', text: safeInput }]);
-
-    // Optimistic UI update
-    
-    try {
-      const response = await chatWithProjectData(project, safeInput, chatHistory.map(m => m.text));
-      setChatHistory(prev => [...prev, { role: 'model', text: response }]);
-    } catch (e) {
-      setChatHistory(prev => [...prev, { role: 'model', text: "Sorry, I encountered an error." }]);
-    }
-  };
+  const {
+    analysis,
+    isLoading,
+    chatInput,
+    setChatInput,
+    chatHistory,
+    scrollRef,
+    handleAnalyze,
+    handleSendChat
+  } = useAiAssistant(project, isOpen);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[450px] bg-white shadow-2xl border-l border-slate-200 transform transition-transform duration-300 z-50 flex flex-col">
+    <div 
+      className="fixed inset-y-0 right-0 w-[450px] bg-white shadow-2xl border-l border-slate-200 transform transition-transform duration-300 z-50 flex flex-col"
+      role="dialog"
+      aria-label="AI Project Assistant"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-nexus-900 to-slate-900 text-white">
         <div className="flex items-center gap-2">
-          <Sparkles className="text-yellow-400" size={20} />
+          <Sparkles className="text-yellow-400" size={20} aria-hidden="true" />
           <h2 className="font-bold">Nexus AI Consultant</h2>
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close AI Assistant">
+        <button 
+          onClick={onClose} 
+          className="text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white rounded p-1" 
+          aria-label="Close AI Assistant"
+        >
           <X size={20} />
         </button>
       </div>
@@ -91,7 +58,12 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
             {isLoading ? (
                <Loader2 className="animate-spin text-nexus-500" size={16} />
             ) : (
-              <button onClick={handleAnalyze} className="text-xs text-nexus-600 hover:underline">Refresh</button>
+              <button 
+                onClick={handleAnalyze} 
+                className="text-xs text-nexus-600 hover:underline focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded"
+              >
+                Refresh
+              </button>
             )}
           </div>
           
@@ -106,7 +78,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
                 <ul className="text-sm space-y-1">
                   {analysis.risks.map((risk, i) => (
                     <li key={i} className="flex gap-2 items-start text-slate-700">
-                      <span className="text-red-400 mt-1">•</span>
+                      <span className="text-red-400 mt-1" aria-hidden="true">•</span>
                       {risk}
                     </li>
                   ))}
@@ -120,7 +92,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
                 <ul className="text-sm space-y-1">
                   {analysis.recommendations.map((rec, i) => (
                     <li key={i} className="flex gap-2 items-start text-slate-700">
-                       <span className="text-amber-400 mt-1">•</span>
+                       <span className="text-amber-400 mt-1" aria-hidden="true">•</span>
                        {rec}
                     </li>
                   ))}
@@ -160,7 +132,9 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
       {/* Input Area */}
       <div className="p-4 bg-white border-t border-slate-200">
         <div className="relative">
+          <label htmlFor="ai-chat-input" className="sr-only">Ask about project details</label>
           <input
+            id="ai-chat-input"
             type="text"
             className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-nexus-500 text-sm"
             placeholder="Ask about schedule delays, budget..."
@@ -170,8 +144,8 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
           />
           <button 
             onClick={handleSendChat}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-nexus-600 text-white rounded-md hover:bg-nexus-700 transition-colors"
-            aria-label="Send chat message"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-nexus-600 text-white rounded-md hover:bg-nexus-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-nexus-500"
+            aria-label="Send message"
           >
             <Send size={16} />
           </button>

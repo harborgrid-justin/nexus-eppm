@@ -1,25 +1,26 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, Suspense, lazy } from 'react';
 import { useProjectState } from '../hooks';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder
+  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2
 } from 'lucide-react';
-
-import ProjectGantt from './ProjectGantt';
-import CostManagement from './CostManagement';
-import RiskManagement from './RiskManagement';
-import IssueLog from './IssueLog';
-import ScopeManagement from './ScopeManagement';
-import StakeholderManagement from './StakeholderManagement';
-import ProcurementManagement from './ProcurementManagement';
-import QualityManagement from './QualityManagement';
-import CommunicationsManagement from './CommunicationsManagement';
-import ResourceManagement from './ResourceManagement';
-import ProjectIntegrationManagement from './ProjectIntegrationManagement';
-import NetworkDiagram from './scheduling/NetworkDiagram';
 import ErrorBoundary from './ErrorBoundary';
-import DocumentControl from './DocumentControl';
 
+// Lazy load modules to split code bundle
+const ProjectGantt = lazy(() => import('./ProjectGantt'));
+const CostManagement = lazy(() => import('./CostManagement'));
+const RiskManagement = lazy(() => import('./RiskManagement'));
+const IssueLog = lazy(() => import('./IssueLog'));
+const ScopeManagement = lazy(() => import('./ScopeManagement'));
+const StakeholderManagement = lazy(() => import('./StakeholderManagement'));
+const ProcurementManagement = lazy(() => import('./ProcurementManagement'));
+const QualityManagement = lazy(() => import('./QualityManagement'));
+const CommunicationsManagement = lazy(() => import('./CommunicationsManagement'));
+const ResourceManagement = lazy(() => import('./ResourceManagement'));
+const ProjectIntegrationManagement = lazy(() => import('./ProjectIntegrationManagement'));
+const NetworkDiagram = lazy(() => import('./scheduling/NetworkDiagram'));
+const DocumentControl = lazy(() => import('./DocumentControl'));
 
 interface ProjectWorkspaceProps {
   projectId: string;
@@ -119,7 +120,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   };
 
   if (!project) {
-    return <div>Loading Project Workspace...</div>;
+    return <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin" /></div>;
   }
 
   return (
@@ -133,7 +134,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
                 <button
                     key={group.id}
                     onClick={() => handleGroupChange(group.id)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-nexus-500 ${
                         activeGroup === group.id
                         ? 'bg-nexus-600 text-white shadow-sm'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -149,7 +150,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
             <button
               key={area.id}
               onClick={() => setActiveArea(area.id)}
-              className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nexus-500 ${
                 activeArea === area.id
                   ? 'border-nexus-600 text-nexus-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
@@ -171,7 +172,16 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
             </div>
         )}
         <ErrorBoundary name={`${activeArea} Module`}>
-          {renderContent()}
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full w-full bg-slate-50">
+                <div className="text-center">
+                    <Loader2 size={32} className="animate-spin text-nexus-500 mx-auto mb-2" />
+                    <p className="text-slate-500 text-sm">Loading Module...</p>
+                </div>
+            </div>
+          }>
+            {renderContent()}
+          </Suspense>
         </ErrorBoundary>
       </div>
     </div>
