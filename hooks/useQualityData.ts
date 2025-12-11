@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useProjectState } from './useProjectState';
 import { NonConformanceReport, QualityReport } from '../types';
@@ -9,7 +8,7 @@ export const useQualityData = (projectId: string) => {
   const paretoData = useMemo(() => {
     if (!nonConformanceReports) return [];
     // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
-    const categoryCounts = nonConformanceReports.reduce((acc: Record<string, number>, defect: NonConformanceReport) => {
+    const categoryCounts = nonConformanceReports.reduce<Record<string, number>>((acc, defect: NonConformanceReport) => {
         acc[defect.category] = (acc[defect.category] || 0) + 1;
         return acc;
     }, {});
@@ -30,7 +29,7 @@ export const useQualityData = (projectId: string) => {
   const trendData = useMemo(() => {
     if (!qualityReports) return [];
     // FIX: Add explicit type to the accumulator in reduce to ensure correct type inference for `acc`.
-    const monthly = qualityReports.reduce((acc: Record<string, { month: string; Pass: number; Fail: number }>, report: QualityReport) => {
+    const monthly = qualityReports.reduce<Record<string, { month: string; Pass: number; Fail: number }>>((acc, report: QualityReport) => {
         const month = new Date(report.date).toLocaleString('default', { month: 'short', year: 'numeric' });
         if (!acc[month]) acc[month] = { month, Pass: 0, Fail: 0 };
         if (report.status === 'Pass') acc[month].Pass++;

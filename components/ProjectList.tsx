@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Project } from '../types';
 import { ChevronRight, MoreHorizontal, Calendar } from 'lucide-react';
@@ -22,15 +21,15 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
             {/* Toolbar */}
             <div className={`p-4 ${theme.layout.headerBorder} bg-slate-50/50 flex justify-between items-center`}>
               <div className="flex items-center gap-2">
-                 <span className="text-sm font-semibold text-slate-600">View:</span>
-                 <select className="bg-white border border-slate-300 text-slate-700 text-sm rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-nexus-500">
+                 <label htmlFor="project-view-select" className="text-sm font-semibold text-slate-600">View:</label>
+                 <select id="project-view-select" className="bg-white border border-slate-300 text-slate-700 text-sm rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-nexus-500">
                    <option>All Projects</option>
                    <option>My Projects</option>
                    <option>Critical Health</option>
                  </select>
               </div>
               <div className="relative">
-                 <input type="text" placeholder="Search by name or code..." className="pl-3 pr-8 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-1 focus:ring-nexus-500 focus:outline-none w-64" />
+                 <input type="text" placeholder="Search by name or code..." aria-label="Search Projects" className="pl-3 pr-8 py-1.5 border border-slate-300 rounded-md text-sm focus:ring-1 focus:ring-nexus-500 focus:outline-none w-64" />
               </div>
             </div>
 
@@ -45,7 +44,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Schedule</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-48">Progress</th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Budget</th>
-                    <th scope="col" className="px-6 py-3 w-10"></th>
+                    <th scope="col" className="px-6 py-3 w-10"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
@@ -71,7 +70,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                            <div className="flex items-center gap-2">
-                             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                             <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600" aria-hidden="true">
                                 {formatInitials(project.manager)}
                              </div>
                              <span className="text-sm text-slate-700">{project.manager}</span>
@@ -79,8 +78,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col text-sm text-slate-600">
-                            <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400"/> {formatDate(project.startDate)}</span>
-                            <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400"/> {formatDate(project.endDate)}</span>
+                            <span className="flex items-center gap-1.5"><Calendar size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.startDate)}</span>
+                            <span className="flex items-center gap-1.5"><ChevronRight size={12} className="text-slate-400" aria-hidden="true"/> {formatDate(project.endDate)}</span>
                           </div>
                         </td>
                         <td className="px-6 py-4 align-middle">
@@ -92,6 +91,10 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                               <div 
                                 className={`h-2 rounded-full transition-all duration-500 ${getHealthColorClass(project.health).replace('bg-','').replace('-100','-500').replace('text-','bg-').replace('-800','')}`}
                                 style={{ width: `${progress}%` }}
+                                role="progressbar"
+                                aria-valuenow={progress}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
                               ></div>
                             </div>
                           </div>
@@ -101,7 +104,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                            <div className="text-xs text-slate-500">{formatCompactCurrency(project.spent)} spent</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-slate-400">
-                           <button className="p-1 hover:bg-slate-200 rounded text-slate-500">
+                           <button className="p-1 hover:bg-slate-200 rounded text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400" aria-label="Options">
                              <MoreHorizontal size={16} />
                            </button>
                         </td>
