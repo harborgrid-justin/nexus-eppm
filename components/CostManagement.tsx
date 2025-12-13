@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
-import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, TrendingUp } from 'lucide-react';
+import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, TrendingUp, ShoppingCart, MessageSquare } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
 import CostEstimating from './cost/CostEstimating';
@@ -11,9 +11,11 @@ import CostExpenses from './cost/CostExpenses';
 import BudgetLog from './cost/BudgetLog';
 import ProjectFunding from './cost/ProjectFunding';
 import EarnedValue from './cost/EarnedValue';
+import ReserveAnalysis from './cost/ReserveAnalysis';
+import CostProcurement from './cost/CostProcurement';
+import CostCommunications from './cost/CostCommunications'; 
 import { useTheme } from '../context/ThemeContext';
 import ErrorBoundary from './ErrorBoundary';
-import { formatCurrency } from '../utils/formatters';
 import { PageHeader } from './common/PageHeader';
 
 interface CostManagementProps {
@@ -39,11 +41,13 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
     { id: 'control', label: 'Control & Execution', items: [
         { id: 'budgetLog', label: 'Budget Log', icon: Landmark },
         { id: 'funding', label: 'Funding & Reconciliation', icon: Banknote },
+        { id: 'procurement', label: 'Procurement (Fin)', icon: ShoppingCart },
         { id: 'expenses', label: 'Expenses', icon: Receipt },
         { id: 'changes', label: 'Change Orders', icon: FileDiff },
     ]},
-    { id: 'analysis', label: 'Analysis', items: [
+    { id: 'monitoring', label: 'Monitoring', items: [
         { id: 'evm', label: 'Earned Value', icon: BarChart2 },
+        { id: 'communications', label: 'Communications', icon: MessageSquare },
     ]},
   ], []);
 
@@ -59,39 +63,6 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
     return navStructure.find(g => g.id === activeGroup)?.items || [];
   }, [activeGroup, navStructure]);
 
-  const renderReserveAnalysis = () => (
-      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ShieldAlert className="text-red-500"/> Reserve Analysis</h2>
-          <div className="grid grid-cols-2 gap-8">
-              <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center">
-                  <h3 className="text-sm font-bold text-slate-500 uppercase">Contingency Reserve</h3>
-                  <p className="text-xs text-slate-400 mb-4">(Known Unknowns)</p>
-                  <div className="text-3xl font-bold text-slate-800 mb-2">{formatCurrency(project?.reserves?.contingencyReserve || 0)}</div>
-                  <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                      <div className="h-full bg-green-500" style={{ width: '15%' }}></div>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-2">15% Utilized</p>
-              </div>
-              <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center">
-                  <h3 className="text-sm font-bold text-slate-500 uppercase">Management Reserve</h3>
-                  <p className="text-xs text-slate-400 mb-4">(Unknown Unknowns)</p>
-                  <div className="text-3xl font-bold text-slate-800 mb-2">{formatCurrency(project?.reserves?.managementReserve || 0)}</div>
-                  <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-500" style={{ width: '0%' }}></div>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-2">0% Utilized</p>
-              </div>
-          </div>
-          <div className="mt-8 border-t border-slate-200 pt-6">
-              <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><TrendingUp size={16}/> Funding Limit Reconciliation</h3>
-              <div className="h-48 bg-slate-50 rounded border border-slate-200 flex items-center justify-center text-slate-400">
-                  [Step Chart: Funding vs. Cumulative Cost expenditures would render here]
-              </div>
-              <p className="text-xs text-slate-500 mt-2 italic">Ensure expenditure does not exceed funding limits in any given period.</p>
-          </div>
-      </div>
-  );
-
   const renderContent = () => {
     switch(activeView) {
       case 'dashboard': return <CostDashboard projectId={projectId} />;
@@ -103,7 +74,9 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
       case 'expenses': return <CostExpenses projectId={projectId} />;
       case 'changes': return <CostChangeOrders projectId={projectId} />;
       case 'evm': return <EarnedValue projectId={projectId} />;
-      case 'reserves': return renderReserveAnalysis();
+      case 'reserves': return <ReserveAnalysis projectId={projectId} />;
+      case 'procurement': return <CostProcurement projectId={projectId} />;
+      case 'communications': return <CostCommunications projectId={projectId} />;
       default: return <CostDashboard projectId={projectId} />;
     }
   };

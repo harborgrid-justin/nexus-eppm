@@ -45,6 +45,22 @@ export interface Solicitation {
   deadline: string;
   status: string;
   invitedVendorIds: string[];
+  bids?: VendorBid[];
+}
+
+export interface VendorBid {
+  vendorId: string;
+  submittedDate: string;
+  totalAmount: number;
+  status: 'Pending' | 'Selected' | 'Rejected';
+  lineItems: BidLineItem[];
+}
+
+export interface BidLineItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
 export interface Contract {
@@ -58,6 +74,10 @@ export interface Contract {
   startDate: string;
   endDate: string;
   type: string;
+  retainagePercent: number; // e.g., 10% withheld
+  invoicedToDate: number;
+  retainedToDate: number;
+  paidToDate: number;
 }
 
 export interface PurchaseOrder {

@@ -1,7 +1,7 @@
 
 import { Risk } from './risk';
 import { Issue } from './risk'; 
-import { BudgetLogItem, ProjectFunding, CostEstimate } from './finance';
+import { BudgetLogItem, ProjectFunding, CostEstimate, CostManagementPlan } from './finance';
 import { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement } from './project_subtypes'; 
 import { ActivityCodeScope } from './common';
 
@@ -51,7 +51,29 @@ export interface Project {
   assumptions?: Assumption[];
   lessonsLearned?: LessonLearned[];
   requirements?: Requirement[];
-  costOfQuality?: { preventionCosts: number; appraisalCosts: number; internalFailureCosts: number; externalFailureCosts: number };
+  qualityPlan?: QualityManagementPlan;
+  costPlan?: CostManagementPlan;
+  costOfQuality?: CostOfQualitySnapshot;
+  coqHistory?: CostOfQualitySnapshot[];
+}
+
+export interface QualityManagementPlan {
+  objectives: string;
+  rolesAndResp: string;
+  deliverablesVerification: string;
+  nonConformanceProcess: string;
+  toolsAndTechniques: string;
+  status: 'Draft' | 'In Review' | 'Approved';
+  version: string;
+  lastUpdated: string;
+}
+
+export interface CostOfQualitySnapshot {
+  period?: string; // e.g. "Q1 2024"
+  preventionCosts: number;
+  appraisalCosts: number;
+  internalFailureCosts: number;
+  externalFailureCosts: number;
 }
 
 export interface Task {
@@ -129,17 +151,6 @@ export interface Baseline {
   taskBaselines: Record<string, { baselineStartDate: string; baselineEndDate: string }>;
 }
 
-export interface ChangeOrder {
-  id: string;
-  projectId: string;
-  title: string;
-  description: string;
-  amount: number;
-  status: 'Approved' | 'Pending Approval' | 'Rejected';
-  submittedBy: string;
-  dateSubmitted: string;
-}
-
 export interface QualityReport {
   id: string;
   projectId: string;
@@ -203,8 +214,11 @@ export interface QualityStandard {
   id: string;
   name: string;
   description: string;
-  source: string;
-  }
+  category: string;
+  source: 'Internal' | 'External' | 'Regulatory';
+  enforcement: 'Mandatory' | 'Guideline';
+  linkedWbsIds?: string[]; // IDs of WBS nodes where this standard applies
+}
 
 export interface AIAnalysisResult {
   summary: string;

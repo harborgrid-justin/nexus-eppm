@@ -47,8 +47,8 @@ export const EXTENSIONS_REGISTRY: Extension[] = [
 ];
 
 export const MOCK_QUALITY_STANDARDS: QualityStandard[] = [
-    { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', source: 'External' },
-    { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', source: 'Internal' },
+    { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', category: 'General', source: 'External', enforcement: 'Mandatory' },
+    { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', category: 'Process', source: 'Internal', enforcement: 'Mandatory' },
 ];
 
 export const MOCK_ENTERPRISE_ROLES: EnterpriseRole[] = [

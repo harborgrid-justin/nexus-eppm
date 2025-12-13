@@ -6,27 +6,53 @@ export interface Risk {
   projectId: string;
   activityId?: string;
   priority?: string;
-  status: string;
+  status: 'Draft' | 'Open' | 'Mitigated' | 'Closed';
   description: string;
   assignedTo?: string;
   dateIdentified?: string;
   category: string;
+  
+  // Qualitative Analysis
   probability: 'High' | 'Medium' | 'Low';
   impact: 'High' | 'Medium' | 'Low';
-  probabilityValue?: number;
-  impactValue?: number;
-  score: number;
+  probabilityValue: number; // 1-5
+  impactValue: number; // 1-5
+  score: number; // Prob * Impact
+  
+  // Quantitative Analysis
+  financialImpact: number; // Estimated cost impact in $
+  emv?: number; // Expected Monetary Value (Financial * Prob %)
+  
+  // Response
+  strategy: 'Avoid' | 'Mitigate' | 'Transfer' | 'Accept' | 'Escalate';
   owner: string;
   mitigationPlan?: string;
   responseActions: RiskResponseAction[];
+  contingencyReserve?: number;
+  
+  // Meta
   linkedTaskId?: string;
   linkedRiskIds?: string[];
+  isEscalated?: boolean;
+  proximity?: 'Near-term' | 'Medium-term' | 'Long-term';
+  
+  // History
+  history?: RiskHistoryItem[];
+}
+
+export interface RiskHistoryItem {
+  date: string;
+  user: string;
+  action: string;
+  change?: string;
 }
 
 export interface RiskResponseAction {
   id: string;
   description: string;
+  owner: string;
   dueDate: string;
+  status: 'Pending' | 'In Progress' | 'Complete';
 }
 
 export interface RiskManagementPlan {
