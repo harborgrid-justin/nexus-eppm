@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck, Coins } from 'lucide-react';
 import { useQualityData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
@@ -9,6 +10,7 @@ import DefectTracking from './quality/DefectTracking';
 import QualityStandards from './quality/QualityStandards';
 import SupplierQuality from './quality/SupplierQuality';
 import { useTheme } from '../context/ThemeContext';
+import { formatCurrency } from '../utils/formatters';
 
 interface QualityManagementProps {
   projectId: string;
@@ -31,6 +33,7 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
     { id: 'planning', label: 'Planning', items: [
       { id: 'plan', label: 'Quality Plan', icon: FileText },
       { id: 'standards', label: 'Standards', icon: BadgeCheck },
+      { id: 'coq', label: 'Cost of Quality', icon: Coins },
     ]},
     { id: 'execution', label: 'Assurance & Control', items: [
       { id: 'control', label: 'Control Log', icon: ClipboardList },
@@ -53,6 +56,40 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
     return navStructure.find(g => g.id === activeGroup)?.items || [];
   }, [activeGroup, navStructure]);
 
+  const renderCoQ = () => (
+      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
+          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><Coins className="text-yellow-600"/> Cost of Quality (CoQ)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
+                  <h3 className="font-bold text-green-800 mb-4 border-b border-green-200 pb-2">Cost of Good Quality</h3>
+                  <div className="space-y-4">
+                      <div className="flex justify-between">
+                          <span className="text-sm text-green-700">Prevention Costs (Training, Planning)</span>
+                          <span className="font-mono font-bold">{formatCurrency(project?.costOfQuality?.preventionCosts || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                          <span className="text-sm text-green-700">Appraisal Costs (Testing, Inspections)</span>
+                          <span className="font-mono font-bold">{formatCurrency(project?.costOfQuality?.appraisalCosts || 0)}</span>
+                      </div>
+                  </div>
+              </div>
+              <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+                  <h3 className="font-bold text-red-800 mb-4 border-b border-red-200 pb-2">Cost of Poor Quality</h3>
+                  <div className="space-y-4">
+                      <div className="flex justify-between">
+                          <span className="text-sm text-red-700">Internal Failure (Rework, Scrap)</span>
+                          <span className="font-mono font-bold">{formatCurrency(project?.costOfQuality?.internalFailureCosts || 0)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                          <span className="text-sm text-red-700">External Failure (Warranty, Returns)</span>
+                          <span className="font-mono font-bold">{formatCurrency(project?.costOfQuality?.externalFailureCosts || 0)}</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  );
+
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
@@ -67,6 +104,8 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
         return <QualityStandards />;
       case 'supplier':
         return <SupplierQuality />;
+      case 'coq':
+        return renderCoQ();
       default:
         return <QualityDashboard projectId={projectId} />;
     }

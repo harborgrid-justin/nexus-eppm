@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { useProcurementData } from '../../hooks';
-import { Plus, FileText, AlertOctagon } from 'lucide-react';
+import { Plus, FileText, AlertOctagon, Lock } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface ContractLifecycleProps {
   projectId: string;
@@ -11,6 +13,8 @@ interface ContractLifecycleProps {
 const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
   const { projectContracts, vendors, projectClaims } = useProcurementData(projectId);
   const theme = useTheme();
+  const { hasPermission } = usePermissions();
+  const canEditProcurement = hasPermission('financials:write');
 
   return (
     <div className="h-full flex flex-col">
@@ -18,9 +22,15 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
             <h3 className="font-semibold text-slate-700 flex items-center gap-2">
                 <FileText size={16} className="text-nexus-600"/> Contract Repository
             </h3>
-            <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-nexus-700 shadow-sm`}>
-                <Plus size={16}/> Create Contract
-            </button>
+            {canEditProcurement ? (
+                <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-nexus-700 shadow-sm`}>
+                    <Plus size={16}/> <span className="hidden sm:inline">Create Contract</span>
+                </button>
+            ) : (
+                <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+                    <Lock size={14}/> Read Only
+                </div>
+            )}
         </div>
         <div className={`flex-1 overflow-auto ${theme.layout.pagePadding} space-y-4`}>
             {projectContracts.map(contract => {
@@ -29,7 +39,7 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                 
                 return (
                     <div key={contract.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm hover:shadow-md transition-all group`}>
-                        <div className="flex justify-between items-start mb-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
                             <div>
                                 <h4 className="text-lg font-bold text-slate-800 flex items-center gap-2 group-hover:text-nexus-600 transition-colors">
                                     {contract.title}

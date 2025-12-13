@@ -1,12 +1,17 @@
+
 import React, { useState, useMemo } from 'react';
-import { Users, FileText, BarChart2, Sliders } from 'lucide-react';
+import { Users, FileText, BarChart2, Sliders, Box, ScrollText } from 'lucide-react';
 import { useResourceData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';
 import ResourceLeveling from './resources/ResourceLeveling';
 import ResourcePlanEditor from './resources/ResourcePlanEditor';
+import TeamCharter from './resources/TeamCharter';
+import ResourceHistogram from './resources/ResourceHistogram';
+import PhysicalResources from './resources/PhysicalResources';
 import { useTheme } from '../context/ThemeContext';
+import { PageHeader } from './common/PageHeader';
 
 interface ResourceManagementProps {
   projectId: string;
@@ -25,11 +30,16 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
   const navStructure = useMemo(() => [
     { id: 'planning', label: 'Planning & Setup', items: [
       { id: 'plan', label: 'Resource Plan', icon: FileText },
+      { id: 'charter', label: 'Team Charter', icon: ScrollText },
       { id: 'pool', label: 'Resource Pool', icon: Users },
     ]},
     { id: 'analysis', label: 'Analysis & Optimization', items: [
       { id: 'capacity', label: 'Capacity Planning', icon: BarChart2 },
+      { id: 'histogram', label: 'Resource Histogram', icon: BarChart2 },
       { id: 'leveling', label: 'Leveling', icon: Sliders },
+    ]},
+    { id: 'physical', label: 'Physical Resources', items: [
+      { id: 'physical_tracking', label: 'Materials & Equipment', icon: Box }
     ]}
   ], []);
 
@@ -47,16 +57,14 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
 
   const renderContent = () => {
     switch(activeView) {
-      case 'plan':
-        return <ResourcePlanEditor projectId={projectId} />;
-      case 'pool':
-        return <ResourcePool resources={projectResources} />;
-      case 'capacity':
-        return <ResourceCapacity projectResources={projectResources} />;
-      case 'leveling':
-        return <ResourceLeveling overAllocatedResources={overAllocatedResources} />;
-      default:
-        return <ResourcePool resources={projectResources} />;
+      case 'plan': return <ResourcePlanEditor projectId={projectId} />;
+      case 'pool': return <ResourcePool resources={projectResources} />;
+      case 'capacity': return <ResourceCapacity projectResources={projectResources} />;
+      case 'leveling': return <ResourceLeveling overAllocatedResources={overAllocatedResources} />;
+      case 'charter': return <TeamCharter project={project} />;
+      case 'histogram': return <ResourceHistogram />;
+      case 'physical_tracking': return <PhysicalResources />;
+      default: return <ResourcePool resources={projectResources} />;
     }
   };
 
@@ -64,12 +72,11 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <div className={theme.layout.header}>
-        <div>
-          <h1 className={theme.typography.h1}><Users className="text-nexus-600"/> Resource Management</h1>
-          <p className={theme.typography.small}>Plan, staff, and manage your project and enterprise resources.</p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Resource Management" 
+        subtitle="Plan, staff, and manage your project and enterprise resources."
+        icon={Users}
+      />
 
       <div className={theme.layout.panelContainer}>
         <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>

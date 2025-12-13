@@ -2,7 +2,7 @@
 import React, { lazy, Suspense } from 'react';
 import { Extension } from '../types';
 import { 
-  LayoutDashboard, Map, Database, Box, FileText, Settings, 
+  LayoutDashboard, Map as MapIcon, Database, Box, FileText, Settings, 
   MoreVertical, Filter, Plus, RefreshCw, Layers, Loader2
 } from 'lucide-react';
 import { 
@@ -13,6 +13,10 @@ import ErrorBoundary from './ErrorBoundary';
 // Lazy load specialized suites
 const DoDSuite = lazy(() => import('./engines/DoDSuite'));
 const GovBudgetSuite = lazy(() => import('./engines/GovBudgetSuite'));
+const ConstructionSuite = lazy(() => import('./engines/ConstructionSuite'));
+const FinancialSuite = lazy(() => import('./engines/FinancialSuite'));
+const FedGovSuite = lazy(() => import('./engines/FedGovSuite'));
+const StateGovSuite = lazy(() => import('./engines/StateGovSuite'));
 
 interface ExtensionEngineProps {
   extension: Extension;
@@ -33,6 +37,38 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
       return (
           <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
               <GovBudgetSuite />
+          </Suspense>
+      );
+  }
+
+  if (extension.id === 'construction_suite') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <ConstructionSuite />
+          </Suspense>
+      );
+  }
+
+  if (extension.id === 'finance_suite') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <FinancialSuite />
+          </Suspense>
+      );
+  }
+
+  if (extension.id === 'fed_gov_platform') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <FedGovSuite />
+          </Suspense>
+      );
+  }
+
+  if (extension.id === 'state_gov_platform') {
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <StateGovSuite />
           </Suspense>
       );
   }
@@ -123,7 +159,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
      <div className="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/-74.006,40.7128,12,0/800x600?access_token=pk.mock')] bg-cover opacity-50"></div>
         <div className="bg-white/90 backdrop-blur p-8 rounded-xl shadow-lg text-center z-10 max-w-md">
-           <Map size={48} className="mx-auto text-nexus-500 mb-4" />
+           <MapIcon size={48} className="mx-auto text-nexus-500 mb-4" />
            <h3 className="text-xl font-bold text-slate-900">Geospatial Engine</h3>
            <p className="text-slate-500 mt-2">
              Map interface loaded for {extension.name}. Real-time telemetry overlay enabled.

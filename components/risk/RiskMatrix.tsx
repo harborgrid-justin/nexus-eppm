@@ -54,43 +54,45 @@ const RiskMatrix: React.FC<RiskMatrixProps> = ({ projectId }) => {
   return (
     <div className={`h-full overflow-auto ${theme.layout.pagePadding}`}>
         <h3 className={`${theme.typography.h3} mb-4`}>Probability-Impact Matrix</h3>
-        <div className="flex items-center justify-center">
-            {/* Y Axis Label */}
-            <div className="flex items-center justify-center -rotate-90 -ml-8 mr-2">
-               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Probability</span>
-               <ArrowUp size={14} className="ml-1" />
+        <div className="overflow-x-auto pb-4">
+            <div className="flex items-center justify-center min-w-[700px]">
+                {/* Y Axis Label */}
+                <div className="flex items-center justify-center -rotate-90 -ml-8 mr-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Probability</span>
+                <ArrowUp size={14} className="ml-1" />
+                </div>
+                
+                <div className="grid grid-cols-5 grid-rows-5 gap-0 border-l border-b border-slate-300">
+                    {scale.slice().reverse().map(prob => 
+                        scale.map(imp => (
+                            <div 
+                                key={`${prob}-${imp}`} 
+                                className={`w-32 h-32 border-r border-t border-slate-300 relative p-2 flex flex-wrap gap-1 content-start ${getCellColor(prob, imp)}`}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, prob, imp)}
+                            >
+                                {risks.filter(r => r.probabilityValue === prob && r.impactValue === imp).map(risk => (
+                                    <div 
+                                        key={risk.id} 
+                                        className="w-8 h-8 rounded-full bg-slate-800 text-white text-[10px] flex items-center justify-center font-bold cursor-grab active:cursor-grabbing shadow-md" 
+                                        title={risk.description}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, risk.id)}
+                                    >
+                                        {risk.id.split('-')[1]}
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
             
-            <div className="grid grid-cols-5 grid-rows-5 gap-0 border-l border-b border-slate-300">
-                {scale.slice().reverse().map(prob => 
-                    scale.map(imp => (
-                        <div 
-                            key={`${prob}-${imp}`} 
-                            className={`w-32 h-32 border-r border-t border-slate-300 relative p-2 flex flex-wrap gap-1 content-start ${getCellColor(prob, imp)}`}
-                            onDragOver={handleDragOver}
-                            onDrop={(e) => handleDrop(e, prob, imp)}
-                        >
-                             {risks.filter(r => r.probabilityValue === prob && r.impactValue === imp).map(risk => (
-                                <div 
-                                    key={risk.id} 
-                                    className="w-8 h-8 rounded-full bg-slate-800 text-white text-[10px] flex items-center justify-center font-bold cursor-grab active:cursor-grabbing shadow-md" 
-                                    title={risk.description}
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, risk.id)}
-                                >
-                                    {risk.id.split('-')[1]}
-                                </div>
-                             ))}
-                        </div>
-                    ))
-                )}
+            {/* X Axis Label */}
+            <div className="flex items-center justify-center mt-2 ml-16 min-w-[700px]">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Impact</span>
+                <ArrowRight size={14} className="ml-1" />
             </div>
-        </div>
-        
-         {/* X Axis Label */}
-        <div className="flex items-center justify-center mt-2 ml-16">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Impact</span>
-            <ArrowRight size={14} className="ml-1" />
         </div>
     </div>
   );

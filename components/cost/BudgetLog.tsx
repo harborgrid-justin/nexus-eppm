@@ -1,8 +1,10 @@
+
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
-import { Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Plus, CheckCircle, Clock, XCircle, Lock } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface BudgetLogProps {
     projectId: string;
@@ -10,6 +12,8 @@ interface BudgetLogProps {
 
 const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
     const { project } = useProjectState(projectId);
+    const { hasPermission } = usePermissions();
+    const canWriteBudget = hasPermission('financials:write');
 
     const budgetSummary = useMemo(() => {
         if (!project) return null;
@@ -51,9 +55,15 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                 </div>
             </div>
             <div className="p-4 border-b border-slate-200 flex justify-end items-center">
-                 <button className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
-                    <Plus size={16} /> Log Budget Change
-                </button>
+                 {canWriteBudget ? (
+                    <button className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+                        <Plus size={16} /> Log Budget Change
+                    </button>
+                 ) : (
+                    <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
+                        <Lock size={14} /> Budget Log Locked
+                    </div>
+                 )}
             </div>
             <div className="flex-1 overflow-auto">
                 <table className="min-w-full divide-y divide-slate-200">

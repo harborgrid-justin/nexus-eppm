@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectState } from '../../hooks';
 import { Banknote, Plus, PieChart as PieChartIcon } from 'lucide-react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
+import { CustomPieChart } from '../charts/CustomPieChart';
 
 interface ProjectFundingProps {
     projectId: string;
@@ -16,11 +16,12 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
     const { project } = useProjectState(projectId);
 
     const fundingData = useMemo(() => {
-        return project?.funding?.map(f => {
+        return project?.funding?.map((f, i) => {
             const source = state.fundingSources.find(s => s.id === f.fundingSourceId);
             return {
                 name: source?.name || 'Unknown Source',
-                value: f.amount
+                value: f.amount,
+                color: COLORS[i % COLORS.length]
             };
         }) || [];
     }, [project, state.fundingSources]);
@@ -63,16 +64,9 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
                         </table>
                     </div>
                 </div>
-                 <div className="h-80 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                 <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                     <h4 className="text-slate-800 font-bold mb-4 flex items-center gap-2"><PieChartIcon size={16} /> Funding Distribution</h4>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie data={fundingData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill="#8884d8" paddingAngle={5}>
-                                {fundingData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                            </Pie>
-                            <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    <CustomPieChart data={fundingData} height={300} />
                 </div>
             </div>
         </div>

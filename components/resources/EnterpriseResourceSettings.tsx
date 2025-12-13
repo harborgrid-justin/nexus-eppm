@@ -1,7 +1,10 @@
+
 import React, { useState } from 'react';
-import { UserCog, Plus, Book, Star } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { useData } from '../../context/DataContext';
 
 const EnterpriseResourceSettings: React.FC = () => {
+    const { state } = useData();
     const [activeTab, setActiveTab] = useState('roles');
 
     return (
@@ -26,15 +29,14 @@ const EnterpriseResourceSettings: React.FC = () => {
                             <p className="text-sm text-slate-600">Define standard job roles and their required skill sets.</p>
                             <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 text-sm rounded-md hover:bg-slate-50"><Plus size={14}/> Add Role</button>
                         </div>
-                        {/* Mock data for roles */}
-                        <div className="p-3 border rounded-md">
-                            <p className="font-semibold">Senior Engineer</p>
-                            <p className="text-xs text-slate-500">Required: <span className="font-mono bg-slate-100 p-1 rounded">SK-CIV-03</span>, <span className="font-mono bg-slate-100 p-1 rounded">SK-AUTOCAD-02</span></p>
-                        </div>
-                         <div className="p-3 border rounded-md">
-                            <p className="font-semibold">Project Coordinator</p>
-                             <p className="text-xs text-slate-500">Required: <span className="font-mono bg-slate-100 p-1 rounded">SK-ADMIN-01</span></p>
-                        </div>
+                        {state.roles.map(role => (
+                            <div key={role.id} className="p-3 border rounded-md">
+                                <p className="font-semibold">{role.title}</p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Required: {role.requiredSkills.map(sk => <span key={sk} className="font-mono bg-slate-100 p-1 rounded ml-1">{sk}</span>)}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 )}
                  {activeTab === 'skills' && (
@@ -43,14 +45,15 @@ const EnterpriseResourceSettings: React.FC = () => {
                             <p className="text-sm text-slate-600">Manage a central library of skills and certifications.</p>
                             <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 text-sm rounded-md hover:bg-slate-50"><Plus size={14}/> Add Skill</button>
                         </div>
-                        {/* Mock data for skills */}
-                        <div className="p-3 border rounded-md flex justify-between items-center">
-                            <div>
-                                <p className="font-semibold">AutoCAD Proficiency</p>
-                                <p className="text-xs text-slate-500">Category: Software</p>
+                        {state.skills.map(skill => (
+                            <div key={skill.id} className="p-3 border rounded-md flex justify-between items-center">
+                                <div>
+                                    <p className="font-semibold">{skill.name}</p>
+                                    <p className="text-xs text-slate-500">Category: {skill.category}</p>
+                                </div>
+                                <p className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">{skill.id}</p>
                             </div>
-                            <p className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">SK-AUTOCAD-02</p>
-                        </div>
+                        ))}
                     </div>
                 )}
             </div>

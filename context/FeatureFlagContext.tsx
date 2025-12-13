@@ -38,3 +38,9 @@ export const useFeatureFlag = (feature: keyof FeatureFlags) => {
   if (!context) throw new Error('useFeatureFlag must be used within a FeatureFlagProvider');
   return context.isFeatureEnabled(feature);
 };
+
+export const useFeatureFlags = () => {
+  const context = useContext(FeatureFlagContext);
+  if (!context) throw new Error('useFeatureFlags must be used within a FeatureFlagProvider');
+  return context;
+};

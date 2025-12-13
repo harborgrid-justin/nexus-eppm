@@ -49,7 +49,7 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Risk</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
                                 <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
@@ -86,7 +86,7 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                         <thead className="bg-white">
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Risk Description</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk Description</th>
                                 <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
                             </tr>
                         </thead>

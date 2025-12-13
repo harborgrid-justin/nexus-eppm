@@ -88,35 +88,37 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
         </div>
       </div>
       <div className="overflow-auto flex-1">
-        <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-          <thead className="bg-slate-50 sticky top-0 z-10">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 w-64 sticky left-0 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Resource</th>
-              {months.map(m => (
-                <th key={m} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200">{m}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-slate-100">
-            {projectResources.map(res => (
-              <tr key={res.id}>
-                <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-medium text-sm text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
-                  {res.name}
-                </td>
-                {months.map((_, idx) => {
-                  const alloc = allocationData[res.id] ? allocationData[res.id][idx] : 0;
-                  return (
-                    <td key={idx} className="p-1 h-12">
-                      <div className={`w-full h-full rounded flex items-center justify-center text-xs font-semibold cursor-pointer transition-colors ${getCellColor(alloc)}`}>
-                        {alloc > 0 ? `${alloc}%` : '-'}
-                      </div>
+        <div className="min-w-[800px]">
+            <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+            <thead className="bg-slate-50 sticky top-0 z-10">
+                <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 w-64 sticky left-0 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Resource</th>
+                {months.map(m => (
+                    <th key={m} className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200">{m}</th>
+                ))}
+                </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-slate-100">
+                {projectResources.map(res => (
+                <tr key={res.id}>
+                    <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-medium text-sm text-slate-700 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                    {res.name}
                     </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {months.map((_, idx) => {
+                    const alloc = allocationData[res.id] ? allocationData[res.id][idx] : 0;
+                    return (
+                        <td key={idx} className="p-1 h-12">
+                        <div className={`w-full h-full rounded flex items-center justify-center text-xs font-semibold cursor-pointer transition-colors ${getCellColor(alloc)}`}>
+                            {alloc > 0 ? `${alloc}%` : '-'}
+                        </div>
+                        </td>
+                    );
+                    })}
+                </tr>
+                ))}
+            </tbody>
+            </table>
+        </div>
       </div>
     </div>
   );

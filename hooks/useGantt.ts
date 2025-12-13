@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Project, Task, TaskStatus } from '../types';
 import { useData } from '../context/DataContext';
@@ -7,7 +8,7 @@ import { toISODateString, addWorkingDays, getWorkingDaysDiff } from '../utils/da
 export const DAY_WIDTH = 28;
 
 export const useGantt = (initialProject: Project) => {
-  const { dispatch } = useData();
+  const { state, dispatch } = useData();
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTraceLogicOpen, setIsTraceLogicOpen] = useState(false);
@@ -23,26 +24,55 @@ export const useGantt = (initialProject: Project) => {
   
   const rafRef = useRef<number | null>(null);
 
+  // Retrieve global calendar based on project settings
+  const projectCalendar = useMemo(() => {
+      const globalCal = state.calendars.find(c => c.id === initialProject.calendarId);
+      if (!globalCal) return undefined;
+      
+      // Adapt GlobalCalendar to legacy ProjectCalendar shape for scheduling util
+      const workingDays: number[] = [];
+      if (globalCal.workWeek.sunday.isWorkDay) workingDays.push(0);
+      if (globalCal.workWeek.monday.isWorkDay) workingDays.push(1);
+      if (globalCal.workWeek.tuesday.isWorkDay) workingDays.push(2);
+      if (globalCal.workWeek.wednesday.isWorkDay) workingDays.push(3);
+      if (globalCal.workWeek.thursday.isWorkDay) workingDays.push(4);
+      if (globalCal.workWeek.friday.isWorkDay) workingDays.push(5);
+      if (globalCal.workWeek.saturday.isWorkDay) workingDays.push(6);
+
+      const holidays = globalCal.holidays.map(h => h.date);
+
+      return {
+          id: globalCal.id,
+          name: globalCal.name,
+          workingDays,
+          holidays
+      };
+  }, [state.calendars, initialProject.calendarId]);
+
   const project = useMemo(() => {
-    if (!initialProject.calendar) {
+    // Inject the resolved calendar into the project object for child components that expect it
+    // Note: 'calendar' property is not on Project type anymore, but we cast or extend for internal use
+    const projWithCal = { ...initialProject, calendar: projectCalendar };
+
+    if (!projectCalendar) {
         console.warn("Project calendar is missing. Critical path calculation skipped.");
-        return initialProject;
+        return projWithCal;
     }
     try {
       let tasks = initialProject.tasks;
       // Filter tasks before calculating critical path if a filter is active
       if (taskFilter !== 'all') {
           tasks = tasks.filter(t => {
-              if (taskFilter === 'critical') return t.critical; // Note: critical is calculated below, so this might need re-ordering
+              if (taskFilter === 'critical') return t.critical; 
               return t.status === taskFilter;
           });
       }
       
-      const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, initialProject.calendar);
+      const tasksWithCriticalPath = calculateCriticalPath(initialProject.tasks, projectCalendar);
 
       if (taskFilter !== 'all') {
           return {
-              ...initialProject,
+              ...projWithCal,
               tasks: tasksWithCriticalPath.filter(t => {
                   if (taskFilter === 'critical') return t.critical;
                   return t.status === taskFilter;
@@ -50,12 +80,12 @@ export const useGantt = (initialProject: Project) => {
           };
       }
 
-      return { ...initialProject, tasks: tasksWithCriticalPath };
+      return { ...projWithCal, tasks: tasksWithCriticalPath };
     } catch (error) {
       console.error("Critical Path Calculation Failed", error);
-      return initialProject;
+      return projWithCal;
     }
-  }, [initialProject, taskFilter]);
+  }, [initialProject, taskFilter, projectCalendar]);
   
   const toggleNode = useCallback((nodeId: string) => {
     setExpandedNodes(prev => {
@@ -86,12 +116,12 @@ export const useGantt = (initialProject: Project) => {
 
   const timelineHeaders = useMemo(() => {
     const headers = { months: new Map<string, { start: number, width: number }>(), days: [] as { date: Date; isWorking: boolean }[] };
-    if (!initialProject.calendar) return headers;
+    if (!projectCalendar) return headers;
 
     let current = new Date(projectStart);
     let dayIndex = 0;
     while (current <= projectEnd) {
-        const isWorking = initialProject.calendar.workingDays.includes(current.getDay());
+        const isWorking = projectCalendar.workingDays.includes(current.getDay());
         const monthYear = current.toLocaleString('default', { month: 'long', year: 'numeric' });
         if(!headers.months.has(monthYear)){
             headers.months.set(monthYear, { start: dayIndex * DAY_WIDTH, width: 0 });
@@ -106,7 +136,7 @@ export const useGantt = (initialProject: Project) => {
         if(isWorking || !isWorking) dayIndex++; 
     }
     return headers;
-  }, [projectStart, projectEnd, initialProject.calendar]);
+  }, [projectStart, projectEnd, projectCalendar]);
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
@@ -124,7 +154,7 @@ export const useGantt = (initialProject: Project) => {
   }, []);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!draggingTask || !ganttContainerRef.current || !initialProject.calendar) return;
+    if (!draggingTask || !ganttContainerRef.current || !projectCalendar) return;
 
     if (rafRef.current) return;
 
@@ -134,7 +164,7 @@ export const useGantt = (initialProject: Project) => {
 
       if (daysMoved !== 0 || draggingTask.type === 'progress') {
         let updatedTask = { ...draggingTask.task };
-        const calendar = initialProject.calendar!;
+        const calendar = projectCalendar;
 
         try {
           if (draggingTask.type === 'move') {
@@ -160,7 +190,7 @@ export const useGantt = (initialProject: Project) => {
       }
       rafRef.current = null;
     });
-  }, [draggingTask, initialProject.id, initialProject.calendar, dispatch]);
+  }, [draggingTask, initialProject.id, projectCalendar, dispatch]);
 
   const handleMouseUp = useCallback(() => {
     if (rafRef.current) {
@@ -204,6 +234,7 @@ export const useGantt = (initialProject: Project) => {
       toggleNode,
       timelineHeaders,
       projectStart,
+      projectEnd,
       getStatusColor,
       handleMouseDown,
       taskFilter,

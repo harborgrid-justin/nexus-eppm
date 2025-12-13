@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useProjectState } from '../hooks';
-import { Users, Plus, ArrowRight, ArrowUp } from 'lucide-react';
+import { Users, Plus, ArrowRight, ArrowUp, BarChart2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 interface StakeholderManagementProps {
@@ -8,7 +9,7 @@ interface StakeholderManagementProps {
 }
 
 const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId }) => {
-  const { stakeholders } = useProjectState(projectId);
+  const { project, stakeholders } = useProjectState(projectId);
   const theme = useTheme();
 
   const getGridPosition = (influence: string, interest: string) => {
@@ -22,6 +23,45 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
     if (influence === 'High' && interest === 'Low') return 'bg-green-50 border-green-200 text-green-800'; // Keep Satisfied
     if (influence === 'Low' && interest === 'High') return 'bg-yellow-50 border-yellow-200 text-yellow-800'; // Keep Informed
     return 'bg-slate-50 border-slate-200 text-slate-800'; // Monitor
+  };
+
+  const renderEngagementMatrix = () => {
+      const levels = ['Unaware', 'Resistant', 'Neutral', 'Supportive', 'Leading'];
+      const engagements = project?.stakeholderEngagement || [];
+
+      return (
+          <div className="mt-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><BarChart2 size={18}/> Stakeholder Engagement Assessment Matrix</h3>
+              <table className="min-w-full divide-y divide-slate-200 text-sm border border-slate-200">
+                  <thead className="bg-slate-100">
+                      <tr>
+                          <th className="px-4 py-3 text-left font-medium text-slate-600 border-r border-slate-200">Stakeholder</th>
+                          {levels.map(l => <th key={l} className="px-4 py-3 text-center font-medium text-slate-600 border-r border-slate-200">{l}</th>)}
+                      </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                      {engagements.map((eng, idx) => {
+                          const stakeholderName = stakeholders.find(s => s.id === eng.stakeholderId)?.name || eng.stakeholderId;
+                          return (
+                              <tr key={idx} className="hover:bg-slate-50">
+                                  <td className="px-4 py-3 font-medium text-slate-800 border-r border-slate-200">{stakeholderName}</td>
+                                  {levels.map(level => {
+                                      const isC = eng.currentLevel === level;
+                                      const isD = eng.desiredLevel === level;
+                                      return (
+                                          <td key={level} className="px-4 py-3 text-center border-r border-slate-200 relative">
+                                              {isC && <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold mr-1" title="Current">C</span>}
+                                              {isD && <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-nexus-600 text-white font-bold" title="Desired">D</span>}
+                                          </td>
+                                      )
+                                  })}
+                              </tr>
+                          );
+                      })}
+                  </tbody>
+              </table>
+          </div>
+      );
   };
 
   return (
@@ -41,7 +81,7 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
        <div className={theme.layout.panelContainer}>
          <div className="h-full overflow-y-auto p-6">
             <h3 className={`${theme.typography.h3} mb-4`}>Interest / Influence Matrix</h3>
-            <div className="relative grid grid-cols-[auto_1fr_1fr] grid-rows-[auto_1fr_1fr] gap-1">
+            <div className="relative grid grid-cols-[auto_1fr_1fr] grid-rows-[auto_1fr_1fr] gap-1 max-w-4xl mx-auto">
                 {/* Y Axis Label */}
                 <div className="flex items-center justify-center -rotate-90 row-span-2">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Influence</span>
@@ -81,6 +121,8 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
                 </div>
                 ))}
             </div>
+
+            {renderEngagementMatrix()}
          </div>
        </div>
     </div>

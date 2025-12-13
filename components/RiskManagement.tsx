@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
 import { AlertTriangle, LayoutDashboard, FileText, List, Columns, BarChart2, Sigma } from 'lucide-react';
@@ -9,6 +10,7 @@ import RiskBreakdownStructure from './risk/RiskBreakdownStructure';
 import RiskMatrix from './risk/RiskMatrix';
 import QuantitativeAnalysis from './risk/QuantitativeAnalysis';
 import { useTheme } from '../context/ThemeContext';
+import { PageHeader } from './common/PageHeader';
 
 interface RiskManagementProps {
   projectId: string;
@@ -67,12 +69,11 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <div className={theme.layout.header}>
-        <div>
-          <h1 className={theme.typography.h1}><AlertTriangle className="text-red-500"/> Risk Management</h1>
-          <p className={theme.typography.small}>Identify, analyze, and respond to project uncertainty.</p>
-        </div>
-      </div>
+      <PageHeader 
+        title="Risk Management" 
+        subtitle="Identify, analyze, and respond to project uncertainty."
+        icon={AlertTriangle}
+      />
 
       <div className={theme.layout.panelContainer}>
         <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>

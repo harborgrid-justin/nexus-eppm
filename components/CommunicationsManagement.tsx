@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { useProjectState } from '../hooks';
-import { MessageCircle, Plus, Mail, Users, Phone } from 'lucide-react';
+import { MessageCircle, Plus, Mail, Users, Phone, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface CommunicationsManagementProps {
   projectId: string;
@@ -10,6 +12,7 @@ interface CommunicationsManagementProps {
 const CommunicationsManagement: React.FC<CommunicationsManagementProps> = ({ projectId }) => {
   const { communicationLogs } = useProjectState(projectId);
   const theme = useTheme();
+  const { canEditProject } = usePermissions();
 
   const getIcon = (type: string) => {
     switch(type) {
@@ -29,40 +32,48 @@ const CommunicationsManagement: React.FC<CommunicationsManagementProps> = ({ pro
             </h1>
             <p className={theme.typography.small}>Record and track all formal project communications.</p>
           </div>
-          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
-             <Plus size={16} /> New Log Entry
-          </button>
+          {canEditProject() ? (
+            <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
+               <Plus size={16} /> <span className="hidden sm:inline">New Log Entry</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+               <Lock size={14}/> Read Only
+            </div>
+          )}
        </div>
 
        <div className={theme.layout.panelContainer}>
           <div className="flex-1 overflow-auto">
-             <table className="min-w-full divide-y divide-slate-200">
-                <thead className={`${theme.colors.background} sticky top-0`}>
-                   <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Subject</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Participants</th>
-                   </tr>
-                </thead>
-                <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
-                  {communicationLogs.map(log => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{log.date}</td>
-                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
-                         <div className="flex items-center gap-2">
-                           {getIcon(log.type)} {log.type}
-                         </div>
-                       </td>
-                       <td className="px-6 py-4">
-                         <div className="text-sm font-semibold text-slate-900">{log.subject}</div>
-                         <div className="text-xs text-slate-500 truncate max-w-md">{log.summary}</div>
-                       </td>
-                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{log.participants.join(', ')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-             </table>
+             <div className="min-w-[800px]">
+                 <table className="min-w-full divide-y divide-slate-200">
+                    <thead className={`${theme.colors.background} sticky top-0`}>
+                       <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-32">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider w-24">Type</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Subject</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Participants</th>
+                       </tr>
+                    </thead>
+                    <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
+                      {communicationLogs.map(log => (
+                        <tr key={log.id} className="hover:bg-slate-50">
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{log.date}</td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">
+                             <div className="flex items-center gap-2">
+                               {getIcon(log.type)} {log.type}
+                             </div>
+                           </td>
+                           <td className="px-6 py-4">
+                             <div className="text-sm font-semibold text-slate-900">{log.subject}</div>
+                             <div className="text-xs text-slate-500 truncate max-w-md">{log.summary}</div>
+                           </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{log.participants.join(', ')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                 </table>
+             </div>
           </div>
        </div>
     </div>

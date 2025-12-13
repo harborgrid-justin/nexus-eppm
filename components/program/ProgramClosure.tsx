@@ -20,39 +20,41 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Transition & Sustainment Planning</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Operational Readiness */}
-            <div className="col-span-2">
+            <div className="lg:col-span-2">
                 <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
                     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2"><RefreshCw size={18} className="text-orange-500"/> Operational Readiness Checklist</h3>
                     </div>
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-100">
-                            {transitionItems.map(item => (
-                                <tr key={item.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.category}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{item.description}</td>
-                                    <td className="px-6 py-4 text-sm text-slate-600">{item.owner}</td>
-                                    <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.dueDate}</td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
-                                            {item.status}
-                                        </Badge>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-white">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-100">
+                                {transitionItems.map(item => (
+                                    <tr key={item.id} className="hover:bg-slate-50">
+                                        <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.category}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{item.description}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{item.owner}</td>
+                                        <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.dueDate}</td>
+                                        <td className="px-6 py-4">
+                                            <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
+                                                {item.status}
+                                            </Badge>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

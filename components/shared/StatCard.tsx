@@ -1,9 +1,10 @@
+
 import React from 'react';
 
 interface StatCardProps {
     title: string;
     value: string | number;
-    subtext: string;
+    subtext?: string;
     icon: React.ElementType;
     trend?: 'up' | 'down';
 }
@@ -22,7 +23,7 @@ const StatCard: React.FC<StatCardProps> = React.memo(({ title, value, subtext, i
           <Icon size={20} />
         </div>
       </div>
-      <p className="text-xs text-slate-500">{subtext}</p>
+      {subtext && <p className="text-xs text-slate-500">{subtext}</p>}
     </div>
 ));
 

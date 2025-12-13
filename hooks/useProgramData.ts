@@ -88,10 +88,10 @@ export const useProgramData = (programId: string | null) => {
 
   // --- MOCKED STAKEHOLDER DATA ---
   const programStakeholders: ProgramStakeholder[] = useMemo(() => [
-      { id: 'PS-01', name: 'City Council', role: 'Regulator', category: 'Strategic', engagementLevel: 'Supportive', influence: 'High', interest: 'High' },
-      { id: 'PS-02', name: 'Local Business Assoc.', role: 'Impacted Group', category: 'Operational', engagementLevel: 'Resistant', influence: 'Medium', interest: 'High' },
-      { id: 'PS-03', name: 'Engineering Corps', role: 'Execution Team', category: 'Delivery', engagementLevel: 'Supportive', influence: 'Low', interest: 'Medium' }
-  ], []);
+      { id: 'PS-01', projectId: programId || 'PRG-001', name: 'City Council', role: 'Regulator', category: 'Strategic', engagementLevel: 'Supportive', influence: 'High', interest: 'High', engagementStrategy: 'Manage Closely' },
+      { id: 'PS-02', projectId: programId || 'PRG-001', name: 'Local Business Assoc.', role: 'Impacted Group', category: 'Operational', engagementLevel: 'Resistant', influence: 'Medium', interest: 'High', engagementStrategy: 'Keep Informed' },
+      { id: 'PS-03', projectId: programId || 'PRG-001', name: 'Engineering Corps', role: 'Execution Team', category: 'Delivery', engagementLevel: 'Supportive', influence: 'Low', interest: 'Medium', engagementStrategy: 'Monitor' }
+  ], [programId]);
 
   const communicationPlan: ProgramCommunicationItem[] = useMemo(() => [
       { id: 'PC-01', audience: 'City Council', content: 'Milestone Progress & Risk Report', frequency: 'Monthly', channel: 'Formal Presentation', owner: 'Program Manager' },

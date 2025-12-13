@@ -1,14 +1,14 @@
+
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { UserDefinedField, UDFSubjectArea } from '../../types';
+import { UDFSubjectArea } from '../../types';
 import { Edit3, Plus } from 'lucide-react';
-import { MOCK_UDFS } from '../../constants';
 
 const UdfSettings: React.FC = () => {
-    const { state, dispatch } = useData();
+    const { state } = useData();
     const [subjectArea, setSubjectArea] = useState<UDFSubjectArea>('Tasks');
 
-    const filteredUdfs = MOCK_UDFS.filter(udf => udf.subjectArea === subjectArea);
+    const filteredUdfs = state.userDefinedFields.filter(udf => udf.subjectArea === subjectArea);
 
     return (
         <div className="space-y-4">
@@ -48,6 +48,9 @@ const UdfSettings: React.FC = () => {
                                 <td className="px-4 py-3 text-sm text-slate-500">{udf.dataType}</td>
                             </tr>
                         ))}
+                        {filteredUdfs.length === 0 && (
+                            <tr><td colSpan={2} className="px-4 py-4 text-center text-sm text-slate-400">No UDFs defined for this area.</td></tr>
+                        )}
                     </tbody>
                 </table>
             </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Risk, RiskResponseAction } from '../../types';
 import { useData } from '../../context/DataContext';
 import { X, Plus, Trash2, Link as LinkIcon, Save, AlertTriangle, Calendar } from 'lucide-react';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface RiskDetailModalProps {
   riskId: string;
@@ -12,8 +13,12 @@ interface RiskDetailModalProps {
 
 const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, onClose }) => {
   const { state, dispatch } = useData();
+  const { canEditProject } = usePermissions();
   const [risk, setRisk] = useState<Risk | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // If we had granular 'risk:write' permissions we would use that, but 'project:edit' covers it for now.
+  const isReadOnly = !canEditProject();
 
   // Get tasks for the current project for integration linkage
   const projectTasks = state.projects.find(p => p.id === projectId)?.tasks || [];
@@ -57,7 +62,7 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
   if (error) {
     return (
        <div className="fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 shadow-xl text-center">
+            <div className="bg-white rounded-lg p-6 shadow-xl text-center m-4">
                 <AlertTriangle className="mx-auto text-red-500" size={32}/>
                 <h3 className="font-bold mt-2">Error</h3>
                 <p className="text-slate-600 text-sm mt-1">{error}</p>
@@ -76,6 +81,7 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
           <div className="p-6 border-b border-slate-200 flex justify-between items-start bg-slate-50">
              <div>
                 <h2 className="text-2xl font-bold text-slate-900">{risk.id}</h2>
+                {isReadOnly && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded ml-2">Read Only</span>}
              </div>
              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
                 <X size={20} />
@@ -86,12 +92,12 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div>
                     <label className="text-sm font-medium text-slate-700">Description</label>
-                    <textarea value={risk.description} onChange={(e) => handleChange('description', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md"/>
+                    <textarea value={risk.description} disabled={isReadOnly} onChange={(e) => handleChange('description', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md min-h-[100px] disabled:bg-slate-50"/>
                  </div>
                  <div className="space-y-4">
                     <div>
                         <label className="text-sm font-medium text-slate-700">Category</label>
-                        <input type="text" value={risk.category} onChange={(e) => handleChange('category', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md"/>
+                        <input type="text" value={risk.category} disabled={isReadOnly} onChange={(e) => handleChange('category', e.target.value)} className="w-full mt-1 p-2 border border-slate-300 rounded-md disabled:bg-slate-50"/>
                     </div>
                     {/* INTEGRATION POINT: Link Risk to Task */}
                     <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg">
@@ -100,8 +106,9 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
                         </label>
                         <select 
                             value={risk.linkedTaskId || ''} 
+                            disabled={isReadOnly}
                             onChange={(e) => handleChange('linkedTaskId', e.target.value || undefined)}
-                            className="w-full p-2 text-sm border border-blue-200 rounded-md bg-white focus:ring-blue-500"
+                            className="w-full p-2 text-sm border border-blue-200 rounded-md bg-white focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500"
                         >
                             <option value="">-- No Schedule Impact --</option>
                             {projectTasks.map(t => (
@@ -116,18 +123,18 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <h3 className="font-semibold mb-2">Response Actions</h3>
                 {risk.responseActions.map((action, index) => (
-                    <div key={action.id} className="grid grid-cols-[1fr_120px_40px] gap-2 items-center mb-2">
-                        <input type="text" value={action.description} onChange={e => handleResponseActionChange(index, 'description', e.target.value)} placeholder="Action description" className="p-1 border-slate-300 rounded text-sm" />
-                        <input type="date" value={action.dueDate} onChange={e => handleResponseActionChange(index, 'dueDate', e.target.value)} className="p-1 border-slate-300 rounded text-sm" />
-                        <button className="text-red-500 hover:bg-red-100 p-1 rounded"><Trash2 size={16}/></button>
+                    <div key={action.id} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_40px] gap-2 items-center mb-2">
+                        <input type="text" value={action.description} disabled={isReadOnly} onChange={e => handleResponseActionChange(index, 'description', e.target.value)} placeholder="Action description" className="p-1 border-slate-300 rounded text-sm w-full disabled:bg-slate-100" />
+                        <input type="date" value={action.dueDate} disabled={isReadOnly} onChange={e => handleResponseActionChange(index, 'dueDate', e.target.value)} className="p-1 border-slate-300 rounded text-sm w-full disabled:bg-slate-100" />
+                        {!isReadOnly && <button className="text-red-500 hover:bg-red-100 p-1 rounded flex justify-center"><Trash2 size={16}/></button>}
                     </div>
                 ))}
-                 <button className="text-sm text-nexus-600 font-semibold flex items-center gap-1 mt-2"><Plus size={14}/> Add Action</button>
+                 {!isReadOnly && <button className="text-sm text-nexus-600 font-semibold flex items-center gap-1 mt-2"><Plus size={14}/> Add Action</button>}
              </div>
 
              <div>
                 <h3 className="font-semibold mb-2 flex items-center gap-2"><LinkIcon size={16}/> Linked Risks</h3>
-                <select multiple className="w-full p-2 border border-slate-300 rounded-md h-24 text-sm" value={risk.linkedRiskIds || []} onChange={(e) => {
+                <select multiple disabled={isReadOnly} className="w-full p-2 border border-slate-300 rounded-md h-24 text-sm disabled:bg-slate-50" value={risk.linkedRiskIds || []} onChange={(e) => {
                   const selectedOptions = Array.from(e.target.options as unknown as HTMLOptionElement[]);
                   const selectedValues = selectedOptions
                     .filter(option => option.selected)
@@ -142,10 +149,12 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
           </div>
 
           <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-             <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Cancel</button>
-             <button onClick={handleSave} className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm flex items-center gap-2">
-                <Save size={16}/> Save Changes
-             </button>
+             <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">{isReadOnly ? 'Close' : 'Cancel'}</button>
+             {!isReadOnly && (
+                <button onClick={handleSave} className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm flex items-center gap-2">
+                    <Save size={16}/> Save Changes
+                </button>
+             )}
           </div>
        </div>
     </div>

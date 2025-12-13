@@ -1,16 +1,9 @@
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
-import {
-  Bar,
-  BarChart as RechartsBarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from 'recharts';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
+import { CustomBarChart } from '../charts/CustomBarChart';
 
 interface RiskDashboardProps {
   projectId: string;
@@ -63,16 +56,13 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className={`${theme.typography.h3} mb-4`}>Risk Exposure by Category</h3>
-                <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RechartsBarChart data={categoryData} layout="vertical">
-                            <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
-                            <Tooltip cursor={{ fill: '#f1f5f9' }} />
-                            <Bar dataKey="count" fill="#0ea5e9" radius={[0, 4, 4, 0]} barSize={20} />
-                        </RechartsBarChart>
-                    </ResponsiveContainer>
-                </div>
+                <CustomBarChart
+                    data={categoryData}
+                    xAxisKey="name"
+                    dataKey="count"
+                    height={250}
+                    barColor="#0ea5e9"
+                />
             </div>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className={`${theme.typography.h3} mb-4`}>Top 5 Risks by Score</h3>

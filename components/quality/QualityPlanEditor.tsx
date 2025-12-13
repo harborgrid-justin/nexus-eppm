@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
-import { FileText, Save, Book } from 'lucide-react';
+import { FileText, Save, Book, Lock } from 'lucide-react';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface QualityPlanEditorProps {
     projectId: string;
@@ -8,6 +10,7 @@ interface QualityPlanEditorProps {
 const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
     const [objectives, setObjectives] = useState('');
     const [roles, setRoles] = useState('');
+    const { canEditProject } = usePermissions();
 
     return (
         <div className="h-full flex flex-col">
@@ -19,16 +22,23 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
                     <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
                         <Book size={14}/> Apply Template
                     </button>
-                    <button className="flex items-center gap-2 px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">
-                        <Save size={14}/> Save Plan
-                    </button>
+                    {canEditProject() ? (
+                        <button className="flex items-center gap-2 px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">
+                            <Save size={14}/> Save Plan
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-400">
+                            <Lock size={14}/> Read Only
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div>
                     <label className="text-sm font-bold text-slate-900 block mb-2">Quality Objectives</label>
                     <textarea 
-                        className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500"
+                        disabled={!canEditProject()}
+                        className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
                         placeholder="Define the primary quality goals for this project, aligned with stakeholder expectations..."
                         value={objectives}
                         onChange={(e) => setObjectives(e.target.value)}
@@ -43,7 +53,8 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
                  <div>
                     <label className="text-sm font-bold text-slate-900 block mb-2">Roles & Responsibilities</label>
                     <textarea 
-                        className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500"
+                        disabled={!canEditProject()}
+                        className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
                         placeholder="Detail the roles responsible for quality assurance and control activities..."
                         value={roles}
                         onChange={(e) => setRoles(e.target.value)}

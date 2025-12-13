@@ -31,62 +31,64 @@ const ProgramVendors: React.FC<ProgramVendorsProps> = ({ programId }) => {
             <div className="p-4 border-b border-slate-200 bg-slate-50">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2"><Award size={18} className="text-nexus-500"/> Vendor Performance Scorecard</h3>
             </div>
-            <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-white">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Vendor Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Strategic Alignment</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Total Value</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Active Contracts</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Performance Score</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Issues</th>
-                    </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-slate-100">
-                    {programVendors.map(vendor => (
-                        <tr key={vendor.vendorId} className="hover:bg-slate-50">
-                            <td className="px-6 py-4">
-                                <div className="font-bold text-sm text-slate-900">{vendor.name}</div>
-                                <div className="text-xs text-slate-500 font-mono">{vendor.vendorId}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                                <span className={`px-2 py-1 text-xs rounded-full font-bold ${
-                                    vendor.strategicAlignment === 'High' ? 'bg-purple-100 text-purple-700' : 
-                                    vendor.strategicAlignment === 'Medium' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
-                                }`}>
-                                    {vendor.strategicAlignment}
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 text-right font-mono text-sm text-slate-700">
-                                {formatCompactCurrency(vendor.totalContractValue)}
-                            </td>
-                            <td className="px-6 py-4 text-center text-sm font-bold text-slate-600">
-                                {vendor.activeContractsCount}
-                            </td>
-                            <td className="px-6 py-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                        <div 
-                                            className={`h-full ${vendor.avgPerformanceScore > 80 ? 'bg-green-500' : vendor.avgPerformanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} 
-                                            style={{width: `${vendor.avgPerformanceScore}%`}}
-                                        ></div>
-                                    </div>
-                                    <span className="text-xs font-bold">{vendor.avgPerformanceScore}/100</span>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                                {vendor.criticalIssuesCount > 0 ? (
-                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold">
-                                        {vendor.criticalIssuesCount}
-                                    </span>
-                                ) : (
-                                    <span className="text-slate-300">-</span>
-                                )}
-                            </td>
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200">
+                    <thead className="bg-white">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Vendor Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Strategic Alignment</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Total Value</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Active Contracts</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Performance Score</th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Issues</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-100">
+                        {programVendors.map(vendor => (
+                            <tr key={vendor.vendorId} className="hover:bg-slate-50">
+                                <td className="px-6 py-4">
+                                    <div className="font-bold text-sm text-slate-900">{vendor.name}</div>
+                                    <div className="text-xs text-slate-500 font-mono">{vendor.vendorId}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={`px-2 py-1 text-xs rounded-full font-bold ${
+                                        vendor.strategicAlignment === 'High' ? 'bg-purple-100 text-purple-700' : 
+                                        vendor.strategicAlignment === 'Medium' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                        {vendor.strategicAlignment}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-right font-mono text-sm text-slate-700">
+                                    {formatCompactCurrency(vendor.totalContractValue)}
+                                </td>
+                                <td className="px-6 py-4 text-center text-sm font-bold text-slate-600">
+                                    {vendor.activeContractsCount}
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                            <div 
+                                                className={`h-full ${vendor.avgPerformanceScore > 80 ? 'bg-green-500' : vendor.avgPerformanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} 
+                                                style={{width: `${vendor.avgPerformanceScore}%`}}
+                                            ></div>
+                                        </div>
+                                        <span className="text-xs font-bold">{vendor.avgPerformanceScore}/100</span>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                    {vendor.criticalIssuesCount > 0 ? (
+                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600 text-xs font-bold">
+                                            {vendor.criticalIssuesCount}
+                                        </span>
+                                    ) : (
+                                        <span className="text-slate-300">-</span>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
   );

@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { Download, MoreHorizontal, Upload, Search, Folder, Filter } from 'lucide-react';
+import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface DocumentControlProps {
   projectId: string;
@@ -11,6 +13,8 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
   const { getProjectDocs } = useData();
   const docs = getProjectDocs(projectId);
   const theme = useTheme();
+  const { hasPermission } = usePermissions();
+  const canUpload = hasPermission('project:edit'); // Mapping upload to edit permission for now
 
   const getIcon = (type: string) => {
      switch(type) {
@@ -30,24 +34,30 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
             </h1>
             <p className={theme.typography.small}>Central repository for all project specifications, drawings, and reports.</p>
           </div>
-          <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
-             <Upload size={16} /> Upload Document
-          </button>
+          {canUpload ? (
+            <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
+                <Upload size={16} /> <span className="hidden sm:inline">Upload Document</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+                <Lock size={14} /> Upload Restricted
+            </div>
+          )}
        </div>
 
        <div className={theme.layout.panelContainer}>
           {/* Toolbar */}
-          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background} flex justify-between items-center`}>
-             <div className="flex gap-4">
-                 <div className="relative">
+          <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background} flex flex-col md:flex-row justify-between items-center gap-4`}>
+             <div className="flex gap-4 w-full md:w-auto">
+                 <div className="relative flex-1 md:flex-none">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Search files..." className="pl-9 pr-4 py-1.5 text-sm border border-slate-300 rounded-md w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500" />
+                    <input type="text" placeholder="Search files..." className="pl-9 pr-4 py-1.5 text-sm border border-slate-300 rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500" />
                  </div>
                  <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm text-slate-600 hover:bg-slate-50">
                     <Filter size={14} /> Filter
                  </button>
              </div>
-             <div className="flex items-center gap-2 text-sm text-slate-500">
+             <div className="flex items-center gap-2 text-sm text-slate-500 w-full md:w-auto justify-end">
                 <span>Storage Used: </span>
                 <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
                    <div className="h-full bg-nexus-500 w-[65%]"></div>
@@ -59,7 +69,7 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
           {/* Grid View */}
           <div className="flex-1 overflow-auto p-6">
              <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Recent Uploads</h3>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {docs.map(doc => (
                    <div key={doc.id} className={`p-4 border ${theme.colors.border} rounded-lg hover:border-nexus-300 hover:shadow-md transition-all ${theme.colors.surface} group cursor-pointer relative`}>
                       <div className="flex justify-between items-start mb-3">
@@ -86,15 +96,17 @@ const DocumentControl: React.FC<DocumentControlProps> = ({ projectId }) => {
                 ))}
                 
                 {/* Upload Placeholder */}
-                <div className={`border-2 border-dashed ${theme.colors.border} rounded-lg flex flex-col items-center justify-center p-6 text-slate-400 hover:border-nexus-400 hover:text-nexus-500 hover:bg-nexus-50/30 transition-all cursor-pointer`}>
-                   <Upload size={24} className="mb-2 opacity-50" />
-                   <span className="text-sm font-medium">Drop files here</span>
-                </div>
+                {canUpload && (
+                    <div className={`border-2 border-dashed ${theme.colors.border} rounded-lg flex flex-col items-center justify-center p-6 text-slate-400 hover:border-nexus-400 hover:text-nexus-500 hover:bg-nexus-50/30 transition-all cursor-pointer h-[140px]`}>
+                    <Upload size={24} className="mb-2 opacity-50" />
+                    <span className="text-sm font-medium">Drop files here</span>
+                    </div>
+                )}
              </div>
 
              <div className="mt-8">
                 <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Folders</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                    {['Specifications', 'Contracts', 'RFI Responses', 'Safety Reports', 'Photos'].map((folder, i) => (
                       <div key={i} className={`flex items-center gap-3 p-3 border ${theme.colors.border} rounded-lg hover:bg-slate-50 cursor-pointer`}>
                          <Folder className="text-yellow-400" size={24} />

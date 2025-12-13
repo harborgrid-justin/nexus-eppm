@@ -6,6 +6,7 @@ import { Button } from './ui/Button';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useData } from '../context/DataContext';
 import { checkMaterialAvailability, checkOpenRFIsForTask } from '../utils/integrationUtils';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -15,6 +16,9 @@ interface TaskDetailModalProps {
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClose }) => {
   const { state } = useData();
+  const { canEditProject } = usePermissions();
+  const isReadOnly = !canEditProject();
+
   const {
     localTask, updateField, handleStatusChange, saveChanges,
     applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs, expenseCategories
@@ -55,9 +59,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                   type="text"
                   value={localTask.name}
                   onChange={(e) => updateField('name', e.target.value)}
-                  className="text-2xl font-bold text-slate-900 bg-transparent -ml-2 px-2 py-1 rounded-lg border border-transparent hover:border-slate-300 focus:border-nexus-500 focus:ring-1 focus:ring-nexus-500 w-full"
+                  disabled={isReadOnly}
+                  className={`text-2xl font-bold text-slate-900 bg-transparent -ml-2 px-2 py-1 rounded-lg border border-transparent w-full ${isReadOnly ? '' : 'hover:border-slate-300 focus:border-nexus-500 focus:ring-1 focus:ring-nexus-500'}`}
                 />
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-mono bg-slate-200 px-2 py-0.5 rounded text-slate-600">{localTask.wbsCode}</span>
                     {!canComplete && (
                         <span className="text-xs font-bold text-red-600 flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200">
@@ -69,9 +74,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                             <MessageCircle size={12} aria-hidden="true" /> RFI Pending
                         </span>
                     )}
+                    {isReadOnly && (
+                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            Read Only
+                        </span>
+                    )}
                 </div>
              </div>
-             <button onClick={onClose} aria-label="Close Modal" className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-nexus-500">
+             <button onClick={onClose} aria-label="Close Modal" className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-nexus-500 flex-shrink-0 ml-4">
                 <X size={20} />
              </button>
           </div>
@@ -123,15 +133,16 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                 )}
              </div>
 
-             <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2 space-y-6">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
                    <section aria-labelledby="desc-heading">
                       <h3 id="desc-heading" className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Description</h3>
                       <textarea
                         value={localTask.description || ''}
                         onChange={(e) => updateField('description', e.target.value)}
-                        className="w-full bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-700 leading-relaxed min-h-[120px] focus:outline-none focus:ring-1 focus:ring-nexus-500"
-                        placeholder="Add a detailed description..."
+                        disabled={isReadOnly}
+                        className="w-full bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-700 leading-relaxed min-h-[120px] focus:outline-none focus:ring-1 focus:ring-nexus-500 disabled:opacity-70 disabled:cursor-not-allowed"
+                        placeholder={isReadOnly ? "No description provided." : "Add a detailed description..."}
                       />
                    </section>
 
@@ -142,18 +153,19 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                       </h3>
                       <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
                           {applicableCodes.map(code => (
-                              <div key={code.id} className="grid grid-cols-[150px_1fr] items-center">
+                              <div key={code.id} className="grid grid-cols-1 sm:grid-cols-[150px_1fr] items-center gap-2 sm:gap-0">
                                   <label htmlFor={`code-${code.id}`} className="text-sm font-medium text-slate-600">{code.name}</label>
                                   <select
                                       id={`code-${code.id}`}
                                       value={localTask.activityCodeAssignments?.[code.id] || ''}
+                                      disabled={isReadOnly}
                                       onChange={(e) => {
                                           const newMap = { ...localTask.activityCodeAssignments };
                                           if (e.target.value) newMap[code.id] = e.target.value;
                                           else delete newMap[code.id];
                                           updateField('activityCodeAssignments', newMap);
                                       }}
-                                      className="w-full mt-1 p-2 text-sm border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-nexus-500"
+                                      className="w-full mt-1 p-2 text-sm border border-slate-300 rounded-md bg-white focus:ring-1 focus:ring-nexus-500 disabled:bg-slate-100 disabled:text-slate-500"
                                   >
                                       <option value="">-- Not Assigned --</option>
                                       {code.values.map(val => (
@@ -179,17 +191,21 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                              </div>
                              <span className="font-bold text-xs">{dep.type}</span>
                              <span className="text-xs">{dep.lag}d lag</span>
-                             <button className="p-1 text-slate-400 hover:text-red-500" aria-label="Remove dependency"><Trash2 size={14} /></button>
+                             {!isReadOnly && (
+                                <button className="p-1 text-slate-400 hover:text-red-500" aria-label="Remove dependency"><Trash2 size={14} /></button>
+                             )}
                            </div>
                          ))}
-                         <button className="w-full p-2 border-2 border-dashed border-slate-200 text-slate-500 rounded-lg text-sm hover:border-nexus-400 hover:text-nexus-600 transition-colors">
-                            + Add Predecessor
-                         </button>
+                         {!isReadOnly && (
+                            <button className="w-full p-2 border-2 border-dashed border-slate-200 text-slate-500 rounded-lg text-sm hover:border-nexus-400 hover:text-nexus-600 transition-colors">
+                                + Add Predecessor
+                            </button>
+                         )}
                       </div>
                    </section>
                    
                    {/* Integration Modules Summary */}
-                   <div className="grid grid-cols-2 gap-4">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                        <div className="bg-orange-50 border border-orange-100 rounded-lg p-3">
                            <h3 className="text-xs font-bold text-orange-800 uppercase mb-2 flex items-center gap-2">
                                <AlertTriangle size={14} aria-hidden="true"/> Risks
@@ -230,12 +246,13 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                           <select 
                             id="task-status"
                             value={localTask.status}
+                            disabled={isReadOnly}
                             onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
                             className={`w-full p-2 text-sm border rounded-md font-semibold ${
                                 (!canComplete || rfiCheck.blocked) && localTask.status !== TaskStatus.COMPLETED 
                                     ? 'border-orange-300 focus:ring-orange-500' 
                                     : 'border-slate-200 focus:ring-nexus-500'
-                            }`}
+                            } disabled:bg-slate-100 disabled:text-slate-500`}
                           >
                               <option value={TaskStatus.NOT_STARTED}>Not Started</option>
                               <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
@@ -252,8 +269,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                           <select
                             id="effort-type"
                             value={localTask.effortType}
+                            disabled={isReadOnly}
                             onChange={(e) => updateField('effortType', e.target.value as EffortType)}
-                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"
+                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"
                           >
                             <option>Fixed Duration</option>
                             <option>Fixed Work</option>
@@ -261,18 +279,18 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                         </div>
                         <div>
                           <label htmlFor="work-hrs" className="text-xs text-slate-500 flex items-center gap-1"><Clock size={12}/> Work (hrs)</label>
-                          <input id="work-hrs" type="number" value={localTask.work || ''} onChange={(e) => updateField('work', parseInt(e.target.value))} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"/>
+                          <input id="work-hrs" type="number" disabled={isReadOnly} value={localTask.work || ''} onChange={(e) => updateField('work', parseInt(e.target.value))} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label htmlFor="start-date" className="text-xs text-slate-500">Start Date</label>
-                          <input id="start-date" type="date" value={localTask.startDate} onChange={e => updateField('startDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"/>
+                          <input id="start-date" type="date" disabled={isReadOnly} value={localTask.startDate} onChange={e => updateField('startDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
                         </div>
                         <div>
                           <label htmlFor="end-date" className="text-xs text-slate-500">End Date</label>
-                          <input id="end-date" type="date" value={localTask.endDate} onChange={e => updateField('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"/>
+                          <input id="end-date" type="date" disabled={isReadOnly} value={localTask.endDate} onChange={e => updateField('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
                         </div>
                       </div>
                        <div>
@@ -280,11 +298,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                           <select 
                             id="constraint"
                             value={localTask.primaryConstraint?.type || ''}
+                            disabled={isReadOnly}
                             onChange={(e) => {
                                 const newType = e.target.value as ConstraintType | '';
                                 updateField('primaryConstraint', newType ? { type: newType, date: newType.includes('Start') ? localTask.startDate : localTask.endDate } : undefined);
                             }}
-                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md"
+                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"
                            >
                               <option value="">None</option>
                               <option value="Start On or After">Start On or After</option>
@@ -301,8 +320,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
           </div>
 
           <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-             <Button variant="secondary" onClick={onClose}>Cancel</Button>
-             <Button variant="primary" onClick={saveChanges}>Save Changes</Button>
+             <Button variant="secondary" onClick={onClose}>{isReadOnly ? 'Close' : 'Cancel'}</Button>
+             {!isReadOnly && <Button variant="primary" onClick={saveChanges}>Save Changes</Button>}
           </div>
        </div>
     </div>

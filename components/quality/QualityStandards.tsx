@@ -1,18 +1,14 @@
-import React from 'react';
-import { BadgeCheck, Plus } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { QualityStandard } from '../../types';
 
-// Mock data for now
-const MOCK_STANDARDS: QualityStandard[] = [
-    { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', source: 'External' },
-    { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', source: 'Internal' },
-    { id: 'QS-03', name: 'ASTM C39', description: 'Standard Test Method for Compressive Strength of Cylindrical Concrete Specimens.', source: 'External' },
-    { id: 'QS-04', name: 'AWS D1.1', description: 'Structural Welding Code—Steel.', source: 'External' },
-];
+import React from 'react';
+import { BadgeCheck, Plus, Lock } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const QualityStandards: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    const { canEditProject } = usePermissions();
 
     return (
         <div className="h-full flex flex-col">
@@ -20,9 +16,15 @@ const QualityStandards: React.FC = () => {
                 <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
                     <BadgeCheck size={16} /> Applicable Quality Standards
                 </h3>
-                <button className={`px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
-                    <Plus size={16} /> Add Standard
-                </button>
+                {canEditProject() ? (
+                    <button className={`px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
+                        <Plus size={16} /> Add Standard
+                    </button>
+                ) : (
+                    <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+                        <Lock size={14}/> Read Only
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 overflow-auto">
@@ -35,7 +37,7 @@ const QualityStandards: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
-                        {MOCK_STANDARDS.map(standard => (
+                        {state.qualityStandards.map(standard => (
                             <tr key={standard.id}>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{standard.name}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">

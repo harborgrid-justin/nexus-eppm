@@ -8,6 +8,7 @@ import { Risk } from '../../types';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
+import DataTable, { Column } from '../common/DataTable';
 
 interface RiskRegisterGridProps {
   projectId: string;
@@ -34,53 +35,74 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
     );
   }, [risks, searchTerm]);
 
+  const columns = useMemo<Column<Risk>[]>(() => [
+    {
+      key: 'id',
+      header: 'ID',
+      width: 'w-24',
+      render: (risk) => <span className="font-mono text-xs text-slate-500">{risk.id}</span>,
+      sortable: true
+    },
+    {
+      key: 'description',
+      header: 'Description',
+      render: (risk) => <span className="font-medium text-slate-900 truncate block max-w-md" title={risk.description}>{risk.description}</span>,
+      sortable: true
+    },
+    {
+      key: 'category',
+      header: 'Category',
+      render: (risk) => <span className="text-slate-600">{risk.category}</span>,
+      sortable: true
+    },
+    {
+      key: 'score',
+      header: 'Score',
+      align: 'center',
+      width: 'w-24',
+      render: (risk) => <Badge variant={getScoreVariant(risk.score)}>{risk.score}</Badge>,
+      sortable: true
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (risk) => <span className="text-slate-700 font-medium text-xs bg-slate-100 px-2 py-1 rounded">{risk.status}</span>,
+      sortable: true
+    },
+    {
+      key: 'owner',
+      header: 'Owner',
+      render: (risk) => <span className="text-slate-600">{risk.owner}</span>,
+      sortable: true
+    }
+  ], []);
+
   return (
     <div className="h-full flex flex-col">
       {selectedRiskId && <RiskDetailModal riskId={selectedRiskId} projectId={projectId} onClose={() => setSelectedRiskId(null)} />}
       
-      <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center bg-slate-50/50 flex-shrink-0`}>
-        <div className="flex items-center gap-2">
+      <div className={`p-4 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 flex-shrink-0 gap-3`}>
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           <Input 
             isSearch 
             placeholder="Search risks..." 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
-            className="w-64"
+            className="w-full sm:w-64"
           />
-          <Button variant="secondary" size="sm" icon={Filter}>Filter</Button>
+          <Button variant="secondary" size="md" icon={Filter} className="w-full sm:w-auto">Filter</Button>
         </div>
-        <Button variant="primary" size="sm" icon={Plus}>Add Risk</Button>
+        <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto">Add Risk</Button>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className={`${theme.colors.background} sticky top-0`}>
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Score</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Owner</th>
-            </tr>
-          </thead>
-          <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
-            {filteredRisks.map((risk: Risk) => (
-              <tr key={risk.id} onClick={() => setSelectedRiskId(risk.id)} className="hover:bg-slate-50 cursor-pointer">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">{risk.id}</td>
-                <td className="px-6 py-4 text-sm font-medium text-slate-900 max-w-md truncate">{risk.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{risk.category}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <Badge variant={getScoreVariant(risk.score)}>
-                    {risk.score}
-                  </Badge>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{risk.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{risk.owner}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex-1 overflow-hidden p-4">
+        <DataTable 
+          data={filteredRisks}
+          columns={columns}
+          onRowClick={(r) => setSelectedRiskId(r.id)}
+          keyField="id"
+          emptyMessage="No risks found matching criteria."
+        />
       </div>
     </div>
   );

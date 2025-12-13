@@ -1,45 +1,21 @@
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
-import { calculateProjectProgress } from '../../utils/calculations';
+import { useEVM } from '../../hooks/useEVM';
 import { getDaysDiff } from '../../utils/dateUtils';
-import { BarChart2 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-import { formatCompactCurrency } from '../../utils/formatters';
+import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
+import { CustomLineChart } from '../charts/CustomLineChart';
 
 interface EarnedValueProps {
   projectId: string;
 }
 
 const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
-  const { project } = useProjectState(projectId);
+  const { project, budgetItems } = useProjectState(projectId);
+  const evm = useEVM(project, budgetItems);
 
-  const evm = useMemo(() => {
-    if (!project) return null;
-    
-    const today = new Date();
-    const projectStart = new Date(project.startDate);
-    const totalProjectDays = getDaysDiff(projectStart, new Date(project.endDate));
-    const daysElapsed = getDaysDiff(projectStart, today);
-
-    const pv = totalProjectDays > 0 ? (daysElapsed / totalProjectDays) * project.originalBudget : 0;
-    const ev = project.originalBudget * (calculateProjectProgress(project) / 100);
-    const ac = project.spent;
-    
-    const sv = ev - pv;
-    const cv = ev - ac;
-    const spi = pv > 0 ? (ev / pv) : 1;
-    const cpi = ac > 0 ? (ev / ac) : 1;
-    
-    const bac = project.originalBudget;
-    const eac = cpi > 0 ? (bac / cpi) : Infinity;
-    const etc = eac - ac;
-    const vac = bac - eac;
-
-    return { pv, ev, ac, sv, cv, spi: spi.toFixed(2), cpi: cpi.toFixed(2), bac, eac, etc, vac };
-  }, [project]);
-
-   const chartData = useMemo(() => {
+  const chartData = useMemo(() => {
     if (!project || !evm) return [];
 
     const startDate = new Date(project.startDate);
@@ -51,73 +27,136 @@ const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
 
     const data = [];
     
-    // Generate points for PV curve
+    // Generate S-Curve Points
     for (let i = 0; i <= totalDays; i += 30) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
-      const pv = (i / totalDays) * bac;
-      data.push({ date: date.toISOString().split('T')[0], pv });
-    }
-    if (getDaysDiff(startDate, endDate) % 30 !== 0) {
-        data.push({ date: endDate.toISOString().split('T')[0], pv: bac });
-    }
+      const percentTime = i / totalDays;
+      
+      // S-Curve Approximation for PV
+      const curveFactor = percentTime < 0.5 ? 2 * percentTime * percentTime : -1 + (4 - 2 * percentTime) * percentTime;
+      const pv = bac * curveFactor;
+      
+      const point: any = { 
+          date: date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'}),
+          pv,
+          bac: project.originalBudget 
+      };
 
-    // Merge EV and AC points
-    const daysElapsed = getDaysDiff(startDate, today);
-    const finalData = data.map(d => {
-        const pointDate = new Date(d.date);
-        if (pointDate > today) {
-            return { ...d, ev: null, ac: null };
-        }
-        const pointDaysElapsed = getDaysDiff(startDate, pointDate);
-        const timeRatio = daysElapsed > 0 ? pointDaysElapsed / daysElapsed : 0;
-        return {
-            ...d,
-            ev: evm.ev * timeRatio,
-            ac: evm.ac * timeRatio,
-        };
-    }).map(d => ({...d, date: new Date(d.date).toLocaleDateString('en-US', {month: 'short'})}));
+      if (date <= today) {
+          const timeRatio = i / getDaysDiff(startDate, today);
+          point.ev = evm.ev * timeRatio; 
+          point.ac = evm.ac * timeRatio; 
+      }
 
-    return finalData;
+      data.push(point);
+    }
+    return data;
   }, [project, evm]);
 
-  if (!evm) return null;
-  const { sv, cv, spi, cpi, bac, eac, etc, vac } = evm;
+  if (!evm || !project) return <div className="p-6 text-slate-500">Insufficient data for EVM analysis.</div>;
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">
-       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard title="SPI" value={spi} subtext="Schedule Performance" trend={parseFloat(spi) >= 1 ? 'up' : 'down'} icon={BarChart2}/>
-          <StatCard title="CPI" value={cpi} subtext="Cost Performance" trend={parseFloat(cpi) >= 1 ? 'up' : 'down'} icon={BarChart2}/>
-          <StatCard title="Schedule Variance" value={formatCompactCurrency(sv)} subtext="EV - PV" trend={sv >= 0 ? 'up' : 'down'} icon={BarChart2}/>
-          <StatCard title="Cost Variance" value={formatCompactCurrency(cv)} subtext="EV - AC" trend={cv >= 0 ? 'up' : 'down'} icon={BarChart2}/>
+       {/* Top Level Status */}
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard 
+            title="Schedule Performance (SPI)" 
+            value={evm.spi.toFixed(2)} 
+            subtext={evm.status} 
+            trend={evm.spi >= 1 ? 'up' : 'down'} 
+            icon={evm.spi >= 1 ? CheckCircle : AlertTriangle}
+          />
+          <StatCard 
+            title="Cost Performance (CPI)" 
+            value={evm.cpi.toFixed(2)} 
+            subtext={evm.costStatus} 
+            trend={evm.cpi >= 1 ? 'up' : 'down'} 
+            icon={evm.cpi >= 1 ? CheckCircle : AlertTriangle}
+          />
+          <StatCard 
+            title="Schedule Variance (SV)" 
+            value={formatCompactCurrency(evm.sv)} 
+            subtext="Earned - Planned" 
+            trend={evm.sv >= 0 ? 'up' : 'down'} 
+            icon={BarChart2}
+          />
+          <StatCard 
+            title="Cost Variance (CV)" 
+            value={formatCompactCurrency(evm.cv)} 
+            subtext="Earned - Actual" 
+            trend={evm.cv >= 0 ? 'up' : 'down'} 
+            icon={BarChart2}
+          />
        </div>
 
+       {/* Main S-Curve Chart */}
        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-         <h3 className="font-bold text-slate-800 mb-4">Core EVM Metrics (S-Curve)</h3>
-         <div className="h-64">
-           <ResponsiveContainer width="100%" height="100%">
-             <LineChart data={chartData}>
-               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-               <XAxis dataKey="date" tick={{fontSize: 12}} />
-               <YAxis tickFormatter={v => formatCompactCurrency(v)} />
-               <Tooltip formatter={(v: number) => `$${v.toLocaleString()}`} />
-               <Legend />
-               <Line type="monotone" dataKey="pv" name="Planned Value" stroke="#94a3b8" strokeWidth={2} dot={false} connectNulls />
-               <Line type="monotone" dataKey="ev" name="Earned Value" stroke="#22c55e" strokeWidth={2} connectNulls />
-               <Line type="monotone" dataKey="ac" name="Actual Cost" stroke="#ef4444" strokeWidth={2} connectNulls />
-             </LineChart>
-           </ResponsiveContainer>
+         <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <TrendingUp size={20} className="text-nexus-600"/> Performance Measurement Baseline (PMB)
+            </h3>
+            <div className="flex gap-4 text-sm text-slate-600">
+                <span><strong>BAC:</strong> {formatCompactCurrency(evm.bac)}</span>
+                <span><strong>EAC:</strong> {formatCompactCurrency(evm.eac)}</span>
+            </div>
          </div>
+         <CustomLineChart 
+            data={chartData}
+            xAxisKey="date"
+            dataKeys={[
+                { key: 'pv', color: '#94a3b8' },
+                { key: 'ev', color: '#22c55e' },
+                { key: 'ac', color: '#ef4444' }
+            ]}
+            height={300}
+         />
        </div>
 
-       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="font-bold text-slate-800 mb-4">Forecasting</h3>
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard title="BAC" value={formatCompactCurrency(bac)} subtext="Budget at Completion" icon={BarChart2}/>
-              <StatCard title="EAC" value={isFinite(eac) ? formatCompactCurrency(eac) : 'N/A'} subtext="Estimate at Completion" icon={BarChart2}/>
-              <StatCard title="ETC" value={isFinite(etc) ? formatCompactCurrency(etc) : 'N/A'} subtext="Estimate to Complete" icon={BarChart2}/>
-              <StatCard title="VAC" value={isFinite(vac) ? formatCompactCurrency(vac) : 'N/A'} subtext="Variance at Completion" trend={!isFinite(vac) || vac >=0 ? 'up' : 'down'} icon={BarChart2}/>
+       {/* Forecasting Panel */}
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 mb-4">Forecasting (EAC)</h3>
+              <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                      <span className="text-sm text-slate-600">Estimate at Completion</span>
+                      <span className="font-mono font-bold text-slate-900">{formatCurrency(evm.eac)}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                      <span className="text-sm text-slate-600">Estimate to Complete</span>
+                      <span className="font-mono font-bold text-nexus-700">{formatCurrency(evm.etc)}</span>
+                  </div>
+                  <div className={`flex justify-between items-center p-3 rounded-lg ${evm.vac >= 0 ? 'bg-green-50 border border-green-100' : 'bg-red-50 border border-red-100'}`}>
+                      <span className="text-sm font-bold">Variance at Completion (VAC)</span>
+                      <span className={`font-mono font-bold ${evm.vac >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                          {evm.vac > 0 ? '+' : ''}{formatCurrency(evm.vac)}
+                      </span>
+                  </div>
+              </div>
+           </div>
+
+           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 mb-4">Performance Index Trends</h3>
+              <div className="h-40 flex items-end gap-2 px-4 pb-2 border-b border-slate-200">
+                  <div className="w-1/2 flex flex-col items-center gap-2">
+                      <div className="relative w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                          <div className={`absolute top-0 left-0 h-full ${evm.spi >= 1 ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${Math.min(evm.spi * 100, 100)}%`}}></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-600">SPI: {evm.spi.toFixed(2)}</span>
+                  </div>
+                  <div className="w-1/2 flex flex-col items-center gap-2">
+                      <div className="relative w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                          <div className={`absolute top-0 left-0 h-full ${evm.cpi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.cpi * 100, 100)}%`}}></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-600">CPI: {evm.cpi.toFixed(2)}</span>
+                  </div>
+              </div>
+              <div className="mt-4 text-xs text-slate-500 text-center">
+                  TCPI (Required Efficiency): <strong>{evm.tcpi.toFixed(2)}</strong>
+                  <p className="mt-1 opacity-70">
+                      {evm.tcpi > 1 ? "Performance must improve to meet budget." : "Project can perform less efficiently and still meet budget."}
+                  </p>
+              </div>
            </div>
        </div>
     </div>

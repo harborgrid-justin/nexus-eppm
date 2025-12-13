@@ -34,7 +34,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
 
                     <div className="p-4 border-b border-slate-100 flex gap-2 overflow-x-auto">
                         {change.impactAreas.map(area => (
-                            <span key={area} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100">
+                            <span key={area} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100 whitespace-nowrap">
                                 {area === 'Roles' ? <Users size={12}/> : 
                                  area === 'Data' ? <Database size={12}/> :
                                  <Layers size={12}/>

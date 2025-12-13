@@ -1,23 +1,35 @@
 
 import React, { useState } from 'react';
-import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote, Edit3 } from 'lucide-react';
+import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest } from 'lucide-react';
 import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
 import ActivityCodeSettings from './admin/ActivityCodeSettings';
 import IssueCodeSettings from './admin/IssueCodeSettings';
 import ExpenseCategorySettings from './admin/ExpenseCategorySettings';
 import FundingSourceSettings from './admin/FundingSourceSettings';
 import UdfSettings from './admin/UdfSettings';
+import UserManagement from './admin/UserManagement';
+import SystemConfigPanel from './admin/SystemConfig';
+import CalendarEditor from './admin/CalendarEditor';
+import WorkflowDesigner from './admin/WorkflowDesigner';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 interface AdminSettingsProps {}
 
 const AdminSettings: React.FC<AdminSettingsProps> = () => {
   const [activeSection, setActiveSection] = useState('general');
   const theme = useTheme();
+  const { canManageSystem } = usePermissions();
 
   const navItems = [
     { id: 'general', icon: Settings, label: 'General' },
-    { id: 'users', icon: Users, label: 'Users & Roles' },
+    // Only show system-critical settings to admins
+    ...(canManageSystem() ? [
+        { id: 'users', icon: Users, label: 'Users & Roles' },
+        { id: 'system', icon: Server, label: 'System Config' },
+    ] : []),
+    { id: 'calendars', icon: Calendar, label: 'Enterprise Calendars' },
+    { id: 'workflows', icon: GitPullRequest, label: 'Workflows' },
     { id: 'activityCodes', icon: Tag, label: 'Activity Codes' },
     { id: 'udfs', icon: Edit3, label: 'User-Defined Fields' },
     { id: 'issueCodes', icon: FileWarning, label: 'Issue Codes' },
@@ -52,38 +64,18 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
                 </div>
               </div>
             </div>
-            
-            <div className="border-t border-slate-200 pt-6 space-y-4">
-              <h3 className="text-lg font-medium text-slate-900">Localization</h3>
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <label className="block text-sm font-medium text-slate-700">Default Currency</label>
-                    <input type="text" className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-3 bg-slate-50 sm:text-sm" disabled defaultValue="USD ($)" />
-                 </div>
-                 <div>
-                    <label className="block text-sm font-medium text-slate-700">Date Format</label>
-                    <select className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-nexus-500 focus:border-nexus-500 sm:text-sm">
-                      <option>MM/DD/YYYY</option>
-                      <option>DD/MM/YYYY</option>
-                      <option>YYYY-MM-DD</option>
-                    </select>
-                 </div>
-              </div>
-            </div>
           </div>
         );
-      case 'activityCodes':
-        return <ActivityCodeSettings />;
-      case 'udfs':
-        return <UdfSettings />;
-      case 'issueCodes':
-        return <IssueCodeSettings />;
-      case 'expenseCategories':
-        return <ExpenseCategorySettings />;
-      case 'fundingSources':
-        return <FundingSourceSettings />;
-      case 'resources':
-        return <EnterpriseResourceSettings />;
+      case 'users': return <UserManagement />;
+      case 'system': return <SystemConfigPanel />;
+      case 'calendars': return <CalendarEditor />;
+      case 'workflows': return <WorkflowDesigner />;
+      case 'activityCodes': return <ActivityCodeSettings />;
+      case 'udfs': return <UdfSettings />;
+      case 'issueCodes': return <IssueCodeSettings />;
+      case 'expenseCategories': return <ExpenseCategorySettings />;
+      case 'fundingSources': return <FundingSourceSettings />;
+      case 'resources': return <EnterpriseResourceSettings />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-64 text-slate-400">

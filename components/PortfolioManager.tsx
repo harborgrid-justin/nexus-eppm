@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map as MapIcon, Gavel, Leaf, Scale, Globe } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -11,7 +11,13 @@ import PortfolioCapacity from './portfolio/PortfolioCapacity';
 import PortfolioFinancials from './portfolio/PortfolioFinancials';
 import PortfolioCommunications from './portfolio/PortfolioCommunications';
 import PortfolioOptimization from './portfolio/PortfolioOptimization';
+import PortfolioRoadmap from './portfolio/PortfolioRoadmap';
+import PortfolioScenarios from './portfolio/PortfolioScenarios';
+import PortfolioValue from './portfolio/PortfolioValue';
+import PortfolioGovernance from './portfolio/PortfolioGovernance';
+import PortfolioESG from './portfolio/PortfolioESG';
 import { useData } from '../context/DataContext';
+import { PageHeader } from './common/PageHeader';
 
 const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
@@ -20,22 +26,25 @@ const PortfolioManager: React.FC = () => {
 
   const navStructure = useMemo(() => [
     { id: 'dashboards', label: 'Dashboards', items: [
-      { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard }
-    ]},
-    { id: 'performance', label: 'Performance', items: [
-      { id: 'financials', label: 'Financial Management', icon: TrendingUp },
-      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
-      { id: 'communications', label: 'Communications', icon: MessageCircle },
-      { id: 'optimization', label: 'Review & Optimize', icon: RefreshCw },
-      { id: 'roadmap', label: 'Strategic Roadmap', icon: Layers }
+      { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
+      { id: 'esg', label: 'ESG & Compliance', icon: Leaf }
     ]},
     { id: 'strategy', label: 'Strategy & Selection', items: [
       { id: 'framework', label: 'Strategic Framework', icon: BookOpen },
+      { id: 'roadmap', label: 'Strategic Roadmap', icon: MapIcon },
       { id: 'prioritization', label: 'Prioritization', icon: ListOrdered },
+      { id: 'scenarios', label: 'Scenario Planning', icon: Layers },
       { id: 'balancing', label: 'Balancing', icon: PieChart },
     ]},
+    { id: 'performance', label: 'Performance', items: [
+      { id: 'financials', label: 'Financial Management', icon: TrendingUp },
+      { id: 'value', label: 'Value & Benefits', icon: Star },
+      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
+      { id: 'communications', label: 'Communications', icon: MessageCircle },
+      { id: 'governance', label: 'Governance Board', icon: Gavel },
+      { id: 'optimization', label: 'Review & Optimize', icon: RefreshCw },
+    ]},
     { id: 'monitoring', label: 'Monitoring & Control', items: [
-      { id: 'benefits', label: 'Benefits Register', icon: Star },
       { id: 'risks', label: 'Portfolio Risks', icon: ShieldAlert },
     ]}
   ], []);
@@ -54,31 +63,22 @@ const PortfolioManager: React.FC = () => {
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'overview':
-        return <Dashboard />;
-      case 'financials':
-        return <PortfolioFinancials projects={state.projects} />;
-      case 'capacity':
-        return <PortfolioCapacity />;
-      case 'communications':
-        return <PortfolioCommunications />;
-      case 'optimization':
-        return <PortfolioOptimization />;
-      case 'roadmap':
-        // Placeholder for existing roadmap or can be expanded later
-        return <div className="p-6 text-slate-500">Roadmap View (Placeholder)</div>;
-      case 'framework':
-        return <PortfolioStrategyFramework />;
-      case 'prioritization':
-        return <PortfolioPrioritization />;
-      case 'balancing':
-        return <PortfolioBalancing />;
-      case 'benefits':
-        return <PortfolioBenefits />;
-      case 'risks':
-        return <PortfolioRisks />;
-      default:
-        return <div className="p-6 text-slate-500">Module under construction</div>;
+      case 'overview': return <Dashboard />;
+      case 'esg': return <PortfolioESG />;
+      case 'financials': return <PortfolioFinancials projects={state.projects} />;
+      case 'capacity': return <PortfolioCapacity />;
+      case 'communications': return <PortfolioCommunications />;
+      case 'optimization': return <PortfolioOptimization />;
+      case 'roadmap': return <PortfolioRoadmap />;
+      case 'scenarios': return <PortfolioScenarios />;
+      case 'framework': return <PortfolioStrategyFramework />;
+      case 'prioritization': return <PortfolioPrioritization />;
+      case 'balancing': return <PortfolioBalancing />;
+      case 'benefits': return <PortfolioBenefits />; // Keeping original simple view as option, but 'value' is advanced
+      case 'value': return <PortfolioValue />;
+      case 'governance': return <PortfolioGovernance />;
+      case 'risks': return <PortfolioRisks />;
+      default: return <div className="p-6 text-slate-500">Module under construction</div>;
     }
   };
 

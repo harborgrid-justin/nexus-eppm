@@ -6,9 +6,10 @@ import {
   Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, 
   MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2,
   PieChart, Users, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain,
-  AlertOctagon, PenTool, LayoutGrid, Filter
+  AlertOctagon, PenTool, LayoutGrid, Filter, Lock
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 const iconMap: Record<string, any> = {
   Box, Radio, Calculator, Receipt, Banknote, TrendingUp, ShoppingCart, 
@@ -22,6 +23,8 @@ const ExtensionMarketplace: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const theme = useTheme();
+  const { hasPermission } = usePermissions();
+  const canManageExtensions = hasPermission('system:configure');
 
   const categories = ['All', ...Array.from(new Set(state.extensions.map(e => e.category)))];
 
@@ -98,25 +101,31 @@ const ExtensionMarketplace: React.FC = () => {
                  
                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{ext.category}</span>
-                    <button 
-                      onClick={() => {
-                        if (isInstalled) {
-                          if (ext.status === 'Installed') dispatch({ type: 'ACTIVATE_EXTENSION', payload: ext.id });
-                        } else {
-                          dispatch({ type: 'INSTALL_EXTENSION', payload: ext.id });
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                        ext.status === 'Active'
-                          ? 'bg-slate-100 text-slate-400 cursor-default'
-                          : isInstalled
-                             ? 'bg-nexus-100 text-nexus-700 hover:bg-nexus-200'
-                             : 'bg-slate-900 text-white hover:bg-slate-700'
-                      }`}
-                      disabled={ext.status === 'Active'}
-                    >
-                      {ext.status === 'Active' ? 'Active' : isInstalled ? 'Activate' : 'Install'}
-                    </button>
+                    {canManageExtensions ? (
+                        <button 
+                        onClick={() => {
+                            if (isInstalled) {
+                            if (ext.status === 'Installed') dispatch({ type: 'ACTIVATE_EXTENSION', payload: ext.id });
+                            } else {
+                            dispatch({ type: 'INSTALL_EXTENSION', payload: ext.id });
+                            }
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            ext.status === 'Active'
+                            ? 'bg-slate-100 text-slate-400 cursor-default'
+                            : isInstalled
+                                ? 'bg-nexus-100 text-nexus-700 hover:bg-nexus-200'
+                                : 'bg-slate-900 text-white hover:bg-slate-700'
+                        }`}
+                        disabled={ext.status === 'Active'}
+                        >
+                        {ext.status === 'Active' ? 'Active' : isInstalled ? 'Activate' : 'Install'}
+                        </button>
+                    ) : (
+                        <div title="Only administrators can manage extensions">
+                            <Lock size={16} className="text-slate-400"/>
+                        </div>
+                    )}
                  </div>
               </div>
             );

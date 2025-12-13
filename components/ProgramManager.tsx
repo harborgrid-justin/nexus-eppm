@@ -1,9 +1,17 @@
 
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Briefcase, ArrowRight, LayoutDashboard, Gavel, Target, Star, Map, ArrowLeft, Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck, MessageSquare, Server, Scale, AlertOctagon, CheckCircle, RefreshCw, Truck } from 'lucide-react';
+import { 
+  Briefcase, ArrowRight, LayoutDashboard, Gavel, Target, Star, Map, 
+  ArrowLeft, Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck, 
+  Server, Scale, AlertOctagon, RefreshCw, Truck, Plus 
+} from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getHealthColorClass } from '../utils/formatters';
+import { usePermissions } from '../hooks/usePermissions';
+import { PageHeader } from './common/PageHeader';
+
+// Sub-components
 import ProgramDashboard from './program/ProgramDashboard';
 import ProgramGovernance from './program/ProgramGovernance';
 import ProgramStrategy from './program/ProgramStrategy';
@@ -26,23 +34,103 @@ import ProgramVendors from './program/ProgramVendors';
 const ProgramManager: React.FC = () => {
   const { state } = useData();
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'dashboard' | 'governance' | 'strategy' | 'scope' | 'financials' | 'resources' | 'risks' | 'benefits' | 'roadmap' | 'stakeholders' | 'quality' | 'closure' | 'architecture' | 'tradeoff' | 'issues' | 'gates' | 'change' | 'vendors'>('dashboard');
+  const [activeView, setActiveView] = useState<string>('dashboard');
   const theme = useTheme();
+  const { canEditProject } = usePermissions(); // Inherit permissions
 
   const selectedProgram = state.programs.find(p => p.id === selectedProgramId);
 
-  // Render List of Programs (Portfolio View)
+  // Navigation Configuration
+  const navGroups = [
+    {
+      label: 'Overview',
+      items: [
+        { id: 'dashboard', label: 'Program Dashboard', icon: LayoutDashboard },
+      ]
+    },
+    {
+      label: 'Strategy & Value',
+      items: [
+        { id: 'strategy', label: 'Strategy Matrix', icon: Target },
+        { id: 'benefits', label: 'Benefits Realization', icon: Star },
+        { id: 'roadmap', label: 'Master Roadmap', icon: Map },
+        { id: 'tradeoff', label: 'Trade-off Analysis', icon: Scale },
+      ]
+    },
+    {
+      label: 'Governance',
+      items: [
+        { id: 'governance', label: 'Governance Board', icon: Gavel },
+        { id: 'gates', label: 'Stage Gates', icon: Flag },
+        { id: 'architecture', label: 'Architecture', icon: Server },
+      ]
+    },
+    {
+      label: 'Execution',
+      items: [
+        { id: 'scope', label: 'Scope & Outcomes', icon: Sliders },
+        { id: 'financials', label: 'Financials', icon: TrendingUp },
+        { id: 'resources', label: 'Resource Mgmt', icon: Users },
+        { id: 'vendors', label: 'Vendors', icon: Truck },
+      ]
+    },
+    {
+      label: 'Control',
+      items: [
+        { id: 'risks', label: 'Risk Management', icon: ShieldAlert },
+        { id: 'issues', label: 'Issues & Escalation', icon: AlertOctagon },
+        { id: 'change', label: 'Integrated Change', icon: RefreshCw },
+        { id: 'quality', label: 'Quality Assurance', icon: ShieldCheck },
+      ]
+    },
+    {
+      label: 'Engagement',
+      items: [
+        { id: 'stakeholders', label: 'Stakeholders', icon: Users },
+        { id: 'closure', label: 'Transition & Close', icon: Flag },
+      ]
+    }
+  ];
+
+  const renderContent = () => {
+    if (!selectedProgram) return null;
+    switch (activeView) {
+      case 'dashboard': return <ProgramDashboard programId={selectedProgram.id} />;
+      case 'governance': return <ProgramGovernance programId={selectedProgram.id} />;
+      case 'strategy': return <ProgramStrategy programId={selectedProgram.id} />;
+      case 'benefits': return <ProgramBenefits programId={selectedProgram.id} />;
+      case 'roadmap': return <ProgramRoadmap programId={selectedProgram.id} />;
+      case 'tradeoff': return <ProgramTradeoff programId={selectedProgram.id} />;
+      case 'gates': return <ProgramStageGates programId={selectedProgram.id} />;
+      case 'architecture': return <ProgramArchitecture programId={selectedProgram.id} />;
+      case 'scope': return <ProgramScope programId={selectedProgram.id} />;
+      case 'financials': return <ProgramFinancials programId={selectedProgram.id} />;
+      case 'resources': return <ProgramResources programId={selectedProgram.id} />;
+      case 'vendors': return <ProgramVendors programId={selectedProgram.id} />;
+      case 'risks': return <ProgramRisks programId={selectedProgram.id} />;
+      case 'issues': return <ProgramIssues programId={selectedProgram.id} />;
+      case 'change': return <ProgramIntegratedChange programId={selectedProgram.id} />;
+      case 'quality': return <ProgramQuality programId={selectedProgram.id} />;
+      case 'stakeholders': return <ProgramStakeholders programId={selectedProgram.id} />;
+      case 'closure': return <ProgramClosure programId={selectedProgram.id} />;
+      default: return <ProgramDashboard programId={selectedProgram.id} />;
+    }
+  };
+
+  // --- PROGRAM LIST VIEW ---
   if (!selectedProgram) {
     return (
       <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-         <div className={theme.layout.header}>
-            <div>
-                <h1 className={theme.typography.h1}>
-                <Briefcase className="text-nexus-600" /> Program Management
-                </h1>
-                <p className={theme.typography.small}>Manage coordinated groups of related projects to obtain benefits not available from managing them individually.</p>
-            </div>
-         </div>
+         <PageHeader
+            title="Program Management"
+            subtitle="Manage coordinated groups of related projects to obtain benefits not available from managing them individually."
+            icon={Briefcase}
+            actions={canEditProject() && (
+                <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 flex items-center gap-2 shadow-sm`}>
+                    <Plus size={16}/> New Program
+                </button>
+            )}
+         />
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.programs.map(program => (
@@ -70,18 +158,24 @@ const ProgramManager: React.FC = () => {
                   </div>
                </div>
             ))}
+            {state.programs.length === 0 && (
+                <div className="col-span-full flex flex-col items-center justify-center p-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
+                    <Briefcase size={48} className="mb-4 opacity-50"/>
+                    <p>No programs defined.</p>
+                </div>
+            )}
          </div>
       </div>
     );
   }
 
-  // Render Program Workspace
+  // --- PROGRAM WORKSPACE VIEW ---
   return (
     <div className={theme.layout.pageContainer}>
        {/* Workspace Header */}
        <div className={`${theme.colors.surface} border-b border-slate-200 shadow-sm flex-shrink-0 z-10`}>
-          <div className="px-6 py-4 flex justify-between items-center">
-             <div className="flex items-center gap-4">
+          <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+             <div className="flex items-center gap-4 w-full md:w-auto">
                 <button 
                     onClick={() => setSelectedProgramId(null)} 
                     className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
@@ -98,70 +192,39 @@ const ProgramManager: React.FC = () => {
                     </div>
                 </div>
              </div>
-             <div className="flex gap-2">
+             <div className="flex gap-2 w-full md:w-auto justify-end">
                 <button className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Settings</button>
-                <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}>New Report</button>
              </div>
           </div>
-          
-          {/* Workspace Navigation Tabs */}
-          <div className="flex px-6 space-x-1 overflow-x-auto scrollbar-hide border-t border-slate-100">
-             {[
-                 { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-                 { id: 'governance', label: 'Governance', icon: Gavel },
-                 { id: 'strategy', label: 'Strategy', icon: Target },
-                 { id: 'roadmap', label: 'Roadmap', icon: Map },
-                 { id: 'scope', label: 'Scope', icon: Sliders },
-                 { id: 'financials', label: 'Financials', icon: TrendingUp },
-                 { id: 'resources', label: 'Resources', icon: Users },
-                 { id: 'risks', label: 'Risks', icon: ShieldAlert },
-                 { id: 'benefits', label: 'Benefits', icon: Star },
-                 { id: 'issues', label: 'Issues', icon: AlertOctagon }, 
-                 { id: 'gates', label: 'Gates', icon: CheckCircle }, 
-                 { id: 'change', label: 'Change', icon: RefreshCw }, 
-                 { id: 'vendors', label: 'Vendors', icon: Truck }, 
-                 { id: 'tradeoff', label: 'Tradeoff', icon: Scale }, 
-                 { id: 'architecture', label: 'Standards', icon: Server }, 
-                 { id: 'stakeholders', label: 'Stakeholders', icon: MessageSquare },
-                 { id: 'quality', label: 'Quality', icon: ShieldCheck },
-                 { id: 'closure', label: 'Closure', icon: Flag },
-             ].map((tab) => (
-                 <button
-                    key={tab.id}
-                    onClick={() => setActiveView(tab.id as any)}
-                    className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap focus:outline-none focus:text-nexus-700 ${
-                        activeView === tab.id 
-                        ? 'border-nexus-600 text-nexus-600 bg-slate-50' 
-                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                    }`}
-                 >
-                    <tab.icon size={16} />
-                    {tab.label}
-                 </button>
-             ))}
+
+          {/* Nav Tabs */}
+          <div className="px-6 flex overflow-x-auto scrollbar-hide gap-6">
+              {navGroups.map((group, gIdx) => (
+                  <div key={gIdx} className="flex gap-1 py-2">
+                      {group.items.map(item => (
+                          <button
+                              key={item.id}
+                              onClick={() => setActiveView(item.id)}
+                              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+                                  activeView === item.id 
+                                  ? 'bg-nexus-50 text-nexus-700' 
+                                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                              }`}
+                          >
+                              <item.icon size={16} />
+                              {item.label}
+                          </button>
+                      ))}
+                      {/* Divider between groups */}
+                      {gIdx < navGroups.length - 1 && <div className="w-px bg-slate-200 mx-2 my-2"></div>}
+                  </div>
+              ))}
           </div>
        </div>
 
        {/* Content Area */}
-       <div className="flex-1 overflow-hidden bg-slate-100">
-          {activeView === 'dashboard' && <ProgramDashboard programId={selectedProgram.id} />}
-          {activeView === 'governance' && <ProgramGovernance programId={selectedProgram.id} />}
-          {activeView === 'strategy' && <ProgramStrategy programId={selectedProgram.id} />}
-          {activeView === 'scope' && <ProgramScope programId={selectedProgram.id} />}
-          {activeView === 'financials' && <ProgramFinancials programId={selectedProgram.id} />}
-          {activeView === 'resources' && <ProgramResources programId={selectedProgram.id} />}
-          {activeView === 'risks' && <ProgramRisks programId={selectedProgram.id} />}
-          {activeView === 'benefits' && <ProgramBenefits programId={selectedProgram.id} />}
-          {activeView === 'roadmap' && <ProgramRoadmap programId={selectedProgram.id} />}
-          {activeView === 'stakeholders' && <ProgramStakeholders programId={selectedProgram.id} />}
-          {activeView === 'quality' && <ProgramQuality programId={selectedProgram.id} />}
-          {activeView === 'closure' && <ProgramClosure programId={selectedProgram.id} />}
-          {activeView === 'architecture' && <ProgramArchitecture programId={selectedProgram.id} />}
-          {activeView === 'tradeoff' && <ProgramTradeoff programId={selectedProgram.id} />}
-          {activeView === 'issues' && <ProgramIssues programId={selectedProgram.id} />}
-          {activeView === 'gates' && <ProgramStageGates programId={selectedProgram.id} />}
-          {activeView === 'change' && <ProgramIntegratedChange programId={selectedProgram.id} />}
-          {activeView === 'vendors' && <ProgramVendors programId={selectedProgram.id} />}
+       <div className="flex-1 overflow-hidden bg-slate-50/50">
+          {renderContent()}
        </div>
     </div>
   );

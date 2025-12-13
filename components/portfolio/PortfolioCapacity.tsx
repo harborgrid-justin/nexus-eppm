@@ -4,6 +4,7 @@ import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
 import { Users, AlertTriangle, ArrowRight } from 'lucide-react';
+import { ProgressBar } from '../common/ProgressBar';
 
 const PortfolioCapacity: React.FC = () => {
     const { state } = useData();
@@ -27,10 +28,7 @@ const PortfolioCapacity: React.FC = () => {
                 .reduce((sum, r) => sum + (r.capacity * 4), 0); // Weekly cap * 4
 
             // Demand: Sum of all task assignments active in this month
-            // Note: In a real app, this would use precise date range overlaps. 
-            // We are simulating demand curves here based on project phases.
             const totalDemandHours = state.projects.reduce((projSum, proj) => {
-                // Simulate demand based on project phase and size
                 const baseLoad = proj.tasks.length * 20; 
                 const randomVar = Math.sin(i + proj.id.length) * 50; 
                 return projSum + baseLoad + Math.abs(randomVar);
@@ -110,12 +108,11 @@ const PortfolioCapacity: React.FC = () => {
                                         {Math.round(role.utilization)}%
                                     </span>
                                 </div>
-                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                    <div 
-                                        className={`h-full rounded-full ${role.utilization > 100 ? 'bg-red-500' : role.utilization > 85 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                                        style={{ width: `${Math.min(role.utilization, 100)}%` }}
-                                    ></div>
-                                </div>
+                                <ProgressBar 
+                                    value={role.utilization} 
+                                    max={100} // Allow overflow visual in component logic
+                                    thresholds 
+                                />
                                 <div className="flex justify-between text-xs text-slate-400">
                                     <span>Alloc: {role.allocated}h</span>
                                     <span>Cap: {role.capacity}h</span>

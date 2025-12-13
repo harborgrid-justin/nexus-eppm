@@ -5,7 +5,7 @@ import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon } from 'lucid
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, Line } from 'recharts';
 
 interface ProgramFinancialsProps {
   programId: string;
@@ -47,7 +47,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="name" tick={{fontSize: 10}} interval={0} />
                     <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
                     <Tooltip formatter={(val: number) => formatCurrency(val)} />
                     <Legend />

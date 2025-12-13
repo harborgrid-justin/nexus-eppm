@@ -1,19 +1,19 @@
-
 import React, { useState } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell, PieChart, Pie
-} from 'recharts';
-import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X, Plus } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 import { useGeminiAnalysis } from '../hooks/useGeminiAnalysis';
+import { usePermissions } from '../hooks/usePermissions';
+import { CustomBarChart } from './charts/CustomBarChart';
+import { CustomPieChart } from './charts/CustomPieChart';
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const theme = useTheme();
   const { generateReport, report, isGenerating, error, reset } = useGeminiAnalysis();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const { hasPermission } = usePermissions();
 
   const handleGenerateReport = () => {
     setIsReportModalOpen(true);
@@ -87,7 +87,11 @@ const Dashboard: React.FC = () => {
             <Sparkles size={16} className="text-yellow-500"/>
             Generate AI Summary
            </button>
-           <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700`}>New Project</button>
+           {hasPermission('project:create') && (
+             <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2`}>
+                <Plus size={16} /> New Project
+             </button>
+           )}
         </div>
       </div>
 
@@ -123,51 +127,23 @@ const Dashboard: React.FC = () => {
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
         <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
-          <h3 className={`${theme.typography.h3} mb-6`}>Budget vs Actuals by Project</h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={budgetDataForChart}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{fontSize: 12}} />
-                <YAxis tick={{fontSize: 12}} tickFormatter={(value) => `$${value/1000000}M`} />
-                <RechartsTooltip formatter={(value: number) => `$${(value/1000000).toFixed(2)}M`} />
-                <Bar dataKey="Budget" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Spent" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <h3 className={`${theme.typography.h3} mb-6`}>Budget Actuals by Project</h3>
+          <CustomBarChart 
+            data={budgetDataForChart}
+            xAxisKey="name"
+            dataKey="Spent"
+            height={300}
+            barColor="#0ea5e9"
+            formatTooltip={(val) => `$${(val/1000000).toFixed(2)}M`}
+          />
         </div>
 
         <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
           <h3 className={`${theme.typography.h3} mb-6`}>Portfolio Health Distribution</h3>
-          <div className="h-[300px] w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={healthDataForChart}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={80}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {healthDataForChart.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <RechartsTooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-center gap-6 mt-[-20px]">
-            {healthDataForChart.map(d => (
-              <div key={d.name} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ background: d.color }}></div>
-                <span className="text-sm text-slate-600">{d.name} ({d.value})</span>
-              </div>
-            ))}
-          </div>
+          <CustomPieChart 
+            data={healthDataForChart}
+            height={300}
+          />
         </div>
       </div>
     </div>
