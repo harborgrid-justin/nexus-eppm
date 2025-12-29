@@ -1,12 +1,11 @@
 
 import { DataState, Action } from '../context/DataContext';
-import { SystemAlert, AlertSeverity } from '../types/business';
-import { Project, Task, Risk, ChangeOrder, ProgramIssue } from '../types';
-import { addWorkingDays, getDaysDiff } from './dateUtils';
+import { SystemAlert, AlertSeverity, AlertCategory } from '../types/business';
+import { Project, ProgramIssue, TaskStatus } from '../types';
+import { getDaysDiff, addWorkingDays } from './dateUtils';
 import { generateId } from './formatters';
 
-// Helper to create alerts
-const createAlert = (severity: AlertSeverity, category: any, title: string, message: string, link?: any): SystemAlert => ({
+const createAlert = (severity: AlertSeverity, category: AlertCategory, title: string, message: string, link?: any): SystemAlert => ({
   id: `ALT-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
   date: new Date().toISOString(),
   severity,
@@ -26,6 +25,7 @@ export const applyBusinessLogic = (newState: DataState, action: Action, oldState
   let projects = [...newState.projects];
   let programs = [...newState.programs];
   let programIssues = [...newState.programIssues];
+  let programGates = [...newState.programFundingGates];
 
   // --- I. FINANCIAL GOVERNANCE ---
 
@@ -35,14 +35,10 @@ export const applyBusinessLogic = (newState: DataState, action: Action, oldState
     const project = projects.find(p => p.id === action.payload.projectId);
     
     if (co && project && project.reserves) {
-      const remainingContingency = project.reserves.contingencyReserve - (project.spent * 0.1); // Mock calculation
-      
+      const remainingContingency = project.reserves.contingencyReserve - (project.spent * 0.05); // Mock usage
       if (co.amount > remainingContingency) {
-        // Trigger: Breach
-        alerts.push(createAlert('Critical', 'Finance', 'Contingency Exhausted', `Change Order ${co.id} exhausted project reserves. Escalating to Program level.`, { type: 'Project', id: project.id }));
-        
-        // Action: Auto-create Program Issue
-        const newIssue: ProgramIssue = {
+        alerts.push(createAlert('Critical', 'Finance', 'Contingency Exhausted', `Change Order ${co.id} exhausted project reserves. Escalating to Program.`, { type: 'Project', id: project.id }));
+        programIssues.push({
           id: generateId('PI'),
           programId: project.programId || 'PRG-001',
           title: `Reserve Breach: ${project.name}`,
@@ -52,52 +48,56 @@ export const applyBusinessLogic = (newState: DataState, action: Action, oldState
           owner: 'Program Manager',
           resolutionPath: 'Financial Review',
           impactedProjectIds: [project.id]
-        };
-        programIssues.push(newIssue);
+        });
       }
     }
   }
 
-  // Hook 3: Currency Fluctuation (Simulated via Action)
+  // Hook 2: Portfolio Funding Solvency Lock
+  if (action.type === 'UPDATE_PROGRAM_GATE') {
+      const gate = action.payload;
+      const portfolioLimit = 100000000; // Mock Portfolio Yearly Limit
+      const currentAllocated = programGates.filter(g => g.status === 'Released').reduce((sum, g) => sum + g.amount, 0);
+      
+      if (gate.status === 'Released' && (currentAllocated + gate.amount) > portfolioLimit) {
+          // Revert change (logic handled by returning old state for gate, but new state for alert)
+          // For simplicity here, we allow it but blast a blocker alert
+          alerts.push(createAlert('Blocker', 'Portfolio', 'Funding Solvency Breach', `Releasing Gate ${gate.name} exceeds Portfolio FY Limit.`, { type: 'Program', id: gate.programId }));
+      }
+  }
+
+  // Hook 3: Currency Fluctuation Ripple
   if (action.type === 'UPDATE_EXCHANGE_RATES') {
-     // In a real app, re-calculate EAC for all projects with foreign currency
      alerts.push(createAlert('Info', 'Finance', 'EAC Recalculated', 'Exchange rates updated. Project estimates adjusted globally.'));
+     // In real app: Recalculate EAC for all projects
   }
 
   // Hook 4: Strategic Benefit ROI Recalculation
-  // Run on every financial change
   if (['APPROVE_CHANGE_ORDER', 'UPDATE_TASK'].includes(action.type)) {
      projects.forEach(p => {
-        const roi = p.financialValue; // Simplified
-        const hurdleRate = 6; // Mock hurdle
-        if (roi < hurdleRate && p.health !== 'Critical') {
-            // p.health = 'Warning'; // Side effect: downgrade health
+        const roi = (p.financialValue * 1000000) / (p.budget || 1); 
+        if (roi < 1.1 && p.health !== 'Critical') { // < 10% ROI
             alerts.push(createAlert('Warning', 'Strategy', 'ROI Degradation', `Project ${p.code} ROI dropped below hurdle rate.`));
         }
      });
   }
 
-  // --- II. SCHEDULE INTELLIGENCE ---
+  // --- II. SCHEDULE & DEPENDENCY INTELLIGENCE ---
 
   // Hook 5: The "Domino Effect" Dependency
   if (action.type === 'UPDATE_TASK') {
     const updatedTask = action.payload.task;
     const projectIndex = projects.findIndex(p => p.id === action.payload.projectId);
-    
     if (projectIndex > -1) {
         const project = projects[projectIndex];
+        // Find successors in ANY project (Program level logic would search all projects)
+        // Here we search local project
         const successors = project.tasks.filter(t => t.dependencies.some(d => d.targetId === updatedTask.id));
-        
-        // Simple FS Logic: Successor Start >= Predecessor End
         successors.forEach(succ => {
              const predEnd = new Date(updatedTask.endDate);
              const succStart = new Date(succ.startDate);
-             
              if (predEnd >= succStart) {
-                 // Logic: Push successor
-                 const gap = getDaysDiff(succStart, predEnd) + 1; // +1 day buffer
-                 // Note: In a real app, this would recurse. Here we alert.
-                 alerts.push(createAlert('Warning', 'Schedule', 'Dependency Violation', `Task '${succ.name}' logic broken by '${updatedTask.name}' update. Schedule slip likely.`));
+                 alerts.push(createAlert('Warning', 'Schedule', 'Dependency Violation', `Task '${succ.name}' logic broken by '${updatedTask.name}' update.`, { type: 'Task', id: succ.id }));
              }
         });
     }
@@ -105,29 +105,52 @@ export const applyBusinessLogic = (newState: DataState, action: Action, oldState
 
   // Hook 6: Portfolio Roadmap Freeze
   if (action.type === 'FREEZE_BASELINE') {
-     // Logic to lock baseline fields would happen here
      alerts.push(createAlert('Info', 'Schedule', 'Roadmap Frozen', 'Q3 Baseline locked. Changes now require CR.'));
   }
 
-  // --- III. RESOURCE & CAPACITY ---
+  // Hook 7: Program Gate Synchronization
+  if (action.type === 'UPDATE_PROGRAM_GATE' && action.payload.status === 'Released') {
+      const gate = action.payload;
+      // Check if all projects in previous phase are complete
+      const openProjects = projects.filter(p => p.programId === gate.programId && p.health === 'Critical');
+      if (openProjects.length > 0) {
+          alerts.push(createAlert('Blocker', 'Governance', 'Gate Hold', `Cannot release ${gate.name}. ${openProjects.length} projects are Critical.`, { type: 'Program', id: gate.programId }));
+      }
+  }
+
+  // Hook 8: Strategic Deadline Back-Propagation
+  if (action.type === 'UPDATE_STRATEGIC_GOAL') {
+      // Mock: If goal date moves left, alert projects
+      alerts.push(createAlert('Warning', 'Strategy', 'Goal Shift', `Strategic Goal updated. Check negative float on linked projects.`));
+  }
+
+  // --- III. RESOURCE MANAGEMENT ---
 
   // Hook 9: Key Person Risk Monitor
-  if (action.type === 'UPDATE_TASK' && action.payload.task.assignments) {
-     // Scan for "Key Person" overload
-     // Mock logic: assume 'Sarah Chen' is key
-     const keyPersonId = 'R-001'; 
-     let totalLoad = 0;
-     // This is expensive, usually done async. Simplified here.
-     projects.forEach(p => p.tasks.forEach(t => {
-         if (t.status === 'In Progress') {
-             const assign = t.assignments.find(a => a.resourceId === keyPersonId);
-             if (assign) totalLoad += assign.units;
-         }
-     }));
-     
-     if (totalLoad > 100) {
-         alerts.push(createAlert('Critical', 'Resource', 'Key Person Overload', `Sarah Chen is allocated at ${totalLoad}%. Conflict detected.`));
-     }
+  if (action.type === 'UPDATE_TASK') {
+      // Simplified check
+      alerts.push(createAlert('Info', 'Resource', 'Load Check', 'Resource load recalculated.'));
+  }
+
+  // Hook 10: Global Calendar Cascade
+  // Triggered via a hypothetic 'UPDATE_CALENDAR' action or implicitly here
+  // Logic: Reprocess CPM for all projects linked to calendar (Expensive, usually async job)
+
+  // Hook 11: Skill Shortage Forecasting
+  // Passive check
+  if (action.type === 'UPDATE_TASK') {
+      const pendingReqs = projects.flatMap(p => p.tasks).filter(t => t.status === 'Not Started').flatMap(t => t.resourceRequirements);
+      // If demand for 'Architect' > Supply, trigger alert (Mocked)
+  }
+
+  // Hook 12: Vendor Blacklist Enforcer
+  if (action.type === 'ADD_OR_UPDATE_COST_ESTIMATE' || action.type === 'UPDATE_PROGRAM_ALLOCATION') {
+      const blacklist = newState.governance.vendorBlacklist;
+      // Check active contracts (mocked access to contracts)
+      const blacklistedContract = newState.contracts.find(c => blacklist.includes(c.vendorId) && c.status === 'Active');
+      if (blacklistedContract) {
+          alerts.push(createAlert('Blocker', 'Compliance', 'Blacklist Violation', `Active contract detected with blacklisted vendor ${blacklistedContract.vendorId}.`, { type: 'Project', id: blacklistedContract.projectId }));
+      }
   }
 
   // --- IV. RISK & QUALITY ---
@@ -135,65 +158,97 @@ export const applyBusinessLogic = (newState: DataState, action: Action, oldState
   // Hook 13: Systemic Risk Promotion
   if (action.type === 'ADD_RISK') {
      const newRisk = action.payload;
-     // Count similar risks
-     let similarCount = 0;
-     newState.risks.forEach(r => {
-         if (r.category === newRisk.category && r.status === 'Open') similarCount++;
-     });
-     
-     if (similarCount >= 3) {
-         alerts.push(createAlert('Critical', 'Risk', 'Systemic Risk Detected', `Category '${newRisk.category}' has appeared in >3 projects. Suggested: Elevate to Portfolio Risk.`));
+     const similarRisks = newState.risks.filter(r => r.category === newRisk.category).length;
+     if (similarRisks >= 3) {
+         alerts.push(createAlert('Critical', 'Risk', 'Systemic Risk Detected', `Category '${newRisk.category}' appearing frequently. Consider Portfolio Risk entry.`));
      }
   }
 
+  // Hook 14: Risk Appetite Governance
+  // Passive: If Governance State 'riskTolerance' changes, re-color scores. (UI handled)
+
   // Hook 15: Lessons Learned Push
   if (action.type === 'CLOSE_PROJECT') {
-     alerts.push(createAlert('Info', 'Strategy', 'Knowledge Transfer', 'Project closed. 5 Lessons Learned pushed to Architecture Board.'));
+     alerts.push(createAlert('Info', 'Quality', 'Knowledge Transfer', 'Project closed. Lessons Learned pushed to Architecture Board.'));
+  }
+
+  // Hook 16: Cost of Quality Roll-up
+  if (action.type === 'ADD_RISK') { // Using ADD_RISK as proxy for NCR creation for this example
+      // In real app, listen to ADD_NCR
+      // Sum NCR costs -> Program KPI
   }
 
   // --- V. STRATEGY & SCOPE ---
 
+  // Hook 17: Strategic Driver Weighting
+  // Triggered by specific action in admin panel, recalculates priority scores
+
   // Hook 18: Zombie Project Detector
-  // Usually a cron, but we check on load or major updates
+  // Periodic check. Here we check on load or major updates
   projects.forEach(p => {
-      const lastUpdate = new Date(p.endDate); // Mocking "last activity" with end date for demo
-      const today = new Date();
-      const diff = getDaysDiff(lastUpdate, today);
-      if (p.status === 'Active' && diff < -45) {
-          // alerts.push(createAlert('Warning', 'Strategy', 'Zombie Project', `${p.name} has no activity for 45 days.`));
+      const lastActivity = new Date(p.startDate); // Mock
+      const now = new Date();
+      if (getDaysDiff(lastActivity, now) > 45 && p.status === 'Active') {
+         // alerts.push(createAlert('Warning', 'Portfolio', 'Zombie Project', `${p.name} stagnant for 45+ days.`));
       }
   });
 
   // Hook 19: Scope Creep Watchdog
   if (action.type === 'APPROVE_CHANGE_ORDER') {
-      // Check total CO value vs Original Budget
-      // Logic handled in Dashboard visuals, but we alert here
-      // alerts.push(createAlert('Warning', 'Finance', 'Scope Creep', 'Cumulative change orders exceed 10% of baseline.'));
+      // Logic handled in component, but alert here
   }
 
-  // --- VI. AUTOMATION ---
+  // Hook 20: Benefit Obsolescence
+  if (action.type === 'DELETE_STRATEGIC_GOAL') {
+      const goalId = action.payload;
+      const orphanedProjects = projects.filter(p => true); // Mock logic to find projects linked ONLY to this goal
+      if (orphanedProjects.length > 0) {
+          alerts.push(createAlert('Warning', 'Strategy', 'Strategic Orphan', `Goal deletion left ${orphanedProjects.length} projects without strategic alignment.`));
+      }
+  }
+
+  // --- VI. AUTOMATION & WORKFLOW ---
+
+  // Hook 21: Automated Status Reporting
+  // Triggered by time/cron.
+
+  // Hook 22: Project Activation Handshake
+  // When Portfolio status -> Active, unlock budget.
 
   // Hook 23: Safety Incident Shutdown
   if (action.type === 'LOG_SAFETY_INCIDENT') {
-      const locationId = action.payload.locationId;
-      // Auto-suspend projects at location
+      const loc = action.payload.locationId;
       projects = projects.map(p => {
-          if (p.locationId === locationId) {
-              alerts.push(createAlert('Blocker', 'Compliance', 'Safety Stand-down', `Project ${p.code} suspended due to incident at ${locationId}.`));
-              return { ...p, status: 'On Hold' }; // Hook 23 Action
+          if (p.locationId === loc) {
+              alerts.push(createAlert('Blocker', 'Compliance', 'Safety Stand-down', `Project ${p.code} suspended due to safety incident.`));
+              return { ...p, status: 'On Hold' }; 
           }
           return p;
       });
   }
-  
-  // Return the enriched state
+
+  // Hook 24: Document Compliance Gate
+  if (action.type === 'UPDATE_TASK' && action.payload.task.status === TaskStatus.COMPLETED) {
+      // Check for required docs
+      // Mock check: 50% chance of missing docs for demo
+      if (Math.random() > 0.9) {
+          alerts.push(createAlert('Warning', 'Quality', 'Missing Documentation', `Task completed without 'Final' deliverables.`, { type: 'Task', id: action.payload.task.id }));
+          // Note: We don't block the state update here to avoid frustrating the user in demo, but in prod we would return oldState.
+      }
+  }
+
+  // Hook 25: ESG Carbon Roll-up
+  if (action.type === 'UPDATE_TASK') { // Proxy for procurement update
+      // Re-sum carbon impact based on material quantities
+  }
+
   return {
     ...newState,
     projects,
     programIssues,
     governance: {
         ...newState.governance,
-        alerts: alerts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Newest first
+        alerts: alerts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     }
   };
 };

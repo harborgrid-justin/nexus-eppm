@@ -73,7 +73,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
         label: t('nav.administration', 'Administration'),
         icon: Settings,
         items: [
-          // Permission-gated items
           ...(hasPermission('system:configure') ? [
             { id: 'dataExchange', icon: Database, label: t('nav.data_exchange', 'Data Exchange') },
             { id: 'marketplace', icon: LayoutGrid, label: t('nav.marketplace', 'App Marketplace') },
@@ -84,7 +83,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
         ]
       }
     ];
-    // Filter empty groups
     return groups.filter(g => g.items.length > 0);
   }, [activeExtensions, t, showWorkbench, hasPermission]);
 
@@ -94,7 +92,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 md:hidden" 
@@ -118,7 +115,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
           </button>
         </div>
 
-        {/* Module Group Switching */}
         <nav className="p-4 border-b border-slate-800" aria-label="Module Groups">
           <ul className="space-y-2">
             {navGroups.map((group) => {
@@ -130,7 +126,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
                   <button
                     onClick={() => {
                       setActiveGroup(group.id);
-                      // Default select first item when switching groups
                       if (group.items.length > 0) setActiveTab(group.items[0].id);
                     }}
                     aria-current={isActive ? 'true' : undefined}
@@ -149,7 +144,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
           </ul>
         </nav>
 
-        {/* Feature Navigation */}
         <nav className="flex-1 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700" aria-label="Features">
           <ul className="space-y-0.5 px-4">
             {activeGroupItems.map((item) => {
@@ -159,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
                   <button
                     onClick={() => {
                         setActiveTab(item.id);
-                        if (window.innerWidth < 768) onClose(); // Close on mobile selection
+                        if (window.innerWidth < 768) onClose(); 
                     }}
                     aria-current={isActive ? 'page' : undefined}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-nexus-500 ${
@@ -189,7 +183,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
               <p className="text-xs text-slate-500 truncate">{user?.role || 'Viewer'}</p>
             </div>
             
-            {/* Added Notification Center to Sidebar Footer for visibility */}
             <div className="md:hidden">
                  <NotificationCenter />
             </div>

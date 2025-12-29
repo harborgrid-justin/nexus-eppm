@@ -1,8 +1,6 @@
 
-import { ActivityCodeScope } from './common';
-
 export type AlertSeverity = 'Info' | 'Warning' | 'Critical' | 'Blocker';
-export type AlertCategory = 'Finance' | 'Schedule' | 'Resource' | 'Risk' | 'Strategy' | 'Compliance';
+export type AlertCategory = 'Finance' | 'Schedule' | 'Resource' | 'Risk' | 'Strategy' | 'Compliance' | 'Quality' | 'Portfolio' | 'Governance';
 
 export interface SystemAlert {
   id: string;
@@ -11,24 +9,15 @@ export interface SystemAlert {
   message: string;
   severity: AlertSeverity;
   category: AlertCategory;
-  link?: { type: 'Project' | 'Program' | 'Risk'; id: string };
+  link?: { type: 'Project' | 'Program' | 'Risk' | 'Task'; id: string };
   isRead: boolean;
 }
 
-export interface GovernanceRule {
-  id: string;
-  name: string;
-  description: string;
-  isActive: boolean;
-  threshold?: number;
-}
-
-// Extension to Global State for Governance
 export interface GovernanceState {
   alerts: SystemAlert[];
   auditLog: any[];
-  exchangeRates: Record<string, number>; // Hook #3
-  riskTolerance: 'Aggressive' | 'Moderate' | 'Conservative'; // Hook #14
-  strategicWeights: Record<string, number>; // Hook #17
-  vendorBlacklist: string[]; // Hook #12
+  exchangeRates: Record<string, number>;
+  riskTolerance: 'Aggressive' | 'Moderate' | 'Conservative';
+  strategicWeights: Record<string, number>;
+  vendorBlacklist: string[];
 }

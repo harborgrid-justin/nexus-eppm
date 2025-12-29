@@ -5,9 +5,7 @@ import { useData } from '../../context/DataContext';
 
 export const NotificationCenter: React.FC = () => {
     const { state, dispatch } = useData();
-    // Use the new governance alerts + mock system notifications if empty
     const notifications = state.governance.alerts;
-    
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const getIcon = (severity: string) => {
@@ -15,6 +13,7 @@ export const NotificationCenter: React.FC = () => {
             case 'Info': return <Info size={16} className="text-blue-500"/>;
             case 'Warning': return <AlertTriangle size={16} className="text-yellow-500"/>;
             case 'Critical': return <XCircle size={16} className="text-red-500"/>;
+            case 'Blocker': return <XCircle size={16} className="text-purple-600 font-bold"/>;
             default: return <CheckCircle size={16} className="text-green-500"/>;
         }
     };
@@ -56,11 +55,18 @@ export const NotificationCenter: React.FC = () => {
                                     <span className="text-[10px] text-slate-400 whitespace-nowrap ml-2">{getTimeAgo(n.date)}</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{n.message}</p>
-                                {n.category && (
-                                    <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
-                                        {n.category}
-                                    </span>
-                                )}
+                                <div className="flex gap-2 mt-1.5">
+                                    {n.category && (
+                                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
+                                            {n.category}
+                                        </span>
+                                    )}
+                                    {n.link && (
+                                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-500 border border-indigo-100">
+                                            {n.link.type}: {n.link.id}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )) : (
