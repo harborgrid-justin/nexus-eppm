@@ -6,6 +6,7 @@ import {
   MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2
 } from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
 // Lazy load modules to split code bundle
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
@@ -32,7 +33,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   const [activeArea, setActiveArea] = useState('integration');
   const [scheduleView, setScheduleView] = useState<'gantt' | 'network'>('gantt');
 
-  const navStructure = useMemo(() => [
+  const navGroups: NavGroup[] = useMemo(() => [
     {
       id: 'overview',
       label: 'Overview',
@@ -42,7 +43,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
     },
     {
       id: 'planning',
-      label: 'Planning & Performance',
+      label: 'Planning',
       items: [
         { id: 'scope', label: 'Scope', icon: Sliders },
         { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
@@ -56,32 +57,28 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       items: [
         { id: 'resources', label: 'Resources', icon: Users },
         { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
-        { id: 'documents', label: 'Documents', icon: Folder },
+        { id: 'documents', label: 'Docs', icon: Folder },
       ]
     },
     {
       id: 'monitoring',
-      label: 'Monitoring & Control',
+      label: 'Control',
       items: [
         { id: 'risk', label: 'Risk', icon: AlertTriangle },
         { id: 'issues', label: 'Issues', icon: FileWarning },
         { id: 'stakeholder', label: 'Stakeholders', icon: Users },
-        { id: 'communications', label: 'Communications', icon: MessageCircle },
+        { id: 'communications', label: 'Comms', icon: MessageCircle },
       ]
     }
   ], []);
   
   const handleGroupChange = (groupId: string) => {
-    const newGroup = navStructure.find(g => g.id === groupId);
+    const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
       setActiveGroup(groupId);
       setActiveArea(newGroup.items[0].id);
     }
   };
-
-  const activeGroupItems = useMemo(() => {
-    return navStructure.find(g => g.id === activeGroup)?.items || [];
-  }, [activeGroup, navStructure]);
 
   const renderContent = () => {
     if (!project) {
@@ -125,50 +122,20 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
   return (
     <div className="h-full w-full flex flex-col bg-slate-100 animate-in fade-in duration-300">
-      {/* Horizontal Tab Navigation */}
-      <div className="flex-shrink-0 border-b border-slate-200 bg-white shadow-sm z-10">
-        
-        {/* Group Pills */}
-        <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
-            {navStructure.map(group => (
-                <button
-                    key={group.id}
-                    onClick={() => handleGroupChange(group.id)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-nexus-500 ${
-                        activeGroup === group.id
-                        ? 'bg-nexus-600 text-white shadow-sm'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                >
-                    {group.label}
-                </button>
-            ))}
-        </div>
-        
-        <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
-          {activeGroupItems.map(area => (
-            <button
-              key={area.id}
-              onClick={() => setActiveArea(area.id)}
-              className={`flex items-center gap-2 px-3 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nexus-500 ${
-                activeArea === area.id
-                  ? 'border-nexus-600 text-nexus-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              }`}
-            >
-              <area.icon size={16} />
-              <span>{area.label}</span>
-            </button>
-          ))}
-        </nav>
-      </div>
+      <ModuleNavigation 
+        groups={navGroups}
+        activeGroup={activeGroup}
+        activeItem={activeArea}
+        onGroupChange={handleGroupChange}
+        onItemChange={setActiveArea}
+      />
 
       {/* Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {activeArea === 'schedule' && (
-            <div className="absolute top-4 right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30">
-                <button onClick={() => setScheduleView('gantt')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><GanttChartSquare size={16} /></button>
-                <button onClick={() => setScheduleView('network')} className={`p-1.5 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><Network size={16} /></button>
+            <div className="absolute top-4 right-4 md:right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
+                <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><GanttChartSquare size={18} /></button>
+                <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><Network size={18} /></button>
             </div>
         )}
         <ErrorBoundary name={`${activeArea} Module`}>

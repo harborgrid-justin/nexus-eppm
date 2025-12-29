@@ -9,19 +9,21 @@ interface CostPlanEditorProps {
     projectId: string;
 }
 
+interface PlanSectionProps {
+    title: string;
+    icon: any;
+    children: React.ReactNode;
+    isOpen: boolean;
+    onToggle: () => void;
+}
+
 // Collapsible Section Component
-const PlanSection = ({ 
+const PlanSection: React.FC<PlanSectionProps> = ({ 
     title, 
     icon: Icon, 
     children, 
     isOpen, 
     onToggle 
-}: { 
-    title: string; 
-    icon: any; 
-    children: React.ReactNode; 
-    isOpen: boolean; 
-    onToggle: () => void; 
 }) => (
     <div className="border border-slate-200 rounded-lg bg-white overflow-hidden mb-4 shadow-sm">
         <button 

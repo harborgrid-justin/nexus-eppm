@@ -1,15 +1,18 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Briefcase, ArrowRight, LayoutDashboard, Gavel, Target, Star, Map, 
   ArrowLeft, Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck, 
-  Server, Scale, AlertOctagon, RefreshCw, Truck, Plus 
+  Server, Scale, AlertOctagon, RefreshCw, Truck, Plus, Layers
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { getHealthColorClass } from '../utils/formatters';
 import { usePermissions } from '../hooks/usePermissions';
 import { PageHeader } from './common/PageHeader';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { StatusBadge } from './common/StatusBadge';
+import { ProgressBar } from './common/ProgressBar';
+import { formatCompactCurrency } from '../utils/formatters';
 
 // Sub-components
 import ProgramDashboard from './program/ProgramDashboard';
@@ -34,21 +37,23 @@ import ProgramVendors from './program/ProgramVendors';
 const ProgramManager: React.FC = () => {
   const { state } = useData();
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  const [activeGroup, setActiveGroup] = useState<string>('Overview');
   const [activeView, setActiveView] = useState<string>('dashboard');
   const theme = useTheme();
-  const { canEditProject } = usePermissions(); // Inherit permissions
+  const { canEditProject } = usePermissions();
 
   const selectedProgram = state.programs.find(p => p.id === selectedProgramId);
 
-  // Navigation Configuration
-  const navGroups = [
+  const navGroups: NavGroup[] = useMemo(() => [
     {
+      id: 'Overview',
       label: 'Overview',
       items: [
         { id: 'dashboard', label: 'Program Dashboard', icon: LayoutDashboard },
       ]
     },
     {
+      id: 'Strategy',
       label: 'Strategy & Value',
       items: [
         { id: 'strategy', label: 'Strategy Matrix', icon: Target },
@@ -58,6 +63,7 @@ const ProgramManager: React.FC = () => {
       ]
     },
     {
+      id: 'Governance',
       label: 'Governance',
       items: [
         { id: 'governance', label: 'Governance Board', icon: Gavel },
@@ -66,6 +72,7 @@ const ProgramManager: React.FC = () => {
       ]
     },
     {
+      id: 'Execution',
       label: 'Execution',
       items: [
         { id: 'scope', label: 'Scope & Outcomes', icon: Sliders },
@@ -75,6 +82,7 @@ const ProgramManager: React.FC = () => {
       ]
     },
     {
+      id: 'Control',
       label: 'Control',
       items: [
         { id: 'risks', label: 'Risk Management', icon: ShieldAlert },
@@ -84,13 +92,22 @@ const ProgramManager: React.FC = () => {
       ]
     },
     {
+      id: 'Engagement',
       label: 'Engagement',
       items: [
         { id: 'stakeholders', label: 'Stakeholders', icon: Users },
         { id: 'closure', label: 'Transition & Close', icon: Flag },
       ]
     }
-  ];
+  ], []);
+
+  const handleGroupChange = (groupId: string) => {
+    const newGroup = navGroups.find(g => g.id === groupId);
+    if (newGroup?.items.length) {
+      setActiveGroup(groupId);
+      setActiveView(newGroup.items[0].id);
+    }
+  };
 
   const renderContent = () => {
     if (!selectedProgram) return null;
@@ -124,44 +141,71 @@ const ProgramManager: React.FC = () => {
          <PageHeader
             title="Program Management"
             subtitle="Manage coordinated groups of related projects to obtain benefits not available from managing them individually."
-            icon={Briefcase}
+            icon={Layers}
             actions={canEditProject() && (
-                <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 flex items-center gap-2 shadow-sm`}>
-                    <Plus size={16}/> New Program
+                <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm`}>
+                    <Plus size={16} /> New Program
                 </button>
             )}
          />
-
+         
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {state.programs.map(program => (
-               <div 
-                  key={program.id} 
-                  onClick={() => { setSelectedProgramId(program.id); setActiveView('dashboard'); }}
-                  className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} p-6 shadow-sm hover:shadow-md transition-all cursor-pointer group`}
-               >
-                  <div className="flex justify-between items-start mb-4">
-                     <div className="w-10 h-10 bg-nexus-50 text-nexus-600 rounded-lg flex items-center justify-center">
-                        <Briefcase size={20} />
-                     </div>
-                     <span className={`px-2 py-1 rounded text-xs font-bold ${getHealthColorClass(program.health)}`}>
-                        {program.health}
-                     </span>
-                  </div>
-                  <h3 className={`${theme.typography.h3} group-hover:text-nexus-600 transition-colors mb-2`}>{program.name}</h3>
-                  <p className={`${theme.typography.body} text-slate-500 mb-4 line-clamp-2`}>{program.description}</p>
-                  
-                  <div className="flex justify-between items-center text-sm text-slate-600 border-t border-slate-100 pt-4">
-                     <span>{state.projects.filter(p => p.programId === program.id).length} Projects</span>
-                     <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform text-nexus-600 font-medium">
-                        Open Workspace <ArrowRight size={14} />
-                     </span>
-                  </div>
-               </div>
-            ))}
+            {state.programs.map(program => {
+                // Determine linked projects
+                const projects = state.projects.filter(p => p.programId === program.id);
+                const totalBudget = program.budget; // simplified, usually sum of projects + program reserve
+                const projectCount = projects.length;
+                
+                // Calculate average health logic or use program prop
+                
+                return (
+                    <div 
+                        key={program.id} 
+                        onClick={() => setSelectedProgramId(program.id)}
+                        className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-all cursor-pointer group"
+                    >
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-nexus-50 flex items-center justify-center text-nexus-600 group-hover:bg-nexus-100 transition-colors">
+                                    <Layers size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-900 group-hover:text-nexus-700 transition-colors">{program.name}</h3>
+                                    <p className="text-xs text-slate-500">{program.manager}</p>
+                                </div>
+                            </div>
+                            <StatusBadge status={program.health} variant="health"/>
+                        </div>
+                        
+                        <p className="text-sm text-slate-600 mb-6 line-clamp-2">{program.description}</p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-slate-500">Program Budget</span>
+                                    <span className="font-medium text-slate-900">{formatCompactCurrency(totalBudget)}</span>
+                                </div>
+                                <ProgressBar value={65} size="sm" /> 
+                            </div>
+                            
+                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <Briefcase size={14}/>
+                                    <span>{projectCount} Projects</span>
+                                </div>
+                                <button className="text-xs font-bold text-nexus-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                    Open Workspace <ArrowRight size={12}/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+            
             {state.programs.length === 0 && (
-                <div className="col-span-full flex flex-col items-center justify-center p-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
-                    <Briefcase size={48} className="mb-4 opacity-50"/>
-                    <p>No programs defined.</p>
+                <div className="col-span-full text-center py-12 text-slate-400">
+                    <Layers size={48} className="mx-auto mb-4 opacity-50"/>
+                    <p>No programs found. Create a new program to group projects.</p>
                 </div>
             )}
          </div>
@@ -171,61 +215,45 @@ const ProgramManager: React.FC = () => {
 
   // --- PROGRAM WORKSPACE VIEW ---
   return (
-    <div className={theme.layout.pageContainer}>
-       {/* Workspace Header */}
-       <div className={`${theme.colors.surface} border-b border-slate-200 shadow-sm flex-shrink-0 z-10`}>
-          <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-             <div className="flex items-center gap-4 w-full md:w-auto">
-                <button 
-                    onClick={() => setSelectedProgramId(null)} 
-                    className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
-                    title="Back to Program List"
-                >
-                    <ArrowLeft size={20} />
-                </button>
-                <div>
-                    <h1 className={theme.typography.h1}>{selectedProgram.name}</h1>
-                    <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span className="bg-slate-100 px-2 py-0.5 rounded font-mono">ID: {selectedProgram.id}</span>
-                        <span className="flex items-center gap-1">Manager: <span className="font-semibold text-slate-700">{selectedProgram.manager}</span></span>
-                        <span className={`px-2 py-0.5 rounded font-bold ${getHealthColorClass(selectedProgram.health)}`}>{selectedProgram.health}</span>
+    <div className="h-full w-full flex flex-col bg-slate-100 animate-in fade-in duration-300">
+        <div className="bg-white border-b border-slate-200 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => setSelectedProgramId(null)}
+                        className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                        title="Back to Program List"
+                    >
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-900 leading-tight">{selectedProgram.name}</h1>
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">Program</span>
+                            <span>{selectedProgram.manager}</span>
+                        </div>
                     </div>
                 </div>
-             </div>
-             <div className="flex gap-2 w-full md:w-auto justify-end">
-                <button className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Settings</button>
-             </div>
-          </div>
+                <div className="hidden md:flex items-center gap-2">
+                    <div className="text-right mr-2">
+                        <p className="text-[10px] text-slate-400 uppercase font-bold">Health</p>
+                        <StatusBadge status={selectedProgram.health} variant="health"/>
+                    </div>
+                </div>
+            </div>
+            
+            <ModuleNavigation 
+                groups={navGroups}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={setActiveView}
+            />
+        </div>
 
-          {/* Nav Tabs */}
-          <div className="px-6 flex overflow-x-auto scrollbar-hide gap-6">
-              {navGroups.map((group, gIdx) => (
-                  <div key={gIdx} className="flex gap-1 py-2">
-                      {group.items.map(item => (
-                          <button
-                              key={item.id}
-                              onClick={() => setActiveView(item.id)}
-                              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
-                                  activeView === item.id 
-                                  ? 'bg-nexus-50 text-nexus-700' 
-                                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                              }`}
-                          >
-                              <item.icon size={16} />
-                              {item.label}
-                          </button>
-                      ))}
-                      {/* Divider between groups */}
-                      {gIdx < navGroups.length - 1 && <div className="w-px bg-slate-200 mx-2 my-2"></div>}
-                  </div>
-              ))}
-          </div>
-       </div>
-
-       {/* Content Area */}
-       <div className="flex-1 overflow-hidden bg-slate-50/50">
-          {renderContent()}
-       </div>
+        <div className="flex-1 overflow-hidden relative">
+            {renderContent()}
+        </div>
     </div>
   );
 };

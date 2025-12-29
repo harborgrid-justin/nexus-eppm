@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
-import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, TrendingUp, ShoppingCart, MessageSquare } from 'lucide-react';
+import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, ShoppingCart, MessageSquare } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
 import CostEstimating from './cost/CostEstimating';
@@ -17,6 +17,7 @@ import CostCommunications from './cost/CostCommunications';
 import { useTheme } from '../context/ThemeContext';
 import ErrorBoundary from './ErrorBoundary';
 import { PageHeader } from './common/PageHeader';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
 interface CostManagementProps {
   projectId: string;
@@ -28,7 +29,7 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   const [activeView, setActiveView] = useState('dashboard');
   const theme = useTheme();
 
-  const navStructure = useMemo(() => [
+  const navGroups: NavGroup[] = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ]},
@@ -52,16 +53,12 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   ], []);
 
   const handleGroupChange = (groupId: string) => {
-    const newGroup = navStructure.find(g => g.id === groupId);
+    const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
       setActiveGroup(groupId);
       setActiveView(newGroup.items[0].id);
     }
   };
-
-  const activeGroupItems = useMemo(() => {
-    return navStructure.find(g => g.id === activeGroup)?.items || [];
-  }, [activeGroup, navStructure]);
 
   const renderContent = () => {
     switch(activeView) {
@@ -92,40 +89,17 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
       />
 
       <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>
-            <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
-                {navStructure.map(group => (
-                    <button
-                        key={group.id}
-                        onClick={() => handleGroupChange(group.id)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                            activeGroup === group.id
-                            ? 'bg-nexus-600 text-white shadow-sm'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                        {group.label}
-                    </button>
-                ))}
-            </div>
-            <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
-                {activeGroupItems.map(item => (
-                <button
-                    key={item.id}
-                    onClick={() => setActiveView(item.id)}
-                    className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
-                    activeView === item.id
-                        ? 'border-nexus-600 text-nexus-600'
-                        : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-                    }`}
-                >
-                    <item.icon size={16} />
-                    <span>{item.label}</span>
-                </button>
-                ))}
-            </nav>
+        <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden">
+            <ModuleNavigation 
+                groups={navGroups}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={setActiveView}
+                className="border-b border-slate-200"
+            />
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
           <ErrorBoundary name="Cost Module">
             {renderContent()}
           </ErrorBoundary>

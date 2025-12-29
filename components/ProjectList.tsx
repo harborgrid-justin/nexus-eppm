@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { Project, EPSNode } from '../types';
-import { ChevronRight, ChevronDown, Calendar, MoreHorizontal, Briefcase, Plus, Folder, Layers } from 'lucide-react';
+import { ChevronRight, ChevronDown, Calendar, MoreHorizontal, Briefcase, Plus, Folder, Layers, User, Activity } from 'lucide-react';
 import { calculateProjectProgress } from '../utils/calculations';
 import { usePortfolioState } from '../hooks';
 import { useData } from '../context/DataContext';
@@ -135,7 +135,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
     }
   ], []);
 
-  // Recursive EPS Renderer
+  // Recursive EPS Renderer (Desktop Only)
   const renderEpsNode = (node: EPSNode, level: number = 0) => {
     const nodeProjects = filteredProjects.filter(p => p.epsId === node.id);
     const childNodes = state.eps.filter(e => e.parentId === node.id);
@@ -197,6 +197,58 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
     );
   };
 
+  // --- MOBILE CARD RENDERER ---
+  const renderMobileCards = () => (
+    <div className="flex flex-col gap-4 p-4 pb-20">
+      {filteredProjects.map(project => {
+        const progress = calculateProjectProgress(project);
+        return (
+          <div 
+            key={project.id} 
+            onClick={() => onSelectProject(project.id)}
+            className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 active:scale-[0.98] transition-transform"
+          >
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 leading-tight">{project.name}</h3>
+                <p className="text-xs font-mono text-slate-500 mt-1">{project.code}</p>
+              </div>
+              <StatusBadge status={project.health} variant="health"/>
+            </div>
+            
+            <div className="flex justify-between items-center text-sm text-slate-600 mb-4">
+              <div className="flex items-center gap-1.5">
+                <User size={14} className="text-slate-400"/>
+                <span>{project.manager.split(' ')[0]}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Briefcase size={14} className="text-slate-400"/>
+                <span className="font-mono font-medium">{formatCompactCurrency(project.budget)}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-slate-500">
+                <span>Progress</span>
+                <span className="font-bold">{progress}%</span>
+              </div>
+              <ProgressBar 
+                value={progress} 
+                colorClass={project.health === 'Critical' ? 'bg-red-500' : project.health === 'Warning' ? 'bg-yellow-500' : 'bg-nexus-600'} 
+                size="sm"
+              />
+            </div>
+          </div>
+        );
+      })}
+      {filteredProjects.length === 0 && (
+        <div className="text-center p-8 text-slate-400">
+          No projects found.
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
       <PageHeader 
@@ -204,15 +256,16 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
         subtitle="Manage active projects, track progress, and monitor health."
         icon={Briefcase}
         actions={canEditProject() && (
-            <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm`}>
-                <Plus size={16} /> New Project
+            <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm active:opacity-90`}>
+                <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
+                <span className="sm:hidden">New</span>
             </button>
         )}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden h-full">
         {/* Filter Bar */}
-        <div className="flex-shrink-0 mb-4 bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="flex-shrink-0 mb-4 bg-white rounded-xl border border-slate-200 shadow-sm p-3 md:p-4">
             <FilterBar 
                 searchValue={searchTerm} 
                 onSearch={setSearchTerm} 
@@ -220,7 +273,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                 searchPlaceholder="Search projects..."
                 actions={
                     <div className="flex items-center gap-2">
-                        <div className="bg-slate-100 p-1 rounded-lg flex text-xs font-medium">
+                        {/* Desktop View Switcher */}
+                        <div className="hidden md:flex bg-slate-100 p-1 rounded-lg text-xs font-medium">
                             <button 
                                 onClick={() => setViewMode('list')}
                                 className={`px-3 py-1.5 rounded-md flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
@@ -244,25 +298,31 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
             />
         </div>
 
-        {/* Data View */}
-        <div className="flex-1 overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col">
-          {viewMode === 'list' ? (
-             <div className="flex-1 overflow-auto">
-                <DataTable 
-                    data={filteredProjects}
-                    columns={columns}
-                    onRowClick={(p) => onSelectProject(p.id)}
-                    keyField="id"
-                    emptyMessage="No projects found matching your criteria."
-                />
-             </div>
-          ) : (
-             <div className="flex-1 overflow-auto">
-                 {/* Root nodes (nodes with no parent) */}
-                 {state.eps.filter(e => !e.parentId).map(node => renderEpsNode(node))}
-                 {state.eps.length === 0 && <div className="p-8 text-center text-slate-500">No Enterprise Project Structure defined.</div>}
-             </div>
-          )}
+        {/* Responsive Content */}
+        <div className="flex-1 overflow-hidden bg-slate-50 md:bg-white md:border md:border-slate-200 md:rounded-xl md:shadow-sm flex flex-col">
+          
+          {/* Mobile View (Cards) */}
+          <div className="block md:hidden flex-1 overflow-y-auto">
+            {renderMobileCards()}
+          </div>
+
+          {/* Desktop View (Table/EPS) */}
+          <div className="hidden md:block flex-1 overflow-auto">
+            {viewMode === 'list' ? (
+               <DataTable 
+                  data={filteredProjects}
+                  columns={columns}
+                  onRowClick={(p) => onSelectProject(p.id)}
+                  keyField="id"
+                  emptyMessage="No projects found matching your criteria."
+              />
+            ) : (
+               <div className="p-2">
+                   {state.eps.filter(e => !e.parentId).map(node => renderEpsNode(node))}
+                   {state.eps.length === 0 && <div className="p-8 text-center text-slate-500">No Enterprise Project Structure defined.</div>}
+               </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

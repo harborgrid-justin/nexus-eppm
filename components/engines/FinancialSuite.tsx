@@ -172,7 +172,11 @@ const FinancialSuite: React.FC = () => {
 
 // Helper for Treemap
 const CustomizedContent = (props: any) => {
-  const { root, depth, x, y, width, height, index, payload, colors, name } = props;
+  const { root, depth, x, y, width, height, index, payload, colors, name, value } = props;
+  
+  const displayValue = value || (payload ? payload.value : 0);
+  const color = (colors && colors[index % colors.length]) ? colors[index % colors.length].color : '#8884d8';
+
   return (
     <g>
       <rect
@@ -181,7 +185,7 @@ const CustomizedContent = (props: any) => {
         width={width}
         height={height}
         style={{
-          fill: colors[index % colors.length].color,
+          fill: color,
           stroke: '#fff',
           strokeWidth: 2 / (depth + 1e-10),
           strokeOpacity: 1 / (depth + 1e-10),
@@ -194,7 +198,7 @@ const CustomizedContent = (props: any) => {
       )}
       {width > 50 && height > 50 && (
         <text x={x + width / 2} y={y + height / 2 + 16} textAnchor="middle" fill="#fff" fontSize={10}>
-          {formatCompactCurrency(payload.value)}
+          {formatCompactCurrency(displayValue)}
         </text>
       )}
     </g>
