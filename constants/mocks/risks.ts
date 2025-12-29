@@ -1,5 +1,5 @@
 
-import { Issue, IssueCode, RiskManagementPlan, RiskBreakdownStructureNode, PortfolioRisk } from '../../types';
+import { Issue, IssueCode, RiskManagementPlan, RiskBreakdownStructureNode, PortfolioRisk, Risk } from '../../types';
 
 export const MOCK_ISSUE_CODES: IssueCode[] = [
   { id: 'IC-01', name: 'Priority', scope: 'Global', values: [{ id: 'P-High', value: 'High', description: 'Urgent' }] }
@@ -19,4 +19,43 @@ export const MOCK_RBS: RiskBreakdownStructureNode[] = [
 
 export const MOCK_PORTFOLIO_RISKS: PortfolioRisk[] = [
   { id: 'PR-01', description: 'Supply Chain Disruption', category: 'External', probability: 'Medium', impact: 'High', score: 12, owner: 'COO', status: 'Open', mitigationPlan: 'Diversify suppliers' }
+];
+
+export const MOCK_RISKS: Risk[] = [
+    {
+        id: 'R-001',
+        projectId: 'P1001',
+        description: 'Unforeseen subsurface soil conditions',
+        category: 'Technical',
+        status: 'Open',
+        probability: 'Medium',
+        impact: 'High',
+        probabilityValue: 3,
+        impactValue: 4,
+        score: 12,
+        financialImpact: 150000,
+        emv: 45000,
+        owner: 'Civil Lead',
+        strategy: 'Mitigate',
+        mitigationPlan: 'Conduct advanced geotechnical survey',
+        responseActions: []
+    },
+    {
+        id: 'R-002',
+        projectId: 'P1001',
+        description: 'Structural steel delivery delay',
+        category: 'Schedule',
+        status: 'Open',
+        probability: 'High',
+        impact: 'Medium',
+        probabilityValue: 4,
+        impactValue: 3,
+        score: 12,
+        financialImpact: 50000,
+        emv: 25000,
+        owner: 'Procurement Mgr',
+        strategy: 'Transfer',
+        mitigationPlan: 'Includes penalty clauses in contract',
+        responseActions: []
+    }
 ];

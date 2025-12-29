@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext';
 import { Users, Gavel, Calendar, Clock, Plus, Trash2, X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useTheme } from '../../context/ThemeContext';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GovernanceRole } from '../../types';
@@ -20,7 +20,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
   const { dispatch } = useData();
   const theme = useTheme();
   
-  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isRolePanelOpen, setIsRolePanelOpen] = useState(false);
   const [newRole, setNewRole] = useState<Partial<GovernanceRole>>({
       role: '',
       name: '',
@@ -41,7 +41,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                   responsibilities: newRole.responsibilities || ''
               } as GovernanceRole
           });
-          setIsRoleModalOpen(false);
+          setIsRolePanelOpen(false);
           setNewRole({ role: '', name: '', authorityLevel: 'Medium', responsibilities: '' });
       }
   };
@@ -81,7 +81,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                 <Gavel className="text-nexus-600" size={24}/>
                 <h2 className={theme.typography.h2}>Program Governance & Oversight</h2>
             </div>
-            <Button size="sm" icon={Plus} onClick={() => setIsRoleModalOpen(true)}>Add Role</Button>
+            <Button size="sm" icon={Plus} onClick={() => setIsRolePanelOpen(true)}>Add Role</Button>
         </div>
         <p className="text-slate-500 text-sm mb-6">Established decision-making authority, escalation paths, and approval gates.</p>
 
@@ -165,20 +165,20 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
             </div>
         </Card>
 
-        {/* Add Role Modal */}
-        <Modal
-            isOpen={isRoleModalOpen}
-            onClose={() => setIsRoleModalOpen(false)}
+        {/* Add Role SidePanel */}
+        <SidePanel
+            isOpen={isRolePanelOpen}
+            onClose={() => setIsRolePanelOpen(false)}
             title="Add Governance Role"
-            size="md"
+            width="md:w-[500px]"
             footer={
                 <>
-                    <Button variant="secondary" onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => setIsRolePanelOpen(false)}>Cancel</Button>
                     <Button onClick={handleAddRole}>Add Role</Button>
                 </>
             }
         >
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Role Title</label>
                     <Input value={newRole.role} onChange={e => setNewRole({...newRole, role: e.target.value})} placeholder="e.g. Chief Architect" />
@@ -190,7 +190,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Authority Level</label>
                     <select 
-                        className="w-full p-2 border border-slate-300 rounded-lg text-sm"
+                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
                         value={newRole.authorityLevel}
                         onChange={e => setNewRole({...newRole, authorityLevel: e.target.value})}
                     >
@@ -202,13 +202,14 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Responsibilities</label>
                     <textarea 
-                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-20"
+                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500"
                         value={newRole.responsibilities}
                         onChange={e => setNewRole({...newRole, responsibilities: e.target.value})}
+                        placeholder="Define key duties and decision scope..."
                     />
                 </div>
             </div>
-        </Modal>
+        </SidePanel>
     </div>
   );
 };

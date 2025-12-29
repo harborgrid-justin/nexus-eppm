@@ -1,3 +1,4 @@
+
 import React, { useState, lazy, Suspense, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AiAssistant from './components/AiAssistant';
@@ -13,6 +14,7 @@ import { useNetworkStatus } from './hooks/useNetworkStatus';
 import IndustrySelector from './components/IndustrySelector';
 import { Logger } from './services/Logger';
 import ErrorBoundary from './components/ErrorBoundary';
+import { NotificationCenter } from './components/common/NotificationCenter';
 
 // Lazy load major components
 const AdminSettings = lazy(() => import('./components/AdminSettings'));
@@ -199,6 +201,11 @@ const AppContent = () => {
                 <option value="en-US">EN</option>
                 <option value="es-ES">ES</option>
               </select>
+
+              {/* Notification Center: Added here */}
+              <div className="hidden md:block border-l border-slate-200 pl-4">
+                  <NotificationCenter />
+              </div>
 
               {/* Feature Flag: AI Assistant */}
               {enableAi && (

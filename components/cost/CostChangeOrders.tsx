@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { useData } from '../../context/DataContext';
-import { Plus, CheckCircle, Lock, Filter, FileText, AlertOctagon, TrendingUp, LayoutGrid, List as ListIcon, BarChart2, DollarSign, Calendar } from 'lucide-react';
+import { Plus, CheckCircle, Lock, Filter, FileText, AlertOctagon, LayoutGrid, List as ListIcon, BarChart2, DollarSign, Calendar } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
@@ -11,22 +11,28 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import DataTable, { Column } from '../common/DataTable';
 import ChangeOrderDetailModal from './ChangeOrderDetailModal';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import StatCard from '../shared/StatCard';
+import { ChangeOrder } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 interface CostChangeOrdersProps {
   projectId: string;
 }
 
 const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
-  const { changeOrders, project } = useProjectState(projectId);
+  const { changeOrders } = useProjectState(projectId);
   const { dispatch } = useData();
   const theme = useTheme();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, user } = usePermissions();
 
   const [viewMode, setViewMode] = useState<'list' | 'board' | 'analytics'>('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCoId, setSelectedCoId] = useState<string | null>(null);
+  
+  // State for creating new CO
+  const [isCreating, setIsCreating] = useState(false);
+  const [newCo, setNewCo] = useState<ChangeOrder | null>(null);
   
   // Permissions Check
   const canApprove = hasPermission('financials:approve');
@@ -70,6 +76,30 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
 
   const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444'];
 
+  const handleCreate = () => {
+      const draftCo: ChangeOrder = {
+          id: generateId('CO'),
+          projectId,
+          title: 'New Change Request',
+          description: '',
+          amount: 0,
+          scheduleImpactDays: 0,
+          status: 'Draft',
+          stage: 'Initiation',
+          priority: 'Medium',
+          category: 'Client Request',
+          submittedBy: user?.name || 'Current User',
+          dateSubmitted: new Date().toISOString().split('T')[0],
+          history: [{
+              date: new Date().toISOString().split('T')[0],
+              user: user?.name || 'System',
+              action: 'Draft Created'
+          }]
+      };
+      setNewCo(draftCo);
+      setIsCreating(true);
+  };
+
   // Columns for List View
   const columns: Column<typeof enrichedOrders[0]>[] = [
     { key: 'id', header: 'ID', width: 'w-24', render: (co) => <span className="font-mono text-xs text-slate-500">{co.id}</span>, sortable: true },
@@ -103,10 +133,19 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
 
   return (
     <div className="h-full flex flex-col bg-slate-50/30">
+      {/* Existing CO Detail */}
       {selectedCoId && filteredOrders.find(co => co.id === selectedCoId) && (
           <ChangeOrderDetailModal 
             changeOrder={filteredOrders.find(co => co.id === selectedCoId)!}
             onClose={() => setSelectedCoId(null)}
+          />
+      )}
+
+      {/* New CO Creation */}
+      {isCreating && newCo && (
+          <ChangeOrderDetailModal 
+            changeOrder={newCo}
+            onClose={() => { setIsCreating(false); setNewCo(null); }}
           />
       )}
 
@@ -130,7 +169,7 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
             <Button variant="secondary" size="sm" icon={Filter}>Filter</Button>
         </div>
         {canCreate ? (
-            <Button variant="primary" icon={Plus} onClick={() => alert('Opens Create Form')}>Create Request</Button>
+            <Button variant="primary" icon={Plus} onClick={handleCreate}>Create Request</Button>
         ) : (
             <div className="flex items-center gap-2 text-xs text-slate-400 bg-white px-3 py-2 rounded-lg border border-slate-200">
                 <Lock size={14} /> Read Only
@@ -204,7 +243,7 @@ const CostChangeOrders: React.FC<CostChangeOrdersProps> = ({ projectId }) => {
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[400px]">
                     <h3 className="font-bold text-slate-800 mb-4">Cumulative Cost Impact</h3>
                     <div className="flex items-center justify-center h-full text-slate-400">
-                        [Cumulative Step Chart Placeholder]
+                        <p>Cumulative step chart coming soon.</p>
                     </div>
                 </div>
             </div>

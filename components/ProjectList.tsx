@@ -13,7 +13,7 @@ import DataTable, { Column } from './common/DataTable';
 import { PageHeader } from './common/PageHeader';
 import { FilterBar } from './common/FilterBar';
 import { usePermissions } from '../hooks/usePermissions';
-import { ProjectWizard } from './projects/ProjectWizard';
+import ProjectCreatePage from './projects/ProjectCreatePage';
 
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;
@@ -24,9 +24,8 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
   const { state, dispatch } = useData();
   const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'eps'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'eps' | 'create'>('list');
   const [expandedEps, setExpandedEps] = useState<Set<string>>(new Set(state.eps.map(e => e.id))); // Default all open
-  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { canEditProject } = usePermissions();
 
   const filteredProjects = useMemo(() => {
@@ -45,7 +44,9 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
 
   const handleCreateProject = (newProject: Project) => {
     dispatch({ type: 'IMPORT_PROJECTS', payload: [newProject] });
-    // In a real app, we might navigate to the new workspace immediately
+    setViewMode('list');
+    // Optionally auto-select the new project
+    // onSelectProject(newProject.id);
   };
 
   const columns = useMemo<Column<Project>[]>(() => [
@@ -256,6 +257,16 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
     </div>
   );
 
+  // --- FULL PAGE CREATION VIEW ---
+  if (viewMode === 'create') {
+      return (
+          <ProjectCreatePage 
+              onClose={() => setViewMode('list')}
+              onSave={handleCreateProject}
+          />
+      );
+  }
+
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
       <PageHeader 
@@ -264,19 +275,13 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
         icon={Briefcase}
         actions={canEditProject() && (
             <button 
-                onClick={() => setIsWizardOpen(true)}
+                onClick={() => setViewMode('create')}
                 className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm active:opacity-90`}
             >
                 <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
                 <span className="sm:hidden">New</span>
             </button>
         )}
-      />
-
-      <ProjectWizard 
-          isOpen={isWizardOpen} 
-          onClose={() => setIsWizardOpen(false)} 
-          onSave={handleCreateProject} 
       />
 
       <div className="flex-1 flex flex-col overflow-hidden h-full">

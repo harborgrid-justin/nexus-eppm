@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, CheckCircle, List, Users, PenTool, Shield, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, Save, Book, Lock, CheckCircle, List, Users, PenTool, Shield, ChevronDown, ChevronRight, Copy } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { Project } from '../../types';
 import { useData } from '../../context/DataContext';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 interface QualityPlanEditorProps {
     projectId: string;
@@ -44,7 +46,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 );
 
 const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
-    const { state } = useData(); // In real app, dispatch to update
+    const { state } = useData(); 
     const project = state.projects.find(p => p.id === projectId);
     const plan = project?.qualityPlan || {
         objectives: '',
@@ -65,9 +67,19 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
         control: false,
         assurance: false
     });
+    
+    // Template Panel State
+    const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
     const { canEditProject } = usePermissions();
     const theme = useTheme();
+
+    const templates = [
+        { id: 'iso9001', name: 'ISO 9001:2015 Compliant', description: 'Standard QMS structure focusing on customer satisfaction and continual improvement.' },
+        { id: 'sixsigma', name: 'Six Sigma / DMAIC', description: 'Data-driven approach for minimizing defects in process-heavy projects.' },
+        { id: 'lean', name: 'Lean Construction', description: 'Focus on minimizing waste and maximizing value flow.' }
+    ];
 
     const toggleSection = (id: string) => {
         setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
@@ -75,6 +87,19 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
 
     const handleChange = (field: keyof typeof plan, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const applyTemplate = () => {
+        if (!selectedTemplate) return;
+        // Mock template application - simply pre-filling text
+        const templateText = `[Applied from ${templates.find(t => t.id === selectedTemplate)?.name} Template]\n\n`;
+        setFormData({
+            ...formData,
+            objectives: templateText + "Objective: Zero critical defects at handover.",
+            rolesAndResp: templateText + "Quality Manager: Full authority to stop work.",
+            status: 'Draft'
+        });
+        setIsTemplatePanelOpen(false);
     };
 
     return (
@@ -98,7 +123,10 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    <button 
+                        onClick={() => setIsTemplatePanelOpen(true)}
+                        className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    >
                         <Book size={14}/> Templates
                     </button>
                     {canEditProject() ? (
@@ -235,6 +263,40 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
                 </PlanSection>
 
             </div>
+
+            {/* Template Selection Panel */}
+            <SidePanel
+                isOpen={isTemplatePanelOpen}
+                onClose={() => setIsTemplatePanelOpen(false)}
+                title="Apply Quality Plan Template"
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button>
+                        <Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Template</Button>
+                    </>
+                }
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-600">Select a standardized Quality Management Plan template to pre-fill sections. <strong className="text-red-600">Warning: This will overwrite existing content.</strong></p>
+                    <div className="space-y-3">
+                        {templates.map(t => (
+                            <div 
+                                key={t.id} 
+                                onClick={() => setSelectedTemplate(t.id)}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                                    selectedTemplate === t.id 
+                                    ? 'bg-nexus-50 border-nexus-500 ring-1 ring-nexus-500' 
+                                    : 'bg-white border-slate-200 hover:border-nexus-300'
+                                }`}
+                            >
+                                <h4 className="font-bold text-slate-800">{t.name}</h4>
+                                <p className="text-sm text-slate-600 mt-1">{t.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </SidePanel>
         </div>
     );
 };

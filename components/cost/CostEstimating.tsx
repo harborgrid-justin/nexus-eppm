@@ -3,9 +3,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useWbsManager } from '../../hooks';
 import { CostEstimate, CostEstimateItem, WBSNode } from '../../types';
 import { useData } from '../../context/DataContext';
-import { Save, Plus, Trash2, Calculator, PieChart, FileText, ChevronRight, ChevronDown, CheckCircle, AlertCircle } from 'lucide-react';
+import { Save, Plus, Trash2, Calculator, PieChart, FileText, ChevronRight, ChevronDown, CheckCircle, Search, Book } from 'lucide-react';
 import { formatCurrency, formatCompactCurrency, formatPercentage } from '../../utils/formatters';
 import { ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 interface CostEstimatingProps {
   projectId: string;
@@ -20,6 +22,16 @@ const ESTIMATE_CLASSES = [
     { id: 'Class 1 (Definitive)', accuracy: '-10% to +15%' },
 ];
 
+// Mock Cost Book Data
+const COST_BOOK_ITEMS = [
+    { id: 'CB-001', description: 'Labor - Senior Electrician', type: 'Labor', unit: 'HR', rate: 85.00 },
+    { id: 'CB-002', description: 'Labor - General Laborer', type: 'Labor', unit: 'HR', rate: 45.00 },
+    { id: 'CB-003', description: 'Material - Concrete 3000psi', type: 'Material', unit: 'CY', rate: 125.00 },
+    { id: 'CB-004', description: 'Material - Steel Rebar #4', type: 'Material', unit: 'TON', rate: 950.00 },
+    { id: 'CB-005', description: 'Equipment - Excavator 20T', type: 'Equipment', unit: 'DAY', rate: 1200.00 },
+    { id: 'CB-006', description: 'Sub - HVAC Install', type: 'Subcontract', unit: 'LS', rate: 5000.00 },
+];
+
 const COLORS = ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {
@@ -28,6 +40,10 @@ const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {
   
   const [estimate, setEstimate] = useState<CostEstimate | null>(null);
   const [activeTab, setActiveTab] = useState<'worksheet' | 'analysis' | 'boe'>('worksheet');
+  
+  // Lookup Panel State
+  const [isLookupOpen, setIsLookupOpen] = useState(false);
+  const [lookupSearch, setLookupSearch] = useState('');
 
   // Load estimate when node selection changes
   useEffect(() => {
@@ -77,7 +93,22 @@ const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {
       }
   }, [estimate?.items, estimate?.contingencyPercent, estimate?.escalationPercent]);
 
-  const handleAddItem = () => {
+  const handleAddItemFromBook = (bookItem: typeof COST_BOOK_ITEMS[0]) => {
+      if (!estimate) return;
+      const newItem: CostEstimateItem = {
+          id: `ITEM-${Date.now()}`,
+          description: bookItem.description,
+          resourceType: bookItem.type as any,
+          quantity: 1,
+          uom: bookItem.unit,
+          unitRate: bookItem.rate,
+          total: bookItem.rate // qty 1 initially
+      };
+      setEstimate({ ...estimate, items: [...estimate.items, newItem] });
+      setIsLookupOpen(false);
+  };
+
+  const handleAddCustomItem = () => {
       if (!estimate) return;
       const newItem: CostEstimateItem = {
           id: `ITEM-${Date.now()}`,
@@ -160,7 +191,57 @@ const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {
   if (!wbsTree.length) return <div className="p-6">Loading WBS...</div>;
 
   return (
-    <div className="h-full flex flex-col md:flex-row overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+    <div className="h-full flex flex-col md:flex-row overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm relative">
+      
+      {/* SidePanel for Cost Book */}
+      <SidePanel
+          isOpen={isLookupOpen}
+          onClose={() => setIsLookupOpen(false)}
+          title="Cost Item Lookup"
+          width="md:w-[600px]"
+          footer={<Button variant="secondary" onClick={() => setIsLookupOpen(false)}>Close</Button>}
+      >
+          <div className="space-y-4">
+              <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                  <input 
+                    type="text" 
+                    placeholder="Search cost items..." 
+                    className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+                    value={lookupSearch}
+                    onChange={e => setLookupSearch(e.target.value)}
+                  />
+              </div>
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-slate-200">
+                      <thead className="bg-slate-50">
+                          <tr>
+                              <th className="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase">Item</th>
+                              <th className="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase">Unit</th>
+                              <th className="px-4 py-2 text-right text-xs font-bold text-slate-500 uppercase">Rate</th>
+                              <th className="w-10"></th>
+                          </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                          {COST_BOOK_ITEMS.filter(i => i.description.toLowerCase().includes(lookupSearch.toLowerCase())).map(item => (
+                              <tr key={item.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => handleAddItemFromBook(item)}>
+                                  <td className="px-4 py-2 text-sm text-slate-800">
+                                      {item.description}
+                                      <span className="ml-2 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{item.type}</span>
+                                  </td>
+                                  <td className="px-4 py-2 text-sm text-slate-600 font-mono">{item.unit}</td>
+                                  <td className="px-4 py-2 text-sm text-slate-900 font-bold text-right">{formatCurrency(item.rate)}</td>
+                                  <td className="px-4 py-2 text-right">
+                                      <Plus size={16} className="text-nexus-600"/>
+                                  </td>
+                              </tr>
+                          ))}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </SidePanel>
+
       {/* Sidebar: WBS Selector */}
       <div className="w-full md:w-80 border-r border-slate-200 flex flex-col bg-slate-50">
         <div className="p-4 border-b border-slate-200">
@@ -257,9 +338,14 @@ const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {
                                     /> Three-Point (PERT)
                                 </label>
                             </div>
-                            <button onClick={handleAddItem} className="text-xs flex items-center gap-1 bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50 text-slate-700 font-medium">
-                                <Plus size={12}/> Add Line Item
-                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsLookupOpen(true)} className="text-xs flex items-center gap-1 bg-nexus-50 border border-nexus-200 px-3 py-1.5 rounded hover:bg-nexus-100 text-nexus-700 font-bold">
+                                    <Book size={12}/> Lookup Item
+                                </button>
+                                <button onClick={handleAddCustomItem} className="text-xs flex items-center gap-1 bg-white border border-slate-300 px-3 py-1.5 rounded hover:bg-slate-50 text-slate-700 font-medium">
+                                    <Plus size={12}/> Custom Item
+                                </button>
+                            </div>
                         </div>
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-slate-50">

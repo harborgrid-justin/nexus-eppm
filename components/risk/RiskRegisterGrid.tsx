@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../../hooks';
 import { Plus, Filter } from 'lucide-react';
-import RiskDetailModal from './RiskDetailModal';
+import RiskDetailPanel from './RiskDetailPanel'; // Updated Import
 import { useTheme } from '../../context/ThemeContext';
 import { Risk } from '../../types';
 import { Button } from '../ui/Button';
@@ -19,10 +19,14 @@ interface RiskRegisterGridProps {
 const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
   const { dispatch } = useData();
+  
+  // Selection State for the Panel
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Creation State for the Form Modal
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [riskToEdit, setRiskToEdit] = useState<Risk | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const theme = useTheme();
 
@@ -41,25 +45,23 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
     );
   }, [risks, searchTerm]);
 
-  const handleEdit = (risk: Risk) => {
-    setRiskToEdit(risk);
-    setIsFormOpen(true);
-  };
-
+  // Handler for opening the "Wizard/Form" for creating new risks
   const handleCreate = () => {
     setRiskToEdit(null);
     setIsFormOpen(true);
+  };
+  
+  // Handler for opening the "Wizard/Form" for quick edit (from row action if needed)
+  const handleQuickEdit = (risk: Risk) => {
+      setRiskToEdit(risk);
+      setIsFormOpen(true);
   };
 
   const handleSaveRisk = (risk: Risk) => {
     if (riskToEdit) {
          dispatch({ type: 'UPDATE_RISK', payload: { risk } });
     } else {
-         // In real app: dispatch({ type: 'ADD_RISK', payload: risk });
-         // For demo, we might need a dedicated ADD_RISK action in DataContext, 
-         // but UPDATE_RISK usually handles upsert logic if ID matches.
-         // If not, we simulate:
-         dispatch({ type: 'UPDATE_RISK', payload: { risk } });
+         dispatch({ type: 'ADD_RISK', payload: risk });
     }
   };
 
@@ -106,7 +108,8 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
   ], []);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
+      {/* Creation Modal (kept as modal for simple creation flow) */}
       <RiskForm 
           isOpen={isFormOpen} 
           onClose={() => setIsFormOpen(false)} 
@@ -115,8 +118,14 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
           existingRisk={riskToEdit}
       />
       
-      {/* Detail Modal for viewing deep details (optional if RiskForm covers edits) */}
-      {selectedRiskId && !isFormOpen && <RiskDetailModal riskId={selectedRiskId} projectId={projectId} onClose={() => setSelectedRiskId(null)} />}
+      {/* Detail Panel (replaces the Detail Modal) */}
+      {selectedRiskId && (
+        <RiskDetailPanel 
+            riskId={selectedRiskId} 
+            projectId={projectId} 
+            onClose={() => setSelectedRiskId(null)} 
+        />
+      )}
       
       <div className={`p-4 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 flex-shrink-0 gap-3`}>
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
@@ -136,7 +145,7 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
         <DataTable<Risk>
           data={filteredRisks}
           columns={columns}
-          onRowClick={(r) => handleEdit(r)}
+          onRowClick={(r) => setSelectedRiskId(r.id)} // Opens the SidePanel
           keyField="id"
           emptyMessage="No risks found matching criteria."
         />

@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight } from 'lucide-react';
+import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight, Copy } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 interface CostPlanEditorProps {
     projectId: string;
@@ -65,8 +67,18 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
         funding: false
     });
 
+    // Template Panel State
+    const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
     const { canEditProject } = usePermissions();
     const theme = useTheme();
+
+    const templates = [
+        { id: 'gov_standard', name: 'Government Standard (EVM)', description: 'Strict adherence to ANSI/EIA-748 EVMS guidelines with variance thresholds.' },
+        { id: 'agile_lean', name: 'Agile / Lean Costing', description: 'Focus on burn rate, throughput accounting, and iterative funding releases.' },
+        { id: 'construction_fixed', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs, retainage, and change order management.' }
+    ];
 
     const toggleSection = (id: string) => {
         setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
@@ -74,6 +86,19 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
 
     const handleChange = (field: keyof typeof plan, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const applyTemplate = () => {
+        if (!selectedTemplate) return;
+        // Mock template application
+        const templateText = `[Applied from ${templates.find(t => t.id === selectedTemplate)?.name} Template]\n\n`;
+        setFormData({
+            ...formData,
+            estimatingMethodology: templateText + "Definitive estimates required for Phase 2.",
+            controlThresholds: templateText + "SPI/CPI +/- 0.10 requires VAR.",
+            status: 'Draft'
+        });
+        setIsTemplatePanelOpen(false);
     };
 
     return (
@@ -97,7 +122,10 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    <button 
+                        onClick={() => setIsTemplatePanelOpen(true)}
+                        className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    >
                         <Book size={14}/> Templates
                     </button>
                     {canEditProject() ? (
@@ -210,8 +238,41 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                         />
                     </div>
                 </PlanSection>
-
             </div>
+
+            {/* Template Selection Panel */}
+            <SidePanel
+                isOpen={isTemplatePanelOpen}
+                onClose={() => setIsTemplatePanelOpen(false)}
+                title="Apply Cost Management Template"
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button>
+                        <Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Template</Button>
+                    </>
+                }
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-600">Select a standardized Cost Management Plan template to pre-fill sections. <strong className="text-red-600">Warning: This will overwrite existing content.</strong></p>
+                    <div className="space-y-3">
+                        {templates.map(t => (
+                            <div 
+                                key={t.id} 
+                                onClick={() => setSelectedTemplate(t.id)}
+                                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                                    selectedTemplate === t.id 
+                                    ? 'bg-nexus-50 border-nexus-500 ring-1 ring-nexus-500' 
+                                    : 'bg-white border-slate-200 hover:border-nexus-300'
+                                }`}
+                            >
+                                <h4 className="font-bold text-slate-800">{t.name}</h4>
+                                <p className="text-sm text-slate-600 mt-1">{t.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </SidePanel>
         </div>
     );
 };

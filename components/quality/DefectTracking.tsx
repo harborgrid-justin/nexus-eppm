@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
 import { NonConformanceReport } from '../../types';
-import { Bug, Plus, Lock, Search, Filter, AlertOctagon, CheckSquare, GitPullRequest, ArrowRight, User, Calendar } from 'lucide-react';
+import { Bug, Plus, Lock, Search, Filter, AlertOctagon, CheckSquare, GitPullRequest, ArrowRight, User, Calendar, Save } from 'lucide-react';
 import { useProjectState } from '../../hooks/useProjectState';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { generateId } from '../../utils/formatters';
 
 interface DefectTrackingProps {
     projectId: string;
@@ -17,6 +21,17 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
     const theme = useTheme();
     const [selectedDefectId, setSelectedDefectId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // Panel State
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [newDefect, setNewDefect] = useState<Partial<NonConformanceReport>>({
+        description: '',
+        severity: 'Minor',
+        category: 'Workmanship',
+        status: 'Open',
+        assignedTo: '',
+        linkedDeliverable: ''
+    });
 
     const selectedDefect = nonConformanceReports.find(d => d.id === selectedDefectId);
 
@@ -30,6 +45,21 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
         d.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
         d.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleSaveDefect = () => {
+        if (!newDefect.description) return;
+        // In real app: dispatch action
+        console.log("Saving defect", newDefect);
+        setIsCreateOpen(false);
+        setNewDefect({
+            description: '',
+            severity: 'Minor',
+            category: 'Workmanship',
+            status: 'Open',
+            assignedTo: '',
+            linkedDeliverable: ''
+        });
+    };
 
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
@@ -53,9 +83,7 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
                         />
                     </div>
                     {canEditProject() ? (
-                        <button className="px-4 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
-                            <Plus size={16} /> New NCR
-                        </button>
+                        <Button onClick={() => setIsCreateOpen(true)} icon={Plus}>New NCR</Button>
                     ) : (
                         <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
                             <Lock size={14}/> Read Only
@@ -210,6 +238,75 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
                     </div>
                 )}
             </div>
+
+            {/* Create Panel */}
+            <SidePanel
+                isOpen={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+                title="Raise Non-Conformance Report"
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveDefect} icon={Save}>Create NCR</Button>
+                    </>
+                }
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Description of Non-Conformance</label>
+                        <textarea 
+                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500"
+                            placeholder="Detailed description of what requirement was not met..."
+                            value={newDefect.description}
+                            onChange={e => setNewDefect({...newDefect, description: e.target.value})}
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Severity</label>
+                            <select 
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                                value={newDefect.severity}
+                                onChange={e => setNewDefect({...newDefect, severity: e.target.value as any})}
+                            >
+                                <option>Minor</option>
+                                <option>Major</option>
+                                <option>Critical</option>
+                            </select>
+                        </div>
+                        <div>
+                             <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                            <select 
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                                value={newDefect.category}
+                                onChange={e => setNewDefect({...newDefect, category: e.target.value})}
+                            >
+                                <option>Workmanship</option>
+                                <option>Material</option>
+                                <option>Documentation</option>
+                                <option>Design</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                         <label className="block text-sm font-medium text-slate-700 mb-1">Linked Deliverable / WBS</label>
+                         <Input 
+                            placeholder="e.g. WBS-1.2 Foundation" 
+                            value={newDefect.linkedDeliverable}
+                            onChange={e => setNewDefect({...newDefect, linkedDeliverable: e.target.value})}
+                         />
+                    </div>
+                    <div>
+                         <label className="block text-sm font-medium text-slate-700 mb-1">Assign To</label>
+                         <Input 
+                            placeholder="Responsible Person" 
+                            value={newDefect.assignedTo}
+                            onChange={e => setNewDefect({...newDefect, assignedTo: e.target.value})}
+                         />
+                    </div>
+                </div>
+            </SidePanel>
         </div>
     );
 };

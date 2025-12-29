@@ -1,12 +1,15 @@
 
 import React, { useState } from 'react';
-import { Plus, CheckCircle, XCircle, AlertCircle, ClipboardList, Lock, Search, Filter, ChevronRight, Camera, FileCheck, UserCheck } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, AlertCircle, ClipboardList, Lock, Search, Filter, ChevronRight, Camera, FileCheck, UserCheck, Save } from 'lucide-react';
 import { QualityReport } from '../../types';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
-import { ProgressBar } from '../common/ProgressBar';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import StatCard from '../shared/StatCard';
+import { generateId } from '../../utils/formatters';
 
 interface QualityControlLogProps {
   qualityReports: QualityReport[] | undefined;
@@ -26,6 +29,15 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
   const theme = useTheme();
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState('All');
+  
+  // Creation Panel State
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newInspection, setNewInspection] = useState({
+      type: 'Field Inspection',
+      date: new Date().toISOString().split('T')[0],
+      inspector: 'CurrentUser',
+      checklistItems: [{ label: '', status: 'N/A' }]
+  });
 
   // KPIs
   const totalInspections = qualityReports?.length || 0;
@@ -43,6 +55,19 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
       case 'Fail': return <Badge variant="danger" icon={XCircle}>Fail</Badge>;
       default: return <Badge variant="warning" icon={AlertCircle}>Conditional</Badge>;
     }
+  };
+
+  const handleSaveInspection = () => {
+     // Mock save logic
+     console.log("Saving inspection", newInspection);
+     setIsCreateOpen(false);
+  };
+
+  const addChecklistItem = () => {
+      setNewInspection({
+          ...newInspection,
+          checklistItems: [...newInspection.checklistItems, { label: '', status: 'N/A' }]
+      });
   };
 
   // Mock detail data generator
@@ -72,12 +97,10 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
               <h1 className={theme.typography.h2}>
                   <ClipboardList className="text-nexus-600" /> Inspection & Test Log
               </h1>
-              <p className={theme.typography.small}>Track daily field inspections, material receipts, and test results.</p>
+              <p className="text-typography.small text-slate-500">Track daily field inspections, material receipts, and test results.</p>
             </div>
             {canEditProject() ? (
-              <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
-                  <Plus size={16} /> <span className="hidden sm:inline">New Inspection</span>
-              </button>
+              <Button onClick={() => setIsCreateOpen(true)} icon={Plus}>New Inspection</Button>
             ) : (
               <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
                  <Lock size={14}/> Read Only
@@ -247,6 +270,81 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
             </div>
           )}
        </div>
+
+       {/* Create Inspection Panel */}
+       <SidePanel
+            isOpen={isCreateOpen}
+            onClose={() => setIsCreateOpen(false)}
+            title="Log New Inspection"
+            width="md:w-[600px]"
+            footer={
+                <>
+                    <Button variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSaveInspection} icon={Save}>Save Record</Button>
+                </>
+            }
+       >
+           <div className="space-y-6">
+               <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Inspection Date</label>
+                        <Input type="date" value={newInspection.date} onChange={e => setNewInspection({...newInspection, date: e.target.value})} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                        <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" 
+                            value={newInspection.type} onChange={e => setNewInspection({...newInspection, type: e.target.value})}
+                        >
+                            <option>Field Inspection</option>
+                            <option>Material Receipt</option>
+                            <option>Safety Audit</option>
+                            <option>Pre-Commissioning</option>
+                        </select>
+                    </div>
+               </div>
+
+               <div>
+                   <label className="block text-sm font-medium text-slate-700 mb-2">Checklist</label>
+                   <div className="space-y-3">
+                       {newInspection.checklistItems.map((item, idx) => (
+                           <div key={idx} className="flex gap-2 items-center">
+                               <Input 
+                                 placeholder={`Checklist item ${idx + 1}`} 
+                                 value={item.label}
+                                 onChange={(e) => {
+                                     const items = [...newInspection.checklistItems];
+                                     items[idx].label = e.target.value;
+                                     setNewInspection({...newInspection, checklistItems: items});
+                                 }}
+                                 className="flex-1"
+                               />
+                               <select 
+                                 className="w-24 p-2 border border-slate-300 rounded-lg text-sm"
+                                 value={item.status}
+                                 onChange={(e) => {
+                                     const items = [...newInspection.checklistItems];
+                                     items[idx].status = e.target.value;
+                                     setNewInspection({...newInspection, checklistItems: items});
+                                 }}
+                               >
+                                   <option>N/A</option>
+                                   <option>Pass</option>
+                                   <option>Fail</option>
+                               </select>
+                           </div>
+                       ))}
+                   </div>
+                   <button onClick={addChecklistItem} className="mt-2 text-xs text-nexus-600 font-bold flex items-center gap-1 hover:underline">
+                       <Plus size={12}/> Add Item
+                   </button>
+               </div>
+               
+               <div className="p-4 border-2 border-dashed border-slate-300 rounded-lg text-center text-slate-400">
+                   <Camera size={24} className="mx-auto mb-2 opacity-50"/>
+                   <span className="text-sm">Upload Photos or Evidence</span>
+               </div>
+           </div>
+       </SidePanel>
     </div>
   );
 };

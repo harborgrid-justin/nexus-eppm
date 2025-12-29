@@ -7,7 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { ProgramBudgetAllocation } from '../../types';
 
@@ -20,7 +20,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const { dispatch } = useData();
   const theme = useTheme();
 
-  const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
+  const [isAllocationPanelOpen, setIsAllocationPanelOpen] = useState(false);
   const [editAllocations, setEditAllocations] = useState<ProgramBudgetAllocation[]>([]);
 
   const remainingBudget = aggregateMetrics.totalBudget - aggregateMetrics.totalSpent;
@@ -34,16 +34,16 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
       Forecast: a.forecast
   }));
 
-  const handleOpenAllocationModal = () => {
+  const handleOpenAllocationPanel = () => {
       setEditAllocations(JSON.parse(JSON.stringify(programFinancials.allocations)));
-      setIsAllocationModalOpen(true);
+      setIsAllocationPanelOpen(true);
   };
 
   const handleSaveAllocations = () => {
       editAllocations.forEach(alloc => {
           dispatch({ type: 'UPDATE_PROGRAM_ALLOCATION', payload: alloc });
       });
-      setIsAllocationModalOpen(false);
+      setIsAllocationPanelOpen(false);
   };
 
   const handleAllocationChange = (id: string, value: number) => {
@@ -69,7 +69,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
         <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm h-[400px]`}>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-slate-800">Budget Allocation & Cost-to-Complete</h3>
-                <button onClick={handleOpenAllocationModal} className="text-xs flex items-center gap-1 text-nexus-600 font-medium hover:underline">
+                <button onClick={handleOpenAllocationPanel} className="text-xs flex items-center gap-1 text-nexus-600 font-medium hover:underline">
                     <Edit2 size={14}/> Adjust Allocations
                 </button>
             </div>
@@ -118,40 +118,50 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
             </div>
         </div>
 
-        {/* Edit Allocation Modal */}
-        <Modal
-            isOpen={isAllocationModalOpen}
-            onClose={() => setIsAllocationModalOpen(false)}
+        {/* Edit Allocation Panel */}
+        <SidePanel
+            isOpen={isAllocationPanelOpen}
+            onClose={() => setIsAllocationPanelOpen(false)}
+            width="md:w-[500px]"
             title="Adjust Budget Allocations"
             footer={
                 <>
-                    <Button variant="secondary" onClick={() => setIsAllocationModalOpen(false)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => setIsAllocationPanelOpen(false)}>Cancel</Button>
                     <Button onClick={handleSaveAllocations}>Save Allocations</Button>
                 </>
             }
         >
             <div className="space-y-4">
+                <p className="text-sm text-slate-600 mb-4">Rebalance funding across active projects based on latest forecasts.</p>
                 {editAllocations.map(alloc => (
-                    <div key={alloc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
-                         <div className="text-sm font-bold text-slate-700 w-1/3">
-                             {projectNamesMap.get(alloc.projectId) || alloc.projectId}
+                    <div key={alloc.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                         <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-bold text-slate-700">
+                                {projectNamesMap.get(alloc.projectId) || alloc.projectId}
+                            </span>
+                            <span className="text-xs text-slate-500">Current Forecast: {formatCompactCurrency(alloc.forecast)}</span>
                          </div>
-                         <div className="flex items-center gap-2">
-                             <span className="text-xs text-slate-500">Allocated:</span>
-                             <div className="relative w-40">
-                                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                         
+                         <div className="flex items-center gap-3">
+                             <div className="relative flex-1">
+                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
                                  <input 
                                     type="number" 
                                     value={alloc.allocated} 
                                     onChange={e => handleAllocationChange(alloc.id, parseFloat(e.target.value))}
-                                    className="w-full pl-6 pr-2 py-1 text-sm border border-slate-300 rounded focus:ring-nexus-500"
+                                    className="w-full pl-6 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-nexus-500"
                                  />
                              </div>
                          </div>
                     </div>
                 ))}
+                
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded text-xs text-blue-800 flex gap-2">
+                    <div className="font-bold">Total Allocated:</div>
+                    <div>{formatCurrency(editAllocations.reduce((s,a) => s + a.allocated, 0))}</div>
+                </div>
             </div>
-        </Modal>
+        </SidePanel>
     </div>
   );
 };

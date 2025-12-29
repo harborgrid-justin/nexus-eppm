@@ -1,17 +1,31 @@
 
 import React, { useState } from 'react';
-import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { QualityStandard } from '../../types';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { generateId } from '../../utils/formatters';
 
 const QualityStandards: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData(); // In real app, would use dispatch to add/remove
+    const { state } = useData(); 
     const { canEditProject } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
+    
+    // Panel State
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [editingStandard, setEditingStandard] = useState<Partial<QualityStandard>>({
+        name: '',
+        category: 'General',
+        source: 'Internal',
+        description: '',
+        enforcement: 'Mandatory'
+    });
 
     // Combine mock data from constants if state is empty, or use state
     const standards: QualityStandard[] = state.qualityStandards.length > 0 ? state.qualityStandards : [
@@ -26,6 +40,32 @@ const QualityStandards: React.FC = () => {
         const matchesCat = categoryFilter === 'All' || std.category === categoryFilter;
         return matchesSearch && matchesCat;
     });
+
+    const handleOpenPanel = (standard?: QualityStandard) => {
+        if (standard) {
+            setEditingStandard({ ...standard });
+        } else {
+            setEditingStandard({
+                name: '',
+                category: 'General',
+                source: 'Internal',
+                description: '',
+                enforcement: 'Mandatory'
+            });
+        }
+        setIsPanelOpen(true);
+    };
+
+    const handleSave = () => {
+        // In a real app, dispatch to store
+        console.log("Saving standard:", editingStandard);
+        const newStandard = {
+            ...editingStandard,
+            id: editingStandard.id || generateId('QS')
+        };
+        // dispatch({ type: 'ADD_QUALITY_STANDARD', payload: newStandard });
+        setIsPanelOpen(false);
+    };
 
     const getSourceIcon = (source: string) => {
         switch(source) {
@@ -46,9 +86,7 @@ const QualityStandards: React.FC = () => {
                 </div>
                 
                 {canEditProject() ? (
-                    <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium`}>
-                        <Plus size={16} /> Add Standard
-                    </button>
+                    <Button onClick={() => handleOpenPanel()} icon={Plus}>Add Standard</Button>
                 ) : (
                     <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
                         <Lock size={14}/> Read Only
@@ -102,7 +140,7 @@ const QualityStandards: React.FC = () => {
                         <tbody className="bg-white divide-y divide-slate-100">
                             {filteredStandards.map(standard => (
                                 <tr key={standard.id} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{standard.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer" onClick={() => handleOpenPanel(standard)}>{standard.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-600">
                                         <span className="bg-slate-100 px-2 py-1 rounded border border-slate-200">{standard.category}</span>
                                     </td>
@@ -148,6 +186,95 @@ const QualityStandards: React.FC = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Create/Edit Panel */}
+            <SidePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                title={editingStandard.id ? "Edit Standard" : "Add Quality Standard"}
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSave} icon={Save}>Save Standard</Button>
+                    </>
+                }
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Standard Name / Code</label>
+                        <Input 
+                            value={editingStandard.name} 
+                            onChange={e => setEditingStandard({...editingStandard, name: e.target.value})} 
+                            placeholder="e.g. ISO 9001:2015"
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                         <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                            <select 
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                                value={editingStandard.category}
+                                onChange={e => setEditingStandard({...editingStandard, category: e.target.value})}
+                            >
+                                <option>General</option>
+                                <option>Process</option>
+                                <option>Material</option>
+                                <option>Safety</option>
+                                <option>Environmental</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
+                            <select 
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                                value={editingStandard.source}
+                                onChange={e => setEditingStandard({...editingStandard, source: e.target.value as any})}
+                            >
+                                <option>Internal</option>
+                                <option>External</option>
+                                <option>Regulatory</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <textarea 
+                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500"
+                            placeholder="Describe the standard and its applicability..."
+                            value={editingStandard.description}
+                            onChange={e => setEditingStandard({...editingStandard, description: e.target.value})}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Enforcement Level</label>
+                        <div className="flex gap-4">
+                            <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                <input 
+                                    type="radio" 
+                                    name="enforcement" 
+                                    value="Mandatory" 
+                                    checked={editingStandard.enforcement === 'Mandatory'}
+                                    onChange={() => setEditingStandard({...editingStandard, enforcement: 'Mandatory'})}
+                                    className="text-nexus-600 focus:ring-nexus-500"
+                                />
+                                Mandatory
+                            </label>
+                            <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                <input 
+                                    type="radio" 
+                                    name="enforcement" 
+                                    value="Guideline" 
+                                    checked={editingStandard.enforcement === 'Guideline'}
+                                    onChange={() => setEditingStandard({...editingStandard, enforcement: 'Guideline'})}
+                                    className="text-nexus-600 focus:ring-nexus-500"
+                                />
+                                Guideline (Best Practice)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </SidePanel>
         </div>
     );
 };

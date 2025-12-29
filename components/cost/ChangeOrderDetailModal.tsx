@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { ChangeOrder, ChangeOrderHistoryItem } from '../../types';
 import { useData } from '../../context/DataContext';
-import { X, Save, DollarSign, Calendar, AlertTriangle, CheckCircle, Clock, FileText, GitPullRequest, ArrowRight, User } from 'lucide-react';
+import { Save, DollarSign, Calendar, AlertTriangle, CheckCircle, Clock, FileText, GitPullRequest, ArrowRight, User } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { formatCurrency } from '../../utils/formatters';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 interface ChangeOrderDetailModalProps {
   changeOrder: ChangeOrder;
@@ -45,13 +47,9 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
           history: [...(co.history || []), historyItem]
       };
 
-      // If approved, trigger the domain logic (simulated here via dispatch if we had a specific update action)
       if (action === 'Approve') {
           dispatch({ type: 'APPROVE_CHANGE_ORDER', payload: { projectId: co.projectId, changeOrderId: co.id } });
-      } else {
-          // For rejection, we'd just update the record
-          // dispatch({ type: 'UPDATE_CHANGE_ORDER', payload: updatedCo });
-      }
+      } 
       onClose();
   };
 
@@ -59,49 +57,59 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
   const currentStepIdx = steps.indexOf(co.stage || 'Initiation');
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-          
-          {/* Header */}
-          <div className="p-6 border-b border-slate-200 flex justify-between items-start bg-slate-50">
-             <div>
-                <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-xl font-bold text-slate-900">{co.title}</h2>
-                    <span className="font-mono text-xs text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded">{co.id}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
-                        co.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                        co.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                        co.status === 'Pending Approval' ? 'bg-orange-100 text-orange-800' :
-                        'bg-slate-100 text-slate-700'
-                    }`}>
-                        {co.status}
-                    </span>
-                </div>
-                <div className="text-xs text-slate-500 flex gap-4">
-                    <span>Submitted by: <strong>{co.submittedBy}</strong></span>
-                    <span>Date: <strong>{co.dateSubmitted}</strong></span>
-                </div>
+    <SidePanel
+       isOpen={true}
+       onClose={onClose}
+       width="md:w-[800px]"
+       title={
+          <div className="flex flex-col">
+             <div className="flex items-center gap-3 mb-1">
+                 <h2 className="text-xl font-bold text-slate-900">{co.title}</h2>
+                 <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
+                     co.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                     co.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                     co.status === 'Pending Approval' ? 'bg-orange-100 text-orange-800' :
+                     'bg-slate-100 text-slate-700'
+                 }`}>
+                     {co.status}
+                 </span>
              </div>
-             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow">
-                <X size={20} />
-             </button>
+             <div className="text-xs text-slate-500 flex gap-4">
+                 <span>ID: <span className="font-mono">{co.id}</span></span>
+                 <span>Submitted by: <strong>{co.submittedBy}</strong></span>
+                 <span>Date: <strong>{co.dateSubmitted}</strong></span>
+             </div>
           </div>
-
+       }
+       footer={
+         <>
+             <Button variant="secondary" onClick={onClose}>Close</Button>
+             {!isReadOnly && <Button onClick={handleSave} icon={Save}>Save Draft</Button>}
+             {canApprove && (
+                 <>
+                     <Button variant="danger" onClick={() => handleApprovalAction('Reject')}>Reject</Button>
+                     <Button variant="primary" onClick={() => handleApprovalAction('Approve')} icon={CheckCircle} className="bg-green-600 hover:bg-green-700 focus:ring-green-500">Approve</Button>
+                 </>
+             )}
+         </>
+       }
+    >
+       <div className="space-y-6">
           {/* Workflow Stepper */}
-          <div className="px-8 py-6 bg-white border-b border-slate-100">
+          <div className="px-4 py-6 bg-slate-50 border border-slate-200 rounded-xl mb-6">
               <div className="flex items-center justify-between relative">
-                  <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-100 -z-10"></div>
+                  <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-200 -z-10"></div>
                   {steps.map((step, idx) => {
                       const isComplete = idx <= currentStepIdx;
                       const isCurrent = idx === currentStepIdx;
                       return (
-                          <div key={step} className="flex flex-col items-center gap-2 bg-white px-2">
+                          <div key={step} className="flex flex-col items-center gap-2 bg-slate-50 px-2">
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${
                                   isComplete ? 'bg-nexus-600 border-nexus-600 text-white' : 'bg-white border-slate-300 text-slate-400'
                               }`}>
                                   {isComplete ? <CheckCircle size={14}/> : idx + 1}
                               </div>
-                              <span className={`text-xs font-medium ${isCurrent ? 'text-nexus-700' : 'text-slate-500'}`}>{step}</span>
+                              <span className={`text-xs font-medium ${isCurrent ? 'text-nexus-700 font-bold' : 'text-slate-500'}`}>{step}</span>
                           </div>
                       )
                   })}
@@ -109,7 +117,7 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-slate-200 bg-white px-6">
+          <div className="flex border-b border-slate-200">
               {[
                   { id: 'details', label: 'General Details', icon: FileText },
                   { id: 'impact', label: 'Impact Analysis', icon: AlertTriangle },
@@ -129,76 +137,78 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
               ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30">
+          <div className="pt-6">
              {activeTab === 'details' && (
-                 <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="col-span-2">
+                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="grid grid-cols-1 gap-6">
+                        <div>
                             <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Description of Change</label>
                             <textarea 
                                 value={co.description}
                                 disabled={isReadOnly}
                                 onChange={(e) => handleChange('description', e.target.value)}
-                                className="w-full p-3 border border-slate-300 rounded-lg text-sm h-24 focus:ring-nexus-500"
+                                className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-nexus-500"
                             />
                         </div>
                         
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-800 mb-4 text-sm">Classification</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs text-slate-500 block mb-1">Category</label>
-                                    <select 
-                                        value={co.category || 'Client Request'} 
-                                        onChange={(e) => handleChange('category', e.target.value)}
-                                        disabled={isReadOnly}
-                                        className="w-full p-2 border border-slate-300 rounded-md text-sm"
-                                    >
-                                        <option>Client Request</option>
-                                        <option>Design Error</option>
-                                        <option>Unforeseen Condition</option>
-                                        <option>Regulatory</option>
-                                        <option>Value Engineering</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="text-xs text-slate-500 block mb-1">Priority</label>
-                                    <div className="flex gap-2">
-                                        {['Low', 'Medium', 'High', 'Critical'].map(p => (
-                                            <button
-                                                key={p}
-                                                onClick={() => handleChange('priority', p)}
-                                                disabled={isReadOnly}
-                                                className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
-                                                    co.priority === p 
-                                                    ? 'bg-nexus-50 border-nexus-500 text-nexus-700' 
-                                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                }`}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <h3 className="font-bold text-slate-800 mb-4 text-sm">Classification</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-xs text-slate-500 block mb-1">Category</label>
+                                        <select 
+                                            value={co.category || 'Client Request'} 
+                                            onChange={(e) => handleChange('category', e.target.value)}
+                                            disabled={isReadOnly}
+                                            className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                                        >
+                                            <option>Client Request</option>
+                                            <option>Design Error</option>
+                                            <option>Unforeseen Condition</option>
+                                            <option>Regulatory</option>
+                                            <option>Value Engineering</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-slate-500 block mb-1">Priority</label>
+                                        <div className="flex gap-2">
+                                            {['Low', 'Medium', 'High', 'Critical'].map(p => (
+                                                <button
+                                                    key={p}
+                                                    onClick={() => handleChange('priority', p)}
+                                                    disabled={isReadOnly}
+                                                    className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+                                                        co.priority === p 
+                                                        ? 'bg-nexus-50 border-nexus-500 text-nexus-700' 
+                                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-800 mb-4 text-sm">Justification</h3>
-                            <textarea 
-                                value={co.justification || ''}
-                                onChange={(e) => handleChange('justification', e.target.value)}
-                                disabled={isReadOnly}
-                                placeholder="Reason for change..."
-                                className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 resize-none"
-                            />
+                            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <h3 className="font-bold text-slate-800 mb-4 text-sm">Justification</h3>
+                                <textarea 
+                                    value={co.justification || ''}
+                                    onChange={(e) => handleChange('justification', e.target.value)}
+                                    disabled={isReadOnly}
+                                    placeholder="Reason for change..."
+                                    className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 resize-none"
+                                />
+                            </div>
                         </div>
                     </div>
                  </div>
              )}
 
              {activeTab === 'impact' && (
-                 <div className="space-y-6">
+                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -261,7 +271,7 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
              )}
 
              {activeTab === 'workflow' && (
-                 <div className="space-y-6">
+                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                          <h3 className="font-bold text-slate-800 mb-4">Approval Chain</h3>
                          <div className="space-y-4">
@@ -297,24 +307,8 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
                  </div>
              )}
           </div>
-
-          <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
-             <div className="text-xs text-slate-500">
-                Total Impact: <span className="font-bold text-slate-700">{formatCurrency(co.amount)}</span> / <span className="font-bold text-slate-700">{co.scheduleImpactDays || 0} days</span>
-             </div>
-             <div className="flex gap-3">
-                <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">Close</button>
-                {!isReadOnly && <button onClick={handleSave} className="px-4 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm flex items-center gap-2"><Save size={16}/> Save Draft</button>}
-                {canApprove && (
-                    <>
-                        <button onClick={() => handleApprovalAction('Reject')} className="px-4 py-2 bg-red-600 rounded-lg text-sm font-medium text-white hover:bg-red-700 shadow-sm">Reject</button>
-                        <button onClick={() => handleApprovalAction('Approve')} className="px-4 py-2 bg-green-600 rounded-lg text-sm font-medium text-white hover:bg-green-700 shadow-sm flex items-center gap-2"><CheckCircle size={16}/> Approve</button>
-                    </>
-                )}
-             </div>
-          </div>
        </div>
-    </div>
+    </SidePanel>
   );
 };
 

@@ -1,8 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Plus, Filter, Search } from 'lucide-react';
+import { Plus, Filter, Search, Receipt, Save } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { generateId } from '../../utils/formatters';
+import { Expense } from '../../types';
 
 interface CostExpensesProps {
     projectId: string;
@@ -16,6 +21,38 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
     // Filter expenses associated with tasks in the current project
     const expenses = state.expenses.filter(e => tasks.some(t => t.id === e.activityId));
 
+    // Panel State
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [newExpense, setNewExpense] = useState<Partial<Expense>>({
+        description: '',
+        categoryId: state.expenseCategories[0]?.id || '',
+        activityId: '',
+        budgetedCost: 0,
+        actualCost: 0
+    });
+
+    const handleSaveExpense = () => {
+        if(!newExpense.description || !newExpense.activityId) return;
+        const expense: Expense = {
+            id: generateId('EXP'),
+            activityId: newExpense.activityId,
+            categoryId: newExpense.categoryId || '',
+            description: newExpense.description,
+            budgetedCost: newExpense.budgetedCost || 0,
+            actualCost: newExpense.actualCost || 0,
+            remainingCost: (newExpense.budgetedCost || 0) - (newExpense.actualCost || 0),
+            atCompletionCost: newExpense.budgetedCost || 0,
+            budgetedUnits: 0,
+            actualUnits: 0,
+            remainingUnits: 0,
+            atCompletionUnits: 0
+        };
+        // Dispatch logic would go here
+        console.log("Saving Expense:", expense);
+        setIsPanelOpen(false);
+        setNewExpense({ description: '', categoryId: '', activityId: '', budgetedCost: 0, actualCost: 0 });
+    };
+
     return (
         <div className="h-full flex flex-col">
             <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 flex-shrink-0">
@@ -25,7 +62,10 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                         <input type="text" placeholder="Search expenses..." className="pl-9 pr-4 py-1.5 text-sm border border-slate-300 rounded-md w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500" />
                     </div>
                 </div>
-                <button className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium">
+                <button 
+                    onClick={() => setIsPanelOpen(true)}
+                    className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium"
+                >
                     <Plus size={16} /> Add Expense
                 </button>
             </div>
@@ -63,6 +103,77 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                     </tbody>
                 </table>
             </div>
+
+            <SidePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                title="Add Non-Labor Expense"
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveExpense} icon={Save}>Add Expense</Button>
+                    </>
+                }
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Expense Description</label>
+                        <Input 
+                            value={newExpense.description} 
+                            onChange={e => setNewExpense({...newExpense, description: e.target.value})}
+                            placeholder="e.g. Travel to Site A"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <select 
+                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                            value={newExpense.categoryId}
+                            onChange={e => setNewExpense({...newExpense, categoryId: e.target.value})}
+                        >
+                            {state.expenseCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Linked Task</label>
+                        <select 
+                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                            value={newExpense.activityId}
+                            onChange={e => setNewExpense({...newExpense, activityId: e.target.value})}
+                        >
+                            <option value="">Select Task...</option>
+                            {tasks.map(t => <option key={t.id} value={t.id}>{t.wbsCode} - {t.name}</option>)}
+                        </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Budgeted Amount</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                <input 
+                                    type="number" 
+                                    className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+                                    value={newExpense.budgetedCost}
+                                    onChange={e => setNewExpense({...newExpense, budgetedCost: parseFloat(e.target.value)})}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Actual Amount (To Date)</label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                <input 
+                                    type="number" 
+                                    className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+                                    value={newExpense.actualCost}
+                                    onChange={e => setNewExpense({...newExpense, actualCost: parseFloat(e.target.value)})}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </SidePanel>
         </div>
     );
 };

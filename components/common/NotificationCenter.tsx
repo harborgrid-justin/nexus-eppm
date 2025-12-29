@@ -1,42 +1,75 @@
 
 import React from 'react';
-import { Bell, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
+import { useData } from '../../context/DataContext';
 
 export const NotificationCenter: React.FC = () => {
-    const notifications = [
-        { id: 1, type: 'success', title: 'Export Completed', message: 'Project P1001 export is ready for download.', time: '2m ago' },
-        { id: 2, type: 'warning', title: 'Budget Threshold', message: 'Phase 2 labor costs exceeded 90% of budget.', time: '1h ago' },
-        { id: 3, type: 'info', title: 'System Maintenance', message: 'Scheduled downtime on Sunday at 2am.', time: '5h ago' }
-    ];
+    const { state, dispatch } = useData();
+    // Use the new governance alerts + mock system notifications if empty
+    const notifications = state.governance.alerts;
+    
+    const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    const getIcon = (type: string) => {
-        switch(type) {
-            case 'success': return <CheckCircle size={16} className="text-green-500"/>;
-            case 'warning': return <AlertTriangle size={16} className="text-yellow-500"/>;
-            default: return <Info size={16} className="text-blue-500"/>;
+    const getIcon = (severity: string) => {
+        switch(severity) {
+            case 'Info': return <Info size={16} className="text-blue-500"/>;
+            case 'Warning': return <AlertTriangle size={16} className="text-yellow-500"/>;
+            case 'Critical': return <XCircle size={16} className="text-red-500"/>;
+            default: return <CheckCircle size={16} className="text-green-500"/>;
         }
+    };
+    
+    const getTimeAgo = (dateStr: string) => {
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 60) return `${mins}m ago`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `${hours}h ago`;
+        return `${Math.floor(hours / 24)}d ago`;
     };
 
     return (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden z-50">
-            <div className="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                <h3 className="font-bold text-slate-700 text-sm">Notifications</h3>
-                <button className="text-xs text-nexus-600 hover:underline">Mark all read</button>
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-                {notifications.map(n => (
-                    <div key={n.id} className="p-3 border-b border-slate-50 hover:bg-slate-50 flex gap-3 items-start cursor-pointer">
-                        <div className="mt-0.5">{getIcon(n.type)}</div>
-                        <div className="flex-1">
-                            <p className="text-sm font-semibold text-slate-800">{n.title}</p>
-                            <p className="text-xs text-slate-500 mt-0.5">{n.message}</p>
-                            <p className="text-[10px] text-slate-400 mt-1">{n.time}</p>
+        <div className="relative group">
+            <button className="relative p-2 text-slate-500 hover:text-slate-700 transition-colors">
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                )}
+            </button>
+            
+            <div className="absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 hidden group-hover:block animate-in slide-in-from-top-2">
+                <div className="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-700 text-sm">Notifications</h3>
+                    <span className="text-xs text-slate-500">{unreadCount} unread</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                    {notifications.length > 0 ? notifications.map(n => (
+                        <div 
+                            key={n.id} 
+                            onClick={() => dispatch({type: 'MARK_ALERT_READ', payload: n.id})}
+                            className={`p-3 border-b border-slate-50 hover:bg-slate-50 flex gap-3 items-start cursor-pointer transition-colors ${!n.isRead ? 'bg-blue-50/30' : ''}`}
+                        >
+                            <div className="mt-0.5">{getIcon(n.severity)}</div>
+                            <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                    <p className="text-sm font-semibold text-slate-800">{n.title}</p>
+                                    <span className="text-[10px] text-slate-400 whitespace-nowrap ml-2">{getTimeAgo(n.date)}</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{n.message}</p>
+                                {n.category && (
+                                    <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-500 border border-slate-200">
+                                        {n.category}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-            <div className="p-2 text-center border-t border-slate-100">
-                <button className="text-xs text-slate-500 hover:text-slate-800">View History</button>
+                    )) : (
+                        <div className="p-8 text-center text-slate-400 text-xs">No notifications.</div>
+                    )}
+                </div>
+                <div className="p-2 text-center border-t border-slate-100 bg-slate-50">
+                    <button className="text-xs text-nexus-600 hover:text-nexus-800 font-medium">View All History</button>
+                </div>
             </div>
         </div>
     );

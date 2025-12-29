@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext';
 import { AlertOctagon, ArrowUpRight, Folder, Shield, CheckCircle, Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel'; // Updated import
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ProgramIssue } from '../../types';
@@ -20,7 +20,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
   const { dispatch } = useData();
   const theme = useTheme();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   
@@ -34,7 +34,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
       impactedProjectIds: []
   });
 
-  const handleOpenModal = (issue?: ProgramIssue) => {
+  const handleOpenPanel = (issue?: ProgramIssue) => {
       if (issue) {
           setCurrentIssue({ ...issue });
       } else {
@@ -48,7 +48,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
               impactedProjectIds: []
           });
       }
-      setIsModalOpen(true);
+      setIsPanelOpen(true);
   };
 
   const handleSave = () => {
@@ -71,7 +71,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
       } else {
           dispatch({ type: 'ADD_PROGRAM_ISSUE', payload: issueToSave });
       }
-      setIsModalOpen(false);
+      setIsPanelOpen(false);
   };
 
   const handleDelete = (id: string) => {
@@ -103,7 +103,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <AlertOctagon className="text-red-500" size={24}/>
                 <h2 className={theme.typography.h2}>Program Issues & Escalations</h2>
             </div>
-            <Button size="sm" icon={Plus} onClick={() => handleOpenModal()}>Log Issue</Button>
+            <Button size="sm" icon={Plus} onClick={() => handleOpenPanel()}>Log Issue</Button>
         </div>
 
         {/* Toolbar */}
@@ -143,7 +143,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                         
                         {/* Actions */}
                         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleOpenModal(issue)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
+                            <button onClick={() => handleOpenPanel(issue)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
                             <button onClick={() => handleDelete(issue.id)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-red-600"><Trash2 size={14}/></button>
                         </div>
 
@@ -226,19 +226,20 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
             </div>
         </div>
 
-        {/* Create/Edit Modal */}
-        <Modal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+        {/* Create/Edit Panel */}
+        <SidePanel
+            isOpen={isPanelOpen}
+            onClose={() => setIsPanelOpen(false)}
+            width="md:w-[500px]"
             title={currentIssue.id ? 'Edit Issue' : 'Log New Issue'}
             footer={
                 <>
-                    <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
                     <Button onClick={handleSave}>{currentIssue.id ? 'Save Changes' : 'Log Issue'}</Button>
                 </>
             }
         >
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
@@ -262,7 +263,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
                         <select 
-                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500"
+                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 bg-white"
                             value={currentIssue.priority}
                             onChange={(e) => setCurrentIssue({...currentIssue, priority: e.target.value})}
                         >
@@ -275,7 +276,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
                         <select 
-                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500"
+                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 bg-white"
                             value={currentIssue.status}
                             onChange={(e) => setCurrentIssue({...currentIssue, status: e.target.value})}
                         >
@@ -290,7 +291,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
                     <textarea 
-                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-24 focus:ring-nexus-500 outline-none"
+                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
                         value={currentIssue.description}
                         onChange={(e) => setCurrentIssue({...currentIssue, description: e.target.value})}
                         placeholder="Detailed description of the issue..."
@@ -300,7 +301,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Resolution Path</label>
                     <textarea 
-                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-16 focus:ring-nexus-500 outline-none"
+                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-24 focus:ring-2 focus:ring-nexus-500 outline-none"
                         value={currentIssue.resolutionPath}
                         onChange={(e) => setCurrentIssue({...currentIssue, resolutionPath: e.target.value})}
                         placeholder="Steps taken or planned to resolve..."
@@ -309,12 +310,12 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Impacted Projects</label>
-                    <div className="border border-slate-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-slate-50">
+                    <div className="border border-slate-200 rounded-lg max-h-48 overflow-y-auto p-2 bg-slate-50">
                         {projects.map(p => (
-                            <label key={p.id} className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition-colors">
+                            <label key={p.id} className="flex items-center gap-3 p-3 hover:bg-white rounded cursor-pointer transition-colors border border-transparent hover:border-slate-100">
                                 <input 
                                     type="checkbox"
-                                    className="rounded text-nexus-600 focus:ring-nexus-500 border-slate-300"
+                                    className="rounded text-nexus-600 focus:ring-nexus-500 h-4 w-4"
                                     checked={currentIssue.impactedProjectIds?.includes(p.id)}
                                     onChange={() => toggleProjectImpact(p.id)}
                                 />
@@ -325,7 +326,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                     </div>
                 </div>
             </div>
-        </Modal>
+        </SidePanel>
     </div>
   );
 };

@@ -7,7 +7,8 @@ import { formatCurrency, formatCompactCurrency, formatPercentage } from '../../u
 import { calculateRiskExposure } from '../../utils/integrationUtils';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Cell, AreaChart, Area } from 'recharts';
-import { BudgetLogItem } from '../../types';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 interface ReserveAnalysisProps {
   projectId: string;
@@ -17,8 +18,9 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
   const { project, risks, budgetItems } = useProjectState(projectId);
   const { dispatch } = useData();
   
-  const [calculationMethod, setCalculationMethod] = useState<'Fixed' | 'Percentage' | 'EMV'>('EMV');
-  const [percentInput, setPercentInput] = useState(10);
+  const [isUpdatePanelOpen, setIsUpdatePanelOpen] = useState(false);
+  const [newReserves, setNewReserves] = useState({ contingency: 0, management: 0 });
+  const [justification, setJustification] = useState('');
 
   // --- Derived Metrics ---
 
@@ -32,8 +34,7 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
   const managementReserve = project?.reserves?.managementReserve || 0;
   const totalReserves = contingencyReserve + managementReserve;
 
-  // Calculate Drawdowns (Consumed Reserves) based on Budget Log
-  // Assuming log items with specific sources imply drawdown
+  // Calculate Drawdowns
   const drawdowns = useMemo(() => {
       const contingencyDrawdown = (project?.budgetLog || [])
         .filter(log => log.source === 'Contingency' && log.status === 'Approved')
@@ -49,20 +50,16 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
   const remainingContingency = contingencyReserve - drawdowns.contingency;
   const remainingManagement = managementReserve - drawdowns.management;
 
-  // Coverage Ratio: Remaining Contingency / Current Risk Exposure
-  const coverageRatio = currentRiskExposure > 0 ? (remainingContingency / currentRiskExposure) : 2.0; // Cap at 200% for display logic if 0 risk
+  const coverageRatio = currentRiskExposure > 0 ? (remainingContingency / currentRiskExposure) : 2.0;
 
   // --- Chart Data ---
-
-  // Waterfall Data: Base + Reserves = Total Budget
   const waterfallData = [
-      { name: 'Base Cost', value: baseCost, fill: '#64748b' }, // Slate
-      { name: 'Contingency', value: contingencyReserve, fill: '#eab308' }, // Yellow
-      { name: 'Mgmt Reserve', value: managementReserve, fill: '#3b82f6' }, // Blue
-      { name: 'Total Budget', value: baseCost + totalReserves, fill: '#0ea5e9', isTotal: true }, // Light Blue
+      { name: 'Base Cost', value: baseCost, fill: '#64748b' },
+      { name: 'Contingency', value: contingencyReserve, fill: '#eab308' },
+      { name: 'Mgmt Reserve', value: managementReserve, fill: '#3b82f6' },
+      { name: 'Total Budget', value: baseCost + totalReserves, fill: '#0ea5e9', isTotal: true },
   ];
 
-  // Drawdown Trend Data (Mocked but plausible based on current state)
   const trendData = [
       { month: 'Jan', contingency: contingencyReserve, management: managementReserve, exposure: currentRiskExposure * 1.2 },
       { month: 'Feb', contingency: contingencyReserve, management: managementReserve, exposure: currentRiskExposure * 1.1 },
@@ -71,29 +68,16 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
       { month: 'May', contingency: remainingContingency, management: remainingManagement, exposure: currentRiskExposure },
   ];
 
-  // --- Actions ---
+  const openUpdatePanel = () => {
+      setNewReserves({ contingency: contingencyReserve, management: managementReserve });
+      setIsUpdatePanelOpen(true);
+  };
 
-  const handleRecalculate = () => {
+  const handleSaveReserves = () => {
       if (!project) return;
-      
-      let newContingency = contingencyReserve;
-      
-      if (calculationMethod === 'EMV') {
-          newContingency = currentRiskExposure;
-      } else if (calculationMethod === 'Percentage') {
-          newContingency = baseCost * (percentInput / 100);
-      }
-
-      // Dispatch update (Mock)
-      const updatedProject = {
-          ...project,
-          reserves: {
-              ...project.reserves,
-              contingencyReserve: newContingency
-          }
-      };
-      // In a real app: dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-      alert(`Recalculated Contingency to ${formatCurrency(newContingency)} based on ${calculationMethod}`);
+      // In real app, dispatch an update action.
+      alert(`Updated Reserves: Contingency=${newReserves.contingency}, Mgmt=${newReserves.management}\nJustification: ${justification}`);
+      setIsUpdatePanelOpen(false);
   };
 
   if (!project) return <div>Loading...</div>;
@@ -155,41 +139,10 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
             <div className="space-y-6">
                 <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <Calculator size={18} className="text-green-600"/> Reserve Calculator
+                        <Calculator size={18} className="text-green-600"/> Reserve Status
                     </h3>
                     
                     <div className="space-y-4">
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase">Calculation Method</label>
-                            <div className="flex gap-2 mt-1">
-                                {['Fixed', 'Percentage', 'EMV'].map(method => (
-                                    <button
-                                        key={method}
-                                        onClick={() => setCalculationMethod(method as any)}
-                                        className={`flex-1 py-1.5 text-xs font-medium rounded border ${
-                                            calculationMethod === method 
-                                            ? 'bg-nexus-50 border-nexus-500 text-nexus-700' 
-                                            : 'bg-white border-slate-200 text-slate-600'
-                                        }`}
-                                    >
-                                        {method}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {calculationMethod === 'Percentage' && (
-                            <div className="flex items-center gap-3">
-                                <input 
-                                    type="number" 
-                                    value={percentInput}
-                                    onChange={(e) => setPercentInput(parseFloat(e.target.value))}
-                                    className="w-20 p-2 border border-slate-300 rounded text-sm"
-                                />
-                                <span className="text-sm text-slate-600">% of Remaining Cost</span>
-                            </div>
-                        )}
-
                         <div className="p-3 bg-slate-50 rounded border border-slate-200 space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span className="text-slate-600">Current Exposure (EMV):</span>
@@ -208,10 +161,10 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
                         </div>
 
                         <button 
-                            onClick={handleRecalculate}
+                            onClick={openUpdatePanel}
                             className="w-full py-2 bg-nexus-600 hover:bg-nexus-700 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 shadow-sm"
                         >
-                            <RefreshCw size={16}/> Update Reserve Plan
+                            <RefreshCw size={16}/> Adjust Reserves
                         </button>
                     </div>
                 </div>
@@ -248,6 +201,59 @@ const ReserveAnalysis: React.FC<ReserveAnalysisProps> = ({ projectId }) => {
                 </AreaChart>
             </ResponsiveContainer>
         </div>
+
+        {/* Update SidePanel */}
+        <SidePanel
+            isOpen={isUpdatePanelOpen}
+            onClose={() => setIsUpdatePanelOpen(false)}
+            title="Adjust Reserve Allocation"
+            width="md:w-[500px]"
+            footer={
+                <>
+                    <Button variant="secondary" onClick={() => setIsUpdatePanelOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSaveReserves} icon={Save}>Update Plan</Button>
+                </>
+            }
+        >
+            <div className="space-y-6">
+                <p className="text-sm text-slate-600 bg-blue-50 p-3 rounded border border-blue-100">
+                    Changes to the reserve plan will be logged in the project budget history.
+                </p>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Contingency Reserve</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                        <input 
+                            type="number" 
+                            className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg text-sm font-mono"
+                            value={newReserves.contingency}
+                            onChange={(e) => setNewReserves({...newReserves, contingency: parseFloat(e.target.value)})}
+                        />
+                    </div>
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Management Reserve</label>
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                        <input 
+                            type="number" 
+                            className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg text-sm font-mono"
+                            value={newReserves.management}
+                            onChange={(e) => setNewReserves({...newReserves, management: parseFloat(e.target.value)})}
+                        />
+                    </div>
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Justification</label>
+                    <textarea 
+                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 resize-none"
+                        placeholder="Reason for adjustment (e.g. Risk score increased, scope reduction)..."
+                        value={justification}
+                        onChange={(e) => setJustification(e.target.value)}
+                    />
+                </div>
+            </div>
+        </SidePanel>
     </div>
   );
 };

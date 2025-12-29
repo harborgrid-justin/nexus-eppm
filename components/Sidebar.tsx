@@ -5,11 +5,12 @@ import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { 
   Users, Settings, Briefcase, Network, LayoutGrid, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers, TestTube, X, LogOut, FileText, ShieldAlert, Calendar, HardHat, Landmark, Map as MapIcon
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2, PieChart, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain, AlertOctagon, PenTool, Database, Globe, Layers, TestTube, X, LogOut, FileText, ShieldAlert, Calendar, HardHat, Landmark, Map as MapIcon, Bell
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 import { useFeatureFlag } from '../context/FeatureFlagContext';
 import { Logger } from '../services/Logger';
+import { NotificationCenter } from './common/NotificationCenter';
 
 interface SidebarProps {
   activeTab: string;
@@ -178,13 +179,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onCl
 
         <div className="p-4 border-t border-slate-800 bg-slate-900 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-white border border-slate-600 overflow-hidden" aria-hidden="true">
-              {user?.avatar ? <img src={user.avatar} alt="User" /> : 'U'}
-            </div>
+             <div className="relative">
+                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-white border border-slate-600 overflow-hidden" aria-hidden="true">
+                  {user?.avatar ? <img src={user.avatar} alt="User" /> : 'U'}
+                </div>
+             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.name || 'Guest'}</p>
               <p className="text-xs text-slate-500 truncate">{user?.role || 'Viewer'}</p>
             </div>
+            
+            {/* Added Notification Center to Sidebar Footer for visibility */}
+            <div className="md:hidden">
+                 <NotificationCenter />
+            </div>
+
             <button 
                 onClick={logout}
                 aria-label="Logout" 

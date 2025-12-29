@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { StrategicGoal } from '../../types';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Target } from 'lucide-react';
@@ -29,11 +29,15 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
   }, [goal, isOpen]);
 
   return (
-    <Modal
+    <SidePanel
         isOpen={isOpen}
         onClose={onClose}
-        title={<span className="flex items-center gap-2"><Target className="text-nexus-600"/> {goal ? 'Edit Strategic Goal' : 'Define Strategic Goal'}</span>}
-        size="md"
+        width="md:w-[500px]"
+        title={
+          <span className="flex items-center gap-2">
+             <Target className="text-nexus-600"/> {goal ? 'Edit Strategic Goal' : 'Define Strategic Goal'}
+          </span>
+        }
         footer={
             <>
                 <Button variant="secondary" onClick={onClose}>Cancel</Button>
@@ -41,7 +45,7 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
             </>
         }
     >
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Goal Name</label>
                 <Input 
@@ -53,13 +57,13 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Description & KPIs</label>
                 <textarea 
-                    className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+                    className="w-full p-4 border border-slate-300 rounded-lg text-sm h-48 focus:ring-2 focus:ring-nexus-500 outline-none"
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
                     placeholder="Describe the goal and how success will be measured..."
                 />
             </div>
         </div>
-    </Modal>
+    </SidePanel>
   );
 };

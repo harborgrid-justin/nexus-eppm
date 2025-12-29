@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X, Plus } from 'lucide-react';
+import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X, Plus, FileText } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
@@ -7,72 +8,79 @@ import { useGeminiAnalysis } from '../hooks/useGeminiAnalysis';
 import { usePermissions } from '../hooks/usePermissions';
 import { CustomBarChart } from './charts/CustomBarChart';
 import { CustomPieChart } from './charts/CustomPieChart';
+import { SidePanel } from './ui/SidePanel';
+import { Button } from './ui/Button';
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const theme = useTheme();
   const { generateReport, report, isGenerating, error, reset } = useGeminiAnalysis();
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const { hasPermission } = usePermissions();
 
   const handleGenerateReport = () => {
-    setIsReportModalOpen(true);
+    setIsReportOpen(true);
     generateReport(projects);
   };
 
   const handleCloseReport = () => {
-    setIsReportModalOpen(false);
+    setIsReportOpen(false);
     reset();
   };
 
-  const ReportModal = () => (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-         <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 flex-shrink-0">
-           <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><Sparkles size={18} className="text-nexus-500" /> AI Portfolio Analysis</h3>
-           <button onClick={handleCloseReport} className="p-1 rounded-full hover:bg-slate-200"><X size={20} /></button>
-         </div>
-         <div className="p-6 overflow-y-auto">
+  return (
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+      <SidePanel
+        isOpen={isReportOpen}
+        onClose={handleCloseReport}
+        width="md:w-[600px]"
+        title={
+          <span className="flex items-center gap-2">
+             <Sparkles size={18} className="text-nexus-500" /> AI Portfolio Analysis
+          </span>
+        }
+        footer={<Button onClick={handleCloseReport}>Close Report</Button>}
+      >
            {isGenerating && (
-             <div className="flex flex-col items-center justify-center py-10">
-               <Loader2 className="animate-spin text-nexus-500 mb-2" size={32} />
-               <p className="text-slate-500">Analyzing portfolio data...</p>
+             <div className="flex flex-col items-center justify-center py-20">
+               <Loader2 className="animate-spin text-nexus-500 mb-4" size={40} />
+               <p className="text-slate-500 font-medium">Analyzing portfolio data...</p>
              </div>
            )}
            
            {error && (
-             <div className="text-red-500 text-center py-10">
+             <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
                {error}
              </div>
            )}
 
-           {report && !isGenerating && report.split('\n').filter(line => line.trim() !== '').map((line, i) => {
-               if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-semibold mt-4 mb-1 text-slate-800">{line.substring(4)}</h3>;
-               if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-bold mt-6 mb-2 text-slate-900 border-b pb-1">{line.substring(3)}</h2>;
-               if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-extrabold mt-2 mb-4 text-slate-900">{line.substring(2)}</h1>;
-               if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return (
-                   <div key={i} className="flex items-start my-1 pl-4">
-                     <span className="text-nexus-500 mr-2 mt-1 font-bold">•</span>
-                     <p className="text-sm text-slate-700 flex-1">{line.trim().substring(2)}</p>
-                   </div>
-               );
-               if (line.match(/^\d+\./)) return (
-                  <div key={i} className="flex items-start my-1 pl-4">
-                     <span className="text-slate-600 mr-2 mt-1 font-semibold">{line.match(/^\d+\./)![0]}</span>
-                     <p className="text-sm text-slate-700 flex-1">{line.replace(/^\d+\.\s*/, '')}</p>
-                   </div>
-               );
-               return <p key={i} className="text-sm text-slate-600 my-3 leading-relaxed">{line}</p>;
-           })}
-        </div>
-       </div>
-    </div>
-  );
+           {report && !isGenerating && (
+             <div className="prose prose-sm prose-slate max-w-none">
+                 {report.split('\n').filter(line => line.trim() !== '').map((line, i) => {
+                    if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-slate-800">{line.substring(4)}</h3>;
+                    if (line.startsWith('## ')) return <h2 key={i} className="text-xl font-extrabold mt-8 mb-4 text-slate-900 border-b pb-2">{line.substring(3)}</h2>;
+                    if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-black mt-4 mb-6 text-slate-900">{line.substring(2)}</h1>;
+                    
+                    if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return (
+                        <div key={i} className="flex items-start my-2 pl-4">
+                            <span className="text-nexus-500 mr-3 mt-1.5 text-xs">●</span>
+                            <p className="text-slate-700 flex-1 leading-relaxed">{line.trim().substring(2)}</p>
+                        </div>
+                    );
+                    
+                    if (line.match(/^\d+\./)) return (
+                        <div key={i} className="flex items-start my-3 pl-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <span className="text-nexus-600 mr-3 font-bold">{line.match(/^\d+\./)![0]}</span>
+                            <p className="text-slate-700 flex-1 leading-relaxed">{line.replace(/^\d+\.\s*/, '')}</p>
+                        </div>
+                    );
 
+                    return <p key={i} className="my-4 leading-relaxed text-slate-600">{line}</p>;
+                 })}
+             </div>
+           )}
+      </SidePanel>
 
-  return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      {isReportModalOpen && <ReportModal />}
       <div className={`${theme.layout.header} mb-6`}>
         <div>
           <h1 className={theme.typography.h1}>Portfolio Overview</h1>
@@ -82,13 +90,13 @@ const Dashboard: React.FC = () => {
            <button 
              onClick={handleGenerateReport}
              disabled={isGenerating}
-             className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50"
+             className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50 shadow-sm"
            >
             <Sparkles size={16} className="text-yellow-500"/>
             Generate AI Summary
            </button>
            {hasPermission('project:create') && (
-             <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2`}>
+             <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm`}>
                 <Plus size={16} /> New Project
              </button>
            )}

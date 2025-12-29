@@ -6,7 +6,7 @@ import { RefreshCw, Users, Database, Layers, BarChart2, Activity, Settings, Netw
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { IntegratedChangeRequest } from '../../types';
 
@@ -20,25 +20,24 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
   const theme = useTheme();
 
   const [selectedChange, setSelectedChange] = useState<IntegratedChangeRequest | null>(null);
-  const [modalMode, setModalMode] = useState<'impact' | 'readiness' | null>(null);
+  const [panelMode, setPanelMode] = useState<'impact' | 'readiness' | null>(null);
   
-  // State for editing readiness scores in the modal
   const [readinessScores, setReadinessScores] = useState<IntegratedChangeRequest['readinessImpact']>([]);
 
-  const openImpactModal = (change: IntegratedChangeRequest) => {
+  const openImpactPanel = (change: IntegratedChangeRequest) => {
     setSelectedChange(change);
-    setModalMode('impact');
+    setPanelMode('impact');
   };
 
-  const openReadinessModal = (change: IntegratedChangeRequest) => {
+  const openReadinessPanel = (change: IntegratedChangeRequest) => {
     setSelectedChange(change);
     setReadinessScores(JSON.parse(JSON.stringify(change.readinessImpact))); // Deep copy
-    setModalMode('readiness');
+    setPanelMode('readiness');
   };
 
-  const closeModals = () => {
+  const closePanel = () => {
     setSelectedChange(null);
-    setModalMode(null);
+    setPanelMode(null);
     setReadinessScores([]);
   };
 
@@ -46,7 +45,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
     if (selectedChange) {
         const updatedChange = { ...selectedChange, readinessImpact: readinessScores };
         dispatch({ type: 'UPDATE_INTEGRATED_CHANGE', payload: updatedChange });
-        closeModals();
+        closePanel();
     }
   };
 
@@ -113,25 +112,25 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                     <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
                         <span className="text-xs text-slate-500 font-mono">ID: {change.id}</span>
                         <div className="flex gap-2">
-                            <button onClick={() => openImpactModal(change)} className="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-medium hover:bg-slate-50">View Impact Analysis</button>
-                            <button onClick={() => openReadinessModal(change)} className="px-3 py-1.5 bg-nexus-600 text-white rounded text-xs font-medium hover:bg-nexus-700">Update Readiness</button>
+                            <button onClick={() => openImpactPanel(change)} className="px-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-medium hover:bg-slate-50">View Impact Analysis</button>
+                            <button onClick={() => openReadinessPanel(change)} className="px-3 py-1.5 bg-nexus-600 text-white rounded text-xs font-medium hover:bg-nexus-700">Update Readiness</button>
                         </div>
                     </div>
                 </div>
             ))}
         </div>
 
-        {/* Impact Analysis Modal */}
-        <Modal
-            isOpen={modalMode === 'impact' && !!selectedChange}
-            onClose={closeModals}
+        {/* Impact Analysis Panel */}
+        <SidePanel
+            isOpen={panelMode === 'impact' && !!selectedChange}
+            onClose={closePanel}
+            width="md:w-[700px]"
             title={`Impact Analysis: ${selectedChange?.title}`}
-            size="lg"
-            footer={<Button onClick={closeModals}>Close</Button>}
+            footer={<Button onClick={closePanel}>Close</Button>}
         >
             {selectedChange && (
                 <div className="space-y-6">
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
                              <h4 className="text-blue-900 font-bold mb-2 flex items-center gap-2"><Settings size={16}/> Systems</h4>
                              <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
@@ -178,17 +177,17 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                     </div>
                 </div>
             )}
-        </Modal>
+        </SidePanel>
 
-        {/* Readiness Assessment Modal */}
-        <Modal
-            isOpen={modalMode === 'readiness' && !!selectedChange}
-            onClose={closeModals}
+        {/* Readiness Assessment Panel */}
+        <SidePanel
+            isOpen={panelMode === 'readiness' && !!selectedChange}
+            onClose={closePanel}
+            width="md:w-[700px]"
             title={`Update Readiness: ${selectedChange?.title}`}
-            size="lg"
             footer={
                 <>
-                    <Button variant="secondary" onClick={closeModals}>Cancel</Button>
+                    <Button variant="secondary" onClick={closePanel}>Cancel</Button>
                     <Button onClick={saveReadiness}>Save Assessment</Button>
                 </>
             }
@@ -219,7 +218,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                     </div>
                 ))}
             </div>
-        </Modal>
+        </SidePanel>
     </div>
   );
 };

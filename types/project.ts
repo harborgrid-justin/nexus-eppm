@@ -24,6 +24,7 @@ export interface Project {
   startDate: string;
   endDate: string;
   health: 'Good' | 'Warning' | 'Critical';
+  status?: string;
   
   // Children / Related Entities
   wbs?: WBSNode[];
@@ -131,6 +132,9 @@ export interface WBSNode {
   description: string;
   children: WBSNode[];
   shape?: WBSNodeShape;
+  costAccount?: string;
+  owner?: string;
+  riskIds?: string[]; // Link to Risks
 }
 
 export type WBSNodeShape = 'rectangle' | 'oval' | 'hexagon';

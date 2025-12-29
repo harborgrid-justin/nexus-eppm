@@ -1,12 +1,13 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Task, Project, ConstraintType, EffortType, TaskStatus } from '../types';
-import { X, Link, Trash2, Clock, BrainCircuit, Tag, FileWarning, Receipt, ShieldAlert, AlertTriangle, MessageCircle, Truck } from 'lucide-react';
+import { Link, Trash2, Clock, BrainCircuit, Tag, Receipt, ShieldAlert, AlertTriangle, MessageCircle, Truck } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useData } from '../context/DataContext';
 import { checkMaterialAvailability, checkOpenRFIsForTask } from '../utils/integrationUtils';
 import { usePermissions } from '../hooks/usePermissions';
+import { SidePanel } from './ui/SidePanel';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -24,71 +25,38 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
     applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs, expenseCategories
   } = useTaskForm(task, project, onClose);
 
-  const modalRef = useRef<HTMLDivElement>(null);
-
   // Phase 2 Checks (Integration Opportunities)
   const materialCheck = checkMaterialAvailability(localTask, state.purchaseOrders);
   const rfiCheck = checkOpenRFIsForTask(localTask.id, state.communicationLogs);
 
-  // Focus trap for accessibility
-  useEffect(() => {
-    const focusableElements = modalRef.current?.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusableElements && focusableElements.length > 0) {
-      (focusableElements[0] as HTMLElement).focus();
-    }
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-       <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-          
-          {/* Header */}
-          <div className="p-6 border-b border-slate-200 flex justify-between items-start bg-slate-50">
-             <div>
-                <label htmlFor="task-name" className="sr-only">Task Name</label>
-                <input
-                  id="task-name"
-                  type="text"
-                  value={localTask.name}
-                  onChange={(e) => updateField('name', e.target.value)}
-                  disabled={isReadOnly}
-                  className={`text-2xl font-bold text-slate-900 bg-transparent -ml-2 px-2 py-1 rounded-lg border border-transparent w-full ${isReadOnly ? '' : 'hover:border-slate-300 focus:border-nexus-500 focus:ring-1 focus:ring-nexus-500'}`}
-                />
-                <div className="mt-1 flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-mono bg-slate-200 px-2 py-0.5 rounded text-slate-600">{localTask.wbsCode}</span>
-                    {!canComplete && (
-                        <span className="text-xs font-bold text-red-600 flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                            <ShieldAlert size={12} aria-hidden="true" /> Quality Gate Locked
-                        </span>
-                    )}
-                    {rfiCheck.blocked && (
-                        <span className="text-xs font-bold text-orange-600 flex items-center gap-1 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
-                            <MessageCircle size={12} aria-hidden="true" /> RFI Pending
-                        </span>
-                    )}
-                    {isReadOnly && (
-                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                            Read Only
-                        </span>
-                    )}
-                </div>
-             </div>
-             <button onClick={onClose} aria-label="Close Modal" className="text-slate-400 hover:text-slate-600 bg-white p-2 rounded-full border border-slate-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-nexus-500 flex-shrink-0 ml-4">
-                <X size={20} />
-             </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-6">
+    <SidePanel
+       isOpen={true}
+       onClose={onClose}
+       width="md:w-[800px]"
+       title={
+         <div className="flex flex-col">
+            <span className="text-xs font-mono text-slate-500">{localTask.wbsCode}</span>
+            <div className="flex items-center gap-3">
+                <span className="text-xl font-bold text-slate-900">{localTask.name}</span>
+                {!canComplete && (
+                    <span className="text-xs font-bold text-red-600 flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                        <ShieldAlert size={12} aria-hidden="true" /> QC Block
+                    </span>
+                )}
+            </div>
+         </div>
+       }
+       footer={
+         <>
+             <Button variant="secondary" onClick={onClose}>{isReadOnly ? 'Close' : 'Cancel'}</Button>
+             {!isReadOnly && <Button variant="primary" onClick={saveChanges}>Save Changes</Button>}
+         </>
+       }
+    >
+       <div className="space-y-6">
              {/* ALERTS SECTION */}
-             <div className="space-y-3 mb-6">
+             <div className="space-y-3">
                 {/* Quality Gate Warning */}
                 {!canComplete && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3" role="alert">
@@ -133,8 +101,8 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                 )}
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
+             <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-6">
                    <section aria-labelledby="desc-heading">
                       <h3 id="desc-heading" className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Description</h3>
                       <textarea
@@ -145,6 +113,61 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                         placeholder={isReadOnly ? "No description provided." : "Add a detailed description..."}
                       />
                    </section>
+
+                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                      <div>
+                          <label htmlFor="task-status" className="text-xs text-slate-500 font-bold uppercase mb-1 block">Task Status</label>
+                          <select 
+                            id="task-status"
+                            value={localTask.status}
+                            disabled={isReadOnly}
+                            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
+                            className={`w-full p-2 text-sm border rounded-md font-semibold ${
+                                (!canComplete || rfiCheck.blocked) && localTask.status !== TaskStatus.COMPLETED 
+                                    ? 'border-orange-300 focus:ring-orange-500' 
+                                    : 'border-slate-200 focus:ring-nexus-500'
+                            } disabled:bg-slate-100 disabled:text-slate-500`}
+                          >
+                              <option value={TaskStatus.NOT_STARTED}>Not Started</option>
+                              <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
+                              <option value={TaskStatus.COMPLETED} disabled={!canComplete || rfiCheck.blocked}>Completed {(!canComplete || rfiCheck.blocked) ? '(Blocked)' : ''}</option>
+                              <option value={TaskStatus.DELAYED}>Delayed</option>
+                          </select>
+                      </div>
+
+                      <div className="h-px bg-slate-100 my-2"></div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="effort-type" className="text-xs text-slate-500 flex items-center gap-1 font-bold"><BrainCircuit size={12}/> Effort Type</label>
+                          <select
+                            id="effort-type"
+                            value={localTask.effortType}
+                            disabled={isReadOnly}
+                            onChange={(e) => updateField('effortType', e.target.value as EffortType)}
+                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"
+                          >
+                            <option>Fixed Duration</option>
+                            <option>Fixed Work</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="work-hrs" className="text-xs text-slate-500 flex items-center gap-1 font-bold"><Clock size={12}/> Work (hrs)</label>
+                          <input id="work-hrs" type="number" disabled={isReadOnly} value={localTask.work || ''} onChange={(e) => updateField('work', parseInt(e.target.value))} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="start-date" className="text-xs text-slate-500 font-bold">Start Date</label>
+                          <input id="start-date" type="date" disabled={isReadOnly} value={localTask.startDate} onChange={e => updateField('startDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
+                        </div>
+                        <div>
+                          <label htmlFor="end-date" className="text-xs text-slate-500 font-bold">End Date</label>
+                          <input id="end-date" type="date" disabled={isReadOnly} value={localTask.endDate} onChange={e => updateField('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
+                        </div>
+                      </div>
+                   </div>
 
                    {/* Activity Codes */}
                    <section aria-labelledby="codes-heading">
@@ -214,7 +237,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                        </div>
                        <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
                            <h3 className="text-xs font-bold text-yellow-800 uppercase mb-2 flex items-center gap-2">
-                               <FileWarning size={14} aria-hidden="true"/> Issues
+                               <ShieldAlert size={14} aria-hidden="true"/> Issues
                            </h3>
                            <p className="text-sm text-yellow-900">{linkedIssues.length} active issues</p>
                        </div>
@@ -237,94 +260,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                      </section>
                    )}
                 </div>
-
-                {/* Sidebar Controls */}
-                <div className="space-y-6">
-                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                      <div>
-                          <label htmlFor="task-status" className="text-xs text-slate-500 font-bold uppercase mb-1 block">Task Status</label>
-                          <select 
-                            id="task-status"
-                            value={localTask.status}
-                            disabled={isReadOnly}
-                            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
-                            className={`w-full p-2 text-sm border rounded-md font-semibold ${
-                                (!canComplete || rfiCheck.blocked) && localTask.status !== TaskStatus.COMPLETED 
-                                    ? 'border-orange-300 focus:ring-orange-500' 
-                                    : 'border-slate-200 focus:ring-nexus-500'
-                            } disabled:bg-slate-100 disabled:text-slate-500`}
-                          >
-                              <option value={TaskStatus.NOT_STARTED}>Not Started</option>
-                              <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
-                              <option value={TaskStatus.COMPLETED} disabled={!canComplete || rfiCheck.blocked}>Completed {(!canComplete || rfiCheck.blocked) ? '(Blocked)' : ''}</option>
-                              <option value={TaskStatus.DELAYED}>Delayed</option>
-                          </select>
-                      </div>
-
-                      <div className="h-px bg-slate-100 my-2"></div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label htmlFor="effort-type" className="text-xs text-slate-500 flex items-center gap-1"><BrainCircuit size={12}/> Effort Type</label>
-                          <select
-                            id="effort-type"
-                            value={localTask.effortType}
-                            disabled={isReadOnly}
-                            onChange={(e) => updateField('effortType', e.target.value as EffortType)}
-                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"
-                          >
-                            <option>Fixed Duration</option>
-                            <option>Fixed Work</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="work-hrs" className="text-xs text-slate-500 flex items-center gap-1"><Clock size={12}/> Work (hrs)</label>
-                          <input id="work-hrs" type="number" disabled={isReadOnly} value={localTask.work || ''} onChange={(e) => updateField('work', parseInt(e.target.value))} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label htmlFor="start-date" className="text-xs text-slate-500">Start Date</label>
-                          <input id="start-date" type="date" disabled={isReadOnly} value={localTask.startDate} onChange={e => updateField('startDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
-                        </div>
-                        <div>
-                          <label htmlFor="end-date" className="text-xs text-slate-500">End Date</label>
-                          <input id="end-date" type="date" disabled={isReadOnly} value={localTask.endDate} onChange={e => updateField('endDate', e.target.value)} className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"/>
-                        </div>
-                      </div>
-                       <div>
-                          <label htmlFor="constraint" className="text-xs text-slate-500">Constraint</label>
-                          <select 
-                            id="constraint"
-                            value={localTask.primaryConstraint?.type || ''}
-                            disabled={isReadOnly}
-                            onChange={(e) => {
-                                const newType = e.target.value as ConstraintType | '';
-                                updateField('primaryConstraint', newType ? { type: newType, date: newType.includes('Start') ? localTask.startDate : localTask.endDate } : undefined);
-                            }}
-                            className="w-full mt-1 p-2 text-sm border border-slate-200 rounded-md disabled:bg-slate-100"
-                           >
-                              <option value="">None</option>
-                              <option value="Start On or After">Start On or After</option>
-                              <option value="Finish On or Before">Finish On or Before</option>
-                              <option value="Start On">Start On</option>
-                              <option value="Finish On">Finish On</option>
-                              <option value="Mandatory Start">Mandatory Start</option>
-                              <option value="Mandatory Finish">Mandatory Finish</option>
-                           </select>
-                       </div>
-                   </div>
-                </div>
              </div>
           </div>
-
-          <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
-             <Button variant="secondary" onClick={onClose}>{isReadOnly ? 'Close' : 'Cancel'}</Button>
-             {!isReadOnly && <Button variant="primary" onClick={saveChanges}>Save Changes</Button>}
-          </div>
-       </div>
-    </div>
+    </SidePanel>
   );
 };
 

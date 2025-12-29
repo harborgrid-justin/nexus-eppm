@@ -1,5 +1,7 @@
 
 import { Project, UserDefinedField, DataJob, CommunicationLog, QualityReport, NonConformanceReport, TaskStatus } from '../../types';
+import { MOCK_BUDGET_LOG, MOCK_PROJECT_FUNDING, MOCK_COST_ESTIMATES } from './finance';
+import { MOCK_RISKS } from './risks';
 
 // IMPORTANT: Cross-reference with MOCK_RESOURCES in resources.ts
 // R-001: Sarah Chen
@@ -30,6 +32,57 @@ export const MOCK_PROJECTS: Project[] = [
     category: 'Infrastructure',
     businessCase: 'Central transport node for city expansion.',
     
+    // WBS Structure (Critical for Cost Estimating & Scope)
+    wbs: [
+        {
+            id: 'WBS-01',
+            wbsCode: '1',
+            name: 'Downtown Metro Hub',
+            description: 'Overall project container',
+            costAccount: 'CA-100.0',
+            owner: 'Sarah Chen',
+            children: [
+                {
+                    id: 'WBS-01-01',
+                    wbsCode: '1.1',
+                    name: 'Site Preparation',
+                    description: 'Demolition, clearing, and grading of the main terminal site.',
+                    costAccount: 'CA-101.1',
+                    owner: 'Mike Ross',
+                    children: []
+                },
+                {
+                    id: 'WBS-01-02',
+                    wbsCode: '1.2',
+                    name: 'Substructure',
+                    description: 'Foundations, piling, and basement excavation.',
+                    costAccount: 'CA-102.0',
+                    owner: 'Mike Ross',
+                    children: []
+                },
+                {
+                    id: 'WBS-01-03',
+                    wbsCode: '1.3',
+                    name: 'Superstructure',
+                    description: 'Steel framework, decking, and concrete pours for levels 1-4.',
+                    costAccount: 'CA-102.1',
+                    owner: 'Structural Lead',
+                    children: []
+                },
+                 {
+                    id: 'WBS-01-04',
+                    wbsCode: '1.4',
+                    name: 'MEP Systems',
+                    description: 'Mechanical, Electrical, and Plumbing rough-in and finish.',
+                    costAccount: 'CA-102.3',
+                    owner: 'Sarah Chen',
+                    riskIds: ['R-001'],
+                    children: []
+                }
+            ]
+        }
+    ],
+
     tasks: [
         { 
             id: 'T-101', 
@@ -72,7 +125,7 @@ export const MOCK_PROJECTS: Project[] = [
         },
         {
             id: 'T-105',
-            wbsCode: '1.3',
+            wbsCode: '1.3', 
             name: 'Steel Framework',
             startDate: '2024-03-20',
             endDate: '2024-05-30',
@@ -86,14 +139,31 @@ export const MOCK_PROJECTS: Project[] = [
             assignments: [],
             resourceRequirements: [],
             activityCodeAssignments: { 'AC-PHASE': 'PH-08', 'AC-DISC': 'DISC-STR' }
+        },
+        {
+            id: 'T-106',
+            wbsCode: '1.4', 
+            name: 'HVAC Rough-in',
+            startDate: '2024-06-01',
+            endDate: '2024-06-20',
+            duration: 20,
+            status: TaskStatus.NOT_STARTED,
+            progress: 0,
+            dependencies: [],
+            critical: false, 
+            type: 'Task', 
+            effortType: 'Fixed Duration',
+            assignments: [],
+            resourceRequirements: [],
+            activityCodeAssignments: { 'AC-PHASE': 'PH-08', 'AC-DISC': 'DISC-MEC' }
         }
     ],
     
     // Sub-Entities with FKs
-    risks: [], // Populated in risks.ts, but linked via projectId='P1001'
-    budgetLog: [], // Populated in finance.ts
-    funding: [],
-    costEstimates: [],
+    risks: MOCK_RISKS.filter(r => r.projectId === 'P1001'), 
+    budgetLog: MOCK_BUDGET_LOG,
+    funding: MOCK_PROJECT_FUNDING,
+    costEstimates: MOCK_COST_ESTIMATES,
     issues: [], // Populated in risks.ts
     
     // Detailed Attributes
@@ -118,6 +188,17 @@ export const MOCK_PROJECTS: Project[] = [
         appraisalCosts: 25000,
         internalFailureCosts: 5000,
         externalFailureCosts: 0
+    },
+    costPlan: {
+        estimatingMethodology: 'Bottom-up',
+        precisionLevel: 'Level 2 (Control)',
+        unitsOfMeasure: 'Imperial',
+        controlThresholds: '10% Variance',
+        reportingFormats: 'EVM Standard',
+        fundingStrategy: 'Quarterly Grant Drawdown',
+        status: 'Approved',
+        version: '1.0',
+        lastUpdated: '2024-01-10'
     }
   }
 ];

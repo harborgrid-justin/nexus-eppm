@@ -10,6 +10,8 @@ import {
     ProgramRisk, ProgramIssue, GovernanceRole, GovernanceEvent, ProgramBudgetAllocation, ProgramFundingGate,
     IntegratedChangeRequest
 } from '../types';
+import { GovernanceState } from '../types/business';
+import { applyBusinessLogic } from '../utils/businessLogic';
 import { 
     MOCK_PROJECTS, MOCK_RESOURCES, MOCK_ACTIVITY_CODES, MOCK_UDFS, MOCK_DATA_JOBS, MOCK_ISSUE_CODES, 
     MOCK_ISSUES, MOCK_EXPENSE_CATEGORIES, MOCK_EXPENSES, MOCK_BUDGET_LOG, MOCK_FUNDING_SOURCES, 
@@ -18,7 +20,7 @@ import {
     MOCK_PROCUREMENT_PACKAGES, MOCK_SOLICITATIONS, MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS, 
     MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_PORTFOLIO_RISKS, MOCK_BENEFITS, MOCK_PROGRAMS, 
     EXTENSIONS_REGISTRY, MOCK_QUALITY_STANDARDS, MOCK_ENTERPRISE_ROLES, MOCK_ENTERPRISE_SKILLS, 
-    MOCK_DOCUMENTS, MOCK_EPS, MOCK_OBS, MOCK_CALENDARS, MOCK_BUDGET_ITEMS 
+    MOCK_DOCUMENTS, MOCK_EPS, MOCK_OBS, MOCK_CALENDARS, MOCK_BUDGET_ITEMS, MOCK_RISKS
 } from '../constants';
 
 export interface DataState {
@@ -62,7 +64,6 @@ export interface DataState {
   calendars: GlobalCalendar[];
   strategicGoals: StrategicGoal[];
   programObjectives: ProgramObjective[];
-  // Program Specific Data Arrays
   programRisks: ProgramRisk[];
   programIssues: ProgramIssue[];
   governanceRoles: GovernanceRole[];
@@ -70,6 +71,7 @@ export interface DataState {
   programAllocations: ProgramBudgetAllocation[];
   programFundingGates: ProgramFundingGate[];
   integratedChanges: IntegratedChangeRequest[];
+  governance: GovernanceState; // NEW: Governance Overlay
   errors: string[];
 }
 
@@ -79,7 +81,9 @@ export type Action =
   | { type: 'UPDATE_DATA_JOB'; payload: { jobId: string; status: DataJob['status']; progress?: number; details?: string; fileName?: string; fileSize?: string } }
   | { type: 'IMPORT_PROJECTS'; payload: Project[] }
   | { type: 'UPDATE_TASK'; payload: { projectId: string; task: Task } }
+  | { type: 'ADD_RISK'; payload: Risk }
   | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
+  | { type: 'DELETE_RISK'; payload: string }
   | { type: 'SET_BASELINE'; payload: { projectId: string; name: string } }
   | { type: 'TOGGLE_INTEGRATION'; payload: string }
   | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
@@ -97,7 +101,6 @@ export type Action =
   | { type: 'ADD_PROGRAM_OBJECTIVE'; payload: ProgramObjective }
   | { type: 'UPDATE_PROGRAM_OBJECTIVE'; payload: ProgramObjective }
   | { type: 'DELETE_PROGRAM_OBJECTIVE'; payload: string }
-  // Program CRUD Actions
   | { type: 'ADD_PROGRAM_RISK'; payload: ProgramRisk }
   | { type: 'UPDATE_PROGRAM_RISK'; payload: ProgramRisk }
   | { type: 'DELETE_PROGRAM_RISK'; payload: string }
@@ -110,6 +113,11 @@ export type Action =
   | { type: 'UPDATE_PROGRAM_ALLOCATION'; payload: ProgramBudgetAllocation }
   | { type: 'UPDATE_PROGRAM_GATE'; payload: ProgramFundingGate }
   | { type: 'UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
+  | { type: 'MARK_ALERT_READ'; payload: string }
+  | { type: 'UPDATE_EXCHANGE_RATES'; payload: Record<string, number> } // Hook 3
+  | { type: 'FREEZE_BASELINE'; payload: string } // Hook 6
+  | { type: 'LOG_SAFETY_INCIDENT'; payload: { locationId: string; description: string } } // Hook 23
+  | { type: 'CLOSE_PROJECT'; payload: string } // Hook 15
   | { type: 'CLEAR_ERRORS' };
 
 const initialState: DataState = {
@@ -137,7 +145,7 @@ const initialState: DataState = {
   nonConformanceReports: MOCK_DEFECTS,
   changeOrders: [], 
   budgetItems: MOCK_BUDGET_ITEMS, 
-  risks: [], 
+  risks: MOCK_RISKS, 
   issues: MOCK_ISSUES,
   rbs: MOCK_RBS,
   issueCodes: MOCK_ISSUE_CODES,
@@ -164,7 +172,6 @@ const initialState: DataState = {
     { id: 'PO-01', description: 'Increase transit capacity by 40%', linkedStrategicGoalId: 'SG-02', linkedProjectIds: ['P1001'] },
     { id: 'PO-02', description: 'Centralize city services hub', linkedStrategicGoalId: 'SG-01', linkedProjectIds: ['P1002'] },
   ],
-  // Initial Mock Data for Program Management
   programRisks: [
       { id: 'PR-001', programId: 'PRG-001', description: 'Regulatory shift in environmental compliance standards', category: 'External', probability: 'Medium', impact: 'High', score: 12, owner: 'Legal', status: 'Open', mitigationPlan: 'Engage lobbyists and prepare impact assessment.' },
       { id: 'PR-002', programId: 'PRG-001', description: 'Resource contention between Metro and Hub projects', category: 'Resource', probability: 'High', impact: 'Medium', score: 12, owner: 'PMO', status: 'Open', mitigationPlan: 'Implement resource leveling at portfolio level.' }
@@ -198,93 +205,129 @@ const initialState: DataState = {
             { stakeholderGroup: 'Finance Team', awareness: 90, desire: 60, knowledge: 40, ability: 20, reinforcement: 10 },
             { stakeholderGroup: 'Project Managers', awareness: 50, desire: 80, knowledge: 10, ability: 10, reinforcement: 0 }
         ]
-    },
-    {
-        id: 'ICR-002', programId: 'PRG-001', title: 'Agile Transformation', description: 'Shifting software teams to SAFe methodology.', type: 'Organizational', 
-        impactAreas: ['Roles', 'Governance'], severity: 'Medium', status: 'Implemented',
-        readinessImpact: [
-            { stakeholderGroup: 'Dev Teams', awareness: 100, desire: 90, knowledge: 85, ability: 80, reinforcement: 70 }
-        ]
     }
   ],
+  governance: {
+    alerts: [
+        { id: 'A1', title: 'Safety Compliance', message: 'OSHA 1926 standards updated. Review Site Safety Plans.', severity: 'Info', category: 'Compliance', date: new Date().toISOString(), isRead: false },
+        { id: 'A2', title: 'Currency Risk', message: 'EUR/USD rate fluctuation exceeded 5% threshold.', severity: 'Warning', category: 'Finance', date: new Date(Date.now() - 86400000).toISOString(), isRead: false }
+    ],
+    auditLog: [],
+    exchangeRates: { 'USD': 1, 'EUR': 0.92, 'GBP': 0.78 },
+    riskTolerance: 'Moderate',
+    strategicWeights: { 'Innovation': 0.4, 'ROI': 0.4, 'Risk': 0.2 },
+    vendorBlacklist: ['V-BAD-01']
+  },
   errors: [],
 };
 
-const dataReducer = (state: DataState, action: Action): DataState => {
+const reducer = (state: DataState, action: Action): DataState => {
+  // 1. Process standard state update
+  let nextState: DataState = { ...state };
+  
   switch (action.type) {
     case 'QUEUE_DATA_JOB':
-      return { ...state, dataJobs: [action.payload, ...state.dataJobs] };
+      nextState = { ...state, dataJobs: [action.payload, ...state.dataJobs] }; break;
     case 'UPDATE_DATA_JOB':
-      return {
+      nextState = {
         ...state,
         dataJobs: state.dataJobs.map(job => job.id === action.payload.jobId ? { ...job, ...action.payload } : job)
-      };
+      }; break;
     case 'IMPORT_PROJECTS':
-      return { ...state, projects: [...state.projects, ...action.payload] };
+      nextState = { ...state, projects: [...state.projects, ...action.payload] }; break;
     case 'UPDATE_TASK':
-      return {
+      nextState = {
         ...state,
         projects: state.projects.map(p => 
           p.id === action.payload.projectId 
             ? { ...p, tasks: p.tasks.map(t => t.id === action.payload.task.id ? action.payload.task : t) }
             : p
         )
-      };
+      }; break;
     case 'INSTALL_EXTENSION':
-        return {
-            ...state,
-            extensions: state.extensions.map(ext => ext.id === action.payload ? { ...ext, status: 'Installed' } : ext)
-        };
+        nextState = { ...state, extensions: state.extensions.map(ext => ext.id === action.payload ? { ...ext, status: 'Installed' } : ext) }; break;
     case 'ACTIVATE_EXTENSION':
-        return {
-            ...state,
-            extensions: state.extensions.map(ext => ext.id === action.payload ? { ...ext, status: 'Active' } : ext)
-        };
+        nextState = { ...state, extensions: state.extensions.map(ext => ext.id === action.payload ? { ...ext, status: 'Active' } : ext) }; break;
     case 'TOGGLE_INTEGRATION':
-        return {
-            ...state,
-            integrations: state.integrations.map(int => int.id === action.payload ? { ...int, status: int.status === 'Connected' ? 'Disconnected' : 'Connected' } : int)
-        };
+        nextState = { ...state, integrations: state.integrations.map(int => int.id === action.payload ? { ...int, status: int.status === 'Connected' ? 'Disconnected' : 'Connected' } : int) }; break;
     case 'ADD_STRATEGIC_GOAL':
-        return { ...state, strategicGoals: [...state.strategicGoals, action.payload] };
+        nextState = { ...state, strategicGoals: [...state.strategicGoals, action.payload] }; break;
     case 'UPDATE_STRATEGIC_GOAL':
-        return { ...state, strategicGoals: state.strategicGoals.map(g => g.id === action.payload.id ? action.payload : g) };
+        nextState = { ...state, strategicGoals: state.strategicGoals.map(g => g.id === action.payload.id ? action.payload : g) }; break;
     case 'DELETE_STRATEGIC_GOAL':
-        return { ...state, strategicGoals: state.strategicGoals.filter(g => g.id !== action.payload) };
+        nextState = { ...state, strategicGoals: state.strategicGoals.filter(g => g.id !== action.payload) }; break;
     case 'ADD_PROGRAM_OBJECTIVE':
-        return { ...state, programObjectives: [...state.programObjectives, action.payload] };
+        nextState = { ...state, programObjectives: [...state.programObjectives, action.payload] }; break;
     case 'UPDATE_PROGRAM_OBJECTIVE':
-        return { ...state, programObjectives: state.programObjectives.map(o => o.id === action.payload.id ? action.payload : o) };
+        nextState = { ...state, programObjectives: state.programObjectives.map(o => o.id === action.payload.id ? action.payload : o) }; break;
     case 'DELETE_PROGRAM_OBJECTIVE':
-        return { ...state, programObjectives: state.programObjectives.filter(o => o.id !== action.payload) };
-    // --- Program Management Reducers ---
+        nextState = { ...state, programObjectives: state.programObjectives.filter(o => o.id !== action.payload) }; break;
     case 'ADD_PROGRAM_RISK':
-        return { ...state, programRisks: [...state.programRisks, action.payload] };
+        nextState = { ...state, programRisks: [...state.programRisks, action.payload] }; break;
     case 'UPDATE_PROGRAM_RISK':
-        return { ...state, programRisks: state.programRisks.map(r => r.id === action.payload.id ? action.payload : r) };
+        nextState = { ...state, programRisks: state.programRisks.map(r => r.id === action.payload.id ? action.payload : r) }; break;
     case 'DELETE_PROGRAM_RISK':
-        return { ...state, programRisks: state.programRisks.filter(r => r.id !== action.payload) };
+        nextState = { ...state, programRisks: state.programRisks.filter(r => r.id !== action.payload) }; break;
     case 'ADD_PROGRAM_ISSUE':
-        return { ...state, programIssues: [...state.programIssues, action.payload] };
+        nextState = { ...state, programIssues: [...state.programIssues, action.payload] }; break;
     case 'UPDATE_PROGRAM_ISSUE':
-        return { ...state, programIssues: state.programIssues.map(i => i.id === action.payload.id ? action.payload : i) };
+        nextState = { ...state, programIssues: state.programIssues.map(i => i.id === action.payload.id ? action.payload : i) }; break;
     case 'DELETE_PROGRAM_ISSUE':
-        return { ...state, programIssues: state.programIssues.filter(i => i.id !== action.payload) };
+        nextState = { ...state, programIssues: state.programIssues.filter(i => i.id !== action.payload) }; break;
     case 'ADD_GOVERNANCE_ROLE':
-        return { ...state, governanceRoles: [...state.governanceRoles, action.payload] };
+        nextState = { ...state, governanceRoles: [...state.governanceRoles, action.payload] }; break;
     case 'DELETE_GOVERNANCE_ROLE':
-        return { ...state, governanceRoles: state.governanceRoles.filter(r => r.id !== action.payload) };
+        nextState = { ...state, governanceRoles: state.governanceRoles.filter(r => r.id !== action.payload) }; break;
     case 'ADD_GOVERNANCE_EVENT':
-        return { ...state, governanceEvents: [...state.governanceEvents, action.payload] };
+        nextState = { ...state, governanceEvents: [...state.governanceEvents, action.payload] }; break;
     case 'UPDATE_PROGRAM_ALLOCATION':
-        return { ...state, programAllocations: state.programAllocations.map(a => a.id === action.payload.id ? action.payload : a) };
+        nextState = { ...state, programAllocations: state.programAllocations.map(a => a.id === action.payload.id ? action.payload : a) }; break;
     case 'UPDATE_PROGRAM_GATE':
-        return { ...state, programFundingGates: state.programFundingGates.map(g => g.id === action.payload.id ? action.payload : g) };
+        nextState = { ...state, programFundingGates: state.programFundingGates.map(g => g.id === action.payload.id ? action.payload : g) }; break;
     case 'UPDATE_INTEGRATED_CHANGE':
-        return { ...state, integratedChanges: state.integratedChanges.map(c => c.id === action.payload.id ? action.payload : c) };
+        nextState = { ...state, integratedChanges: state.integratedChanges.map(c => c.id === action.payload.id ? action.payload : c) }; break;
+    case 'ADD_OR_UPDATE_COST_ESTIMATE':
+        nextState = {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id === action.payload.projectId) {
+                    const estimates = p.costEstimates || [];
+                    const existingIdx = estimates.findIndex(e => e.id === action.payload.estimate.id);
+                    if (existingIdx >= 0) {
+                        const updated = [...estimates];
+                        updated[existingIdx] = action.payload.estimate;
+                        return { ...p, costEstimates: updated };
+                    } else {
+                        return { ...p, costEstimates: [...estimates, action.payload.estimate] };
+                    }
+                }
+                return p;
+            })
+        }; break;
+    case 'ADD_RISK':
+        nextState = { ...state, risks: [action.payload, ...state.risks] }; break;
+    case 'UPDATE_RISK':
+        nextState = { ...state, risks: state.risks.map(r => r.id === action.payload.risk.id ? action.payload.risk : r) }; break;
+    case 'DELETE_RISK':
+        nextState = { ...state, risks: state.risks.filter(r => r.id !== action.payload) }; break;
+    case 'MARK_ALERT_READ':
+        nextState = { ...state, governance: { ...state.governance, alerts: state.governance.alerts.map(a => a.id === action.payload ? { ...a, isRead: true } : a) } }; break;
+    case 'UPDATE_EXCHANGE_RATES':
+        nextState = { ...state, governance: { ...state.governance, exchangeRates: action.payload } }; break;
+    case 'APPROVE_CHANGE_ORDER':
+        // Basic approval logic
+        const co = state.changeOrders.find(c => c.id === action.payload.changeOrderId);
+        if (co) {
+            nextState = { ...state, changeOrders: state.changeOrders.map(c => c.id === co.id ? { ...c, status: 'Approved' } : c) };
+        }
+        break;
     default:
-      return state;
+        nextState = state;
   }
+
+  // 2. Apply Business Logic Middleware (The "Governance Engine")
+  // This processes the 25 Hooks defined in businessLogic.ts
+  return applyBusinessLogic(nextState, action, state);
 };
 
 const DataContext = createContext<{
@@ -296,7 +339,7 @@ const DataContext = createContext<{
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(dataReducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const getRiskPlan = useCallback((projectId: string) => {
       return MOCK_RISK_PLAN;

@@ -1,11 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Risk } from '../../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Risk, RiskBreakdownStructureNode } from '../../types';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters';
-import { AlertTriangle, DollarSign, Calendar, Shield } from 'lucide-react';
+import { AlertTriangle, DollarSign, Calendar, Shield, Zap } from 'lucide-react';
 
 interface RiskFormProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
   
   const [formData, setFormData] = useState<Partial<Risk>>({
     description: '',
-    category: 'Technical',
+    category: '',
     status: 'Open',
     probabilityValue: 1,
     impactValue: 1,
@@ -30,6 +30,23 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
     responseActions: []
   });
 
+  const [automationTriggered, setAutomationTriggered] = useState<string | null>(null);
+
+  // Flatten RBS to get categories
+  const rbsCategories = useMemo(() => {
+    const categories: string[] = [];
+    const traverse = (nodes: RiskBreakdownStructureNode[]) => {
+        nodes.forEach(node => {
+            categories.push(node.name); // Using name as category for simplicity in flat list
+            if (node.children) traverse(node.children);
+        });
+    };
+    if (state.rbs) traverse(state.rbs);
+    // Add default if empty
+    if (categories.length === 0) return ['Technical', 'Schedule', 'Cost', 'External', 'Resource'];
+    return categories;
+  }, [state.rbs]);
+
   useEffect(() => {
     if (existingRisk) {
       setFormData({ ...existingRisk });
@@ -37,7 +54,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
         // Reset
         setFormData({
             description: '',
-            category: 'Technical',
+            category: rbsCategories[0],
             status: 'Open',
             probabilityValue: 1,
             impactValue: 1,
@@ -46,13 +63,25 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             responseActions: []
         });
     }
-  }, [existingRisk, isOpen]);
+  }, [existingRisk, isOpen, rbsCategories]);
 
+  // --- Automation Logic ---
   const calculateScore = (prob: number, imp: number) => prob * imp;
-  const calculateEMV = (cost: number, prob: number) => cost * (prob * 0.2); // Simplified probability scalar
+  const calculateEMV = (cost: number, prob: number) => cost * (prob * 0.2); // Simplified probability scalar (1=20%, 5=100%)
 
   const currentScore = calculateScore(formData.probabilityValue || 1, formData.impactValue || 1);
   const currentEMV = calculateEMV(formData.financialImpact || 0, formData.probabilityValue || 1);
+
+  // Auto-escalation Logic Hook
+  useEffect(() => {
+      if (currentScore >= 15 && !formData.isEscalated) {
+          setAutomationTriggered("High Risk Score detected. Recommendation: Escalate to Program Level.");
+      } else if (currentEMV > 100000 && formData.strategy !== 'Transfer') {
+          setAutomationTriggered("High Financial Exposure. Recommendation: Consider Transfer/Insure strategy.");
+      } else {
+          setAutomationTriggered(null);
+      }
+  }, [currentScore, currentEMV, formData.isEscalated, formData.strategy]);
 
   const handleSubmit = () => {
     const risk: Risk = {
@@ -61,7 +90,9 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
         owner: formData.owner || 'Unassigned',
         ...formData as Risk,
         score: currentScore,
-        emv: currentEMV
+        emv: currentEMV,
+        // Auto-apply escalation if high score
+        isEscalated: currentScore >= 20 ? true : formData.isEscalated
     };
     onSave(risk);
     onClose();
@@ -95,17 +126,13 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">RBS Category</label>
                         <select 
                             className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
                             value={formData.category}
                             onChange={e => setFormData({...formData, category: e.target.value})}
                         >
-                            <option>Technical</option>
-                            <option>Schedule</option>
-                            <option>Cost</option>
-                            <option>External</option>
-                            <option>Resource</option>
+                            {rbsCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     </div>
                     <div>
@@ -190,6 +217,15 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                         <span className="font-bold">{formatCurrency(currentEMV)}</span>
                     </div>
                 </div>
+
+                {automationTriggered && (
+                    <div className="p-3 bg-nexus-50 border border-nexus-200 rounded-lg flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
+                        <Zap size={16} className="text-nexus-600 shrink-0 mt-0.5"/>
+                        <p className="text-xs text-nexus-800">
+                            <strong>AI Trigger:</strong> {automationTriggered}
+                        </p>
+                    </div>
+                )}
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Response Strategy</label>
