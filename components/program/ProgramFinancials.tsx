@@ -1,11 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon } from 'lucide-react';
+import { useData } from '../../context/DataContext';
+import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon, Edit2, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Modal } from '../ui/Modal';
+import { Button } from '../ui/Button';
+import { ProgramBudgetAllocation } from '../../types';
 
 interface ProgramFinancialsProps {
   programId: string;
@@ -13,7 +17,11 @@ interface ProgramFinancialsProps {
 
 const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const { programFinancials, aggregateMetrics, projects } = useProgramData(programId);
+  const { dispatch } = useData();
   const theme = useTheme();
+
+  const [isAllocationModalOpen, setIsAllocationModalOpen] = useState(false);
+  const [editAllocations, setEditAllocations] = useState<ProgramBudgetAllocation[]>([]);
 
   const remainingBudget = aggregateMetrics.totalBudget - aggregateMetrics.totalSpent;
   const projectNamesMap = new Map(projects.map(p => [p.id, p.name]));
@@ -25,6 +33,22 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
       Spent: a.spent,
       Forecast: a.forecast
   }));
+
+  const handleOpenAllocationModal = () => {
+      setEditAllocations(JSON.parse(JSON.stringify(programFinancials.allocations)));
+      setIsAllocationModalOpen(true);
+  };
+
+  const handleSaveAllocations = () => {
+      editAllocations.forEach(alloc => {
+          dispatch({ type: 'UPDATE_PROGRAM_ALLOCATION', payload: alloc });
+      });
+      setIsAllocationModalOpen(false);
+  };
+
+  const handleAllocationChange = (id: string, value: number) => {
+      setEditAllocations(prev => prev.map(a => a.id === id ? { ...a, allocated: value } : a));
+  };
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -43,7 +67,12 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
 
         {/* Budget Allocation & Forecast */}
         <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm h-[400px]`}>
-            <h3 className="font-bold text-slate-800 mb-4">Budget Allocation & Cost-to-Complete</h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-slate-800">Budget Allocation & Cost-to-Complete</h3>
+                <button onClick={handleOpenAllocationModal} className="text-xs flex items-center gap-1 text-nexus-600 font-medium hover:underline">
+                    <Edit2 size={14}/> Adjust Allocations
+                </button>
+            </div>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -75,15 +104,54 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                         <p className="text-sm text-slate-600 mt-1">{gate.milestoneTrigger}</p>
                         <p className="text-xl font-bold text-nexus-700 mt-2">{formatCompactCurrency(gate.amount)}</p>
                         <p className="text-xs text-slate-400 mt-1">Date: {gate.releaseDate}</p>
-                        <div className={`mt-3 px-3 py-1 text-xs font-bold rounded-full ${
-                            gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
-                        }`}>
+                        <div className={`mt-3 px-3 py-1 text-xs font-bold rounded-full cursor-pointer ${
+                            gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                        }`} onClick={() => {
+                             if(gate.status !== 'Released' && confirm("Release this funding gate?")) {
+                                 dispatch({type: 'UPDATE_PROGRAM_GATE', payload: {...gate, status: 'Released'}});
+                             }
+                        }}>
                             {gate.status}
                         </div>
                     </div>
                 ))}
             </div>
         </div>
+
+        {/* Edit Allocation Modal */}
+        <Modal
+            isOpen={isAllocationModalOpen}
+            onClose={() => setIsAllocationModalOpen(false)}
+            title="Adjust Budget Allocations"
+            footer={
+                <>
+                    <Button variant="secondary" onClick={() => setIsAllocationModalOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSaveAllocations}>Save Allocations</Button>
+                </>
+            }
+        >
+            <div className="space-y-4">
+                {editAllocations.map(alloc => (
+                    <div key={alloc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+                         <div className="text-sm font-bold text-slate-700 w-1/3">
+                             {projectNamesMap.get(alloc.projectId) || alloc.projectId}
+                         </div>
+                         <div className="flex items-center gap-2">
+                             <span className="text-xs text-slate-500">Allocated:</span>
+                             <div className="relative w-40">
+                                 <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                                 <input 
+                                    type="number" 
+                                    value={alloc.allocated} 
+                                    onChange={e => handleAllocationChange(alloc.id, parseFloat(e.target.value))}
+                                    className="w-full pl-6 pr-2 py-1 text-sm border border-slate-300 rounded focus:ring-nexus-500"
+                                 />
+                             </div>
+                         </div>
+                    </div>
+                ))}
+            </div>
+        </Modal>
     </div>
   );
 };

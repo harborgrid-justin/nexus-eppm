@@ -1,11 +1,16 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { ShieldAlert, TrendingUp, AlertOctagon, Layers } from 'lucide-react';
+import { ShieldAlert, TrendingUp, AlertOctagon, Layers, Plus, Trash2 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { Modal } from '../ui/Modal';
+import { Input } from '../ui/Input';
+import { ProgramRisk } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 interface ProgramRisksProps {
   programId: string;
@@ -13,8 +18,54 @@ interface ProgramRisksProps {
 
 const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
   const { programRisks, projects } = useProgramData(programId);
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newRisk, setNewRisk] = useState<Partial<ProgramRisk>>({
+      description: '',
+      category: 'External',
+      probability: 'Medium',
+      impact: 'Medium',
+      owner: '',
+      mitigationPlan: ''
+  });
+
+  const handleAddRisk = () => {
+      if (!newRisk.description) return;
+      
+      // Calculate score
+      const pVal = newRisk.probability === 'High' ? 5 : newRisk.probability === 'Medium' ? 3 : 1;
+      const iVal = newRisk.impact === 'High' ? 5 : newRisk.impact === 'Medium' ? 3 : 1;
+
+      const risk: ProgramRisk = {
+          id: generateId('PR'),
+          programId,
+          description: newRisk.description || '',
+          category: newRisk.category || 'External',
+          probability: newRisk.probability as any,
+          impact: newRisk.impact as any,
+          score: pVal * iVal,
+          owner: newRisk.owner || 'Unassigned',
+          status: 'Open',
+          mitigationPlan: newRisk.mitigationPlan || '',
+          probabilityValue: pVal,
+          impactValue: iVal,
+          financialImpact: 0,
+          strategy: 'Mitigate',
+          responseActions: []
+      };
+
+      dispatch({ type: 'ADD_PROGRAM_RISK', payload: risk });
+      setIsModalOpen(false);
+      setNewRisk({ description: '', category: 'External', probability: 'Medium', impact: 'Medium', owner: '', mitigationPlan: '' });
+  };
+
+  const handleDeleteRisk = (id: string) => {
+      if(confirm("Are you sure you want to delete this risk?")) {
+          dispatch({ type: 'DELETE_PROGRAM_RISK', payload: id });
+      }
+  };
 
   // Aggregate project risks
   const escalatedRisks = useMemo(() => {
@@ -28,9 +79,12 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
-        <div className="flex items-center gap-2 mb-2">
-            <ShieldAlert className="text-nexus-600" size={24}/>
-            <h2 className={theme.typography.h2}>Program Risk Management</h2>
+        <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-2">
+                <ShieldAlert className="text-nexus-600" size={24}/>
+                <h2 className={theme.typography.h2}>Program Risk Management</h2>
+            </div>
+            <Button size="sm" icon={Plus} onClick={() => setIsModalOpen(true)}>Add Program Risk</Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -53,11 +107,12 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
                                 <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                                <th className="px-4 py-3 w-10"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {programRisks.map(risk => (
-                                <tr key={risk.id} className="hover:bg-slate-50">
+                                <tr key={risk.id} className="hover:bg-slate-50 group">
                                     <td className="px-4 py-3 text-sm font-medium text-slate-900">
                                         {risk.description}
                                         <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
@@ -69,8 +124,16 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3"><Badge variant="neutral">{risk.status}</Badge></td>
+                                    <td className="px-4 py-3 text-right">
+                                        <button onClick={() => handleDeleteRisk(risk.id)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Trash2 size={14}/>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
+                            {programRisks.length === 0 && (
+                                <tr><td colSpan={5} className="p-6 text-center text-sm text-slate-500 italic">No program risks recorded.</td></tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -115,6 +178,55 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 </div>
             </div>
         </div>
+
+        <Modal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            title="New Program Risk"
+            footer={
+                <>
+                    <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                    <Button onClick={handleAddRisk}>Save Risk</Button>
+                </>
+            }
+        >
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Risk Description</label>
+                    <textarea 
+                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-20"
+                        value={newRisk.description}
+                        onChange={e => setNewRisk({...newRisk, description: e.target.value})}
+                    />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Probability</label>
+                        <select className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={newRisk.probability} onChange={e => setNewRisk({...newRisk, probability: e.target.value as any})}>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Impact</label>
+                        <select className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={newRisk.impact} onChange={e => setNewRisk({...newRisk, impact: e.target.value as any})}>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Mitigation Plan</label>
+                    <Input value={newRisk.mitigationPlan} onChange={e => setNewRisk({...newRisk, mitigationPlan: e.target.value})} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Owner</label>
+                    <Input value={newRisk.owner} onChange={e => setNewRisk({...newRisk, owner: e.target.value})} />
+                </div>
+            </div>
+        </Modal>
     </div>
   );
 };

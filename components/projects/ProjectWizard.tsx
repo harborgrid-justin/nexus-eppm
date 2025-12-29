@@ -1,0 +1,238 @@
+
+import React, { useState } from 'react';
+import { Modal } from '../ui/Modal';
+import { Project } from '../../types';
+import { useData } from '../../context/DataContext';
+import { generateId } from '../../utils/formatters';
+import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+
+interface ProjectWizardProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (project: Project) => void;
+}
+
+const STEPS = [
+  { id: 1, label: 'General Info', icon: Briefcase },
+  { id: 2, label: 'Schedule & EPS', icon: Calendar },
+  { id: 3, label: 'Financial Baseline', icon: DollarSign },
+  { id: 4, label: 'Team Charter', icon: Users },
+];
+
+export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, onSave }) => {
+  const { state } = useData();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<Partial<Project>>({
+    name: '',
+    code: '',
+    description: '',
+    status: 'Planned',
+    health: 'Good',
+    budget: 0,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    manager: '',
+    epsId: state.eps[0]?.id || '',
+    tasks: [],
+    risks: [],
+    teamCharter: {
+        values: [],
+        communicationGuidelines: 'Weekly Status Reports',
+        decisionMakingProcess: 'PM Authority',
+        conflictResolutionProcess: 'Escalation to Sponsor'
+    }
+  });
+
+  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+  const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const handleSubmit = () => {
+    const newProject: Project = {
+      id: generateId('P'),
+      ...formData as Project,
+      spent: 0,
+      tasks: [], 
+      // Defaults for missing required fields
+      strategicImportance: 5,
+      financialValue: 0,
+      riskScore: 0,
+      resourceFeasibility: 5,
+      calculatedPriorityScore: 50,
+      category: 'General',
+      obsId: 'OBS-ROOT',
+      calendarId: 'CAL-STD'
+    };
+    onSave(newProject);
+    onClose();
+  };
+
+  const renderStep1 = () => (
+    <div className="space-y-4">
+       <div className="grid grid-cols-2 gap-4">
+          <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
+              <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Headquarters Expansion" />
+          </div>
+          <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Project Code</label>
+              <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="e.g. P-2024-001" />
+          </div>
+       </div>
+       <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Business Case</label>
+          <textarea 
+            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+            placeholder="Why are we undertaking this project?"
+            value={formData.businessCase}
+            onChange={e => setFormData({...formData, businessCase: e.target.value})}
+          />
+       </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Enterprise Project Structure (EPS)</label>
+            <select 
+                className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+                value={formData.epsId}
+                onChange={e => setFormData({...formData, epsId: e.target.value})}
+            >
+                {state.eps.map(node => <option key={node.id} value={node.id}>{node.name}</option>)}
+            </select>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Planned Start</label>
+                <input type="date" className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Planned Finish</label>
+                <input type="date" className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
+            </div>
+        </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+      <div className="space-y-6">
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+              <label className="block text-sm font-bold text-slate-700 mb-2">Total Budget Authority</label>
+              <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                  <input 
+                    type="number" 
+                    className="w-full pl-8 pr-4 py-3 text-xl font-bold text-slate-900 border border-slate-300 rounded-lg"
+                    value={formData.budget}
+                    onChange={e => setFormData({...formData, budget: parseFloat(e.target.value), originalBudget: parseFloat(e.target.value)})}
+                  />
+              </div>
+          </div>
+          <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Funding Source</label>
+              <select className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white">
+                  <option>Internal CapEx</option>
+                  <option>Grant / External</option>
+                  <option>OpEx</option>
+              </select>
+          </div>
+      </div>
+  );
+
+  const renderStep4 = () => (
+      <div className="space-y-4">
+          <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Project Manager</label>
+              <select 
+                  className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+                  value={formData.manager}
+                  onChange={e => setFormData({...formData, manager: e.target.value})}
+              >
+                  <option value="">Select Manager...</option>
+                  {state.resources.map(r => <option key={r.id} value={r.name}>{r.name} ({r.role})</option>)}
+              </select>
+          </div>
+          <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Initial Charter Values</label>
+              <div className="flex gap-2">
+                  {['Transparency', 'Safety', 'Innovation', 'Speed'].map(val => (
+                      <button 
+                        key={val}
+                        onClick={() => {
+                            const current = formData.teamCharter?.values || [];
+                            const newVals = current.includes(val) ? current.filter(v => v !== val) : [...current, val];
+                            setFormData({...formData, teamCharter: { ...formData.teamCharter!, values: newVals }});
+                        }}
+                        className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                            formData.teamCharter?.values.includes(val) 
+                            ? 'bg-nexus-100 border-nexus-200 text-nexus-700' 
+                            : 'bg-white border-slate-200 text-slate-500'
+                        }`}
+                      >
+                          {val}
+                      </button>
+                  ))}
+              </div>
+          </div>
+      </div>
+  );
+
+  return (
+    <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={<span className="flex items-center gap-2"><Briefcase className="text-nexus-600"/> New Project Wizard</span>}
+        footer={
+            <div className="flex justify-between w-full">
+                <Button variant="ghost" onClick={handleBack} disabled={currentStep === 1}>
+                    <ArrowLeft className="mr-2 h-4 w-4"/> Back
+                </Button>
+                <div className="flex gap-2">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    {currentStep < STEPS.length ? (
+                        <Button onClick={handleNext}>
+                            Next <ArrowRight className="ml-2 h-4 w-4"/>
+                        </Button>
+                    ) : (
+                        <Button onClick={handleSubmit} icon={CheckCircle}>
+                            Create Project
+                        </Button>
+                    )}
+                </div>
+            </div>
+        }
+    >
+        {/* Stepper */}
+        <div className="flex justify-between mb-8 relative">
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -z-10"></div>
+            {STEPS.map((step) => {
+                const isActive = step.id === currentStep;
+                const isComplete = step.id < currentStep;
+                return (
+                    <div key={step.id} className="flex flex-col items-center gap-2 bg-white px-2">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                            isActive ? 'border-nexus-600 bg-nexus-50 text-nexus-600' :
+                            isComplete ? 'border-green-500 bg-green-50 text-green-600' :
+                            'border-slate-300 text-slate-400'
+                        }`}>
+                            {isComplete ? <CheckCircle size={16}/> : step.id}
+                        </div>
+                        <span className={`text-xs font-medium ${isActive ? 'text-nexus-700' : 'text-slate-500'}`}>{step.label}</span>
+                    </div>
+                );
+            })}
+        </div>
+
+        {/* Content */}
+        <div className="min-h-[300px]">
+            {currentStep === 1 && renderStep1()}
+            {currentStep === 2 && renderStep2()}
+            {currentStep === 3 && renderStep3()}
+            {currentStep === 4 && renderStep4()}
+        </div>
+    </Modal>
+  );
+};

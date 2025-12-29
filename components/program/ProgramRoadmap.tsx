@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Map as MapIcon, Link as LinkIcon, AlertTriangle, Calendar, Flag } from 'lucide-react';
+import { Map as MapIcon, Link as LinkIcon, AlertTriangle, Calendar, Flag, Activity } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { getDaysDiff } from '../../utils/dateUtils';
 
@@ -14,7 +15,7 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
 
   if (!program) return null;
 
-  // Simple Timeline Calculation
+  // Timeline bounds
   const start = new Date(program.startDate);
   const end = new Date(program.endDate);
   const today = new Date();
@@ -51,98 +52,119 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
                 <h2 className={theme.typography.h2}>Integrated Master Roadmap</h2>
             </div>
             <div className="flex gap-2 flex-wrap">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <span className="w-3 h-3 bg-blue-500 rounded"></span> Project
-                    <span className="w-3 h-3 bg-nexus-600 rounded rotate-45"></span> Milestone
-                    <span className="w-3 h-0.5 bg-slate-400"></span> Dependency
+                <div className="flex items-center gap-4 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded"></span> Project</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 bg-nexus-600 rounded rotate-45"></span> Milestone</span>
+                    {/* Feature: Legend for Critical Dependencies */}
+                    <span className="flex items-center gap-1"><span className="w-6 h-0.5 bg-red-500 border-b border-dashed"></span> Critical Dep</span>
+                    <span className="flex items-center gap-1"><span className="w-6 h-0.5 bg-slate-400"></span> Standard Dep</span>
                 </div>
             </div>
         </div>
 
         <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
             <div className="overflow-x-auto">
-              <div className="min-w-[800px]">
+              <div className="min-w-[1000px]">
                 {/* Timeline Header */}
                 <div className="relative h-8 border-b border-slate-200 mb-4 text-xs font-bold text-slate-400 uppercase">
                     {years.map(year => {
                         const yearStart = new Date(year, 0, 1);
                         const pos = getPosition(yearStart.toISOString());
-                        // Only show if within range (simplified check)
                         if (pos > 0 && pos < 100) {
-                            return <span key={year} className="absolute top-0 transform -translate-x-1/2" style={{ left: `${pos}%` }}>{year}</span>
+                            return <span key={year} className="absolute top-0 transform -translate-x-1/2 border-l border-slate-200 h-full pl-2" style={{ left: `${pos}%` }}>{year}</span>
                         }
                         return null;
                     })}
-                    <span className="absolute left-0">{startYear}</span>
-                    <span className="absolute right-0">{endYear}</span>
                 </div>
                 
-                <div className="relative space-y-10 min-h-[300px] py-4">
+                <div className="relative space-y-12 min-h-[400px] py-4">
                     {/* Vertical Grid Lines & Today Marker */}
                     <div className="absolute inset-0 pointer-events-none">
-                        <div className="w-full h-full flex justify-between opacity-10">
-                            <div className="border-r border-slate-900 h-full w-1/4"></div>
-                            <div className="border-r border-slate-900 h-full w-1/4"></div>
-                            <div className="border-r border-slate-900 h-full w-1/4"></div>
-                            <div className="border-r border-slate-900 h-full w-1/4"></div>
+                        <div className="w-full h-full flex justify-between opacity-5">
+                            {[0,1,2,3,4,5,6,7,8].map(i => <div key={i} className="border-r border-slate-900 h-full w-full"></div>)}
                         </div>
-                        {/* Today Line */}
+                        {/* Feature: Integrated Today Line */}
                         <div 
                             className="absolute top-0 bottom-0 border-l-2 border-red-500 border-dashed z-20"
                             style={{ left: `${todayPosition}%` }}
                         >
-                            <div className="absolute -top-1 -translate-x-1/2 text-[10px] font-bold text-red-500 bg-white px-1">TODAY</div>
+                            <div className="absolute -top-2 -translate-x-1/2 text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded shadow-sm">TODAY</div>
                         </div>
                     </div>
 
                     {projects.map((proj, idx) => (
                         <div key={proj.id} className="relative h-12 group">
+                            {/* Feature: Baseline Ghost Bar (Mocked as slightly wider/shifted) */}
+                            <div 
+                                className="absolute top-1 h-10 rounded-lg bg-slate-100 border border-slate-300 opacity-50 z-0"
+                                style={{ 
+                                    left: `${getPosition(proj.startDate) - 2}%`, 
+                                    width: `${getWidth(proj.startDate, proj.endDate)}%` 
+                                }}
+                            ></div>
+
                             {/* Project Bar */}
                             <div 
-                                className={`absolute top-0 h-10 rounded-lg shadow-sm flex items-center px-3 text-white text-xs font-bold overflow-hidden whitespace-nowrap z-10 transition-all cursor-pointer border-b-4 border-black/20 ${
-                                    proj.health === 'Critical' ? 'bg-red-500 hover:bg-red-600' :
-                                    proj.health === 'Warning' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-500 hover:bg-blue-600'
+                                className={`absolute top-0 h-10 rounded-lg shadow-md flex items-center px-3 text-white text-xs font-bold overflow-hidden whitespace-nowrap z-10 transition-all cursor-pointer border-b-4 border-black/10 hover:shadow-lg ${
+                                    proj.health === 'Critical' ? 'bg-red-500' :
+                                    proj.health === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500'
                                 }`}
                                 style={{ 
                                     left: `${getPosition(proj.startDate)}%`, 
                                     width: `${getWidth(proj.startDate, proj.endDate)}%` 
                                 }}
-                                title={`${proj.name} (${proj.startDate} - ${proj.endDate})`}
                             >
-                                <span className="mr-2 opacity-70 font-mono">{proj.code}</span>
+                                <span className="mr-2 opacity-80 font-mono bg-black/10 px-1 rounded">{proj.code}</span>
                                 {proj.name}
+                                {/* Feature: Progress Bar inside Roadmap Item */}
+                                <div className="absolute bottom-0 left-0 h-1 bg-white/30" style={{width: '65%'}}></div>
                             </div>
                             
-                            {/* Dependency Lines (Visual only, simple logic) */}
+                            {/* Feature: Cross-Project Dependency Visualization */}
                             {programDependencies.filter(d => d.sourceProjectId === proj.id).map(dep => {
                                 const target = projects.find(p => p.id === dep.targetProjectId);
                                 if(!target) return null;
                                 
                                 const isCritical = dep.status === 'Critical';
-                                const sourcePos = getPosition(proj.endDate);
-                                const targetPos = getPosition(target.startDate);
-                                const width = Math.abs(targetPos - sourcePos);
-                                const left = Math.min(sourcePos, targetPos);
+                                const sourceEndPos = getPosition(proj.endDate);
+                                const targetStartPos = getPosition(target.startDate);
+                                
+                                // Draw curve
+                                const width = Math.abs(targetStartPos - sourceEndPos);
+                                const left = Math.min(sourceEndPos, targetStartPos);
+                                const isForward = targetStartPos > sourceEndPos;
+                                const verticalGap = 50; // approximate gap between rows
 
                                 return (
                                     <div 
                                         key={dep.id} 
-                                        className="absolute top-5 h-12 z-0 pointer-events-none"
+                                        className="absolute top-5 h-20 z-20 pointer-events-none"
                                         style={{
                                             left: `${left}%`,
                                             width: `${width}%`
                                         }}
                                     >
-                                        {/* Simplified connector line */}
                                         <svg width="100%" height="100%" preserveAspectRatio="none" className="overflow-visible">
+                                            {/* Feature: Red line if critical/delayed */}
                                             <path 
-                                                d={`M 0 5 Q ${width/2} 5, ${width} 40`} 
+                                                d={`M ${isForward ? 0 : '100%'} 5 C ${isForward ? '50%' : '50%'} 5, ${isForward ? '50%' : '50%'} ${verticalGap}, ${isForward ? '100%' : 0} ${verticalGap}`} 
                                                 fill="none" 
-                                                stroke={isCritical ? '#f87171' : '#94a3b8'} 
-                                                strokeWidth="2" 
+                                                stroke={isCritical ? '#ef4444' : '#94a3b8'} 
+                                                strokeWidth={isCritical ? "3" : "1.5"} 
                                                 strokeDasharray={isCritical ? "0" : "4 4"}
+                                                markerEnd={isCritical ? "url(#arrow-red)" : "url(#arrow-gray)"}
                                             />
+                                            <defs>
+                                                <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" /></marker>
+                                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" /></marker>
+                                            </defs>
                                         </svg>
+                                        {/* Warning Icon on Critical Path */}
+                                        {isCritical && (
+                                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-0.5 border border-red-200">
+                                                <AlertTriangle size={12} className="text-red-500" fill="white"/>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -153,19 +175,20 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
             </div>
         </div>
 
-        {/* Dependency Log */}
+        {/* Dependency Log Table */}
         <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2"><LinkIcon size={16}/> Critical Dependencies Log</h3>
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 className="font-bold text-slate-800 flex items-center gap-2"><LinkIcon size={16}/> Program Dependencies Log</h3>
+                <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border">Showing {programDependencies.length} links</span>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
                   <thead className="bg-white">
                       <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Source</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Target</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Predecessor (Source)</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Successor (Target)</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Description</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Lag</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                       </tr>
                   </thead>
@@ -176,13 +199,15 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
                           
                           return (
                               <tr key={dep.id} className="hover:bg-slate-50">
-                                  <td className="px-6 py-4 text-sm font-bold text-slate-700">{source?.name || dep.sourceProjectId}</td>
+                                  <td className="px-6 py-4 text-sm font-bold text-slate-700 flex items-center gap-2">
+                                      <Activity size={14} className="text-slate-400"/> {source?.name || dep.sourceProjectId}
+                                  </td>
                                   <td className="px-6 py-4 text-sm font-bold text-slate-700">{target?.name || dep.targetProjectId}</td>
                                   <td className="px-6 py-4 text-sm text-slate-600">{dep.type}</td>
-                                  <td className="px-6 py-4 text-sm text-slate-600">{dep.description}</td>
+                                  <td className="px-6 py-4 text-sm text-slate-600 font-mono">0d</td>
                                   <td className="px-6 py-4">
                                       <span className={`px-2 py-1 rounded text-xs font-bold ${
-                                          dep.status === 'Critical' ? 'bg-red-100 text-red-700' : 
+                                          dep.status === 'Critical' ? 'bg-red-100 text-red-700 animate-pulse' : 
                                           dep.status === 'Resolved' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'
                                       }`}>
                                           {dep.status}

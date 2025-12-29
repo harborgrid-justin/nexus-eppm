@@ -13,6 +13,7 @@ import DataTable, { Column } from './common/DataTable';
 import { PageHeader } from './common/PageHeader';
 import { FilterBar } from './common/FilterBar';
 import { usePermissions } from '../hooks/usePermissions';
+import { ProjectWizard } from './projects/ProjectWizard';
 
 interface ProjectListProps {
   onSelectProject: (projectId: string) => void;
@@ -20,11 +21,12 @@ interface ProjectListProps {
 
 const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
   const { projects } = usePortfolioState();
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'eps'>('list');
   const [expandedEps, setExpandedEps] = useState<Set<string>>(new Set(state.eps.map(e => e.id))); // Default all open
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const { canEditProject } = usePermissions();
 
   const filteredProjects = useMemo(() => {
@@ -39,6 +41,11 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
     if (newSet.has(id)) newSet.delete(id);
     else newSet.add(id);
     setExpandedEps(newSet);
+  };
+
+  const handleCreateProject = (newProject: Project) => {
+    dispatch({ type: 'IMPORT_PROJECTS', payload: [newProject] });
+    // In a real app, we might navigate to the new workspace immediately
   };
 
   const columns = useMemo<Column<Project>[]>(() => [
@@ -256,11 +263,20 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
         subtitle="Manage active projects, track progress, and monitor health."
         icon={Briefcase}
         actions={canEditProject() && (
-            <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm active:opacity-90`}>
+            <button 
+                onClick={() => setIsWizardOpen(true)}
+                className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm active:opacity-90`}
+            >
                 <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
                 <span className="sm:hidden">New</span>
             </button>
         )}
+      />
+
+      <ProjectWizard 
+          isOpen={isWizardOpen} 
+          onClose={() => setIsWizardOpen(false)} 
+          onSave={handleCreateProject} 
       />
 
       <div className="flex-1 flex flex-col overflow-hidden h-full">

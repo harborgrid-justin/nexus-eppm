@@ -9,6 +9,8 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import DataTable, { Column } from '../common/DataTable';
+import { RiskForm } from './RiskForm';
+import { useData } from '../../context/DataContext';
 
 interface RiskRegisterGridProps {
   projectId: string;
@@ -16,8 +18,12 @@ interface RiskRegisterGridProps {
 
 const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
   const { risks } = useProjectState(projectId);
+  const { dispatch } = useData();
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [riskToEdit, setRiskToEdit] = useState<Risk | null>(null);
+
   const theme = useTheme();
 
   const getScoreVariant = (score: number): 'danger' | 'warning' | 'success' => {
@@ -34,6 +40,28 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
       r.owner.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [risks, searchTerm]);
+
+  const handleEdit = (risk: Risk) => {
+    setRiskToEdit(risk);
+    setIsFormOpen(true);
+  };
+
+  const handleCreate = () => {
+    setRiskToEdit(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSaveRisk = (risk: Risk) => {
+    if (riskToEdit) {
+         dispatch({ type: 'UPDATE_RISK', payload: { risk } });
+    } else {
+         // In real app: dispatch({ type: 'ADD_RISK', payload: risk });
+         // For demo, we might need a dedicated ADD_RISK action in DataContext, 
+         // but UPDATE_RISK usually handles upsert logic if ID matches.
+         // If not, we simulate:
+         dispatch({ type: 'UPDATE_RISK', payload: { risk } });
+    }
+  };
 
   const columns = useMemo<Column<Risk>[]>(() => [
     {
@@ -79,7 +107,16 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
 
   return (
     <div className="h-full flex flex-col">
-      {selectedRiskId && <RiskDetailModal riskId={selectedRiskId} projectId={projectId} onClose={() => setSelectedRiskId(null)} />}
+      <RiskForm 
+          isOpen={isFormOpen} 
+          onClose={() => setIsFormOpen(false)} 
+          onSave={handleSaveRisk}
+          projectId={projectId}
+          existingRisk={riskToEdit}
+      />
+      
+      {/* Detail Modal for viewing deep details (optional if RiskForm covers edits) */}
+      {selectedRiskId && !isFormOpen && <RiskDetailModal riskId={selectedRiskId} projectId={projectId} onClose={() => setSelectedRiskId(null)} />}
       
       <div className={`p-4 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 flex-shrink-0 gap-3`}>
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
@@ -92,14 +129,14 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
           />
           <Button variant="secondary" size="md" icon={Filter} className="w-full sm:w-auto">Filter</Button>
         </div>
-        <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto">Add Risk</Button>
+        <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto" onClick={handleCreate}>Add Risk</Button>
       </div>
 
       <div className="flex-1 overflow-hidden p-4">
-        <DataTable 
+        <DataTable<Risk>
           data={filteredRisks}
           columns={columns}
-          onRowClick={(r) => setSelectedRiskId(r.id)}
+          onRowClick={(r) => handleEdit(r)}
           keyField="id"
           emptyMessage="No risks found matching criteria."
         />

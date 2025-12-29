@@ -22,30 +22,30 @@ export const useProgramData = (programId: string | null) => {
     state.projects.filter(p => p.programId === programId),
   [state.projects, programId]);
 
-  // --- MOCKED PROGRAM GOVERNANCE DATA ---
-  const governanceRoles: GovernanceRole[] = useMemo(() => [
-    { id: 'GR-01', role: 'Sponsor', name: 'VP Infrastructure', authorityLevel: 'High', responsibilities: 'Funding approval, strategic alignment validation.' },
-    { id: 'GR-02', role: 'Steering Committee', name: 'Enterprise Steering Board', authorityLevel: 'High', responsibilities: 'Gate reviews, major scope changes, risk escalation.' },
-    { id: 'GR-03', role: 'Program Manager', name: program?.manager || 'Unassigned', authorityLevel: 'Medium', responsibilities: 'Day-to-day execution, dependency management, reporting.' },
-  ], [program]);
+  // --- PROGRAM GOVERNANCE DATA (From State) ---
+  const governanceRoles = useMemo(() => 
+      state.governanceRoles.filter(r => r.programId === programId),
+  [state.governanceRoles, programId]);
 
-  const governanceEvents: GovernanceEvent[] = useMemo(() => [
-    { id: 'GE-01', name: 'Monthly Steering Committee', type: 'Steering Committee', frequency: 'Monthly', nextDate: '2024-07-15', status: 'Scheduled' },
-    { id: 'GE-02', name: 'Phase 2 Gate Review', type: 'Gate Review', frequency: 'Ad-hoc', nextDate: '2024-08-01', status: 'Scheduled' },
-  ], []);
+  const governanceEvents = useMemo(() => 
+      state.governanceEvents.filter(e => e.programId === programId),
+  [state.governanceEvents, programId]);
 
-  // --- MOCKED STRATEGIC DATA ---
-  const strategicGoals: StrategicGoal[] = useMemo(() => [
-    { id: 'SG-01', name: 'Operational Excellence', description: 'Reduce operating costs by 15% through infrastructure modernization.', programs: ['PRG-001', 'PRG-002'] },
-    { id: 'SG-02', name: 'Market Expansion', description: 'Enable service delivery in 2 new metropolitan regions.', programs: ['PRG-001'] },
-  ], []);
+  // --- STRATEGIC DATA (CONNECTED TO STATE) ---
+  const strategicGoals = useMemo(() => {
+      if (!programId) return state.strategicGoals;
+      return state.strategicGoals.filter(g => g.programs.includes(programId));
+  }, [state.strategicGoals, programId]);
 
-  const programObjectives: ProgramObjective[] = useMemo(() => [
-    { id: 'PO-01', description: 'Increase transit capacity by 40%', linkedStrategicGoalId: 'SG-02', linkedProjectIds: ['P1001'] },
-    { id: 'PO-02', description: 'Centralize city services hub', linkedStrategicGoalId: 'SG-01', linkedProjectIds: ['P1002'] },
-  ], []);
+  const programObjectives = useMemo(() => {
+      if (!programId) return state.programObjectives;
+      const projectIds = projects.map(p => p.id);
+      return state.programObjectives.filter(obj => 
+          obj.linkedProjectIds.some(pid => projectIds.includes(pid))
+      );
+  }, [state.programObjectives, projects, programId]);
 
-  // --- MOCKED DEPENDENCIES ---
+  // --- MOCKED DEPENDENCIES (Still Mocked as they require complex relational data) ---
   const programDependencies: ProgramDependency[] = useMemo(() => {
       if (projects.length < 2) return [];
       return [
@@ -53,7 +53,7 @@ export const useProgramData = (programId: string | null) => {
       ];
   }, [projects]);
 
-  // --- MOCKED SCOPE & CHANGE CONTROL DATA ---
+  // --- MOCKED SCOPE (For now) ---
   const programOutcomes: ProgramOutcome[] = useMemo(() => [
       { id: 'OUT-01', description: 'Operational High-Speed Rail Link', targetDate: '2026-12-31', status: 'On Track', linkedProjectIds: ['P1001'] },
       { id: 'OUT-02', description: 'Integrated Digital Ticketing System', targetDate: '2025-06-30', status: 'At Risk', linkedProjectIds: ['P1001', 'P1002'] }
@@ -64,33 +64,28 @@ export const useProgramData = (programId: string | null) => {
       { id: 'PCR-002', title: 'Defer Platform Extension', description: 'Move platform extension to Phase 2 to meet deadline.', submittedBy: 'Program Mgr', submittedDate: '2024-05-15', status: 'Approved', impact: { benefits: 'Delayed capacity increase', cost: -500000, schedule: -30, risk: 'Low' } }
   ], []);
 
-  // --- MOCKED RISK DATA ---
-  const programRisks: ProgramRisk[] = useMemo(() => [
-      { id: 'PR-001', description: 'Regulatory shift in environmental compliance standards', category: 'External', probability: 'Medium', impact: 'High', score: 12, owner: 'Legal', status: 'Open', mitigationPlan: 'Engage lobbyists and prepare impact assessment.' },
-      { id: 'PR-002', description: 'Resource contention between Metro and Hub projects', category: 'Resource', probability: 'High', impact: 'Medium', score: 12, owner: 'PMO', status: 'Open', mitigationPlan: 'Implement resource leveling at portfolio level.' },
-      { id: 'PR-003', description: 'Governance misalignment with new Steering Committee', category: 'Governance', probability: 'Low', impact: 'High', score: 9, owner: 'Program Sponsor', status: 'Mitigated', mitigationPlan: 'Workshops to align on Terms of Reference.' }
-  ], []);
+  // --- RISK DATA (From State) ---
+  const programRisks = useMemo(() => 
+      state.programRisks.filter(r => r.programId === programId),
+  [state.programRisks, programId]);
 
-  // --- MOCKED FINANCIAL DATA ---
-  const programFinancials: { allocations: ProgramBudgetAllocation[], gates: ProgramFundingGate[] } = useMemo(() => {
+  const programIssues = useMemo(() => 
+      state.programIssues.filter(i => i.programId === programId),
+  [state.programIssues, programId]);
+
+  // --- FINANCIAL DATA (From State + Projects) ---
+  const programFinancials = useMemo(() => {
       return {
-          allocations: [
-              ...projects.map(p => ({ projectId: p.id, allocated: p.budget, spent: p.spent, forecast: p.budget * 1.1 })), // Mock forecast 
-              { projectId: 'Unallocated Reserve', allocated: 5000000, spent: 0, forecast: 5000000 }
-          ],
-          gates: [
-              { id: 'FG-01', name: 'Initiation Release', amount: 5000000, releaseDate: '2023-01-15', status: 'Released', milestoneTrigger: 'Program Charter Approval' },
-              { id: 'FG-02', name: 'Design Phase Funding', amount: 15000000, releaseDate: '2023-06-01', status: 'Released', milestoneTrigger: 'Concept Review' },
-              { id: 'FG-03', name: 'Construction Mobilization', amount: 50000000, releaseDate: '2024-02-01', status: 'Pending', milestoneTrigger: 'Permit Acquisition' }
-          ]
+          allocations: state.programAllocations.filter(a => a.programId === programId),
+          gates: state.programFundingGates.filter(g => g.programId === programId)
       };
-  }, [projects]);
+  }, [state.programAllocations, state.programFundingGates, programId]);
 
-  // --- MOCKED STAKEHOLDER DATA ---
+  // --- MOCKED STAKEHOLDER DATA (Still Mocked) ---
   const programStakeholders: ProgramStakeholder[] = useMemo(() => [
-      { id: 'PS-01', projectId: programId || 'PRG-001', name: 'City Council', role: 'Regulator', category: 'Strategic', engagementLevel: 'Supportive', influence: 'High', interest: 'High', engagementStrategy: 'Manage Closely' },
-      { id: 'PS-02', projectId: programId || 'PRG-001', name: 'Local Business Assoc.', role: 'Impacted Group', category: 'Operational', engagementLevel: 'Resistant', influence: 'Medium', interest: 'High', engagementStrategy: 'Keep Informed' },
-      { id: 'PS-03', projectId: programId || 'PRG-001', name: 'Engineering Corps', role: 'Execution Team', category: 'Delivery', engagementLevel: 'Supportive', influence: 'Low', interest: 'Medium', engagementStrategy: 'Monitor' }
+      { id: 'PS-01', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'City Council', role: 'Regulator', category: 'Strategic', engagementLevel: 'Supportive', influence: 'High', interest: 'High', engagementStrategy: 'Manage Closely' },
+      { id: 'PS-02', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'Local Business Assoc.', role: 'Impacted Group', category: 'Operational', engagementLevel: 'Resistant', influence: 'Medium', interest: 'High', engagementStrategy: 'Keep Informed' },
+      { id: 'PS-03', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'Engineering Corps', role: 'Execution Team', category: 'Delivery', engagementLevel: 'Supportive', influence: 'Low', interest: 'Medium', engagementStrategy: 'Monitor' }
   ], [programId]);
 
   const communicationPlan: ProgramCommunicationItem[] = useMemo(() => [
@@ -133,12 +128,6 @@ export const useProgramData = (programId: string | null) => {
   const tradeoffScenarios: TradeoffScenario[] = useMemo(() => [
       { id: 'TS-01', name: 'Accelerate Phase 2', description: 'Compress schedule by 3 months using overtime.', benefitValue: 2000000, costImpact: 500000, riskScore: 12, recommendation: 'Proceed' },
       { id: 'TS-02', name: 'Vendor Switch', description: 'Change steel supplier to reduce cost by 10%.', benefitValue: 150000, costImpact: 50000, riskScore: 20, recommendation: 'Reject' }
-  ], []);
-
-  // --- MOCKED PROGRAM ISSUES ---
-  const programIssues: ProgramIssue[] = useMemo(() => [
-      { id: 'PI-01', title: 'Global Supply Chain Disruption', description: 'Steel tariffs impacting all infrastructure projects.', priority: 'Critical', status: 'Open', impactedProjectIds: ['P1001', 'P1002'], owner: 'Procurement Director', resolutionPath: 'Negotiating bulk fixed-price contracts.' },
-      { id: 'PI-02', title: 'PMO Resource Shortage', description: 'Lack of senior schedulers for complex integration.', priority: 'High', status: 'Escalated', impactedProjectIds: ['P1001'], owner: 'HR Director', resolutionPath: 'Hiring contractors.' }
   ], []);
 
   // --- MOCKED STAGE GATES ---

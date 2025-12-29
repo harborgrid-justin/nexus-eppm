@@ -1,6 +1,5 @@
-
 import { Stakeholder } from './project';
-import { PortfolioRisk } from './risk';
+import { PortfolioRisk, RiskResponseAction } from './risk';
 
 export interface Program {
   id: string;
@@ -35,6 +34,7 @@ export interface Benefit {
 
 export interface ProgramDependency {
   id: string;
+  programId?: string;
   sourceProjectId: string;
   targetProjectId: string;
   description: string;
@@ -44,6 +44,7 @@ export interface ProgramDependency {
 
 export interface ProgramOutcome {
   id: string;
+  programId?: string;
   description: string;
   targetDate: string;
   status: string;
@@ -52,6 +53,7 @@ export interface ProgramOutcome {
 
 export interface ProgramChangeRequest {
   id: string;
+  programId?: string;
   title: string;
   description: string;
   submittedBy: string;
@@ -60,9 +62,19 @@ export interface ProgramChangeRequest {
   impact: { benefits: string; cost: number; schedule: number; risk: string };
 }
 
-export interface ProgramRisk extends PortfolioRisk {}
+export interface ProgramRisk extends PortfolioRisk {
+    programId: string;
+    mitigationPlan: string; 
+    probabilityValue?: number;
+    impactValue?: number;
+    financialImpact?: number;
+    strategy?: string;
+    responseActions?: RiskResponseAction[];
+}
 
 export interface ProgramBudgetAllocation {
+  id: string;
+  programId: string;
   projectId: string;
   allocated: number;
   spent: number;
@@ -71,6 +83,7 @@ export interface ProgramBudgetAllocation {
 
 export interface ProgramFundingGate {
   id: string;
+  programId: string;
   name: string;
   amount: number;
   releaseDate: string;
@@ -79,12 +92,14 @@ export interface ProgramFundingGate {
 }
 
 export interface ProgramStakeholder extends Stakeholder {
+  programId: string; // Override
   category: 'Strategic' | 'Operational' | 'Delivery';
   engagementLevel: string;
 }
 
 export interface ProgramCommunicationItem {
   id: string;
+  programId?: string;
   audience: string;
   content: string;
   frequency: string;
@@ -94,6 +109,7 @@ export interface ProgramCommunicationItem {
 
 export interface ProgramQualityStandard {
   id: string;
+  programId?: string;
   category: string;
   description: string;
   enforcementLevel: string;
@@ -101,6 +117,7 @@ export interface ProgramQualityStandard {
 
 export interface ProgramAssuranceReview {
   id: string;
+  programId?: string;
   date: string;
   type: string;
   scope: string;
@@ -110,6 +127,7 @@ export interface ProgramAssuranceReview {
 
 export interface ProgramTransitionItem {
   id: string;
+  programId?: string;
   category: string;
   description: string;
   owner: string;
@@ -119,6 +137,7 @@ export interface ProgramTransitionItem {
 
 export interface ProgramArchitectureStandard {
   id: string;
+  programId?: string;
   category: string;
   title: string;
   description: string;
@@ -127,6 +146,7 @@ export interface ProgramArchitectureStandard {
 
 export interface ProgramArchitectureReview {
   id: string;
+  programId?: string;
   gate: string;
   date: string;
   status: string;
@@ -135,6 +155,7 @@ export interface ProgramArchitectureReview {
 
 export interface TradeoffScenario {
   id: string;
+  programId?: string;
   name: string;
   description: string;
   benefitValue: number;
@@ -145,6 +166,7 @@ export interface TradeoffScenario {
 
 export interface ProgramIssue {
   id: string;
+  programId: string;
   title: string;
   description: string;
   priority: string;
@@ -156,6 +178,7 @@ export interface ProgramIssue {
 
 export interface ProgramStageGate {
   id: string;
+  programId?: string;
   name: string;
   type: string;
   plannedDate: string;
@@ -168,6 +191,7 @@ export interface ProgramStageGate {
 
 export interface IntegratedChangeRequest {
   id: string;
+  programId?: string;
   title: string;
   description: string;
   type: string;
@@ -179,6 +203,7 @@ export interface IntegratedChangeRequest {
 
 export interface ProgramVendorSummary {
   vendorId: string;
+  programId?: string;
   name: string;
   totalContractValue: number;
   activeContractsCount: number;
@@ -189,6 +214,7 @@ export interface ProgramVendorSummary {
 
 export interface GovernanceRole {
   id: string;
+  programId: string;
   role: string;
   name: string;
   authorityLevel: string;
@@ -197,6 +223,7 @@ export interface GovernanceRole {
 
 export interface GovernanceEvent {
   id: string;
+  programId: string;
   name: string;
   type: string;
   frequency: string;
