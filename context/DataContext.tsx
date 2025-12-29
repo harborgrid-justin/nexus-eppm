@@ -7,7 +7,8 @@ import {
     QualityReport, NonConformanceReport, ChangeOrder, BudgetLineItem, RiskBreakdownStructureNode, IssueCode, 
     Integration, RiskManagementPlan, Document, CostEstimate, WBSNode, QualityStandard, EnterpriseRole, 
     EnterpriseSkill, EPSNode, OBSNode, GlobalCalendar, StrategicGoal, ProgramObjective, 
-    ProgramRisk, ProgramIssue, GovernanceRole, GovernanceEvent, ProgramBudgetAllocation, ProgramFundingGate 
+    ProgramRisk, ProgramIssue, GovernanceRole, GovernanceEvent, ProgramBudgetAllocation, ProgramFundingGate,
+    IntegratedChangeRequest
 } from '../types';
 import { 
     MOCK_PROJECTS, MOCK_RESOURCES, MOCK_ACTIVITY_CODES, MOCK_UDFS, MOCK_DATA_JOBS, MOCK_ISSUE_CODES, 
@@ -68,6 +69,7 @@ export interface DataState {
   governanceEvents: GovernanceEvent[];
   programAllocations: ProgramBudgetAllocation[];
   programFundingGates: ProgramFundingGate[];
+  integratedChanges: IntegratedChangeRequest[];
   errors: string[];
 }
 
@@ -107,6 +109,7 @@ export type Action =
   | { type: 'ADD_GOVERNANCE_EVENT'; payload: GovernanceEvent }
   | { type: 'UPDATE_PROGRAM_ALLOCATION'; payload: ProgramBudgetAllocation }
   | { type: 'UPDATE_PROGRAM_GATE'; payload: ProgramFundingGate }
+  | { type: 'UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
   | { type: 'CLEAR_ERRORS' };
 
 const initialState: DataState = {
@@ -187,6 +190,23 @@ const initialState: DataState = {
       { id: 'FG-02', programId: 'PRG-001', name: 'Design Phase Funding', amount: 15000000, releaseDate: '2023-06-01', status: 'Released', milestoneTrigger: 'Concept Review' },
       { id: 'FG-03', programId: 'PRG-001', name: 'Construction Mobilization', amount: 50000000, releaseDate: '2024-02-01', status: 'Pending', milestoneTrigger: 'Permit Acquisition' }
   ],
+  integratedChanges: [
+    {
+        id: 'ICR-001', programId: 'PRG-001', title: 'New ERP Rollout', description: 'Transitioning finance from Legacy System to SAP.', type: 'Hybrid', 
+        impactAreas: ['Systems', 'Processes', 'Data'], severity: 'High', status: 'Assessing', 
+        readinessImpact: [
+            { stakeholderGroup: 'Finance Team', awareness: 90, desire: 60, knowledge: 40, ability: 20, reinforcement: 10 },
+            { stakeholderGroup: 'Project Managers', awareness: 50, desire: 80, knowledge: 10, ability: 10, reinforcement: 0 }
+        ]
+    },
+    {
+        id: 'ICR-002', programId: 'PRG-001', title: 'Agile Transformation', description: 'Shifting software teams to SAFe methodology.', type: 'Organizational', 
+        impactAreas: ['Roles', 'Governance'], severity: 'Medium', status: 'Implemented',
+        readinessImpact: [
+            { stakeholderGroup: 'Dev Teams', awareness: 100, desire: 90, knowledge: 85, ability: 80, reinforcement: 70 }
+        ]
+    }
+  ],
   errors: [],
 };
 
@@ -260,6 +280,8 @@ const dataReducer = (state: DataState, action: Action): DataState => {
         return { ...state, programAllocations: state.programAllocations.map(a => a.id === action.payload.id ? action.payload : a) };
     case 'UPDATE_PROGRAM_GATE':
         return { ...state, programFundingGates: state.programFundingGates.map(g => g.id === action.payload.id ? action.payload : g) };
+    case 'UPDATE_INTEGRATED_CHANGE':
+        return { ...state, integratedChanges: state.integratedChanges.map(c => c.id === action.payload.id ? action.payload : c) };
     default:
       return state;
   }

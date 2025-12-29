@@ -149,24 +149,10 @@ export const useProgramData = (programId: string | null) => {
       }
   ], []);
 
-  // --- MOCKED INTEGRATED CHANGE ---
-  const integratedChanges: IntegratedChangeRequest[] = useMemo(() => [
-      {
-          id: 'ICR-001', title: 'New ERP Rollout', description: 'Transitioning finance from Legacy System to SAP.', type: 'Hybrid', 
-          impactAreas: ['Systems', 'Processes', 'Data'], severity: 'High', status: 'Assessing', 
-          readinessImpact: [
-              { stakeholderGroup: 'Finance Team', awareness: 90, desire: 60, knowledge: 40, ability: 20, reinforcement: 10 },
-              { stakeholderGroup: 'Project Managers', awareness: 50, desire: 80, knowledge: 10, ability: 10, reinforcement: 0 }
-          ]
-      },
-      {
-          id: 'ICR-002', title: 'Agile Transformation', description: 'Shifting software teams to SAFe methodology.', type: 'Organizational', 
-          impactAreas: ['Roles', 'Governance'], severity: 'Medium', status: 'Implemented',
-          readinessImpact: [
-              { stakeholderGroup: 'Dev Teams', awareness: 100, desire: 90, knowledge: 85, ability: 80, reinforcement: 70 }
-          ]
-      }
-  ], []);
+  // --- INTEGRATED CHANGE (From State) ---
+  const integratedChanges = useMemo(() => 
+    state.integratedChanges.filter(c => c.programId === programId),
+  [state.integratedChanges, programId]);
 
   // --- MOCKED PROGRAM VENDORS ---
   const programVendors: ProgramVendorSummary[] = useMemo(() => [
