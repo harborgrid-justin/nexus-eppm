@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { FileWarning, Plus, Globe, Briefcase } from 'lucide-react';
+import { Plus, Briefcase, AlertCircle, Folder } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { ActivityCodeScope } from '../../types';
+
+const FileWarning = (LucideIcons as any).FileWarning || AlertCircle;
+const Globe = (LucideIcons as any).Globe || Folder;
 
 const IssueCodeSettings: React.FC = () => {
     const { state } = useData();

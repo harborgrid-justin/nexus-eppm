@@ -40,10 +40,10 @@ const PortfolioBalancing: React.FC = () => {
                 id: item.id,
                 name: item.name,
                 risk: item.riskScore,
-                value: Math.round(riskAdjustedValue * 100), // Scale up
+                value: Math.round(riskAdjustedValue * 100),
                 budget: item.budget,
                 category: item.category,
-                roi: (item.financialValue * 10) + (Math.random() * 20) // Mock ROI
+                roi: item.financialValue * 10
             };
         }).sort((a, b) => b.value - a.value); // Sort by value for frontier
     }, [state.projects, state.programs, weights]);

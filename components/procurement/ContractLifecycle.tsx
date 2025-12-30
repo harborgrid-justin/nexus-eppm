@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useProcurementData } from '../../hooks';
-import { Plus, FileText, AlertOctagon, Lock } from 'lucide-react';
+import { Plus, FileText, XCircle, Lock } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -72,7 +72,7 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
 
                         {claims.length > 0 && (
                             <div className="bg-red-50 border border-red-100 rounded-lg p-3 mt-4 animate-in fade-in slide-in-from-top-2">
-                                <h5 className="text-xs font-bold text-red-800 uppercase mb-2 flex items-center gap-1"><AlertOctagon size={12}/> Open Claims</h5>
+                                <h5 className="text-xs font-bold text-red-800 uppercase mb-2 flex items-center gap-1"><XCircle size={12}/> Open Claims</h5>
                                 {claims.map(claim => (
                                     <div key={claim.id} className="flex justify-between text-sm text-red-900 mb-1 last:mb-0 pl-4 border-l-2 border-red-200">
                                         <span>{claim.title} ({claim.status})</span>

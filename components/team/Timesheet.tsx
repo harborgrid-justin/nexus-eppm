@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Timesheet as TimesheetType, TimesheetRow } from '../../types/resource';
-import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Mail, AlertCircle, CheckCircle } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
 const Timesheet: React.FC = () => {
@@ -100,12 +100,12 @@ const Timesheet: React.FC = () => {
                 >
                     <Save size={16}/> Save
                 </button>
-                <button 
+                <button
                     disabled={status === 'Submitted'}
                     onClick={() => setStatus('Submitted')}
                     className="flex items-center gap-2 px-4 py-2 bg-nexus-600 text-white font-medium rounded-lg text-sm hover:bg-nexus-700 disabled:bg-green-600 disabled:opacity-100"
                 >
-                    {status === 'Submitted' ? <CheckCircle size={16}/> : <Send size={16}/>}
+                    {status === 'Submitted' ? <CheckCircle size={16}/> : <Mail size={16}/>}
                     {status === 'Submitted' ? 'Submitted' : 'Submit'}
                 </button>
             </div>

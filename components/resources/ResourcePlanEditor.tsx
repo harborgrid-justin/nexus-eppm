@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock } from 'lucide-react';
+import { FileText, Save, BookOpen, Lock } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 
 interface ResourcePlanEditorProps {
@@ -20,7 +20,7 @@ const ResourcePlanEditor: React.FC<ResourcePlanEditorProps> = ({ projectId }) =>
                 </h3>
                 <div className="flex gap-2">
                     <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
-                        <Book size={14}/> Apply Template
+                        <BookOpen size={14}/> Apply Template
                     </button>
                     {canEditProject() ? (
                         <button className="flex items-center gap-2 px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700">

@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Scale, TrendingUp, AlertTriangle, ArrowRight, DollarSign } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
-import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ZAxis, ReferenceLine } from 'recharts';
+
+const { TrendingUp, AlertTriangle, ArrowRight, DollarSign, BarChart2 } = LucideIcons;
+const Scale = (LucideIcons as any).Scale || BarChart2;
 
 interface ProgramTradeoffProps {
   programId: string;
@@ -34,25 +36,52 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Impact Matrix */}
-            <div className={`lg:col-span-2 ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[400px]`}>
+            <div className={`lg:col-span-2 ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className="font-bold text-slate-800 mb-4">Value vs. Exposure Matrix</h3>
-                <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" dataKey="exposure" name="Exposure (Cost + Risk)" unit="$" tickFormatter={(val) => formatCompactCurrency(val)} label={{ value: 'Negative Exposure', position: 'bottom', offset: 0 }} />
-                        <YAxis type="number" dataKey="benefit" name="Benefit Value" unit="$" tickFormatter={(val) => formatCompactCurrency(val)} label={{ value: 'Benefit Value', angle: -90, position: 'insideLeft' }} />
-                        <ZAxis type="number" dataKey="score" range={[60, 400]} name="Risk Score" />
-                        <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value: any, name: string) => {
-                             if(typeof value === 'number') return formatCompactCurrency(value);
-                             return value;
-                        }} />
-                        <ReferenceLine y={500000} stroke="green" strokeDasharray="3 3" label="Target Value" />
-                        <Scatter name="Scenarios" data={chartData} fill="#8884d8" onClick={(data) => {
-                             const scenario = tradeoffScenarios.find(s => s.name === data.name);
-                             if(scenario) setSelectedScenario(scenario.id);
-                        }} cursor="pointer" />
-                    </ScatterChart>
-                </ResponsiveContainer>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-200">
+                        <thead className="bg-slate-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Scenario</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Benefit Value</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Exposure</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Risk Score</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Net Value</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-slate-100">
+                            {chartData.map((data) => {
+                                const scenario = tradeoffScenarios.find(s => s.name === data.name);
+                                if (!scenario) return null;
+                                const netValue = scenario.benefitValue - scenario.costImpact;
+                                return (
+                                    <tr
+                                        key={scenario.id}
+                                        onClick={() => setSelectedScenario(scenario.id)}
+                                        className={`hover:bg-slate-50 cursor-pointer ${selectedScenario === scenario.id ? 'bg-nexus-50' : ''}`}
+                                    >
+                                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{data.name}</td>
+                                        <td className="px-6 py-4 text-sm text-right font-mono text-green-600">{formatCompactCurrency(data.benefit)}</td>
+                                        <td className="px-6 py-4 text-sm text-right font-mono text-red-600">{formatCompactCurrency(data.exposure)}</td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${
+                                                data.score > 10 ? 'bg-red-100 text-red-700' :
+                                                data.score > 5 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                            }`}>
+                                                {data.score}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-center font-mono font-bold">
+                                            <span className={netValue > 0 ? 'text-green-600' : 'text-red-600'}>
+                                                {netValue > 0 ? '+' : ''}{formatCompactCurrency(netValue)}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Scenario Details */}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useProcurementData } from '../../hooks';
 import StatCard from '../shared/StatCard';
-import { DollarSign, Briefcase, AlertTriangle, CheckCircle, BarChart2 } from 'lucide-react';
+import { DollarSign, Briefcase, XCircle, CheckCircle, BarChart2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { CustomBarChart } from '../charts/CustomBarChart';
@@ -30,7 +30,7 @@ const ProcurementDashboard: React.FC<ProcurementDashboardProps> = ({ projectId }
             <StatCard title="Committed Spend" value={formatCompactCurrency(totalContractValue)} subtext="Total Contract Value" icon={DollarSign} />
             <StatCard title="Active Contracts" value={activeContracts} subtext="Currently in execution" icon={Briefcase} />
             <StatCard title="PO Spend" value={formatCompactCurrency(totalPOSpend)} subtext="Issued against contracts" icon={CheckCircle} />
-            <StatCard title="Open Claims" value={openClaims} subtext="Disputes requiring attention" icon={AlertTriangle} trend={openClaims > 0 ? 'down' : undefined} />
+            <StatCard title="Open Claims" value={openClaims} subtext="Disputes requiring attention" icon={XCircle} trend={openClaims > 0 ? 'down' : undefined} />
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>

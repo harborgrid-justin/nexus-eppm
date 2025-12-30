@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
-import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, TrendingUp, BarChart2 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { CustomBarChart } from '../charts/CustomBarChart';
@@ -47,10 +47,10 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
-            <StatCard title="Total Risks" value={risks.length} icon={List} />
-            <StatCard title="Open Risks" value={openRisksCount} icon={AlertTriangle} trend="down" />
+            <StatCard title="Total Risks" value={risks.length} icon={BarChart2} />
+            <StatCard title="Open Risks" value={openRisksCount} icon={ShieldAlert} trend="down" />
             <StatCard title="Mitigated / Closed" value={mitigatedCount} icon={ShieldCheck} trend="up" />
-            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingDown} trend="down" />
+            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingUp} trend="up" />
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>

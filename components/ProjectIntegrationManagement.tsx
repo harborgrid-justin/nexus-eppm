@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useProjectState } from '../hooks';
-import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, Lock } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency, formatDate, formatPercentage } from '../utils/formatters';
@@ -34,7 +34,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
   if (!project || !summary || !financials || !riskProfile || !qualityProfile || !phase2Metrics) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 size={24} className="animate-spin text-nexus-500" />
+        <LucideIcons.Loader2 size={24} className="animate-spin text-nexus-500" />
         <span className="ml-2 text-slate-500">Loading project overview...</span>
       </div>
     );
@@ -44,11 +44,11 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
     <div className="animate-in fade-in duration-300">
         {/* Primary Stats */}
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap} mb-6`}>
-        <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={GanttChartSquare} />
+        <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={LucideIcons.GanttChart} />
         {/* Updated to show Committed Cost impact */}
-        <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`Includes ${formatCompactCurrency(financials.totalCommitted)} committed`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
-        <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
-        <StatCard title="Quality Score" value={formatPercentage(qualityProfile.passRate)} subtext={`${qualityProfile.failedReports} failed inspections`} icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
+        <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`Includes ${formatCompactCurrency(financials.totalCommitted)} committed`} icon={LucideIcons.DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
+        <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={LucideIcons.AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
+        <StatCard title="Quality Score" value={formatPercentage(qualityProfile.passRate)} subtext={`${qualityProfile.failedReports} failed inspections`} icon={LucideIcons.ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>
 
       {/* Phase 2 Metrics Row (New Integrations) */}
@@ -59,28 +59,28 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
                <p className="text-xs font-bold text-orange-700 uppercase">Scope Creep (Rate)</p>
                <p className="text-xl font-bold text-orange-900">{phase2Metrics.scopeCreep.toFixed(1)}%</p>
             </div>
-            <AlertOctagon className="text-orange-400" size={24} />
+            <LucideIcons.OctagonAlert className="text-orange-400" size={24} />
          </div>
          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center justify-between">
             <div>
                <p className="text-xs font-bold text-red-700 uppercase">Unmitigated Risk (EMV)</p>
                <p className="text-xl font-bold text-red-900">{formatCompactCurrency(riskProfile.exposure)}</p>
             </div>
-            <ShieldCheck className="text-red-400" size={24} />
+            <LucideIcons.ShieldCheck className="text-red-400" size={24} />
          </div>
          <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-center justify-between">
             <div>
                <p className="text-xs font-bold text-blue-700 uppercase">Funding Solvency</p>
                <p className="text-xl font-bold text-blue-900">{financials.solvency}</p>
             </div>
-            <Anchor className="text-blue-400" size={24} />
+            <LucideIcons.Anchor className="text-blue-400" size={24} />
          </div>
          <div className="bg-purple-50 border border-purple-200 p-4 rounded-xl flex items-center justify-between">
             <div>
                <p className="text-xs font-bold text-purple-700 uppercase">SPI (Schedule Perf)</p>
                <p className="text-xl font-bold text-purple-900">{financials.evm.spi.toFixed(2)}</p>
             </div>
-            <Zap className="text-purple-400" size={24} />
+            <LucideIcons.Zap className="text-purple-400" size={24} />
          </div>
       </div>
 
@@ -138,7 +138,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
                     <button className="px-4 py-2 bg-nexus-600 text-white rounded-md text-sm font-medium hover:bg-nexus-700">Approve Charter</button>
                   ) : (
                     <div className="flex items-center gap-1 text-xs text-slate-400 font-medium bg-white px-3 py-2 border rounded">
-                        <Lock size={12} /> Approval Locked
+                        <LucideIcons.LockKeyhole size={12} /> Approval Locked
                     </div>
                   )}
               </div>
@@ -161,7 +161,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
           {/* Assumption Log */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col h-[500px]">
               <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2"><BookOpen size={16} className="text-blue-500"/> Assumption Log</h3>
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2"><LucideIcons.BookOpen size={16} className="text-blue-500"/> Assumption Log</h3>
                   {canEditProject() && <button className="text-xs font-bold text-blue-600 hover:underline">Add New</button>}
               </div>
               <div className="flex-1 overflow-auto">
@@ -193,7 +193,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
           {/* Lessons Learned */}
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col h-[500px]">
               <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2"><ClipboardList size={16} className="text-green-500"/> Lessons Learned Register</h3>
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2"><LucideIcons.ClipboardList size={16} className="text-green-500"/> Lessons Learned Register</h3>
                   {canEditProject() && <button className="text-xs font-bold text-green-600 hover:underline">Add Lesson</button>}
               </div>
               <div className="flex-1 overflow-auto">
@@ -227,7 +227,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
       <div className={theme.layout.header + " mb-6"}>
         <div>
           <h1 className={theme.typography.h1}>
-            <Briefcase className="text-nexus-600" /> Integration Management
+            <LucideIcons.Briefcase className="text-nexus-600" /> Integration Management
           </h1>
           <p className={theme.typography.small}>Coordinate all aspects of the project from initiation to closure.</p>
         </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Risk, RiskResponseAction, RiskHistoryItem } from '../../types';
 import { useData } from '../../context/DataContext';
-import { X, Plus, Trash2, Link as LinkIcon, Save, AlertTriangle, Calendar, DollarSign, Shield, History, ArrowRight, Activity } from 'lucide-react';
+import { X, Plus, Save, ShieldAlert, Calendar, DollarSign, Shield, Clock, ArrowRight, TrendingUp } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -127,7 +127,7 @@ const RiskDetailModal: React.FC<RiskDetailModalProps> = ({ riskId, projectId, on
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Scoring Panel */}
                         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Activity size={16} className="text-blue-500"/> Qualitative Analysis</h3>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><TrendingUp size={16} className="text-blue-500"/> Qualitative Analysis</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs text-slate-500">Probability (1-5)</label>

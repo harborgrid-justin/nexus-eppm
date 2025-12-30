@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, ChevronDown, ChevronRight, Target, AlertCircle, CheckSquare, XSquare } from 'lucide-react';
+import { FileText, Save, BookOpen, Lock, ChevronDown, ChevronRight, AlertCircle, Check, X } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -55,7 +55,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
-                <ScopeSection title="1. Product & Project Scope Description" icon={Target} isOpen={sections.description} onToggle={() => toggle('description')}>
+                <ScopeSection title="1. Product & Project Scope Description" icon={FileText} isOpen={sections.description} onToggle={() => toggle('description')}>
                     <div className="space-y-4">
                         <p className="text-sm text-slate-500">Describe the characteristics of the product, service, or result.</p>
                         <textarea 
@@ -66,7 +66,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                     </div>
                 </ScopeSection>
 
-                <ScopeSection title="2. Project Deliverables" icon={CheckSquare} isOpen={sections.deliverables} onToggle={() => toggle('deliverables')}>
+                <ScopeSection title="2. Project Deliverables" icon={Check} isOpen={sections.deliverables} onToggle={() => toggle('deliverables')}>
                     <div className="space-y-4">
                         <p className="text-sm text-slate-500">List the unique and verifiable products, results, or capabilities.</p>
                         <textarea 
@@ -77,7 +77,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                     </div>
                 </ScopeSection>
 
-                <ScopeSection title="3. Project Exclusions" icon={XSquare} isOpen={sections.exclusions} onToggle={() => toggle('exclusions')}>
+                <ScopeSection title="3. Project Exclusions" icon={X} isOpen={sections.exclusions} onToggle={() => toggle('exclusions')}>
                     <div className="space-y-4">
                         <p className="text-sm text-slate-500">Explicitly state what is out of scope to manage stakeholder expectations.</p>
                         <textarea 

@@ -12,19 +12,18 @@ const FedGovSuite: React.FC = () => {
   const theme = useTheme();
   const [activeDept, setActiveDept] = useState<Department>('Treasury');
 
-  // --- MOCK DATA ---
   const treasuryData = [
-    { year: '2020', revenue: 3.4, outlay: 6.5 },
-    { year: '2021', revenue: 4.0, outlay: 6.8 },
-    { year: '2022', revenue: 4.9, outlay: 6.2 },
-    { year: '2023', revenue: 4.4, outlay: 6.1 },
-    { year: '2024', revenue: 4.8, outlay: 6.3 }, // Est
+    { year: '2020', revenue: 0, outlay: 0 },
+    { year: '2021', revenue: 0, outlay: 0 },
+    { year: '2022', revenue: 0, outlay: 0 },
+    { year: '2023', revenue: 0, outlay: 0 },
+    { year: '2024', revenue: 0, outlay: 0 },
   ];
 
   const energyData = [
-    { source: 'Fossil', output: 60, target: 40 },
-    { source: 'Nuclear', output: 20, target: 20 },
-    { source: 'Renewable', output: 20, target: 40 },
+    { source: 'Fossil', output: 0, target: 0 },
+    { source: 'Nuclear', output: 0, target: 0 },
+    { source: 'Renewable', output: 0, target: 0 },
   ];
 
   // --- RENDERERS ---

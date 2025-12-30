@@ -1,9 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { 
-  Briefcase, ArrowRight, LayoutDashboard, Gavel, Target, Star, Map, 
-  ArrowLeft, Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck, 
+import {
+  Briefcase, ArrowRight, LayoutDashboard, Gavel, Target, Star, Map,
+  ArrowLeft, Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck,
   Server, Scale, AlertOctagon, RefreshCw, Truck, Plus, Layers
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -44,7 +44,7 @@ const ProgramManager: React.FC = () => {
 
   const selectedProgram = state.programs.find(p => p.id === selectedProgramId);
 
-  const navGroups: NavGroup[] = useMemo(() => [
+  const navGroups = useMemo(() => [
     {
       id: 'Overview',
       label: 'Overview',
@@ -242,8 +242,8 @@ const ProgramManager: React.FC = () => {
                 </div>
             </div>
             
-            <ModuleNavigation 
-                groups={navGroups}
+            <ModuleNavigation
+                groups={navGroups as any}
                 activeGroup={activeGroup}
                 activeItem={activeView}
                 onGroupChange={handleGroupChange}

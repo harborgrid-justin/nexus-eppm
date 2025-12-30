@@ -1,7 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { ActivityCode, ActivityCodeScope, ActivityCodeValue } from '../../types';
-import { Tag, Plus, Edit2, Trash2, Save, X, Globe, Building, Briefcase } from 'lucide-react';
+import { Plus, X, Briefcase, FileText, Check, Folder } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+
+const Tag = (LucideIcons as any).Tag || FileText;
+const Edit2 = (LucideIcons as any).Edit2 || FileText;
+const Trash2 = (LucideIcons as any).Trash2 || X;
+const Save = (LucideIcons as any).Save || Check;
+const Globe = (LucideIcons as any).Globe || Folder;
+const Building = (LucideIcons as any).Building || Briefcase;
 
 const ActivityCodeSettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -17,7 +25,7 @@ const ActivityCodeSettings: React.FC = () => {
         return state.activityCodes.find(ac => ac.id === selectedCodeId) || null;
     }, [state.activityCodes, selectedCodeId]);
 
-    const scopeTabs: { id: ActivityCodeScope, label: string, icon: React.ElementType }[] = [
+    const scopeTabs: { id: ActivityCodeScope, label: string, icon: React.ComponentType<{ size?: number | string }> }[] = [
         { id: 'Global', label: 'Global', icon: Globe },
         { id: 'EPS', label: 'EPS', icon: Building },
         { id: 'Project', label: 'Project', icon: Briefcase },

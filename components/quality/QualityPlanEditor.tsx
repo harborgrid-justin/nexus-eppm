@@ -46,8 +46,8 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 );
 
 const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
-    const { state } = useData(); 
-    const project = state.projects.find(p => p.id === projectId);
+    const { state } = useData();
+    const project = state.projects.filter(p => p.id === projectId)[0];
     const plan = project?.qualityPlan || {
         objectives: '',
         rolesAndResp: '',
@@ -65,7 +65,8 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
         objectives: true,
         roles: false,
         control: false,
-        assurance: false
+        assurance: false,
+        tools: false
     });
     
     // Template Panel State
@@ -91,12 +92,17 @@ const QualityPlanEditor: React.FC<QualityPlanEditorProps> = ({ projectId }) => {
 
     const applyTemplate = () => {
         if (!selectedTemplate) return;
-        // Mock template application - simply pre-filling text
-        const templateText = `[Applied from ${templates.find(t => t.id === selectedTemplate)?.name} Template]\n\n`;
+        const template = templates.filter(t => t.id === selectedTemplate)[0];
+        if (!template) return;
+
+        const templateText = `[Applied from ${template.name} Template]\n\n`;
         setFormData({
             ...formData,
             objectives: templateText + "Objective: Zero critical defects at handover.",
             rolesAndResp: templateText + "Quality Manager: Full authority to stop work.",
+            deliverablesVerification: templateText + "All deliverables require inspection sign-off.",
+            nonConformanceProcess: templateText + "NCR process follows company standard QP-001.",
+            toolsAndTechniques: templateText + "Nexus PPM for quality tracking and reporting.",
             status: 'Draft'
         });
         setIsTemplatePanelOpen(false);

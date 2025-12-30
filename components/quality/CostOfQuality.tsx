@@ -26,17 +26,8 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
     const totalCoQ = goodQualityCost + poorQualityCost;
     const budgetPercent = project.budget > 0 ? (totalCoQ / project.budget) * 100 : 0;
 
-    // Mock trend data if not present on project
     const trendData = useMemo(() => {
-        if (project.coqHistory && project.coqHistory.length > 0) return project.coqHistory;
-        
-        // Generate mock trend showing "Investment in Prevention reduces Failure"
-        return [
-            { period: 'Q1', preventionCosts: 5000, appraisalCosts: 5000, internalFailureCosts: 15000, externalFailureCosts: 2000 },
-            { period: 'Q2', preventionCosts: 8000, appraisalCosts: 7000, internalFailureCosts: 12000, externalFailureCosts: 1000 },
-            { period: 'Q3', preventionCosts: 12000, appraisalCosts: 8000, internalFailureCosts: 6000, externalFailureCosts: 500 },
-            { period: 'Q4', preventionCosts: 15000, appraisalCosts: 8000, internalFailureCosts: 4000, externalFailureCosts: 0 },
-        ];
+        return project.coqHistory || [];
     }, [project.coqHistory]);
 
     return (

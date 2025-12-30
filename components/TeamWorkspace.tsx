@@ -2,9 +2,13 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
-import { CheckSquare, Calendar, Clock, ListTodo } from 'lucide-react';
+import { Clock, CheckCircle, Calendar, FileText } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import MyTasks from './team/MyTasks';
 import Timesheet from './team/Timesheet';
+
+const CheckSquare = (LucideIcons as any).CheckSquare || CheckCircle;
+const ListTodo = (LucideIcons as any).ListTodo || FileText;
 
 const TeamWorkspace: React.FC = () => {
   const theme = useTheme();

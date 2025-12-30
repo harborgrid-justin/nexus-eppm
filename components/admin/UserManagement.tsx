@@ -1,29 +1,63 @@
 
-import React, { useState } from 'react';
-import { MOCK_USERS } from '../../constants/auth';
+import React, { useState, useEffect } from 'react';
 import { User, Role } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
-import { Users, Search, MoreVertical, Shield, Mail, Calendar, UserPlus } from 'lucide-react';
+import { Search, MoreVertical, Shield, Mail, Calendar, UserPlus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 
 const UserManagement: React.FC = () => {
   const theme = useTheme();
-  const { updateUserRole } = useAuth(); // In real app, this calls API
+  const { updateUserRole } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleRoleChange = (userId: string, newRole: Role) => {
-    // Optimistic update
+  const handleRoleChange = async (userId: string, newRole: Role) => {
     const updated = users.map(u => u.id === userId ? { ...u, role: newRole } : u);
     setUsers(updated);
-    updateUserRole(userId, newRole);
+
+    try {
+      await fetch(`/api/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+      });
+      updateUserRole(userId, newRole);
+    } catch (error) {
+      console.error('Failed to update user role:', error);
+      setUsers(users);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-slate-400">Loading users...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">

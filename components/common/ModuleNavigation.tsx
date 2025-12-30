@@ -1,11 +1,10 @@
 
 import React, { useRef, useEffect } from 'react';
-import { LucideIcon } from 'lucide-react';
 
 export interface NavItem {
   id: string;
   label: string;
-  icon?: LucideIcon;
+  icon?: React.ComponentType<{ size?: string | number; className?: string }>;
 }
 
 export interface NavGroup {

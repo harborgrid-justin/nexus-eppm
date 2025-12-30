@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map as MapIcon, Gavel, Leaf } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map, Gavel, Leaf } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -19,12 +19,14 @@ import PortfolioESG from './portfolio/PortfolioESG';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
+const MapIcon = Map;
+
 const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
   const [activeTab, setActiveTab] = useState('overview');
   const { state } = useData();
 
-  const navGroups: NavGroup[] = useMemo(() => [
+  const navGroups = useMemo(() => [
     { id: 'dashboards', label: 'Dashboards', items: [
       { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
       { id: 'esg', label: 'ESG & Compliance', icon: Leaf }
@@ -80,8 +82,8 @@ const PortfolioManager: React.FC = () => {
 
   return (
     <div className="h-full w-full flex flex-col bg-slate-100">
-      <ModuleNavigation 
-        groups={navGroups}
+      <ModuleNavigation
+        groups={navGroups as any}
         activeGroup={activeGroup}
         activeItem={activeTab}
         onGroupChange={handleGroupChange}

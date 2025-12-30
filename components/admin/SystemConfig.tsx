@@ -2,8 +2,15 @@
 import React, { useState } from 'react';
 import { useFeatureFlags } from '../../context/FeatureFlagContext';
 import { SystemConfig } from '../../types/auth';
-import { Settings, ToggleLeft, ToggleRight, Server, Shield } from 'lucide-react';
+import { XCircle, CheckCircle, LockKeyhole, Folder } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Button } from '../ui/Button';
+
+const Settings = (LucideIcons as any).Settings || Folder;
+const ToggleLeft = (LucideIcons as any).ToggleLeft || XCircle;
+const ToggleRight = (LucideIcons as any).ToggleRight || CheckCircle;
+const Server = (LucideIcons as any).Server || Folder;
+const Shield = (LucideIcons as any).Shield || LockKeyhole;
 
 const SystemConfigPanel: React.FC = () => {
   const { flags, isFeatureEnabled } = useFeatureFlags(); 

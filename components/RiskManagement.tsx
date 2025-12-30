@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
-import { AlertTriangle, LayoutDashboard, FileText, List, Columns, BarChart2, Sigma } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
 import RiskDashboard from './risk/RiskDashboard';
 import RiskPlanEditor from './risk/RiskPlanEditor';
@@ -24,18 +24,18 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
 
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'dashboard', label: 'Dashboard', icon: LucideIcons.LayoutDashboard },
     ]},
     { id: 'planning', label: 'Planning', items: [
-      { id: 'plan', label: 'Risk Plan', icon: FileText },
-      { id: 'rbs', label: 'RBS', icon: Columns },
+      { id: 'plan', label: 'Risk Plan', icon: LucideIcons.FileText },
+      { id: 'rbs', label: 'RBS', icon: LucideIcons.Columns3 },
     ]},
     { id: 'analysis', label: 'Identification & Analysis', items: [
-      { id: 'register', label: 'Register', icon: List },
-      { id: 'matrix', label: 'P-I Matrix', icon: Sigma },
+      { id: 'register', label: 'Register', icon: LucideIcons.List },
+      { id: 'matrix', label: 'P-I Matrix', icon: LucideIcons.Sigma },
     ]},
     { id: 'advanced', label: 'Advanced', items: [
-      { id: 'quantitative', label: 'Quantitative', icon: BarChart2 },
+      { id: 'quantitative', label: 'Quantitative', icon: LucideIcons.BarChart2 },
     ]},
   ], []);
 
@@ -72,7 +72,7 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
       <PageHeader 
         title="Risk Management" 
         subtitle="Identify, analyze, and respond to project uncertainty."
-        icon={AlertTriangle}
+        icon={LucideIcons.AlertTriangle}
       />
 
       <div className={theme.layout.panelContainer}>

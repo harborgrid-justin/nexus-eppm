@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Users, FileText, BarChart2, Sliders, Box, ScrollText } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useResourceData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
@@ -29,17 +29,17 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
 
   const navStructure = useMemo(() => [
     { id: 'planning', label: 'Planning & Setup', items: [
-      { id: 'plan', label: 'Resource Plan', icon: FileText },
-      { id: 'charter', label: 'Team Charter', icon: ScrollText },
-      { id: 'pool', label: 'Resource Pool', icon: Users },
+      { id: 'plan', label: 'Resource Plan', icon: LucideIcons.FileText },
+      { id: 'charter', label: 'Team Charter', icon: LucideIcons.ScrollText },
+      { id: 'pool', label: 'Resource Pool', icon: LucideIcons.Users },
     ]},
     { id: 'analysis', label: 'Analysis & Optimization', items: [
-      { id: 'capacity', label: 'Capacity Planning', icon: BarChart2 },
-      { id: 'histogram', label: 'Resource Histogram', icon: BarChart2 },
-      { id: 'leveling', label: 'Leveling', icon: Sliders },
+      { id: 'capacity', label: 'Capacity Planning', icon: LucideIcons.BarChart2 },
+      { id: 'histogram', label: 'Resource Histogram', icon: LucideIcons.BarChart2 },
+      { id: 'leveling', label: 'Leveling', icon: LucideIcons.Sliders },
     ]},
     { id: 'physical', label: 'Physical Resources', items: [
-      { id: 'physical_tracking', label: 'Materials & Equipment', icon: Box }
+      { id: 'physical_tracking', label: 'Materials & Equipment', icon: LucideIcons.Box }
     ]}
   ], []);
 
@@ -75,7 +75,7 @@ const ResourceManagement: React.FC<ResourceManagementProps> = ({ projectId }) =>
       <PageHeader 
         title="Resource Management" 
         subtitle="Plan, staff, and manage your project and enterprise resources."
-        icon={Users}
+        icon={LucideIcons.Users}
       />
 
       <div className={theme.layout.panelContainer}>

@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { 
-  Search, Download, CheckCircle, Package, Box, Radio, Calculator, Receipt, 
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, 
+import {
+  Search, Download, CheckCircle, Package, Box, Radio, Calculator, Receipt,
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare,
   MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2,
   PieChart, Users, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain,
   AlertOctagon, PenTool, LayoutGrid, Filter, Lock
@@ -26,7 +26,7 @@ const ExtensionMarketplace: React.FC = () => {
   const { hasPermission } = usePermissions();
   const canManageExtensions = hasPermission('system:configure');
 
-  const categories = ['All', ...Array.from(new Set(state.extensions.map(e => e.category)))];
+  const categories: string[] = ['All', ...Array.from(new Set<string>(state.extensions.map((e: { category: string }) => e.category)))];
 
   const filteredExtensions = state.extensions.filter(ext => {
     const matchesCategory = categoryFilter === 'All' || ext.category === categoryFilter;

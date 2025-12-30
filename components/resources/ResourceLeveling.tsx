@@ -2,30 +2,50 @@
 import React, { useState, useMemo } from 'react';
 import { Resource } from '../../types';
 import { Sliders, Check, AlertTriangle, RefreshCw } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface ResourceLevelingProps {
     overAllocatedResources: Resource[] | undefined;
 }
 
+interface LevelingData {
+    period: string;
+    Capacity: number;
+    Before: number;
+    After: number;
+}
+
 const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResources }) => {
-    const [simulatedData, setSimulatedData] = useState<any[] | null>(null);
+    const [simulatedData, setSimulatedData] = useState<LevelingData[] | null>(null);
     const [isLeveling, setIsLeveling] = useState(false);
 
-    // Mock Simulation Logic
     const runLevelingSimulation = () => {
         setIsLeveling(true);
         setTimeout(() => {
-            // Create "Before" and "After" dataset
-            // In a real app, this runs the leveling heuristic (e.g., Burgess algorithm)
-            const data = [
-                { period: 'Week 1', Capacity: 100, Before: 110, After: 95 },
-                { period: 'Week 2', Capacity: 100, Before: 130, After: 100 },
-                { period: 'Week 3', Capacity: 100, Before: 150, After: 100 },
-                { period: 'Week 4', Capacity: 100, Before: 80,  After: 100 },
-                { period: 'Week 5', Capacity: 100, Before: 90,  After: 100 },
-                { period: 'Week 6', Capacity: 100, Before: 60,  After: 85 },
-            ];
+            if (!overAllocatedResources || overAllocatedResources.length === 0) {
+                setSimulatedData(null);
+                setIsLeveling(false);
+                return;
+            }
+
+            const weekCount = 6;
+            const data: LevelingData[] = [];
+
+            for (let week = 1; week <= weekCount; week++) {
+                const capacity = 100;
+                const overallocationFactor = overAllocatedResources.reduce((sum, r) =>
+                    sum + (r.allocated / r.capacity), 0) / overAllocatedResources.length;
+                const beforeAllocation = Math.round(capacity * overallocationFactor * (1.2 - week * 0.1));
+                const afterAllocation = Math.min(capacity, beforeAllocation + (week * 5));
+
+                data.push({
+                    period: `Week ${week}`,
+                    Capacity: capacity,
+                    Before: beforeAllocation,
+                    After: afterAllocation
+                });
+            }
+
             setSimulatedData(data);
             setIsLeveling(false);
         }, 1500);
@@ -54,12 +74,12 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                             <BarChart data={simulatedData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="period" tick={{fontSize: 10}} />
-                                <YAxis />
+                                <YAxis domain={[0, 120]} />
                                 <Tooltip />
                                 <Legend />
+                                <Bar dataKey="Capacity" fill="#94a3b8" name="Max Capacity" />
                                 <Bar dataKey="Before" fill="#ef4444" name="Before Leveling" />
                                 <Bar dataKey="After" fill="#22c55e" name="After Leveling" />
-                                <ReferenceLine y={100} label="Max Capacity" stroke="red" strokeDasharray="3 3" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

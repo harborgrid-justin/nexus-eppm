@@ -174,7 +174,7 @@ const PortfolioCapacity: React.FC = () => {
         return 'bg-red-100 text-red-700 font-bold';
     };
 
-    const roles = Array.from(new Set(state.resources.map(r => r.role)));
+    const roles = Array.from(new Set(state.resources.map(r => r.role))) as string[];
     
     // Filtered resources for heatmap
     const displayResources = state.resources.filter(r => 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DollarSign, Truck, AlertCircle } from 'lucide-react';
+import { DollarSign, Package, AlertCircle } from 'lucide-react';
 import { useProcurementData } from '../../hooks';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -44,7 +44,7 @@ const ProcurementExecution: React.FC<ProcurementExecutionProps> = ({ projectId }
                                     <td className="px-6 py-4 text-sm text-slate-800">{po.description}</td>
                                     <td className="px-6 py-4 text-sm text-right font-mono font-bold text-slate-900">{formatCurrency(po.amount)}</td>
                                     <td className="px-6 py-4 text-sm text-slate-600 flex items-center gap-2">
-                                        <Truck size={14} className="text-slate-400"/> {po.expectedDeliveryDate ? formatDate(po.expectedDeliveryDate) : 'TBD'}
+                                        <Package size={14} className="text-slate-400"/> {po.expectedDeliveryDate ? formatDate(po.expectedDeliveryDate) : 'TBD'}
                                     </td>
                                     <td className="px-6 py-4">
                                         <Badge variant={po.status === 'Issued' ? 'success' : po.status === 'Draft' ? 'neutral' : 'warning'}>

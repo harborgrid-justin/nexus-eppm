@@ -11,22 +11,20 @@ const GovBudgetSuite: React.FC = () => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'ppbe' | 'funds' | 'forms'>('ppbe');
 
-  // --- MOCK DATA FOR FUNDS ---
   const fundsFlow = [
-    { name: 'Appropriated', value: 50000000 },
-    { name: 'Apportioned', value: 48000000 },
-    { name: 'Allotted', value: 45000000 },
-    { name: 'Committed', value: 30000000 },
-    { name: 'Obligated', value: 25000000 },
-    { name: 'Expended', value: 12000000 },
+    { name: 'Appropriated', value: 0 },
+    { name: 'Apportioned', value: 0 },
+    { name: 'Allotted', value: 0 },
+    { name: 'Committed', value: 0 },
+    { name: 'Obligated', value: 0 },
+    { name: 'Expended', value: 0 },
   ];
 
-  // --- MOCK DATA FOR PPBE CALENDAR ---
   const fiscalYears = [
-    { year: 'FY24', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
-    { year: 'FY25', phase: 'Budgeting', status: 'Enactment', color: 'bg-blue-500' },
-    { year: 'FY26', phase: 'Programming', status: 'POM Dev', color: 'bg-yellow-500' },
-    { year: 'FY27', phase: 'Planning', status: 'Strat Guidance', color: 'bg-slate-400' },
+    { year: 'FY24', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
+    { year: 'FY25', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
+    { year: 'FY26', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
+    { year: 'FY27', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
   ];
 
   const renderPPBECalendar = () => (

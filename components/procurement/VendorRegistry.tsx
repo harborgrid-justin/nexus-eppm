@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useProcurementData } from '../../hooks';
-import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock } from 'lucide-react';
+import { Filter, ShieldCheck, AlertCircle, Plus, Lock, XCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -21,7 +21,7 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
   const getStatusBadge = (status: string) => {
       switch(status) {
           case 'Preferred': return <Badge variant="success" icon={ShieldCheck}>Preferred</Badge>;
-          case 'Blacklisted': return <Badge variant="danger" icon={Ban}>Blacklisted</Badge>;
+          case 'Blacklisted': return <Badge variant="danger" icon={XCircle}>Blacklisted</Badge>;
           case 'Probationary': return <Badge variant="warning" icon={AlertCircle}>Probation</Badge>;
           default: return <Badge variant="neutral">{status}</Badge>;
       }

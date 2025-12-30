@@ -27,7 +27,7 @@ export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, o
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
     code: '',
-    description: '',
+    businessCase: '',
     status: 'Planned',
     health: 'Good',
     budget: 0,
@@ -159,16 +159,17 @@ export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, o
               <label className="block text-sm font-medium text-slate-700 mb-1">Initial Charter Values</label>
               <div className="flex gap-2">
                   {['Transparency', 'Safety', 'Innovation', 'Speed'].map(val => (
-                      <button 
+                      <button
                         key={val}
                         onClick={() => {
                             const current = formData.teamCharter?.values || [];
-                            const newVals = current.includes(val) ? current.filter(v => v !== val) : [...current, val];
+                            const hasValue = current.indexOf(val) !== -1;
+                            const newVals = hasValue ? current.filter(v => v !== val) : current.concat([val]);
                             setFormData({...formData, teamCharter: { ...formData.teamCharter!, values: newVals }});
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
-                            formData.teamCharter?.values.includes(val) 
-                            ? 'bg-nexus-100 border-nexus-200 text-nexus-700' 
+                            (formData.teamCharter?.values || []).indexOf(val) !== -1
+                            ? 'bg-nexus-100 border-nexus-200 text-nexus-700'
                             : 'bg-white border-slate-200 text-slate-500'
                         }`}
                       >

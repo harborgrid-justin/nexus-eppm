@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ChangeOrder, ChangeOrderHistoryItem } from '../../types';
 import { useData } from '../../context/DataContext';
-import { Save, DollarSign, Calendar, AlertTriangle, CheckCircle, Clock, FileText, GitPullRequest, ArrowRight, User } from 'lucide-react';
+import { DollarSign, CheckCircle, Clock, Save, FileText, GitPullRequest, Calendar, AlertTriangle } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { formatCurrency } from '../../utils/formatters';
 import { SidePanel } from '../ui/SidePanel';

@@ -137,7 +137,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                     <div key={alloc.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                          <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-bold text-slate-700">
-                                {projectNamesMap.get(alloc.projectId) || alloc.projectId}
+                                {String(projectNamesMap.get(alloc.projectId) || alloc.projectId)}
                             </span>
                             <span className="text-xs text-slate-500">Current Forecast: {formatCompactCurrency(alloc.forecast)}</span>
                          </div>

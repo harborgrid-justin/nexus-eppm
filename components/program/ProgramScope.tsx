@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Card } from '../ui/Card';
+
+const { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock } = LucideIcons;
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency } from '../../utils/formatters';

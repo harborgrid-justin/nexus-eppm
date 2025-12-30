@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  icon?: React.ElementType;
+  icon?: React.ComponentType<{ size?: string | number; className?: string }>;
   actions?: React.ReactNode;
 }
 

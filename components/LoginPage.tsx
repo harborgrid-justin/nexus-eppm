@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 const LoginPage: React.FC = () => {
   const { login, isLoading, error } = useAuth();
   const theme = useTheme();
-  
+
   const [email, setEmail] = useState('sarah@nexus.com');
   const [password, setPassword] = useState('password');
 

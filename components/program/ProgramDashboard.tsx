@@ -2,9 +2,10 @@
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useTheme } from '../../context/ThemeContext';
-import { 
-  Activity, TrendingUp, AlertTriangle, CheckCircle, 
-  Calendar, DollarSign, Layers, PieChart as PieIcon, ArrowUpRight
+import { useData } from '../../context/DataContext';
+import {
+  Activity, TrendingUp, AlertTriangle, CheckCircle,
+  Calendar, DollarSign, Layers, Circle as PieIcon, ArrowUpRight
 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell, ComposedChart, Line } from 'recharts';
@@ -18,24 +19,28 @@ interface ProgramDashboardProps {
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444'];
 
 const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
-  const { 
-    program, 
-    projects, 
-    aggregateMetrics, 
-    programRisks, 
-    programFinancials, 
-    programObjectives 
+  const {
+    program,
+    projects,
+    aggregateMetrics,
+    programRisks,
+    programFinancials,
+    programObjectives
   } = useProgramData(programId);
+  const { state } = useData();
   const theme = useTheme();
 
   const activeRisks = programRisks.filter(r => r.status === 'Open').length;
   const highRisks = programRisks.filter(r => r.score >= 12).length;
-  
-  // Calculate Benefit Realization (Mock Logic based on Objectives)
-  const benefitData = [
-    { name: 'Planned', value: 100 },
-    { name: 'Realized', value: 65 }
-  ];
+
+  const programBenefits = state.benefits.filter(b =>
+    b.componentId === programId || projects.some(p => p.id === b.componentId)
+  );
+  const totalBenefitValue = programBenefits.reduce((sum, b) => sum + b.value, 0);
+  const realizedBenefitValue = programBenefits.reduce((sum, b) => sum + (b.realizedValue || 0), 0);
+  const benefitRealizationPercent = totalBenefitValue > 0
+    ? Math.round((realizedBenefitValue / totalBenefitValue) * 100)
+    : 0;
 
   // Project Health Distribution
   const healthData = useMemo(() => {
@@ -91,12 +96,12 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                 icon={AlertTriangle} 
                 trend={highRisks > 0 ? 'down' : 'up'}
             />
-            <StatCard 
-                title="Benefits Realized" 
-                value="65%" 
-                subtext="Target: 75% by Q4" 
-                icon={TrendingUp} 
-                trend="up"
+            <StatCard
+                title="Benefits Realized"
+                value={`${benefitRealizationPercent}%`}
+                subtext={`${formatCompactCurrency(realizedBenefitValue)} of ${formatCompactCurrency(totalBenefitValue)}`}
+                icon={TrendingUp}
+                trend={benefitRealizationPercent >= 50 ? 'up' : 'down'}
             />
         </div>
 

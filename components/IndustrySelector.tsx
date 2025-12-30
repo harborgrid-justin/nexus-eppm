@@ -6,7 +6,7 @@ import { Building, Code, BookOpen, ChevronDown } from 'lucide-react';
 const IndustrySelector: React.FC = () => {
   const { industry, setIndustry } = useIndustry();
 
-  const industries: { id: Industry; label: string; icon: React.ElementType }[] = [
+  const industries: { id: Industry; label: string; icon: any }[] = [
     { id: 'Construction', label: 'General Contracting', icon: Building },
     { id: 'Software', label: 'Software Development', icon: Code },
     { id: 'Standard', label: 'Standard PM', icon: BookOpen },

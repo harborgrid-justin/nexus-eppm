@@ -64,6 +64,7 @@ export const initialState: DataState = {
   integratedChanges: MOCK_INTEGRATED_CHANGES,
   programStakeholders: MOCK_PROGRAM_STAKEHOLDERS,
   programCommunicationPlan: MOCK_COMMUNICATION_PLAN,
+  resourceAssignments: [],
   governance: {
     alerts: [],
     auditLog: [],

@@ -19,7 +19,7 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
   const { canEditProject } = usePermissions();
   
   const taskMap = useMemo(() => {
-    return new Map(project?.tasks.map(t => [t.id, t.name]));
+    return new Map<string, string>(project?.tasks.map(t => [t.id, t.name]));
   }, [project?.tasks]);
 
   const getPriorityBadge = (priority: Issue['priority']) => {
@@ -81,9 +81,9 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
                           <td className="px-6 py-4 text-sm font-medium text-slate-900 max-w-md truncate">{issue.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.status}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.assignedTo}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(issue.activityId || '')}>
-                            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{project?.tasks.find(t=>t.id===issue.activityId)?.wbsCode}</span> 
-                            {taskMap.get(issue.activityId || '')}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(issue.activityId || '') || ''}>
+                            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{project?.tasks.find(t=>t.id===issue.activityId)?.wbsCode}</span>
+                            {taskMap.get(issue.activityId || '') || ''}
                           </td>
                        </tr>
                      ))}

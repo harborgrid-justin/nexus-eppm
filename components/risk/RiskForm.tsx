@@ -5,7 +5,7 @@ import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters';
-import { AlertTriangle, DollarSign, Calendar, Shield, Zap } from 'lucide-react';
+import { ShieldAlert, DollarSign, Calendar, Shield, Star } from 'lucide-react';
 
 interface RiskFormProps {
   isOpen: boolean;
@@ -168,7 +168,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             <div className="space-y-6">
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <AlertTriangle size={16} className="text-orange-500"/> Qualitative Scoring
+                        <ShieldAlert size={16} className="text-orange-500"/> Qualitative Scoring
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -220,7 +220,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
 
                 {automationTriggered && (
                     <div className="p-3 bg-nexus-50 border border-nexus-200 rounded-lg flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
-                        <Zap size={16} className="text-nexus-600 shrink-0 mt-0.5"/>
+                        <Star size={16} className="text-nexus-600 shrink-0 mt-0.5"/>
                         <p className="text-xs text-nexus-800">
                             <strong>AI Trigger:</strong> {automationTriggered}
                         </p>

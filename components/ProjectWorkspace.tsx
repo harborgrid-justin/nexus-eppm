@@ -1,10 +1,7 @@
 
 import React, { useState, useMemo, Suspense, lazy } from 'react';
 import { useProjectState } from '../hooks';
-import { 
-  Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageCircle, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
@@ -33,41 +30,41 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   const [activeArea, setActiveArea] = useState('integration');
   const [scheduleView, setScheduleView] = useState<'gantt' | 'network'>('gantt');
 
-  const navGroups: NavGroup[] = useMemo(() => [
+  const navGroups = useMemo<NavGroup[]>(() => [
     {
       id: 'overview',
       label: 'Overview',
       items: [
-        { id: 'integration', label: 'Dashboard', icon: Briefcase }
+        { id: 'integration', label: 'Dashboard', icon: LucideIcons.Briefcase }
       ]
     },
     {
       id: 'planning',
       label: 'Planning',
       items: [
-        { id: 'scope', label: 'Scope', icon: Sliders },
-        { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
-        { id: 'cost', label: 'Cost', icon: DollarSign },
-        { id: 'quality', label: 'Quality', icon: ShieldCheck },
+        { id: 'scope', label: 'Scope', icon: LucideIcons.Sliders },
+        { id: 'schedule', label: 'Schedule', icon: LucideIcons.GanttChart },
+        { id: 'cost', label: 'Cost', icon: LucideIcons.DollarSign },
+        { id: 'quality', label: 'Quality', icon: LucideIcons.ShieldCheck },
       ]
     },
     {
       id: 'execution',
       label: 'Execution',
       items: [
-        { id: 'resources', label: 'Resources', icon: Users },
-        { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
-        { id: 'documents', label: 'Docs', icon: Folder },
+        { id: 'resources', label: 'Resources', icon: LucideIcons.Users },
+        { id: 'procurement', label: 'Procurement', icon: LucideIcons.ShoppingCart },
+        { id: 'documents', label: 'Docs', icon: LucideIcons.Folder },
       ]
     },
     {
       id: 'monitoring',
       label: 'Control',
       items: [
-        { id: 'risk', label: 'Risk', icon: AlertTriangle },
-        { id: 'issues', label: 'Issues', icon: FileWarning },
-        { id: 'stakeholder', label: 'Stakeholders', icon: Users },
-        { id: 'communications', label: 'Comms', icon: MessageCircle },
+        { id: 'risk', label: 'Risk', icon: LucideIcons.AlertTriangle },
+        { id: 'issues', label: 'Issues', icon: LucideIcons.TriangleAlert },
+        { id: 'stakeholder', label: 'Stakeholders', icon: LucideIcons.Users },
+        { id: 'communications', label: 'Comms', icon: LucideIcons.MessageSquare },
       ]
     }
   ], []);
@@ -117,7 +114,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
   };
 
   if (!project) {
-    return <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin" /></div>;
+    return <div className="flex items-center justify-center h-full"><LucideIcons.Loader2 className="animate-spin" /></div>;
   }
 
   return (
@@ -134,15 +131,15 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {activeArea === 'schedule' && (
             <div className="absolute top-4 right-4 md:right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
-                <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><GanttChartSquare size={18} /></button>
-                <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><Network size={18} /></button>
+                <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><LucideIcons.GanttChart size={18} /></button>
+                <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><LucideIcons.Network size={18} /></button>
             </div>
         )}
         <ErrorBoundary name={`${activeArea} Module`}>
           <Suspense fallback={
             <div className="flex items-center justify-center h-full w-full bg-slate-50">
                 <div className="text-center">
-                    <Loader2 size={32} className="animate-spin text-nexus-500 mx-auto mb-2" />
+                    <LucideIcons.Loader2 size={32} className="animate-spin text-nexus-500 mx-auto mb-2" />
                     <p className="text-slate-500 text-sm">Loading Module...</p>
                 </div>
             </div>

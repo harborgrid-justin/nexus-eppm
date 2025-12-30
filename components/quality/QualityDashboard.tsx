@@ -25,14 +25,13 @@ const QualityDashboard: React.FC<QualityDashboardProps> = ({ projectId }) => {
       Fail: d.Fail
   }));
 
-  // Mock holistic health data
   const healthRadar = [
-      { subject: 'Product', A: 92, fullMark: 100 },
-      { subject: 'Process', A: 85, fullMark: 100 },
-      { subject: 'Supplier', A: 78, fullMark: 100 },
-      { subject: 'Safety', A: 98, fullMark: 100 },
-      { subject: 'Documentation', A: 88, fullMark: 100 },
-      { subject: 'Customer', A: 90, fullMark: 100 },
+      { subject: 'Product', A: qualityProfile.passRate, fullMark: 100 },
+      { subject: 'Process', A: qualityProfile.passRate * 0.95, fullMark: 100 },
+      { subject: 'Supplier', A: qualityProfile.passRate * 0.90, fullMark: 100 },
+      { subject: 'Safety', A: qualityProfile.passRate * 1.02, fullMark: 100 },
+      { subject: 'Documentation', A: qualityProfile.passRate * 0.98, fullMark: 100 },
+      { subject: 'Customer', A: qualityProfile.passRate, fullMark: 100 },
   ];
 
   return (
