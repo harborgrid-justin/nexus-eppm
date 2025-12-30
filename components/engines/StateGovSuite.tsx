@@ -12,19 +12,18 @@ const StateGovSuite: React.FC = () => {
   const theme = useTheme();
   const [activeAgency, setActiveAgency] = useState('Governor');
 
-  // --- MOCK DATA ---
   const budgetData = [
-    { agency: 'HHS', allocated: 4500, spent: 4100 },
-    { agency: 'Education', allocated: 3800, spent: 3750 },
-    { agency: 'Transportation', allocated: 2200, spent: 1500 }, // Under spent
-    { agency: 'Public Safety', allocated: 1500, spent: 1480 },
-    { agency: 'Environment', allocated: 800, spent: 600 },
+    { agency: 'HHS', allocated: 0, spent: 0 },
+    { agency: 'Education', allocated: 0, spent: 0 },
+    { agency: 'Transportation', allocated: 0, spent: 0 },
+    { agency: 'Public Safety', allocated: 0, spent: 0 },
+    { agency: 'Environment', allocated: 0, spent: 0 },
   ];
 
   const caseLoadData = [
-    { name: 'Processed', value: 12500 },
-    { name: 'Pending', value: 3400 },
-    { name: 'Escalated', value: 450 },
+    { name: 'Processed', value: 0 },
+    { name: 'Pending', value: 0 },
+    { name: 'Escalated', value: 0 },
   ];
   const COLORS = ['#22c55e', '#eab308', '#ef4444'];
 

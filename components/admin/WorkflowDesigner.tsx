@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GitPullRequest, Plus, ArrowRight, X, Check } from 'lucide-react';
+import { Plus, ArrowRight, X, Check } from 'lucide-react';
 import { Card } from '../ui/Card';
 
 interface WorkflowStep {

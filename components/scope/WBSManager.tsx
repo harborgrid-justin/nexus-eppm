@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Save, Lock, ArrowUpRight, DollarSign, Calendar, AlertTriangle, User } from 'lucide-react';
+import { Plus, Save, Lock, ArrowRight, DollarSign, Calendar, AlertCircle, Users } from 'lucide-react';
 import { useWbsManager } from '../../hooks';
 import WBSNodeComponent from './WBSNodeComponent';
 import { WBSNode, CostEstimate } from '../../types';
@@ -37,12 +37,12 @@ const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
     handleShapeChange
   } = useWbsManager(projectId);
 
-  const [editedNode, setEditedNode] = useState<Partial<WBSNode> | null>(null);
+  const [editedNode, setEditedNode] = useState<WBSNode | null>(null);
   const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
 
   useEffect(() => {
     if (selectedNode) {
-        setEditedNode({ ...selectedNode });
+        setEditedNode(selectedNode);
     }
   }, [selectedNode]);
 
@@ -199,9 +199,9 @@ const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                             <span className="block text-xs font-bold text-slate-500 uppercase mb-1">Owner (RMS Link)</span>
                              <div className="flex items-center gap-2">
-                                <User size={14} className="text-slate-400"/>
-                                <input 
-                                    className="w-full bg-transparent text-sm text-slate-800 focus:outline-none focus:border-b focus:border-nexus-500" 
+                                <Users size={14} className="text-slate-400"/>
+                                <input
+                                    className="w-full bg-transparent text-sm text-slate-800 focus:outline-none focus:border-b focus:border-nexus-500"
                                     value={editedNode.owner || ''}
                                     onChange={e => handleFieldChange('owner', e.target.value)}
                                     disabled={!canEditProject()}
@@ -214,7 +214,7 @@ const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
                     {/* Cross-Reference (Linking) Section */}
                     <div>
                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2 border-t pt-4 border-slate-100">
-                           <ArrowUpRight size={14}/> Integrated Cross-References
+                           <ArrowRight size={14}/> Integrated Cross-References
                         </h4>
                         
                         <div className="space-y-3">
@@ -268,7 +268,7 @@ const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
                              {/* Risk Link */}
                              <div className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors group">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-50 text-red-600 rounded-md"><AlertTriangle size={16}/></div>
+                                    <div className="p-2 bg-red-50 text-red-600 rounded-md"><AlertCircle size={16}/></div>
                                     <div>
                                         <p className="text-sm font-bold text-slate-700">Risks (RBS)</p>
                                         <p className="text-xs text-slate-500">{linkedRisks.length > 0 ? `${linkedRisks.length} Risks Identified` : 'No Risks Linked'}</p>
@@ -286,7 +286,7 @@ const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
                 </div>
                 ) : (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                    <ArrowUpRight size={48} className="mb-4 opacity-20"/>
+                    <ArrowRight size={48} className="mb-4 opacity-20"/>
                     <p>Select a WBS element to view dictionary details.</p>
                 </div>
                 )}

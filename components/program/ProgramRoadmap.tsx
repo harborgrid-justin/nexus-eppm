@@ -1,9 +1,13 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Map as MapIcon, Link as LinkIcon, AlertTriangle, Calendar, Flag, Activity } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { getDaysDiff } from '../../utils/dateUtils';
+
+const { Map: MapIcon, AlertTriangle, Calendar, Flag, ChevronRight, TrendingUp } = LucideIcons;
+const LinkIcon = (LucideIcons as any).Link || ChevronRight;
+const Activity = (LucideIcons as any).Activity || TrendingUp;
 
 interface ProgramRoadmapProps {
   programId: string;

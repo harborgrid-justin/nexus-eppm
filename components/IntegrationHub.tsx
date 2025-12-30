@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
-import ErrorBoundary from './ErrorBoundary';
+import { Network, RefreshCw, CheckCircle, XCircle, Settings, Power } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
@@ -24,7 +23,6 @@ const IntegrationHub: React.FC = () => {
           <Button variant="secondary" icon={RefreshCw}>Sync All</Button>
        </div>
 
-      <ErrorBoundary>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {state.integrations.map((integration) => (
               <Card key={integration.id} className="p-6 relative group">
@@ -32,9 +30,9 @@ const IntegrationHub: React.FC = () => {
                     <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center text-xl font-bold text-slate-700 border border-slate-100">
                         {integration.logo}
                     </div>
-                    <Badge 
+                    <Badge
                       variant={integration.status === 'Connected' ? 'success' : 'neutral'}
-                      icon={integration.status === 'Connected' ? CheckCircle2 : XCircle}
+                      icon={integration.status === 'Connected' ? CheckCircle : XCircle}
                     >
                       {integration.status}
                     </Badge>
@@ -70,7 +68,6 @@ const IntegrationHub: React.FC = () => {
               </div>
             ))}
         </div>
-      </ErrorBoundary>
     </div>
   );
 };

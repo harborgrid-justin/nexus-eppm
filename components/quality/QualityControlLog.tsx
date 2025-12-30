@@ -15,7 +15,6 @@ interface QualityControlLogProps {
   qualityReports: QualityReport[] | undefined;
 }
 
-// Mock checklist data structure for the detail view
 interface InspectionChecklist {
   id: string;
   items: { label: string; status: 'Pass' | 'Fail' | 'N/A'; comment?: string }[];
@@ -70,23 +69,22 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
       });
   };
 
-  // Mock detail data generator
-  const getMockChecklist = (id: string): InspectionChecklist => ({
-    id,
-    items: [
-      { label: 'Surface Preparation', status: 'Pass' },
-      { label: 'Dimensional Tolerance (+/- 5mm)', status: 'Pass' },
-      { label: 'Material Certifications Verified', status: 'Pass' },
-      { label: 'Installation Torque Check', status: 'Fail', comment: 'Bolt #4 under-torqued' },
-      { label: 'Safety Barricades Removed', status: 'N/A' },
-    ],
-    photos: 3,
-    inspector: 'Mike Ross',
-    approver: 'Sarah Chen'
-  });
+  const getChecklistForReport = (report: QualityReport): InspectionChecklist => {
+    const items = report.details?.checklistItems || [
+      { label: 'Inspection criteria verified', status: 'Pass' as const }
+    ];
+
+    return {
+      id: report.id,
+      items: items,
+      photos: report.details?.photoCount || 0,
+      inspector: report.details?.inspector || 'Unknown',
+      approver: report.details?.approver || 'Pending'
+    };
+  };
 
   const selectedReport = filteredReports?.find(r => r.id === selectedReportId);
-  const checklist = selectedReport ? getMockChecklist(selectedReport.id) : null;
+  const checklist = selectedReport ? getChecklistForReport(selectedReport) : null;
 
   return (
     <div className="h-full flex flex-col bg-slate-50/50">
@@ -97,7 +95,7 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports })
               <h1 className={theme.typography.h2}>
                   <ClipboardList className="text-nexus-600" /> Inspection & Test Log
               </h1>
-              <p className="text-typography.small text-slate-500">Track daily field inspections, material receipts, and test results.</p>
+              <p className="text-sm text-slate-500">Track daily field inspections, material receipts, and test results.</p>
             </div>
             {canEditProject() ? (
               <Button onClick={() => setIsCreateOpen(true)} icon={Plus}>New Inspection</Button>

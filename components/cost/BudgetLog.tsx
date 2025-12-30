@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useProjectState } from '../../hooks';
-import { Plus, CheckCircle, Clock, XCircle, Lock, Save } from 'lucide-react';
+import { Plus, CheckCircle, Clock, XCircle, LockKeyhole, Save } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -95,7 +95,7 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                     </button>
                  ) : (
                     <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
-                        <Lock size={14} /> Budget Log Locked
+                        <LockKeyhole size={14} /> Budget Log Locked
                     </div>
                  )}
             </div>

@@ -1,8 +1,14 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Users, MessageSquare, Volume2, Shield, Plus, Edit2, Trash2 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+
+const { Users, Shield, Plus, FileText, X } = LucideIcons;
+const MessageSquare = (LucideIcons as any).MessageSquare || FileText;
+const Volume2 = (LucideIcons as any).Volume2 || Users;
+const Edit2 = (LucideIcons as any).Edit2 || FileText;
+const Trash2 = (LucideIcons as any).Trash2 || X;
 import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
@@ -222,14 +228,5 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
     </div>
   );
 };
-
-// Helper for SidePanel forms
-const LabeledInput = ({ label, ...props }: any) => (
-    <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-        <Input {...props} />
-    </div>
-);
-
 
 export default ProgramStakeholders;

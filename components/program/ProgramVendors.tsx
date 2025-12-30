@@ -1,10 +1,13 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Truck, Award, DollarSign, FileText, AlertTriangle } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import StatCard from '../shared/StatCard';
+
+const { Award, DollarSign, FileText, AlertTriangle } = LucideIcons;
+const Truck = (LucideIcons as any).Truck || FileText;
 
 interface ProgramVendorsProps {
   programId: string;

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Sliders, LayoutDashboard, FileText, List, Layers, Lock } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import ErrorBoundary from './ErrorBoundary';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
@@ -24,14 +24,14 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
 
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
+      { id: 'dashboard', label: 'Dashboard', icon: LucideIcons.LayoutDashboard }
     ]},
     { id: 'definition', label: 'Definition', items: [
-      { id: 'statement', label: 'Scope Statement', icon: FileText },
-      { id: 'requirements', label: 'Requirements (RTM)', icon: List },
+      { id: 'statement', label: 'Scope Statement', icon: LucideIcons.FileText },
+      { id: 'requirements', label: 'Requirements (RTM)', icon: LucideIcons.List },
     ]},
     { id: 'breakdown', label: 'Breakdown', items: [
-      { id: 'wbs', label: 'Work Breakdown Structure', icon: Layers },
+      { id: 'wbs', label: 'Work Breakdown Structure', icon: LucideIcons.Layers3 },
     ]}
   ], []);
 
@@ -64,7 +64,7 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
       <PageHeader 
         title="Scope Management" 
         subtitle="Define, validate, and control project scope and deliverables."
-        icon={Sliders}
+        icon={LucideIcons.Sliders}
       />
 
       <div className={theme.layout.panelContainer}>

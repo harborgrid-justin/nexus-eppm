@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NonConformanceReport } from '../../types';
-import { Bug, Plus, Lock, Search, Filter, AlertOctagon, CheckSquare, GitPullRequest, ArrowRight, User, Calendar, Save } from 'lucide-react';
+import { Bug, Plus, Lock, Search, Filter, AlertOctagon, CheckSquare, GitPullRequest, ArrowRight, UserCircle, Calendar, Save } from 'lucide-react';
 import { useProjectState } from '../../hooks/useProjectState';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
@@ -33,7 +33,7 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
         linkedDeliverable: ''
     });
 
-    const selectedDefect = nonConformanceReports.find(d => d.id === selectedDefectId);
+    const selectedDefect = nonConformanceReports.filter(d => d.id === selectedDefectId)[0];
 
     const getSeverityColor = (severity: NonConformanceReport['severity']) => {
         if (severity === 'Critical') return 'danger';
@@ -41,10 +41,11 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
         return 'info';
     };
 
-    const filteredDefects = nonConformanceReports.filter(d => 
-        d.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        d.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDefects = nonConformanceReports.filter(d => {
+        const searchLower = searchTerm.toLowerCase();
+        return d.description.toLowerCase().indexOf(searchLower) !== -1 ||
+               d.id.toLowerCase().indexOf(searchLower) !== -1;
+    });
 
     const handleSaveDefect = () => {
         if (!newDefect.description) return;
@@ -159,7 +160,7 @@ const DefectTracking: React.FC<DefectTrackingProps> = ({ projectId }) => {
                                     <div>
                                         <span className="block text-xs font-bold text-slate-400 uppercase">Assigned To</span>
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <User size={14} className="text-slate-400"/>
+                                            <UserCircle size={14} className="text-slate-400"/>
                                             <span className="font-medium text-slate-800">{selectedDefect.assignedTo}</span>
                                         </div>
                                     </div>

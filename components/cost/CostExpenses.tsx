@@ -16,7 +16,7 @@ interface CostExpensesProps {
 const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
     const { state } = useData();
     const tasks = state.projects.find(p => p.id === projectId)?.tasks || [];
-    const taskMap = new Map(tasks.map(t => [t.id, t.name]));
+    const taskMap = new Map<string, string>(tasks.map(t => [t.id, t.name]));
     
     // Filter expenses associated with tasks in the current project
     const expenses = state.expenses.filter(e => tasks.some(t => t.id === e.activityId));
@@ -87,9 +87,9 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
                             <tr key={exp.id} className="hover:bg-slate-50">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{exp.description}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{state.expenseCategories.find(c=>c.id === exp.categoryId)?.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(exp.activityId)}>
-                                  <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{tasks.find(t=>t.id===exp.activityId)?.wbsCode}</span> 
-                                  {taskMap.get(exp.activityId)}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(exp.activityId) || ''}>
+                                  <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{tasks.find(t=>t.id===exp.activityId)?.wbsCode}</span>
+                                  {taskMap.get(exp.activityId) || ''}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 text-right">{formatCurrency(exp.budgetedCost)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 text-right">{formatCurrency(exp.actualCost)}</td>

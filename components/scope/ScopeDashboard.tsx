@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useProjectState } from '../../hooks';
-import { Layers, ListChecks, FileWarning, CheckCircle } from 'lucide-react';
+import { Layers, List, AlertCircle, CheckCircle } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';
 import { useTheme } from '../../context/ThemeContext';
@@ -59,11 +59,11 @@ const ScopeDashboard: React.FC<ScopeDashboardProps> = ({ projectId }) => {
                 subtext={`Depth: Level ${metrics.wbsDepth}`} 
                 icon={Layers} 
             />
-            <StatCard 
-                title="Requirements" 
-                value={metrics.totalRequirements} 
-                subtext={`${metrics.reqCoverage.toFixed(0)}% Verified`} 
-                icon={ListChecks} 
+            <StatCard
+                title="Requirements"
+                value={metrics.totalRequirements}
+                subtext={`${metrics.reqCoverage.toFixed(0)}% Verified`}
+                icon={List}
             />
             <StatCard 
                 title="Scope Completion" 
@@ -72,12 +72,12 @@ const ScopeDashboard: React.FC<ScopeDashboardProps> = ({ projectId }) => {
                 icon={CheckCircle} 
                 trend="up"
             />
-            <StatCard 
-                title="Unapproved Scope" 
-                value="0" 
-                subtext="Pending Change Orders" 
-                icon={FileWarning} 
-                trend="up" // Up is good here (0 is good)
+            <StatCard
+                title="Unapproved Scope"
+                value="0"
+                subtext="Pending Change Orders"
+                icon={AlertCircle}
+                trend="up"
             />
         </div>
 

@@ -2,8 +2,13 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { GlobalCalendar, WorkDay } from '../../types';
-import { Calendar as CalendarIcon, Clock, Plus, Trash2, Check, X } from 'lucide-react';
+import { Clock, Plus, X, Calendar, CheckCircle } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Card } from '../ui/Card';
+
+const Trash2 = (LucideIcons as any).Trash2 || X;
+const Check = (LucideIcons as any).Check || CheckCircle;
+const CalendarIcon = Calendar;
 
 const CalendarEditor: React.FC = () => {
     const { state } = useData();

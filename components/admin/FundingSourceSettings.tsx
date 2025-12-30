@@ -1,6 +1,9 @@
 import React from 'react';
 import { useData } from '../../context/DataContext';
-import { Banknote, Plus } from 'lucide-react';
+import { Plus, DollarSign } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+
+const Banknote = (LucideIcons as any).Banknote || DollarSign;
 
 const FundingSourceSettings: React.FC = () => {
     const { state } = useData();

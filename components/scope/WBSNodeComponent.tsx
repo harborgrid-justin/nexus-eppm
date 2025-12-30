@@ -1,6 +1,6 @@
 import React from 'react';
 import { WBSNode, WBSNodeShape } from '../../types';
-import { ChevronRight, ChevronDown, PlusCircle } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus } from 'lucide-react';
 
 interface WBSNodeComponentProps {
   node: WBSNode;
@@ -63,7 +63,7 @@ const WBSNodeComponent: React.FC<WBSNodeComponentProps> = ({
       </div>
       <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
         <button onClick={(e) => { e.stopPropagation(); onAddChild(); }} className="p-1 hover:bg-slate-200 rounded text-green-500" title="Add child node">
-          <PlusCircle size={12} />
+          <Plus size={12} />
         </button>
       </div>
     </div>

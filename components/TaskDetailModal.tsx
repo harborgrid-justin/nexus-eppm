@@ -1,8 +1,19 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Task, Project, ConstraintType, EffortType, TaskStatus } from '../types';
-import { Link, Trash2, Clock, BrainCircuit, Tag, Receipt, ShieldAlert, AlertTriangle, MessageCircle, Truck } from 'lucide-react';
+import { Clock, X, Loader2, FileText, AlertCircle, ChevronRight } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Button } from './ui/Button';
+
+const Link = (LucideIcons as any).Link || ChevronRight;
+const Trash2 = (LucideIcons as any).Trash2 || X;
+const BrainCircuit = (LucideIcons as any).BrainCircuit || Loader2;
+const Tag = (LucideIcons as any).Tag || FileText;
+const Receipt = (LucideIcons as any).Receipt || FileText;
+const ShieldAlert = (LucideIcons as any).ShieldAlert || AlertCircle;
+const AlertTriangle = (LucideIcons as any).AlertTriangle || AlertCircle;
+const MessageCircle = (LucideIcons as any).MessageCircle || FileText;
+const Truck = (LucideIcons as any).Truck || FileText;
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useData } from '../context/DataContext';
 import { checkMaterialAvailability, checkOpenRFIsForTask } from '../utils/integrationUtils';

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Risk, RiskResponseAction, RiskHistoryItem } from '../../types';
 import { useData } from '../../context/DataContext';
-import { Plus, Trash2, Save, AlertTriangle, Calendar, DollarSign, Shield, Activity, ArrowRight } from 'lucide-react';
+import { Plus, X, Save, ShieldAlert, Calendar, DollarSign, Shield, TrendingUp, ArrowRight } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { formatCurrency } from '../../utils/formatters';
 import { SidePanel } from '../ui/SidePanel';
@@ -143,7 +143,7 @@ const RiskDetailPanel: React.FC<RiskDetailPanelProps> = ({ riskId, projectId, on
                             {/* Qualitative */}
                             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                    <Activity size={18} className="text-blue-500"/> Qualitative Scoring
+                                    <TrendingUp size={18} className="text-blue-500"/> Qualitative Scoring
                                 </h3>
                                 <div className="space-y-4">
                                     <div>

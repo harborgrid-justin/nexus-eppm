@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { CheckCircle, XCircle, Clock, AlertTriangle, FileText, ChevronRight, Gavel } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+
+const { CheckCircle, XCircle, Clock, AlertTriangle, FileText, ChevronRight, Gavel } = LucideIcons;
 
 interface ProgramStageGatesProps {
   programId: string;

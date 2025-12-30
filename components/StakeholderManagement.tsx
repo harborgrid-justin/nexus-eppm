@@ -1,13 +1,23 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjectState } from '../hooks';
-import { 
-  Users, BarChart2, DollarSign, TrendingUp, Filter, Plus, 
-  MessageSquare, Shield, AlertTriangle, Target, LayoutDashboard, 
-  CheckCircle, ArrowRight, UserCheck
+import {
+  Users, BarChart2, DollarSign, Plus,
+  LayoutDashboard,
+  CheckCircle, AlertCircle, FileText, ChevronRight, LockKeyhole
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Cell } from 'recharts';
+
+const TrendingUp = (LucideIcons as any).TrendingUp || BarChart2;
+const Filter = (LucideIcons as any).Filter || Plus;
+const MessageSquare = (LucideIcons as any).MessageSquare || FileText;
+const Shield = (LucideIcons as any).Shield || LockKeyhole;
+const AlertTriangle = (LucideIcons as any).AlertTriangle || AlertCircle;
+const Target = (LucideIcons as any).Target || AlertCircle;
+const ArrowRight = (LucideIcons as any).ArrowRight || ChevronRight;
+const UserCheck = (LucideIcons as any).UserCheck || Users;
 import StatCard from './shared/StatCard';
 import { formatCurrency } from '../utils/formatters';
 import { Badge } from './ui/Badge';

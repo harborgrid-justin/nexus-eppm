@@ -1,8 +1,14 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+
+const { ChevronDown: ArrowDown, Folder, Plus, X, Save, CheckCircle, FileText } = LucideIcons;
+const Target = (LucideIcons as any).Target || CheckCircle;
+const CheckSquare = (LucideIcons as any).CheckSquare || CheckCircle;
+const Edit2 = (LucideIcons as any).Edit2 || FileText;
+const Trash2 = (LucideIcons as any).Trash2 || X;
 import { useData } from '../../context/DataContext';
 import { StrategicGoal, ProgramObjective } from '../../types';
 import { generateId } from '../../utils/formatters';

@@ -2,7 +2,10 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { UDFSubjectArea } from '../../types';
-import { Edit3, Plus } from 'lucide-react';
+import { Plus, FileText } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+
+const Edit3 = (LucideIcons as any).Edit3 || FileText;
 
 const UdfSettings: React.FC = () => {
     const { state } = useData();

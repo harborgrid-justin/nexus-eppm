@@ -2,11 +2,11 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectState } from '../../hooks';
-import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, Table, ArrowDownRight, AlertTriangle, Layers, Lock, ShieldCheck } from 'lucide-react';
+import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, AlertTriangle, Layers, Lock, ShieldCheck } from 'lucide-react';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomPieChart } from '../charts/CustomPieChart';
-import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Step, Bar } from 'recharts';
-import { ProjectFunding, FundingTransaction } from '../../types';
+import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Bar } from 'recharts';
+import type { ProjectFunding, FundingTransaction } from '../../types';
 import FundingAllocationModal from './FundingAllocationModal';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
@@ -14,13 +14,6 @@ import StatCard from '../shared/StatCard';
 interface ProjectFundingProps {
     projectId: string;
 }
-
-// Mock initial transactions for demo if none exist
-const mockTransactions: FundingTransaction[] = [
-    { id: 'TX-001', date: '2024-01-10', type: 'Allocation', amount: 2000000, description: 'Initial Q1 Release', approvedBy: 'Board' },
-    { id: 'TX-002', date: '2024-03-15', type: 'Drawdown', amount: -450000, description: 'Vendor Payment Batch 1', approvedBy: 'Finance' },
-    { id: 'TX-003', date: '2024-04-01', type: 'Allocation', amount: 1500000, description: 'Q2 Tranche', approvedBy: 'Board' },
-];
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
@@ -52,29 +45,25 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
         const end = new Date(project.endDate);
         const totalDays = getDaysDiff(start, end);
         const data = [];
-        const steps = 12; 
-        
-        let cumulativeFunding = 0;
-        let cumulativeCost = 0;
+        const steps = 12;
 
-        // Mock Funding Releases (Steps)
-        const fundingReleases = [
-            { day: 0, amount: 1000000 },
-            { day: 90, amount: 1500000 },
-            { day: 180, amount: 2000000 },
-            { day: 270, amount: 1000000 }
-        ];
+        const fundingReleases = (project.funding || [])
+            .filter(f => f.status === 'Released' && f.transactions)
+            .flatMap(f => (f.transactions || [])
+                .filter(t => t.type === 'Allocation')
+                .map(t => ({
+                    day: getDaysDiff(start, new Date(t.date)),
+                    amount: t.amount
+                }))
+            );
 
         for (let i = 0; i <= steps; i++) {
             const currentDay = (i / steps) * totalDays;
-            
-            // Calculate funding Step
-            // Sum all releases that happened before currentDay
+
             const fundingAtPoint = fundingReleases
                 .filter(r => r.day <= currentDay)
                 .reduce((sum, r) => sum + r.amount, 0);
 
-            // S-Curve Cost (Simulated)
             const percentTime = i / steps;
             const curveFactor = percentTime < 0.5 ? 2 * percentTime * percentTime : -1 + (4 - 2 * percentTime) * percentTime;
             const costAtPoint = project.budget * curveFactor;
@@ -103,11 +92,9 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
 
     // 4. Ledger Data
     const ledgerData = useMemo(() => {
-        // Flatten transactions from all funding buckets
-        // If empty, use mock
-        if (!project?.funding || project.funding.every(f => !f.transactions)) return mockTransactions;
-        
-        return project.funding.flatMap(f => 
+        if (!project?.funding) return [];
+
+        return project.funding.flatMap(f =>
             (f.transactions || []).map(t => ({
                 ...t,
                 sourceName: state.fundingSources.find(s => s.id === f.fundingSourceId)?.name

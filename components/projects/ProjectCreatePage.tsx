@@ -3,13 +3,16 @@ import React, { useState } from 'react';
 import { Project } from '../../types';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
-import { 
-  Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, 
-  Save, X, Shield, Target, Layers 
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../context/ThemeContext';
+
+const {
+  Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, Save, X, Shield, Layers, ChevronLeft
+} = LucideIcons;
+const ArrowLeft = (LucideIcons as any).ArrowLeft || ChevronLeft;
+const Target = (LucideIcons as any).Target || CheckCircle;
 
 interface ProjectCreatePageProps {
   onClose: () => void;
@@ -32,10 +35,10 @@ const ProjectCreatePage: React.FC<ProjectCreatePageProps> = ({ onClose, onSave }
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
     code: '',
-    description: '',
     status: 'Planned',
     health: 'Good',
     budget: 0,
+    originalBudget: 0,
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     manager: '',

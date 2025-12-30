@@ -4,7 +4,10 @@ import { StrategicGoal } from '../../types';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Target } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+
+const { CheckCircle } = LucideIcons;
+const Target = (LucideIcons as any).Target || CheckCircle;
 
 interface StrategicGoalFormProps {
   isOpen: boolean;

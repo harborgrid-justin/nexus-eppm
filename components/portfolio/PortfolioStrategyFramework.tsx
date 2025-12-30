@@ -1,6 +1,6 @@
 import React from 'react';
-import { 
-  Users, Shield, Scale, BookOpen, BarChart2, Briefcase, FileText, ArrowRight, Layers
+import {
+  Users, Shield, BookOpen, BarChart2, Briefcase, FileText, ArrowRight, Layers
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';

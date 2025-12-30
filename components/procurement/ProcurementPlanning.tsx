@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, Calendar } from 'lucide-react';
+import { FileText, Save, BookOpen, Lock, Calendar } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -21,7 +21,7 @@ const ProcurementPlanning: React.FC<ProcurementPlanningProps> = ({ projectId }) 
                 </h3>
                 <div className="flex gap-2">
                     <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
-                        <Book size={14}/> Load Template
+                        <BookOpen size={14}/> Load Template
                     </button>
                     {canEditProject() ? (
                         <button className={`flex items-center gap-2 px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}>

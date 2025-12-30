@@ -27,16 +27,12 @@ const QualityStandards: React.FC = () => {
         enforcement: 'Mandatory'
     });
 
-    // Combine mock data from constants if state is empty, or use state
-    const standards: QualityStandard[] = state.qualityStandards.length > 0 ? state.qualityStandards : [
-        { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', category: 'General', source: 'External', enforcement: 'Mandatory' },
-        { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', category: 'Process', source: 'Internal', enforcement: 'Mandatory' },
-        { id: 'QS-03', name: 'ASTM C143', description: 'Standard Test Method for Slump of Hydraulic-Cement Concrete.', category: 'Material', source: 'External', enforcement: 'Mandatory' },
-        { id: 'QS-04', name: 'OSHA 1926', description: 'Safety and Health Regulations for Construction.', category: 'Safety', source: 'Regulatory', enforcement: 'Mandatory' },
-    ];
+    const standards: QualityStandard[] = state.qualityStandards;
 
     const filteredStandards = standards.filter(std => {
-        const matchesSearch = std.name.toLowerCase().includes(searchTerm.toLowerCase()) || std.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = std.name.toLowerCase().indexOf(searchLower) !== -1 ||
+                             std.description.toLowerCase().indexOf(searchLower) !== -1;
         const matchesCat = categoryFilter === 'All' || std.category === categoryFilter;
         return matchesSearch && matchesCat;
     });

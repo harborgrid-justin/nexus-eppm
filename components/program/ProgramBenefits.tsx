@@ -26,13 +26,23 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   const plannedValue = programBenefits.reduce((sum, b) => sum + b.value, 0);
   const realizationRate = plannedValue > 0 ? (realizedValue / plannedValue) * 100 : 0;
 
-  // Mock Trend Data
-  const trendData = [
-      { month: 'Q1', planned: plannedValue * 0.2, actual: realizedValue * 0.1 },
-      { month: 'Q2', planned: plannedValue * 0.4, actual: realizedValue * 0.3 },
-      { month: 'Q3', planned: plannedValue * 0.7, actual: realizedValue * 0.6 },
-      { month: 'Q4', planned: plannedValue, actual: realizedValue }
-  ];
+  const benefitsByQuarter = programBenefits.reduce((acc, b) => {
+    const quarter = new Date(b.targetDate).getMonth() < 3 ? 'Q1' :
+                    new Date(b.targetDate).getMonth() < 6 ? 'Q2' :
+                    new Date(b.targetDate).getMonth() < 9 ? 'Q3' : 'Q4';
+    if (!acc[quarter]) {
+      acc[quarter] = { planned: 0, actual: 0 };
+    }
+    acc[quarter].planned += b.value;
+    acc[quarter].actual += (b.realizedValue || 0);
+    return acc;
+  }, {} as Record<string, { planned: number; actual: number }>);
+
+  const trendData = ['Q1', 'Q2', 'Q3', 'Q4'].map(quarter => ({
+    month: quarter,
+    planned: benefitsByQuarter[quarter]?.planned || 0,
+    actual: benefitsByQuarter[quarter]?.actual || 0
+  }));
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck, Coins } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useQualityData } from '../hooks';
 import ErrorBoundary from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
@@ -29,19 +29,19 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
 
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
+      { id: 'dashboard', label: 'Dashboard', icon: LucideIcons.LayoutDashboard }
     ]},
     { id: 'planning', label: 'Planning', items: [
-      { id: 'plan', label: 'Quality Plan', icon: FileText },
-      { id: 'standards', label: 'Standards Registry', icon: BadgeCheck },
-      { id: 'coq', label: 'Cost of Quality', icon: Coins },
+      { id: 'plan', label: 'Quality Plan', icon: LucideIcons.FileText },
+      { id: 'standards', label: 'Standards Registry', icon: LucideIcons.BadgeCheck },
+      { id: 'coq', label: 'Cost of Quality', icon: LucideIcons.Coins },
     ]},
     { id: 'assurance', label: 'Assurance & Control', items: [
-      { id: 'control', label: 'Control Log', icon: ClipboardList },
-      { id: 'supplier', label: 'Supplier Quality', icon: Truck },
+      { id: 'control', label: 'Control Log', icon: LucideIcons.ClipboardList },
+      { id: 'supplier', label: 'Supplier Quality', icon: LucideIcons.Truck },
     ]},
     { id: 'issues', label: 'Issue Tracking', items: [
-      { id: 'defects', label: 'Defect Log (NCR)', icon: Bug },
+      { id: 'defects', label: 'Defect Log (NCR)', icon: LucideIcons.Bug },
     ]}
   ], []);
 
@@ -82,10 +82,10 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <PageHeader 
-        title="Quality Management" 
+      <PageHeader
+        title="Quality Management"
         subtitle="Ensure project deliverables meet and exceed stakeholder expectations."
-        icon={ShieldCheck}
+        icon={LucideIcons.ShieldCheck}
       />
 
       <div className={theme.layout.panelContainer}>

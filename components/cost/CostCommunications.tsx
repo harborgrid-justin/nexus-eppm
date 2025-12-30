@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
-import { 
-    MessageSquare, Calendar, FileText, Send, CheckCircle, 
-    Clock, AlertTriangle, Users, Download, Eye, Bell 
+import {
+    MessageSquare, Calendar, FileText, Send, CheckCircle,
+    Clock, AlertTriangle, Users, Download, Eye, Bell
 } from 'lucide-react';
 import { MOCK_COST_REPORTS, MOCK_COST_MEETINGS, MOCK_COST_ALERTS } from '../../constants/mocks/finance';
 import { formatCurrency } from '../../utils/formatters';

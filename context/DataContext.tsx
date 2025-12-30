@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
 import { 
     Project, Resource, Task, Risk, Issue, Expense, ExpenseCategory, DataJob, Extension, ActivityCode, 
     FundingSource, ProcurementPackage, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, 
@@ -66,6 +66,7 @@ export interface DataState {
   integratedChanges: IntegratedChangeRequest[];
   programStakeholders: ProgramStakeholder[];
   programCommunicationPlan: ProgramCommunicationItem[];
+  resourceAssignments: any[];
   governance: GovernanceState;
   errors: string[];
 }
@@ -133,7 +134,7 @@ const DataContext = createContext<{
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(rootReducer, initialState);
+  const [state, dispatch] = React.useReducer(rootReducer, initialState);
 
   const getRiskPlan = useCallback((projectId: string) => MOCK_RISK_PLAN, []);
   

@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProcurementData } from '../hooks';
-import ErrorBoundary from './ErrorBoundary';
 import ProcurementDashboard from './procurement/ProcurementDashboard';
 import VendorRegistry from './procurement/VendorRegistry';
 import ContractLifecycle from './procurement/ContractLifecycle';
@@ -9,7 +8,7 @@ import ProcurementPlanning from './procurement/ProcurementPlanning';
 import ProcurementSourcing from './procurement/ProcurementSourcing';
 import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
-import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListCheck } from 'lucide-react';
+import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListChecks } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { formatCurrency } from '../utils/formatters';
@@ -33,7 +32,7 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
       { id: 'planning', label: 'Planning', icon: FileText },
       { id: 'makebuy', label: 'Make-or-Buy', icon: Scale },
       { id: 'vendors', label: 'Vendors', icon: Users },
-      { id: 'criteria', label: 'Source Selection', icon: ListCheck },
+      { id: 'criteria', label: 'Source Selection', icon: ListChecks },
       { id: 'sourcing', label: 'Sourcing', icon: ShoppingCart },
     ]},
     { id: 'post-award', label: 'Post-Award', items: [
@@ -88,7 +87,7 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
 
   const renderSourceSelection = () => (
       <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ListCheck className="text-nexus-600"/> Source Selection Criteria</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ListChecks className="text-nexus-600"/> Source Selection Criteria</h2>
           <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
               <p className="text-sm text-slate-600 mb-4">Criteria used to rate or score vendor proposals.</p>
               <ul className="space-y-3">
@@ -167,9 +166,7 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
             </nav>
           </div>
           <div className="flex-1 overflow-hidden">
-             <ErrorBoundary>
                 {renderContent()}
-             </ErrorBoundary>
           </div>
        </div>
     </div>

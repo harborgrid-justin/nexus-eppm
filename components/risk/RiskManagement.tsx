@@ -9,7 +9,7 @@ import RiskRegisterGrid from './RiskRegisterGrid';
 import RiskBreakdownStructure from './RiskBreakdownStructure';
 import RiskMatrix from './RiskMatrix';
 import QuantitativeAnalysis from './QuantitativeAnalysis';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RiskManagementProps {
   projectId: string;

@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import { useProjectState } from '../../hooks';
 import { useData } from '../../context/DataContext';
-import { ShieldAlert, TrendingUp, AlertTriangle, Calculator, RefreshCw, Save, PieChart, ArrowRight, Lock } from 'lucide-react';
+import { ShieldAlert, TrendingUp, AlertTriangle, Calculator, RefreshCw, Save, PieChart, Lock } from 'lucide-react';
 import { formatCurrency, formatCompactCurrency, formatPercentage } from '../../utils/formatters';
 import { calculateRiskExposure } from '../../utils/integrationUtils';
 import StatCard from '../shared/StatCard';

@@ -2,8 +2,12 @@
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { ShieldAlert, TrendingUp, AlertOctagon, Layers, Plus, Trash2 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import StatCard from '../shared/StatCard';
+
+const { ShieldAlert, TrendingUp, Layers, Plus, AlertCircle, X } = LucideIcons;
+const AlertOctagon = (LucideIcons as any).AlertOctagon || AlertCircle;
+const Trash2 = (LucideIcons as any).Trash2 || X;
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';

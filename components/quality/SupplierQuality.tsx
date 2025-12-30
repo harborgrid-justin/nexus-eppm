@@ -13,7 +13,6 @@ const SupplierQuality: React.FC = () => {
     const vendors = state.vendors;
     const allNCRs = state.nonConformanceReports;
 
-    // --- Mock Data Calculation ---
     const topVendorScores = useMemo(() => {
         return vendors
             .map(v => ({ name: v.name, score: v.performanceScore }))
@@ -21,20 +20,45 @@ const SupplierQuality: React.FC = () => {
             .slice(0, 5);
     }, [vendors]);
 
-    const performanceTrend = [
-        { month: 'Jan', AverageScore: 82, Defects: 12 },
-        { month: 'Feb', AverageScore: 84, Defects: 10 },
-        { month: 'Mar', AverageScore: 83, Defects: 14 },
-        { month: 'Apr', AverageScore: 86, Defects: 8 },
-        { month: 'May', AverageScore: 88, Defects: 5 },
-        { month: 'Jun', AverageScore: 89, Defects: 4 },
-    ];
+    const performanceTrend = useMemo(() => {
+        const currentMonth = new Date().getMonth();
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const trend = [];
 
-    const materialInspections = [
-        { id: 'MRR-1024', item: 'Steel Beams (W12x40)', vendor: 'Acme Steel', qty: 50, rejected: 0, status: 'Accepted', date: '2024-06-15' },
-        { id: 'MRR-1025', item: 'Pre-cast Panels', vendor: 'Global Foundations', qty: 12, rejected: 1, status: 'Conditional', date: '2024-06-12' },
-        { id: 'MRR-1026', item: 'HVAC Units', vendor: 'BuildRight Inc.', qty: 4, rejected: 0, status: 'Accepted', date: '2024-06-10' },
-    ];
+        for (let i = 5; i >= 0; i--) {
+            const monthIndex = (currentMonth - i + 12) % 12;
+            const avgScore = vendors.length > 0
+                ? vendors.reduce((sum, v) => sum + v.performanceScore, 0) / vendors.length
+                : 0;
+            const defectCount = allNCRs.filter(ncr => {
+                const ncrDate = new Date(ncr.date);
+                return ncrDate.getMonth() === monthIndex && ncr.status !== 'Closed';
+            }).length;
+
+            trend.push({
+                month: monthNames[monthIndex],
+                AverageScore: Math.round(avgScore),
+                Defects: defectCount
+            });
+        }
+
+        return trend;
+    }, [vendors, allNCRs]);
+
+    const materialInspections = useMemo(() => {
+        return state.qualityReports
+            ?.filter(qr => qr.type === 'Material Receipt')
+            .slice(0, 3)
+            .map(qr => ({
+                id: qr.id,
+                item: qr.details?.itemName || 'Material Item',
+                vendor: qr.details?.vendorName || 'Unknown Vendor',
+                qty: qr.details?.quantity || 0,
+                rejected: qr.details?.rejected || 0,
+                status: qr.status === 'Pass' ? 'Accepted' : qr.status === 'Fail' ? 'Rejected' : 'Conditional',
+                date: qr.date
+            })) || [];
+    }, [state.qualityReports]);
 
     const avgScore = vendors.reduce((sum, v) => sum + v.performanceScore, 0) / (vendors.length || 1);
     const criticalVendors = vendors.filter(v => v.riskLevel === 'High').length;

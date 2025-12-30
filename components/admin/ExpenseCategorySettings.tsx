@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Receipt, Plus, Globe, Briefcase } from 'lucide-react';
+import { Plus, Briefcase, FileText, Folder } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { ActivityCodeScope } from '../../types';
+
+const Receipt = (LucideIcons as any).Receipt || FileText;
+const Globe = (LucideIcons as any).Globe || Folder;
 
 const ExpenseCategorySettings: React.FC = () => {
     const { state } = useData();
