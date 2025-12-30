@@ -1,0 +1,231 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction/Welcome" />
+
+# Welcome to Nexus EPPM Component Library
+
+<div style={{ 
+  padding: '2rem', 
+  backgroundColor: '#f8fafc', 
+  borderRadius: '8px',
+  marginBottom: '2rem'
+}}>
+  <h2 style={{ marginTop: 0 }}>🚀 Enterprise Project Portfolio Management</h2>
+  <p>
+    This component library contains all reusable UI components, patterns, and guidelines 
+    for building consistent, accessible, and high-quality interfaces in the Nexus EPPM application.
+  </p>
+</div>
+
+## 📚 What's Inside
+
+### UI Components
+Basic building blocks for the application:
+- **Buttons** - Primary actions and interactions
+- **Inputs** - Form controls and data entry
+- **Cards** - Content containers and layouts
+- **Modals** - Dialogs and overlays
+- **Badges** - Status indicators and labels
+
+### Shared Components
+Application-specific components:
+- **StatCards** - Metric and KPI displays
+- **Charts** - Data visualizations
+- **Navigation** - Sidebars and menus
+
+### Domain Components
+Business logic components:
+- **Project Cards** - Project information displays
+- **Task Items** - Task management components
+- **Risk Items** - Risk tracking components
+- **Resource Cards** - Resource allocation displays
+
+### Patterns
+Composite patterns and templates:
+- **Forms** - Form layouts and validation
+- **Tables** - Data grids and lists
+- **Dashboards** - Dashboard layouts
+
+## 🎯 Getting Started
+
+### For Developers
+
+1. **Browse Components**: Explore the component library in the sidebar
+2. **Read Documentation**: Each component includes usage guidelines
+3. **View Examples**: Check out real-world usage examples
+4. **Copy Code**: Use the code snippets in your application
+5. **Test Accessibility**: Review the a11y tab for each component
+
+### For Designers
+
+1. **Design System**: Use components as reference for designs
+2. **Variants**: Review all available variants and states
+3. **Spacing**: Check component spacing and layouts
+4. **Colors**: Reference color usage in components
+5. **Interactions**: Understand hover, focus, and active states
+
+## 🛠️ Development Workflow
+
+```bash
+# Start Storybook development server
+npm run storybook
+
+# Build Storybook for deployment
+npm run build-storybook
+
+# Run tests
+npm run test-storybook
+```
+
+## 📖 Key Features
+
+### Auto-Generated Documentation
+All components have auto-generated documentation from TypeScript props.
+
+### Accessibility Testing
+Every component is tested for accessibility compliance using the a11y addon.
+
+### Interactive Controls
+Modify component props in real-time using the Controls panel.
+
+### Responsive Testing
+Test components at different viewport sizes using the Viewport addon.
+
+### Visual Testing
+Compare component variations side-by-side.
+
+## 🎨 Design Principles
+
+### Consistency
+All components follow consistent design patterns and naming conventions.
+
+### Accessibility
+Components are built with accessibility in mind and tested with a11y tools.
+
+### Flexibility
+Components accept className props for customization while maintaining consistency.
+
+### Type Safety
+All components are built with TypeScript for type safety and better DX.
+
+### Documentation
+Comprehensive documentation helps developers understand and use components effectively.
+
+## 📐 Component Standards
+
+### TypeScript First
+All components are written in TypeScript with proper type definitions.
+
+### Prop Interfaces
+Clear, documented interfaces for all component props.
+
+### Default Props
+Sensible defaults for optional props.
+
+### Composition
+Components are composable and can be used together.
+
+### Testing
+Components should have stories covering all variants and states.
+
+## 🔍 Finding Components
+
+Use the search bar (Press `/` to focus) to quickly find components by name.
+
+Components are organized by category in the sidebar:
+- **UI** - Basic UI components
+- **Shared** - Shared application components
+- **Domain** - Business domain components
+- **Patterns** - Composite patterns
+
+## 📚 Additional Resources
+
+- [Component Development Guide](./?path=/docs/introduction-component-guide--docs)
+- [Storybook Documentation](https://storybook.js.org/docs/react/get-started/introduction)
+- [Accessibility Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- [React Best Practices](https://react.dev/learn)
+
+## 🤝 Contributing
+
+### Adding New Components
+
+1. Create the component in the appropriate directory
+2. Add TypeScript types and props documentation
+3. Create a `.stories.tsx` file with comprehensive examples
+4. Include usage guidelines and accessibility notes
+5. Test all variants and states
+6. Review accessibility with the a11y addon
+
+### Updating Existing Components
+
+1. Update the component implementation
+2. Update the story file with new props/variants
+3. Update documentation and examples
+4. Test all existing stories still work
+5. Review accessibility impact
+
+### Documentation
+
+- Write clear component descriptions
+- Provide usage guidelines
+- Include code examples
+- Document accessibility features
+- Show common patterns and anti-patterns
+
+## 💡 Best Practices
+
+### Component Design
+- Keep components focused and single-purpose
+- Make components reusable and composable
+- Provide sensible defaults
+- Use TypeScript for type safety
+
+### Stories
+- Show all component variants
+- Include interactive examples
+- Demonstrate real-world usage
+- Cover edge cases
+
+### Accessibility
+- Test with keyboard navigation
+- Check color contrast
+- Verify screen reader support
+- Use semantic HTML
+
+### Documentation
+- Write clear descriptions
+- Provide code examples
+- Document props thoroughly
+- Include usage guidelines
+
+## 🔧 Configuration
+
+Storybook is configured with:
+- **Vite** - Fast build tool
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **A11y Addon** - Accessibility testing
+- **Vitest** - Component testing
+- **Auto Docs** - Automatic documentation
+
+## 📞 Support
+
+Need help? Here's how to get support:
+
+1. **Search Documentation** - Use the search feature
+2. **Check Examples** - Review existing component stories
+3. **Read Guidelines** - Consult the development guide
+4. **Ask the Team** - Reach out to frontend team members
+
+---
+
+<div style={{ 
+  padding: '1rem', 
+  backgroundColor: '#eff6ff', 
+  borderRadius: '8px',
+  border: '1px solid #3b82f6'
+}}>
+  💡 <strong>Tip:</strong> Use the keyboard shortcut <code>/</code> to quickly search for components, 
+  and <code>Ctrl/Cmd + K</code> to open the command palette for quick navigation.
+</div>

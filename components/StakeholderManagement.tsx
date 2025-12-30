@@ -4,7 +4,7 @@ import { useProjectState } from '../hooks';
 import {
   Users, BarChart2, DollarSign, Plus,
   LayoutDashboard,
-  CheckCircle, AlertCircle, FileText, ChevronRight, LockKeyhole
+  CheckCircle, AlertCircle, FileText, ChevronRight, Lock
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -13,7 +13,7 @@ import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Cartes
 const TrendingUp = (LucideIcons as any).TrendingUp || BarChart2;
 const Filter = (LucideIcons as any).Filter || Plus;
 const MessageSquare = (LucideIcons as any).MessageSquare || FileText;
-const Shield = (LucideIcons as any).Shield || LockKeyhole;
+const Shield = (LucideIcons as any).Shield || Lock;
 const AlertTriangle = (LucideIcons as any).AlertTriangle || AlertCircle;
 const Target = (LucideIcons as any).Target || AlertCircle;
 const ArrowRight = (LucideIcons as any).ArrowRight || ChevronRight;
@@ -142,23 +142,23 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
         <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm`}>
           <h3 className="font-bold text-slate-800 mb-4">Top Concerns & Issues</h3>
           <div className="space-y-4">
-             {[
-               { topic: 'Budget Cuts', raisedBy: 'Finance Director', status: 'Open', priority: 'High' },
-               { topic: 'Schedule Compression', raisedBy: 'Site Manager', status: 'In Review', priority: 'Medium' },
-               { topic: 'Vendor Selection', raisedBy: 'Procurement Lead', status: 'Closed', priority: 'Low' },
-             ].map((issue, i) => (
-               <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
-                 <div>
-                   <p className="font-bold text-sm text-slate-800">{issue.topic}</p>
-                   <p className="text-xs text-slate-500">Raised by: {issue.raisedBy}</p>
-                 </div>
-                 <div className="text-right">
-                   <Badge variant={issue.priority === 'High' ? 'danger' : issue.priority === 'Medium' ? 'warning' : 'success'}>
-                     {issue.priority}
-                   </Badge>
-                 </div>
-               </div>
-             ))}
+            {[
+              { topic: 'Budget Cuts', raisedBy: 'Finance Director', status: 'Open', priority: 'High' },
+              { topic: 'Schedule Compression', raisedBy: 'Site Manager', status: 'In Review', priority: 'Medium' },
+              { topic: 'Vendor Selection', raisedBy: 'Procurement Lead', status: 'Closed', priority: 'Low' },
+            ].map((issue, i) => (
+              <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex justify-between items-center">
+                <div>
+                  <p className="font-bold text-sm text-slate-800">{issue.topic}</p>
+                  <p className="text-xs text-slate-500">Raised by: {issue.raisedBy}</p>
+                </div>
+                <div className="text-right">
+                  <Badge variant={issue.priority === 'High' ? 'danger' : issue.priority === 'Medium' ? 'warning' : 'success'}>
+                    {issue.priority}
+                  </Badge>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -194,14 +194,14 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
                   <td key={level} className="px-6 py-4 text-center relative">
                     {isC && <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold mr-1" title="Current">C</span>}
                     {isD && <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-nexus-600 text-white font-bold" title="Desired">D</span>}
-                    {isC && isD && <span className="absolute top-4 right-4 text-green-500"><CheckCircle size={12}/></span>}
+                    {isC && isD && <span className="absolute top-4 right-4 text-green-500"><CheckCircle size={12} /></span>}
                   </td>
                 );
               })}
               <td className="px-6 py-4">
                 {s.engagement.current !== s.engagement.desired ? (
                   <button className="text-xs text-nexus-600 font-medium hover:underline flex items-center gap-1">
-                    Create Plan <ArrowRight size={12}/>
+                    Create Plan <ArrowRight size={12} />
                   </button>
                 ) : (
                   <span className="text-xs text-green-600 font-medium">Aligned</span>
@@ -217,27 +217,27 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
   const renderFinancialAuthority = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-3 bg-green-100 text-green-700 rounded-full"><DollarSign size={24}/></div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Approval Capacity</p>
-              <p className="text-2xl font-bold text-slate-900">{formatCurrency(stakeholders.reduce((sum, s) => sum + s.financialAuthority.limit, 0))}</p>
-            </div>
-         </div>
-         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-3 bg-purple-100 text-purple-700 rounded-full"><Shield size={24}/></div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">CCB Members</p>
-              <p className="text-2xl font-bold text-slate-900">{stakeholders.filter(s => s.financialAuthority.ccbMember).length}</p>
-            </div>
-         </div>
-         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="p-3 bg-blue-100 text-blue-700 rounded-full"><UserCheck size={24}/></div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Budget Owners</p>
-              <p className="text-2xl font-bold text-slate-900">3</p>
-            </div>
-         </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-green-100 text-green-700 rounded-full"><DollarSign size={24} /></div>
+          <div>
+            <p className="text-sm font-medium text-slate-500">Total Approval Capacity</p>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stakeholders.reduce((sum, s) => sum + s.financialAuthority.limit, 0))}</p>
+          </div>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-purple-100 text-purple-700 rounded-full"><Shield size={24} /></div>
+          <div>
+            <p className="text-sm font-medium text-slate-500">CCB Members</p>
+            <p className="text-2xl font-bold text-slate-900">{stakeholders.filter(s => s.financialAuthority.ccbMember).length}</p>
+          </div>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-blue-100 text-blue-700 rounded-full"><UserCheck size={24} /></div>
+          <div>
+            <p className="text-sm font-medium text-slate-500">Budget Owners</p>
+            <p className="text-2xl font-bold text-slate-900">3</p>
+          </div>
+        </div>
       </div>
 
       <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
@@ -271,7 +271,7 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
                 </td>
                 <td className="px-6 py-4 text-center">
                   {s.financialAuthority.ccbMember ? (
-                    <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-700 rounded-full"><CheckCircle size={14}/></span>
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-700 rounded-full"><CheckCircle size={14} /></span>
                   ) : (
                     <span className="text-slate-300">-</span>
                   )}
@@ -297,10 +297,10 @@ const StakeholderManagement: React.FC<StakeholderManagementProps> = ({ projectId
           <p className={theme.typography.small}>Analyze influence, manage engagement, and track financial authority.</p>
         </div>
         <div className="flex bg-white border border-slate-200 rounded-lg p-1">
-          <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><LayoutDashboard size={14}/> Dashboard</button>
-          <button onClick={() => setActiveTab('analysis')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'analysis' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><Target size={14}/> Power/Interest</button>
-          <button onClick={() => setActiveTab('engagement')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'engagement' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><TrendingUp size={14}/> Engagement</button>
-          <button onClick={() => setActiveTab('financial')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'financial' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><DollarSign size={14}/> Financial</button>
+          <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'dashboard' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><LayoutDashboard size={14} /> Dashboard</button>
+          <button onClick={() => setActiveTab('analysis')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'analysis' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><Target size={14} /> Power/Interest</button>
+          <button onClick={() => setActiveTab('engagement')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'engagement' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><TrendingUp size={14} /> Engagement</button>
+          <button onClick={() => setActiveTab('financial')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'financial' ? 'bg-nexus-50 text-nexus-700' : 'text-slate-500'}`}><DollarSign size={14} /> Financial</button>
         </div>
       </div>
 

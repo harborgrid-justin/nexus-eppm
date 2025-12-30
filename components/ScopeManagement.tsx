@@ -31,7 +31,7 @@ const ScopeManagement: React.FC<ScopeManagementProps> = ({ projectId }) => {
       { id: 'requirements', label: 'Requirements (RTM)', icon: LucideIcons.List },
     ]},
     { id: 'breakdown', label: 'Breakdown', items: [
-      { id: 'wbs', label: 'Work Breakdown Structure', icon: LucideIcons.Layers3 },
+      { id: 'wbs', label: 'Work Breakdown Structure', icon: LucideIcons.Layers },
     ]}
   ], []);
 

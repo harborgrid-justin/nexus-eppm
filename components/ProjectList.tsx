@@ -297,7 +297,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
                                 onClick={() => setViewMode('eps')}
                                 className={`px-3 py-1.5 rounded-md flex items-center gap-1 transition-all ${viewMode === 'eps' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <LucideIcons.Layers3 size={14}/> EPS
+                                <LucideIcons.Layers size={14}/> EPS
                             </button>
                         </div>
                         <select className="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-nexus-500 hidden sm:block">

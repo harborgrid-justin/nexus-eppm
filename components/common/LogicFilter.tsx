@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Filter, Plus, X } from 'lucide-react';
+import { Sliders, Plus, X } from 'lucide-react';
 
 interface FilterCriteria {
     id: string;
@@ -26,10 +26,10 @@ export const LogicFilter: React.FC = () => {
         <div className="p-4 bg-white border border-slate-200 rounded-lg shadow-sm w-full">
             <div className="flex justify-between items-center mb-3">
                 <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
-                    <Filter size={12}/> Advanced Filters
+                    <Sliders size={12} /> Advanced Filters
                 </h4>
                 <button onClick={addFilter} className="text-nexus-600 hover:text-nexus-700 text-xs font-medium flex items-center gap-1">
-                    <Plus size={12}/> Add Criteria
+                    <Plus size={12} /> Add Criteria
                 </button>
             </div>
             <div className="space-y-2">
@@ -49,7 +49,7 @@ export const LogicFilter: React.FC = () => {
                             <option>Greater Than</option>
                         </select>
                         <input type="text" className="text-sm border-slate-300 rounded py-1 px-2 flex-1 focus:ring-nexus-500 focus:border-nexus-500" defaultValue={f.value} />
-                        <button onClick={() => removeFilter(f.id)} className="text-slate-400 hover:text-red-500"><X size={14}/></button>
+                        <button onClick={() => removeFilter(f.id)} className="text-slate-400 hover:text-red-500"><X size={14} /></button>
                     </div>
                 ))}
             </div>

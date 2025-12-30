@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useProjectState } from '../../hooks';
-import { Plus, CheckCircle, Clock, XCircle, LockKeyhole, Save } from 'lucide-react';
+import { Plus, CheckCircle, Clock, XCircle, Lock, Save } from 'lucide-react';
 import { BudgetLogItem } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -18,7 +18,7 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
     const { project } = useProjectState(projectId);
     const { hasPermission, user } = usePermissions();
     const canWriteBudget = hasPermission('financials:write');
-    
+
     // Panel State
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<BudgetLogItem>>({
@@ -38,7 +38,7 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
     }, [project]);
 
     const getStatusIcon = (status: BudgetLogItem['status']) => {
-        switch(status) {
+        switch (status) {
             case 'Approved': return <CheckCircle size={14} className="text-green-500" />;
             case 'Pending': return <Clock size={14} className="text-yellow-500" />;
             case 'Not Approved': return <XCircle size={14} className="text-red-500" />;
@@ -72,32 +72,32 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                     <p className="text-xs font-medium text-slate-500">Original Budget</p>
                     <p className="text-lg font-bold text-slate-800">{formatCurrency(project.originalBudget)}</p>
                 </div>
-                 <div className="p-3 bg-white rounded-lg border border-slate-200">
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <p className="text-xs font-medium text-slate-500">Net Changes</p>
                     <p className="text-lg font-bold text-green-600">{formatCurrency(budgetSummary.approvedChanges)}</p>
                 </div>
-                 <div className="p-3 bg-white rounded-lg border border-slate-200">
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
                     <p className="text-xs font-medium text-slate-500">Current Budget</p>
                     <p className="text-lg font-bold text-slate-800">{formatCurrency(budgetSummary.currentBudget)}</p>
                 </div>
-                 <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                     <p className="text-xs font-medium text-yellow-700">Proposed Budget</p>
                     <p className="text-lg font-bold text-yellow-800">{formatCurrency(budgetSummary.proposedBudget)}</p>
                 </div>
             </div>
             <div className="p-4 border-b border-slate-200 flex justify-end items-center">
-                 {canWriteBudget ? (
-                    <button 
+                {canWriteBudget ? (
+                    <button
                         onClick={() => setIsPanelOpen(true)}
                         className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium"
                     >
                         <Plus size={16} /> Log Budget Change
                     </button>
-                 ) : (
+                ) : (
                     <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200">
-                        <LockKeyhole size={14} /> Budget Log Locked
+                        <Lock size={14} /> Budget Log Locked
                     </div>
-                 )}
+                )}
             </div>
             <div className="flex-1 overflow-auto">
                 <table className="min-w-full divide-y divide-slate-200">
@@ -147,10 +147,10 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Change Type / Source</label>
-                        <select 
+                        <select
                             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
                             value={newItem.source}
-                            onChange={e => setNewItem({...newItem, source: e.target.value})}
+                            onChange={e => setNewItem({ ...newItem, source: e.target.value })}
                         >
                             <option>Management Reserve</option>
                             <option>Contingency Drawdown</option>
@@ -160,9 +160,9 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                        <Input 
-                            value={newItem.description} 
-                            onChange={e => setNewItem({...newItem, description: e.target.value})}
+                        <Input
+                            value={newItem.description}
+                            onChange={e => setNewItem({ ...newItem, description: e.target.value })}
                             placeholder="Reason for budget adjustment..."
                         />
                     </div>
@@ -170,11 +170,11 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                         <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                            <input 
-                                type="number" 
+                            <input
+                                type="number"
                                 className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
                                 value={newItem.amount}
-                                onChange={e => setNewItem({...newItem, amount: parseFloat(e.target.value)})}
+                                onChange={e => setNewItem({ ...newItem, amount: parseFloat(e.target.value) })}
                                 placeholder="0.00"
                             />
                         </div>
@@ -182,10 +182,10 @@ const BudgetLog: React.FC<BudgetLogProps> = ({ projectId }) => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                        <select 
+                        <select
                             className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
                             value={newItem.status}
-                            onChange={e => setNewItem({...newItem, status: e.target.value as any})}
+                            onChange={e => setNewItem({ ...newItem, status: e.target.value as any })}
                         >
                             <option value="Pending">Pending Approval</option>
                             <option value="Approved">Approved (Immediate)</option>

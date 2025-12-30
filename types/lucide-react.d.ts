@@ -1,7 +1,8 @@
-declare module 'lucide-react' {
-  import { ComponentType, SVGProps } from 'react';
+declare module "lucide-react" {
+  import { ComponentType, SVGProps } from "react";
 
-  export interface LucideProps extends Partial<Omit<SVGProps<SVGSVGElement>, 'ref'>> {
+  export interface LucideProps
+    extends Partial<Omit<SVGProps<SVGSVGElement>, "ref">> {
     size?: string | number;
     absoluteStrokeWidth?: boolean;
     className?: string;
@@ -49,14 +50,14 @@ declare module 'lucide-react' {
   export const HardHat: LucideIcon;
   export const Landmark: LucideIcon;
   export const Layers: LucideIcon;
-  export const Layers3: LucideIcon;
+  export const Layers: LucideIcon;
   export const LayoutDashboard: LucideIcon;
   export const LayoutGrid: LucideIcon;
   export const Leaf: LucideIcon;
   export const List: LucideIcon;
   export const ListFilter: LucideIcon;
   export const Loader2: LucideIcon;
-  export const LockKeyhole: LucideIcon;
+  export const Lock: LucideIcon;
   export const LogOut: LucideIcon;
   export const Map: LucideIcon;
   export const MessageSquare: LucideIcon;

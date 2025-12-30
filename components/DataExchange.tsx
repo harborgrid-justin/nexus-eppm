@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useData } from '../context/DataContext';
-import { Database, UploadCloud, Download, CheckCircle, XCircle, FileText, FileCode, FileSpreadsheet, AlertCircle, Loader2, LockKeyhole } from 'lucide-react';
+import { Database, UploadCloud, Download, CheckCircle, XCircle, FileText, FileCode, FileSpreadsheet, AlertCircle, Loader2, Lock } from 'lucide-react';
 import { DataJob, Project } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { formatBytes } from '../utils/dataExchangeUtils';
@@ -222,7 +222,7 @@ const DataExchange: React.FC = () => {
                 <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6 flex flex-col relative`}>
                     {!canExchange && (
                         <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-slate-500">
-                            <LockKeyhole size={32} className="mb-2 text-slate-400"/>
+                            <Lock size={32} className="mb-2 text-slate-400"/>
                             <p className="font-semibold">Access Restricted</p>
                             <p className="text-xs">You do not have permission to import data.</p>
                         </div>
@@ -303,7 +303,7 @@ const DataExchange: React.FC = () => {
                 <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6 flex flex-col relative`}>
                     {!canExchange && (
                         <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-slate-500">
-                            <LockKeyhole size={32} className="mb-2 text-slate-400"/>
+                            <Lock size={32} className="mb-2 text-slate-400"/>
                             <p className="font-semibold">Access Restricted</p>
                             <p className="text-xs">You do not have permission to export data.</p>
                         </div>

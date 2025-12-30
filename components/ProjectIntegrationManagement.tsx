@@ -44,7 +44,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
     <div className="animate-in fade-in duration-300">
         {/* Primary Stats */}
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap} mb-6`}>
-        <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={LucideIcons.GanttChart} />
+        <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} tasks complete`} icon={LucideIcons.BarChart2} />
         {/* Updated to show Committed Cost impact */}
         <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`Includes ${formatCompactCurrency(financials.totalCommitted)} committed`} icon={LucideIcons.DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
         <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} high-impact`} icon={LucideIcons.AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
@@ -59,7 +59,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
                <p className="text-xs font-bold text-orange-700 uppercase">Scope Creep (Rate)</p>
                <p className="text-xl font-bold text-orange-900">{phase2Metrics.scopeCreep.toFixed(1)}%</p>
             </div>
-            <LucideIcons.OctagonAlert className="text-orange-400" size={24} />
+            <LucideIcons.AlertTriangle className="text-orange-400" size={24} />
          </div>
          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center justify-between">
             <div>
@@ -138,7 +138,7 @@ const ProjectIntegrationManagement: React.FC<ProjectIntegrationManagementProps> 
                     <button className="px-4 py-2 bg-nexus-600 text-white rounded-md text-sm font-medium hover:bg-nexus-700">Approve Charter</button>
                   ) : (
                     <div className="flex items-center gap-1 text-xs text-slate-400 font-medium bg-white px-3 py-2 border rounded">
-                        <LucideIcons.LockKeyhole size={12} /> Approval Locked
+                        <LucideIcons.Lock size={12} /> Approval Locked
                     </div>
                   )}
               </div>

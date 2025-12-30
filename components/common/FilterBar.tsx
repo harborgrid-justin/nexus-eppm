@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search, Sliders } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
@@ -32,7 +32,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           className="w-full sm:w-64"
         />
         {onFilterClick && (
-          <Button variant="secondary" size="md" icon={Filter} onClick={onFilterClick}>
+          <Button variant="secondary" size="md" icon={Sliders} onClick={onFilterClick}>
             Filter
           </Button>
         )}

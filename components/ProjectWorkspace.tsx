@@ -43,7 +43,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       label: 'Planning',
       items: [
         { id: 'scope', label: 'Scope', icon: LucideIcons.Sliders },
-        { id: 'schedule', label: 'Schedule', icon: LucideIcons.GanttChart },
+        { id: 'schedule', label: 'Schedule', icon: LucideIcons.Calendar },
         { id: 'cost', label: 'Cost', icon: LucideIcons.DollarSign },
         { id: 'quality', label: 'Quality', icon: LucideIcons.ShieldCheck },
       ]
@@ -68,7 +68,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       ]
     }
   ], []);
-  
+
   const handleGroupChange = (groupId: string) => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
@@ -79,7 +79,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
   const renderContent = () => {
     if (!project) {
-        return <div className="p-6">Loading project details...</div>;
+      return <div className="p-6">Loading project details...</div>;
     }
     switch (activeArea) {
       case 'integration':
@@ -87,9 +87,9 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       case 'scope':
         return <ScopeManagement projectId={projectId} />;
       case 'schedule':
-        return scheduleView === 'gantt' 
-            ? <ProjectGantt project={project} /> 
-            : <NetworkDiagram project={project} />;
+        return scheduleView === 'gantt'
+          ? <ProjectGantt project={project} />
+          : <NetworkDiagram project={project} />;
       case 'cost':
         return <CostManagement projectId={projectId} />;
       case 'risk':
@@ -101,11 +101,11 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       case 'procurement':
         return <ProcurementManagement projectId={projectId} />;
       case 'quality':
-         return <QualityManagement projectId={projectId} />;
+        return <QualityManagement projectId={projectId} />;
       case 'communications':
-         return <CommunicationsManagement projectId={projectId} />;
+        return <CommunicationsManagement projectId={projectId} />;
       case 'resources':
-         return <ResourceManagement projectId={projectId} />;
+        return <ResourceManagement projectId={projectId} />;
       case 'documents':
         return <DocumentControl projectId={projectId} />;
       default:
@@ -119,7 +119,7 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
 
   return (
     <div className="h-full w-full flex flex-col bg-slate-100 animate-in fade-in duration-300">
-      <ModuleNavigation 
+      <ModuleNavigation
         groups={navGroups}
         activeGroup={activeGroup}
         activeItem={activeArea}
@@ -130,18 +130,18 @@ const ProjectWorkspace: React.FC<ProjectWorkspaceProps> = ({ projectId }) => {
       {/* Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {activeArea === 'schedule' && (
-            <div className="absolute top-4 right-4 md:right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
-                <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><LucideIcons.GanttChart size={18} /></button>
-                <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><LucideIcons.Network size={18} /></button>
-            </div>
+          <div className="absolute top-4 right-4 md:right-6 flex bg-slate-200 p-1 rounded-lg border border-slate-300 flex-shrink-0 z-30 shadow-sm opacity-90 hover:opacity-100 transition-opacity">
+            <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Gantt View"><LucideIcons.Calendar size={18} /></button>
+            <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-700'}`} title="Network Diagram"><LucideIcons.Network size={18} /></button>
+          </div>
         )}
         <ErrorBoundary name={`${activeArea} Module`}>
           <Suspense fallback={
             <div className="flex items-center justify-center h-full w-full bg-slate-50">
-                <div className="text-center">
-                    <LucideIcons.Loader2 size={32} className="animate-spin text-nexus-500 mx-auto mb-2" />
-                    <p className="text-slate-500 text-sm">Loading Module...</p>
-                </div>
+              <div className="text-center">
+                <LucideIcons.Loader2 size={32} className="animate-spin text-nexus-500 mx-auto mb-2" />
+                <p className="text-slate-500 text-sm">Loading Module...</p>
+              </div>
             </div>
           }>
             {renderContent()}
