@@ -1,3 +1,4 @@
+
 import { Stakeholder } from './project';
 import { PortfolioRisk, RiskResponseAction } from './risk';
 
@@ -99,7 +100,7 @@ export interface ProgramStakeholder extends Stakeholder {
 
 export interface ProgramCommunicationItem {
   id: string;
-  programId?: string;
+  programId: string;
   audience: string;
   content: string;
   frequency: string;

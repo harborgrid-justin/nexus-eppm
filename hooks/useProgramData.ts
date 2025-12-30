@@ -81,17 +81,14 @@ export const useProgramData = (programId: string | null) => {
       };
   }, [state.programAllocations, state.programFundingGates, programId]);
 
-  // --- MOCKED STAKEHOLDER DATA (Still Mocked) ---
-  const programStakeholders: ProgramStakeholder[] = useMemo(() => [
-      { id: 'PS-01', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'City Council', role: 'Regulator', category: 'Strategic', engagementLevel: 'Supportive', influence: 'High', interest: 'High', engagementStrategy: 'Manage Closely' },
-      { id: 'PS-02', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'Local Business Assoc.', role: 'Impacted Group', category: 'Operational', engagementLevel: 'Resistant', influence: 'Medium', interest: 'High', engagementStrategy: 'Keep Informed' },
-      { id: 'PS-03', projectId: programId || 'PRG-001', programId: programId || 'PRG-001', name: 'Engineering Corps', role: 'Execution Team', category: 'Delivery', engagementLevel: 'Supportive', influence: 'Low', interest: 'Medium', engagementStrategy: 'Monitor' }
-  ], [programId]);
+  // --- STAKEHOLDER & COMMS DATA (From State) ---
+  const programStakeholders = useMemo(() =>
+    state.programStakeholders.filter(s => s.programId === programId),
+  [state.programStakeholders, programId]);
 
-  const communicationPlan: ProgramCommunicationItem[] = useMemo(() => [
-      { id: 'PC-01', audience: 'City Council', content: 'Milestone Progress & Risk Report', frequency: 'Monthly', channel: 'Formal Presentation', owner: 'Program Manager' },
-      { id: 'PC-02', audience: 'Local Business Assoc.', content: 'Construction Disruption Schedule', frequency: 'Weekly', channel: 'Email Newsletter', owner: 'Comms Lead' }
-  ], []);
+  const communicationPlan = useMemo(() =>
+    state.programCommunicationPlan.filter(c => c.programId === programId),
+  [state.programCommunicationPlan, programId]);
 
   // --- MOCKED QUALITY DATA ---
   const qualityStandards: ProgramQualityStandard[] = useMemo(() => [
@@ -130,24 +127,10 @@ export const useProgramData = (programId: string | null) => {
       { id: 'TS-02', name: 'Vendor Switch', description: 'Change steel supplier to reduce cost by 10%.', benefitValue: 150000, costImpact: 50000, riskScore: 20, recommendation: 'Reject' }
   ], []);
 
-  // --- MOCKED STAGE GATES ---
-  const programStageGates: ProgramStageGate[] = useMemo(() => [
-      {
-          id: 'PSG-01', name: 'Gate 1: Initiation Approval', type: 'Funding', plannedDate: '2023-01-15', actualDate: '2023-01-20', status: 'Approved', 
-          criteria: [{ id: 'C1', description: 'Business Case Signed', status: 'Met' }, { id: 'C2', description: 'Initial Funding Secured', status: 'Met' }], 
-          approvers: ['Executive Steering Committee']
-      },
-      {
-          id: 'PSG-02', name: 'Gate 2: Architecture Lock', type: 'Architecture', plannedDate: '2024-02-01', actualDate: '2024-02-15', status: 'Conditional', 
-          criteria: [{ id: 'C1', description: 'High Level Design Approved', status: 'Met' }, { id: 'C2', description: 'Security Audit Passed', status: 'Not Met', notes: 'Pending pen-test results' }], 
-          approvers: ['Chief Architect', 'CTO']
-      },
-      {
-          id: 'PSG-03', name: 'Gate 3: Construction Mobilization', type: 'Scope', plannedDate: '2024-08-01', status: 'Pending', 
-          criteria: [{ id: 'C1', description: 'Permits Acquired', status: 'Not Met' }, { id: 'C2', description: 'Contractor Onboarded', status: 'Met' }], 
-          approvers: ['Program Sponsor', 'Operations Dir']
-      }
-  ], []);
+  // --- STAGE GATES (From State) ---
+  const programStageGates = useMemo(() => 
+    state.programStageGates.filter(g => g.programId === programId),
+  [state.programStageGates, programId]);
 
   // --- INTEGRATED CHANGE (From State) ---
   const integratedChanges = useMemo(() => 

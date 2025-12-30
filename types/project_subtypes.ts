@@ -8,12 +8,13 @@ export interface TeamCharter {
 
 export interface Stakeholder {
   id: string;
-  projectId: string;
+  projectId?: string; // Made optional
   name: string;
   role: string;
   interest: 'High' | 'Medium' | 'Low';
   influence: 'High' | 'Medium' | 'Low';
   engagementStrategy: string;
+  programId?: string; // Added for program context
 }
 
 export interface StakeholderEngagement {

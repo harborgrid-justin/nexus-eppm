@@ -44,6 +44,8 @@ export interface Project {
   calculatedPriorityScore: number;
   category: string;
   businessCase?: string;
+  lastUpdated?: string; // New field for logic hooks
+  updatedBy?: string;   // New field for logic hooks
   
   // Governance
   teamCharter?: TeamCharter;

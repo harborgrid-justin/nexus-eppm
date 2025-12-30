@@ -1,0 +1,77 @@
+
+import { DataState } from './DataContext';
+import { 
+    MOCK_PROJECTS, MOCK_RESOURCES, MOCK_EXPENSES, MOCK_EXPENSE_CATEGORIES, MOCK_DATA_JOBS, 
+    MOCK_ACTIVITY_CODES, MOCK_FUNDING_SOURCES, MOCK_PROCUREMENT_PACKAGES, MOCK_SOLICITATIONS, 
+    MOCK_CONTRACTS, MOCK_PURCHASE_ORDERS, MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_BENEFITS, 
+    MOCK_PORTFOLIO_RISKS, MOCK_PROGRAMS, MOCK_STAKEHOLDERS, MOCK_COMM_LOGS, MOCK_QUALITY_REPORTS, 
+    MOCK_DEFECTS, MOCK_BUDGET_ITEMS, MOCK_RISKS, MOCK_ISSUES, MOCK_RBS, MOCK_ISSUE_CODES, 
+    EXTENSIONS_REGISTRY, MOCK_QUALITY_STANDARDS, MOCK_ENTERPRISE_ROLES, MOCK_ENTERPRISE_SKILLS, 
+    MOCK_DOCUMENTS, MOCK_EPS, MOCK_OBS, MOCK_CALENDARS, MOCK_INTEGRATED_CHANGES, MOCK_PROGRAM_STAGE_GATES,
+    MOCK_PROGRAM_STAKEHOLDERS, MOCK_COMMUNICATION_PLAN
+} from '../constants';
+
+// Only includes static initial data
+export const initialState: DataState = {
+  projects: MOCK_PROJECTS,
+  resources: MOCK_RESOURCES,
+  expenses: MOCK_EXPENSES,
+  expenseCategories: MOCK_EXPENSE_CATEGORIES,
+  dataJobs: MOCK_DATA_JOBS,
+  extensions: EXTENSIONS_REGISTRY,
+  activityCodes: MOCK_ACTIVITY_CODES,
+  fundingSources: MOCK_FUNDING_SOURCES,
+  procurementPackages: MOCK_PROCUREMENT_PACKAGES,
+  solicitations: MOCK_SOLICITATIONS,
+  contracts: MOCK_CONTRACTS,
+  purchaseOrders: MOCK_PURCHASE_ORDERS,
+  supplierReviews: MOCK_SUPPLIER_REVIEWS,
+  claims: MOCK_CLAIMS,
+  makeOrBuyAnalysis: [],
+  benefits: MOCK_BENEFITS,
+  portfolioRisks: MOCK_PORTFOLIO_RISKS,
+  programs: MOCK_PROGRAMS,
+  stakeholders: MOCK_STAKEHOLDERS,
+  communicationLogs: MOCK_COMM_LOGS,
+  qualityReports: MOCK_QUALITY_REPORTS,
+  nonConformanceReports: MOCK_DEFECTS,
+  changeOrders: [],
+  budgetItems: MOCK_BUDGET_ITEMS,
+  risks: MOCK_RISKS,
+  issues: MOCK_ISSUES,
+  rbs: MOCK_RBS,
+  issueCodes: MOCK_ISSUE_CODES,
+  vendors: [], // Populate if needed
+  integrations: [], // Populate if needed
+  userDefinedFields: [],
+  qualityStandards: MOCK_QUALITY_STANDARDS,
+  roles: MOCK_ENTERPRISE_ROLES,
+  skills: MOCK_ENTERPRISE_SKILLS,
+  documents: MOCK_DOCUMENTS,
+  eps: MOCK_EPS,
+  obs: MOCK_OBS,
+  calendars: MOCK_CALENDARS,
+  // ... Initialize empty arrays for program constructs
+  strategicGoals: [],
+  programObjectives: [],
+  programRisks: [],
+  programIssues: [],
+  governanceRoles: [],
+  governanceEvents: [],
+  programAllocations: [],
+  programFundingGates: [],
+  programStageGates: MOCK_PROGRAM_STAGE_GATES,
+  integratedChanges: MOCK_INTEGRATED_CHANGES,
+  programStakeholders: MOCK_PROGRAM_STAKEHOLDERS,
+  programCommunicationPlan: MOCK_COMMUNICATION_PLAN,
+  governance: {
+    alerts: [],
+    auditLog: [],
+    exchangeRates: { 'USD': 1 },
+    inflationRate: 0.03,
+    riskTolerance: 'Moderate',
+    strategicWeights: {},
+    vendorBlacklist: []
+  },
+  errors: [],
+};

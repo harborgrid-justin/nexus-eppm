@@ -49,11 +49,12 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
     }
   };
 
-  const updateScore = (groupIndex: number, field: keyof typeof readinessScores[0], value: number) => {
+  const updateScore = (groupIndex: number, field: 'awareness' | 'desire' | 'knowledge' | 'ability' | 'reinforcement', value: number) => {
       const newScores = [...readinessScores];
-      // @ts-ignore
-      newScores[groupIndex][field] = value;
-      setReadinessScores(newScores);
+      if (newScores[groupIndex]) {
+          newScores[groupIndex] = { ...newScores[groupIndex], [field]: value };
+          setReadinessScores(newScores);
+      }
   };
 
   return (
@@ -69,7 +70,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-start">
                         <div>
                             <h3 className="font-bold text-slate-800 text-lg">{change.title}</h3>
-                            <p className="text-sm text-slate-500">{change.description}</p>
+                            <p className="text-sm text-slate-500 mt-1">{change.description}</p>
                         </div>
                         <Badge variant={change.severity === 'High' ? 'danger' : 'warning'}>{change.type}</Badge>
                     </div>
@@ -118,6 +119,13 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                     </div>
                 </div>
             ))}
+            
+            {integratedChanges.length === 0 && (
+                 <div className="col-span-2 text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                     <RefreshCw size={48} className="mx-auto text-slate-300 mb-4" />
+                     <p className="text-slate-500">No integrated change requests found for this program.</p>
+                 </div>
+            )}
         </div>
 
         {/* Impact Analysis Panel */}
@@ -193,25 +201,27 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
             }
         >
             <div className="space-y-6">
-                <p className="text-sm text-slate-600">
-                    Adjust the ADKAR scores (0-100) for each stakeholder group based on recent surveys and interviews.
+                <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded border border-slate-200">
+                    Adjust the <strong>ADKAR</strong> scores (0-100) for each stakeholder group based on recent surveys, focus groups, and interviews.
                 </p>
                 
                 {readinessScores.map((group, idx) => (
-                    <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h4 className="font-bold text-slate-800 mb-4">{group.stakeholderGroup}</h4>
+                    <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">{group.stakeholderGroup}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            {['awareness', 'desire', 'knowledge', 'ability', 'reinforcement'].map((dim) => (
+                            {(['awareness', 'desire', 'knowledge', 'ability', 'reinforcement'] as const).map((dim) => (
                                 <div key={dim} className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase block">{dim}</label>
                                     <input 
                                         type="range" 
                                         min="0" max="100" 
-                                        value={(group as any)[dim]} 
-                                        onChange={(e) => updateScore(idx, dim as any, parseInt(e.target.value))}
+                                        value={group[dim]} 
+                                        onChange={(e) => updateScore(idx, dim, parseInt(e.target.value))}
                                         className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-nexus-600"
                                     />
-                                    <div className="text-center font-mono font-bold text-slate-700">{(group as any)[dim]}</div>
+                                    <div className={`text-center font-mono font-bold ${group[dim] < 50 ? 'text-red-500' : 'text-slate-700'}`}>
+                                        {group[dim]}
+                                    </div>
                                 </div>
                             ))}
                         </div>
