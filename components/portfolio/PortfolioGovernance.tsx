@@ -23,11 +23,11 @@ const PortfolioGovernance: React.FC = () => {
                 <div className="space-y-4">
                     <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
                         <h4 className="font-bold text-blue-900 text-sm">Investment Committee</h4>
-                        <p className="text-xs text-blue-700 mt-1">Approves new investments > $1M. Meets Quarterly.</p>
+                        <p className="text-xs text-blue-700 mt-1">Approves new investments {'>'} $1M. Meets Quarterly.</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                         <h4 className="font-bold text-slate-900 text-sm">Steering Group</h4>
-                        <p className="text-xs text-slate-600 mt-1">Approves scope changes > 10%. Meets Monthly.</p>
+                        <p className="text-xs text-slate-600 mt-1">Approves scope changes {'>'} 10%. Meets Monthly.</p>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                         <h4 className="font-bold text-slate-900 text-sm">Architecture Board</h4>

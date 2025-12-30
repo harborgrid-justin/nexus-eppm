@@ -5,7 +5,7 @@ import { BudgetLogItem, ProjectFunding, CostEstimate, CostManagementPlan } from 
 import { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement } from './project_subtypes'; 
 import { ActivityCodeScope } from './common';
 
-export { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement };
+export type { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement };
 
 export interface Project {
   id: string; // Primary Key
