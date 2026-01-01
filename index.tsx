@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ensureElement } from './utils/validationUtils';
 
@@ -16,7 +16,7 @@ window.addEventListener('unhandledrejection', (event) => {
 const mountApp = () => {
   try {
     const rootElement = ensureElement('root');
-    const root = ReactDOM.createRoot(rootElement);
+    const root = createRoot(rootElement);
     
     root.render(
       <React.StrictMode>

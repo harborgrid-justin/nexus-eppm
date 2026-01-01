@@ -7,7 +7,6 @@ import { CommandPalette } from '../common/CommandPalette';
 import { ActivitySidecar } from '../common/ActivitySidecar';
 import { useData } from '../../context/DataContext';
 import { useFeatureFlag } from '../../context/FeatureFlagContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from '../ErrorBoundary';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
@@ -69,10 +68,16 @@ const MainLayout: React.FC = () => {
         />
         <main className="flex-1 overflow-hidden relative">
            <ErrorBoundary name="Main Content">
-             {isPending && <SuspenseFallback />}
-             <Suspense fallback={<SuspenseFallback />}>
-               <Outlet />
-             </Suspense>
+             <div className="h-full w-full relative flex flex-col">
+                 {isPending && (
+                    <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
+                        <SuspenseFallback />
+                    </div>
+                 )}
+                 <Suspense fallback={<SuspenseFallback />}>
+                   <Outlet />
+                 </Suspense>
+             </div>
            </ErrorBoundary>
         </main>
         <AppFooter />
