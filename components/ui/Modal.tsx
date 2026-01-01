@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const Modal: React.FC<ModalProps> = ({
   size = 'lg' 
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,32 +51,32 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-300">
       <div 
         ref={modalRef}
-        className={`bg-white rounded-xl shadow-2xl flex flex-col w-full ${sizeClasses[size]} max-h-[90vh] animate-in zoom-in-95 duration-200`}
+        className={`${theme.colors.surface} ${theme.layout.borderRadius} shadow-2xl flex flex-col w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <div className="text-lg font-bold text-slate-900">{title}</div>
+        <div className={`flex items-center justify-between px-8 py-5 border-b ${theme.colors.border.replace('border-', 'border-b-')} ${theme.colors.surface}`}>
+          <div className={`${theme.typography.h3} text-slate-900`}>{title}</div>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 transition-colors rounded-full hover:text-slate-600 hover:bg-slate-100"
+            className="p-2 text-slate-400 transition-all rounded-full hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-nexus-500"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className={`flex-1 p-8 overflow-y-auto ${theme.colors.surface} scrollbar-thin`}>
           {children}
         </div>
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-xl">
+          <div className={`flex items-center justify-end gap-3 px-8 py-5 ${theme.colors.background} border-t ${theme.colors.border.replace('border-', 'border-t-')}`}>
             {footer}
           </div>
         )}

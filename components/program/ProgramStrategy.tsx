@@ -1,14 +1,8 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import * as LucideIcons from 'lucide-react';
+import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-
-const { ChevronDown: ArrowDown, Folder, Plus, X, Save, CheckCircle, FileText } = LucideIcons;
-const Target = (LucideIcons as any).Target || CheckCircle;
-const CheckSquare = (LucideIcons as any).CheckSquare || CheckCircle;
-const Edit2 = (LucideIcons as any).Edit2 || FileText;
-const Trash2 = (LucideIcons as any).Trash2 || X;
 import { useData } from '../../context/DataContext';
 import { StrategicGoal, ProgramObjective } from '../../types';
 import { generateId } from '../../utils/formatters';
@@ -44,16 +38,16 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
 
   const handleDeleteGoal = (id: string) => {
       if (confirm('Are you sure you want to delete this Strategic Goal?')) {
-          dispatch({ type: 'DELETE_STRATEGIC_GOAL', payload: id });
+          dispatch({ type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL', payload: id });
       }
   };
 
   const saveGoal = (goal: StrategicGoal) => {
       if (!goal.id) {
           goal.id = generateId('SG');
-          dispatch({ type: 'ADD_STRATEGIC_GOAL', payload: goal });
+          dispatch({ type: 'GOVERNANCE_ADD_STRATEGIC_GOAL', payload: goal });
       } else {
-          dispatch({ type: 'UPDATE_STRATEGIC_GOAL', payload: goal });
+          dispatch({ type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL', payload: goal });
       }
   };
 
@@ -70,21 +64,21 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
 
   const handleDeleteObj = (id: string) => {
       if (confirm('Are you sure you want to delete this Objective?')) {
-          dispatch({ type: 'DELETE_PROGRAM_OBJECTIVE', payload: id });
+          dispatch({ type: 'PROGRAM_DELETE_OBJECTIVE', payload: id });
       }
   };
 
   const saveObj = (obj: ProgramObjective) => {
       if (!obj.id) {
           obj.id = generateId('PO');
-          dispatch({ type: 'ADD_PROGRAM_OBJECTIVE', payload: obj });
+          dispatch({ type: 'PROGRAM_ADD_OBJECTIVE', payload: obj });
       } else {
-          dispatch({ type: 'UPDATE_PROGRAM_OBJECTIVE', payload: obj });
+          dispatch({ type: 'PROGRAM_UPDATE_OBJECTIVE', payload: obj });
       }
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 relative`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
         <div className="flex items-center gap-2 mb-4">
             <Target className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Strategic Alignment Matrix</h2>
@@ -93,8 +87,8 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
         <div className="relative">
             {/* Layer 1: Corporate Strategy */}
             <div className="mb-12">
-                <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">1. Organizational Strategy</h3>
+                <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
+                    <h3 className={`${theme.typography.label} text-slate-400`}>1. Organizational Strategy</h3>
                     <button onClick={handleAddGoal} className="text-xs flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-slate-600 font-medium transition-colors">
                         <Plus size={12}/> Add Goal
                     </button>
@@ -114,7 +108,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         </div>
                     ))}
                     {strategicGoals.length === 0 && (
-                        <div className="col-span-2 p-8 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400">
+                        <div className={`col-span-2 p-8 border-2 border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center text-slate-400`}>
                             No strategic goals defined for this program.
                         </div>
                     )}
@@ -123,8 +117,8 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
 
             {/* Layer 2: Program Objectives */}
             <div className="mb-12">
-                <div className="flex justify-between items-center mb-4 border-b border-slate-200 pb-2">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">2. Program Objectives</h3>
+                <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
+                    <h3 className={`${theme.typography.label} text-slate-400`}>2. Program Objectives</h3>
                     <button onClick={handleAddObj} className="text-xs flex items-center gap-1 bg-nexus-50 hover:bg-nexus-100 px-2 py-1 rounded text-nexus-700 font-medium transition-colors">
                         <Plus size={12}/> Add Objective
                     </button>
@@ -163,14 +157,14 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
 
             {/* Layer 3: Project Deliverables */}
             <div>
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">3. Project Execution</h3>
+                <h3 className={`${theme.typography.label} text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {projects.map(proj => {
                         // Find which objective this project supports
                         const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
                         
                         return (
-                            <div key={proj.id} className={`p-4 bg-white border border-slate-200 rounded-lg shadow-sm ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
+                            <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
                                 <div className="flex items-center gap-2 mb-2">
                                     <Folder size={16} className="text-slate-400"/>
                                     <h4 className="font-bold text-sm text-slate-900">{proj.name}</h4>

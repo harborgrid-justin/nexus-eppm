@@ -1,4 +1,8 @@
-import { Task, ProjectCalendar } from '../types';
+
+
+
+// FIX: Corrected import path for types to resolve module resolution errors.
+import { Task, ProjectCalendar, Dependency } from '../types/index';
 import { addWorkingDays, maxDate, minDate, getWorkingDaysDiff } from './dateUtils';
 
 interface CPMTask extends Task {
@@ -42,12 +46,13 @@ export const calculateCriticalPath = (tasks: Task[], calendar: ProjectCalendar):
       task.earlyStart = new Date(task.startDate);
     }
     
+    let maxPredFinish = new Date(-8640000000000000);
     for (const dep of task.dependencies) {
         const pred = taskMap.get(dep.targetId)!;
-        const potentialStart = addWorkingDays(pred.earlyFinish, dep.lag + 1, calendar);
-        if(potentialStart > task.earlyStart) {
-            task.earlyStart = potentialStart;
-        }
+        maxPredFinish = maxDate(maxPredFinish, addWorkingDays(pred.earlyFinish, dep.lag, calendar));
+    }
+    if(task.dependencies.length > 0) {
+      task.earlyStart = addWorkingDays(maxPredFinish, 1, calendar);
     }
     task.earlyFinish = addWorkingDays(task.earlyStart, task.duration > 0 ? task.duration - 1 : 0, calendar);
   }
@@ -65,15 +70,19 @@ export const calculateCriticalPath = (tasks: Task[], calendar: ProjectCalendar):
     if (task.successors.length === 0) {
       task.lateFinish = projectEndDate;
     }
-    task.lateStart = addWorkingDays(task.lateFinish, -(task.duration > 0 ? task.duration -1 : 0), calendar);
     
-    for (const dep of task.dependencies) {
-        const pred = taskMap.get(dep.targetId)!;
-        const potentialFinish = addWorkingDays(task.lateStart, -(dep.lag + 1), calendar);
-        if(potentialFinish < pred.lateFinish) {
-            pred.lateFinish = potentialFinish;
-        }
+    let minSuccStart = new Date(8640000000000000);
+    for(const succId of task.successors) {
+        const succ = taskMap.get(succId)!;
+        const dep = succ.dependencies.find(d => d.targetId === task.id)!;
+        minSuccStart = minDate(minSuccStart, addWorkingDays(succ.lateStart, -dep.lag, calendar));
     }
+
+    if(task.successors.length > 0) {
+        task.lateFinish = addWorkingDays(minSuccStart, -1, calendar);
+    }
+
+    task.lateStart = addWorkingDays(task.lateFinish, -(task.duration > 0 ? task.duration - 1 : 0), calendar);
   }
 
   // Calculate float
@@ -84,6 +93,6 @@ export const calculateCriticalPath = (tasks: Task[], calendar: ProjectCalendar):
   
   return Array.from(taskMap.values()).map(cpmTask => {
     const { earlyStart, earlyFinish, lateStart, lateFinish, float, successors, ...originalTask } = cpmTask;
-    return originalTask;
+    return originalTask as Task;
   });
 };

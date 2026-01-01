@@ -1,24 +1,22 @@
 
 import React, { useState, useMemo } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { AlertTriangle, LayoutDashboard, FileText, List, Columns, BarChart2, Sigma } from 'lucide-react';
-import ErrorBoundary from '../ErrorBoundary';
+import { ErrorBoundary } from '../ErrorBoundary';
 import RiskDashboard from './RiskDashboard';
 import RiskPlanEditor from './RiskPlanEditor';
-import RiskRegisterGrid from './RiskRegisterGrid';
+import { RiskRegisterGrid } from './RiskRegisterGrid';
 import RiskBreakdownStructure from './RiskBreakdownStructure';
 import RiskMatrix from './RiskMatrix';
 import QuantitativeAnalysis from './QuantitativeAnalysis';
 import { useTheme } from '../../context/ThemeContext';
+import { PageHeader } from '../common/PageHeader';
 
-interface RiskManagementProps {
-  projectId: string;
-}
-
-const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
+const RiskManagement: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
-  const { project } = useProjectState(projectId);
+  const { project } = useProjectWorkspace();
+  const projectId = project.id;
   const theme = useTheme();
 
   const navStructure = useMemo(() => [
@@ -56,35 +54,34 @@ const RiskManagement: React.FC<RiskManagementProps> = ({ projectId }) => {
     }
 
     switch(activeView) {
-      case 'dashboard': return <RiskDashboard projectId={projectId} />;
-      case 'plan': return <RiskPlanEditor projectId={projectId} />;
-      case 'register': return <RiskRegisterGrid projectId={projectId} />;
+      case 'dashboard': return <RiskDashboard />;
+      case 'plan': return <RiskPlanEditor />;
+      case 'register': return <RiskRegisterGrid />;
       case 'rbs': return <RiskBreakdownStructure projectId={projectId} />;
-      case 'matrix': return <RiskMatrix projectId={projectId} />;
-      case 'quantitative': return <QuantitativeAnalysis projectId={projectId} />;
-      default: return <RiskDashboard projectId={projectId} />;
+      case 'matrix': return <RiskMatrix />;
+      case 'quantitative': return <QuantitativeAnalysis />;
+      default: return <RiskDashboard />;
     }
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <div className={theme.layout.header}>
-        <div>
-          <h1 className={theme.typography.h1}><AlertTriangle className="text-red-500"/> Risk Management</h1>
-          <p className={theme.typography.small}>Identify, analyze, and respond to project uncertainty.</p>
-        </div>
-      </div>
+    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+      <PageHeader 
+        title="Risk Management" 
+        subtitle="Identify, analyze, and respond to project uncertainty."
+        icon={AlertTriangle}
+      />
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>
-            <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
+      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
+        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+            <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
                 {navStructure.map(group => (
                     <button
                         key={group.id}
                         onClick={() => handleGroupChange(group.id)}
                         className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                             activeGroup === group.id
-                            ? 'bg-nexus-600 text-white shadow-sm'
+                            ? `${theme.colors.primary} text-white shadow-sm`
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >

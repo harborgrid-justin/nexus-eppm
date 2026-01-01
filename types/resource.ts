@@ -1,16 +1,29 @@
 
 export interface Resource {
   id: string;
+  userId?: string; // Link to System User (Auth)
   name: string;
   role: string;
   type: 'Human' | 'Equipment' | 'Material';
   status: 'Active' | 'Inactive';
-  capacity: number;
+  capacity: number; // For Humans/Equipment (hrs)
   allocated: number;
   hourlyRate: number;
   skills: string[];
   costRates: any[];
   calendarId: string;
+  
+  // Physical Resource Extension
+  unitOfMeasure?: string; // For Materials (e.g., TONS, CY, EA)
+  availableQuantity?: number; // Current Stock
+  minQuantity?: number; // Reorder Point
+  location?: string; // Physical Site/Warehouse
+  
+  // Equipment Specific
+  maintenanceStatus?: 'Good' | 'Service Required' | 'Down';
+  lastMaintenanceDate?: string;
+  nextMaintenanceDate?: string;
+  serialNumber?: string;
 }
 
 export interface EnterpriseRole {

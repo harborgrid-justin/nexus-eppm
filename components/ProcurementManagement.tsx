@@ -1,6 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
-import { useProcurementData } from '../hooks';
+
+
+import React, { useState, useMemo, useTransition } from 'react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
+import { ErrorBoundary } from './ErrorBoundary';
 import ProcurementDashboard from './procurement/ProcurementDashboard';
 import VendorRegistry from './procurement/VendorRegistry';
 import ContractLifecycle from './procurement/ContractLifecycle';
@@ -8,21 +12,22 @@ import ProcurementPlanning from './procurement/ProcurementPlanning';
 import ProcurementSourcing from './procurement/ProcurementSourcing';
 import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
-import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListChecks } from 'lucide-react';
+import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListCheck } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { formatCurrency } from '../utils/formatters';
 import { PageHeader } from './common/PageHeader';
+import { MakeOrBuyAnalysisView } from './procurement/MakeOrBuyAnalysisView';
+import { SourceSelectionView } from './procurement/SourceSelectionView';
 
-interface ProcurementManagementProps {
-  projectId: string;
-}
-
-const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId }) => {
+const ProcurementManagement: React.FC = () => {
   const theme = useTheme();
-  const { state } = useData();
+  const { project } = useProjectWorkspace();
+  const projectId = project.id;
+
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
+  const [isPending, startTransition] = useTransition();
   
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
@@ -32,7 +37,7 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
       { id: 'planning', label: 'Planning', icon: FileText },
       { id: 'makebuy', label: 'Make-or-Buy', icon: Scale },
       { id: 'vendors', label: 'Vendors', icon: Users },
-      { id: 'criteria', label: 'Source Selection', icon: ListChecks },
+      { id: 'criteria', label: 'Source Selection', icon: ListCheck },
       { id: 'sourcing', label: 'Sourcing', icon: ShoppingCart },
     ]},
     { id: 'post-award', label: 'Post-Award', items: [
@@ -47,100 +52,56 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
   const handleGroupChange = (groupId: string) => {
     const newGroup = navStructure.find(g => g.id === groupId);
     if (newGroup?.items.length) {
-      setActiveGroup(groupId);
-      setActiveView(newGroup.items[0].id);
+      startTransition(() => {
+        setActiveGroup(groupId);
+        setActiveView(newGroup.items[0].id);
+      });
     }
+  };
+  
+  const handleViewChange = (viewId: string) => {
+      startTransition(() => {
+          setActiveView(viewId);
+      });
   };
 
   const activeGroupItems = useMemo(() => {
     return navStructure.find(g => g.id === activeGroup)?.items || [];
   }, [activeGroup, navStructure]);
 
-  const renderMakeOrBuy = () => (
-      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-y-auto">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><Scale className="text-nexus-600"/> Make-or-Buy Analysis</h2>
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-100">
-                  <tr>
-                      <th className="px-4 py-2 text-left font-medium text-slate-500">Item</th>
-                      <th className="px-4 py-2 text-right font-medium text-slate-500">Make Cost (Internal)</th>
-                      <th className="px-4 py-2 text-right font-medium text-slate-500">Buy Cost (Vendor)</th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-500">Rationale</th>
-                      <th className="px-4 py-2 text-left font-medium text-slate-500">Decision</th>
-                  </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                  {state.makeOrBuyAnalysis.filter(i => i.projectId === projectId).map(item => (
-                      <tr key={item.id}>
-                          <td className="px-4 py-3 font-medium text-slate-800">{item.item}</td>
-                          <td className="px-4 py-3 text-right font-mono">{formatCurrency(item.makeCost)}</td>
-                          <td className="px-4 py-3 text-right font-mono">{formatCurrency(item.buyCost)}</td>
-                          <td className="px-4 py-3 text-slate-600">{item.rationale}</td>
-                          <td className="px-4 py-3"><span className={`px-2 py-1 rounded text-xs font-bold ${item.decision === 'Buy' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{item.decision}</span></td>
-                      </tr>
-                  ))}
-                  {!state.makeOrBuyAnalysis.filter(i => i.projectId === projectId).length && <tr><td colSpan={5} className="p-4 text-center text-slate-400">No analysis items recorded.</td></tr>}
-              </tbody>
-          </table>
-      </div>
-  );
-
-  const renderSourceSelection = () => (
-      <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ListChecks className="text-nexus-600"/> Source Selection Criteria</h2>
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <p className="text-sm text-slate-600 mb-4">Criteria used to rate or score vendor proposals.</p>
-              <ul className="space-y-3">
-                  <li className="flex justify-between items-center p-2 bg-white rounded border border-slate-100">
-                      <span className="text-sm font-medium">Technical Capability</span>
-                      <span className="text-xs bg-slate-100 px-2 py-1 rounded font-bold">Weight: 35%</span>
-                  </li>
-                  <li className="flex justify-between items-center p-2 bg-white rounded border border-slate-100">
-                      <span className="text-sm font-medium">Past Performance</span>
-                      <span className="text-xs bg-slate-100 px-2 py-1 rounded font-bold">Weight: 25%</span>
-                  </li>
-                  <li className="flex justify-between items-center p-2 bg-white rounded border border-slate-100">
-                      <span className="text-sm font-medium">Price / Cost</span>
-                      <span className="text-xs bg-slate-100 px-2 py-1 rounded font-bold">Weight: 40%</span>
-                  </li>
-              </ul>
-          </div>
-      </div>
-  );
-
   const renderContent = () => {
     switch (activeView) {
-        case 'dashboard': return <ProcurementDashboard projectId={projectId} />;
+        case 'dashboard': return <ProcurementDashboard />;
         case 'vendors': return <VendorRegistry projectId={projectId} />;
         case 'contracts': return <ContractLifecycle projectId={projectId} />;
-        case 'makebuy': return renderMakeOrBuy();
-        case 'criteria': return renderSourceSelection();
+        case 'makebuy': return <MakeOrBuyAnalysisView projectId={projectId} />;
+        case 'criteria': return <SourceSelectionView />;
         case 'planning': return <ProcurementPlanning projectId={projectId} />;
         case 'sourcing': return <ProcurementSourcing projectId={projectId} />;
-        case 'execution': return <ProcurementExecution projectId={projectId} />;
+        case 'execution': return <ProcurementExecution />;
         case 'performance': return <SupplierPerformance projectId={projectId} />;
-        default: return <ProcurementDashboard projectId={projectId} />;
+        default: return <ProcurementDashboard />;
     }
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
        <PageHeader 
          title="Procurement Management"
          subtitle="End-to-end procurement lifecycle from planning to performance."
          icon={ShoppingCart}
        />
 
-       <div className={theme.layout.panelContainer}>
-          <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>
-            <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
+       <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
+          <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+            <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
                 {navStructure.map(group => (
                     <button
                         key={group.id}
                         onClick={() => handleGroupChange(group.id)}
                         className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                             activeGroup === group.id
-                            ? 'bg-nexus-600 text-white shadow-sm'
+                            ? `${theme.colors.primary} text-white shadow-sm`
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
@@ -152,7 +113,7 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
                 {activeGroupItems.map(item => (
                 <button
                     key={item.id}
-                    onClick={() => setActiveView(item.id)}
+                    onClick={() => handleViewChange(item.id)}
                     className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                     activeView === item.id
                         ? 'border-nexus-600 text-nexus-600'
@@ -165,8 +126,10 @@ const ProcurementManagement: React.FC<ProcurementManagementProps> = ({ projectId
                 ))}
             </nav>
           </div>
-          <div className="flex-1 overflow-hidden">
+          <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+             <ErrorBoundary>
                 {renderContent()}
+             </ErrorBoundary>
           </div>
        </div>
     </div>

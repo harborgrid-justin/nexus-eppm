@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,7 +15,7 @@ const PortfolioRisks: React.FC = () => {
     };
 
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6`}>
+        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className={theme.typography.h2}>Portfolio Risk Register</h2>
@@ -27,36 +26,38 @@ const PortfolioRisks: React.FC = () => {
                 </button>
             </div>
             
-            <div className="overflow-x-auto bg-white border border-slate-200 rounded-xl">
-                <table className="min-w-full divide-y divide-slate-200">
-                    <thead className="bg-slate-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Risk ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Score</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Owner</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {state.portfolioRisks.map(risk => (
-                            <tr key={risk.id} className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-mono text-sm text-slate-500">{risk.id}</td>
-                                <td className="px-6 py-4">
-                                    <div className="font-medium text-slate-900">{risk.description}</div>
-                                    <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-slate-600">{risk.category}</td>
-                                <td className="px-6 py-4 text-center">
-                                    <Badge variant={getScoreVariant(risk.score)}>{risk.score}</Badge>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-slate-600">{risk.status}</td>
-                                <td className="px-6 py-4 text-sm text-slate-600">{risk.owner}</td>
+            <div className={`${theme.components.card} overflow-hidden`}>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-slate-200">
+                        <thead className="bg-slate-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Risk ID</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wider">Score</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Owner</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {state.portfolioRisks.map(risk => (
+                                <tr key={risk.id} className="hover:bg-slate-50">
+                                    <td className="px-6 py-4 font-mono text-sm text-slate-500">{risk.id}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="font-medium text-slate-900">{risk.description}</div>
+                                        <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">{risk.category}</td>
+                                    <td className="px-6 py-4 text-center">
+                                        <Badge variant={getScoreVariant(risk.score)}>{risk.score}</Badge>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">{risk.status}</td>
+                                    <td className="px-6 py-4 text-sm text-slate-600">{risk.ownerId}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

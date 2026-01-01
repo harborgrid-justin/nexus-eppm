@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { Plus, Filter } from 'lucide-react';
-import RiskDetailPanel from './RiskDetailPanel'; // Updated Import
+// FIX: Changed import to correct file and aliased for usage.
+import { RiskDetailPanel as RiskDetailModal } from './RiskDetailPanel'; 
 import { useTheme } from '../../context/ThemeContext';
-import { Risk } from '../../types';
+import { Risk } from '../../types/index';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
@@ -12,23 +12,20 @@ import DataTable, { Column } from '../common/DataTable';
 import { RiskForm } from './RiskForm';
 import { useData } from '../../context/DataContext';
 
-interface RiskRegisterGridProps {
-  projectId: string;
-}
+export const RiskRegisterGrid: React.FC = () => {
+  const { project, risks } = useProjectWorkspace();
+  const projectId = project.id;
+  const { state, dispatch } = useData();
+  const theme = useTheme();
 
-const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
-  const { risks } = useProjectState(projectId);
-  const { dispatch } = useData();
-  
-  // Selection State for the Panel
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
-  
-  // Creation State for the Form Modal
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [riskToEdit, setRiskToEdit] = useState<Risk | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const theme = useTheme();
+  const getResourceName = (id: string) => {
+    return state.resources.find(r => r.id === id)?.name || 'Unknown';
+  };
 
   const getScoreVariant = (score: number): 'danger' | 'warning' | 'success' => {
     if (score >= 15) return 'danger';
@@ -37,24 +34,17 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
   };
 
   const filteredRisks = useMemo(() => {
-    if (!searchTerm) return risks || [];
-    return (risks || []).filter(r => 
+    const list = risks || [];
+    if (!searchTerm) return list;
+    return list.filter(r => 
       r.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.owner.toLowerCase().includes(searchTerm.toLowerCase())
+      getResourceName(r.ownerId).toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [risks, searchTerm]);
+  }, [risks, searchTerm, state.resources]);
 
-  // Handler for opening the "Wizard/Form" for creating new risks
   const handleCreate = () => {
     setRiskToEdit(null);
     setIsFormOpen(true);
-  };
-  
-  // Handler for opening the "Wizard/Form" for quick edit (from row action if needed)
-  const handleQuickEdit = (risk: Risk) => {
-      setRiskToEdit(risk);
-      setIsFormOpen(true);
   };
 
   const handleSaveRisk = (risk: Risk) => {
@@ -70,19 +60,19 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
       key: 'id',
       header: 'ID',
       width: 'w-24',
-      render: (risk) => <span className="font-mono text-xs text-slate-500">{risk.id}</span>,
+      render: (risk) => <span className={`font-mono text-xs ${theme.colors.text.tertiary}`}>{risk.id}</span>,
       sortable: true
     },
     {
       key: 'description',
       header: 'Description',
-      render: (risk) => <span className="font-medium text-slate-900 truncate block max-w-md" title={risk.description}>{risk.description}</span>,
+      render: (risk) => <span className={`font-medium ${theme.colors.text.primary} truncate block max-w-md`} title={risk.description}>{risk.description}</span>,
       sortable: true
     },
     {
       key: 'category',
       header: 'Category',
-      render: (risk) => <span className="text-slate-600">{risk.category}</span>,
+      render: (risk) => <span className={theme.colors.text.secondary}>{risk.category}</span>,
       sortable: true
     },
     {
@@ -96,20 +86,19 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
     {
       key: 'status',
       header: 'Status',
-      render: (risk) => <span className="text-slate-700 font-medium text-xs bg-slate-100 px-2 py-1 rounded">{risk.status}</span>,
+      render: (risk) => <span className={`${theme.colors.text.secondary} font-medium text-xs ${theme.colors.background} px-2 py-1 rounded border ${theme.colors.border}`}>{risk.status}</span>,
       sortable: true
     },
     {
-      key: 'owner',
+      key: 'ownerId',
       header: 'Owner',
-      render: (risk) => <span className="text-slate-600">{risk.owner}</span>,
+      render: (risk) => <span className={theme.colors.text.secondary}>{getResourceName(risk.ownerId)}</span>,
       sortable: true
     }
-  ], []);
+  ], [state.resources, theme]);
 
   return (
     <div className="h-full flex flex-col relative">
-      {/* Creation Modal (kept as modal for simple creation flow) */}
       <RiskForm 
           isOpen={isFormOpen} 
           onClose={() => setIsFormOpen(false)} 
@@ -118,16 +107,15 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
           existingRisk={riskToEdit}
       />
       
-      {/* Detail Panel (replaces the Detail Modal) */}
       {selectedRiskId && (
-        <RiskDetailPanel 
+        <RiskDetailModal 
             riskId={selectedRiskId} 
             projectId={projectId} 
             onClose={() => setSelectedRiskId(null)} 
         />
       )}
       
-      <div className={`p-4 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 flex-shrink-0 gap-3`}>
+      <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center ${theme.colors.background}/50 flex-shrink-0 gap-3`}>
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           <Input 
             isSearch 
@@ -145,7 +133,7 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
         <DataTable<Risk>
           data={filteredRisks}
           columns={columns}
-          onRowClick={(r) => setSelectedRiskId(r.id)} // Opens the SidePanel
+          onRowClick={(r) => setSelectedRiskId(r.id)}
           keyField="id"
           emptyMessage="No risks found matching criteria."
         />
@@ -153,5 +141,3 @@ const RiskRegisterGrid: React.FC<RiskRegisterGridProps> = ({ projectId }) => {
     </div>
   );
 };
-
-export default RiskRegisterGrid;

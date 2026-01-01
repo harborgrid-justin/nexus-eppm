@@ -1,59 +1,50 @@
 
-import React from 'react';
-import { Box } from 'lucide-react';
-import { useData } from '../../context/DataContext';
-
-interface PhysicalResource {
-    id: string;
-    name: string;
-    type: string;
-    location: string;
-    status: string;
-}
+import React, { useState } from 'react';
+import { Box, Truck, MapPin, AlertTriangle } from 'lucide-react';
+import { usePhysicalResources } from '../../hooks/usePhysicalResources';
+import { useTheme } from '../../context/ThemeContext';
+import StatCard from '../shared/StatCard';
+import { formatCompactCurrency } from '../../utils/formatters';
+import { InventoryList } from './physical/InventoryList';
+import { FleetList } from './physical/FleetList';
+import { AssetMap } from './physical/AssetMap';
 
 const PhysicalResources: React.FC = () => {
-    const { state } = useData();
+    const theme = useTheme();
+    const { inventoryAlerts, fleetMetrics, financialValuation } = usePhysicalResources();
+    const [activeTab, setActiveTab] = useState<'inventory' | 'fleet' | 'map'>('inventory');
 
-    const physicalResources: PhysicalResource[] = state.resources
-        .filter(r => r.type === 'Equipment' || r.type === 'Material')
-        .map(r => {
-            const utilizationPct = r.capacity > 0 ? (r.allocated / r.capacity) * 100 : 0;
-            return {
-                id: r.id,
-                name: r.name,
-                type: r.type || 'Equipment',
-                location: 'Central Warehouse',
-                status: utilizationPct < 20 ? 'Available' : utilizationPct < 80 ? 'In Use' : 'Allocated'
-            };
-        });
+    const renderContent = () => {
+        switch(activeTab) {
+            case 'inventory': return <InventoryList />;
+            case 'fleet': return <FleetList />;
+            case 'map': return <AssetMap />;
+            default: return null;
+        }
+    };
 
     return (
-        <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-y-auto">
-            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2"><Box className="text-orange-500"/> Physical Resource Tracking</h2>
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-                <thead className="bg-slate-100">
-                    <tr>
-                        <th className="px-4 py-2 text-left font-medium text-slate-500">Resource Name</th>
-                        <th className="px-4 py-2 text-left font-medium text-slate-500">Type</th>
-                        <th className="px-4 py-2 text-left font-medium text-slate-500">Location</th>
-                        <th className="px-4 py-2 text-left font-medium text-slate-500">Status</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                    {physicalResources.length > 0 ? physicalResources.map((res) => (
-                        <tr key={res.id}>
-                            <td className="px-4 py-3 font-medium text-slate-800">{res.name}</td>
-                            <td className="px-4 py-3 text-slate-600">{res.type}</td>
-                            <td className="px-4 py-3 text-slate-600">{res.location}</td>
-                            <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">{res.status}</span></td>
-                        </tr>
-                    )) : (
-                        <tr>
-                            <td colSpan={4} className="px-4 py-8 text-center text-slate-400">No physical resources found</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+        <div className="h-full flex flex-col bg-slate-50/30 overflow-hidden animate-in fade-in duration-300">
+            <div className="bg-white border-b border-slate-200 p-6 flex-shrink-0 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard title="Fleet Availability" value={`${fleetMetrics.availabilityRate.toFixed(0)}%`} icon={Truck} />
+                    <StatCard title="Inventory Value" value={formatCompactCurrency(financialValuation)} icon={Box} />
+                    <StatCard title="Critical Shortages" value={inventoryAlerts.length} icon={AlertTriangle} trend={inventoryAlerts.length > 0 ? 'down' : 'up'} />
+                    <StatCard title="Fleet Downtime" value={fleetMetrics.down} icon={Box} trend={fleetMetrics.down > 0 ? 'down' : 'up'} />
+                </div>
+            </div>
+            <div className="px-6 border-b border-slate-200 bg-white flex-shrink-0">
+                <nav className="flex space-x-8">
+                    {[ { id: 'inventory', label: 'Material Stock', icon: Box }, { id: 'fleet', label: 'Fleet Mgmt', icon: Truck }, { id: 'map', label: 'Asset Map', icon: MapPin } ].map(tab => (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex items-center gap-2 py-4 px-1 border-b-2 text-sm font-bold ${activeTab === tab.id ? 'border-nexus-600 text-nexus-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                            <tab.icon size={16} /> {tab.label}
+                        </button>
+                    ))}
+                </nav>
+            </div>
+            <div className="flex-1 overflow-hidden flex flex-col min-w-0 p-6 relative">
+                {renderContent()}
+            </div>
         </div>
     );
 };

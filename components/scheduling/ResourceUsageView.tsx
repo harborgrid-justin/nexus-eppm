@@ -1,5 +1,6 @@
+
 import React, { useMemo } from 'react';
-import { Project } from '../../types';
+import { Project } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { Users } from 'lucide-react';

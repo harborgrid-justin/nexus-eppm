@@ -1,6 +1,7 @@
+
 import React from 'react';
-import { WBSNode, WBSNodeShape } from '../../types';
-import { ChevronRight, ChevronDown, Plus } from 'lucide-react';
+import { WBSNode, WBSNodeShape } from '../../types/index';
+import { ChevronRight, ChevronDown, PlusCircle } from 'lucide-react';
 
 interface WBSNodeComponentProps {
   node: WBSNode;
@@ -34,8 +35,9 @@ const WBSNodeComponent: React.FC<WBSNodeComponentProps> = ({
   return (
     <div
       onClick={onClick}
+      onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { onClick(); e.preventDefault(); } }}
       onContextMenu={onContextMenu}
-      className={`group flex items-center pr-2 my-0.5 rounded-md cursor-pointer relative
+      className={`group flex items-center pr-2 my-0.5 rounded-md cursor-pointer relative focus:outline-none focus:ring-2 focus:ring-nexus-500
         ${isSelected ? 'bg-nexus-100' : 'hover:bg-slate-50'}
         ${isDragged ? 'opacity-30' : ''}
       `}
@@ -45,12 +47,21 @@ const WBSNodeComponent: React.FC<WBSNodeComponentProps> = ({
       onDragEnd={onDragEnd}
       onDrop={onDrop}
       onDragOver={onDragOver}
+      tabIndex={0}
+      role="treeitem"
+      aria-selected={isSelected}
+      aria-expanded={isOpen}
     >
       {/* Link Handles */}
       <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white border-2 border-slate-400 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer" />
       <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-white border-2 border-slate-400 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer" />
 
-      <div onClick={(e) => { e.stopPropagation(); onToggle(); }} className="p-1 -ml-2">
+      <div 
+        onClick={(e) => { e.stopPropagation(); onToggle(); }} 
+        className="p-1 -ml-2"
+        role="button"
+        aria-label={isOpen ? "Collapse" : "Expand"}
+      >
         {node.children.length > 0 ? (
           isOpen ? <ChevronDown size={14} className="text-slate-400" /> : <ChevronRight size={14} className="text-slate-400" />
         ) : (
@@ -61,9 +72,14 @@ const WBSNodeComponent: React.FC<WBSNodeComponentProps> = ({
         <span className="font-mono text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">{node.wbsCode}</span>
         <span className="text-sm font-medium text-slate-800">{node.name}</span>
       </div>
-      <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={(e) => { e.stopPropagation(); onAddChild(); }} className="p-1 hover:bg-slate-200 rounded text-green-500" title="Add child node">
-          <Plus size={12} />
+      <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+        <button 
+          onClick={(e) => { e.stopPropagation(); onAddChild(); }} 
+          className="p-1 hover:bg-slate-200 rounded text-green-500 focus:outline-none focus:ring-2 focus:ring-green-500" 
+          title="Add child node"
+          aria-label="Add child WBS element"
+        >
+          <PlusCircle size={12} />
         </button>
       </div>
     </div>

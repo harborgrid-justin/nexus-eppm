@@ -1,18 +1,15 @@
 
 import React, { useState, useMemo } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { BarChart2, RefreshCw, TrendingUp, Info, Play, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
+import { Button } from '../ui/Button';
 
-interface QuantitativeAnalysisProps {
-  projectId: string;
-}
-
-const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }) => {
-  const { project, risks } = useProjectState(projectId);
+const QuantitativeAnalysis: React.FC = () => {
+  const { project, risks } = useProjectWorkspace();
   const theme = useTheme();
   const [iterations, setIterations] = useState(1000);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -112,7 +109,7 @@ const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }
   if (!project) return <div className="p-6">Loading project context...</div>;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in`}>
         <div className={theme.layout.header}>
           <div>
             <h1 className={theme.typography.h1}>
@@ -130,30 +127,30 @@ const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }
                  <option value="1000">1,000 Iterations</option>
                  <option value="5000">5,000 Iterations</option>
              </select>
-             <button 
+             <Button 
                 onClick={runSimulation}
                 disabled={isSimulating}
-                className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium disabled:opacity-50 transition-all`}
+                isLoading={isSimulating}
+                icon={Play}
              >
-                {isSimulating ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
                 {isSimulating ? 'Running Model...' : 'Run Simulation'}
-             </button>
+             </Button>
           </div>
        </div>
 
        {!results ? (
-           <div className="flex flex-col items-center justify-center h-[400px] bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
+           <div className={`flex flex-col items-center justify-center h-[400px] ${theme.colors.background} border-2 border-dashed ${theme.colors.border} rounded-xl text-slate-400`}>
                 <BarChart2 size={64} className="mb-4 opacity-20" />
                 <h3 className="text-lg font-semibold text-slate-500">No Simulation Data</h3>
                 <p className="max-w-md text-center mt-2 text-sm">Run the Monte Carlo simulation to analyze schedule risk based on task variance (PERT) and active risk register events.</p>
-                <button onClick={runSimulation} className="mt-6 text-nexus-600 hover:text-nexus-800 font-medium text-sm flex items-center gap-2">
-                    Start Analysis <TrendingUp size={14} />
-                </button>
+                <Button variant="ghost" onClick={runSimulation} className="mt-6" icon={TrendingUp}>
+                    Start Analysis
+                </Button>
            </div>
        ) : (
-           <div className="space-y-6">
+           <div className={theme.layout.sectionSpacing}>
                 {/* Confidence Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
                     <StatCard 
                         title="Deterministic Duration" 
                         value={`${results.deterministic} Days`} 
@@ -182,9 +179,9 @@ const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }
                 </div>
 
                 {/* Main Chart */}
-                <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[500px]`}>
+                <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[500px]`}>
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-slate-800">Duration Frequency & Cumulative Probability (S-Curve)</h3>
+                        <h3 className={theme.typography.h3}>Duration Frequency & Cumulative Probability (S-Curve)</h3>
                         <div className="flex gap-4 text-xs">
                             <span className="flex items-center gap-1"><div className="w-3 h-3 bg-slate-300"></div> Frequency</span>
                             <span className="flex items-center gap-1"><div className="w-3 h-1 bg-nexus-500"></div> Probability %</span>
@@ -197,7 +194,7 @@ const QuantitativeAnalysis: React.FC<QuantitativeAnalysisProps> = ({ projectId }
                             <YAxis yAxisId="left" label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: {fontSize: 12} }} />
                             <YAxis yAxisId="right" orientation="right" unit="%" label={{ value: 'Probability', angle: 90, position: 'insideRight', style: {fontSize: 12} }} />
                             <Tooltip 
-                                contentStyle={{backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0'}}
+                                contentStyle={theme.charts.tooltip}
                                 labelStyle={{fontWeight: 'bold', color: '#1e293b'}}
                             />
                             <Bar yAxisId="left" dataKey="frequency" fill="#cbd5e1" name="Frequency" barSize={30} radius={[4, 4, 0, 0]} />

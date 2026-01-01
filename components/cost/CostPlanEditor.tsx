@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight, Copy } from 'lucide-react';
+import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight, Copy, Info, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 
 interface CostPlanEditorProps {
     projectId: string;
@@ -19,7 +20,6 @@ interface PlanSectionProps {
     onToggle: () => void;
 }
 
-// Collapsible Section Component
 const PlanSection: React.FC<PlanSectionProps> = ({ 
     title, 
     icon: Icon, 
@@ -27,20 +27,23 @@ const PlanSection: React.FC<PlanSectionProps> = ({
     isOpen, 
     onToggle 
 }) => (
-    <div className="border border-slate-200 rounded-lg bg-white overflow-hidden mb-4 shadow-sm">
+    <div className={`border rounded-2xl bg-white overflow-hidden mb-6 shadow-sm transition-all duration-300 ${isOpen ? 'border-nexus-200 ring-4 ring-nexus-500/5' : 'border-slate-200'}`}>
         <button 
             onClick={onToggle}
-            className="w-full flex items-center justify-between p-4 bg-slate-50 border-b border-slate-100 hover:bg-slate-100 transition-colors"
+            className={`w-full flex items-center justify-between p-5 text-left transition-colors ${isOpen ? 'bg-white border-b border-slate-100' : 'bg-slate-50/50 hover:bg-slate-100'}`}
+            aria-expanded={isOpen}
         >
-            <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${isOpen ? 'bg-nexus-100 text-nexus-700' : 'bg-white border border-slate-200 text-slate-500'}`}>
-                    <Icon size={18} />
+            <div className="flex items-center gap-4">
+                <div className={`p-2.5 rounded-xl transition-all duration-300 ${isOpen ? 'bg-nexus-600 text-white shadow-lg shadow-nexus-500/20 scale-110' : 'bg-white border border-slate-200 text-slate-400'}`}>
+                    <Icon size={20} />
                 </div>
-                <h4 className="font-bold text-slate-800">{title}</h4>
+                <h4 className={`font-bold tracking-tight ${isOpen ? 'text-slate-900 text-lg' : 'text-slate-700 text-base'}`}>{title}</h4>
             </div>
-            {isOpen ? <ChevronDown size={16} className="text-slate-400" /> : <ChevronRight size={16} className="text-slate-400" />}
+            <div className={`p-1.5 rounded-full transition-all ${isOpen ? 'bg-nexus-50 text-nexus-600 rotate-0' : 'bg-slate-100 text-slate-400 rotate-180'}`}>
+                <ChevronDown size={18} />
+            </div>
         </button>
-        {isOpen && <div className="p-6 animate-in slide-in-from-top-2 duration-200">{children}</div>}
+        {isOpen && <div className="p-8 animate-in slide-in-from-top-4 duration-300 bg-white" role="region">{children}</div>}
     </div>
 );
 
@@ -67,7 +70,6 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
         funding: false
     });
 
-    // Template Panel State
     const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
@@ -90,7 +92,6 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
 
     const applyTemplate = () => {
         if (!selectedTemplate) return;
-        // Mock template application
         const templateText = `[Applied from ${templates.find(t => t.id === selectedTemplate)?.name} Template]\n\n`;
         setFormData({
             ...formData,
@@ -102,81 +103,76 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-slate-50/50">
-            {/* Toolbar */}
-            <div className={`p-4 ${theme.layout.headerBorder} flex-shrink-0 flex items-center justify-between bg-white`}>
-                <div className="flex items-center gap-4">
-                    <h3 className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-                        <FileText size={18} className="text-nexus-600" /> Cost Management Plan
+        <div className="h-full flex flex-col bg-slate-100/30 scrollbar-thin">
+            <div className={`p-6 md:p-8 flex-shrink-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white border-b border-slate-200`}>
+                <div className="flex flex-col gap-1">
+                    <h3 className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
+                        <FileText size={24} className="text-nexus-600" /> Cost Management Strategy
                     </h3>
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className={`px-2 py-0.5 rounded border ${
-                            formData.status === 'Approved' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                        }`}>
-                            {formData.status}
-                        </span>
-                        <span className="text-slate-400">|</span>
-                        <span className="text-slate-500 font-mono">v{formData.version}</span>
-                        <span className="text-slate-400">|</span>
-                        <span className="text-slate-500">Updated: {new Date(formData.lastUpdated).toLocaleDateString()}</span>
+                    <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50">
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> {formData.status}
+                        </div>
+                        <span>Protocol: v{formData.version}</span>
+                        <span>Synchronized: {new Date(formData.lastUpdated).toLocaleDateString()}</span>
                     </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3 w-full md:w-auto">
                     <button 
                         onClick={() => setIsTemplatePanelOpen(true)}
-                        className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
+                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95 transition-all"
                     >
-                        <Book size={14}/> Templates
+                        <Book size={16} className="text-nexus-600"/> Apply Corporate Baseline
                     </button>
                     {canEditProject() ? (
-                        <button className={`flex items-center gap-2 px-3 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm`}>
-                            <Save size={14}/> Save & Version
+                        <button className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-nexus-600 rounded-xl text-sm font-black text-white hover:bg-nexus-700 shadow-lg shadow-nexus-500/30 active:scale-95 transition-all uppercase tracking-widest`}>
+                            <Save size={16}/> Save & Version
                         </button>
                     ) : (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-400">
-                            <Lock size={14}/> Read Only
+                        <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest">
+                            <Lock size={14}/> Read Only Strategy
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full">
-                
+            <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
                 <PlanSection 
-                    title="1. Estimating Methodology & Precision" 
+                    title="1. Estimating Methodology" 
                     icon={Calculator} 
                     isOpen={openSections.methodology} 
                     onToggle={() => toggleSection('methodology')}
                 >
-                    <div className="space-y-4">
-                        <p className="text-sm text-slate-500 mb-2">Define the methods used for estimating costs (e.g., Analogous, Parametric, Bottom-up) and the required level of precision.</p>
-                        <textarea 
-                            disabled={!canEditProject()}
-                            className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
-                            placeholder="e.g., Conceptual estimates will use analogous data (+/- 50%). Definitive estimates will use bottom-up quotes (+/- 10%)..."
-                            value={formData.estimatingMethodology}
-                            onChange={(e) => handleChange('estimatingMethodology', e.target.value)}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Precision Level</label>
+                    <div className="space-y-8 animate-in fade-in slide-in-from-top-4">
+                        <div>
+                            <p className="text-sm font-medium text-slate-500 mb-4 leading-relaxed">Define the standardized methods for cost development (e.g., Analogous, Parametric, Bottom-up) and the mandatory precision levels for the current WBS phase.</p>
+                            <textarea 
+                                disabled={!canEditProject()}
+                                className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 focus:bg-white outline-none disabled:opacity-70 transition-all resize-none shadow-inner"
+                                placeholder="Formalize the estimating approach here..."
+                                value={formData.estimatingMethodology}
+                                onChange={(e) => handleChange('estimatingMethodology', e.target.value)}
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Precision Tolerance</label>
                                 <input 
                                     disabled={!canEditProject()}
                                     type="text"
-                                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
-                                    placeholder="e.g., Round to nearest $100"
+                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-nexus-500 outline-none"
+                                    placeholder="e.g., +/- 10% Definitive"
                                     value={formData.precisionLevel}
                                     onChange={(e) => handleChange('precisionLevel', e.target.value)}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Units of Measure</label>
+                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Corporate Units of Measure</label>
                                 <input 
                                     disabled={!canEditProject()}
                                     type="text"
-                                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
-                                    placeholder="e.g., Staff hours, USD, Linear Feet"
+                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-nexus-500 outline-none"
+                                    placeholder="e.g., Man-hours, Cubic Yards, USD"
                                     value={formData.unitsOfMeasure}
                                     onChange={(e) => handleChange('unitsOfMeasure', e.target.value)}
                                 />
@@ -191,15 +187,21 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                     isOpen={openSections.controls} 
                     onToggle={() => toggleSection('controls')}
                 >
-                    <div className="space-y-4">
-                        <p className="text-sm text-slate-500 mb-2">Specify the variance thresholds for monitoring cost performance (CPI/CV) that trigger corrective action.</p>
+                    <div className="space-y-6">
+                        <p className="text-sm font-medium text-slate-500 leading-relaxed">Specify the formal variance thresholds (CPI/CV) that trigger mandatory Corrective Action Plans or executive escalation.</p>
                         <textarea 
                             disabled={!canEditProject()}
-                            className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
-                            placeholder="e.g., If CPI < 0.9, PM must submit a corrective action plan. If CPI < 0.8, escalate to Sponsor..."
+                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
+                            placeholder="e.g., If CPI < 0.90 for two consecutive periods, a formal VAR must be submitted..."
                             value={formData.controlThresholds}
                             onChange={(e) => handleChange('controlThresholds', e.target.value)}
                         />
+                        <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3 shadow-sm">
+                            <Info size={20} className="text-amber-600 shrink-0 mt-0.5"/>
+                            <p className="text-[11px] text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
+                                Threshold breaches are auto-detected by the Performance Measurement Engine and will trigger immediate alerts to the PMO Steering Committee.
+                            </p>
+                        </div>
                     </div>
                 </PlanSection>
 
@@ -210,11 +212,11 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                     onToggle={() => toggleSection('reporting')}
                 >
                     <div className="space-y-4">
-                        <p className="text-sm text-slate-500 mb-2">Define the format and frequency of cost reports.</p>
+                        <p className="text-sm font-medium text-slate-500">Define the formal reporting templates and distribution cadence for financial status.</p>
                         <textarea 
                             disabled={!canEditProject()}
-                            className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
-                            placeholder="e.g., Monthly Earned Value Report (Format A) distributed to Stakeholders by the 5th business day..."
+                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
+                            placeholder="Identify specific artifacts like EVM Reports, Burn Rate Charts, and CBS Summaries..."
                             value={formData.reportingFormats}
                             onChange={(e) => handleChange('reportingFormats', e.target.value)}
                         />
@@ -227,47 +229,60 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                     isOpen={openSections.funding} 
                     onToggle={() => toggleSection('funding')}
                 >
-                    <div className="space-y-4">
-                        <p className="text-sm text-slate-500 mb-2">Outline funding sources and mechanisms for reconciling limits.</p>
+                    <div className="space-y-6">
+                        <p className="text-sm font-medium text-slate-500 leading-relaxed">Outline funding sources, grant restrictions, and the mechanisms for periodic fund reconciliation against spending curves.</p>
                         <textarea 
                             disabled={!canEditProject()}
-                            className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:bg-slate-50"
-                            placeholder="e.g., Self-funded via Q3 CapEx allocation. Reconciled quarterly against spending curve..."
+                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
+                            placeholder="Detail Capital vs Operating fund split and authority limits..."
                             value={formData.fundingStrategy}
                             onChange={(e) => handleChange('fundingStrategy', e.target.value)}
                         />
+                        <div className="p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-xl">
+                            <div className="relative z-10">
+                                <h4 className="font-bold flex items-center gap-2 mb-2 text-base tracking-tight">
+                                    <ShieldCheck size={20} className="text-nexus-400"/> Regulatory Alignment
+                                </h4>
+                                <p className="text-xs text-slate-400 leading-relaxed max-w-lg">
+                                    Funding releases are gated via the Stage-Gate Governance process. All actuals must be reconciled against the approved Fiscal Year budget before next-phase funding is authorized.
+                                </p>
+                            </div>
+                            <DollarSign size={160} className="absolute -right-12 -bottom-12 text-white/5 opacity-10 rotate-12" />
+                        </div>
                     </div>
                 </PlanSection>
             </div>
 
-            {/* Template Selection Panel */}
             <SidePanel
                 isOpen={isTemplatePanelOpen}
                 onClose={() => setIsTemplatePanelOpen(false)}
-                title="Apply Cost Management Template"
+                title="Strategy Template Library"
                 width="md:w-[500px]"
                 footer={
                     <>
                         <Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button>
-                        <Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Template</Button>
+                        <Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Corporate Policy</Button>
                     </>
                 }
             >
-                <div className="space-y-4">
-                    <p className="text-sm text-slate-600">Select a standardized Cost Management Plan template to pre-fill sections. <strong className="text-red-600">Warning: This will overwrite existing content.</strong></p>
-                    <div className="space-y-3">
+                <div className="space-y-6">
+                    <p className="text-sm font-medium text-slate-600 bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-start gap-3">
+                        <AlertTriangle className="text-amber-600 shrink-0" size={18}/>
+                        <span>Applying a template will <strong className="text-amber-900">overwrite</strong> current strategy text. This action is logged in the project audit trail.</span>
+                    </p>
+                    <div className="space-y-4">
                         {templates.map(t => (
                             <div 
                                 key={t.id} 
                                 onClick={() => setSelectedTemplate(t.id)}
-                                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                                className={`p-6 rounded-2xl border-2 transition-all cursor-pointer ${
                                     selectedTemplate === t.id 
-                                    ? 'bg-nexus-50 border-nexus-500 ring-1 ring-nexus-500' 
-                                    : 'bg-white border-slate-200 hover:border-nexus-300'
+                                    ? 'bg-nexus-50 border-nexus-500 ring-4 ring-nexus-500/10' 
+                                    : 'bg-white border-slate-100 hover:border-nexus-300'
                                 }`}
                             >
-                                <h4 className="font-bold text-slate-800">{t.name}</h4>
-                                <p className="text-sm text-slate-600 mt-1">{t.description}</p>
+                                <h4 className="font-black text-slate-900 text-base mb-1">{t.name}</h4>
+                                <p className="text-sm font-medium text-slate-500 leading-relaxed">{t.description}</p>
                             </div>
                         ))}
                     </div>

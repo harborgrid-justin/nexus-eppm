@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { Risk, RiskBreakdownStructureNode } from '../../types';
+// FIX: Corrected import path
+import { Risk, RiskBreakdownStructureNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters';
-import { ShieldAlert, DollarSign, Calendar, Shield, Star } from 'lucide-react';
+import { AlertTriangle, DollarSign, Calendar, Shield, Zap } from 'lucide-react';
 
 interface RiskFormProps {
   isOpen: boolean;
@@ -87,7 +87,8 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
     const risk: Risk = {
         id: existingRisk?.id || `RISK-${Date.now()}`,
         projectId,
-        owner: formData.owner || 'Unassigned',
+        // FIX: Changed owner to ownerId
+        ownerId: formData.ownerId || 'Unassigned',
         ...formData as Risk,
         score: currentScore,
         emv: currentEMV,
@@ -139,8 +140,8 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                         <label className="block text-sm font-medium text-slate-700 mb-1">Owner</label>
                         <select 
                             className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
-                            value={formData.owner}
-                            onChange={e => setFormData({...formData, owner: e.target.value})}
+                            value={formData.ownerId}
+                            onChange={e => setFormData({...formData, ownerId: e.target.value})}
                         >
                             <option value="">Select Owner...</option>
                             {state.resources.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
@@ -168,7 +169,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             <div className="space-y-6">
                 <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <ShieldAlert size={16} className="text-orange-500"/> Qualitative Scoring
+                        <AlertTriangle size={16} className="text-orange-500"/> Qualitative Scoring
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -207,7 +208,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
                         <input 
                             type="number" 
-                            className="w-full pl-8 p-2 border border-slate-300 rounded-lg text-sm font-mono"
+                            className="w-full pl-8 p-2 border border-slate-300 rounded-lg text-sm font-mono font-bold"
                             value={formData.financialImpact}
                             onChange={e => setFormData({...formData, financialImpact: parseFloat(e.target.value)})}
                         />
@@ -220,7 +221,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
 
                 {automationTriggered && (
                     <div className="p-3 bg-nexus-50 border border-nexus-200 rounded-lg flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
-                        <Star size={16} className="text-nexus-600 shrink-0 mt-0.5"/>
+                        <Zap size={16} className="text-nexus-600 shrink-0 mt-0.5"/>
                         <p className="text-xs text-nexus-800">
                             <strong>AI Trigger:</strong> {automationTriggered}
                         </p>

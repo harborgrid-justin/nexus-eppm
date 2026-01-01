@@ -1,59 +1,51 @@
 
-import React, { useMemo, useState } from 'react';
-import { useProjectState } from '../../hooks';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
 import { DollarSign, TrendingUp, TrendingDown, Layers, AlertTriangle, Zap, Coins, ShoppingCart } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../utils/formatters';
-import { calculateProjectProgress } from '../../utils/calculations';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, Bar } from 'recharts';
-import { calculateRiskExposure, calculateCommittedCost } from '../../utils/integrationUtils';
+import { calculateRiskExposure } from '../../utils/integrationUtils';
+import { useTheme } from '../../context/ThemeContext';
 
-interface CostDashboardProps {
-  projectId: string;
-}
-
-const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
-  const { project, financials, budgetItems, risks, purchaseOrders, nonConformanceReports } = useProjectState(projectId);
+const CostDashboard: React.FC = () => {
+  const { project, financials, budgetItems, risks, purchaseOrders, nonConformanceReports } = useProjectWorkspace();
   const evm = useEVM(project, budgetItems);
+  const theme = useTheme();
   
-  // Feature: Toggles for "What-If" Analysis
   const [includeRisk, setIncludeRisk] = useState(true);
   const [includePendingChanges, setIncludePendingChanges] = useState(false);
+  const [today, setToday] = useState<Date | null>(null);
 
-  // --- Integration Metrics ---
-  // Feature: Risk Exposure Calculation (EMV)
+  useEffect(() => {
+    setToday(new Date());
+  }, []);
+
   const riskExposure = useMemo(() => calculateRiskExposure(risks), [risks]);
   
-  // Feature: Cost of Quality (CoQ) - Mock calculation based on NCR severity
   const costOfQuality = useMemo(() => nonConformanceReports.reduce((sum, ncr) => {
-      return sum + (ncr.severity === 'Critical' ? 5000 : 1000); // Mock rework costs
+      return sum + (ncr.severity === 'Critical' ? 5000 : 1000); 
   }, 0), [nonConformanceReports]);
 
-  // Feature: Procurement Commitments
   const committedCosts = useMemo(() => purchaseOrders
     .filter(po => po.status === 'Issued')
     .reduce((sum, po) => sum + po.amount, 0), [purchaseOrders]);
 
   const eac = useMemo(() => {
       if (!project || !financials || !evm) return 0;
-      
       let projectedCost = evm.eac;
-
-      // Feature: Advanced EAC Modeling
       if (includeRisk) projectedCost += riskExposure;
       if (includePendingChanges) projectedCost += financials.pendingCOAmount;
-      
       return projectedCost;
   }, [project, financials, evm, includeRisk, includePendingChanges, riskExposure]);
 
   const chartData = useMemo(() => {
-    if (!project || !evm) return [];
+    if (!project || !evm || !today) return [];
     
     const startDate = new Date(project.startDate);
     const totalDays = getDaysDiff(project.startDate, project.endDate);
-    const today = new Date();
     
     const data = [];
     const steps = 12;
@@ -66,8 +58,6 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
         
         const percentTime = Math.min(1, currentDayOffset / totalDays);
         const curveFactor = (1 - Math.cos(percentTime * Math.PI)) / 2;
-        
-        // Feature: Inflation Modeling (Compound 3% annually)
         const inflationFactor = Math.pow(1.03, (currentDayOffset / 365));
         const pv = (project.originalBudget * curveFactor) * inflationFactor;
 
@@ -77,9 +67,8 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
 
         if (currentDate <= today) {
             ev = evm.ev * curveFactor; 
-            ac = (evm.ac * curveFactor) + (costOfQuality * curveFactor); // Integrated CoQ
+            ac = (evm.ac * curveFactor) + (costOfQuality * curveFactor); 
         } else {
-            // Feature: Forecast Projection Line
             forecast = eac * curveFactor;
         }
 
@@ -92,111 +81,79 @@ const CostDashboard: React.FC<CostDashboardProps> = ({ projectId }) => {
         });
     }
     return data;
-  }, [project, evm, eac, costOfQuality]);
+  }, [project, evm, eac, costOfQuality, today]);
 
-  if (!financials) return null;
+  if (!financials || !today) return <div>Loading...</div>;
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6 animate-in fade-in duration-300">
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         
-        {/* Feature: Integrated Cost Controls */}
-        <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+        <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4`}>
             <div>
-                <h2 className="text-lg font-bold text-slate-800">Integrated Cost Analysis</h2>
-                <p className="text-xs text-slate-500">Includes Risk, Quality, and Procurement impacts.</p>
+                <h2 className={`${theme.typography.h3}`}>Integrated Cost Analysis</h2>
+                <p className={`${theme.typography.small} mt-1`}>Includes Risk, Quality, and Procurement impacts.</p>
             </div>
-            <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <div className="flex flex-col sm:flex-row gap-4">
+                <label className={`flex items-center gap-2 text-sm ${theme.colors.text.primary} cursor-pointer`}>
                     <input type="checkbox" checked={includeRisk} onChange={e => setIncludeRisk(e.target.checked)} className="rounded text-nexus-600"/>
                     Include Risk Exposure (+{formatCompactCurrency(riskExposure)})
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <label className={`flex items-center gap-2 text-sm ${theme.colors.text.primary} cursor-pointer`}>
                     <input type="checkbox" checked={includePendingChanges} onChange={e => setIncludePendingChanges(e.target.checked)} className="rounded text-nexus-600"/>
                     Pending Changes (+{formatCompactCurrency(financials.pendingCOAmount)})
                 </label>
             </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Original + Approved Changes" icon={DollarSign} />
-            
-            {/* Feature: Procurement Integration in Card */}
             <StatCard title="Committed Cost" value={formatCompactCurrency(committedCosts)} subtext="Issued Purchase Orders" icon={ShoppingCart} />
-            
-            {/* Feature: Quality Cost Integration */}
             <StatCard title="Cost of Quality" value={formatCompactCurrency(costOfQuality)} subtext="Rework & Defects Impact" icon={Coins} trend="down"/>
-            
             <StatCard title="Forecast (EAC)" value={formatCompactCurrency(eac)} subtext={`Var: ${formatCompactCurrency(project.budget - eac)}`} icon={Layers} trend={project.budget - eac >= 0 ? 'up' : 'down'} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[400px]">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
+            <div className={`lg:col-span-2 ${theme.components.card} ${theme.layout.cardPadding} h-[400px]`}>
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <h3 className={`${theme.typography.h3} flex items-center gap-2`}>
                         <TrendingUp className="text-nexus-600" size={20}/> Risk-Adjusted S-Curve
                     </h3>
                 </div>
                 <ResponsiveContainer width="100%" height="85%">
                     <ComposedChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
                         <XAxis dataKey="date" />
                         <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
-                        <Tooltip formatter={(val: number) => formatCurrency(val)} />
+                        <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
                         <Legend />
-                        <Area type="monotone" dataKey="PV" fill="#f1f5f9" stroke="#94a3b8" strokeWidth={2} name="Planned Value" />
-                        <Line type="monotone" dataKey="EV" stroke="#22c55e" strokeWidth={3} dot={false} name="Earned Value" />
-                        <Line type="monotone" dataKey="AC" stroke="#ef4444" strokeWidth={3} dot={false} name="Actual Cost" />
-                        <Line type="monotone" dataKey="Forecast" stroke="#eab308" strokeWidth={2} strokeDasharray="5 5" name="Forecast (Risk Adj)" />
+                        <Area type="monotone" dataKey="PV" fill={theme.colors.background} stroke="#94a3b8" strokeWidth={2} name="Planned Value" />
+                        <Line type="monotone" dataKey="EV" stroke={theme.charts.palette[1]} strokeWidth={3} dot={false} name="Earned Value" />
+                        <Line type="monotone" dataKey="AC" stroke={theme.charts.palette[3]} strokeWidth={3} dot={false} name="Actual Cost" />
+                        <Line type="monotone" dataKey="Forecast" stroke={theme.charts.palette[2]} strokeWidth={2} strokeDasharray="5 5" name="Forecast (Risk Adj)" />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
 
-            {/* Feature: Performance Indices Gauge */}
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Zap size={18} className="text-purple-500"/> Efficiency Metrics</h3>
+            <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col justify-between`}>
+                <h3 className={`${theme.typography.h3} mb-4 flex items-center gap-2`}><Zap size={18} className="text-purple-500"/> Efficiency Metrics</h3>
                 
                 <div className="space-y-6">
                     <div>
-                        <div className="flex justify-between text-sm mb-1">
-                            <span className="text-slate-600">Cost Efficiency (CPI)</span>
-                            <span className={`font-bold ${evm.cpi >= 1 ? 'text-green-600' : 'text-red-600'}`}>{evm.cpi.toFixed(2)}</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div className={`h-full ${evm.cpi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.cpi * 100, 100)}%`}}></div>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-1">Target: 1.0+</p>
+                        <div className="flex justify-between text-sm mb-1"><span className={theme.colors.text.secondary}>Cost Efficiency (CPI)</span><span className={`font-bold ${evm.cpi >= 1 ? 'text-green-600' : 'text-red-600'}`}>{evm.cpi.toFixed(2)}</span></div>
+                        <div className={`w-full ${theme.colors.background} h-2 rounded-full overflow-hidden`}><div className={`h-full ${evm.cpi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.cpi * 100, 100)}%`}}></div></div>
                     </div>
-
                     <div>
-                        <div className="flex justify-between text-sm mb-1">
-                            <span className="text-slate-600">Schedule Efficiency (SPI)</span>
-                            <span className={`font-bold ${evm.spi >= 1 ? 'text-green-600' : 'text-yellow-600'}`}>{evm.spi.toFixed(2)}</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div className={`h-full ${evm.spi >= 1 ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${Math.min(evm.spi * 100, 100)}%`}}></div>
-                        </div>
+                        <div className="flex justify-between text-sm mb-1"><span className={theme.colors.text.secondary}>Schedule Efficiency (SPI)</span><span className={`font-bold ${evm.spi >= 1 ? 'text-green-600' : 'text-yellow-600'}`}>{evm.spi.toFixed(2)}</span></div>
+                        <div className={`w-full ${theme.colors.background} h-2 rounded-full overflow-hidden`}><div className={`h-full ${evm.spi >= 1 ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${Math.min(evm.spi * 100, 100)}%`}}></div></div>
                     </div>
-
                     <div>
-                        <div className="flex justify-between text-sm mb-1">
-                            <span className="text-slate-600">To Complete (TCPI)</span>
-                            <span className={`font-bold ${evm.tcpi <= 1 ? 'text-green-600' : 'text-red-600'}`}>{evm.tcpi.toFixed(2)}</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div className={`h-full ${evm.tcpi <= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.tcpi * 100, 100)}%`}}></div>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-1">Efficiency needed to finish on budget.</p>
+                        <div className="flex justify-between text-sm mb-1"><span className={theme.colors.text.secondary}>To Complete (TCPI)</span><span className={`font-bold ${evm.tcpi <= 1 ? 'text-green-600' : 'text-red-600'}`}>{evm.tcpi.toFixed(2)}</span></div>
+                        <div className={`w-full ${theme.colors.background} h-2 rounded-full overflow-hidden`}><div className={`h-full ${evm.tcpi <= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.tcpi * 100, 100)}%`}}></div></div>
                     </div>
                 </div>
 
-                <div className="mt-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Automated Analysis</h4>
-                    <p className="text-sm text-slate-700 leading-relaxed">
-                        CPI is currently <strong>{evm.cpi.toFixed(2)}</strong>. 
-                        With risk exposure of <strong>{formatCompactCurrency(riskExposure)}</strong>, 
-                        the projected overrun is <strong>{formatPercentage(((eac - project.budget)/project.budget)*100, 1)}</strong>. 
-                        Recommend utilizing contingency for WBS 1.2 material escalation.
-                    </p>
+                <div className={`mt-6 ${theme.colors.background} p-4 rounded-lg border ${theme.colors.border}`}>
+                    <p className={`text-sm ${theme.colors.text.primary} leading-relaxed`}>CPI is <strong>{evm.cpi.toFixed(2)}</strong>. Projected overrun is <strong>{formatPercentage(((eac - project.budget)/project.budget)*100, 1)}</strong>.</p>
                 </div>
             </div>
         </div>

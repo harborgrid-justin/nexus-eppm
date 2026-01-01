@@ -1,13 +1,8 @@
-
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import * as LucideIcons from 'lucide-react';
+import { Map as MapIcon, Link as LinkIcon, AlertTriangle, Calendar, Flag, Activity } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { getDaysDiff } from '../../utils/dateUtils';
-
-const { Map: MapIcon, AlertTriangle, Calendar, Flag, ChevronRight, TrendingUp } = LucideIcons;
-const LinkIcon = (LucideIcons as any).Link || ChevronRight;
-const Activity = (LucideIcons as any).Activity || TrendingUp;
 
 interface ProgramRoadmapProps {
   programId: string;
@@ -16,13 +11,17 @@ interface ProgramRoadmapProps {
 const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
   const { program, projects, programDependencies } = useProgramData(programId);
   const theme = useTheme();
+  
+  const [today, setToday] = useState<Date | null>(null);
+  useEffect(() => {
+    setToday(new Date());
+  }, []);
 
-  if (!program) return null;
+  if (!program || !today) return null;
 
   // Timeline bounds
   const start = new Date(program.startDate);
   const end = new Date(program.endDate);
-  const today = new Date();
   
   const totalDuration = getDaysDiff(start, end);
   const todayPosition = Math.max(0, Math.min(100, (getDaysDiff(start, today) / totalDuration) * 100));
@@ -49,33 +48,32 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
   }
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-2 gap-4 md:gap-0">
             <div className="flex items-center gap-2">
                 <MapIcon className="text-nexus-600" size={24}/>
                 <h2 className={theme.typography.h2}>Integrated Master Roadmap</h2>
             </div>
             <div className="flex gap-2 flex-wrap">
-                <div className="flex items-center gap-4 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                <div className={`flex items-center gap-4 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-lg border ${theme.colors.border}`}>
                     <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded"></span> Project</span>
                     <span className="flex items-center gap-1"><span className="w-3 h-3 bg-nexus-600 rounded rotate-45"></span> Milestone</span>
-                    {/* Feature: Legend for Critical Dependencies */}
                     <span className="flex items-center gap-1"><span className="w-6 h-0.5 bg-red-500 border-b border-dashed"></span> Critical Dep</span>
                     <span className="flex items-center gap-1"><span className="w-6 h-0.5 bg-slate-400"></span> Standard Dep</span>
                 </div>
             </div>
         </div>
 
-        <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+        <div className={`${theme.components.card} p-6 overflow-hidden`}>
             <div className="overflow-x-auto">
               <div className="min-w-[1000px]">
                 {/* Timeline Header */}
-                <div className="relative h-8 border-b border-slate-200 mb-4 text-xs font-bold text-slate-400 uppercase">
+                <div className={`relative h-8 border-b ${theme.colors.border} mb-4 text-xs font-bold text-slate-400 uppercase`}>
                     {years.map(year => {
                         const yearStart = new Date(year, 0, 1);
                         const pos = getPosition(yearStart.toISOString());
                         if (pos > 0 && pos < 100) {
-                            return <span key={year} className="absolute top-0 transform -translate-x-1/2 border-l border-slate-200 h-full pl-2" style={{ left: `${pos}%` }}>{year}</span>
+                            return <span key={year} className={`absolute top-0 transform -translate-x-1/2 border-l ${theme.colors.border} h-full pl-2`} style={{ left: `${pos}%` }}>{year}</span>
                         }
                         return null;
                     })}
@@ -98,7 +96,7 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
 
                     {projects.map((proj, idx) => (
                         <div key={proj.id} className="relative h-12 group">
-                            {/* Feature: Baseline Ghost Bar (Mocked as slightly wider/shifted) */}
+                            {/* Feature: Baseline Ghost Bar */}
                             <div 
                                 className="absolute top-1 h-10 rounded-lg bg-slate-100 border border-slate-300 opacity-50 z-0"
                                 style={{ 
@@ -149,7 +147,6 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
                                         }}
                                     >
                                         <svg width="100%" height="100%" preserveAspectRatio="none" className="overflow-visible">
-                                            {/* Feature: Red line if critical/delayed */}
                                             <path 
                                                 d={`M ${isForward ? 0 : '100%'} 5 C ${isForward ? '50%' : '50%'} 5, ${isForward ? '50%' : '50%'} ${verticalGap}, ${isForward ? '100%' : 0} ${verticalGap}`} 
                                                 fill="none" 
@@ -180,10 +177,10 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
         </div>
 
         {/* Dependency Log Table */}
-        <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+        <div className={`${theme.components.card} overflow-hidden`}>
+            <div className={`bg-slate-50 px-6 py-4 border-b ${theme.colors.border} flex justify-between items-center`}>
                 <h3 className="font-bold text-slate-800 flex items-center gap-2"><LinkIcon size={16}/> Program Dependencies Log</h3>
-                <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border">Showing {programDependencies.length} links</span>
+                <span className="text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">Showing {programDependencies.length} links</span>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">

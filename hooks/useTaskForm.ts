@@ -1,8 +1,10 @@
 
 import { useState, useMemo, useEffect } from 'react';
-import { Task, Project, TaskStatus } from '../types';
+// FIX: Corrected import path
+import { Task, Project, TaskStatus } from '../types/index';
 import { useData } from '../context/DataContext';
-import { canCompleteTask } from '../utils/integrationUtils';
+// FIX: Correctly import canCompleteTask utility.
+import { canCompleteTask } from '../utils/integrations/quality';
 
 export const useTaskForm = (task: Task, project: Project, onClose: () => void) => {
   const { state, dispatch, getActivityCodesForProject } = useData();
@@ -48,7 +50,7 @@ export const useTaskForm = (task: Task, project: Project, onClose: () => void) =
   };
 
   const saveChanges = () => {
-    dispatch({ type: 'UPDATE_TASK', payload: { projectId: project.id, task: localTask } });
+    dispatch({ type: 'TASK_UPDATE', payload: { projectId: project.id, task: localTask } });
     onClose();
   };
 

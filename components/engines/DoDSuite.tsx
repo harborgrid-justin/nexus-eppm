@@ -10,26 +10,28 @@ const DoDSuite: React.FC = () => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'acquisition' | 'evms' | 'risk'>('acquisition');
 
+  // --- MOCK DATA FOR ACQUISITION ---
   const milestones = [
-    { id: 'A', name: 'Milestone A', date: '', status: 'Planned', desc: 'Material Solution Decision' },
-    { id: 'B', name: 'Milestone B', date: '', status: 'Planned', desc: 'Engineering & Mfg Development' },
-    { id: 'C', name: 'Milestone C', date: '', status: 'Planned', desc: 'Production & Deployment' },
+    { id: 'A', name: 'Milestone A', date: 'Q1 2023', status: 'Complete', desc: 'Material Solution Decision' },
+    { id: 'B', name: 'Milestone B', date: 'Q3 2024', status: 'Upcoming', desc: 'Engineering & Mfg Development' },
+    { id: 'C', name: 'Milestone C', date: 'Q2 2026', status: 'Planned', desc: 'Production & Deployment' },
   ];
 
   const phases = [
-    { name: 'Materiel Solution Analysis', duration: '', status: 'Planned' },
-    { name: 'Tech Maturation & Risk Reduction', duration: '', status: 'Planned' },
-    { name: 'Engineering & Mfg Development', duration: '', status: 'Planned' },
-    { name: 'Production & Deployment', duration: '', status: 'Planned' },
-    { name: 'Operations & Support', duration: '', status: 'Planned' },
+    { name: 'Materiel Solution Analysis', duration: '18 mo', status: 'Complete' },
+    { name: 'Tech Maturation & Risk Reduction', duration: '24 mo', status: 'In Progress' },
+    { name: 'Engineering & Mfg Development', duration: '36 mo', status: 'Planned' },
+    { name: 'Production & Deployment', duration: '48 mo', status: 'Planned' },
+    { name: 'Operations & Support', duration: '20 yr', status: 'Planned' },
   ];
 
+  // --- MOCK DATA FOR EVMS (ANSI/EIA-748) ---
   const evmsData = [
-    { period: 'Jan', BCWS: 0, BCWP: 0, ACWP: 0 },
-    { period: 'Feb', BCWS: 0, BCWP: 0, ACWP: 0 },
-    { period: 'Mar', BCWS: 0, BCWP: 0, ACWP: 0 },
-    { period: 'Apr', BCWS: 0, BCWP: 0, ACWP: 0 },
-    { period: 'May', BCWS: 0, BCWP: 0, ACWP: 0 },
+    { period: 'Jan', BCWS: 100, BCWP: 95, ACWP: 90 },
+    { period: 'Feb', BCWS: 200, BCWP: 190, ACWP: 195 },
+    { period: 'Mar', BCWS: 300, BCWP: 295, ACWP: 310 },
+    { period: 'Apr', BCWS: 400, BCWP: 380, ACWP: 420 },
+    { period: 'May', BCWS: 500, BCWP: 450, ACWP: 550 }, // slipping
   ];
 
   // --- RENDERERS ---
@@ -60,7 +62,7 @@ const DoDSuite: React.FC = () => {
                 <div key={idx} className="flex-1 relative group">
                     <div className={`h-12 flex items-center justify-center text-sm font-bold text-white clip-chevron pr-4 pl-8 transition-all hover:brightness-110 cursor-pointer
                         ${phase.status === 'Complete' ? 'bg-green-700' : phase.status === 'In Progress' ? 'bg-blue-600' : 'bg-slate-400'}
-                    `} style={{ clipPath: 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)', marginLeft: idx === 0 ? 0 : '-20px' }}>
+                    `} style={{ marginLeft: idx === 0 ? 0 : '-20px' }}>
                         {phase.name}
                     </div>
                     <div className="mt-2 text-center text-xs text-slate-500 font-mono">{phase.duration}</div>

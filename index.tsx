@@ -25,11 +25,12 @@ const mountApp = () => {
     );
   } catch (error) {
     console.error("Failed to mount application:", error);
+    // Uses Tailwind classes for styling instead of inline styles
     document.body.innerHTML = `
-      <div style="padding: 20px; color: red; font-family: sans-serif;">
-        <h1>Critical System Error</h1>
-        <p>The application failed to initialize. Please check the console for details.</p>
-        <pre>${error instanceof Error ? error.message : 'Unknown error'}</pre>
+      <div class="p-8 text-red-600 font-sans max-w-2xl mx-auto mt-10 border border-red-200 rounded-lg bg-red-50 shadow-sm">
+        <h1 class="text-2xl font-bold mb-2">Critical System Error</h1>
+        <p class="mb-4 text-sm text-red-800">The application failed to initialize. Please check the console for details.</p>
+        <pre class="bg-white p-4 rounded border border-red-100 text-xs font-mono overflow-auto">${error instanceof Error ? error.message : 'Unknown error'}</pre>
       </div>
     `;
   }

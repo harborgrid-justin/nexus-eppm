@@ -1,22 +1,20 @@
+
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface BadgeProps {
   variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
   children: React.ReactNode;
   icon?: React.ElementType;
+  className?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, icon: Icon }) => {
-  const variants = {
-    success: "bg-green-100 text-green-800 border-green-200",
-    warning: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    danger: "bg-red-100 text-red-800 border-red-200",
-    info: "bg-blue-100 text-blue-800 border-blue-200",
-    neutral: "bg-slate-100 text-slate-800 border-slate-200",
-  };
+export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, icon: Icon, className = '' }) => {
+  const theme = useTheme();
+  const colors = theme.colors.semantic[variant];
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${variants[variant]}`}>
+    <span className={`${theme.components.badge.base} ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
       {Icon && <Icon className="w-3 h-3 mr-1" />}
       {children}
     </span>

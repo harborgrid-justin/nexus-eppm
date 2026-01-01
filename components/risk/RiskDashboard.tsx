@@ -1,16 +1,13 @@
+
 import React, { useMemo } from 'react';
-import { useProjectState } from '../../hooks';
-import { ShieldAlert, ShieldCheck, TrendingUp, BarChart2 } from 'lucide-react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { CustomBarChart } from '../charts/CustomBarChart';
 
-interface RiskDashboardProps {
-  projectId: string;
-}
-
-const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
-  const { risks } = useProjectState(projectId);
+const RiskDashboard: React.FC = () => {
+  const { risks } = useProjectWorkspace();
   const theme = useTheme();
 
   const { categoryData, avgRiskScore, openRisksCount, mitigatedCount } = useMemo(() => {
@@ -34,11 +31,17 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
       return [...risks].sort((a,b) => b.score - a.score).slice(0, 5);
   }, [risks]);
 
-  const getScoreColor = (score: number) => {
-    if (score >= 15) return '#ef4444'; // red
-    if (score >= 8) return '#eab308'; // yellow
-    return '#22c55e'; // green
+  const getScoreColorClass = (score: number) => {
+    if (score >= 15) return theme.colors.semantic.danger.bg; 
+    if (score >= 8) return theme.colors.semantic.warning.bg;
+    return theme.colors.semantic.success.bg;
   };
+
+  const getScoreTextColorClass = (score: number) => {
+    if (score >= 15) return theme.colors.semantic.danger.text; 
+    if (score >= 8) return theme.colors.semantic.warning.text;
+    return theme.colors.semantic.success.text;
+  }
 
   if (!risks) {
     return <div className={theme.layout.pagePadding}>Loading risk data...</div>;
@@ -47,10 +50,10 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
-            <StatCard title="Total Risks" value={risks.length} icon={BarChart2} />
-            <StatCard title="Open Risks" value={openRisksCount} icon={ShieldAlert} trend="down" />
+            <StatCard title="Total Risks" value={risks.length} icon={List} />
+            <StatCard title="Open Risks" value={openRisksCount} icon={AlertTriangle} trend="down" />
             <StatCard title="Mitigated / Closed" value={mitigatedCount} icon={ShieldCheck} trend="up" />
-            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingUp} trend="up" />
+            <StatCard title="Avg. Risk Score" value={avgRiskScore} icon={TrendingDown} trend="down" />
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
@@ -61,7 +64,7 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
                     xAxisKey="name"
                     dataKey="count"
                     height={250}
-                    barColor="#0ea5e9"
+                    barColor={theme.charts.palette[0]}
                 />
             </div>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
@@ -69,12 +72,12 @@ const RiskDashboard: React.FC<RiskDashboardProps> = ({ projectId }) => {
                 <ul className="space-y-3">
                     {topRisks.map(risk => (
                         <li key={risk.id} className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-lg" style={{backgroundColor: getScoreColor(risk.score)}}>
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${getScoreColorClass(risk.score)} ${getScoreTextColorClass(risk.score)}`}>
                                 {risk.score}
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-slate-800">{risk.description}</p>
-                                <p className="text-xs text-slate-500">{risk.category} / {risk.owner}</p>
+                                <p className="text-xs text-slate-500">{risk.category} / {risk.ownerId}</p>
                             </div>
                         </li>
                     ))}

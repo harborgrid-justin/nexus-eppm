@@ -1,56 +1,58 @@
-
-import React, { useState, useMemo } from 'react';
-import * as LucideIcons from 'lucide-react';
-import { useQualityData } from '../hooks';
-import ErrorBoundary from './ErrorBoundary';
+import React, { useState, useMemo, useTransition } from 'react';
+import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck, Coins } from 'lucide-react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
+import { ErrorBoundary } from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
 import QualityControlLog from './quality/QualityControlLog';
 import DefectTracking from './quality/DefectTracking';
-import QualityStandards from './quality/QualityStandards';
+import { QualityStandards } from './quality/QualityStandards';
 import SupplierQuality from './quality/SupplierQuality';
 import CostOfQuality from './quality/CostOfQuality'; 
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 
-interface QualityManagementProps {
-  projectId: string;
-}
-
-const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
-  const {
-    project,
-    qualityProfile,
-    qualityReports,
-  } = useQualityData(projectId);
+const QualityManagement: React.FC = () => {
+  const { project, qualityReports } = useProjectWorkspace();
+  const projectId = project.id;
   const theme = useTheme();
   const [activeGroup, setActiveGroup] = useState('overview'); 
   const [activeView, setActiveView] = useState('dashboard');
+  const [isPending, startTransition] = useTransition();
 
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LucideIcons.LayoutDashboard }
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
     ]},
     { id: 'planning', label: 'Planning', items: [
-      { id: 'plan', label: 'Quality Plan', icon: LucideIcons.FileText },
-      { id: 'standards', label: 'Standards Registry', icon: LucideIcons.BadgeCheck },
-      { id: 'coq', label: 'Cost of Quality', icon: LucideIcons.Coins },
+      { id: 'plan', label: 'Quality Plan', icon: FileText },
+      { id: 'standards', label: 'Standards Registry', icon: BadgeCheck },
+      { id: 'coq', label: 'Cost of Quality', icon: Coins },
     ]},
     { id: 'assurance', label: 'Assurance & Control', items: [
-      { id: 'control', label: 'Control Log', icon: LucideIcons.ClipboardList },
-      { id: 'supplier', label: 'Supplier Quality', icon: LucideIcons.Truck },
+      { id: 'control', label: 'Control Log', icon: ClipboardList },
+      { id: 'supplier', label: 'Supplier Quality', icon: Truck },
     ]},
     { id: 'issues', label: 'Issue Tracking', items: [
-      { id: 'defects', label: 'Defect Log (NCR)', icon: LucideIcons.Bug },
+      { id: 'defects', label: 'Defect Log (NCR)', icon: Bug },
     ]}
   ], []);
 
   const handleGroupChange = (groupId: string) => {
     const newGroup = navStructure.find(g => g.id === groupId);
     if (newGroup?.items.length) {
-      setActiveGroup(groupId);
-      setActiveView(newGroup.items[0].id);
+      startTransition(() => {
+        setActiveGroup(groupId);
+        setActiveView(newGroup.items[0].id);
+      });
     }
+  };
+
+  const handleViewChange = (viewId: string) => {
+      startTransition(() => {
+          setActiveView(viewId);
+      });
   };
 
   const activeGroupItems = useMemo(() => {
@@ -60,13 +62,13 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
-        return <QualityDashboard projectId={projectId} />;
+        return <QualityDashboard />;
       case 'plan':
         return <QualityPlanEditor projectId={projectId} />;
       case 'control':
         return <QualityControlLog qualityReports={qualityReports} />;
       case 'defects':
-        return <DefectTracking projectId={projectId} />;
+        return <DefectTracking />;
       case 'standards':
         return <QualityStandards />;
       case 'supplier':
@@ -74,30 +76,30 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
       case 'coq':
         return <CostOfQuality project={project} />;
       default:
-        return <QualityDashboard projectId={projectId} />;
+        return <QualityDashboard />;
     }
   };
 
   if (!project) return <div className={theme.layout.pagePadding}>Loading quality module...</div>;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <PageHeader
-        title="Quality Management"
+    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+      <PageHeader 
+        title="Quality Management" 
         subtitle="Ensure project deliverables meet and exceed stakeholder expectations."
-        icon={LucideIcons.ShieldCheck}
+        icon={ShieldCheck}
       />
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-white z-10`}>
-          <div className="px-4 pt-3 pb-2 space-x-2 border-b border-slate-200">
+      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
+        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+          <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
               {navStructure.map(group => (
                   <button
                       key={group.id}
                       onClick={() => handleGroupChange(group.id)}
                       className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
                           activeGroup === group.id
-                          ? 'bg-nexus-600 text-white shadow-sm'
+                          ? `${theme.colors.primary} text-white shadow-sm`
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                   >
@@ -109,7 +111,7 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
             {activeGroupItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => setActiveView(item.id)}
+                onClick={() => handleViewChange(item.id)}
                 className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
                   activeView === item.id
                     ? 'border-nexus-600 text-nexus-600'
@@ -122,7 +124,7 @@ const QualityManagement: React.FC<QualityManagementProps> = ({ projectId }) => {
             ))}
           </nav>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
           <ErrorBoundary>
             {renderContent()}
           </ErrorBoundary>

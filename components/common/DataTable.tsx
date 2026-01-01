@@ -54,8 +54,8 @@ function DataTable<T>({
     if (!sortConfig.key || !sortConfig.direction) return data;
 
     return [...data].sort((a: any, b: any) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal = (a as any)[sortConfig.key];
+      const bVal = (b as any)[sortConfig.key];
 
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -65,39 +65,42 @@ function DataTable<T>({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 bg-white border border-slate-200 rounded-xl">
-        <div className="animate-pulse text-slate-400 font-medium">Loading data...</div>
+      <div className={`flex items-center justify-center h-64 ${theme.components.card}`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin"></div>
+          <p className={theme.typography.small}>Loading records...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden flex flex-col h-full`}>
-      <div className="overflow-auto flex-1">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
+    <div className={`${theme.components.card} flex flex-col h-full w-full min-w-0 overflow-hidden`}>
+      <div className="overflow-x-auto flex-1 scrollbar-thin">
+        <table className="min-w-full divide-y divide-slate-100 table-fixed">
+          <thead className={`${theme.colors.background}/80 backdrop-blur-sm sticky top-0 z-10`}>
             <tr>
               {columns.map((col) => (
                 <th
                   key={col.key}
                   scope="col"
                   className={`
-                    px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider select-none
+                    ${theme.components.table.header}
                     ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
-                    ${col.sortable ? 'cursor-pointer hover:bg-slate-100 transition-colors group' : ''}
+                    ${col.sortable ? `cursor-pointer hover:${theme.colors.background} transition-colors group` : ''}
                     ${col.width || ''}
                     ${col.className || ''}
                   `}
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
-                  <div className={`flex items-center gap-1 ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}`}>
-                    {col.header}
+                  <div className={`flex items-center gap-2 overflow-hidden ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}`}>
+                    <span className="truncate">{col.header}</span>
                     {col.sortable && (
-                      <span className="text-slate-400 group-hover:text-nexus-500">
+                      <span className="text-slate-400 group-hover:text-nexus-500 flex-shrink-0 transition-colors">
                         {sortConfig.key === col.key ? (
-                          sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                          sortConfig.direction === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
                         ) : (
-                          <ArrowUpDown size={12} className="opacity-0 group-hover:opacity-50" />
+                          <ArrowUpDown size={10} className="opacity-0 group-hover:opacity-40" />
                         )}
                       </span>
                     )}
@@ -106,42 +109,43 @@ function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-slate-100">
+          <tbody className={`${theme.colors.surface} divide-y divide-slate-50`}>
             {sortedData.length > 0 ? (
               sortedData.map((item) => (
                 <tr
                   key={String(item[keyField])}
                   onClick={() => onRowClick && onRowClick(item)}
                   className={`
-                    transition-colors
-                    ${onRowClick ? 'cursor-pointer hover:bg-slate-50 focus:bg-slate-50' : ''}
+                    ${theme.components.table.row}
+                    ${onRowClick ? `cursor-pointer hover:${theme.colors.background} hover:border-l-nexus-500 focus:${theme.colors.background} outline-none border-l-2 border-l-transparent` : ''}
                   `}
                   tabIndex={onRowClick ? 0 : -1}
-                  onKeyDown={(e) => {
-                    if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
-                      onRowClick(item);
-                    }
-                  }}
                 >
                   {columns.map((col) => (
                     <td
                       key={`${String(item[keyField])}-${col.key}`}
                       className={`
-                        px-6 py-4 whitespace-nowrap text-sm
-                        ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}
+                        ${theme.components.table.cell}
+                        ${col.align === 'right' ? 'text-right font-mono' : col.align === 'center' ? 'text-center' : 'text-left'}
+                        ${col.className || ''}
                       `}
                     >
-                      {col.render ? col.render(item) : (item as any)[col.key]}
+                      {col.render ? col.render(item) : <span className="truncate block">{(item as any)[col.key]}</span>}
                     </td>
                   ))}
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-12 text-center text-slate-400">
-                  <div className="flex flex-col items-center gap-2">
-                    <AlertCircle size={24} className="opacity-50" />
-                    <p>{emptyMessage}</p>
+                <td colSpan={columns.length} className="px-6 py-20 text-center text-slate-400">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className={`p-4 ${theme.colors.background} rounded-full`}>
+                      <AlertCircle size={32} className="opacity-20" />
+                    </div>
+                    <div className="max-w-xs">
+                      <p className={`font-bold ${theme.colors.text.primary} text-sm mb-1`}>No data matching filters</p>
+                      <p className="text-xs leading-relaxed">{emptyMessage}</p>
+                    </div>
                   </div>
                 </td>
               </tr>

@@ -1,12 +1,12 @@
 
-import { DataState } from '../../context/DataContext';
+import { DataState, Action } from '../../types/actions';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
-import { ProgramRisk } from '../../types';
+import { ProgramRisk, Risk } from '../../types/index';
 import { generateId } from '../formatters';
 
-export const applyRiskRules = (state: DataState, action: any, alerts: SystemAlert[]) => {
-  const programRisks: ProgramRisk[] = [];
+export const applyRiskRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
+  let newProgramRisks: ProgramRisk[] = [];
 
   // Hook: Systemic Risk (Category count > 3)
   if (action.type === 'ADD_RISK') {
@@ -25,7 +25,7 @@ export const applyRiskRules = (state: DataState, action: any, alerts: SystemAler
 
   // Hook: Dormant Risk
   // Checked periodically
-  if (action.type === 'QUEUE_DATA_JOB') {
+  if (action.type === 'SYSTEM_QUEUE_DATA_JOB') {
       // Mock date check
       state.risks.forEach(r => {
           if(r.score > 12 && r.status === 'Open') {
@@ -37,23 +37,23 @@ export const applyRiskRules = (state: DataState, action: any, alerts: SystemAler
 
   // Hook: Quality Trend (3 consecutive fails)
   // Simplified check on latest report addition
-  if (action.type === 'UPDATE_TASK') { 
+  if (action.type === 'TASK_UPDATE') { 
      // Logic would normally inspect history. 
   }
 
   // Hook: Safety Stand-down
-  if (action.type === 'LOG_SAFETY_INCIDENT') {
+  if (action.type === 'SYSTEM_LOG_SAFETY_INCIDENT') {
      alerts.push(createAlert('Blocker', 'Compliance', 'Safety Stand-down', 
         `Safety incident reported at ${action.payload.locationId}. Work stoppage in effect.`));
   }
 
   // Hook 10: Auto Risk Escalation (Existing)
   if ((action.type === 'UPDATE_RISK' || action.type === 'ADD_RISK')) {
-      const risk = action.payload.risk || action.payload;
+      const risk: Risk = 'risk' in action.payload ? action.payload.risk : action.payload;
       if (risk.score >= 20 && !risk.isEscalated) {
           const proj = state.projects.find(p => p.id === risk.projectId);
           if (proj?.programId) {
-              programRisks.push({
+              newProgramRisks.push({
                   id: generateId('PR'),
                   programId: proj.programId,
                   description: `[Escalated] ${risk.description}`,
@@ -61,10 +61,14 @@ export const applyRiskRules = (state: DataState, action: any, alerts: SystemAler
                   probability: risk.probability,
                   impact: risk.impact,
                   score: risk.score,
-                  owner: risk.owner,
+                  ownerId: risk.ownerId,
                   status: 'Open',
                   mitigationPlan: 'Escalated review required',
-                  strategy: risk.strategy
+                  probabilityValue: risk.probabilityValue,
+                  impactValue: risk.impactValue,
+                  financialImpact: risk.financialImpact,
+                  strategy: risk.strategy,
+                  responseActions: risk.responseActions
               });
               alerts.push(createAlert('Critical', 'Risk', 'Risk Escalated', 
                 `Risk ${risk.id} escalated to Program.`, { type: 'Program', id: proj.programId }));
@@ -72,5 +76,5 @@ export const applyRiskRules = (state: DataState, action: any, alerts: SystemAler
       }
   }
 
-  return { programRisks, alerts };
+  return { programRisks: newProgramRisks };
 };

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ProjectFunding, FundingSource } from '../../types';
 import { Save, DollarSign, AlertCircle } from 'lucide-react';
-import { SidePanel } from '../ui/SidePanel';
+import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
 interface FundingAllocationModalProps {
@@ -33,7 +33,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
         type: 'Allocation' as const,
         amount: formData.amount,
         description: transactionNote || 'Initial allocation',
-        approvedBy: 'CurrentUser' // In real app, from context
+        approverId: 'CurrentUser' // In real app, from context
     };
 
     onSave({ ...formData, transactions: [initialTransaction] });
@@ -41,10 +41,10 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
   };
 
   return (
-    <SidePanel
+    <Modal
        isOpen={true}
        onClose={onClose}
-       width="md:w-[500px]"
+       size="md"
        title={
           <div className="flex items-center gap-2">
              <DollarSign className="text-green-600" size={20}/> Allocate Funds
@@ -127,7 +127,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
              </p>
           </div>
        </div>
-    </SidePanel>
+    </Modal>
   );
 };
 

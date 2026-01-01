@@ -1,6 +1,8 @@
+
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { WBSNode, WBSNodeShape } from '../types';
+// FIX: Correctly import WBSNode and WBSNodeShape types.
+import { WBSNode, WBSNodeShape } from '../types/project';
 import { findNodeById } from '../utils/treeUtils';
 
 export const useWbsManager = (projectId: string) => {
@@ -55,7 +57,7 @@ export const useWbsManager = (projectId: string) => {
                 description: '',
                 children: []
             };
-            dispatch({ type: 'ADD_WBS_NODE', payload: { projectId, parentId, newNode } });
+            dispatch({ type: 'WBS_ADD_NODE', payload: { projectId, parentId, newNode } });
         }
     }, [dispatch, projectId]);
 
@@ -74,7 +76,7 @@ export const useWbsManager = (projectId: string) => {
         e.stopPropagation();
         const nodeId = e.dataTransfer.getData('text/plain');
         if (nodeId && nodeId !== newParentId) {
-            dispatch({ type: 'UPDATE_WBS_NODE_PARENT', payload: { projectId, nodeId, newParentId } });
+            dispatch({ type: 'WBS_REPARENT', payload: { projectId, nodeId, newParentId } });
         }
         setDraggedNodeId(null);
     }, [dispatch, projectId]);
@@ -98,7 +100,7 @@ export const useWbsManager = (projectId: string) => {
     
     const handleShapeChange = useCallback((shape: WBSNodeShape) => {
         if (contextMenu.nodeId) {
-            dispatch({ type: 'UPDATE_WBS_NODE_SHAPE', payload: { projectId, nodeId: contextMenu.nodeId, shape } });
+            dispatch({ type: 'WBS_UPDATE_SHAPE', payload: { projectId, nodeId: contextMenu.nodeId, shape } });
         }
         closeContextMenu();
     }, [dispatch, projectId, contextMenu.nodeId, closeContextMenu]);

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexus PPM - Enterprise Project Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+              mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular'],
             },
             colors: {
               nexus: {
@@ -32,34 +34,54 @@
       }
     </script>
     <style>
-      /* Custom scrollbar for data-heavy views */
+      /* Base Standardisation */
+      html, body, #root {
+        height: 100%;
+        background-color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: #0f172a;
+      }
+
+      /* Refined Typography Defaults */
+      h1, h2, h3, h4 {
+        letter-spacing: -0.02em;
+      }
+
+      .tracking-tight-closer { letter-spacing: -0.03em; }
+      .tracking-wide-label { letter-spacing: 0.05em; }
+
+      /* Unified Scrollbars */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #f1f5f9; 
+        background: transparent;
       }
       ::-webkit-scrollbar-thumb {
         background: #cbd5e1; 
-        border-radius: 4px;
+        border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8; 
       }
       
-      /* Utility to hide scrollbar but allow scrolling */
-      .scrollbar-hide {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-          display: none;
+      /* Density Standardisation Classes */
+      .density-compact .standard-row { height: 2rem; }
+      .density-comfortable .standard-row { height: 3rem; }
+      
+      .density-compact .text-standard { font-size: 0.75rem; }
+      .density-comfortable .text-standard { font-size: 0.875rem; }
+
+      /* Global Micro-Interactions */
+      button:active {
+        transform: scale(0.98);
       }
 
-      body, #root {
-        height: 100%;
-        background-color: #f8fafc;
+      /* Mask for Sidebar Items */
+      .clip-chevron {
+        clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%);
       }
     </style>
   <script type="importmap">
@@ -68,6 +90,7 @@
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.23.0",
     "vite": "https://esm.sh/vite@^7.2.7",
     "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",

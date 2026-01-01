@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CustomBarChartProps {
   data: any[];
@@ -15,10 +17,13 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   xAxisKey, 
   dataKey, 
   height = 300, 
-  barColor = '#0ea5e9',
+  barColor,
   className = '',
   formatTooltip
 }) => {
+  const theme = useTheme();
+  const effectiveBarColor = barColor || theme.charts.palette[0];
+
   if (!data || data.length === 0) return null;
 
   const maxValue = Math.max(...data.map(d => Number(d[dataKey]) || 0));
@@ -28,13 +33,13 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
   return (
     <div className={`w-full flex flex-col ${className}`} style={{ height: height }}>
       {/* Chart Area */}
-      <div className="flex-1 flex items-end justify-between gap-2 relative border-b border-slate-200 pb-2">
+      <div className={`flex-1 flex items-end justify-between gap-2 relative border-b ${theme.colors.border.replace('border-', 'border-b-')} pb-2`}>
         {/* Y-Axis Guidelines (Simplified) */}
         <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-50">
-            <div className="border-t border-dashed border-slate-200 w-full h-0"></div>
-            <div className="border-t border-dashed border-slate-200 w-full h-0"></div>
-            <div className="border-t border-dashed border-slate-200 w-full h-0"></div>
-            <div className="border-t border-dashed border-slate-200 w-full h-0"></div>
+            <div className={`border-t border-dashed ${theme.colors.border} w-full h-0`}></div>
+            <div className={`border-t border-dashed ${theme.colors.border} w-full h-0`}></div>
+            <div className={`border-t border-dashed ${theme.colors.border} w-full h-0`}></div>
+            <div className={`border-t border-dashed ${theme.colors.border} w-full h-0`}></div>
         </div>
 
         {data.map((item, index) => {
@@ -55,7 +60,7 @@ export const CustomBarChart: React.FC<CustomBarChartProps> = ({
                 className="w-full rounded-t-md transition-all duration-500 ease-out hover:opacity-80"
                 style={{ 
                   height: `${percentage}%`, 
-                  backgroundColor: barColor 
+                  backgroundColor: effectiveBarColor 
                 }}
               ></div>
             </div>

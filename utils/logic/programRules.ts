@@ -1,14 +1,14 @@
 
-import { DataState } from '../../context/DataContext';
+import { DataState, Action } from '../../types/actions';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
-import { TaskStatus } from '../../types';
+import { TaskStatus } from '../../types/project';
 
-export const applyProgramRules = (state: DataState, action: any, alerts: SystemAlert[]) => {
+export const applyProgramRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
   let programs = [...state.programs];
 
   // Hook: Cross-Project Dependency Break
-  if (action.type === 'UPDATE_TASK' && action.payload.task.status === TaskStatus.DELAYED) {
+  if (action.type === 'TASK_UPDATE' && action.payload.task.status === TaskStatus.DELAYED) {
       const task = action.payload.task;
       // Mock check: In real app, check DB for external dependencies
       if (task.wbsCode === '1.2') { 
@@ -46,5 +46,5 @@ export const applyProgramRules = (state: DataState, action: any, alerts: SystemA
       }
   });
 
-  return { programs, alerts };
+  return { programs };
 };

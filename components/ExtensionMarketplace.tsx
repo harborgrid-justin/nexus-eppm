@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import {
-  Search, Download, CheckCircle, Package, Box, Radio, Calculator, Receipt,
-  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare,
+import { 
+  Search, Download, CheckCircle, Package, Box, Radio, Calculator, Receipt, 
+  Banknote, TrendingUp, ShoppingCart, Truck, Clipboard, CheckSquare, 
   MessageSquare, FileInput, Shield, Leaf, Award, ScatterChart, BarChart2,
   PieChart, Users, Camera, BookOpen, Umbrella, Scale, Watch, CloudRain,
   AlertOctagon, PenTool, LayoutGrid, Filter, Lock
@@ -26,38 +26,40 @@ const ExtensionMarketplace: React.FC = () => {
   const { hasPermission } = usePermissions();
   const canManageExtensions = hasPermission('system:configure');
 
-  const categories: string[] = ['All', ...Array.from(new Set<string>(state.extensions.map((e: { category: string }) => e.category)))];
+  const categories = useMemo(() => ['All', ...Array.from(new Set(state.extensions.map(e => e.category)))], [state.extensions]);
 
-  const filteredExtensions = state.extensions.filter(ext => {
-    const matchesCategory = categoryFilter === 'All' || ext.category === categoryFilter;
-    const matchesSearch = ext.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          ext.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredExtensions = useMemo(() => {
+      return state.extensions.filter(ext => {
+        const matchesCategory = categoryFilter === 'All' || ext.category === categoryFilter;
+        const matchesSearch = ext.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              ext.description.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+  }, [state.extensions, categoryFilter, searchTerm]);
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
       <div className={theme.layout.header}>
-        <div>
+        <div className="mb-4 md:mb-0">
           <h1 className={theme.typography.h1}>
             <LayoutGrid className="text-nexus-600" /> Extension Marketplace
           </h1>
           <p className={theme.typography.small}>Discover and install powerful engines to expand your platform.</p>
         </div>
-        <div className="relative">
+        <div className="relative w-full md:w-auto">
              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
              <input 
                type="text" 
                placeholder="Search extensions..." 
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-1 focus:ring-nexus-500 w-64" 
+               className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-1 focus:ring-nexus-500 w-full md:w-64" 
              />
           </div>
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
         {categories.map(cat => (
           <button
             key={cat}
@@ -73,34 +75,34 @@ const ExtensionMarketplace: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2">
+      <div className="flex-1 overflow-y-auto pr-1 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredExtensions.map(ext => {
             const IconComponent = iconMap[ext.icon] || Package;
             const isInstalled = ext.status === 'Installed' || ext.status === 'Active';
 
             return (
-              <div key={ext.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group`}>
+              <div key={ext.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group h-full`}>
                  <div className="flex justify-between items-start mb-4">
-                    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-nexus-600 group-hover:bg-nexus-50 transition-colors">
+                    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-nexus-600 group-hover:bg-nexus-50 transition-colors shrink-0">
                        <IconComponent size={24} />
                     </div>
                     {isInstalled ? (
-                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                      <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 shrink-0">
                         <CheckCircle size={12} /> Installed
                       </span>
                     ) : (
-                      <span className="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded-full font-medium">
+                      <span className="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded-full font-medium shrink-0">
                         v{ext.version}
                       </span>
                     )}
                  </div>
                  
-                 <h3 className={`${theme.typography.h3} mb-1 text-base`}>{ext.name}</h3>
-                 <p className={`${theme.typography.body} text-slate-500 mb-4 line-clamp-2 min-h-[40px]`}>{ext.description}</p>
+                 <h3 className={`${theme.typography.h3} mb-1 text-base truncate`}>{ext.name}</h3>
+                 <p className={`${theme.typography.body} text-slate-500 mb-4 line-clamp-3 min-h-[60px]`}>{ext.description}</p>
                  
                  <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{ext.category}</span>
+                    <span className="text-xs text-slate-400 font-medium uppercase tracking-wider truncate mr-2">{ext.category}</span>
                     {canManageExtensions ? (
                         <button 
                         onClick={() => {
@@ -110,7 +112,7 @@ const ExtensionMarketplace: React.FC = () => {
                             dispatch({ type: 'INSTALL_EXTENSION', payload: ext.id });
                             }
                         }}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
                             ext.status === 'Active'
                             ? 'bg-slate-100 text-slate-400 cursor-default'
                             : isInstalled

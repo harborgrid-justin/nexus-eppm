@@ -1,17 +1,13 @@
 
 import React, { useState } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ListChecks, Filter, Plus, Link, CheckCircle, Search, Lock } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Badge } from '../ui/Badge';
 
-interface RequirementsTraceabilityProps {
-    projectId: string;
-}
-
-const RequirementsTraceability: React.FC<RequirementsTraceabilityProps> = ({ projectId }) => {
-    const { project } = useProjectState(projectId);
+const RequirementsTraceability: React.FC = () => {
+    const { project } = useProjectWorkspace();
     const theme = useTheme();
     const { canEditProject } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Box, ShieldCheck, Folder, Layers, CheckCircle, Clock } from 'lucide-react';
+import { Server, ShieldCheck, Database, Layers, CheckCircle, Clock } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 
@@ -16,7 +16,7 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
         <div className="flex items-center gap-2 mb-2">
-            <Box className="text-nexus-600" size={24}/>
+            <Server className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Architecture & Technical Standards</h2>
         </div>
 
@@ -31,9 +31,9 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                         <div key={std.id} className="p-4 border border-slate-200 rounded-lg hover:shadow-sm transition-shadow">
                             <div className="flex justify-between items-start mb-1">
                                 <div className="flex items-center gap-2">
-                                    {std.category === 'Security' ? <ShieldCheck size={16} className="text-nexus-500"/> :
-                                     std.category === 'Data' ? <Folder size={16} className="text-green-500"/> :
-                                     <Box size={16} className="text-slate-500"/>}
+                                    {std.category === 'Security' ? <ShieldCheck size={16} className="text-nexus-500"/> : 
+                                     std.category === 'Data' ? <Database size={16} className="text-green-500"/> :
+                                     <Server size={16} className="text-slate-500"/>}
                                     <h4 className="font-bold text-sm text-slate-900">{std.title}</h4>
                                 </div>
                                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${

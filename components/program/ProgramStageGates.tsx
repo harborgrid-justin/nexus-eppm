@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import * as LucideIcons from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle, FileText, ChevronRight, Gavel } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
-
-const { CheckCircle, XCircle, Clock, AlertTriangle, FileText, ChevronRight, Gavel } = LucideIcons;
 
 interface ProgramStageGatesProps {
   programId: string;
@@ -67,7 +65,7 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <span className="bg-slate-200 px-2 py-0.5 rounded">{gate.type} Gate</span>
                                     <span>•</span>
-                                    <span>Approvers: {gate.approvers.join(', ')}</span>
+                                    <span>Approvers: {(gate.approverIds || []).join(', ')}</span>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +82,7 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
                                 <CheckCircle size={14}/> Decision Criteria
                             </h4>
                             <ul className="space-y-3">
-                                {gate.criteria.map(crit => (
+                                {(gate.criteria || []).map(crit => (
                                     <li key={crit.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                                         {crit.status === 'Met' ? <CheckCircle size={16} className="text-green-500 mt-0.5"/> : 
                                          crit.status === 'Not Met' ? <XCircle size={16} className="text-red-500 mt-0.5"/> :

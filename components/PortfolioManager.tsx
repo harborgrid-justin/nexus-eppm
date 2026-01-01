@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map, Gavel, Leaf } from 'lucide-react';
+import React, { useState, useMemo, useTransition } from 'react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -16,19 +16,24 @@ import PortfolioScenarios from './portfolio/PortfolioScenarios';
 import PortfolioValue from './portfolio/PortfolioValue';
 import PortfolioGovernance from './portfolio/PortfolioGovernance';
 import PortfolioESG from './portfolio/PortfolioESG';
+import PortfolioPrograms from './portfolio/PortfolioPrograms';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
-
-const MapIcon = Map;
+import ProgramManager from './ProgramManager';
+import { useTheme } from '../context/ThemeContext';
 
 const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
   const [activeTab, setActiveTab] = useState('overview');
+  const [drilledProgramId, setDrilledProgramId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { state } = useData();
+  const theme = useTheme();
 
-  const navGroups = useMemo(() => [
+  const navGroups: NavGroup[] = useMemo(() => [
     { id: 'dashboards', label: 'Dashboards', items: [
       { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
+      { id: 'programs', label: 'Program Portfolio', icon: Layers },
       { id: 'esg', label: 'ESG & Compliance', icon: Leaf }
     ]},
     { id: 'strategy', label: 'Strategy & Selection', items: [
@@ -54,14 +59,45 @@ const PortfolioManager: React.FC = () => {
   const handleGroupChange = (groupId: string) => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
-      setActiveGroup(groupId);
-      setActiveTab(newGroup.items[0].id);
+      startTransition(() => {
+        setActiveGroup(groupId);
+        setActiveTab(newGroup.items[0].id);
+        setDrilledProgramId(null); 
+      });
     }
   };
 
+  const handleItemChange = (tabId: string) => {
+    startTransition(() => {
+        setActiveTab(tabId);
+        setDrilledProgramId(null);
+    });
+  };
+
+  const handleProgramDrillDown = (programId: string) => {
+    startTransition(() => {
+      setDrilledProgramId(programId);
+    });
+  };
+
   const renderContent = () => {
+    if (drilledProgramId) {
+        return (
+            <div className="h-full flex flex-col relative animate-in slide-in-from-bottom-4">
+                <button 
+                    onClick={() => setDrilledProgramId(null)}
+                    className="absolute top-4 left-4 z-[60] bg-white/90 backdrop-blur p-2 rounded-full border border-slate-200 shadow-md text-nexus-600 hover:bg-nexus-50 transition-all font-bold text-xs flex items-center gap-2"
+                >
+                    <ArrowLeft size={16}/> Back to Portfolio
+                </button>
+                <ProgramManager forcedProgramId={drilledProgramId} />
+            </div>
+        );
+    }
+
     switch(activeTab) {
       case 'overview': return <Dashboard />;
+      case 'programs': return <PortfolioPrograms onSelectProgram={handleProgramDrillDown} />;
       case 'esg': return <PortfolioESG />;
       case 'financials': return <PortfolioFinancials projects={state.projects} />;
       case 'capacity': return <PortfolioCapacity />;
@@ -81,16 +117,22 @@ const PortfolioManager: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-slate-100">
-      <ModuleNavigation
-        groups={navGroups as any}
-        activeGroup={activeGroup}
-        activeItem={activeTab}
-        onGroupChange={handleGroupChange}
-        onItemChange={setActiveTab}
-      />
-
-      <div className="flex-1 overflow-hidden">
+    <div className={`h-full w-full flex flex-col ${theme.colors.background}`}>
+      {!drilledProgramId && (
+        <ModuleNavigation 
+            groups={navGroups}
+            activeGroup={activeGroup}
+            activeItem={activeTab}
+            onGroupChange={handleGroupChange}
+            onItemChange={handleItemChange}
+        />
+      )}
+      <div className="flex-1 overflow-hidden relative">
+         {isPending && (
+             <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px] z-20">
+                 <Loader2 className="animate-spin text-nexus-500" />
+             </div>
+         )}
          {renderContent()}
       </div>
     </div>

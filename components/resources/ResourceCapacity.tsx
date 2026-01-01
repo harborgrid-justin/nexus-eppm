@@ -1,6 +1,9 @@
 
-import React, { useMemo } from 'react';
-import { Resource } from '../../types';
+
+
+import React, { useMemo, useState, useEffect } from 'react';
+// FIX: Corrected import path for Resource type to resolve module resolution error.
+import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { getDaysDiff, addWorkingDays } from '../../utils/dateUtils';
 
@@ -11,15 +14,20 @@ interface ResourceCapacityProps {
 const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources }) => {
   const { state } = useData();
   
-  // Define time range (e.g., current year months)
-  const currentYear = new Date().getFullYear();
+  // Hydration safety: Define current year after mount
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+  
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // Calculate allocations dynamically
   const allocationData = useMemo(() => {
       const data: Record<string, number[]> = {};
       
-      if (!projectResources) return {};
+      if (!projectResources || !currentYear) return {};
 
       // Initialize zero allocation for all resources for 12 months
       projectResources.forEach(res => {
@@ -42,15 +50,6 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
                           
                           task.assignments.forEach(assignment => {
                               if (data[assignment.resourceId]) {
-                                  // Add allocation % to the month bucket. 
-                                  // In a real system, this would be: (Hours Assigned in Month / Total Working Hours in Month) * 100
-                                  // Here we approximate: If task is active in this month, add assignment units. 
-                                  // To avoid over-counting if task spans multiple months, we assume uniform distribution or just checking presence.
-                                  // Better approach for visualization: Add the 'units' value (e.g. 100 for full time) 
-                                  // If a resource has 2 overlapping tasks at 50% each, they are 100% allocated.
-                                  
-                                  // We take the max allocation seen in the month for simplicity in this heatmap view, 
-                                  // or add them up if concurrent. Let's add them up to show over-allocation.
                                   data[assignment.resourceId][monthIndex] += assignment.units; 
                               }
                           });
@@ -63,7 +62,6 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
           });
       });
       
-      // Normalize or cap? No, we want to see over-allocation (e.g. 150%)
       return data;
   }, [projectResources, state.projects, currentYear]);
 
@@ -75,7 +73,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
     return 'bg-red-100 text-red-800 hover:bg-red-200';
   };
   
-  if (!projectResources) return <div>Loading capacity data...</div>;
+  if (!projectResources || !currentYear) return <div>Loading capacity data...</div>;
 
   return (
     <div className="h-full flex flex-col">

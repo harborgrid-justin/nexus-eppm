@@ -1,12 +1,13 @@
 
-import { DataState } from '../../context/DataContext';
+// FIX: Correctly import DataState from types/actions.
+import { DataState, Action } from '../../types/actions';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 
-export const applyResourceRules = (state: DataState, action: any, alerts: SystemAlert[]) => {
+export const applyResourceRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
   
   // Hook: Vendor Concentration Risk
-  if (action.type === 'UPDATE_VENDOR' || action.type === 'IMPORT_PROJECTS') {
+  if (action.type === 'UPDATE_VENDOR' || action.type === 'PROJECT_IMPORT') {
       const totalValue = state.contracts.reduce((sum, c) => sum + c.contractValue, 0);
       const vendorExposure: Record<string, number> = {};
       
@@ -25,7 +26,7 @@ export const applyResourceRules = (state: DataState, action: any, alerts: System
   }
 
   // Hook: Skill Shortage on Critical Path
-  if (action.type === 'UPDATE_TASK') {
+  if (action.type === 'TASK_UPDATE') {
       const t = action.payload.task;
       if (t.critical && (!t.assignments || t.assignments.length === 0)) {
            // Simplify: Just check if empty assignment on critical task
@@ -40,7 +41,7 @@ export const applyResourceRules = (state: DataState, action: any, alerts: System
   
   // Hook: Contract Expiry
   // Periodically checked (e.g. on load or daily job)
-  if (action.type === 'QUEUE_DATA_JOB') {
+  if (action.type === 'SYSTEM_QUEUE_DATA_JOB') {
       const today = new Date();
       state.contracts.forEach(c => {
           const endDate = new Date(c.endDate);
@@ -52,5 +53,5 @@ export const applyResourceRules = (state: DataState, action: any, alerts: System
       });
   }
 
-  return { alerts };
+  return {};
 };

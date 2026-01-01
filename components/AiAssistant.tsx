@@ -1,8 +1,12 @@
 
+
+
 import React from 'react';
-import { Project } from '../types';
+// FIX: Corrected import path for types to resolve module resolution errors.
+import { Project, AIAnalysisResult } from '../types/index';
 import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2 } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
+import { useTheme } from '../context/ThemeContext';
 
 interface AiAssistantProps {
   project: Project;
@@ -21,14 +25,16 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
     handleAnalyze,
     handleSendChat
   } = useAiAssistant(project, isOpen);
+  const theme = useTheme();
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-y-0 right-0 w-[450px] bg-white shadow-2xl border-l border-slate-200 transform transition-transform duration-300 z-50 flex flex-col"
+      className={`fixed inset-y-0 right-0 w-[450px] ${theme.colors.surface} shadow-2xl border-l ${theme.colors.border} transform transition-transform duration-300 z-50 flex flex-col`}
       role="dialog"
       aria-label="AI Project Assistant"
+      aria-modal="true"
     >
       {/* Header */}
       <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-gradient-to-r from-nexus-900 to-slate-900 text-white">
@@ -46,11 +52,11 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50" ref={scrollRef}>
+      <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${theme.colors.background}`} ref={scrollRef}>
         
         {/* Analysis Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
+        <div className={`${theme.components.card} overflow-hidden`}>
+          <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
             <h3 className="font-semibold text-slate-800 flex items-center gap-2">
               <FileText size={16} className="text-nexus-600" />
               Project Analysis
@@ -67,47 +73,49 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
             )}
           </div>
           
-          {analysis ? (
-            <div className="p-4 space-y-4">
-              <p className="text-sm text-slate-600 leading-relaxed">{analysis.summary}</p>
-              
-              <div className="space-y-2">
-                <div className="text-xs font-bold uppercase tracking-wider text-red-600 flex items-center gap-1">
-                  <AlertTriangle size={12} /> Risks Detected
+          <div aria-live="polite">
+            {analysis ? (
+              <div className="p-4 space-y-4">
+                <p className="text-sm text-slate-600 leading-relaxed">{analysis.summary}</p>
+                
+                <div className="space-y-2">
+                  <div className="text-xs font-bold uppercase tracking-wider text-red-600 flex items-center gap-1">
+                    <AlertTriangle size={12} /> Risks Detected
+                  </div>
+                  <ul className="text-sm space-y-1">
+                    {analysis.risks.map((risk, i) => (
+                      <li key={i} className="flex gap-2 items-start text-slate-700">
+                        <span className="text-red-400 mt-1" aria-hidden="true">•</span>
+                        {risk}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="text-sm space-y-1">
-                  {analysis.risks.map((risk, i) => (
-                    <li key={i} className="flex gap-2 items-start text-slate-700">
-                      <span className="text-red-400 mt-1" aria-hidden="true">•</span>
-                      {risk}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
-              <div className="space-y-2">
-                 <div className="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1">
-                  <Lightbulb size={12} /> Recommendations
+                <div className="space-y-2">
+                   <div className="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1">
+                    <Lightbulb size={12} /> Recommendations
+                  </div>
+                  <ul className="text-sm space-y-1">
+                    {analysis.recommendations.map((rec, i) => (
+                      <li key={i} className="flex gap-2 items-start text-slate-700">
+                         <span className="text-amber-400 mt-1" aria-hidden="true">•</span>
+                         {rec}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="text-sm space-y-1">
-                  {analysis.recommendations.map((rec, i) => (
-                    <li key={i} className="flex gap-2 items-start text-slate-700">
-                       <span className="text-amber-400 mt-1" aria-hidden="true">•</span>
-                       {rec}
-                    </li>
-                  ))}
-                </ul>
               </div>
-            </div>
-          ) : (
-            <div className="p-8 text-center text-slate-500 text-sm">
-               {isLoading ? "Analyzing project schedule and budget..." : "Ready to analyze."}
-            </div>
-          )}
+            ) : (
+              <div className="p-8 text-center text-slate-500 text-sm">
+                 {isLoading ? "Analyzing project schedule and budget..." : "Ready to analyze."}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Chat Interface */}
-        <div className="space-y-4 pb-4">
+        <div className="space-y-4 pb-4" role="log" aria-label="Chat History">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-px bg-slate-200 flex-1"></div>
             <span className="text-xs font-medium text-slate-400">Ask a Question</span>
@@ -119,7 +127,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
               <div className={`max-w-[85%] rounded-lg p-3 text-sm ${
                 msg.role === 'user' 
                   ? 'bg-nexus-600 text-white rounded-br-none' 
-                  : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'
+                  : `${theme.colors.surface} border ${theme.colors.border} ${theme.colors.text.primary} rounded-bl-none shadow-sm`
               }`}>
                 {msg.text}
               </div>
@@ -130,13 +138,13 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-white border-t border-slate-200">
+      <div className={`p-4 ${theme.colors.surface} border-t ${theme.colors.border}`}>
         <div className="relative">
           <label htmlFor="ai-chat-input" className="sr-only">Ask about project details</label>
           <input
             id="ai-chat-input"
             type="text"
-            className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-nexus-500 text-sm"
+            className={`w-full pl-4 pr-12 py-3 ${theme.colors.background} border ${theme.colors.border} rounded-lg focus:outline-none focus:ring-2 focus:ring-nexus-500 text-sm`}
             placeholder="Ask about schedule delays, budget..."
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}

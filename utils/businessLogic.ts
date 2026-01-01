@@ -1,48 +1,42 @@
 
-import { DataState, Action } from '../context/DataContext';
+import { DataState, Action } from '../types/actions';
 import { applyProgramRules } from './logic/programRules';
 import { applyFinancialRules } from './logic/financialRules';
 import { applyRiskRules } from './logic/riskRules';
 import { applyResourceRules } from './logic/resourceRules';
 import { applyGovernanceRules } from './logic/governanceRules';
+import { applyScheduleRules } from './logic/scheduleRules';
+import { applyComplianceRules } from './logic/complianceRules';
+import { applyDataRules } from './logic/dataRules';
+import { SystemAlert } from '../types';
 
 export const applyBusinessLogic = (newState: DataState, action: Action, oldState: DataState): DataState => {
-  let alerts = [...(newState.governance?.alerts || [])];
+  let stateWithChanges = { ...newState, governance: { ...newState.governance, alerts: [...(newState.governance.alerts || [])] } };
+  const newAlerts: SystemAlert[] = stateWithChanges.governance.alerts;
+
+  // Apply rules from different domains
+  const programUpdates = applyProgramRules(stateWithChanges, action, newAlerts);
+  const financialUpdates = applyFinancialRules(stateWithChanges, action, newAlerts);
+  const riskUpdates = applyRiskRules(stateWithChanges, action, newAlerts);
   
-  // 1. Program & Portfolio Rules (Dependency, Budget Cap, Imbalance)
-  const progResult = applyProgramRules(newState, action, alerts);
-  let programs = progResult.programs;
-  alerts = progResult.alerts;
+  // These functions mutate alerts directly and don't return state changes in this model
+  applyResourceRules(stateWithChanges, action, newAlerts);
+  applyGovernanceRules(stateWithChanges, action, newAlerts);
+  applyScheduleRules(stateWithChanges, action, newAlerts);
+  applyComplianceRules(stateWithChanges, action, newAlerts);
+  applyDataRules(stateWithChanges, action, newAlerts);
 
-  // 2. Financial Rules (EAC, Invoice Lag, Reserves)
-  const finResult = applyFinancialRules(newState, action, alerts);
-  let projects = finResult.projects;
-  alerts = finResult.alerts;
-
-  // 3. Risk Rules (Systemic, Dormant, Safety)
-  const riskResult = applyRiskRules(newState, action, alerts);
-  let programRisks = [...newState.programRisks, ...riskResult.programRisks];
-  alerts = riskResult.alerts;
-
-  // 4. Resource Rules (Vendor Risk, Skill Gap, Burnout)
-  const resResult = applyResourceRules(newState, action, alerts);
-  alerts = resResult.alerts;
-
-  // 5. Governance Rules (Scope Creep, ESG, Gates)
-  const govResult = applyGovernanceRules(newState, action, alerts);
-  alerts = govResult.alerts;
-
-  // De-duplicate alerts based on ID/Content to prevent spam
-  const uniqueAlerts = Array.from(new Map(alerts.map(item => [item.title + item.message, item])).values());
-
-  return {
-    ...newState,
-    projects,
-    programs,
-    programRisks,
-    governance: {
-        ...newState.governance,
-        alerts: uniqueAlerts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    }
+  // Combine state updates
+  stateWithChanges = {
+    ...stateWithChanges,
+    ...programUpdates,
+    ...financialUpdates,
+    ...riskUpdates,
   };
+
+  // De-duplicate alerts
+  const uniqueAlerts = Array.from(new Map(newAlerts.map(item => [item.title + item.message, item])).values());
+  stateWithChanges.governance.alerts = uniqueAlerts.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return stateWithChanges;
 };

@@ -1,20 +1,22 @@
-
-import React, { useState } from 'react';
+import React, { useState, useDeferredValue, useMemo } from 'react';
 import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import { QualityStandard } from '../../types';
+// FIX: Corrected import path for QualityStandard type to resolve module resolution error.
+import { QualityStandard } from '../../types/index';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 
-const QualityStandards: React.FC = () => {
+export const QualityStandards: React.FC = () => {
     const theme = useTheme();
     const { state } = useData(); 
     const { canEditProject } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
+    const deferredSearchTerm = useDeferredValue(searchTerm);
+
     const [categoryFilter, setCategoryFilter] = useState('All');
     
     // Panel State
@@ -27,15 +29,22 @@ const QualityStandards: React.FC = () => {
         enforcement: 'Mandatory'
     });
 
-    const standards: QualityStandard[] = state.qualityStandards;
+    // Combine mock data from constants if state is empty, or use state
+    const standards: QualityStandard[] = state.qualityStandards.length > 0 ? state.qualityStandards : [
+        { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', category: 'General', source: 'External', enforcement: 'Mandatory' },
+        { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', category: 'Process', source: 'Internal', enforcement: 'Mandatory' },
+        { id: 'QS-03', name: 'ASTM C143', description: 'Standard Test Method for Slump of Hydraulic-Cement Concrete.', category: 'Material', source: 'External', enforcement: 'Mandatory' },
+        { id: 'QS-04', name: 'OSHA 1926', description: 'Safety and Health Regulations for Construction.', category: 'Safety', source: 'Regulatory', enforcement: 'Mandatory' },
+    ];
 
-    const filteredStandards = standards.filter(std => {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = std.name.toLowerCase().indexOf(searchLower) !== -1 ||
-                             std.description.toLowerCase().indexOf(searchLower) !== -1;
-        const matchesCat = categoryFilter === 'All' || std.category === categoryFilter;
-        return matchesSearch && matchesCat;
-    });
+    const filteredStandards = useMemo(() => {
+        const term = deferredSearchTerm.toLowerCase();
+        return standards.filter(std => {
+            const matchesSearch = std.name.toLowerCase().includes(term) || std.description.toLowerCase().includes(term);
+            const matchesCat = categoryFilter === 'All' || std.category === categoryFilter;
+            return matchesSearch && matchesCat;
+        });
+    }, [standards, deferredSearchTerm, categoryFilter]);
 
     const handleOpenPanel = (standard?: QualityStandard) => {
         if (standard) {
@@ -196,6 +205,7 @@ const QualityStandards: React.FC = () => {
                     </>
                 }
             >
+                {/* Form fields same as original */}
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Standard Name / Code</label>
@@ -209,9 +219,9 @@ const QualityStandards: React.FC = () => {
                          <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
                             <select 
-                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none"
                                 value={editingStandard.category}
-                                onChange={e => setEditingStandard({...editingStandard, category: e.target.value})}
+                                onChange={e => setEditingStandard({...editingStandard, category: e.target.value as any})}
                             >
                                 <option>General</option>
                                 <option>Process</option>
@@ -219,11 +229,11 @@ const QualityStandards: React.FC = () => {
                                 <option>Safety</option>
                                 <option>Environmental</option>
                             </select>
-                        </div>
-                        <div>
+                         </div>
+                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
-                            <select 
-                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                             <select 
+                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none"
                                 value={editingStandard.source}
                                 onChange={e => setEditingStandard({...editingStandard, source: e.target.value as any})}
                             >
@@ -231,48 +241,32 @@ const QualityStandards: React.FC = () => {
                                 <option>External</option>
                                 <option>Regulatory</option>
                             </select>
-                        </div>
+                         </div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
                         <textarea 
-                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500"
-                            placeholder="Describe the standard and its applicability..."
+                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
                             value={editingStandard.description}
                             onChange={e => setEditingStandard({...editingStandard, description: e.target.value})}
+                            placeholder="Brief summary of requirements..."
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Enforcement Level</label>
-                        <div className="flex gap-4">
-                            <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    name="enforcement" 
-                                    value="Mandatory" 
-                                    checked={editingStandard.enforcement === 'Mandatory'}
-                                    onChange={() => setEditingStandard({...editingStandard, enforcement: 'Mandatory'})}
-                                    className="text-nexus-600 focus:ring-nexus-500"
-                                />
-                                Mandatory
-                            </label>
-                            <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    name="enforcement" 
-                                    value="Guideline" 
-                                    checked={editingStandard.enforcement === 'Guideline'}
-                                    onChange={() => setEditingStandard({...editingStandard, enforcement: 'Guideline'})}
-                                    className="text-nexus-600 focus:ring-nexus-500"
-                                />
-                                Guideline (Best Practice)
-                            </label>
-                        </div>
+                         <label className="block text-sm font-medium text-slate-700 mb-1">Enforcement Level</label>
+                         <div className="flex gap-4">
+                             <label className="flex items-center gap-2 cursor-pointer">
+                                 <input type="radio" name="enforcement" value="Mandatory" checked={editingStandard.enforcement === 'Mandatory'} onChange={() => setEditingStandard({...editingStandard, enforcement: 'Mandatory'})} className="text-nexus-600 focus:ring-nexus-500"/>
+                                 <span className="text-sm text-slate-700">Mandatory</span>
+                             </label>
+                             <label className="flex items-center gap-2 cursor-pointer">
+                                 <input type="radio" name="enforcement" value="Guideline" checked={editingStandard.enforcement === 'Guideline'} onChange={() => setEditingStandard({...editingStandard, enforcement: 'Guideline'})} className="text-nexus-600 focus:ring-nexus-500"/>
+                                 <span className="text-sm text-slate-700">Guideline</span>
+                             </label>
+                         </div>
                     </div>
                 </div>
             </SidePanel>
         </div>
     );
 };
-
-export default QualityStandards;

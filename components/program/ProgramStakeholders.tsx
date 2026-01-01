@@ -1,14 +1,8 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import * as LucideIcons from 'lucide-react';
+import { Users, MessageSquare, Volume2, Shield, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-
-const { Users, Shield, Plus, FileText, X } = LucideIcons;
-const MessageSquare = (LucideIcons as any).MessageSquare || FileText;
-const Volume2 = (LucideIcons as any).Volume2 || Users;
-const Edit2 = (LucideIcons as any).Edit2 || FileText;
-const Trash2 = (LucideIcons as any).Trash2 || X;
 import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
@@ -49,7 +43,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
     } as ProgramStakeholder;
 
     dispatch({
-      type: editingStakeholder.id ? 'UPDATE_PROGRAM_STAKEHOLDER' : 'ADD_PROGRAM_STAKEHOLDER',
+      type: editingStakeholder.id ? 'PROGRAM_UPDATE_STAKEHOLDER' : 'PROGRAM_ADD_STAKEHOLDER',
       payload: stakeholderToSave
     });
     setIsStakeholderPanelOpen(false);
@@ -57,7 +51,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
 
   const handleDeleteStakeholder = (id: string) => {
     if (window.confirm('Are you sure you want to delete this stakeholder?')) {
-      dispatch({ type: 'DELETE_PROGRAM_STAKEHOLDER', payload: id });
+      dispatch({ type: 'PROGRAM_DELETE_STAKEHOLDER', payload: id });
     }
   };
 
@@ -76,7 +70,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
     } as ProgramCommunicationItem;
     
     dispatch({
-        type: editingCommItem.id ? 'UPDATE_PROGRAM_COMM_ITEM' : 'ADD_PROGRAM_COMM_ITEM',
+        type: editingCommItem.id ? 'PROGRAM_UPDATE_COMM_ITEM' : 'PROGRAM_ADD_COMM_ITEM',
         payload: itemToSave
     });
     setIsCommPanelOpen(false);
@@ -84,7 +78,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
 
   const handleDeleteCommItem = (id: string) => {
     if (window.confirm('Are you sure you want to delete this communication item?')) {
-        dispatch({ type: 'DELETE_PROGRAM_COMM_ITEM', payload: id });
+        dispatch({ type: 'PROGRAM_DELETE_COMM_ITEM', payload: id });
     }
   };
 
@@ -114,7 +108,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-100">
                         {programStakeholders.map(s => (
-                            <tr key={s.id} className="hover:bg-slate-50 group">
+                            <tr key={s.id} className="hover:bg-slate-50 group focus-within:bg-slate-50">
                                 <td className="px-6 py-4">
                                     <div className="font-bold text-slate-900 text-sm">{s.name}</div>
                                     <div className="text-xs text-slate-500">{s.role}</div>
@@ -135,9 +129,9 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                                     }>{s.engagementLevel}</Badge>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleOpenStakeholderPanel(s)} className="p-1 text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
-                                        <button onClick={() => handleDeleteStakeholder(s.id)} className="p-1 text-slate-500 hover:text-red-500"><Trash2 size={14}/></button>
+                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+                                        <button onClick={() => handleOpenStakeholderPanel(s)} className="p-1 text-slate-500 hover:text-nexus-600 focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded"><Edit2 size={14}/></button>
+                                        <button onClick={() => handleDeleteStakeholder(s.id)} className="p-1 text-slate-500 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"><Trash2 size={14}/></button>
                                     </div>
                                 </td>
                             </tr>
@@ -167,7 +161,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-100">
                         {communicationPlan.map(c => (
-                            <tr key={c.id} className="hover:bg-slate-50 group">
+                            <tr key={c.id} className="hover:bg-slate-50 group focus-within:bg-slate-50">
                                 <td className="px-6 py-4 text-sm font-medium text-slate-900">{c.audience}</td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{c.content}</td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{c.frequency}</td>
@@ -176,9 +170,9 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                                 </td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{c.owner}</td>
                                 <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleOpenCommPanel(c)} className="p-1 text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
-                                        <button onClick={() => handleDeleteCommItem(c.id)} className="p-1 text-slate-500 hover:text-red-500"><Trash2 size={14}/></button>
+                                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity focus-within:opacity-100">
+                                        <button onClick={() => handleOpenCommPanel(c)} className="p-1 text-slate-500 hover:text-nexus-600 focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded"><Edit2 size={14}/></button>
+                                        <button onClick={() => handleDeleteCommItem(c.id)} className="p-1 text-slate-500 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"><Trash2 size={14}/></button>
                                     </div>
                                 </td>
                             </tr>

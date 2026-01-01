@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Task, TaskStatus } from '../../types';
+import { Task, TaskStatus } from '../../types/index';
 import { Diamond } from 'lucide-react';
 import { getDaysDiff } from '../../utils/dateUtils';
 
@@ -63,7 +63,7 @@ const GanttTaskBar: React.FC<GanttTaskBarProps> = React.memo(({
       {/* Baseline Bar (Rendered underneath) */}
       {hasBaseline && (
           <div 
-            className="absolute h-3 bg-yellow-400 opacity-60 rounded-sm top-5 z-0"
+            className="absolute h-3 bg-amber-400 opacity-60 rounded-sm top-5 z-0"
             style={{ left: `${baselineLeft}px`, width: `${baselineWidth}px` }}
             title={`Baseline: ${baselineStart} - ${baselineEnd}`}
           />
@@ -77,13 +77,13 @@ const GanttTaskBar: React.FC<GanttTaskBarProps> = React.memo(({
         className={`pointer-events-auto h-5 rounded-sm border shadow-sm absolute top-1 group cursor-grab transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-nexus-500 z-10
           ${getStatusColor(task.status)} 
           ${showCriticalPath && task.critical ? 'ring-2 ring-offset-1 ring-red-500' : ''}
-          ${isSelected ? 'ring-2 ring-offset-1 ring-blue-500 z-20' : ''}
+          ${isSelected ? 'ring-2 ring-offset-1 ring-nexus-500 z-20' : ''}
         `}
         style={{ left: `${offsetDays * dayWidth}px`, width: `${width}px` }}
         aria-label={`Task: ${task.name}, Status: ${task.status}, Progress: ${task.progress}%`}
       >
         <div className="absolute h-full w-full left-0 top-0 flex items-center">
-          <div className="h-full bg-black/20 rounded-l-sm" style={{ width: `${task.progress}%` }} />
+          <div className="h-full bg-slate-900/30 rounded-l-sm" style={{ width: `${task.progress}%` }} />
         </div>
         
         {/* Label */}

@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { Project } from '../types';
-import { useData } from '../context/DataContext';
-import * as LucideIcons from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 
-interface ReportsProps {
-  projects: Project[];
-}
+
+
+import React, { useState, useMemo } from 'react';
+// FIX: Corrected import path for types to resolve module resolution errors.
+import { Project, Task, Risk } from '../types/index';
+import { useData } from '../context/DataContext';
+import { FileText, Eye, Download, Play, ListFilter, Columns } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 type SubjectArea = 'Projects' | 'Tasks' | 'Risks';
 
@@ -14,7 +14,7 @@ const ALL_FIELDS: Record<SubjectArea, {id: string, label: string}[]> = {
     'Projects': [
         { id: 'code', label: 'Project Code' },
         { id: 'name', label: 'Project Name' },
-        { id: 'manager', label: 'Project Manager' },
+        { id: 'managerId', label: 'Project Manager' },
         { id: 'health', label: 'Health' },
         { id: 'budget', label: 'Budget' },
         { id: 'spent', label: 'Spent' },
@@ -33,18 +33,19 @@ const ALL_FIELDS: Record<SubjectArea, {id: string, label: string}[]> = {
         { id: 'category', label: 'Category' },
         { id: 'score', label: 'Score' },
         { id: 'status', label: 'Status' },
-        { id: 'owner', label: 'Owner' },
+        { id: 'ownerId', label: 'Owner' },
     ],
 }
 
-const Reports: React.FC<ReportsProps> = ({ projects }) => {
+const Reports: React.FC = () => {
   const { state } = useData();
+  const { projects } = state;
   const [subjectArea, setSubjectArea] = useState<SubjectArea>('Projects');
-  const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set(['code', 'name', 'manager', 'health']));
+  const [selectedColumns, setSelectedColumns] = useState<Set<string>>(new Set(['code', 'name', 'managerId', 'health']));
   const [reportData, setReportData] = useState<Record<string, any>[] | null>(null);
   const theme = useTheme();
 
-  const availableColumns = ALL_FIELDS[subjectArea];
+  const availableColumns = useMemo(() => ALL_FIELDS[subjectArea], [subjectArea]);
 
   const handleColumnToggle = (id: string) => {
     const newSelection = new Set(selectedColumns);
@@ -68,12 +69,17 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
     setReportData(data);
   };
 
+  const previewData = useMemo(() => {
+      if (!reportData) return null;
+      return reportData.slice(0, 50); // Optimization: Limit preview to 50 rows
+  }, [reportData]);
+
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
       <div className={`${theme.layout.header} mb-6`}>
         <div>
           <h1 className={theme.typography.h1}>
-            <LucideIcons.FileText size={24}/> Report Builder
+            <FileText size={24}/> Report Builder
           </h1>
           <p className={theme.typography.small}>Create, run, and save custom tabular reports.</p>
         </div>
@@ -103,18 +109,18 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                     </select>
                 </div>
                  <div>
-                    <label className="text-sm font-semibold text-slate-700 block mb-2 flex items-center gap-2"><LucideIcons.Columns3 size={16}/> 2. Columns</label>
+                    <label className="text-sm font-semibold text-slate-700 block mb-2 flex items-center gap-2"><Columns size={16}/> 2. Columns</label>
                     <div className="space-y-2 max-h-48 overflow-y-auto border border-slate-200 rounded-md p-2 bg-slate-50/50">
                         {availableColumns.map(col => (
-                           <label key={col.id} className="flex items-center gap-2 p-1 rounded hover:bg-slate-100 text-sm">
-                               <input type="checkbox" checked={selectedColumns.has(col.id)} onChange={() => handleColumnToggle(col.id)} />
+                           <label key={col.id} className="flex items-center gap-2 p-1 rounded hover:bg-slate-100 text-sm cursor-pointer">
+                               <input type="checkbox" checked={selectedColumns.has(col.id)} onChange={() => handleColumnToggle(col.id)} className="rounded text-nexus-600 focus:ring-nexus-500"/>
                                {col.label}
                            </label>
                         ))}
                     </div>
                 </div>
                 <div>
-                    <label className="text-sm font-semibold text-slate-700 block mb-2 flex items-center gap-2"><LucideIcons.ListFilter size={16}/> 3. Filters</label>
+                    <label className="text-sm font-semibold text-slate-700 block mb-2 flex items-center gap-2"><ListFilter size={16}/> 3. Filters</label>
                     <button className="w-full p-2 text-sm border-2 border-dashed border-slate-200 rounded-lg text-slate-500 hover:border-nexus-400">
                         + Add Filter
                     </button>
@@ -125,7 +131,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                   onClick={handleGeneratePreview}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}
                 >
-                    <LucideIcons.Play size={14}/> Run Preview
+                    <Play size={14}/> Run Preview
                 </button>
                 <button className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
                     Save
@@ -136,11 +142,11 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
         {/* Preview Panel */}
         <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} flex flex-col overflow-hidden`}>
              <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center`}>
-                <h2 className="font-bold text-slate-800 flex items-center gap-2"><LucideIcons.Eye size={16}/> Report Preview</h2>
-                {reportData && <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm text-slate-600 hover:bg-slate-50"><LucideIcons.Download size={14}/> Export</button>}
+                <h2 className="font-bold text-slate-800 flex items-center gap-2"><Eye size={16}/> Report Preview</h2>
+                {reportData && <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 rounded-md text-sm text-slate-600 hover:bg-slate-50"><Download size={14}/> Export</button>}
             </div>
             <div className="flex-1 overflow-auto">
-                {reportData ? (
+                {previewData ? (
                     <table className="min-w-full text-sm">
                         <thead className="bg-slate-50 sticky top-0">
                             <tr>
@@ -150,7 +156,7 @@ const Reports: React.FC<ReportsProps> = ({ projects }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                           {reportData.slice(0, 50).map((row: Record<string, any>, idx) => ( // limit to 50 for preview
+                           {previewData.map((row: Record<string, any>, idx) => ( 
                                <tr key={idx} className="hover:bg-slate-50">
                                    {Array.from(selectedColumns).map((colId: string) => (
                                        <td key={colId} className="px-4 py-2 text-slate-700 whitespace-nowrap">{String(row[colId] ?? '')}</td>

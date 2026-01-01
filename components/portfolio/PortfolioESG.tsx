@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { Leaf, ShieldCheck, AlertTriangle } from 'lucide-react';
@@ -20,13 +19,13 @@ const PortfolioESG: React.FC = () => {
   ];
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex items-center gap-2 mb-2">
             <Leaf className="text-green-600" size={24}/>
             <h2 className={theme.typography.h2}>ESG & Compliance Monitor</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             {/* Radar Chart */}
             <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[400px] flex flex-col items-center`}>
                 <h3 className="font-bold text-slate-800 mb-2">Portfolio Sustainability Index</h3>

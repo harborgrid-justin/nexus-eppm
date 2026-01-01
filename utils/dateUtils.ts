@@ -1,4 +1,8 @@
-import { ProjectCalendar } from '../types';
+
+
+
+// FIX: Corrected import path for ProjectCalendar type to resolve module resolution error.
+import { ProjectCalendar } from '../types/index';
 
 const isWeekend = (date: Date, calendar: ProjectCalendar): boolean => {
   return !calendar.workingDays.includes(date.getDay());

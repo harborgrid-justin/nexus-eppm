@@ -1,6 +1,8 @@
 
-import React, { useState, useMemo } from 'react';
-import { useProjectState } from '../hooks';
+
+
+import React, { useState, useMemo, useTransition } from 'react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, ShoppingCart, MessageSquare } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
@@ -8,25 +10,24 @@ import CostEstimating from './cost/CostEstimating';
 import CostBudgetView from './cost/CostBudgetView';
 import CostChangeOrders from './cost/CostChangeOrders';
 import CostExpenses from './cost/CostExpenses';
-import BudgetLog from './cost/BudgetLog';
-import ProjectFunding from './cost/ProjectFunding';
+import { BudgetLog } from './cost/BudgetLog';
+import { ProjectFunding } from './cost/ProjectFunding';
 import EarnedValue from './cost/EarnedValue';
 import ReserveAnalysis from './cost/ReserveAnalysis';
 import CostProcurement from './cost/CostProcurement';
 import CostCommunications from './cost/CostCommunications'; 
 import { useTheme } from '../context/ThemeContext';
-import ErrorBoundary from './ErrorBoundary';
+// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
+import { ErrorBoundary } from './ErrorBoundary';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
-interface CostManagementProps {
-  projectId: string;
-}
-
-const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
-  const { project } = useProjectState(projectId);
+const CostManagement: React.FC = () => {
+  const { project } = useProjectWorkspace();
+  const projectId = project.id;
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
+  const [isPending, startTransition] = useTransition();
   const theme = useTheme();
 
   const navGroups: NavGroup[] = useMemo(() => [
@@ -55,51 +56,59 @@ const CostManagement: React.FC<CostManagementProps> = ({ projectId }) => {
   const handleGroupChange = (groupId: string) => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
-      setActiveGroup(groupId);
-      setActiveView(newGroup.items[0].id);
+      startTransition(() => {
+        setActiveGroup(groupId);
+        setActiveView(newGroup.items[0].id);
+      });
     }
+  };
+
+  const handleItemChange = (viewId: string) => {
+      startTransition(() => {
+          setActiveView(viewId);
+      });
   };
 
   const renderContent = () => {
     switch(activeView) {
-      case 'dashboard': return <CostDashboard projectId={projectId} />;
+      case 'dashboard': return <CostDashboard />;
       case 'plan': return <CostPlanEditor projectId={projectId} />;
-      case 'budgetLog': return <BudgetLog projectId={projectId} />;
-      case 'funding': return <ProjectFunding projectId={projectId} />;
+      case 'budgetLog': return <BudgetLog />;
+      case 'funding': return <ProjectFunding />;
       case 'estimating': return <CostEstimating projectId={projectId} />;
-      case 'cbs': return <CostBudgetView projectId={projectId} />;
+      case 'cbs': return <CostBudgetView />;
       case 'expenses': return <CostExpenses projectId={projectId} />;
-      case 'changes': return <CostChangeOrders projectId={projectId} />;
-      case 'evm': return <EarnedValue projectId={projectId} />;
-      case 'reserves': return <ReserveAnalysis projectId={projectId} />;
+      case 'changes': return <CostChangeOrders />;
+      case 'evm': return <EarnedValue />;
+      case 'reserves': return <ReserveAnalysis />;
       case 'procurement': return <CostProcurement projectId={projectId} />;
       case 'communications': return <CostCommunications projectId={projectId} />;
-      default: return <CostDashboard projectId={projectId} />;
+      default: return <CostDashboard />;
     }
   };
 
   if (!project) return <div className={theme.layout.pagePadding}>Loading cost module...</div>;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
       <PageHeader 
         title="Cost Management" 
         subtitle="Plan, estimate, and control project costs with precision."
         icon={DollarSign}
       />
 
-      <div className={theme.layout.panelContainer}>
+      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
         <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden">
             <ModuleNavigation 
                 groups={navGroups}
                 activeGroup={activeGroup}
                 activeItem={activeView}
                 onGroupChange={handleGroupChange}
-                onItemChange={setActiveView}
+                onItemChange={handleItemChange}
                 className="border-b border-slate-200"
             />
         </div>
-        <div className="flex-1 overflow-hidden relative">
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
           <ErrorBoundary name="Cost Module">
             {renderContent()}
           </ErrorBoundary>

@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Scale, FileSignature, AlertCircle, ArrowRight, DollarSign, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
@@ -16,6 +16,7 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'pre-award' | 'post-award'>('pre-award');
   const [expandedBidId, setExpandedBidId] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   // --- Pre-Award Logic ---
   const solicitations = useMemo(() => 
@@ -36,6 +37,12 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
       const paid = contracts.reduce((sum, c) => sum + c.paidToDate, 0);
       return { committed, invoiced, retained, paid };
   }, [contracts]);
+
+  const handleTabChange = (tab: 'pre-award' | 'post-award') => {
+      startTransition(() => {
+          setActiveTab(tab);
+      });
+  };
 
   const renderBidLeveling = (solicitation: Solicitation) => {
       const budget = state.procurementPackages.find(p => p.id === solicitation.packageId)?.budget || 0;
@@ -118,7 +125,7 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
         <div className="p-4 border-b border-slate-200 flex justify-center">
             <div className="bg-white border border-slate-200 p-1 rounded-lg flex shadow-sm">
                 <button 
-                    onClick={() => setActiveTab('pre-award')}
+                    onClick={() => handleTabChange('pre-award')}
                     className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
                         activeTab === 'pre-award' ? 'bg-nexus-50 text-nexus-700 shadow-sm border border-nexus-200' : 'text-slate-500 hover:text-slate-800'
                     }`}
@@ -126,7 +133,7 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
                     <Scale size={16}/> Pre-Award (Bid Leveling)
                 </button>
                 <button 
-                    onClick={() => setActiveTab('post-award')}
+                    onClick={() => handleTabChange('post-award')}
                     className={`px-6 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
                         activeTab === 'post-award' ? 'bg-nexus-50 text-nexus-700 shadow-sm border border-nexus-200' : 'text-slate-500 hover:text-slate-800'
                     }`}
@@ -136,7 +143,7 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className={`flex-1 overflow-y-auto p-6 ${isPending ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
             {activeTab === 'pre-award' && (
                 <div className="max-w-5xl mx-auto">
                     {solicitations.length > 0 ? (

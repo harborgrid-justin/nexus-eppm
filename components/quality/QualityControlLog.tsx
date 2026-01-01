@@ -1,21 +1,18 @@
 
 import React, { useState } from 'react';
-import { Plus, CheckCircle, XCircle, AlertCircle, ClipboardList, Lock, Search, Filter, ChevronRight, Camera, FileCheck, UserCheck, Save } from 'lucide-react';
-import { QualityReport } from '../../types';
+import { QualityReport } from '../../types/index';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
-import { Badge } from '../ui/Badge';
-import { SidePanel } from '../ui/SidePanel';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import StatCard from '../shared/StatCard';
-import { generateId } from '../../utils/formatters';
+import { ControlLogHeader } from './control/ControlLogHeader';
+import { ControlLogTable } from './control/ControlLogTable';
+import { ControlLogDetail } from './control/ControlLogDetail';
+import { CreateInspectionPanel } from './control/CreateInspectionPanel';
 
 interface QualityControlLogProps {
   qualityReports: QualityReport[] | undefined;
 }
 
-interface InspectionChecklist {
+export interface InspectionChecklist {
   id: string;
   items: { label: string; status: 'Pass' | 'Fail' | 'N/A'; comment?: string }[];
   photos: number;
@@ -23,326 +20,58 @@ interface InspectionChecklist {
   approver: string;
 }
 
-const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports }) => {
+const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports = [] }) => {
   const { canEditProject } = usePermissions();
-  const theme = useTheme();
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState('All');
-  
-  // Creation Panel State
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [newInspection, setNewInspection] = useState({
-      type: 'Field Inspection',
-      date: new Date().toISOString().split('T')[0],
-      inspector: 'CurrentUser',
-      checklistItems: [{ label: '', status: 'N/A' }]
-  });
 
-  // KPIs
-  const totalInspections = qualityReports?.length || 0;
-  const passed = qualityReports?.filter(r => r.status === 'Pass').length || 0;
-  const passRate = totalInspections > 0 ? (passed / totalInspections) * 100 : 0;
-  const openDefects = qualityReports?.filter(r => r.status === 'Fail').length || 0;
-
-  const filteredReports = qualityReports?.filter(r => 
+  const filteredReports = qualityReports.filter(r => 
     filterStatus === 'All' || r.status === filterStatus
   );
 
-  const getStatusBadge = (status: QualityReport['status']) => {
-    switch(status) {
-      case 'Pass': return <Badge variant="success" icon={CheckCircle}>Pass</Badge>;
-      case 'Fail': return <Badge variant="danger" icon={XCircle}>Fail</Badge>;
-      default: return <Badge variant="warning" icon={AlertCircle}>Conditional</Badge>;
-    }
-  };
+  const getMockChecklist = (id: string): InspectionChecklist => ({
+    id, items: [
+      { label: 'Surface Preparation', status: 'Pass' },
+      { label: 'Dimensional Tolerance (+/- 5mm)', status: 'Pass' },
+      { label: 'Material Certifications Verified', status: 'Pass' },
+      { label: 'Installation Torque Check', status: 'Fail', comment: 'Bolt #4 under-torqued' },
+    ], photos: 3, inspector: 'Mike Ross', approver: 'Sarah Chen'
+  });
 
-  const handleSaveInspection = () => {
-     // Mock save logic
-     console.log("Saving inspection", newInspection);
-     setIsCreateOpen(false);
-  };
-
-  const addChecklistItem = () => {
-      setNewInspection({
-          ...newInspection,
-          checklistItems: [...newInspection.checklistItems, { label: '', status: 'N/A' }]
-      });
-  };
-
-  const getChecklistForReport = (report: QualityReport): InspectionChecklist => {
-    const items = report.details?.checklistItems || [
-      { label: 'Inspection criteria verified', status: 'Pass' as const }
-    ];
-
-    return {
-      id: report.id,
-      items: items,
-      photos: report.details?.photoCount || 0,
-      inspector: report.details?.inspector || 'Unknown',
-      approver: report.details?.approver || 'Pending'
-    };
-  };
-
-  const selectedReport = filteredReports?.find(r => r.id === selectedReportId);
-  const checklist = selectedReport ? getChecklistForReport(selectedReport) : null;
+  const selectedReport = filteredReports.find(r => r.id === selectedReportId);
+  const checklist = selectedReport ? getMockChecklist(selectedReport.id) : null;
 
   return (
-    <div className="h-full flex flex-col bg-slate-50/50">
-       {/* Header & Stats */}
-       <div className="p-6 border-b border-slate-200 bg-white flex-shrink-0 space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className={theme.typography.h2}>
-                  <ClipboardList className="text-nexus-600" /> Inspection & Test Log
-              </h1>
-              <p className="text-sm text-slate-500">Track daily field inspections, material receipts, and test results.</p>
-            </div>
-            {canEditProject() ? (
-              <Button onClick={() => setIsCreateOpen(true)} icon={Plus}>New Inspection</Button>
-            ) : (
-              <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
-                 <Lock size={14}/> Read Only
-              </div>
-            )}
+    <div className="h-full flex flex-col bg-slate-50/30 overflow-hidden">
+       <ControlLogHeader 
+         reports={qualityReports}
+         canEdit={canEditProject()}
+         onNewInspection={() => setIsCreateOpen(true)}
+       />
+       <div className="flex-1 flex overflow-hidden relative">
+          <div className={`flex-1 flex flex-col bg-white overflow-hidden transition-all duration-300 ${selectedReportId ? 'hidden xl:flex xl:w-2/3 border-r border-slate-200' : 'w-full'}`}>
+            <ControlLogTable
+              reports={filteredReports}
+              filterStatus={filterStatus}
+              onFilterChange={setFilterStatus}
+              onSelectReport={setSelectedReportId}
+              selectedReportId={selectedReportId}
+            />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-             <StatCard title="Inspection Pass Rate" value={`${passRate.toFixed(1)}%`} icon={FileCheck} trend={passRate > 90 ? 'up' : 'down'} />
-             <StatCard title="Total Inspections" value={totalInspections} icon={ClipboardList} />
-             <StatCard title="Failed / Re-Inspect" value={openDefects} icon={XCircle} trend={openDefects > 0 ? 'down' : undefined} />
-             <StatCard title="Avg Closure Time" value="2.4 Days" icon={UserCheck} />
-          </div>
-       </div>
-
-       {/* Main Content Area */}
-       <div className="flex-1 flex overflow-hidden">
-          {/* List View */}
-          <div className={`flex-1 flex flex-col border-r border-slate-200 bg-white ${selectedReportId ? 'hidden lg:flex lg:w-1/2 xl:w-2/3' : 'w-full'}`}>
-              
-              {/* Toolbar */}
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
-                 <div className="relative flex-1">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                    <input 
-                      type="text" 
-                      placeholder="Search inspections..." 
-                      className="pl-9 pr-4 py-1.5 w-full text-sm border border-slate-300 rounded-md focus:ring-1 focus:ring-nexus-500 outline-none"
-                    />
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <Filter size={14} className="text-slate-400"/>
-                    <select 
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                      className="text-sm border border-slate-300 rounded-md py-1.5 px-3 bg-white focus:ring-1 focus:ring-nexus-500 outline-none"
-                    >
-                      <option value="All">All Status</option>
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="Conditional">Conditional</option>
-                    </select>
-                 </div>
-              </div>
-
-              {/* Table */}
-              <div className="flex-1 overflow-auto">
-                <table className="min-w-full divide-y divide-slate-100">
-                    <thead className="bg-slate-50 sticky top-0 z-10">
-                      <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID / Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Activity</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Result</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-slate-50">
-                      {filteredReports?.map(report => (
-                        <tr 
-                          key={report.id} 
-                          onClick={() => setSelectedReportId(report.id)}
-                          className={`cursor-pointer transition-colors ${selectedReportId === report.id ? 'bg-nexus-50' : 'hover:bg-slate-50'}`}
-                        >
-                          <td className="px-6 py-4">
-                            <div className="text-xs font-mono font-bold text-slate-600">{report.id}</div>
-                            <div className="text-xs text-slate-400 mt-0.5">{report.date}</div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-slate-900">{report.type}</div>
-                            <div className="text-xs text-slate-500 truncate max-w-[150px]">
-                              {report.details.testType || report.details.inspectionType || 'Standard Inspection'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            {getStatusBadge(report.status)}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                             <ChevronRight size={16} className="text-slate-300 inline-block"/>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                </table>
-              </div>
-          </div>
-
-          {/* Detail View */}
-          {selectedReportId && selectedReport && (
-            <div className="w-full lg:w-1/2 xl:w-1/3 bg-slate-50 flex flex-col border-l border-slate-200 overflow-hidden shadow-xl lg:shadow-none absolute inset-0 lg:relative z-20">
-               <div className="p-4 bg-white border-b border-slate-200 flex justify-between items-start">
-                  <div>
-                     <h3 className="font-bold text-lg text-slate-800">{selectedReport.type}</h3>
-                     <p className="text-sm text-slate-500">{selectedReport.id} • {selectedReport.date}</p>
-                  </div>
-                  <button onClick={() => setSelectedReportId(null)} className="p-2 hover:bg-slate-100 rounded-full lg:hidden">
-                    <XCircle size={20} className="text-slate-400"/>
-                  </button>
-               </div>
-
-               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                  {/* Status Banner */}
-                  <div className={`p-4 rounded-lg flex items-center gap-3 border ${
-                    selectedReport.status === 'Pass' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                  }`}>
-                     {selectedReport.status === 'Pass' ? <CheckCircle className="text-green-600" size={24}/> : <XCircle className="text-red-600" size={24}/>}
-                     <div>
-                        <h4 className={`font-bold ${selectedReport.status === 'Pass' ? 'text-green-900' : 'text-red-900'}`}>
-                          Inspection Result: {selectedReport.status}
-                        </h4>
-                        <p className={`text-xs ${selectedReport.status === 'Pass' ? 'text-green-700' : 'text-red-700'}`}>
-                          {selectedReport.status === 'Pass' ? 'All criteria met. Proceed to next stage.' : 'Defects identified. NCR generated.'}
-                        </p>
-                     </div>
-                  </div>
-
-                  {/* Checklist */}
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                     <div className="p-3 bg-slate-50 border-b border-slate-200 font-bold text-slate-700 text-sm">
-                        Verification Checklist
-                     </div>
-                     <div className="divide-y divide-slate-100">
-                        {checklist?.items.map((item, i) => (
-                           <div key={i} className="p-3 flex items-start gap-3">
-                              <div className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center border ${
-                                 item.status === 'Pass' ? 'bg-green-100 border-green-300 text-green-700' :
-                                 item.status === 'Fail' ? 'bg-red-100 border-red-300 text-red-700' :
-                                 'bg-slate-100 border-slate-300 text-slate-400'
-                              }`}>
-                                 {item.status === 'Pass' && <CheckCircle size={12}/>}
-                                 {item.status === 'Fail' && <XCircle size={12}/>}
-                                 {item.status === 'N/A' && <span className="text-[10px]">−</span>}
-                              </div>
-                              <div className="flex-1">
-                                 <p className="text-sm text-slate-800">{item.label}</p>
-                                 {item.comment && <p className="text-xs text-red-600 mt-1 italic">Note: {item.comment}</p>}
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-
-                  {/* Evidence & Signatures */}
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><Camera size={14}/> Evidence</h4>
-                        <div className="flex gap-2">
-                           {[1,2,3].map(i => (
-                              <div key={i} className="w-12 h-12 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-xs text-slate-400">IMG</div>
-                           ))}
-                        </div>
-                     </div>
-                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><UserCheck size={14}/> Sign-off</h4>
-                        <div className="space-y-2">
-                           <div className="text-xs">
-                              <span className="text-slate-400">Inspector:</span> <br/>
-                              <span className="font-medium text-slate-700">{checklist?.inspector}</span>
-                           </div>
-                           <div className="text-xs">
-                              <span className="text-slate-400">Approver:</span> <br/>
-                              <span className="font-medium text-slate-700">{checklist?.approver}</span>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
+          {selectedReportId && selectedReport && checklist && (
+            <ControlLogDetail
+              report={selectedReport}
+              checklist={checklist}
+              onClose={() => setSelectedReportId(null)}
+            />
           )}
        </div>
-
-       {/* Create Inspection Panel */}
-       <SidePanel
-            isOpen={isCreateOpen}
-            onClose={() => setIsCreateOpen(false)}
-            title="Log New Inspection"
-            width="md:w-[600px]"
-            footer={
-                <>
-                    <Button variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSaveInspection} icon={Save}>Save Record</Button>
-                </>
-            }
-       >
-           <div className="space-y-6">
-               <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Inspection Date</label>
-                        <Input type="date" value={newInspection.date} onChange={e => setNewInspection({...newInspection, date: e.target.value})} />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
-                        <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" 
-                            value={newInspection.type} onChange={e => setNewInspection({...newInspection, type: e.target.value})}
-                        >
-                            <option>Field Inspection</option>
-                            <option>Material Receipt</option>
-                            <option>Safety Audit</option>
-                            <option>Pre-Commissioning</option>
-                        </select>
-                    </div>
-               </div>
-
-               <div>
-                   <label className="block text-sm font-medium text-slate-700 mb-2">Checklist</label>
-                   <div className="space-y-3">
-                       {newInspection.checklistItems.map((item, idx) => (
-                           <div key={idx} className="flex gap-2 items-center">
-                               <Input 
-                                 placeholder={`Checklist item ${idx + 1}`} 
-                                 value={item.label}
-                                 onChange={(e) => {
-                                     const items = [...newInspection.checklistItems];
-                                     items[idx].label = e.target.value;
-                                     setNewInspection({...newInspection, checklistItems: items});
-                                 }}
-                                 className="flex-1"
-                               />
-                               <select 
-                                 className="w-24 p-2 border border-slate-300 rounded-lg text-sm"
-                                 value={item.status}
-                                 onChange={(e) => {
-                                     const items = [...newInspection.checklistItems];
-                                     items[idx].status = e.target.value;
-                                     setNewInspection({...newInspection, checklistItems: items});
-                                 }}
-                               >
-                                   <option>N/A</option>
-                                   <option>Pass</option>
-                                   <option>Fail</option>
-                               </select>
-                           </div>
-                       ))}
-                   </div>
-                   <button onClick={addChecklistItem} className="mt-2 text-xs text-nexus-600 font-bold flex items-center gap-1 hover:underline">
-                       <Plus size={12}/> Add Item
-                   </button>
-               </div>
-               
-               <div className="p-4 border-2 border-dashed border-slate-300 rounded-lg text-center text-slate-400">
-                   <Camera size={24} className="mx-auto mb-2 opacity-50"/>
-                   <span className="text-sm">Upload Photos or Evidence</span>
-               </div>
-           </div>
-       </SidePanel>
+       <CreateInspectionPanel 
+         isOpen={isCreateOpen} 
+         onClose={() => setIsCreateOpen(false)} 
+         onSave={() => setIsCreateOpen(false)} 
+       />
     </div>
   );
 };

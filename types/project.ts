@@ -1,131 +1,63 @@
 
-import { Risk } from './risk';
-import { Issue } from './risk'; 
-import { BudgetLogItem, ProjectFunding, CostEstimate, CostManagementPlan } from './finance';
-import { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement } from './project_subtypes'; 
-import { ActivityCodeScope } from './common';
+import { Risk, Issue } from './risk';
+import { BudgetLogItem, ProjectFunding, CostEstimate, ChangeOrder } from './finance';
+import { TeamCharter, StakeholderEngagement, Assumption, LessonLearned, Requirement } from './project_subtypes'; 
 
-export type { TeamCharter, Stakeholder, StakeholderEngagement, Assumption, LessonLearned, Requirement };
-
-export interface Project {
-  id: string; // Primary Key
-  programId?: string; // FK to Program
-  epsId: string; // FK to EPSNode
-  obsId: string; // FK to OBSNode
-  calendarId: string; // FK to GlobalCalendar
-  locationId?: string; // FK to Location
-  
-  name: string;
-  code: string;
-  manager: string; // Display name, ideally FK to Resource
-  originalBudget: number;
-  budget: number;
-  spent: number;
-  startDate: string;
-  endDate: string;
-  health: 'Good' | 'Warning' | 'Critical';
-  status?: string;
-  
-  // Children / Related Entities
-  wbs?: WBSNode[];
-  tasks: Task[];
-  issues?: Issue[];
-  budgetLog?: BudgetLogItem[];
-  funding?: ProjectFunding[];
-  costEstimates?: CostEstimate[];
-  baselines?: Baseline[];
-  risks?: Risk[];
-  
-  // Metrics & Metadata
-  strategicImportance: number;
-  financialValue: number;
-  riskScore: number;
-  resourceFeasibility: number;
-  calculatedPriorityScore: number;
-  category: string;
-  businessCase?: string;
-  lastUpdated?: string; // New field for logic hooks
-  updatedBy?: string;   // New field for logic hooks
-  
-  // Governance
-  teamCharter?: TeamCharter;
-  stakeholderEngagement?: StakeholderEngagement[];
-  reserves?: { contingencyReserve: number; managementReserve: number };
-  assumptions?: Assumption[];
-  lessonsLearned?: LessonLearned[];
-  requirements?: Requirement[];
-  qualityPlan?: QualityManagementPlan;
-  costPlan?: CostManagementPlan;
-  costOfQuality?: CostOfQualitySnapshot;
-  coqHistory?: CostOfQualitySnapshot[];
+export enum TaskStatus {
+  NOT_STARTED = 'Not Started',
+  IN_PROGRESS = 'In Progress',
+  COMPLETED = 'Completed',
+  DELAYED = 'Delayed',
+  ON_HOLD = 'On Hold',
 }
 
-export interface QualityManagementPlan {
-  objectives: string;
-  rolesAndResp: string;
-  deliverablesVerification: string;
-  nonConformanceProcess: string;
-  toolsAndTechniques: string;
-  status: 'Draft' | 'In Review' | 'Approved';
-  version: string;
-  lastUpdated: string;
-}
+export type EffortType = 'Fixed Duration' | 'Fixed Work' | 'Fixed Units/Time';
 
-export interface CostOfQualitySnapshot {
-  period?: string; // e.g. "Q1 2024"
-  preventionCosts: number;
-  appraisalCosts: number;
-  internalFailureCosts: number;
-  externalFailureCosts: number;
+export interface Dependency {
+  targetId: string;
+  type: 'FS' | 'SS' | 'FF' | 'SF';
+  lag: number;
 }
 
 export interface Task {
   id: string;
   wbsCode: string;
   name: string;
+  description?: string;
   startDate: string;
   endDate: string;
   duration: number;
   status: TaskStatus;
   progress: number;
-  assignments: Assignment[];
   dependencies: Dependency[];
   critical: boolean;
-  type: string;
+  type: 'Task' | 'Milestone' | 'Summary';
   effortType: EffortType;
   work?: number;
-  resourceRequirements: any[];
-  activityCodeAssignments?: Record<string, string>;
-  expenseIds?: string[];
-  primaryConstraint?: { type: ConstraintType; date: string };
+  assignments: { resourceId: string; units: number }[];
   issueIds?: string[];
+  expenseIds?: string[];
+  activityCodeAssignments?: Record<string, string>;
   udfValues?: Record<string, any>;
-  auditTrail?: any[];
-  description?: string;
+  primaryConstraint?: { type: string; date: string };
+  totalFloat?: number;
+  steps?: any[];
+  notebooks?: any[];
 }
 
-export enum TaskStatus {
-  NOT_STARTED = 'Not Started',
-  IN_PROGRESS = 'In Progress',
-  COMPLETED = 'Completed',
-  DELAYED = 'Delayed'
+export interface Baseline {
+    id: string;
+    name: string;
+    type: 'Initial' | 'Revised' | 'Customer Approved';
+    date: string;
+    taskBaselines: Record<string, {
+        baselineStartDate: string;
+        baselineEndDate: string;
+        baselineDuration: number;
+    }>;
 }
 
-export type ConstraintType = 'Start On or After' | 'Finish On or Before' | 'Start On' | 'Finish On' | 'Mandatory Start' | 'Mandatory Finish';
-export type EffortType = 'Fixed Duration' | 'Fixed Work';
-
-export interface Assignment {
-  resourceId: string; // FK to Resource
-  units: number; // Percentage
-  cost?: number; // Calculated field
-}
-
-export interface Dependency {
-  targetId: string; // FK to Task
-  type: 'FS' | 'SS' | 'FF' | 'SF';
-  lag: number;
-  comment?: string;
-}
+export type WBSNodeShape = 'rectangle' | 'oval' | 'hexagon';
 
 export interface WBSNode {
   id: string;
@@ -134,100 +66,59 @@ export interface WBSNode {
   description: string;
   children: WBSNode[];
   shape?: WBSNodeShape;
-  costAccount?: string;
-  owner?: string;
-  riskIds?: string[]; // Link to Risks
 }
 
-export type WBSNodeShape = 'rectangle' | 'oval' | 'hexagon';
-
-// Legacy ProjectCalendar removed, using GlobalCalendar instead. 
-// Kept temporarily if needed for backward compat in UI logic until refactor complete.
-export interface ProjectCalendar {
+export interface Project {
   id: string;
+  programId?: string;
+  epsId: string;
+  obsId: string;
+  calendarId: string;
+  locationId?: string;
+  primaryDriverId?: string;
   name: string;
-  workingDays: number[];
-  holidays: string[];
-}
-
-export interface Baseline {
-  id: string;
-  name: string;
-  date: string;
-  taskBaselines: Record<string, { baselineStartDate: string; baselineEndDate: string }>;
-}
-
-export interface QualityReport {
-  id: string;
-  projectId: string;
-  date: string;
-  type: string;
-  status: 'Pass' | 'Fail' | 'Conditional';
-  details: any;
-}
-
-export interface NonConformanceReport {
-  id: string;
-  projectId: string;
-  date: string;
-  description: string;
-  severity: 'Critical' | 'Major' | 'Minor';
-  status: string;
-  assignedTo: string;
-  linkedDeliverable: string;
+  code: string;
+  managerId: string;
+  originalBudget: number;
+  budget: number;
+  spent: number;
+  startDate: string;
+  endDate: string;
+  health: 'Good' | 'Warning' | 'Critical';
+  status?: string;
+  wbs?: WBSNode[];
+  tasks: Task[];
+  issues?: Issue[];
+  budgetLog?: BudgetLogItem[];
+  funding?: ProjectFunding[];
+  paymentApplications?: any[]; // Re-using any from PaymentApplication definition
+  costEstimates?: CostEstimate[];
+  baselines?: Baseline[];
+  risks?: Risk[];
+  strategicImportance: number;
+  financialValue: number;
+  riskScore: number;
+  resourceFeasibility: number;
+  calculatedPriorityScore: number;
   category: string;
-  vendorId?: string;
-}
-
-export interface CommunicationLog {
-  id: string;
-  projectId: string;
-  date: string;
-  type: 'Meeting' | 'Email' | 'Call' | 'Official Letter' | 'RFI';
-  subject: string;
-  participants: string[];
-  summary: string;
-  status?: string; 
-  linkedIssueId?: string;
-}
-
-export interface ActivityCode {
-  id: string;
-  name: string;
-  scope: ActivityCodeScope;
-  values: ActivityCodeValue[];
-  projectId?: string;
-}
-
-export interface ActivityCodeValue {
-  id: string;
-  value: string;
-  color?: string;
-  description?: string;
-}
-
-export interface UserDefinedField {
-  id: string;
-  subjectArea: UDFSubjectArea;
-  title: string;
-  dataType: 'Text' | 'List' | 'Number' | 'Date';
-  listValues?: string[];
-}
-
-export type UDFSubjectArea = 'Projects' | 'Tasks' | 'Resources' | 'Risks';
-
-export interface QualityStandard {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  source: 'Internal' | 'External' | 'Regulatory';
-  enforcement: 'Mandatory' | 'Guideline';
-  linkedWbsIds?: string[]; // IDs of WBS nodes where this standard applies
-}
-
-export interface AIAnalysisResult {
-  summary: string;
-  risks: string[];
-  recommendations: string[];
+  businessCase?: string;
+  lastUpdated?: string;
+  updatedBy?: string;
+  teamCharter?: TeamCharter;
+  stakeholderEngagement?: StakeholderEngagement[];
+  reserves?: { contingencyReserve: number; managementReserve: number; };
+  costOfQuality?: {
+      preventionCosts: number;
+      appraisalCosts: number;
+      internalFailureCosts: number;
+      externalFailureCosts: number;
+  };
+  coqHistory?: any[];
+  requirements?: Requirement[];
+  assumptions?: Assumption[];
+  lessonsLearned?: LessonLearned[];
+  qualityPlan?: any;
+  costPlan?: any;
+  notebooks?: any[];
+  [key: string]: any;
 }

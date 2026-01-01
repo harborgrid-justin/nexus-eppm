@@ -41,7 +41,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
 
   const handleSaveAllocations = () => {
       editAllocations.forEach(alloc => {
-          dispatch({ type: 'UPDATE_PROGRAM_ALLOCATION', payload: alloc });
+          dispatch({ type: 'PROGRAM_UPDATE_ALLOCATION', payload: alloc });
       });
       setIsAllocationPanelOpen(false);
   };
@@ -108,7 +108,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                             gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                         }`} onClick={() => {
                              if(gate.status !== 'Released' && confirm("Release this funding gate?")) {
-                                 dispatch({type: 'UPDATE_PROGRAM_GATE', payload: {...gate, status: 'Released'}});
+                                 dispatch({type: 'PROGRAM_UPDATE_GATE', payload: {...gate, status: 'Released'}});
                              }
                         }}>
                             {gate.status}
@@ -137,7 +137,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                     <div key={alloc.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                          <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-bold text-slate-700">
-                                {String(projectNamesMap.get(alloc.projectId) || alloc.projectId)}
+                                {projectNamesMap.get(alloc.projectId) || alloc.projectId}
                             </span>
                             <span className="text-xs text-slate-500">Current Forecast: {formatCompactCurrency(alloc.forecast)}</span>
                          </div>

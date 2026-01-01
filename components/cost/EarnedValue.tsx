@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { useProjectState } from '../../hooks';
+
+import React, { useMemo, useState, useEffect } from 'react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { BarChart2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -7,20 +8,21 @@ import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomLineChart } from '../charts/CustomLineChart';
 
-interface EarnedValueProps {
-  projectId: string;
-}
-
-const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
-  const { project, budgetItems } = useProjectState(projectId);
+const EarnedValue: React.FC = () => {
+  const { project, budgetItems } = useProjectWorkspace();
   const evm = useEVM(project, budgetItems);
+  
+  // Rule 38: Hydration safety
+  const [today, setToday] = useState<Date | null>(null);
+  useEffect(() => {
+    setToday(new Date());
+  }, []);
 
   const chartData = useMemo(() => {
-    if (!project || !evm) return [];
+    if (!project || !evm || !today) return [];
 
     const startDate = new Date(project.startDate);
     const endDate = new Date(project.endDate);
-    const today = new Date();
     const bac = project.originalBudget;
     const totalDays = getDaysDiff(startDate, endDate);
     if (totalDays <= 0) return [];
@@ -52,9 +54,9 @@ const EarnedValue: React.FC<EarnedValueProps> = ({ projectId }) => {
       data.push(point);
     }
     return data;
-  }, [project, evm]);
+  }, [project, evm, today]);
 
-  if (!evm || !project) return <div className="p-6 text-slate-500">Insufficient data for EVM analysis.</div>;
+  if (!evm || !project || !today) return <div className="p-6 text-slate-500">Insufficient data for EVM analysis.</div>;
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">

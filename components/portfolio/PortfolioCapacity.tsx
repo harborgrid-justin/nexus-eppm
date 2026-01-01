@@ -174,7 +174,7 @@ const PortfolioCapacity: React.FC = () => {
         return 'bg-red-100 text-red-700 font-bold';
     };
 
-    const roles = Array.from(new Set(state.resources.map(r => r.role))) as string[];
+    const roles = Array.from(new Set(state.resources.map(r => r.role)));
     
     // Filtered resources for heatmap
     const displayResources = state.resources.filter(r => 
@@ -182,7 +182,7 @@ const PortfolioCapacity: React.FC = () => {
     );
 
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
+        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
             {/* Header Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -222,7 +222,7 @@ const PortfolioCapacity: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
+            <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap} h-[500px]`}>
                 {/* Main Visualization Area (2/3) */}
                 <div className={`lg:col-span-2 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm flex flex-col overflow-hidden`}>
                     

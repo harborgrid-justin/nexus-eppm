@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { Star, TrendingUp, DollarSign } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,31 +10,38 @@ const PortfolioValue: React.FC = () => {
   const { projects } = usePortfolioData();
   const theme = useTheme();
 
-  // Mock financial data generation for value chart
-  const valueData = projects.map(p => ({
-      name: p.code,
-      roi: (p.financialValue * 15) + 10, // Mock ROI 10-160%
-      npv: p.budget * (Math.random() * 0.5 + 0.1), // Mock NPV
-      cost: p.budget
-  }));
+  // Rule 35: Deterministic First Render
+  // Replace Math.random() with deterministic calculation based on Project ID
+  const valueData = useMemo(() => projects.map(p => {
+      const seed = p.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const randomFactor = (seed % 100) / 100; // 0.0 - 1.0 based on ID
+      
+      return {
+          name: p.code,
+          roi: (p.financialValue * 15) + 10, 
+          // Deterministic NPV calculation
+          npv: p.budget * (randomFactor * 0.5 + 0.1), 
+          cost: p.budget
+      };
+  }), [projects]);
 
-  const avgROI = valueData.reduce((sum, d) => sum + d.roi, 0) / valueData.length;
+  const avgROI = valueData.reduce((sum, d) => sum + d.roi, 0) / (valueData.length || 1);
   const totalNPV = valueData.reduce((sum, d) => sum + d.npv, 0);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex items-center gap-2 mb-2">
             <Star className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Value Management & Benefits Realization</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
             <StatCard title="Total Portfolio NPV" value={formatCurrency(totalNPV)} subtext="Net Present Value" icon={DollarSign} />
             <StatCard title="Average ROI" value={formatPercentage(avgROI)} subtext="Return on Investment" icon={TrendingUp} trend="up" />
             <StatCard title="Benefits Realized" value="$12.5M" subtext="YTD Actuals" icon={Star} />
         </div>
 
-        <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[500px]`}>
+        <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm h-[500px]`}>
             <h3 className="font-bold text-slate-800 mb-4">Investment Efficiency (ROI vs NPV)</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>

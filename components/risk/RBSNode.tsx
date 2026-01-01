@@ -1,5 +1,7 @@
+
 import React, { useState } from 'react';
-import { RiskBreakdownStructureNode } from '../../types';
+// FIX: Corrected import path for RiskBreakdownStructureNode type to resolve module resolution error.
+import { RiskBreakdownStructureNode } from '../../types/index';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface RBSNodeProps {
@@ -62,7 +64,15 @@ const RBSNode: React.FC<RBSNodeProps> = ({ node, level, draggedNodeId, setDragge
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div onClick={() => setIsOpen(!isOpen)} className="p-1 -ml-2 cursor-pointer">
+          <div 
+            onClick={() => setIsOpen(!isOpen)} 
+            className="p-1 -ml-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') { setIsOpen(!isOpen); e.preventDefault(); } }}
+            aria-label={isOpen ? "Collapse" : "Expand"}
+            aria-expanded={isOpen}
+          >
             {node.children.length > 0 ? (
               isOpen ? <ChevronDown size={14} className="text-slate-400" /> : <ChevronRight size={14} className="text-slate-400" />
             ) : (

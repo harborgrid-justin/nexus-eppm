@@ -1,146 +1,138 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Layers, Plus, Save, RotateCcw, CheckCircle } from 'lucide-react';
+import { Layers, Plus, Save, RotateCcw, CheckCircle, Sparkles, Loader2, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
+import { generatePortfolioOptimization } from '../../services/geminiService';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
 
 const PortfolioScenarios: React.FC = () => {
   const { scenarios, projects } = usePortfolioData();
   const theme = useTheme();
   const [activeScenarioId, setActiveScenarioId] = useState(scenarios[0].id);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(scenarios[0].selectedComponentIds);
+  const [budgetLimit, setBudgetLimit] = useState(60000000);
+  
+  // AI State
+  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const activeScenario = scenarios.find(s => s.id === activeScenarioId) || scenarios[0];
 
+  const scenarioResults = useMemo(() => {
+    const selected = projects.filter(p => selectedProjectIds.includes(p.id));
+    const totalCost = selected.reduce((sum, p) => sum + p.budget, 0);
+    const avgStrat = selected.length ? selected.reduce((sum, p) => sum + p.strategicImportance, 0) / selected.length * 10 : 0;
+    const avgRisk = selected.length ? selected.reduce((sum, p) => sum + p.riskScore, 0) / selected.length * 4 : 0; 
+    
+    return { totalCost, avgStrat, avgRisk, isOverBudget: totalCost > budgetLimit };
+  }, [selectedProjectIds, projects, budgetLimit]);
+
+  const toggleProject = (id: string) => {
+    setSelectedProjectIds(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  };
+
+  const handleAskAi = async () => {
+    setIsAiLoading(true);
+    const advice = await generatePortfolioOptimization(projects, budgetLimit);
+    setAiAdvice(advice);
+    setIsAiLoading(false);
+  };
+
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
-        <div className="flex justify-between items-center mb-2">
+    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-2">
                 <Layers className="text-nexus-600" size={24}/>
-                <h2 className={theme.typography.h2}>Scenario Planning (What-If)</h2>
+                <h2 className={theme.typography.h2}>Strategic Scenario Modeling</h2>
             </div>
-            <div className="flex gap-2">
-                <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">
-                    <Plus size={16}/> New Scenario
-                </button>
-                <button className={`flex items-center gap-2 px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}>
-                    <Save size={16}/> Save Model
+            <div className="flex gap-2 w-full sm:w-auto">
+                <Button variant="secondary" onClick={handleAskAi} disabled={isAiLoading} icon={Sparkles} className="flex-1 sm:flex-none">
+                    {isAiLoading ? 'Analyzing...' : 'Ask AI Advisor'}
+                </Button>
+                <button className={`flex-1 sm:flex-none px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 shadow-md flex items-center justify-center gap-2`}>
+                    <Save size={16}/> Save
                 </button>
             </div>
         </div>
 
-        {/* Scenario Selector */}
-        <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
-            {scenarios.map(s => (
-                <div 
-                    key={s.id} 
-                    onClick={() => setActiveScenarioId(s.id)}
-                    className={`min-w-[250px] p-4 rounded-xl border cursor-pointer transition-all ${
-                        activeScenarioId === s.id 
-                        ? 'bg-nexus-50 border-nexus-500 ring-1 ring-nexus-500' 
-                        : 'bg-white border-slate-200 hover:border-nexus-300'
-                    }`}
-                >
-                    <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-slate-800">{s.name}</h4>
-                        {activeScenarioId === s.id && <CheckCircle size={16} className="text-nexus-600"/>}
-                    </div>
-                    <p className="text-xs text-slate-500 line-clamp-2 mb-3">{s.description}</p>
-                    <div className="flex justify-between text-xs font-mono bg-white/50 p-1 rounded">
-                        <span>Budget: {formatCompactCurrency(s.budgetConstraint)}</span>
-                        <span>ROI: {s.metrics.totalROI}%</span>
-                    </div>
+        {/* Modeling UI */}
+        <div className={`grid grid-cols-1 lg:grid-cols-4 ${theme.layout.gridGap}`}>
+            {/* Left: Toggles */}
+            <div className={`lg:col-span-1 space-y-4`}>
+                <div className={`${theme.components.card} p-5`}>
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Budget Constraint</h3>
+                    <input 
+                        type="range" min="10000000" max="100000000" step="5000000" 
+                        value={budgetLimit} onChange={e => setBudgetLimit(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-nexus-600"
+                    />
+                    <div className="text-center font-mono font-bold text-lg mt-2 text-nexus-900">{formatCompactCurrency(budgetLimit)}</div>
                 </div>
-            ))}
-        </div>
 
-        {/* Modeling Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Selection List */}
-            <div className={`lg:col-span-2 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-800">Component Selection</h3>
-                    <span className="text-xs text-slate-500">{projects.length} Candidates Available</span>
-                </div>
-                <div className="flex-1 overflow-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="w-12 px-4 py-3 text-center"><input type="checkbox" className="rounded border-slate-300"/></th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Cost</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">ROI</th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Priority</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {projects.map(p => {
-                                const isSelected = activeScenario.selectedComponentIds.includes(p.id);
-                                return (
-                                    <tr key={p.id} className={isSelected ? 'bg-blue-50/30' : ''}>
-                                        <td className="px-4 py-3 text-center">
-                                            <input type="checkbox" checked={isSelected} readOnly className="rounded border-slate-300 text-nexus-600 focus:ring-nexus-500"/>
-                                        </td>
-                                        <td className="px-4 py-3 text-sm font-medium text-slate-900">{p.name}</td>
-                                        <td className="px-4 py-3 text-right text-sm text-slate-600 font-mono">{formatCompactCurrency(p.budget)}</td>
-                                        <td className="px-4 py-3 text-right text-sm text-green-600 font-bold">125%</td>
-                                        <td className="px-4 py-3 text-center text-sm text-slate-600">{p.calculatedPriorityScore}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                <div className={`${theme.components.card} overflow-hidden flex flex-col max-h-[500px]`}>
+                    <div className="p-4 border-b border-slate-100 bg-slate-50 font-bold text-slate-700 text-xs uppercase">Project Candidates</div>
+                    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                        {projects.map(p => (
+                            <label key={p.id} className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${selectedProjectIds.includes(p.id) ? 'bg-nexus-50 border-nexus-200' : 'bg-white border-transparent hover:bg-slate-50'}`}>
+                                <input type="checkbox" checked={selectedProjectIds.includes(p.id)} onChange={() => toggleProject(p.id)} className="rounded text-nexus-600 focus:ring-nexus-500" />
+                                <div className="min-w-0">
+                                    <p className="text-sm font-bold text-slate-800 truncate">{p.name}</p>
+                                    <p className="text-[10px] text-slate-500 font-mono">{formatCompactCurrency(p.budget)}</p>
+                                </div>
+                            </label>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Analysis Panel */}
-            <div className="space-y-6">
-                <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm`}>
-                    <h3 className="font-bold text-slate-800 mb-4">Scenario Impact Analysis</h3>
-                    
-                    <div className="space-y-4">
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-600">Budget Utilization</span>
-                                <span className="font-bold text-slate-900">85%</span>
-                            </div>
-                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                <div className="bg-nexus-500 h-full w-[85%]"></div>
-                            </div>
-                            <p className="text-xs text-slate-400 mt-1 text-right">{formatCompactCurrency(activeScenario.budgetConstraint * 0.85)} / {formatCompactCurrency(activeScenario.budgetConstraint)}</p>
+            {/* Right: Analysis & AI */}
+            <div className={`lg:col-span-3 space-y-6`}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className={`p-6 rounded-xl border shadow-sm ${scenarioResults.isOverBudget ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}>
+                        <p className="text-xs font-bold text-slate-500 uppercase mb-2">Scenario Utilization</p>
+                        <p className={`text-3xl font-black ${scenarioResults.isOverBudget ? 'text-red-600' : 'text-slate-900'}`}>{formatCompactCurrency(scenarioResults.totalCost)}</p>
+                        <div className="w-full bg-slate-100 h-2 mt-4 rounded-full overflow-hidden">
+                             <div className={`h-full ${scenarioResults.isOverBudget ? 'bg-red-500' : 'bg-nexus-500'}`} style={{width: `${Math.min(100, (scenarioResults.totalCost/budgetLimit)*100)}%`}}></div>
                         </div>
-
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-600">Strategic Alignment</span>
-                                <span className="font-bold text-green-600">{activeScenario.metrics.strategicAlignmentScore}/100</span>
-                            </div>
-                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                <div className="bg-green-500 h-full" style={{width: `${activeScenario.metrics.strategicAlignmentScore}%`}}></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-slate-600">Risk Profile</span>
-                                <span className="font-bold text-orange-500">{activeScenario.metrics.riskProfileScore}/100</span>
-                            </div>
-                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                <div className="bg-orange-500 h-full" style={{width: `${activeScenario.metrics.riskProfileScore}%`}}></div>
-                            </div>
-                        </div>
+                    </div>
+                    <div className={`${theme.components.card} p-6`}>
+                        <p className="text-xs font-bold text-slate-500 uppercase mb-2">Strategic Alignment</p>
+                        <p className="text-3xl font-black text-green-600">{scenarioResults.avgStrat.toFixed(0)}%</p>
+                        <p className="text-xs text-slate-400 mt-2">Weighted average contribution</p>
+                    </div>
+                    <div className={`${theme.components.card} p-6`}>
+                        <p className="text-xs font-bold text-slate-500 uppercase mb-2">Risk Exposure</p>
+                        <p className="text-3xl font-black text-orange-500">{scenarioResults.avgRisk.toFixed(0)}</p>
+                        <p className="text-xs text-slate-400 mt-2">Scale 0-100 Aggregate</p>
                     </div>
                 </div>
 
-                <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-64`}>
-                    <h3 className="font-bold text-slate-800 mb-2">Efficient Frontier</h3>
+                {aiAdvice && (
+                    <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm animate-in zoom-in-95">
+                        <div className="flex justify-between items-start mb-4">
+                            <h3 className="font-bold text-indigo-900 flex items-center gap-2"><Sparkles className="text-indigo-600" size={20}/> AI Advisor: Efficient Frontier Suggestion</h3>
+                            <button onClick={() => setAiAdvice(null)} className="text-indigo-400 hover:text-indigo-600"><RotateCcw size={16}/></button>
+                        </div>
+                        <div className="prose prose-sm text-indigo-900 leading-relaxed max-w-none">
+                            {aiAdvice.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+                        </div>
+                    </div>
+                )}
+
+                <div className={`${theme.components.card} p-6 h-[350px]`}>
+                    <h3 className={`${theme.typography.h3} mb-6`}>Simulation Chart (Cost vs Value)</h3>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={scenarios}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" tick={{fontSize: 10}} />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="metrics.totalROI" fill="#8884d8" name="ROI %" />
+                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                             <XAxis dataKey="name" tick={{fontSize: 12}} />
+                             <YAxis tick={{fontSize: 12}} />
+                             <Tooltip />
+                             <Legend />
+                             <Bar dataKey="metrics.totalROI" fill="#818cf8" name="ROI %" radius={[4,4,0,0]} />
+                             <Bar dataKey="metrics.strategicAlignmentScore" fill="#34d399" name="Alignment %" radius={[4,4,0,0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

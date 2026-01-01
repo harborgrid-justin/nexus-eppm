@@ -1,17 +1,19 @@
-import React, { useMemo } from 'react';
-import { Project, Task } from '../../types';
-import { Diamond } from 'lucide-react';
 
-interface NetworkDiagramProps {
-  project: Project;
-}
+import React, { useMemo } from 'react';
+import { Project, Task, Dependency } from '../../types/index';
+import { Diamond } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 
 interface NodeTask extends Task {
   children: string[];
   level: number;
+  dependencies: Dependency[];
 }
 
-const NetworkDiagram: React.FC<NetworkDiagramProps> = ({ project }) => {
+const NetworkDiagram: React.FC = () => {
+  const { project } = useProjectWorkspace();
+  const theme = useTheme();
 
   const { nodes, levels } = useMemo(() => {
     const tasks = project.tasks;
@@ -63,8 +65,10 @@ const NetworkDiagram: React.FC<NetworkDiagramProps> = ({ project }) => {
     return positions;
   }, [levels]);
 
+  if (!project) return null;
+
   return (
-    <div className="h-full w-full overflow-auto bg-slate-50 p-4 relative">
+    <div className={`h-full w-full overflow-auto ${theme.colors.background} p-4 relative`}>
       <h2 className="text-xl font-bold text-slate-800 p-4">Activity Network Diagram</h2>
       <div className="relative" style={{ width: levels.length * 250, height: Math.max(...levels.map(l => l.length)) * 120 + 100 }}>
         <svg className="absolute top-0 left-0 w-full h-full" style={{ zIndex: 1 }}>
@@ -96,7 +100,7 @@ const NetworkDiagram: React.FC<NetworkDiagramProps> = ({ project }) => {
           return (
             <div
               key={node.id}
-              className={`absolute p-3 rounded-lg shadow-md border-2 ${node.critical ? 'border-red-500 bg-red-50' : 'border-slate-300 bg-white'} hover:shadow-xl transition-shadow`}
+              className={`absolute p-3 rounded-lg shadow-md border-2 ${node.critical ? `${theme.colors.semantic.danger.border} ${theme.colors.semantic.danger.bg}` : `${theme.colors.border} ${theme.colors.surface}`} hover:shadow-xl transition-shadow`}
               style={{ left: pos.x, top: pos.y, width: pos.width, height: pos.height, zIndex: 2 }}
             >
               <div className="text-xs font-mono text-slate-500">{node.wbsCode}</div>

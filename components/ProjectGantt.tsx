@@ -1,19 +1,23 @@
 
+
+
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { Project, Task, WBSNode } from '../types';
+// FIX: Corrected import path for types to resolve module resolution errors.
+import { Project, Task, WBSNode } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
 import { List, X } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
 import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
+import { useTheme } from '../context/ThemeContext';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 
-interface ProjectGanttProps {
-  project: Project;
-}
 const ROW_HEIGHT = 44;
 
-const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) => {
+const ProjectGantt: React.FC = () => {
+  const { project: initialProject } = useProjectWorkspace();
+  const theme = useTheme();
   const {
       project, viewMode, setViewMode, selectedTask, setSelectedTask, isTraceLogicOpen,
       setIsTraceLogicOpen, showCriticalPath, setShowCriticalPath, activeBaselineId,
@@ -36,7 +40,9 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
             }
         });
     };
-    traverse(project.wbs || [], 0);
+    if (project.wbs) {
+        traverse(project.wbs, 0);
+    }
     return list;
   }, [project.wbs, project.tasks, expandedNodes]);
 
@@ -52,14 +58,14 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
   }, [activeBaselineId, project.baselines]);
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg overflow-hidden relative border border-slate-200 shadow-sm flex-1">
+    <div className={`flex flex-col h-full ${theme.colors.surface} rounded-lg overflow-hidden relative border ${theme.colors.border} shadow-sm flex-1`}>
       <GanttToolbar 
         project={project} viewMode={viewMode} setViewMode={setViewMode} showCriticalPath={showCriticalPath}
         setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
         showResources={showResources} setShowResources={setShowResources} onTraceLogic={() => setIsTraceLogicOpen(true)}
         isTaskSelected={!!selectedTask} taskFilter={taskFilter} setTaskFilter={setTaskFilter}
       />
-      <button className="md:hidden absolute bottom-20 left-4 z-30 p-3 bg-nexus-600 text-white rounded-full shadow-lg" onClick={() => setShowTaskList(!showTaskList)}>
+      <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>
         {showTaskList ? <X size={20} /> : <List size={20} />}
       </button>
 
@@ -73,7 +79,7 @@ const ProjectGantt: React.FC<ProjectGanttProps> = ({ project: initialProject }) 
                 timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap}
                 projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT}
                 showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask}
-                projectTasks={project.tasks} calendar={project.calendar} ganttContainerRef={ganttContainerRef}
+                projectTasks={project.tasks} calendar={(project as any).calendar} ganttContainerRef={ganttContainerRef}
                 getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask}
             />
         </div>

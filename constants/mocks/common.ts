@@ -1,5 +1,5 @@
 
-import { Document, Extension, QualityStandard, EnterpriseRole, EnterpriseSkill } from '../../types';
+import { Document, Extension, QualityStandard, EnterpriseRole, EnterpriseSkill, CostBookItem, StandardTemplate } from '../../types/index';
 
 export const EXTENSIONS_REGISTRY: Extension[] = [
   { id: 'dod_suite', name: 'DoD Acquisition Suite', category: 'Compliance', description: 'DoD 5000.02 Lifecycle, EVMS-748, and Defense-grade Risk.', icon: 'Shield', status: 'Available', version: '1.0', viewType: 'dashboard' },
@@ -61,4 +61,13 @@ export const MOCK_ENTERPRISE_SKILLS: EnterpriseSkill[] = [
 
 export const MOCK_DOCUMENTS: Document[] = [
     { id: 'D1', projectId: 'P1001', name: 'Project Charter.pdf', type: 'PDF', size: '1.2 MB', version: '1.0', uploadedBy: 'Justin Saadein', status: 'Final', url: '#' },
+];
+
+export const MOCK_COST_BOOK: CostBookItem[] = [
+    { id: 'CB-01', description: 'Concrete Grade 40', type: 'Material', unit: 'CY', rate: 1200 },
+    { id: 'CB-02', description: 'Senior Engineer', type: 'Labor', unit: 'HR', rate: 150 },
+];
+
+export const MOCK_TEMPLATES: StandardTemplate[] = [
+    { id: 'TPL-01', category: 'Risk', name: 'Standard Risk Plan', description: 'Default risk management plan template.', content: {} },
 ];

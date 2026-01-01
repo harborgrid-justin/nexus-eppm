@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ProgramObjective, StrategicGoal, Project } from '../../types';
-import { SidePanel } from '../ui/SidePanel';
+import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Layers } from 'lucide-react';
 
@@ -30,10 +30,10 @@ export const ProgramObjectiveForm: React.FC<ProgramObjectiveFormProps> = ({ isOp
   }, [objective, isOpen]);
 
   return (
-    <SidePanel
+    <Modal
         isOpen={isOpen}
         onClose={onClose}
-        width="md:w-[500px]"
+        size="md"
         title={
           <span className="flex items-center gap-2">
             <Layers className="text-nexus-600"/> {objective ? 'Edit Objective' : 'New Program Objective'}
@@ -91,6 +91,6 @@ export const ProgramObjectiveForm: React.FC<ProgramObjectiveFormProps> = ({ isOp
                 </div>
             </div>
         </div>
-    </SidePanel>
+    </Modal>
   );
 };

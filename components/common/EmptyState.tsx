@@ -6,7 +6,7 @@ import { Search } from 'lucide-react';
 interface EmptyStateProps {
   title: string;
   description: string;
-  icon?: React.ComponentType<{ size?: string | number; className?: string }>;
+  icon?: React.ElementType;
   action?: React.ReactNode;
 }
 

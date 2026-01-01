@@ -1,10 +1,8 @@
 
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import * as LucideIcons from 'lucide-react';
+import { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock } from 'lucide-react';
 import { Card } from '../ui/Card';
-
-const { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock } = LucideIcons;
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency } from '../../utils/formatters';
@@ -88,7 +86,7 @@ const ProgramScope: React.FC<ProgramScopeProps> = ({ programId }) => {
                                 <td className="px-6 py-4">
                                     <div className="font-bold text-slate-900 text-sm">{pcr.title}</div>
                                     <p className="text-sm text-slate-600 mt-1">{pcr.description}</p>
-                                    <div className="text-xs text-slate-400 mt-2">By: {pcr.submittedBy}</div>
+                                    <div className="text-xs text-slate-400 mt-2">By: {pcr.submitterId}</div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="space-y-1 text-xs">

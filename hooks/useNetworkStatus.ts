@@ -3,9 +3,15 @@ import { useState, useEffect } from 'react';
 import { Logger } from '../services/Logger';
 
 export const useNetworkStatus = () => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  // Rule 38: Hydration-Safe Conditional Rendering
+  // Initialize to true (optimistic) to ensure server/client markup matches.
+  // We update to the actual status immediately after mount.
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
+    // Sync with actual browser state upon mount
+    setIsOnline(navigator.onLine);
+
     const handleOnline = () => {
         setIsOnline(true);
         Logger.info('Network Status: Online');

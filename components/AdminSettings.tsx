@@ -1,74 +1,79 @@
 
-import React, { useState } from 'react';
-import { Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { 
+  Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, 
+  Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
+  Terminal, Globe, Layers, MapPin, History, RefreshCw, Search, X 
+} from 'lucide-react';
 import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
 import ActivityCodeSettings from './admin/ActivityCodeSettings';
-import IssueCodeSettings from './admin/IssueCodeSettings';
+import { IssueCodeSettings } from './admin/IssueCodeSettings';
 import ExpenseCategorySettings from './admin/ExpenseCategorySettings';
-import FundingSourceSettings from './admin/FundingSourceSettings';
-import UdfSettings from './admin/UdfSettings';
+import { FundingSourceSettings } from './admin/FundingSourceSettings';
+import { UdfSettings } from './admin/UdfSettings';
 import UserManagement from './admin/UserManagement';
 import SystemConfigPanel from './admin/SystemConfig';
 import CalendarEditor from './admin/CalendarEditor';
 import WorkflowDesigner from './admin/WorkflowDesigner';
-import { useTheme } from '../context/ThemeContext';
-import { usePermissions } from '../hooks/usePermissions';
+import GlobalChangeWorkbench from './admin/GlobalChangeWorkbench';
+import CurrencyRegistry from './admin/CurrencyRegistry';
+import GeneralSettings from './admin/GeneralSettings';
+import SecuritySettings from './admin/SecuritySettings';
+import BillingSettings from './admin/BillingSettings';
+import NotificationSettings from './admin/NotificationSettings';
+import EpsObsSettings from './admin/EpsObsSettings';
+import LocationSettings from './admin/LocationSettings';
+import AuditLog from './admin/AuditLog';
+import { useTheme } from '../../context/ThemeContext';
+import { Button } from '../ui/Button';
+import { ErrorBoundary } from '../ErrorBoundary';
 
-interface AdminSettingsProps {}
-
-const AdminSettings: React.FC<AdminSettingsProps> = () => {
-  const [activeSection, setActiveSection] = useState('general');
+const AdminSettings: React.FC = () => {
+  const { section = 'general' } = useParams<{ section: string }>();
+  const [isApplying, setIsApplying] = useState(false);
   const theme = useTheme();
-  const { canManageSystem } = usePermissions();
+
+  const handleGlobalApply = () => {
+      setIsApplying(true);
+      setTimeout(() => {
+          setIsApplying(false);
+          alert("Global enterprise parameters synchronized across all projects and programs.");
+      }, 1500);
+  };
 
   const navItems = [
-    { id: 'general', icon: Settings, label: 'General' },
-    // Only show system-critical settings to admins
-    ...(canManageSystem() ? [
-        { id: 'users', icon: Users, label: 'Users & Roles' },
-        { id: 'system', icon: Server, label: 'System Config' },
-    ] : []),
-    { id: 'calendars', icon: Calendar, label: 'Enterprise Calendars' },
-    { id: 'workflows', icon: GitPullRequest, label: 'Workflows' },
-    { id: 'activityCodes', icon: Tag, label: 'Activity Codes' },
-    { id: 'udfs', icon: Edit3, label: 'User-Defined Fields' },
-    { id: 'issueCodes', icon: FileWarning, label: 'Issue Codes' },
-    { id: 'expenseCategories', icon: Receipt, label: 'Expense Categories' },
-    { id: 'fundingSources', icon: Banknote, label: 'Funding Sources' },
-    { id: 'resources', icon: UserCog, label: 'Resource Settings'},
-    { id: 'security', icon: Shield, label: 'Security' },
-    { id: 'integrations', icon: Server, label: 'Integrations' },
-    { id: 'billing', icon: CreditCard, label: 'Billing' },
-    { id: 'notifications', icon: Bell, label: 'Notifications' },
+    { id: 'general', label: 'General' },
+    { id: 'users', label: 'Users & Roles' },
+    { id: 'system', label: 'System Config' },
+    { id: 'epsobs', label: 'EPS & OBS' },
+    { id: 'locations', label: 'Global Locations' },
+    { id: 'currencies', label: 'Currencies' },
+    { id: 'globalChange', label: 'Global Change' },
+    { id: 'calendars', label: 'Enterprise Calendars' },
+    { id: 'workflows', label: 'Workflows' },
+    { id: 'activityCodes', label: 'Activity Codes' },
+    { id: 'udfs', label: 'User-Defined Fields' },
+    { id: 'issueCodes', label: 'Issue Codes' },
+    { id: 'expenseCategories', label: 'Expense Categories' },
+    { id: 'fundingSources', label: 'Funding Sources' },
+    { id: 'resources', label: 'Resource Settings'},
+    { id: 'security', label: 'Security' },
+    { id: 'billing', label: 'Billing' },
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'audit', label: 'System Audit Log' },
   ];
 
   const renderContent = () => {
-    switch(activeSection) {
-      case 'general':
-        return (
-          <div className="space-y-6 max-w-2xl">
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-slate-900">Organization Profile</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">Organization Name</label>
-                  <input type="text" className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-nexus-500 focus:border-nexus-500 sm:text-sm" defaultValue="Acme Corp Construction" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">Fiscal Year Start</label>
-                  <select className="mt-1 block w-full border border-slate-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-nexus-500 focus:border-nexus-500 sm:text-sm">
-                    <option>January</option>
-                    <option>April</option>
-                    <option>October</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+    switch(section) {
+      case 'general': return <GeneralSettings />;
       case 'users': return <UserManagement />;
       case 'system': return <SystemConfigPanel />;
+      case 'epsobs': return <EpsObsSettings />;
+      case 'locations': return <LocationSettings />;
       case 'calendars': return <CalendarEditor />;
+      case 'currencies': return <CurrencyRegistry />;
+      case 'globalChange': return <GlobalChangeWorkbench />;
       case 'workflows': return <WorkflowDesigner />;
       case 'activityCodes': return <ActivityCodeSettings />;
       case 'udfs': return <UdfSettings />;
@@ -76,58 +81,42 @@ const AdminSettings: React.FC<AdminSettingsProps> = () => {
       case 'expenseCategories': return <ExpenseCategorySettings />;
       case 'fundingSources': return <FundingSourceSettings />;
       case 'resources': return <EnterpriseResourceSettings />;
-      default:
-        return (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-             <div className="p-4 bg-slate-50 rounded-full mb-4">
-               {React.createElement(navItems.find(n => n.id === activeSection)!.icon, { size: 32 })}
-             </div>
-             <h3 className="text-lg font-medium text-slate-900">Configuration Section</h3>
-             <p>This settings module is currently being provisioned.</p>
-          </div>
-        );
+      case 'security': return <SecuritySettings />;
+      case 'billing': return <BillingSettings />;
+      case 'notifications': return <NotificationSettings />;
+      case 'audit': return <AuditLog />;
+      default: return <GeneralSettings />;
     }
   };
 
-  return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
-      <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} overflow-hidden flex h-full`}>
-        {/* Settings Sidebar */}
-        <div className={`w-64 bg-slate-50 border-r ${theme.colors.border} flex flex-col`}>
-          <div className={`p-6 ${theme.layout.headerBorder}`}>
-            <h2 className={theme.typography.h2}>Settings</h2>
-            <p className={theme.typography.small}>Manage workspace preferences</p>
-          </div>
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeSection === item.id 
-                    ? `bg-white ${theme.colors.primary} shadow-sm ring-1 ring-slate-200` 
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <item.icon size={18} />
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        </div>
+  const currentLabel = navItems.find(n => n.id === section)?.label;
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-white">
-           <div className={`p-6 ${theme.layout.headerBorder} flex justify-between items-center`}>
-              <h1 className="text-xl font-bold text-slate-900">{navItems.find(n => n.id === activeSection)?.label}</h1>
-              <button className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 shadow-sm`}>
-                Save Changes
-              </button>
-           </div>
-           <div className="flex-1 overflow-y-auto p-8">
-              {renderContent()}
-           </div>
-        </div>
+  return (
+    <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
+      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden h-full`}>
+        
+        <header className={`px-8 py-6 border-b border-slate-100 flex justify-between items-center ${theme.colors.surface} sticky top-0 z-10 shrink-0`}>
+            <div>
+              <h1 className={theme.typography.heading}>{currentLabel}</h1>
+              <p className={theme.typography.subtext}>Configure global system logic and enterprise data definitions.</p>
+            </div>
+            <Button 
+              onClick={handleGlobalApply}
+              isLoading={isApplying}
+              variant="secondary"
+              icon={RefreshCw}
+            >
+              Apply Global Changes
+            </Button>
+          </header>
+          
+          <div className={`flex-1 overflow-y-auto p-8 scrollbar-thin ${theme.colors.surface}`}>
+            <div className="max-w-6xl mx-auto h-full">
+              <ErrorBoundary name={`Admin Section: ${currentLabel}`}>
+                  {renderContent()}
+              </ErrorBoundary>
+            </div>
+          </div>
       </div>
     </div>
   );

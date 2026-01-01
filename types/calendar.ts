@@ -36,3 +36,11 @@ export interface CalendarException {
   isWorkDay: boolean;
   intervals?: { start: string; end: string }[];
 }
+
+// FIX: Added missing ProjectCalendar interface
+export interface ProjectCalendar {
+  id: string;
+  name: string;
+  workingDays: number[];
+  holidays: string[];
+}

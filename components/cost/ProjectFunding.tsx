@@ -1,112 +1,57 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
-import { useProjectState } from '../../hooks';
-import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, AlertTriangle, Layers, Lock, ShieldCheck } from 'lucide-react';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, Layers, Lock, ShieldCheck, ArrowRightLeft, DollarSign, Wallet } from 'lucide-react';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomPieChart } from '../charts/CustomPieChart';
 import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Bar } from 'recharts';
-import type { ProjectFunding, FundingTransaction } from '../../types';
 import FundingAllocationModal from './FundingAllocationModal';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
 
-interface ProjectFundingProps {
-    projectId: string;
-}
-
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
-const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
-    const { state, dispatch } = useData();
-    const { project, financials } = useProjectState(projectId);
-    const [viewMode, setViewMode] = useState<'reconciliation' | 'ledger'>('reconciliation');
+export const ProjectFunding: React.FC = () => {
+    const { state } = useData();
+    const { project, financials } = useProjectWorkspace();
+    const projectId = project.id;
+    const [viewMode, setViewMode] = useState<'reconciliation' | 'sources'>('reconciliation');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
-    // --- Derived Data ---
-    
-    // 1. Funding Summary
-    const fundingSummary = useMemo(() => {
-        const totalAuthorized = project?.funding?.filter(f => f.status === 'Authorized' || f.status === 'Released').reduce((sum, f) => sum + f.amount, 0) || 0;
-        const totalReleased = project?.funding?.filter(f => f.status === 'Released').reduce((sum, f) => sum + f.amount, 0) || 0;
-        // In real app, committed comes from POs, spent from Actuals.
-        // We use project.spent and financials.totalCommitted from hook
-        const spent = project?.spent || 0;
-        const remaining = totalReleased - spent;
-        
-        return { totalAuthorized, totalReleased, spent, remaining };
-    }, [project, financials]);
+    const handleViewChange = (mode: 'reconciliation' | 'sources') => {
+        startTransition(() => {
+            setViewMode(mode);
+        });
+    };
 
-    // 2. Funding Limit Reconciliation Chart Data
-    // Compares Cumulative Cost vs Funding Limit Steps over time
-    const reconciliationData = useMemo(() => {
-        if (!project) return [];
-        const start = new Date(project.startDate);
-        const end = new Date(project.endDate);
-        const totalDays = getDaysDiff(start, end);
-        const data = [];
-        const steps = 12;
-
-        const fundingReleases = (project.funding || [])
-            .filter(f => f.status === 'Released' && f.transactions)
-            .flatMap(f => (f.transactions || [])
-                .filter(t => t.type === 'Allocation')
-                .map(t => ({
-                    day: getDaysDiff(start, new Date(t.date)),
-                    amount: t.amount
-                }))
-            );
-
-        for (let i = 0; i <= steps; i++) {
-            const currentDay = (i / steps) * totalDays;
-
-            const fundingAtPoint = fundingReleases
-                .filter(r => r.day <= currentDay)
-                .reduce((sum, r) => sum + r.amount, 0);
-
-            const percentTime = i / steps;
-            const curveFactor = percentTime < 0.5 ? 2 * percentTime * percentTime : -1 + (4 - 2 * percentTime) * percentTime;
-            const costAtPoint = project.budget * curveFactor;
-
-            data.push({
-                period: `Month ${i}`,
-                FundingLimit: fundingAtPoint,
-                CumulativeCost: costAtPoint,
-                Variance: fundingAtPoint - costAtPoint
-            });
-        }
-        return data;
-    }, [project]);
-
-    // 3. Distribution Data
-    const distributionData = useMemo(() => {
-        return project?.funding?.map((f, i) => {
+    // Filter to show only funding sources that are actually linked to this project
+    const projectFundingSources = useMemo(() => {
+        if (!project?.funding) return [];
+        return project.funding.map(f => {
             const source = state.fundingSources.find(s => s.id === f.fundingSourceId);
             return {
-                name: source?.name || 'Unknown Source',
-                value: f.amount,
-                color: COLORS[i % COLORS.length]
+                ...f,
+                sourceName: source?.name || 'Unknown Authority',
+                sourceType: source?.type || 'Other'
             };
-        }) || [];
+        });
     }, [project, state.fundingSources]);
 
-    // 4. Ledger Data
-    const ledgerData = useMemo(() => {
-        if (!project?.funding) return [];
+    const fundingSummary = useMemo(() => {
+        const released = project?.funding?.filter(f => f.status === 'Released').reduce((sum, f) => sum + f.amount, 0) || 0;
+        const total = project?.funding?.reduce((sum, f) => sum + f.amount, 0) || 0;
+        return { released, total, percentage: total > 0 ? (released / total) * 100 : 0 };
+    }, [project]);
 
-        return project.funding.flatMap(f =>
-            (f.transactions || []).map(t => ({
-                ...t,
-                sourceName: state.fundingSources.find(s => s.id === f.fundingSourceId)?.name
-            }))
-        ).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }, [project, state.fundingSources]);
-
-
-    const handleAddFunding = (newFunding: Partial<ProjectFunding>) => {
-        // In real app, dispatch action to add funding
-        alert(`Allocated ${formatCurrency(newFunding.amount || 0)} from Source ${newFunding.fundingSourceId}`);
-    };
+    const sourceData = useMemo(() => {
+        return projectFundingSources.map((f, i) => ({
+            name: f.sourceName,
+            value: f.amount,
+            color: COLORS[i % COLORS.length]
+        }));
+    }, [projectFundingSources]);
 
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
@@ -114,155 +59,91 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
                 <FundingAllocationModal 
                     projectId={projectId} 
                     sources={state.fundingSources} 
-                    onClose={() => setIsModalOpen(false)}
-                    onSave={handleAddFunding}
+                    onClose={() => setIsModalOpen(false)} 
+                    onSave={(funding) => {
+                        // Logic to save allocation would go here
+                        console.log("Saving funding allocation:", funding);
+                    }} 
                 />
             )}
 
-            {/* Header / KPI Area */}
             <div className="p-6 pb-0 grid grid-cols-1 md:grid-cols-4 gap-6">
-                <StatCard 
-                    title="Total Authorized Funding" 
-                    value={formatCompactCurrency(fundingSummary.totalAuthorized)} 
-                    icon={ShieldCheck} 
-                    subtext="Approved Budget Authority"
-                />
-                <StatCard 
-                    title="Funds Released" 
-                    value={formatCompactCurrency(fundingSummary.totalReleased)} 
-                    icon={Banknote} 
-                    subtext="Available for Expenditure"
-                />
-                <StatCard 
-                    title="Burn Rate" 
-                    value="$125k / mo" 
-                    icon={TrendingUp} 
-                    subtext="3-Month Average"
-                />
-                <StatCard 
-                    title="Solvency Status" 
-                    value={fundingSummary.remaining < 0 ? "Insolvent" : "Solvent"} 
-                    icon={fundingSummary.remaining < 0 ? AlertTriangle : Layers}
-                    trend={fundingSummary.remaining < 0 ? 'down' : 'up'}
-                    subtext={`Runway: ${fundingSummary.remaining < 0 ? 0 : 4} Months`}
-                />
+                <StatCard title="Total Funding Authorized" value={formatCompactCurrency(fundingSummary.total)} icon={ShieldCheck} />
+                <StatCard title="Funds Released" value={formatCompactCurrency(fundingSummary.released)} icon={Banknote} subtext={`${fundingSummary.percentage.toFixed(1)}% of Authority`} />
+                <StatCard title="Available Cash Flow" value={formatCompactCurrency(fundingSummary.released - (project?.spent || 0))} icon={Wallet} trend="up" />
+                <StatCard title="Funding Status" value={fundingSummary.released >= (project?.spent || 0) ? 'Solvent' : 'Cash Constraint'} icon={Layers} trend={fundingSummary.released >= (project?.spent || 0) ? 'up' : 'down'} />
             </div>
 
-            {/* Toolbar */}
             <div className="px-6 py-4 flex justify-between items-center">
-                <div className="flex bg-white border border-slate-200 rounded-lg p-1">
-                    <button 
-                        onClick={() => setViewMode('reconciliation')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'reconciliation' ? 'bg-nexus-100 text-nexus-700 shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        Reconciliation Analysis
-                    </button>
-                    <button 
-                        onClick={() => setViewMode('ledger')}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${viewMode === 'ledger' ? 'bg-nexus-100 text-nexus-700 shadow-sm' : 'text-slate-600 hover:bg-slate-50'}`}
-                    >
-                        Transaction Ledger
-                    </button>
+                <div className="flex bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+                    <button onClick={() => handleViewChange('reconciliation')} className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-md transition-all ${viewMode === 'reconciliation' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Reconciliation</button>
+                    <button onClick={() => handleViewChange('sources')} className={`px-4 py-1.5 text-xs font-black uppercase tracking-widest rounded-md transition-all ${viewMode === 'sources' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Color of Money</button>
                 </div>
-                <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-3 py-2 bg-nexus-600 text-white rounded-lg flex items-center gap-2 hover:bg-nexus-700 shadow-sm text-sm font-medium"
-                >
-                    <Plus size={16} /> New Allocation
+                <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-nexus-600 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-nexus-700 shadow-md active:scale-95 transition-all">
+                    <Plus size={16}/> New Allocation
                 </button>
             </div>
 
-            <div className="flex-1 overflow-hidden px-6 pb-6">
+            <div className={`flex-1 overflow-hidden px-6 pb-6 ${isPending ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
                 {viewMode === 'reconciliation' ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full overflow-y-auto">
-                        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[500px]">
-                            <h3 className="font-bold text-slate-800 mb-4">Funding Limit Reconciliation</h3>
-                            <div className="h-[420px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <ComposedChart data={reconciliationData} margin={{top: 20, right: 30, left: 20, bottom: 0}}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="period" />
-                                        <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
-                                        <Tooltip formatter={(val: number) => formatCurrency(val)} />
-                                        <Legend />
-                                        {/* Step Chart for Funding Limit */}
-                                        <Line type="stepAfter" dataKey="FundingLimit" stroke="#22c55e" strokeWidth={3} name="Funding Limit" dot={false} />
-                                        {/* S-Curve for Cost */}
-                                        <Area type="monotone" dataKey="CumulativeCost" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.1} strokeWidth={2} name="Cumulative Cost" />
-                                        {/* Reference Line for Solvency */}
-                                        <ReferenceLine y={fundingSummary.totalReleased} stroke="red" strokeDasharray="3 3" label="Current Cap" />
-                                    </ComposedChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-6">
-                            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex-1">
-                                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><PieChartIcon size={16} /> Funding Sources</h4>
-                                <CustomPieChart data={distributionData} height={200} />
-                            </div>
-                            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                <h4 className="font-bold text-slate-800 mb-2">Solvency Check</h4>
-                                <p className="text-sm text-slate-600 mb-4">Ensure funding releases (Step) always exceed cumulative costs (Curve).</p>
-                                {reconciliationData.some(d => d.Variance < 0) ? (
-                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-                                        <AlertTriangle className="text-red-600 shrink-0" size={20}/>
-                                        <div className="text-sm text-red-800">
-                                            <strong>Solvency Breach Detected:</strong> Cost exceeds funding limit in upcoming period. Request drawdown immediately.
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex gap-3">
-                                        <ShieldCheck className="text-green-600 shrink-0" size={20}/>
-                                        <div className="text-sm text-green-800">
-                                            <strong>Healthy:</strong> Funding covers projected costs through project completion.
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-full flex flex-col">
+                        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <ArrowRightLeft size={18} className="text-nexus-600"/> Fiscal Burn vs. Funding Release
+                        </h3>
+                        <div className="flex-1 min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart data={[
+                                    { name: 'Jan', Limit: 500000, Spend: 420000 },
+                                    { name: 'Feb', Limit: 500000, Spend: 480000 },
+                                    { name: 'Mar', Limit: 800000, Spend: 550000 },
+                                    { name: 'Apr', Limit: 800000, Spend: 720000 },
+                                ]}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" />
+                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
+                                    <Tooltip formatter={(val: number) => formatCurrency(val)} />
+                                    <Legend />
+                                    <Area type="stepAfter" dataKey="Limit" stroke="#10b981" fill="#dcfce7" name="Funding Limit" />
+                                    <Bar dataKey="Spend" fill="#0ea5e9" barSize={30} name="Actual Spend" radius={[4,4,0,0]} />
+                                </ComposedChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden h-full flex flex-col">
-                        <div className="p-4 border-b border-slate-200 bg-slate-50 font-bold text-slate-700">
-                            Funding Ledger (Audit Trail)
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <PieChartIcon size={18} className="text-blue-500"/> Funding by Source (Authority Distribution)
+                            </h3>
+                            <CustomPieChart data={sourceData} height={350} />
                         </div>
-                        <div className="flex-1 overflow-auto">
-                            <table className="min-w-full divide-y divide-slate-200">
-                                <thead className="bg-white sticky top-0">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Transaction ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
-                                        <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Approved By</th>
-                                        <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-slate-100">
-                                    {ledgerData.map((tx) => (
-                                        <tr key={tx.id} className="hover:bg-slate-50">
-                                            <td className="px-6 py-4 text-sm font-mono text-slate-500">{tx.id}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-600">{tx.date}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                                    tx.type === 'Allocation' ? 'bg-green-100 text-green-700' :
-                                                    tx.type === 'Drawdown' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
-                                                }`}>
-                                                    {tx.type}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-slate-800">{tx.description}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-600">{tx.approvedBy}</td>
-                                            <td className={`px-6 py-4 text-sm font-mono font-bold text-right ${
-                                                tx.amount < 0 ? 'text-red-600' : 'text-green-600'
-                                            }`}>
-                                                {formatCurrency(tx.amount)}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+                            <div className="p-4 bg-slate-50 border-b border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-500">Source Restrictions & Compliance</div>
+                            <div className="p-6 space-y-6 flex-1 overflow-y-auto scrollbar-thin">
+                                {projectFundingSources.map(f => (
+                                    <div key={f.id} className="border-l-4 border-l-nexus-500 pl-4 py-1 group hover:bg-slate-50 transition-colors">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-bold text-slate-800">{f.sourceName}</p>
+                                                <p className="text-xs text-slate-500 mt-1">Authority Type: <strong>{f.sourceType}</strong> • FY{f.fiscalYear}</p>
+                                            </div>
+                                            <span className="font-mono font-bold text-sm text-nexus-700">{formatCompactCurrency(f.amount)}</span>
+                                        </div>
+                                        <div className="mt-3 flex gap-2">
+                                            <span className="text-[9px] font-black px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-tighter">Ringfenced</span>
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded border border-indigo-100 uppercase tracking-tighter ${f.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-indigo-50 text-indigo-700'}`}>
+                                                {f.status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {projectFundingSources.length === 0 && (
+                                    <div className="h-full flex flex-col items-center justify-center text-slate-300">
+                                        <Lock size={48} className="opacity-20 mb-4"/>
+                                        <p className="text-sm font-bold uppercase tracking-widest">No Funding Allocated</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -270,5 +151,3 @@ const ProjectFunding: React.FC<ProjectFundingProps> = ({ projectId }) => {
         </div>
     );
 };
-
-export default ProjectFunding;

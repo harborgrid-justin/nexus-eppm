@@ -1,42 +1,63 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Plus, DollarSign } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Banknote, Plus } from 'lucide-react';
+// FIX: Corrected import path to avoid module resolution conflict.
+import { FundingSource } from '../../types/index';
+import { Button } from '../ui/Button';
+import { FundingSourceGrid } from './funding/FundingSourceGrid';
+import { FundingSourcePanel } from './funding/FundingSourcePanel';
 
-const Banknote = (LucideIcons as any).Banknote || DollarSign;
+export const FundingSourceSettings: React.FC = () => {
+    const { dispatch } = useData();
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [editingSource, setEditingSource] = useState<Partial<FundingSource> | null>(null);
 
-const FundingSourceSettings: React.FC = () => {
-    const { state } = useData();
+    const handleOpenPanel = (fs?: FundingSource) => {
+        setEditingSource(fs ? { ...fs } : { 
+            name: '', type: 'Internal', totalAuthorized: 0, description: '' 
+        });
+        setIsPanelOpen(true);
+    };
+
+    const handleSave = (sourceToSave: FundingSource) => {
+        dispatch({
+            type: sourceToSave.id && sourceToSave.id.startsWith('FS-') ? 'ADMIN_UPDATE_FUNDING_SOURCE' : 'ADMIN_ADD_FUNDING_SOURCE',
+            payload: sourceToSave
+        });
+        setIsPanelOpen(false);
+    };
+
+    const handleDelete = (id: string) => {
+        if (confirm("Remove this funding source?")) {
+            dispatch({ type: 'ADMIN_DELETE_FUNDING_SOURCE', payload: id });
+        }
+    };
 
     return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <p className="text-sm text-slate-600">Define the agencies, businesses, or groups that provide funding for projects.</p>
-                <button className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-300 text-sm rounded-md hover:bg-slate-50">
-                    <Plus size={14} /> Add Source
-                </button>
+        <div className="space-y-6 h-full overflow-y-auto pr-2">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 p-6 rounded-2xl border border-slate-200 gap-4 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-nexus-600 text-white rounded-xl shadow-lg shadow-nexus-500/20"><Banknote size={24}/></div>
+                    <div>
+                        <h4 className="font-bold text-slate-900 text-lg">Financial Authority Registry</h4>
+                        <p className="text-sm text-slate-500">Define entities that provide budget authority.</p>
+                    </div>
+                </div>
+                <Button icon={Plus} onClick={() => handleOpenPanel()} className="w-full md:w-auto">Register Source</Button>
             </div>
 
-            <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-slate-200">
-                    <thead className="bg-slate-50">
-                        <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Source Name</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-slate-100">
-                        {state.fundingSources.map(fs => (
-                            <tr key={fs.id}>
-                                <td className="px-4 py-3 text-sm font-medium text-slate-800">{fs.name}</td>
-                                <td className="px-4 py-3 text-sm text-slate-500">{fs.description || 'N/A'}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <FundingSourceGrid 
+                onEdit={handleOpenPanel}
+                onDelete={handleDelete}
+            />
+
+            <FundingSourcePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                onSave={handleSave}
+                editingSource={editingSource}
+            />
         </div>
     );
 };
-
-export default FundingSourceSettings;

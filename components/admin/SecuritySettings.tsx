@@ -1,0 +1,184 @@
+import React, { useState } from 'react';
+import { useData } from '../../context/DataContext';
+import { Shield, Lock, Fingerprint, Globe, ShieldAlert, CheckCircle, Save, Key, Wifi, Clock, AlertTriangle, UserX, RotateCcw } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
+import { SidePanel } from '../ui/SidePanel';
+import { useTheme } from '../../context/ThemeContext';
+
+const SecuritySettings: React.FC = () => {
+    const { state, dispatch } = useData();
+    const theme = useTheme();
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    
+    // Policy State (In real app, this is synced with state.governance.security)
+    const [policies, setPolicies] = useState({
+        mfa: true,
+        passwordComplexity: 'High',
+        sessionLimit: 30,
+        ipLock: false,
+        allowPublicLinks: false,
+        enforceHttps: true,
+        loginRetries: 5
+    });
+
+    const handleSave = () => {
+        dispatch({ type: 'UPDATE_SECURITY_POLICY', payload: policies });
+        alert("Security policy updated. Changes will take effect at next login session.");
+    };
+
+    const runSecurityAudit = () => {
+        alert("Security scan initiated. Scanning for over-privileged users and inactive sessions...");
+    };
+
+    return (
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
+            {/* Security Header Banner */}
+            <div className="bg-slate-800 p-6 md:p-8 rounded-2xl text-slate-200 flex flex-col lg:flex-row justify-between items-start lg:items-center shadow-xl relative overflow-hidden gap-6">
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 md:gap-6">
+                    <div className="p-3 md:p-4 bg-white/10 rounded-2xl backdrop-blur-xl border border-white/10 shrink-0">
+                        <Shield className="text-nexus-400" size={32} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl md:text-2xl font-black tracking-tight text-white">System Security Perimeter</h3>
+                        <p className="text-slate-400 text-xs md:text-sm mt-1 max-w-sm leading-relaxed">Centralized management of global authentication, session lifecycle, and data protection policies.</p>
+                    </div>
+                </div>
+                <div className="flex flex-wrap gap-3 relative z-10 w-full sm:w-auto">
+                    <div className="px-4 py-2 bg-green-500/10 text-green-400 text-xs font-black uppercase tracking-widest rounded-full border border-green-500/20 flex items-center gap-2 justify-center flex-1 sm:flex-none">
+                        <CheckCircle size={14}/> SOC 2 Compliant
+                    </div>
+                    <button onClick={runSecurityAudit} className="px-4 py-2 bg-white/10 text-white text-xs font-black uppercase tracking-widest rounded-full border border-white/20 hover:bg-white/20 transition-all flex-1 sm:flex-none whitespace-nowrap">
+                        Run Audit
+                    </button>
+                </div>
+                <Shield className="absolute -right-20 -bottom-20 text-white/5 opacity-10" size={400}/>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Auth Policy */}
+                <div className={`${theme.components.card} p-6 space-y-6 flex flex-col h-full hover:border-nexus-300 transition-colors`}>
+                    <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <Fingerprint size={16} className="text-nexus-600"/> Authentication
+                    </h3>
+                    <div className="flex-1 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-slate-700">Enforce Multi-Factor (MFA)</span>
+                            <input type="checkbox" checked={policies.mfa} onChange={() => setPolicies({...policies, mfa: !policies.mfa})} className="w-10 h-5 rounded-full appearance-none bg-slate-200 checked:bg-nexus-600 relative cursor-pointer transition-all before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:left-5 shadow-inner" />
+                        </div>
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Complexity Requirement</p>
+                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.background} font-bold text-slate-700`} value={policies.passwordComplexity} onChange={e => setPolicies({...policies, passwordComplexity: e.target.value})}>
+                                <option>Standard (8 chars)</option>
+                                <option>High (12 chars + Special)</option>
+                                <option>Strict (16+ chars + Bio)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Session Policy */}
+                <div className={`${theme.components.card} p-6 space-y-6 flex flex-col h-full hover:border-nexus-300 transition-colors`}>
+                    <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <Clock size={16} className="text-blue-600"/> Session Management
+                    </h3>
+                    <div className="flex-1 space-y-6">
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Timeout (Minutes)</p>
+                            <input 
+                                type="number" 
+                                className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.background} font-mono font-bold`} 
+                                value={policies.sessionLimit} 
+                                onChange={e => setPolicies({...policies, sessionLimit: parseInt(e.target.value)})} 
+                            />
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-slate-700">Prevent Concurrent Logins</span>
+                            <input type="checkbox" className="w-10 h-5 rounded-full appearance-none bg-slate-200 checked:bg-nexus-600 relative cursor-pointer transition-all before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:left-5 shadow-inner" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Network Policy */}
+                <div className={`${theme.components.card} p-6 space-y-6 flex flex-col h-full hover:border-nexus-300 transition-colors`}>
+                    <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <Globe size={16} className="text-purple-600"/> Network Perimeter
+                    </h3>
+                    <div className="flex-1 space-y-6">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-slate-700">Strict IP Whitelisting</span>
+                            <input type="checkbox" checked={policies.ipLock} onChange={() => setPolicies({...policies, ipLock: !policies.ipLock})} className="w-10 h-5 rounded-full appearance-none bg-slate-200 checked:bg-nexus-600 relative cursor-pointer transition-all before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:left-5 shadow-inner" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-slate-700">Enforce TLS 1.3</span>
+                            <input type="checkbox" checked={true} readOnly className="w-10 h-5 rounded-full appearance-none bg-nexus-600 relative cursor-default before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-5 shadow-inner" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Global Actions Workbench */}
+            <div className={`${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.border} border rounded-2xl p-6`}>
+                <h4 className={`${theme.colors.semantic.danger.text} font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2`}>
+                    <AlertTriangle size={18}/> Emergency Governance Actions
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button 
+                        onClick={() => confirm("WARNING: This will force all active users to re-authenticate via MFA. Continue?")}
+                        className={`bg-white ${theme.colors.semantic.danger.border} border p-4 rounded-xl flex items-center gap-4 hover:bg-red-100 transition-all group text-left shadow-sm w-full`}
+                    >
+                        <div className={`p-2 ${theme.colors.semantic.danger.bg} rounded-lg ${theme.colors.semantic.danger.text} group-hover:bg-red-200 transition-colors shrink-0`}>
+                            <RotateCcw size={20}/>
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-red-800">Force Global Re-auth</p>
+                            <p className="text-xs text-red-600">Immediate session termination for all users.</p>
+                        </div>
+                    </button>
+                    <button 
+                        onClick={() => confirm("Revoke all active public sharing links across all projects?")}
+                        className={`bg-white ${theme.colors.semantic.danger.border} border p-4 rounded-xl flex items-center gap-4 hover:bg-red-100 transition-all group text-left shadow-sm w-full`}
+                    >
+                        <div className={`p-2 ${theme.colors.semantic.danger.bg} rounded-lg ${theme.colors.semantic.danger.text} group-hover:bg-red-200 transition-colors shrink-0`}>
+                            <UserX size={20}/>
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-red-800">Invalidate Public Links</p>
+                            <p className="text-xs text-red-600">Secure all externally shared dashboard snapshots.</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pb-20">
+                <Button variant="secondary" onClick={() => setIsPanelOpen(true)} icon={Key}>View API Credentials</Button>
+                <Button icon={Save} onClick={handleSave}>Commit Security Baseline</Button>
+            </div>
+
+            {/* Credentials SidePanel (Scaffolded) */}
+            <SidePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                title="Service Account & API Registry"
+                width="md:w-[500px]"
+                footer={<Button onClick={() => setIsPanelOpen(false)}>Done</Button>}
+            >
+                <div className="space-y-6">
+                    <div className="bg-slate-900 p-6 rounded-2xl text-white">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Shield size={16} className="text-nexus-400"/>
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400">System Identity</span>
+                        </div>
+                        <p className="text-xs text-slate-300">Enterprise Service Key</p>
+                        <div className="mt-1 p-2 bg-black/40 rounded-lg border border-white/5 font-mono text-xs break-all">
+                            nx_live_51P2...00abc_secure_v2
+                        </div>
+                        <button className="mt-4 text-[10px] font-black uppercase text-nexus-400 hover:text-nexus-300 underline">Regenerate Token</button>
+                    </div>
+                </div>
+            </SidePanel>
+        </div>
+    );
+};
+
+export default SecuritySettings;

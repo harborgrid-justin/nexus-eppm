@@ -1,83 +1,78 @@
+
 import React, { useState, useEffect } from 'react';
-import { useProjectState } from '../../hooks';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { FileText, Save, Book } from 'lucide-react';
+import { FileText, Save, Book, Lock, ShieldCheck, Activity, Settings, ListTree, Grid } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { usePermissions } from '../../hooks/usePermissions';
+import { Button } from '../ui/Button';
+import { PlanOverview } from './planning/PlanOverview';
+import { PlanMethodology } from './planning/PlanMethodology';
+import { PlanTaxonomy } from './planning/PlanTaxonomy';
+import { PlanThresholds } from './planning/PlanThresholds';
+import { PlanTemplatePanel } from './planning/PlanTemplatePanel';
+import { Badge } from '../ui/Badge';
 
-interface RiskPlanEditorProps {
-    projectId: string;
-}
-
-const RiskPlanEditor: React.FC<RiskPlanEditorProps> = ({ projectId }) => {
-    const { riskPlan } = useProjectState(projectId);
+const RiskPlanEditor: React.FC = () => {
+    const { project, riskPlan } = useProjectWorkspace();
     const { dispatch } = useData();
-    const [planData, setPlanData] = useState(riskPlan);
-    const [isSaved, setIsSaved] = useState(false);
     const theme = useTheme();
+    const { canEditProject } = usePermissions();
 
-    useEffect(() => {
-        setPlanData(riskPlan);
-    }, [riskPlan]);
+    const [formData, setFormData] = useState(riskPlan);
+    const [activeTab, setActiveTab] = useState<'overview' | 'methodology' | 'taxonomy' | 'thresholds'>('overview');
+    const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
+
+    useEffect(() => { if (riskPlan) setFormData(riskPlan); }, [riskPlan]);
 
     const handleSave = () => {
-        if (planData) {
-            dispatch({ type: 'UPDATE_RISK_PLAN', payload: { projectId, plan: planData } });
-            setIsSaved(true);
-            setTimeout(() => setIsSaved(false), 2000);
+        if (formData) {
+            dispatch({ type: 'PROJECT_UPDATE_RISK_PLAN', payload: { projectId: project.id, plan: formData } });
+            alert("Risk Management Plan updated.");
         }
     };
+
+    if (!formData || !project) return <div className="p-8 text-slate-400">Initializing Plan Context...</div>;
     
-    if (!planData) return <div className={theme.layout.pagePadding}>Loading plan...</div>;
+    const renderContent = () => {
+        const props = { formData, setFormData, isReadOnly: !canEditProject() };
+        switch(activeTab) {
+            case 'overview': return <PlanOverview {...props} project={project} />;
+            case 'methodology': return <PlanMethodology {...props} />;
+            case 'taxonomy': return <PlanTaxonomy {...props} />;
+            case 'thresholds': return <PlanThresholds {...props} />;
+            default: return null;
+        }
+    }
 
     return (
-        <div className="h-full flex flex-col">
-            <div className={`p-4 ${theme.layout.headerBorder} flex-shrink-0 flex items-center justify-between`}>
-                <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
-                    <FileText size={16} /> Risk Management Plan
-                </h3>
-                <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50">
-                        <Book size={14}/> Apply Template
-                    </button>
-                    <button onClick={handleSave} className={`flex items-center justify-center gap-2 px-3 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 w-28`}>
-                        {isSaved ? "Saved!" : <><Save size={14}/> Save Plan</>}
-                    </button>
-                </div>
-            </div>
-            <div className={`flex-1 overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} max-w-4xl mx-auto`}>
-                <div>
-                    <label className="text-sm font-bold text-slate-900 block mb-2">Objectives</label>
-                    <textarea 
-                        className="w-full h-24 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500"
-                        value={planData.objectives}
-                        onChange={(e) => setPlanData({...planData, objectives: e.target.value})}
-                    />
-                </div>
-                 <div>
-                    <label className="text-sm font-bold text-slate-900 block mb-2">Scope</label>
-                    <textarea 
-                        className="w-full h-24 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500"
-                        value={planData.scope}
-                        onChange={(e) => setPlanData({...planData, scope: e.target.value})}
-                    />
-                </div>
-                <div>
-                    <label className="text-sm font-bold text-slate-900 block mb-2">Methodology / Approach</label>
-                    <textarea 
-                        className="w-full h-32 p-4 border border-slate-300 rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500"
-                        value={planData.approach}
-                        onChange={(e) => setPlanData({...planData, approach: e.target.value})}
-                    />
-                </div>
-                 <div className={`p-4 border ${theme.colors.border} rounded-lg`}>
-                    <h4 className="text-sm font-bold text-slate-900 block mb-2">Risk Categories</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {planData.riskCategories.map(cat => (
-                           <span key={cat.id} className="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full">{cat.name}</span>
-                        ))}
+        <div className={`h-full flex flex-col ${theme.colors.background}/30 scrollbar-thin`}>
+            <div className={`px-8 py-5 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center shrink-0`}>
+                <div className="flex items-center gap-4">
+                    <div className={`p-3 ${theme.colors.background} rounded-xl border ${theme.colors.border}`}><ShieldCheck size={24}/></div>
+                    <div>
+                        <h1 className="text-xl font-bold">Risk Management Plan</h1>
+                        <div className="flex items-center gap-3 mt-1"><Badge variant={formData.status === 'Approved' ? 'success' : 'warning'}>{formData.status}</Badge></div>
                     </div>
                 </div>
+                <div className="flex gap-3">
+                    <Button variant="secondary" icon={Book} onClick={() => setIsTemplatePanelOpen(true)}>Templates</Button>
+                    {canEditProject() && <Button icon={Save} onClick={handleSave}>Commit Plan</Button>}
+                </div>
             </div>
+            <div className={`${theme.colors.surface} border-b ${theme.colors.border} px-8 flex gap-1`}>
+                {[ { id: 'overview', label: 'Overview', icon: Activity }, { id: 'methodology', label: 'Methodology', icon: Settings }, { id: 'taxonomy', label: 'RBS', icon: ListTree }, { id: 'thresholds', label: 'Thresholds', icon: Grid } ].map(tab => (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-6 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === tab.id ? `border-nexus-600 text-nexus-700` : `border-transparent text-slate-500 hover:text-slate-800`}`}>
+                        <tab.icon size={14}/> {tab.label}
+                    </button>
+                ))}
+            </div>
+            <div className="flex-1 overflow-y-auto p-8">
+                <div className="max-w-5xl mx-auto bg-white border border-slate-200 shadow-sm rounded-xl p-10 min-h-[600px]">
+                    {renderContent()}
+                </div>
+            </div>
+            <PlanTemplatePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} onApply={() => {}} />
         </div>
     );
 };

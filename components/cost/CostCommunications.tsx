@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
-import {
-    MessageSquare, Calendar, FileText, Send, CheckCircle,
-    Clock, AlertTriangle, Users, Download, Eye, Bell
+import { 
+    MessageSquare, Calendar, FileText, Send, CheckCircle, 
+    Clock, AlertTriangle, Users, Download, Eye, Bell 
 } from 'lucide-react';
 import { MOCK_COST_REPORTS, MOCK_COST_MEETINGS, MOCK_COST_ALERTS } from '../../constants/mocks/finance';
 import { formatCurrency } from '../../utils/formatters';
@@ -47,7 +47,7 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                       { step: 'Review', status: 'pending' },
                       { step: 'Distribution', status: 'pending' }
                   ].map((s, i) => (
-                      <div key={i} className="flex items-center">
+                      <div key={s.step} className="flex items-center">
                           <div className={`flex flex-col items-center gap-1 ${s.status === 'active' ? 'opacity-100' : 'opacity-60'}`}>
                               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
                                   s.status === 'done' ? 'bg-green-100 border-green-500 text-green-700' :
@@ -92,7 +92,7 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                                   <Badge variant={getReportStatusColor(report.status)}>{report.status}</Badge>
                               </td>
                               <td className="px-6 py-4 text-xs text-slate-500">
-                                  {report.distributedTo.length > 0 ? report.distributedTo.join(', ') : '-'}
+                                  {report.distributedToIds?.length > 0 ? report.distributedToIds.join(', ') : '-'}
                               </td>
                               <td className="px-6 py-4 text-right flex justify-end gap-2">
                                   <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500" title="Preview"><Eye size={16}/></button>
@@ -140,7 +140,7 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                                           <li key={item.id} className="flex items-start gap-2 text-xs">
                                               <input type="checkbox" checked={item.status === 'Closed'} readOnly className="mt-0.5 rounded text-nexus-600"/>
                                               <span className={item.status === 'Closed' ? 'line-through text-slate-400' : 'text-slate-700'}>
-                                                  {item.description} <span className="text-slate-400">({item.assignedTo})</span>
+                                                  {item.description} <span className="text-slate-400">({item.assigneeId})</span>
                                               </span>
                                           </li>
                                       ))}
@@ -184,7 +184,7 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                           <div className="mt-2 flex gap-4 text-xs text-slate-500">
                               <span>Value: <strong className="text-slate-800">{alert.metric === 'Variance' ? formatCurrency(alert.value) : alert.value}</strong></span>
                               <span>Limit: {alert.metric === 'Variance' ? formatCurrency(alert.threshold) : alert.threshold}</span>
-                              <span>Sent to: {alert.recipients.join(', ')}</span>
+                              <span>Sent to: {(alert.recipientIds || []).join(', ')}</span>
                           </div>
                       </div>
                   </div>

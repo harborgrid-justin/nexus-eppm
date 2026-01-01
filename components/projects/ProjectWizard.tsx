@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
-import { Project } from '../../types';
+// FIX: Corrected import path to avoid module resolution conflict.
+import { Project } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
 import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -9,7 +9,6 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
 interface ProjectWizardProps {
-  isOpen: boolean;
   onClose: () => void;
   onSave: (project: Project) => void;
 }
@@ -21,19 +20,20 @@ const STEPS = [
   { id: 4, label: 'Team Charter', icon: Users },
 ];
 
-export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, onSave }) => {
+// FIX: Changed from named to default export
+const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const { state } = useData();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
     code: '',
-    businessCase: '',
+    description: '',
     status: 'Planned',
     health: 'Good',
     budget: 0,
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
-    manager: '',
+    managerId: '',
     epsId: state.eps[0]?.id || '',
     tasks: [],
     risks: [],
@@ -148,28 +148,27 @@ export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, o
               <label className="block text-sm font-medium text-slate-700 mb-1">Project Manager</label>
               <select 
                   className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
-                  value={formData.manager}
-                  onChange={e => setFormData({...formData, manager: e.target.value})}
+                  value={formData.managerId}
+                  onChange={e => setFormData({...formData, managerId: e.target.value})}
               >
                   <option value="">Select Manager...</option>
-                  {state.resources.map(r => <option key={r.id} value={r.name}>{r.name} ({r.role})</option>)}
+                  {state.resources.map(r => <option key={r.id} value={r.id}>{r.name} ({r.role})</option>)}
               </select>
           </div>
           <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Initial Charter Values</label>
               <div className="flex gap-2">
                   {['Transparency', 'Safety', 'Innovation', 'Speed'].map(val => (
-                      <button
+                      <button 
                         key={val}
                         onClick={() => {
                             const current = formData.teamCharter?.values || [];
-                            const hasValue = current.indexOf(val) !== -1;
-                            const newVals = hasValue ? current.filter(v => v !== val) : current.concat([val]);
+                            const newVals = current.includes(val) ? current.filter(v => v !== val) : [...current, val];
                             setFormData({...formData, teamCharter: { ...formData.teamCharter!, values: newVals }});
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
-                            (formData.teamCharter?.values || []).indexOf(val) !== -1
-                            ? 'bg-nexus-100 border-nexus-200 text-nexus-700'
+                            formData.teamCharter?.values.includes(val) 
+                            ? 'bg-nexus-100 border-nexus-200 text-nexus-700' 
                             : 'bg-white border-slate-200 text-slate-500'
                         }`}
                       >
@@ -183,7 +182,7 @@ export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, o
 
   return (
     <Modal
-        isOpen={isOpen}
+        isOpen={true} // This component is lazy-loaded, so it's always open when rendered
         onClose={onClose}
         title={<span className="flex items-center gap-2"><Briefcase className="text-nexus-600"/> New Project Wizard</span>}
         footer={
@@ -237,3 +236,5 @@ export const ProjectWizard: React.FC<ProjectWizardProps> = ({ isOpen, onClose, o
     </Modal>
   );
 };
+
+export default ProjectWizard;

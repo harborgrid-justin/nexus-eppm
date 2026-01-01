@@ -1,341 +1,132 @@
 
-import React, { useMemo, useState } from 'react';
-import { Project, EPSNode } from '../types';
-import * as LucideIcons from 'lucide-react';
-import { calculateProjectProgress } from '../utils/calculations';
+
+
+import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
+// FIX: Corrected import path for Project type to resolve module resolution error.
+import { Project } from '../types/index';
+import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2 } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
 import { useData } from '../context/DataContext';
-import { formatCompactCurrency, formatDate, formatInitials } from '../utils/formatters';
 import { useTheme } from '../context/ThemeContext';
-import { StatusBadge } from './common/StatusBadge';
-import { ProgressBar } from './common/ProgressBar';
-import DataTable, { Column } from './common/DataTable';
 import { PageHeader } from './common/PageHeader';
 import { FilterBar } from './common/FilterBar';
 import { usePermissions } from '../hooks/usePermissions';
-import ProjectCreatePage from './projects/ProjectCreatePage';
+import ProjectWizard from './projects/ProjectWizard';
+import { ProjectListTable } from './projects/list/ProjectListTable';
+import { ProjectListCards } from './projects/list/ProjectListCards';
+import { EpsTreeView } from './projects/list/EpsTreeView';
+import { EmptyState } from './common/EmptyState';
+import { useNavigate } from 'react-router-dom';
 
-interface ProjectListProps {
-  onSelectProject: (projectId: string) => void;
-}
-
-const ProjectList: React.FC<ProjectListProps> = ({ onSelectProject }) => {
+const ProjectList: React.FC = () => {
   const { projects } = usePortfolioState();
-  const { state, dispatch } = useData();
+  const { dispatch } = useData();
   const theme = useTheme();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'eps' | 'create'>('list');
-  const [expandedEps, setExpandedEps] = useState<Set<string>>(new Set(state.eps.map(e => e.id)));
   const { canEditProject } = usePermissions();
+  const navigate = useNavigate();
 
-  const filteredProjects = useMemo(() => {
-    return projects.filter(p =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [projects, searchTerm]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  
+  const [viewMode, setViewMode] = useState<'list' | 'eps' | 'create'>('list');
+  const [isPending, startTransition] = useTransition();
 
-  const toggleEps = (id: string) => {
-    const newSet = new Set(expandedEps);
-    if (newSet.has(id)) newSet.delete(id);
-    else newSet.add(id);
-    setExpandedEps(newSet);
-  };
+  const filteredProjects = useMemo(() => 
+    projects.filter(p => 
+      p.name.toLowerCase().includes(deferredSearchTerm.toLowerCase()) || 
+      p.code.toLowerCase().includes(deferredSearchTerm.toLowerCase())
+    ), 
+  [projects, deferredSearchTerm]);
 
   const handleCreateProject = (newProject: Project) => {
-    dispatch({ type: 'IMPORT_PROJECTS', payload: [newProject] });
-    setViewMode('list');
+    dispatch({ type: 'PROJECT_IMPORT', payload: [newProject] });
+    startTransition(() => {
+        setViewMode('list');
+    });
   };
 
-  const columns = useMemo<Column<Project>[]>(() => [
-    {
-      key: 'health',
-      header: 'Status',
-      width: 'w-24',
-      sortable: true,
-      render: (project) => <StatusBadge status={project.health} variant="health" />
-    },
-    {
-      key: 'name',
-      header: 'Project Name',
-      sortable: true,
-      render: (project) => (
-        <div className="flex flex-col min-w-[180px]">
-          <span className="text-sm font-semibold text-slate-900 hover:text-nexus-600 transition-colors">{project.name}</span>
-          <span className="text-xs text-slate-500 font-mono">{project.code}</span>
-        </div>
-      )
-    },
-    {
-      key: 'manager',
-      header: 'Manager',
-      sortable: true,
-      render: (project) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600" aria-hidden="true">
-            {formatInitials(project.manager)}
-          </div>
-          <span className="text-sm text-slate-700">{project.manager}</span>
-        </div>
-      )
-    },
-    {
-      key: 'endDate',
-      header: 'Schedule',
-      sortable: true,
-      render: (project) => (
-        <div className="flex flex-col text-sm text-slate-600 min-w-[140px]">
-          <span className="flex items-center gap-1.5"><LucideIcons.Calendar size={12} className="text-slate-400" /> {formatDate(project.startDate)}</span>
-          <span className="flex items-center gap-1.5"><LucideIcons.ChevronRight size={12} className="text-slate-400" /> {formatDate(project.endDate)}</span>
-        </div>
-      )
-    },
-    {
-      key: 'progress',
-      header: 'Progress',
-      width: 'w-48',
-      render: (project) => {
-        const progress = calculateProjectProgress(project);
-        return (
-          <div className="w-full">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="font-medium text-slate-700">{progress}% Complete</span>
-            </div>
-            <ProgressBar
-              value={progress}
-              colorClass={
-                project.health === 'Critical' ? 'bg-red-500' :
-                project.health === 'Warning' ? 'bg-yellow-500' :
-                'bg-nexus-600'
-              }
-            />
-          </div>
-        );
-      }
-    },
-    {
-      key: 'budget',
-      header: 'Budget',
-      align: 'right',
-      sortable: true,
-      render: (project) => (
-        <div>
-          <div className="text-sm font-medium text-slate-900">{formatCompactCurrency(project.budget)}</div>
-          <div className="text-xs text-slate-500">{formatCompactCurrency(project.spent)} spent</div>
-        </div>
-      )
-    },
-    {
-      key: 'actions',
-      header: '',
-      width: 'w-10',
-      align: 'right',
-      render: () => (
-        <button
-          className="p-1 hover:bg-slate-200 rounded text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-400"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <LucideIcons.MoreHorizontal size={16} />
-        </button>
-      )
-    }
-  ], []);
-
-  const renderEpsNode = (node: EPSNode, level: number = 0) => {
-    const nodeProjects = filteredProjects.filter(p => p.epsId === node.id);
-    const childNodes = state.eps.filter(e => e.parentId === node.id);
-    const hasChildren = nodeProjects.length > 0 || childNodes.length > 0;
-    const isExpanded = expandedEps.has(node.id);
-
-    if (!hasChildren && level > 0) return null;
-
-    return (
-      <React.Fragment key={node.id}>
-        <div
-          className={`flex items-center px-4 py-2 bg-slate-50 border-b border-slate-200 hover:bg-slate-100 cursor-pointer select-none transition-colors`}
-          style={{ paddingLeft: `${level * 20 + 16}px` }}
-          onClick={() => toggleEps(node.id)}
-        >
-          <span className="mr-2 text-slate-400">
-            {hasChildren ? (isExpanded ? <LucideIcons.ChevronDown size={16} /> : <LucideIcons.ChevronRight size={16} />) : <div className="w-4" />}
-          </span>
-          <LucideIcons.Folder size={16} className="text-nexus-500 mr-2" />
-          <span className="font-bold text-sm text-slate-800">{node.name}</span>
-          <span className="ml-2 text-xs text-slate-400 font-mono">({node.code})</span>
-          {nodeProjects.length > 0 && <span className="ml-auto text-xs bg-white border border-slate-200 px-2 py-0.5 rounded-full text-slate-500">{nodeProjects.length} Projects</span>}
-        </div>
-
-        {isExpanded && (
-          <>
-            {nodeProjects.map(project => (
-               <div
-                 key={project.id}
-                 onClick={() => onSelectProject(project.id)}
-                 className="group flex items-center px-4 py-3 border-b border-slate-100 hover:bg-white bg-slate-50/30 cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-nexus-500"
-                 style={{ paddingLeft: `${(level + 1) * 20 + 36}px` }}
-               >
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-                      <div className="col-span-1">
-                          <div className="font-semibold text-sm text-slate-800 group-hover:text-nexus-700">{project.name}</div>
-                          <div className="text-xs text-slate-500 font-mono">{project.code}</div>
-                      </div>
-                      <div className="hidden md:block text-sm text-slate-600">
-                          {project.manager}
-                      </div>
-                      <div className="hidden md:block">
-                          <StatusBadge status={project.health} variant="health"/>
-                      </div>
-                      <div className="hidden md:block text-right text-sm font-mono text-slate-700">
-                          {formatCompactCurrency(project.budget)}
-                      </div>
-                  </div>
-                  <LucideIcons.ChevronRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 ml-4"/>
-               </div>
-            ))}
-
-            {childNodes.map(child => renderEpsNode(child, level + 1))}
-          </>
-        )}
-      </React.Fragment>
-    );
+  const handleViewChange = (mode: 'list' | 'eps' | 'create') => {
+    startTransition(() => {
+      setViewMode(mode);
+    });
   };
 
-  const renderMobileCards = () => (
-    <div className="flex flex-col gap-4 p-4 pb-20">
-      {filteredProjects.map(project => {
-        const progress = calculateProjectProgress(project);
-        return (
-          <div
-            key={project.id}
-            onClick={() => onSelectProject(project.id)}
-            className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 active:scale-[0.98] transition-transform"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 leading-tight">{project.name}</h3>
-                <p className="text-xs font-mono text-slate-500 mt-1">{project.code}</p>
-              </div>
-              <StatusBadge status={project.health} variant="health"/>
-            </div>
-
-            <div className="flex justify-between items-center text-sm text-slate-600 mb-4">
-              <div className="flex items-center gap-1.5">
-                <LucideIcons.UserCircle size={14} className="text-slate-400"/>
-                <span>{project.manager.split(' ')[0]}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <LucideIcons.Briefcase size={14} className="text-slate-400"/>
-                <span className="font-mono font-medium">{formatCompactCurrency(project.budget)}</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-slate-500">
-                <span>Progress</span>
-                <span className="font-bold">{progress}%</span>
-              </div>
-              <ProgressBar
-                value={progress}
-                colorClass={project.health === 'Critical' ? 'bg-red-500' : project.health === 'Warning' ? 'bg-yellow-500' : 'bg-nexus-600'}
-                size="sm"
-              />
-            </div>
-          </div>
-        );
-      })}
-      {filteredProjects.length === 0 && (
-        <div className="text-center p-8 text-slate-400">
-          No projects found.
-        </div>
-      )}
-    </div>
-  );
+  const handleSelectProject = (projectId: string) => {
+    navigate(`/projectWorkspace/${projectId}`);
+  };
 
   if (viewMode === 'create') {
-      return (
-          <ProjectCreatePage
-              onClose={() => setViewMode('list')}
-              onSave={handleCreateProject}
-          />
-      );
+      return <ProjectWizard onClose={() => handleViewChange('list')} onSave={handleCreateProject} />;
   }
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      <PageHeader
-        title="Projects"
-        subtitle="Manage active projects, track progress, and monitor health."
-        icon={LucideIcons.Briefcase}
+    <div className={`${theme.layout.pagePadding} h-full flex flex-col overflow-hidden`}>
+      <PageHeader 
+        title="Enterprise Projects" 
+        subtitle="Manage active project portfolio, track execution, and monitor delivery health."
+        icon={Briefcase}
         actions={canEditProject() && (
-            <button
-                onClick={() => setViewMode('create')}
-                className={`px-4 py-2 ${theme.colors.accentBg} rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 shadow-sm active:opacity-90`}
-            >
-                <LucideIcons.Plus size={16} /> <span className="hidden sm:inline">New Project</span>
-                <span className="sm:hidden">New</span>
+            <button onClick={() => handleViewChange('create')} className={`px-4 py-2 ${theme.colors.primary} ${theme.colors.primaryHover} rounded-lg text-sm font-semibold text-white flex items-center gap-2 shadow-sm active:scale-95 transition-all`}>
+                <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
             </button>
         )}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden h-full">
-        <div className="flex-shrink-0 mb-4 bg-white rounded-xl border border-slate-200 shadow-sm p-3 md:p-4">
-            <FilterBar
-                searchValue={searchTerm}
-                onSearch={setSearchTerm}
-                onFilterClick={() => {}}
+      <div className={`${theme.components.card} flex-1 flex flex-col min-h-0 overflow-hidden`}>
+        <div className={`p-4 border-b ${theme.colors.border} bg-slate-50/50`}>
+            <FilterBar 
+                searchValue={searchTerm} 
+                onSearch={setSearchTerm} 
                 searchPlaceholder="Search projects..."
                 actions={
-                    <div className="flex items-center gap-2">
-                        <div className="hidden md:flex bg-slate-100 p-1 rounded-lg text-xs font-medium">
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`px-3 py-1.5 rounded-md flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                <LucideIcons.Briefcase size={14}/> Flat
-                            </button>
-                            <button
-                                onClick={() => setViewMode('eps')}
-                                className={`px-3 py-1.5 rounded-md flex items-center gap-1 transition-all ${viewMode === 'eps' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                <LucideIcons.Layers size={14}/> EPS
-                            </button>
-                        </div>
-                        <select className="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-nexus-500 hidden sm:block">
-                            <option>All Projects</option>
-                            <option>My Projects</option>
-                            <option>Critical Health</option>
-                        </select>
+                    <div className="bg-slate-200/60 p-1 rounded-lg flex text-[11px] font-bold">
+                        <button onClick={() => handleViewChange('list')} className={`px-4 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+                            <ListIcon size={14}/> Flat List
+                        </button>
+                        <button onClick={() => handleViewChange('eps')} className={`px-4 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === 'eps' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
+                            <Layers size={14}/> EPS Hierarchy
+                        </button>
                     </div>
                 }
             />
         </div>
 
-        <div className="flex-1 overflow-hidden bg-slate-50 md:bg-white md:border md:border-slate-200 md:rounded-xl md:shadow-sm flex flex-col">
+        <div className={`flex-1 overflow-hidden flex flex-col relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
+          {isPending && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-white/50 backdrop-blur-[1px]">
+                <Loader2 className="animate-spin text-nexus-500" size={32} />
+             </div>
+          )}
 
-          <div className="block md:hidden flex-1 overflow-y-auto">
-            {renderMobileCards()}
-          </div>
-
-          <div className="hidden md:block flex-1 overflow-auto">
-            {viewMode === 'list' ? (
-               <DataTable
-                  data={filteredProjects}
-                  columns={columns}
-                  onRowClick={(p) => onSelectProject(p.id)}
-                  keyField="id"
-                  emptyMessage="No projects found matching your criteria."
-              />
-            ) : (
-               <div className="p-2">
-                   {state.eps.filter(e => !e.parentId).map(node => renderEpsNode(node))}
-                   {state.eps.length === 0 && <div className="p-8 text-center text-slate-500">No Enterprise Project Structure defined.</div>}
-               </div>
-            )}
-          </div>
+          {filteredProjects.length === 0 ? (
+             <div className="flex-1 flex items-center justify-center">
+                 <EmptyState 
+                    title="No Projects Found" 
+                    description={deferredSearchTerm ? `No projects match "${deferredSearchTerm}"` : "Get started by creating your first project."}
+                    icon={Search}
+                 />
+             </div>
+          ) : (
+             <>
+                {viewMode === 'list' && (
+                   <>
+                     <div className="hidden lg:block h-full overflow-hidden">
+                       <ProjectListTable projects={filteredProjects} onSelect={handleSelectProject} />
+                     </div>
+                     <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 scrollbar-thin">
+                       <ProjectListCards projects={filteredProjects} onSelect={handleSelectProject} />
+                     </div>
+                   </>
+                )}
+                {viewMode === 'eps' && (
+                   <div className="flex-1 h-full overflow-auto bg-white">
+                       <EpsTreeView projects={filteredProjects} onSelect={handleSelectProject} />
+                   </div>
+                )}
+             </>
+          )}
         </div>
       </div>
     </div>
   );
 };
-
-export default ProjectList;

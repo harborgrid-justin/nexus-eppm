@@ -8,7 +8,7 @@ export interface Risk {
   priority?: string;
   status: 'Draft' | 'Open' | 'Mitigated' | 'Closed';
   description: string;
-  assignedTo?: string;
+  assigneeId?: string; // FK to Resource
   dateIdentified?: string;
   category: string;
   
@@ -25,7 +25,7 @@ export interface Risk {
   
   // Response
   strategy: 'Avoid' | 'Mitigate' | 'Transfer' | 'Accept' | 'Escalate';
-  owner: string;
+  ownerId: string; // FK to Resource
   mitigationPlan?: string;
   responseActions: RiskResponseAction[];
   contingencyReserve?: number;
@@ -42,7 +42,7 @@ export interface Risk {
 
 export interface RiskHistoryItem {
   date: string;
-  user: string;
+  userId: string; // FK to User
   action: string;
   change?: string;
 }
@@ -50,7 +50,7 @@ export interface RiskHistoryItem {
 export interface RiskResponseAction {
   id: string;
   description: string;
-  owner: string;
+  ownerId: string; // FK to Resource
   dueDate: string;
   status: 'Pending' | 'In Progress' | 'Complete';
 }
@@ -86,10 +86,10 @@ export interface Issue {
   id: string;
   projectId: string;
   activityId?: string;
-  priority: 'High' | 'Medium' | 'Low';
+  priority: 'High' | 'Medium' | 'Low' | 'Critical';
   status: string;
   description: string;
-  assignedTo: string;
+  assigneeId: string; // FK to Resource
   dateIdentified: string;
 }
 
@@ -100,7 +100,50 @@ export interface PortfolioRisk {
   probability: string;
   impact: string;
   score: number;
-  owner: string;
+  ownerId: string; // FK to Resource
   status: string;
   mitigationPlan: string;
+}
+
+// FIX: Added missing interface QualityReport
+export interface QualityReport {
+  id: string;
+  projectId: string;
+  date: string;
+  type: 'Inspection' | 'Test' | 'Audit';
+  status: 'Pass' | 'Fail' | 'Conditional';
+  inspector: string;
+  summary: string;
+}
+
+// FIX: Added missing interface NonConformanceReport
+export interface NonConformanceReport {
+  id: string;
+  projectId: string;
+  date: string;
+  description: string;
+  severity: 'Critical' | 'Major' | 'Minor';
+  status: 'Open' | 'In Progress' | 'Closed';
+  linkedTaskId?: string;
+  category: string;
+  vendorId?: string;
+}
+
+// FIX: Added missing interface ProgramRisk
+export interface ProgramRisk {
+  id: string;
+  programId: string;
+  description: string;
+  category: string;
+  probability: 'High' | 'Medium' | 'Low';
+  impact: 'High' | 'Medium' | 'Low';
+  score: number;
+  ownerId: string;
+  status: 'Open' | 'Closed' | 'Mitigated';
+  mitigationPlan: string;
+  probabilityValue: number;
+  impactValue: number;
+  financialImpact: number;
+  strategy: string;
+  responseActions: any[];
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { ShoppingCart, Plus, Filter, FileText, CheckCircle } from 'lucide-react';
 import { useProcurementData } from '../../hooks';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +13,15 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
     const { projectSolicitations } = useProcurementData(projectId);
     const theme = useTheme();
     const [filter, setFilter] = useState('All');
+    const [isPending, startTransition] = useTransition();
+
+    const handleFilterChange = (newFilter: string) => {
+        startTransition(() => {
+            setFilter(newFilter);
+        });
+    };
+
+    const filteredSolicitations = projectSolicitations.filter(sol => filter === 'All' || sol.status === filter);
 
     return (
         <div className="h-full flex flex-col">
@@ -25,7 +34,7 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
                         {['All', 'Open', 'Closed'].map(f => (
                             <button 
                                 key={f}
-                                onClick={() => setFilter(f)}
+                                onClick={() => handleFilterChange(f)}
                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${filter === f ? 'bg-slate-100 text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 {f}
@@ -38,9 +47,9 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
                 </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-6">
+            <div className={`flex-1 overflow-auto p-6 ${isPending ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
                 <div className="grid grid-cols-1 gap-4">
-                    {projectSolicitations.map(sol => (
+                    {filteredSolicitations.map(sol => (
                         <div key={sol.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
@@ -74,7 +83,7 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
                             </div>
                         </div>
                     ))}
-                    {projectSolicitations.length === 0 && (
+                    {filteredSolicitations.length === 0 && (
                         <div className="text-center p-12 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
                             <FileText size={32} className="mx-auto mb-2 opacity-50"/>
                             <p>No sourcing events found.</p>

@@ -1,13 +1,13 @@
 
-import { Project } from '../types';
+import { Project } from '../types/index';
 
 export const flattenProjectsToCSV = (projects: Project[]): string => {
-  const headers = ['Project Code', 'Project Name', 'Manager', 'WBS', 'Task ID', 'Task Name', 'Start Date', 'End Date', 'Status', 'Progress', 'Budget', 'Spent'];
+  const headers = ['Project Code', 'Project Name', 'Manager ID', 'WBS', 'Task ID', 'Task Name', 'Start Date', 'End Date', 'Status', 'Progress', 'Budget', 'Spent'];
   const rows = projects.flatMap(p => 
     p.tasks.length > 0 ? p.tasks.map(t => [
       p.code,
       p.name,
-      p.manager,
+      p.managerId,
       t.wbsCode,
       t.id,
       t.name,
@@ -20,7 +20,7 @@ export const flattenProjectsToCSV = (projects: Project[]): string => {
     ]) : [[
       p.code,
       p.name,
-      p.manager,
+      p.managerId,
       '',
       '',
       '',

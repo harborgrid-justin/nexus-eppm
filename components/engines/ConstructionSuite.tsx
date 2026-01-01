@@ -10,21 +10,26 @@ const ConstructionSuite: React.FC = () => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'field' | 'submittals' | 'bim'>('field');
 
+  // --- MOCK DATA ---
   const safetyStats = [
-    { type: 'Near Miss', count: 0 },
-    { type: 'First Aid', count: 0 },
-    { type: 'Medical Only', count: 0 },
+    { type: 'Near Miss', count: 12 },
+    { type: 'First Aid', count: 4 },
+    { type: 'Medical Only', count: 1 },
     { type: 'Lost Time', count: 0 },
   ];
 
   const submittalData = [
-    { status: 'Open', count: 0 },
-    { status: 'In Review', count: 0 },
-    { status: 'Approved', count: 0 },
-    { status: 'Rejected', count: 0 },
+    { status: 'Open', count: 45 },
+    { status: 'In Review', count: 12 },
+    { status: 'Approved', count: 88 },
+    { status: 'Rejected', count: 5 },
   ];
 
-  const dailyLogs: Array<{ date: string; weather: string; workers: number; hours: number; incidents: number }> = [];
+  const dailyLogs = [
+    { id: '1', date: 'Today', weather: 'Sunny, 72°F', workers: 142, hours: 1136, incidents: 0 },
+    { id: '2', date: 'Yesterday', weather: 'Cloudy, 68°F', workers: 138, hours: 1104, incidents: 0 },
+    { id: '3', date: '2 days ago', weather: 'Rain, 62°F', workers: 95, hours: 760, incidents: 1 },
+  ];
 
   // --- RENDERERS ---
 
@@ -43,8 +48,8 @@ const ConstructionSuite: React.FC = () => {
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Clipboard size={18} className="text-nexus-600"/> Daily Site Logs</h3>
                 <div className="space-y-4">
-                    {dailyLogs.map((log, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    {dailyLogs.map((log) => (
+                        <div key={log.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                             <div>
                                 <p className="font-bold text-sm text-slate-900">{log.date}</p>
                                 <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">

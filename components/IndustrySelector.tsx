@@ -1,12 +1,16 @@
+
+
+
 import React from 'react';
 import { useIndustry } from '../context/IndustryContext';
-import { Industry } from '../types';
+// FIX: Corrected import path for Industry type to resolve module resolution error.
+import { Industry } from '../types/index';
 import { Building, Code, BookOpen, ChevronDown } from 'lucide-react';
 
 const IndustrySelector: React.FC = () => {
   const { industry, setIndustry } = useIndustry();
 
-  const industries: { id: Industry; label: string; icon: any }[] = [
+  const industries: { id: Industry; label: string; icon: React.ElementType }[] = [
     { id: 'Construction', label: 'General Contracting', icon: Building },
     { id: 'Software', label: 'Software Development', icon: Code },
     { id: 'Standard', label: 'Standard PM', icon: BookOpen },

@@ -11,24 +11,29 @@ const FinancialSuite: React.FC = () => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'allocation' | 'cashflow' | 'audit'>('allocation');
 
+  // --- MOCK DATA ---
   const allocationData = [
-    { name: 'Digital', size: 0, color: '#3b82f6' },
-    { name: 'Infrastructure', size: 0, color: '#10b981' },
-    { name: 'Compliance', size: 0, color: '#f59e0b' },
-    { name: 'Maintenance', size: 0, color: '#64748b' },
-    { name: 'R&D', size: 0, color: '#8b5cf6' },
+    { name: 'Digital', size: 45000000, color: '#3b82f6' },
+    { name: 'Infrastructure', size: 35000000, color: '#10b981' },
+    { name: 'Compliance', size: 15000000, color: '#f59e0b' },
+    { name: 'Maintenance', size: 10000000, color: '#64748b' },
+    { name: 'R&D', size: 25000000, color: '#8b5cf6' },
   ];
 
   const cashFlowData = [
-    { month: 'Jan', Operating: 0, Investing: 0, Financing: 0 },
-    { month: 'Feb', Operating: 0, Investing: 0, Financing: 0 },
-    { month: 'Mar', Operating: 0, Investing: 0, Financing: 0 },
-    { month: 'Apr', Operating: 0, Investing: 0, Financing: 0 },
-    { month: 'May', Operating: 0, Investing: 0, Financing: 0 },
-    { month: 'Jun', Operating: 0, Investing: 0, Financing: 0 },
+    { month: 'Jan', Operating: 4000, Investing: -2400, Financing: 1000 },
+    { month: 'Feb', Operating: 3000, Investing: -1398, Financing: 2210 },
+    { month: 'Mar', Operating: 2000, Investing: -9800, Financing: 2290 },
+    { month: 'Apr', Operating: 2780, Investing: -3908, Financing: 2000 },
+    { month: 'May', Operating: 1890, Investing: -4800, Financing: 2181 },
+    { month: 'Jun', Operating: 2390, Investing: -3800, Financing: 2500 },
   ];
 
-  const auditLogs: Array<{ id: string; control: string; status: string; date: string }> = [];
+  const auditLogs = [
+    { id: 'AUD-001', control: 'SOX 404 - Change Mgmt', status: 'Pass', date: '2024-05-15' },
+    { id: 'AUD-002', control: 'Basel III - Capital Req', status: 'Pass', date: '2024-05-10' },
+    { id: 'AUD-003', control: 'GDPR - Data Privacy', status: 'Finding', date: '2024-04-22' },
+  ];
 
   // --- RENDERERS ---
 

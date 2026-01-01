@@ -1,25 +1,29 @@
 import React from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CustomPieChartProps {
-  data: { name: string; value: number; color: string }[];
+  data: { name: string; value: number; color?: string }[];
   height?: number;
 }
 
 export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 300 }) => {
+  const theme = useTheme();
   const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  if (!data || data.length === 0 || total === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-slate-400" style={{ height }}>
+        <p className="text-xs">No data to display</p>
+      </div>
+    );
+  }
+  
   let cumulativeAngle = 0;
 
   // SVG Config
   const size = 100;
   const radius = 50;
   const center = 50;
-
-  // Helper to calculate coordinates
-  const getCoordinatesForPercent = (percent: number) => {
-    const x = Math.cos(2 * Math.PI * percent);
-    const y = Math.sin(2 * Math.PI * percent);
-    return [x, y];
-  };
 
   const slices = data.map((slice, index) => {
     const startAngle = cumulativeAngle;
@@ -43,10 +47,13 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 3
       `Z` // Close path
     ].join(' ');
 
+    const sliceColor = slice.color || theme.charts.palette[index % theme.charts.palette.length];
+
     return {
       ...slice,
       pathData,
-      fraction
+      fraction,
+      color: sliceColor
     };
   });
 
@@ -71,7 +78,7 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 3
       
       {/* Legend */}
       <div className="flex flex-wrap justify-center gap-4 mt-4">
-        {data.map((item, i) => (
+        {slices.map((item, i) => (
           <div key={i} className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
             <span className="text-xs text-slate-600 font-medium">

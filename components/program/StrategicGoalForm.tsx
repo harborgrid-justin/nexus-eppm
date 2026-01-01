@@ -1,13 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { StrategicGoal } from '../../types';
-import { SidePanel } from '../ui/SidePanel';
+import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import * as LucideIcons from 'lucide-react';
-
-const { CheckCircle } = LucideIcons;
-const Target = (LucideIcons as any).Target || CheckCircle;
+import { Target } from 'lucide-react';
 
 interface StrategicGoalFormProps {
   isOpen: boolean;
@@ -32,10 +29,10 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
   }, [goal, isOpen]);
 
   return (
-    <SidePanel
+    <Modal
         isOpen={isOpen}
         onClose={onClose}
-        width="md:w-[500px]"
+        size="md"
         title={
           <span className="flex items-center gap-2">
              <Target className="text-nexus-600"/> {goal ? 'Edit Strategic Goal' : 'Define Strategic Goal'}
@@ -67,6 +64,6 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
                 />
             </div>
         </div>
-    </SidePanel>
+    </Modal>
   );
 };

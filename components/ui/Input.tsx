@@ -1,35 +1,39 @@
-import React from 'react';
-import { Search } from 'lucide-react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+import React, { InputHTMLAttributes, forwardRef } from 'react';
+import { Search } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ElementType;
   isSearch?: boolean;
-  label?: string;
 }
 
-const InputComponent: React.ForwardRefRenderFunction<HTMLInputElement, InputProps> = ({ className = '', icon: Icon, isSearch, label, ...props }, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '', icon: Icon, isSearch, ...props }, ref) => {
+  const theme = useTheme();
   const IconToRender = isSearch ? Search : Icon;
 
   return (
-    <div className="w-full">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+    <div className="relative w-full group">
+      {IconToRender && (
+        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nexus-500 transition-colors pointer-events-none">
+          <IconToRender size={16} strokeWidth={2.5} />
+        </div>
       )}
-      <div className="relative">
-        {IconToRender && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-            <IconToRender size={16} />
-          </div>
-        )}
-        <input
-          ref={ref}
-          className={`w-full bg-white border border-slate-300 rounded-lg py-2 text-sm focus:outline-none focus:ring-2 focus:ring-nexus-500 focus:border-transparent disabled:bg-slate-100 disabled:text-slate-500 placeholder:text-slate-400 ${IconToRender ? 'pl-10' : 'pl-3'} pr-3 ${className}`}
-          {...props}
-        />
-      </div>
+      <input
+        ref={ref}
+        className={`
+          w-full ${theme.colors.surface} ${theme.colors.border} border rounded-lg transition-all
+          focus:outline-none focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 
+          disabled:bg-slate-50 disabled:text-slate-400 placeholder:text-slate-400 font-medium
+          ${theme.layout.inputHeight}
+          ${IconToRender ? 'pl-11' : 'pl-4'} 
+          pr-4 
+          ${className}
+        `}
+        {...props}
+      />
     </div>
   );
-};
+});
 
-export const Input = React.forwardRef(InputComponent);
 Input.displayName = 'Input';

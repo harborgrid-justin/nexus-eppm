@@ -1,25 +1,22 @@
 
 import React, { useMemo } from 'react';
-import { Issue } from '../types';
+// FIX: Corrected import path to avoid module resolution conflict.
+import { Issue } from '../types/index';
 import { Plus, Filter, FileWarning, ArrowUp, ArrowDown, ChevronsUp, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useProjectState } from '../hooks';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { usePermissions } from '../hooks/usePermissions';
 
-interface IssueLogProps {
-  projectId: string;
-}
-
-const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
-  const { project, issues } = useProjectState(projectId);
+const IssueLog: React.FC = () => {
+  const { project, issues } = useProjectWorkspace();
   const theme = useTheme();
   const { canEditProject } = usePermissions();
   
   const taskMap = useMemo(() => {
-    return new Map<string, string>(project?.tasks.map(t => [t.id, t.name]));
+    return new Map(project?.tasks.map(t => [t.id, t.name]));
   }, [project?.tasks]);
 
   const getPriorityBadge = (priority: Issue['priority']) => {
@@ -80,10 +77,10 @@ const IssueLog: React.FC<IssueLogProps> = ({ projectId }) => {
                           </td>
                           <td className="px-6 py-4 text-sm font-medium text-slate-900 max-w-md truncate">{issue.description}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.status}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.assignedTo}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(issue.activityId || '') || ''}>
-                            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{project?.tasks.find(t=>t.id===issue.activityId)?.wbsCode}</span>
-                            {taskMap.get(issue.activityId || '') || ''}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{issue.assigneeId}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 truncate max-w-xs" title={taskMap.get(issue.activityId || '')}>
+                            <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs mr-2">{project?.tasks.find(t=>t.id===issue.activityId)?.wbsCode}</span> 
+                            {taskMap.get(issue.activityId || '')}
                           </td>
                        </tr>
                      ))}

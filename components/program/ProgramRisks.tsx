@@ -2,12 +2,8 @@
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import * as LucideIcons from 'lucide-react';
+import { ShieldAlert, TrendingUp, AlertOctagon, Layers, Plus, Trash2 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-
-const { ShieldAlert, TrendingUp, Layers, Plus, AlertCircle, X } = LucideIcons;
-const AlertOctagon = (LucideIcons as any).AlertOctagon || AlertCircle;
-const Trash2 = (LucideIcons as any).Trash2 || X;
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -31,14 +27,13 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
       category: 'External',
       probability: 'Medium',
       impact: 'Medium',
-      owner: '',
+      ownerId: '',
       mitigationPlan: ''
   });
 
   const handleAddRisk = () => {
       if (!newRisk.description) return;
       
-      // Calculate score
       const pVal = newRisk.probability === 'High' ? 5 : newRisk.probability === 'Medium' ? 3 : 1;
       const iVal = newRisk.impact === 'High' ? 5 : newRisk.impact === 'Medium' ? 3 : 1;
 
@@ -50,7 +45,7 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
           probability: newRisk.probability as any,
           impact: newRisk.impact as any,
           score: pVal * iVal,
-          owner: newRisk.owner || 'Unassigned',
+          ownerId: newRisk.ownerId || 'Unassigned',
           status: 'Open',
           mitigationPlan: newRisk.mitigationPlan || '',
           probabilityValue: pVal,
@@ -60,21 +55,20 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
           responseActions: []
       };
 
-      dispatch({ type: 'ADD_PROGRAM_RISK', payload: risk });
+      dispatch({ type: 'PROGRAM_ADD_RISK', payload: risk });
       setIsModalOpen(false);
-      setNewRisk({ description: '', category: 'External', probability: 'Medium', impact: 'Medium', owner: '', mitigationPlan: '' });
+      setNewRisk({ description: '', category: 'External', probability: 'Medium', impact: 'Medium', ownerId: '', mitigationPlan: '' });
   };
 
   const handleDeleteRisk = (id: string) => {
       if(confirm("Are you sure you want to delete this risk?")) {
-          dispatch({ type: 'DELETE_PROGRAM_RISK', payload: id });
+          dispatch({ type: 'PROGRAM_DELETE_RISK', payload: id });
       }
   };
 
-  // Aggregate project risks
   const escalatedRisks = useMemo(() => {
       const allRisks = state.risks.filter(r => projects.some(p => p.id === r.projectId));
-      return allRisks.filter(r => r.score >= 15); // High severity threshold
+      return allRisks.filter(r => r.score >= 15);
   }, [state.risks, projects]);
 
   const totalExposure = useMemo(() => {
@@ -98,7 +92,6 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Program Risk Register */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className="p-4 border-b border-slate-200 bg-slate-50">
                     <h3 className="font-bold text-slate-800">Program Risk Register (Systemic)</h3>
@@ -143,7 +136,6 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 </div>
             </div>
 
-            {/* Escalated Project Risks */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className="p-4 border-b border-slate-200 bg-red-50">
                     <h3 className="font-bold text-red-900">Escalated Project Risks</h3>
@@ -226,8 +218,8 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     <Input value={newRisk.mitigationPlan} onChange={e => setNewRisk({...newRisk, mitigationPlan: e.target.value})} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Owner</label>
-                    <Input value={newRisk.owner} onChange={e => setNewRisk({...newRisk, owner: e.target.value})} />
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Owner ID</label>
+                    <Input value={newRisk.ownerId} onChange={e => setNewRisk({...newRisk, ownerId: e.target.value})} placeholder="e.g. R-001" />
                 </div>
             </div>
         </Modal>

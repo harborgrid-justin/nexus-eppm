@@ -30,8 +30,8 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
   getStatusColor, handleMouseDown, setSelectedTask
 }) => {
   return (
-    <div ref={ganttContainerRef} className="flex-1 overflow-auto bg-slate-50 relative">
-        <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${renderList.length * rowHeight + 50}px` }}>
+    <div ref={ganttContainerRef} className="flex-1 overflow-auto bg-slate-50 relative scrollbar-thin">
+        <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${renderList.length * rowHeight + 100}px` }}>
             <div className="sticky top-0 z-10 bg-white border-b border-slate-200 h-[50px] flex">
                 {Array.from(timelineHeaders.months.entries()).map(([key, data]) => (
                     <div key={key} className="absolute top-0 border-r border-slate-200 text-xs font-bold text-slate-500 px-2 py-1 truncate bg-white" 
@@ -40,8 +40,9 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
                     </div>
                 ))}
                 <div className="flex pt-6">
-                    {timelineHeaders.days.map((day, i) => (
-                        <div key={i} className={`flex-shrink-0 flex items-center justify-center text-[10px] text-slate-400 border-r border-slate-100 ${day.isWorking ? 'bg-white' : 'bg-slate-50'}`} 
+                    {timelineHeaders.days.map((day) => (
+                        // Rule 40: Identity-Stable Keys (using ISO string instead of index)
+                        <div key={day.date.toISOString()} className={`flex-shrink-0 flex items-center justify-center text-[10px] text-slate-400 border-r border-slate-100 ${day.isWorking ? 'bg-white' : 'bg-slate-50'}`} 
                             style={{ width: `${dayWidth}px` }}>
                             {day.date.getDate()}
                         </div>
@@ -50,8 +51,10 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
             </div>
 
             <div className="relative">
+                {/* Grid Lines */}
                 {timelineHeaders.days.map((day, i) => (
-                    <div key={`grid-${i}`} className={`absolute top-0 bottom-0 border-r border-slate-100 ${day.isWorking ? '' : 'bg-slate-100/30'}`} 
+                    // Stable key for grid line
+                    <div key={`grid-${day.date.toISOString()}`} className={`absolute top-0 bottom-0 border-r border-slate-100 ${day.isWorking ? '' : 'bg-slate-200/20'}`} 
                         style={{ left: `${(i + 1) * dayWidth}px`, height: '100%' }} />
                 ))}
 
@@ -75,6 +78,7 @@ export const GanttTimeline: React.FC<GanttTimelineProps> = ({
                             onMouseDown={handleMouseDown}
                             onSelect={setSelectedTask}
                             isSelected={selectedTask?.id === item.task.id}
+                            // Visual comparison props
                             baselineStart={baselineData?.baselineStartDate}
                             baselineEnd={baselineData?.baselineEndDate}
                             projectStart={projectStart}

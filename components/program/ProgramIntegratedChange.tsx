@@ -44,7 +44,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
   const saveReadiness = () => {
     if (selectedChange) {
         const updatedChange = { ...selectedChange, readinessImpact: readinessScores };
-        dispatch({ type: 'UPDATE_INTEGRATED_CHANGE', payload: updatedChange });
+        dispatch({ type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE', payload: updatedChange });
         closePanel();
     }
   };
@@ -206,7 +206,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                 </p>
                 
                 {readinessScores.map((group, idx) => (
-                    <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div key={group.stakeholderGroup} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                         <h4 className="font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">{group.stakeholderGroup}</h4>
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             {(['awareness', 'desire', 'knowledge', 'ability', 'reinforcement'] as const).map((dim) => (

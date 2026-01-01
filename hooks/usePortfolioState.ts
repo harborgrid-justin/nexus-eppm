@@ -1,10 +1,16 @@
+
+
+
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { Project, TaskStatus } from '../types';
+// FIX: Corrected import path for types to resolve module resolution errors.
+import { Project, TaskStatus } from '../types/index';
 import { calculateProjectProgress } from '../utils/calculations';
+import { useTheme } from '../context/ThemeContext';
 
 export const usePortfolioState = () => {
   const { state } = useData();
+  const theme = useTheme();
   const { projects } = state;
 
   const summary = useMemo(() => {
@@ -34,10 +40,10 @@ export const usePortfolioState = () => {
   }, [projects]);
   
   const healthDataForChart = useMemo(() => [
-    { name: 'Good', value: summary.healthCounts.good, color: '#22c55e' },
-    { name: 'Warning', value: summary.healthCounts.warning, color: '#eab308' },
-    { name: 'Critical', value: summary.healthCounts.critical, color: '#ef4444' },
-  ], [summary.healthCounts]);
+    { name: 'Good', value: summary.healthCounts.good, color: theme.charts.palette[1] },
+    { name: 'Warning', value: summary.healthCounts.warning, color: theme.charts.palette[2] },
+    { name: 'Critical', value: summary.healthCounts.critical, color: theme.charts.palette[3] },
+  ], [summary.healthCounts, theme]);
   
   const budgetDataForChart = useMemo(() => projects.map(p => ({
     name: p.code,

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Landmark, TrendingUp, Shield, Zap, Truck, DollarSign, Activity, Globe, Scale, Users, Layers } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -12,18 +13,19 @@ const FedGovSuite: React.FC = () => {
   const theme = useTheme();
   const [activeDept, setActiveDept] = useState<Department>('Treasury');
 
+  // --- MOCK DATA ---
   const treasuryData = [
-    { year: '2020', revenue: 0, outlay: 0 },
-    { year: '2021', revenue: 0, outlay: 0 },
-    { year: '2022', revenue: 0, outlay: 0 },
-    { year: '2023', revenue: 0, outlay: 0 },
-    { year: '2024', revenue: 0, outlay: 0 },
+    { year: '2020', revenue: 3.4, outlay: 6.5 },
+    { year: '2021', revenue: 4.0, outlay: 6.8 },
+    { year: '2022', revenue: 4.9, outlay: 6.2 },
+    { year: '2023', revenue: 4.4, outlay: 6.1 },
+    { year: '2024', revenue: 4.8, outlay: 6.3 }, // Est
   ];
 
   const energyData = [
-    { source: 'Fossil', output: 0, target: 0 },
-    { source: 'Nuclear', output: 0, target: 0 },
-    { source: 'Renewable', output: 0, target: 0 },
+    { source: 'Fossil', output: 60, target: 40 },
+    { source: 'Nuclear', output: 20, target: 20 },
+    { source: 'Renewable', output: 20, target: 40 },
   ];
 
   // --- RENDERERS ---
@@ -37,7 +39,7 @@ const FedGovSuite: React.FC = () => {
             <StatCard title="Interest Rates" value="5.25%" subtext="Fed Funds Rate" icon={Activity} />
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[400px]">
+        <div className={`${theme.components.card} p-6 h-[400px]`}>
             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Landmark size={18} className="text-green-700"/> Federal Receipts vs Outlays (Trillions)</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={treasuryData}>
@@ -105,7 +107,7 @@ const FedGovSuite: React.FC = () => {
                 </table>
             </Card>
             
-            <div className="bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center p-6 text-slate-400">
+            <div className={`${theme.colors.background} rounded-xl border border-slate-200 flex items-center justify-center p-6 text-slate-400`}>
                 <Globe size={48} className="mr-4 opacity-50"/>
                 <div>
                     <h4 className="font-bold">Global Force Disposition Map</h4>
@@ -124,7 +126,7 @@ const FedGovSuite: React.FC = () => {
               <StatCard title="Renewable Gen" value="24%" subtext="Target: 40% by 2030" icon={Activity} trend="up" />
               <StatCard title="Nuclear Plants" value="93" subtext="Operating Units" icon={Shield} />
           </div>
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[400px]">
+          <div className={`${theme.components.card} p-6 h-[400px]`}>
               <h3 className="font-bold text-slate-800 mb-4">Energy Mix Transition</h3>
               <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={energyData}>
@@ -158,7 +160,7 @@ const FedGovSuite: React.FC = () => {
                 </h1>
                 <p className={theme.typography.small}>Executive Branch Management System</p>
             </div>
-            <div className="flex bg-white border border-slate-200 rounded-lg p-1">
+            <div className={`flex ${theme.colors.surface} border border-slate-200 rounded-lg p-1`}>
                 <button onClick={() => setActiveDept('Treasury')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md ${activeDept === 'Treasury' ? 'bg-green-50 text-green-700 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>
                     <DollarSign size={14}/> Treasury
                 </button>

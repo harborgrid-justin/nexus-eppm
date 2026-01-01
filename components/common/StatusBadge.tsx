@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { getHealthColorClass } from '../../utils/formatters';
+import { useTheme } from '../../context/ThemeContext';
 
 export type StatusVariant = 'health' | 'status' | 'priority' | 'custom';
 
@@ -17,34 +17,41 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   customColorClass
 }) => {
-  let colorClass = 'bg-slate-100 text-slate-800 border-slate-200';
+  const theme = useTheme();
+  const s = status?.toLowerCase();
+  
+  // Default to neutral
+  let colors = theme.colors.semantic.neutral;
 
+  if (customColorClass) {
+      // Escape hatch if needed
+      return (
+        <span className={`${theme.components.badge.base} ${customColorClass} ${className}`}>
+            {status}
+        </span>
+      );
+  }
+
+  // Map status text to semantic theme tokens
   if (variant === 'health') {
-    colorClass = getHealthColorClass(status);
+      if (['good', 'healthy', 'on track'].includes(s)) colors = theme.colors.semantic.success;
+      else if (['warning', 'at risk'].includes(s)) colors = theme.colors.semantic.warning;
+      else if (['critical', 'poor', 'off track'].includes(s)) colors = theme.colors.semantic.danger;
   } else if (variant === 'priority') {
-    switch (status?.toLowerCase()) {
-      case 'high': case 'critical': colorClass = 'bg-red-100 text-red-800 border-red-200'; break;
-      case 'medium': colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200'; break;
-      case 'low': colorClass = 'bg-blue-100 text-blue-800 border-blue-200'; break;
-    }
-  } else if (variant === 'custom' && customColorClass) {
-    colorClass = customColorClass;
+      if (['high', 'critical', 'urgent'].includes(s)) colors = theme.colors.semantic.danger;
+      else if (['medium'].includes(s)) colors = theme.colors.semantic.warning;
+      else if (['low'].includes(s)) colors = theme.colors.semantic.info;
   } else {
-    // Default Status logic
-    switch (status?.toLowerCase()) {
-      case 'approved': case 'active': case 'completed': case 'paid': case 'met':
-        colorClass = 'bg-green-100 text-green-800 border-green-200'; break;
-      case 'pending': case 'in progress': case 'open': case 'conditional':
-        colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200'; break;
-      case 'rejected': case 'critical': case 'blocked': case 'failed': case 'not met':
-        colorClass = 'bg-red-100 text-red-800 border-red-200'; break;
-      case 'closed': case 'draft':
-        colorClass = 'bg-slate-100 text-slate-600 border-slate-200'; break;
-    }
+      // General Status
+      if (['approved', 'active', 'completed', 'paid', 'met', 'resolved', 'success'].includes(s)) colors = theme.colors.semantic.success;
+      else if (['pending', 'in progress', 'open', 'conditional', 'draft', 'review'].includes(s)) colors = theme.colors.semantic.warning;
+      else if (['rejected', 'critical', 'blocked', 'failed', 'not met', 'blacklisted', 'error'].includes(s)) colors = theme.colors.semantic.danger;
+      else if (['closed', 'archived', 'inactive'].includes(s)) colors = theme.colors.semantic.neutral;
+      else if (['issued', 'sent'].includes(s)) colors = theme.colors.semantic.info;
   }
 
   return (
-    <span className={`inline-flex items-center justify-center px-2 py-0.5 md:px-2.5 md:py-0.5 rounded-full text-[10px] md:text-xs font-bold border uppercase tracking-wider shadow-sm ${colorClass} ${className}`}>
+    <span className={`${theme.components.badge.base} ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
       {status}
     </span>
   );

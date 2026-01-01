@@ -13,12 +13,43 @@ export interface SystemAlert {
   isRead: boolean;
 }
 
+export interface SchedulingLogic {
+  retainedLogic: boolean;
+  calculateCriticalPathUsing: 'Total Float' | 'Longest Path';
+  computeMultipleFloatPaths: boolean;
+  floatPathTaskCount: number;
+  autoSaveOnSchedule: boolean;
+  defaultTaskType: 'Fixed Duration' | 'Fixed Units' | 'Fixed Units/Time';
+}
+
+export interface ResourceGlobals {
+  defaultWorkHoursPerDay: number;
+  autoLevelingThreshold: number;
+  usePricePerUnitForCost: boolean;
+  allowOvertimeInPlanning: boolean;
+}
+
+// Added SecurityPolicy interface to support governance security settings
+export interface SecurityPolicy {
+  mfa: boolean;
+  passwordComplexity: string;
+  sessionLimit: number;
+  ipLock: boolean;
+  allowPublicLinks: boolean;
+  enforceHttps: boolean;
+  loginRetries: number;
+}
+
 export interface GovernanceState {
   alerts: SystemAlert[];
   auditLog: any[];
   exchangeRates: Record<string, number>;
-  inflationRate: number; // New Hook 36
+  inflationRate: number;
   riskTolerance: 'Aggressive' | 'Moderate' | 'Conservative';
   strategicWeights: Record<string, number>;
   vendorBlacklist: string[];
+  scheduling: SchedulingLogic;
+  resourceDefaults: ResourceGlobals;
+  // Added security property to resolve errors in DataContext and rootReducer
+  security: SecurityPolicy;
 }

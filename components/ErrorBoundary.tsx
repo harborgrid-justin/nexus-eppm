@@ -1,80 +1,55 @@
-import React, { ErrorInfo, ReactNode } from "react";
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
   children?: ReactNode;
-  fallback?: ReactNode;
   name?: string;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
+  error?: Error;
 }
 
-// Fix: Changed `Component` to `React.Component` to resolve typing issue where `this.props` and `this.setState` were not found. Also removed unused `Component` import.
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: null,
-    errorInfo: null,
-  };
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false
+    };
+  }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`ErrorBoundary caught an error in ${this.props.name || 'Component'}:`, error, errorInfo);
-    this.setState({ errorInfo });
+    console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
-  handleReset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null });
+  handleRetry = () => {
+    this.setState({ hasError: false, error: undefined });
   };
 
-  render(): ReactNode {
+  render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
       return (
-        <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-red-900 m-4 flex flex-col gap-4 shadow-sm animate-in fade-in zoom-in-95 duration-300">
-           <div className="flex items-start gap-3">
-             <div className="p-2 bg-red-100 rounded-full shrink-0">
-                <AlertTriangle className="text-red-600" size={24} />
-             </div>
-             <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-lg">Application Error</h3>
-                <p className="text-sm mt-1 text-red-800">
-                    {this.props.name ? `Error in ${this.props.name}: ` : ''}
-                    {this.state.error?.message || "An unexpected error occurred."}
-                </p>
-                {this.state.errorInfo && (
-                    <details className="mt-3 text-xs font-mono bg-red-100/50 p-2 rounded border border-red-200/50 overflow-auto max-h-32 whitespace-pre-wrap text-red-800">
-                        <summary className="cursor-pointer font-semibold mb-1 opacity-70 hover:opacity-100">View Stack Trace</summary>
-                        {this.state.errorInfo.componentStack}
-                    </details>
-                )}
-             </div>
-           </div>
-           
-           <div className="flex justify-end pt-2 border-t border-red-200/50">
-             <button 
-                onClick={this.handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-700 text-sm font-medium rounded-lg hover:bg-red-50 focus:ring-2 focus:ring-red-500 focus:outline-none transition-colors"
-             >
-                <RefreshCw size={14} /> Try Again
-             </button>
-           </div>
+        <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
+          <h2 className="font-bold flex items-center gap-2"><AlertTriangle size={20} /> Error in {this.props.name || 'Component'}</h2>
+          <p className="text-sm mt-2">{this.state.error?.message || 'An unexpected error occurred.'}</p>
+          <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 overflow-auto max-h-32 text-red-800 font-mono">
+            {this.state.error?.stack}
+          </pre>
+          <button 
+            onClick={this.handleRetry} 
+            className="mt-4 px-4 py-2 bg-white border border-red-200 text-red-700 hover:bg-red-50 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
+          >
+            <RefreshCw size={14}/> Try again
+          </button>
         </div>
       );
     }
-    
+
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

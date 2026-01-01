@@ -5,6 +5,8 @@ export type Industry = 'Construction' | 'Software' | 'Standard';
 
 export type ActivityCodeScope = 'Global' | 'EPS' | 'Project';
 
+export type UDFSubjectArea = 'Projects' | 'Tasks' | 'Resources' | 'Risks';
+
 export interface Document {
   id: string;
   projectId?: string;
@@ -49,4 +51,86 @@ export interface Extension {
   version: string;
   viewType: 'dashboard' | 'grid' | 'form' | 'viewer3d' | 'map';
   installedDate?: string;
+}
+
+export interface ActivityCode {
+  id: string;
+  name: string;
+  scope: ActivityCodeScope;
+  projectId?: string;
+  values: ActivityCodeValue[];
+}
+
+export interface ActivityCodeValue {
+  id: string;
+  value: string;
+  color?: string;
+  description?: string;
+}
+
+export interface UserDefinedField {
+  id: string;
+  subjectArea: UDFSubjectArea;
+  title: string;
+  dataType: 'Text' | 'Number' | 'Date' | 'List';
+  listValues?: string[];
+}
+
+export interface StandardTemplate {
+    id: string;
+    category: 'Risk' | 'Quality' | 'Scope' | 'Procurement';
+    name: string;
+    description: string;
+    content: any; // Flexible content structure
+}
+
+// --- NEW TYPES FOR ADVANCED ADMIN ---
+
+export interface WorkflowStep {
+    id: string;
+    name: string;
+    role: string;
+    type: 'Review' | 'Approval' | 'Notification';
+    requirements?: string[];
+}
+
+export interface WorkflowDefinition {
+    id: string;
+    name: string;
+    trigger: 'ChangeOrder' | 'ScheduleBaseline' | 'RiskEscalation';
+    steps: WorkflowStep[];
+    status: 'Active' | 'Draft';
+}
+
+export interface GlobalChangeRule {
+    id: string;
+    field: string;
+    operator: 'is' | 'contains' | 'is empty' | 'greater than';
+    value: string;
+    thenField: string;
+    thenValue: string;
+}
+
+export interface AIAnalysisResult {
+  summary: string;
+  risks: string[];
+  recommendations: string[];
+}
+
+export interface QualityStandard {
+    id: string;
+    name: string;
+    description: string;
+    category: 'General' | 'Process' | 'Material' | 'Safety' | 'Environmental';
+    source: 'Internal' | 'External' | 'Regulatory';
+    enforcement: 'Mandatory' | 'Guideline';
+    linkedWbsIds?: string[];
+}
+
+export interface CostBookItem {
+    id: string;
+    description: string;
+    type: 'Labor' | 'Material' | 'Equipment' | 'Subcontract';
+    unit: string;
+    rate: number;
 }

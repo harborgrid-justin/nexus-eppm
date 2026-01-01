@@ -33,7 +33,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner ID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                                 </tr>
@@ -43,7 +43,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                                     <tr key={item.id} className="hover:bg-slate-50">
                                         <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.category}</td>
                                         <td className="px-6 py-4 text-sm text-slate-600">{item.description}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.owner}</td>
+                                        <td className="px-6 py-4 text-sm text-slate-600">{item.ownerId}</td>
                                         <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.dueDate}</td>
                                         <td className="px-6 py-4">
                                             <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
@@ -68,8 +68,8 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                             { label: 'Financial Reconciliation', status: 'In Progress' },
                             { label: 'Lessons Learned Archive', status: 'Complete' },
                             { label: 'Steering Committee Sign-off', status: 'Not Started' }
-                        ].map((g, i) => (
-                            <li key={i} className="flex justify-between items-center text-sm">
+                        ].map((g) => (
+                            <li key={g.label} className="flex justify-between items-center text-sm">
                                 <span className="text-slate-700">{g.label}</span>
                                 <span className={`text-xs font-bold ${
                                     g.status === 'Complete' ? 'text-green-600' : 

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Task, ProjectCalendar, WBSNode } from '../../types';
+import { Task, ProjectCalendar, WBSNode } from '../../types/index';
 import { getWorkingDaysDiff } from '../../utils/dateUtils';
 
 interface DependencyLinesProps {

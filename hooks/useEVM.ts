@@ -1,25 +1,12 @@
 
 import { useMemo } from 'react';
-import { Project, BudgetLineItem } from '../types';
+// FIX: Correctly import Project and BudgetLineItem types.
+import { Project } from '../types/project';
+import { BudgetLineItem, EVMMetrics } from '../types/finance';
 import { calculateProjectProgress } from '../utils/calculations';
 import { getDaysDiff } from '../utils/dateUtils';
 
-export interface EVMMetrics {
-  pv: number;   // Planned Value
-  ev: number;   // Earned Value
-  ac: number;   // Actual Cost
-  sv: number;   // Schedule Variance
-  cv: number;   // Cost Variance
-  spi: number;  // Schedule Performance Index
-  cpi: number;  // Cost Performance Index
-  bac: number;  // Budget at Completion
-  eac: number;  // Estimate at Completion
-  etc: number;  // Estimate to Complete
-  vac: number;  // Variance at Completion
-  tcpi: number; // To Complete Performance Index
-  status: 'Ahead' | 'Behind' | 'On Track';
-  costStatus: 'Under Budget' | 'Over Budget' | 'On Budget';
-}
+export { EVMMetrics };
 
 export const useEVM = (project: Project | undefined, budgetItems: BudgetLineItem[] = []) => {
   const metrics = useMemo<EVMMetrics | null>(() => {

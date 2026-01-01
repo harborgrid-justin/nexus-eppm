@@ -1,5 +1,5 @@
 
-import { DataState } from './DataContext';
+import { DataState } from '../types/actions';
 import { 
     MOCK_PROJECTS, MOCK_RESOURCES, MOCK_EXPENSES, MOCK_EXPENSE_CATEGORIES, MOCK_DATA_JOBS, 
     MOCK_ACTIVITY_CODES, MOCK_FUNDING_SOURCES, MOCK_PROCUREMENT_PACKAGES, MOCK_SOLICITATIONS, 
@@ -8,20 +8,37 @@ import {
     MOCK_DEFECTS, MOCK_BUDGET_ITEMS, MOCK_RISKS, MOCK_ISSUES, MOCK_RBS, MOCK_ISSUE_CODES, 
     EXTENSIONS_REGISTRY, MOCK_QUALITY_STANDARDS, MOCK_ENTERPRISE_ROLES, MOCK_ENTERPRISE_SKILLS, 
     MOCK_DOCUMENTS, MOCK_EPS, MOCK_OBS, MOCK_CALENDARS, MOCK_INTEGRATED_CHANGES, MOCK_PROGRAM_STAGE_GATES,
-    MOCK_PROGRAM_STAKEHOLDERS, MOCK_COMMUNICATION_PLAN
-} from '../constants';
+    MOCK_PROGRAM_STAKEHOLDERS, MOCK_COMMUNICATION_PLAN, MOCK_LOCATIONS, MOCK_UDFS,
+    MOCK_USERS, MOCK_TIMESHEETS, MOCK_COST_REPORTS, MOCK_COST_MEETINGS, MOCK_COST_ALERTS, 
+    MOCK_PROCUREMENT_PLANS, MOCK_VENDORS, 
+    MOCK_INVOICES, MOCK_INTEGRATIONS,
+    MOCK_PROGRAM_DEPENDENCIES, MOCK_PROGRAM_OUTCOMES, MOCK_PROGRAM_CHANGE_REQUESTS,
+    MOCK_PROGRAM_QUALITY_STANDARDS, MOCK_PROGRAM_ASSURANCE_REVIEWS,
+    MOCK_PROGRAM_TRANSITION_ITEMS, MOCK_PROGRAM_ARCHITECTURE_STANDARDS,
+    MOCK_PROGRAM_ARCHITECTURE_REVIEWS, MOCK_TRADEOFF_SCENARIOS, MOCK_GOVERNANCE_DECISIONS,
+    MOCK_GOVERNANCE_ROLES, MOCK_GOVERNANCE_EVENTS, MOCK_STRATEGIC_DRIVERS, MOCK_ESG_METRICS,
+    MOCK_PORTFOLIO_SCENARIOS
+} from '../constants/index';
+import { MOCK_COST_BOOK, MOCK_TEMPLATES } from '../constants/mocks/common';
 
-// Only includes static initial data
 export const initialState: DataState = {
   projects: MOCK_PROJECTS,
   resources: MOCK_RESOURCES,
+  timesheets: MOCK_TIMESHEETS,
+  users: MOCK_USERS,
   expenses: MOCK_EXPENSES,
   expenseCategories: MOCK_EXPENSE_CATEGORIES,
+  invoices: MOCK_INVOICES,
+  costReports: MOCK_COST_REPORTS, 
+  costMeetings: MOCK_COST_MEETINGS, 
+  costAlerts: MOCK_COST_ALERTS, 
+  costBook: MOCK_COST_BOOK,
   dataJobs: MOCK_DATA_JOBS,
   extensions: EXTENSIONS_REGISTRY,
   activityCodes: MOCK_ACTIVITY_CODES,
   fundingSources: MOCK_FUNDING_SOURCES,
   procurementPackages: MOCK_PROCUREMENT_PACKAGES,
+  procurementPlans: MOCK_PROCUREMENT_PLANS, 
   solicitations: MOCK_SOLICITATIONS,
   contracts: MOCK_CONTRACTS,
   purchaseOrders: MOCK_PURCHASE_ORDERS,
@@ -30,6 +47,7 @@ export const initialState: DataState = {
   makeOrBuyAnalysis: [],
   benefits: MOCK_BENEFITS,
   portfolioRisks: MOCK_PORTFOLIO_RISKS,
+  portfolioScenarios: MOCK_PORTFOLIO_SCENARIOS,
   programs: MOCK_PROGRAMS,
   stakeholders: MOCK_STAKEHOLDERS,
   communicationLogs: MOCK_COMM_LOGS,
@@ -41,38 +59,65 @@ export const initialState: DataState = {
   issues: MOCK_ISSUES,
   rbs: MOCK_RBS,
   issueCodes: MOCK_ISSUE_CODES,
-  vendors: [], // Populate if needed
-  integrations: [], // Populate if needed
-  userDefinedFields: [],
+  vendors: MOCK_VENDORS,
+  integrations: MOCK_INTEGRATIONS,
+  userDefinedFields: MOCK_UDFS,
   qualityStandards: MOCK_QUALITY_STANDARDS,
   roles: MOCK_ENTERPRISE_ROLES,
   skills: MOCK_ENTERPRISE_SKILLS,
   documents: MOCK_DOCUMENTS,
+  standardTemplates: MOCK_TEMPLATES,
   eps: MOCK_EPS,
   obs: MOCK_OBS,
   calendars: MOCK_CALENDARS,
-  // ... Initialize empty arrays for program constructs
+  locations: MOCK_LOCATIONS,
   strategicGoals: [],
+  strategicDrivers: MOCK_STRATEGIC_DRIVERS,
+  esgMetrics: MOCK_ESG_METRICS,
   programObjectives: [],
+  programDependencies: MOCK_PROGRAM_DEPENDENCIES,
+  programOutcomes: MOCK_PROGRAM_OUTCOMES,
   programRisks: [],
   programIssues: [],
-  governanceRoles: [],
-  governanceEvents: [],
+  programChangeRequests: MOCK_PROGRAM_CHANGE_REQUESTS,
+  programQualityStandards: MOCK_PROGRAM_QUALITY_STANDARDS,
+  programAssuranceReviews: MOCK_PROGRAM_ASSURANCE_REVIEWS,
+  programTransitionItems: MOCK_PROGRAM_TRANSITION_ITEMS,
+  programArchitectureStandards: MOCK_PROGRAM_ARCHITECTURE_STANDARDS,
+  programArchitectureReviews: MOCK_PROGRAM_ARCHITECTURE_REVIEWS,
+  tradeoffScenarios: MOCK_TRADEOFF_SCENARIOS,
+  governanceRoles: MOCK_GOVERNANCE_ROLES,
+  governanceEvents: MOCK_GOVERNANCE_EVENTS,
+  governanceDecisions: MOCK_GOVERNANCE_DECISIONS,
   programAllocations: [],
   programFundingGates: [],
   programStageGates: MOCK_PROGRAM_STAGE_GATES,
   integratedChanges: MOCK_INTEGRATED_CHANGES,
   programStakeholders: MOCK_PROGRAM_STAKEHOLDERS,
   programCommunicationPlan: MOCK_COMMUNICATION_PLAN,
-  resourceAssignments: [],
+  workflows: [],
+  globalChangeRules: [],
   governance: {
     alerts: [],
     auditLog: [],
-    exchangeRates: { 'USD': 1 },
+    exchangeRates: { 'USD': 1.0, 'EUR': 0.92, 'GBP': 0.79 },
     inflationRate: 0.03,
     riskTolerance: 'Moderate',
-    strategicWeights: {},
-    vendorBlacklist: []
+    strategicWeights: { 'Strategic': 40, 'Financial': 40, 'Risk': 20 },
+    vendorBlacklist: [],
+    scheduling: {
+      retainedLogic: true, calculateCriticalPathUsing: 'Total Float',
+      computeMultipleFloatPaths: false, floatPathTaskCount: 10,
+      autoSaveOnSchedule: true, defaultTaskType: 'Fixed Duration'
+    },
+    resourceDefaults: {
+      defaultWorkHoursPerDay: 8, autoLevelingThreshold: 100,
+      usePricePerUnitForCost: true, allowOvertimeInPlanning: false
+    },
+    security: {
+      mfa: true, passwordComplexity: 'High', sessionLimit: 30,
+      ipLock: false, allowPublicLinks: false, enforceHttps: true, loginRetries: 5
+    }
   },
   errors: [],
 };

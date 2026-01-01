@@ -1,7 +1,9 @@
 
+
 import { useState, useCallback } from 'react';
-import { generatePortfolioReport } from '../services/geminiService';
+import { generatePortfolioReport, generateProgramReport as genProgramReportService } from '../services/geminiService';
 import { Project } from '../types';
+import { Program } from '../types';
 
 export const useGeminiAnalysis = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -24,6 +26,22 @@ export const useGeminiAnalysis = () => {
     }
   }, []);
 
+  const generateProgramReport = useCallback(async (program: Program, projects: Project[]) => {
+    setIsGenerating(true);
+    setReport(null);
+    setError(null);
+
+    try {
+        const result = await genProgramReportService(program, projects);
+        setReport(result);
+    } catch (err) {
+        console.error(err);
+        setError("Failed to generate program report. Please try again.");
+    } finally {
+        setIsGenerating(false);
+    }
+  }, []);
+
   const reset = useCallback(() => {
     setReport(null);
     setError(null);
@@ -31,6 +49,7 @@ export const useGeminiAnalysis = () => {
 
   return {
     generateReport,
+    generateProgramReport,
     report,
     isGenerating,
     error,

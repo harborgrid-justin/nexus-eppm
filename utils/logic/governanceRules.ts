@@ -1,9 +1,10 @@
 
-import { DataState } from '../../context/DataContext';
+// FIX: Correctly import DataState from types/actions.
+import { DataState, Action } from '../../types/actions';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 
-export const applyGovernanceRules = (state: DataState, action: any, alerts: SystemAlert[]) => {
+export const applyGovernanceRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
   
   // Hook: Scope Creep Velocity
   if (action.type === 'APPROVE_CHANGE_ORDER') {
@@ -20,7 +21,7 @@ export const applyGovernanceRules = (state: DataState, action: any, alerts: Syst
   }
 
   // Hook: ESG Breach
-  if (action.type === 'UPDATE_TASK') { // Triggered on updates usually
+  if (action.type === 'TASK_UPDATE') { // Triggered on updates usually
       // Mock ESG check
       const esgScore = 65; // Would come from project metadata
       if (esgScore < 70) {
@@ -29,14 +30,14 @@ export const applyGovernanceRules = (state: DataState, action: any, alerts: Syst
   }
 
   // Hook: Strategic Drift
-  if (action.type === 'UPDATE_STRATEGIC_GOAL') {
+  if (action.type === 'GOVERNANCE_UPDATE_STRATEGIC_GOAL') {
       // If goals change, check all projects for alignment
       alerts.push(createAlert('Info', 'Strategy', 'Strategic Realignment', 
           'Strategic Goals updated. Please review project alignment scores.'));
   }
 
   // Hook: Gate Skipping
-  if (action.type === 'UPDATE_TASK' && action.payload.task.status === 'In Progress') {
+  if (action.type === 'TASK_UPDATE' && action.payload.task.status === 'In Progress') {
       const project = state.projects.find(p => p.id === action.payload.projectId);
       if (project && project.status === 'Planned') {
            alerts.push(createAlert('Blocker', 'Governance', 'Gate Skipping', 
@@ -44,5 +45,5 @@ export const applyGovernanceRules = (state: DataState, action: any, alerts: Syst
       }
   }
 
-  return { alerts };
+  return {};
 };

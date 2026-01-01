@@ -11,20 +11,22 @@ const GovBudgetSuite: React.FC = () => {
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState<'ppbe' | 'funds' | 'forms'>('ppbe');
 
+  // --- MOCK DATA FOR FUNDS ---
   const fundsFlow = [
-    { name: 'Appropriated', value: 0 },
-    { name: 'Apportioned', value: 0 },
-    { name: 'Allotted', value: 0 },
-    { name: 'Committed', value: 0 },
-    { name: 'Obligated', value: 0 },
-    { name: 'Expended', value: 0 },
+    { name: 'Appropriated', value: 50000000 },
+    { name: 'Apportioned', value: 48000000 },
+    { name: 'Allotted', value: 45000000 },
+    { name: 'Committed', value: 30000000 },
+    { name: 'Obligated', value: 25000000 },
+    { name: 'Expended', value: 12000000 },
   ];
 
+  // --- MOCK DATA FOR PPBE CALENDAR ---
   const fiscalYears = [
-    { year: 'FY24', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
-    { year: 'FY25', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
-    { year: 'FY26', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
-    { year: 'FY27', phase: 'Planning', status: 'Pending', color: 'bg-slate-400' },
+    { year: 'FY24', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
+    { year: 'FY25', phase: 'Budgeting', status: 'Enactment', color: 'bg-blue-500' },
+    { year: 'FY26', phase: 'Programming', status: 'POM Dev', color: 'bg-yellow-500' },
+    { year: 'FY27', phase: 'Planning', status: 'Strat Guidance', color: 'bg-slate-400' },
   ];
 
   const renderPPBECalendar = () => (
@@ -64,8 +66,8 @@ const GovBudgetSuite: React.FC = () => {
                     { type: '3010 - Aircraft Procurement', years: '3 Year', exp: 'FY26', available: 12500000 },
                     { type: '3600 - RDT&E', years: '2 Year', exp: 'FY25', available: 4500000 },
                     { type: '3400 - O&M', years: '1 Year', exp: 'FY24', available: 800000 },
-                ].map((approp, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                ].map((approp) => (
+                    <div key={approp.type} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <div>
                             <p className="font-bold text-sm text-slate-800">{approp.type}</p>
                             <p className="text-xs text-slate-500">{approp.years} Money • Expires {approp.exp}</p>
