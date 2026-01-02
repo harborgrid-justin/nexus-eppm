@@ -223,4 +223,7 @@ export type Action =
     | { type: 'UPDATE_GLOBAL_CHANGE_RULES'; payload: any }
     | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: any }
     | { type: 'UPDATE_RBS_NODE_PARENT'; payload: any }
+    | { type: 'RESOURCE_ADD'; payload: Resource }
+    | { type: 'RESOURCE_UPDATE'; payload: Resource }
+    | { type: 'RESOURCE_DELETE'; payload: string }
     | { type: 'MARK_ALERT_READ'; payload: string };

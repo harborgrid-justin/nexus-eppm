@@ -1,11 +1,11 @@
 
 import React, { useState, useMemo, useTransition, useDeferredValue, Suspense } from 'react';
-import { useLoaderData } from 'react-router-dom';
 import { TrendingDown, TrendingUp, AlertOctagon, DollarSign, Sparkles, Loader2, X, Plus, FileText, BarChart3, Filter } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 import { useGeminiAnalysis } from '../hooks/useGeminiAnalysis';
 import { usePermissions } from '../hooks/usePermissions';
+import { usePortfolioState } from '../hooks/usePortfolioState';
 import { CustomBarChart } from './charts/CustomBarChart';
 import { CustomPieChart } from './charts/CustomPieChart';
 import { SidePanel } from './ui/SidePanel';
@@ -48,7 +48,7 @@ const ChartSkeleton = ({ height = 300 }) => (
 );
 
 const Dashboard: React.FC = () => {
-  const { summary, healthDataForChart: rawHealthData, budgetDataForChart: rawBudgetData, projects } = useLoaderData() as any;
+  const { summary, healthDataForChart: rawHealthData, budgetDataForChart: rawBudgetData, projects } = usePortfolioState();
   const theme = useTheme();
   const { generateReport, report, isGenerating, error, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);

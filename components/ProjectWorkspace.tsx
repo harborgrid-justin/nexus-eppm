@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, Suspense, lazy, useTransition } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
   MessageSquare, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2, History, Activity,
@@ -10,6 +10,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
 import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
+import { useProjectState } from '../hooks/useProjectState';
 import SuspenseFallback from './layout/SuspenseFallback';
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
@@ -30,9 +31,9 @@ const ScheduleHealthReport = lazy(() => import('./scheduling/ScheduleHealthRepor
 const FieldManagement = lazy(() => import('./FieldManagement'));
 
 const ProjectWorkspace: React.FC = () => {
-  const projectData = useLoaderData() as any;
-  const { project } = projectData;
-
+  const { projectId } = useParams();
+  const projectData = useProjectState(projectId || null);
+  
   const theme = useTheme();
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeArea, setActiveArea] = useState('integration');
@@ -84,8 +85,20 @@ const ProjectWorkspace: React.FC = () => {
       });
   };
 
+  if (!projectData) {
+      return (
+        <div className="flex items-center justify-center h-full">
+            <div className="flex flex-col items-center gap-4 text-slate-400">
+                <Loader2 className="animate-spin" size={32} />
+                <p>Loading project workspace...</p>
+            </div>
+        </div>
+      );
+  }
+
+  const { project } = projectData;
+
   const renderContent = () => {
-    if (!project) return <div className="p-6">Loading project...</div>;
     switch (activeArea) {
       case 'integration': return <ProjectIntegrationManagement />;
       case 'scope': return <ScopeManagement />;

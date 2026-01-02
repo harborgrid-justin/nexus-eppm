@@ -23,6 +23,11 @@ export const adminReducer = (state: DataState, action: Action): DataState => {
     case 'ADMIN_UPDATE_USER': return { ...state, users: state.users.map(u => u.id === action.payload.id ? action.payload : u) };
     case 'ADMIN_DELETE_USER': return { ...state, users: state.users.filter(u => u.id !== action.payload) };
 
+    // Resources
+    case 'RESOURCE_ADD': return { ...state, resources: [...state.resources, action.payload] };
+    case 'RESOURCE_UPDATE': return { ...state, resources: state.resources.map(r => r.id === action.payload.id ? action.payload : r) };
+    case 'RESOURCE_DELETE': return { ...state, resources: state.resources.filter(r => r.id !== action.payload) };
+
     // Funding Sources
     case 'ADMIN_ADD_FUNDING_SOURCE': return { ...state, fundingSources: [...state.fundingSources, action.payload] };
     case 'ADMIN_UPDATE_FUNDING_SOURCE': return { ...state, fundingSources: state.fundingSources.map(f => f.id === action.payload.id ? action.payload : f) };

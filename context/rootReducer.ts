@@ -14,7 +14,7 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
       nextState = projectReducer(state, action);
   } else if (action.type.startsWith('PROGRAM_')) {
       nextState = programReducer(state, action);
-  } else if (action.type.startsWith('ADMIN_')) {
+  } else if (action.type.startsWith('ADMIN_') || action.type.startsWith('RESOURCE_')) {
       nextState = adminReducer(state, action);
   } else if (action.type.startsWith('SYSTEM_') || action.type.startsWith('GOVERNANCE_') || action.type.startsWith('ADD_') || action.type.startsWith('UPDATE_') || action.type === 'APPROVE_CHANGE_ORDER' || action.type === 'SUBMIT_TIMESHEET') {
       nextState = systemReducer(state, action);

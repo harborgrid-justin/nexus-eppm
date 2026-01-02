@@ -1,21 +1,26 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
-import { Resource, EnterpriseRole } from '../../types/index';
-import { Plus, Filter, Lock, Calendar, UserCog, Briefcase, Loader2 } from 'lucide-react';
+import { Resource } from '../../types/index';
+import { Plus, Filter, Lock, Calendar, UserCog, Briefcase, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useData } from '../../context/DataContext';
 import { Badge } from '../ui/Badge';
+import { ResourceFormPanel } from './ResourceFormPanel';
 
 interface ResourcePoolProps {
   resources: Resource[] | undefined;
 }
 
 const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('resource:write') || hasPermission('project:edit');
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Panel State
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Partial<Resource> | null>(null);
+
   // Pattern 9: Defer search for large resource pool
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -54,8 +59,25 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
     );
   }, [resources, deferredSearchTerm]);
 
-  const handleResourceClick = (id: string) => {
-      console.log('Selected resource:', id);
+  // CRUD Handlers
+  const handleOpenPanel = (resource?: Resource) => {
+      setEditingResource(resource ? { ...resource } : null);
+      setIsPanelOpen(true);
+  };
+
+  const handleSaveResource = (resource: Resource) => {
+      if (editingResource?.id) {
+          dispatch({ type: 'RESOURCE_UPDATE', payload: resource });
+      } else {
+          dispatch({ type: 'RESOURCE_ADD', payload: resource });
+      }
+      setIsPanelOpen(false);
+  };
+
+  const handleDeleteResource = (id: string) => {
+      if (confirm("Are you sure you want to remove this resource?")) {
+          dispatch({ type: 'RESOURCE_DELETE', payload: id });
+      }
   };
 
   if (!resources) {
@@ -85,7 +107,10 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
                 <Briefcase size={14}/> Resource Leveling
             </button>
             {canEdit ? (
-                <button className="flex-1 sm:flex-none px-4 py-2 bg-nexus-600 rounded-lg text-sm font-bold text-white hover:bg-nexus-700 flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all">
+                <button 
+                    onClick={() => handleOpenPanel()}
+                    className="flex-1 sm:flex-none px-4 py-2 bg-nexus-600 rounded-lg text-sm font-bold text-white hover:bg-nexus-700 flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+                >
                     <Plus size={16}/> Provision Resource
                 </button>
             ) : (
@@ -107,18 +132,15 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Org Calendar</th>
                 <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
                 <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-widest">Std Rate</th>
+                <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-widest">Actions</th>
                 </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
                 {filteredResources.map((resource) => (
                 <tr 
                     key={resource.id} 
-                    className="hover:bg-slate-50/80 cursor-pointer transition-colors group focus:bg-slate-50 outline-none"
-                    onClick={() => handleResourceClick(resource.id)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleResourceClick(resource.id)}
+                    className="hover:bg-slate-50/80 cursor-default transition-colors group"
                     tabIndex={0}
-                    role="button"
-                    aria-label={`View details for ${resource.name}`}
                 >
                     <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -155,6 +177,28 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                         <span className="font-mono text-sm font-bold text-slate-700">${resource.hourlyRate}/hr</span>
                     </td>
+                     <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {canEdit && (
+                                <>
+                                    <button 
+                                        onClick={() => handleOpenPanel(resource)} 
+                                        className="p-1.5 hover:bg-slate-200 rounded text-slate-500 hover:text-nexus-600"
+                                        title="Edit Resource"
+                                    >
+                                        <Edit2 size={14}/>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDeleteResource(resource.id)} 
+                                        className="p-1.5 hover:bg-red-50 rounded text-slate-500 hover:text-red-500"
+                                        title="Delete Resource"
+                                    >
+                                        <Trash2 size={14}/>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </td>
                 </tr>
                 ))}
             </tbody>
@@ -174,6 +218,13 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
           </div>
           <button className="text-xs font-bold text-nexus-600 hover:underline">View Enterprise Skills Matrix</button>
       </div>
+
+      <ResourceFormPanel 
+        isOpen={isPanelOpen} 
+        onClose={() => setIsPanelOpen(false)} 
+        onSave={handleSaveResource}
+        editingResource={editingResource}
+      />
     </div>
   );
 };
