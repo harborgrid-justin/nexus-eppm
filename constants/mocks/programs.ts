@@ -1,5 +1,12 @@
 
-import { Program, Benefit, IntegratedChangeRequest, ProgramStageGate, ProgramStakeholder, ProgramCommunicationItem, ProgramDependency, ProgramOutcome, ProgramChangeRequest, ProgramQualityStandard, ProgramAssuranceReview, ProgramTransitionItem, ProgramArchitectureStandard, ProgramArchitectureReview, TradeoffScenario } from '../../types/index';
+import { 
+    Program, Benefit, IntegratedChangeRequest, ProgramStageGate, 
+    ProgramStakeholder, ProgramCommunicationItem, ProgramDependency, 
+    ProgramOutcome, ProgramChangeRequest, ProgramQualityStandard, 
+    ProgramAssuranceReview, ProgramTransitionItem, ProgramArchitectureStandard, 
+    ProgramArchitectureReview, TradeoffScenario,
+    ProgramIssue, ProgramRisk, ProgramObjective
+} from '../../types/index';
 
 export const MOCK_PROGRAMS: Program[] = [
   { id: 'PRG-001', name: 'Smart City Initiative', managerId: 'R-001', description: 'Modernizing urban infrastructure and digital services.', startDate: '2023-01-01', endDate: '2027-12-31', budget: 25000000, benefits: 'Improved citizen satisfaction.', status: 'Active', health: 'Good', strategicImportance: 10, financialValue: 7, riskScore: 5, calculatedPriorityScore: 90, category: 'Innovation & Growth', businessCase: 'Strategic directive to improve livability.' }
@@ -48,6 +55,30 @@ export const MOCK_PROGRAM_STAGE_GATES: ProgramStageGate[] = [
           { id: 'C1-1', description: 'Business Case Approved', status: 'Met', notes: '' }
       ]
   }
+];
+
+export const MOCK_PROGRAM_OBJECTIVES: ProgramObjective[] = [
+    {
+        id: 'PO-001',
+        description: 'Digitize 100% of municipal payment workflows.',
+        linkedStrategicGoalId: 'SG-02', 
+        linkedProjectIds: ['P1005']
+    }
+];
+
+export const MOCK_PROGRAM_RISKS: ProgramRisk[] = [
+    { 
+        id: 'PR-001', programId: 'PRG-001', description: 'Public adoption resistance', category: 'External', 
+        probability: 'Medium', impact: 'High', score: 15, ownerId: 'R-003', status: 'Open', mitigationPlan: 'Community outreach program.',
+        probabilityValue: 3, impactValue: 5, financialImpact: 250000, strategy: 'Mitigate', responseActions: []
+    }
+];
+
+export const MOCK_PROGRAM_ISSUES: ProgramIssue[] = [
+    { 
+        id: 'PI-001', programId: 'PRG-001', title: 'Data Privacy Legislation', description: 'New state laws regarding citizen data.', 
+        priority: 'High', status: 'Open', ownerId: 'R-001', resolutionPath: 'Legal review initiated.', impactedProjectIds: ['P1005']
+    }
 ];
 
 export const MOCK_PROGRAM_DEPENDENCIES: ProgramDependency[] = [];

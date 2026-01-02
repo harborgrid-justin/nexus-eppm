@@ -1,19 +1,15 @@
-
-
-
 import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import type { 
     Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode
 } from '../types/index';
 import { User } from '../types/auth';
-// FIX: Export DataState and Action to be used in other files
-export type { DataState, Action } from '../types/actions';
 import { DataState, Action } from '../types/actions';
-// FIX: Corrected import path for constants to resolve module resolution errors.
 import { MOCK_RISK_PLAN } from '../constants/index';
 import { initialState } from './initialState';
 import { rootReducer } from './rootReducer';
+
+// Re-export for convenience
+export type { DataState, Action };
 
 const DataContext = createContext<{
   state: DataState;

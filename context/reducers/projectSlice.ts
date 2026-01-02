@@ -101,7 +101,7 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
                     const newBaseline: Baseline = {
                         id: generateId('BL'),
                         name,
-                        type: type || 'Revised',
+                        type: (type as Baseline['type']) || 'Revised',
                         date: new Date().toISOString(),
                         taskBaselines
                     };
@@ -120,7 +120,7 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
                     return {
                         ...p,
                         baselines: (p.baselines || []).map(b => 
-                            b.id === baselineId ? { ...b, name, type } : b
+                            b.id === baselineId ? { ...b, name, type: type as Baseline['type'] } : b
                         )
                     };
                 }
