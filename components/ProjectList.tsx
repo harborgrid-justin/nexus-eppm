@@ -1,6 +1,4 @@
 
-
-
 import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
 // FIX: Corrected import path for Project type to resolve module resolution error.
 import { Project } from '../types/index';
@@ -130,3 +128,4 @@ const ProjectList: React.FC = () => {
     </div>
   );
 };
+export default ProjectList;

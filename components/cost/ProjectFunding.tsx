@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, Layers, Lock, ShieldCheck, ArrowRightLeft, DollarSign, Wallet } from 'lucide-react';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomPieChart } from '../charts/CustomPieChart';
@@ -151,3 +151,4 @@ export const ProjectFunding: React.FC = () => {
         </div>
     );
 };
+export default ProjectFunding;

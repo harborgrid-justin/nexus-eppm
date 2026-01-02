@@ -113,5 +113,4 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
     </div>
   );
 };
-
 export default VendorRegistry;

@@ -1,31 +1,42 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, Lock, CheckCircle, Clock, Activity } from 'lucide-react';
+import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, CheckCircle, Clock, Activity as ActivityIcon } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency, formatDate, formatPercentage } from '../utils/formatters';
-import { calculateScopeCreep, checkTaskStagnation } from '../utils/integrationUtils';
+import { calculateScopeCreep } from '../utils/integrations/cost';
+import { checkTaskStagnation } from '../utils/integrations/schedule';
 import { usePermissions } from '../hooks/usePermissions';
 import { useData } from '../context/DataContext';
+
+// Sub-components
+import ProjectCharter from './integration/ProjectCharter';
+import ChangeLog from './integration/ChangeLog';
 
 const ProjectIntegrationManagement: React.FC = () => {
   const { project, summary, financials, riskProfile, qualityProfile, changeOrders } = useProjectWorkspace();
   const { state } = useData();
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { canEditProject } = usePermissions();
+  const [isPending, startTransition] = useTransition();
+  
+  const handleTabChange = (tab: string) => {
+      startTransition(() => {
+          setActiveTab(tab);
+      });
+  };
 
   const pmName = useMemo(() => {
       if(!project) return 'Unassigned';
-      return state.resources.find(r => r.id === project.managerId)?.name || 'Unknown';
+      return state.resources.find(r => r.id === project.managerId)?.name || 'Unknown PM';
   }, [project, state.resources]);
 
   const phase2Metrics = useMemo(() => {
       if(!project) return null;
-      const scopeCreep = calculateScopeCreep(project.originalBudget, changeOrders);
+      const scopeCreepValue = calculateScopeCreep(project.originalBudget, changeOrders);
       const stagnantTasks = project.tasks.filter(t => checkTaskStagnation(t)).length;
-      return { scopeCreep, stagnantTasks };
+      return { scopeCreep: scopeCreepValue, stagnantTasks };
   }, [project, changeOrders]);
 
   if (!project || !summary || !financials || !riskProfile || !qualityProfile || !phase2Metrics) {
@@ -48,7 +59,7 @@ const ProjectIntegrationManagement: React.FC = () => {
 
       <div className="mb-4">
         <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
-            <Activity size={12}/> Global Health Indicators
+            <ActivityIcon size={12}/> Global Health Indicators
         </h3>
       </div>
       
@@ -87,7 +98,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><BookOpen size={18} className="text-nexus-600"/> High-Level Charter</h3>
-             <button className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
+             <button onClick={() => handleTabChange('charter')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
            </div>
            <div className="p-6">
                <dl className="space-y-4">
@@ -103,6 +114,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><FileText size={18} className="text-nexus-600"/> Change Summary</h3>
+             <button onClick={() => handleTabChange('logs')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">View Log</button>
            </div>
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -142,7 +154,7 @@ const ProjectIntegrationManagement: React.FC = () => {
             {['dashboard', 'charter', 'logs'].map(tab => (
                 <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => handleTabChange(tab)}
                     className={`px-5 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
                 >
                     {tab}
@@ -151,16 +163,13 @@ const ProjectIntegrationManagement: React.FC = () => {
         </div>
       </div>
       
-      {activeTab === 'dashboard' && renderDashboard()}
-      {activeTab !== 'dashboard' && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center min-h-[400px] text-slate-400">
-              <ClipboardList size={48} className="opacity-10 mb-4" />
-              <p className="font-bold text-slate-500">Module loading...</p>
-              <p className="text-sm mt-1 max-w-xs text-center">Refining technical data views for {activeTab} section.</p>
-          </div>
-      )}
+      {/* Content Rendering with Transition */}
+      <div className={`transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
+          {activeTab === 'dashboard' && renderDashboard()}
+          {activeTab === 'charter' && <ProjectCharter />}
+          {activeTab === 'logs' && <ChangeLog />}
+      </div>
     </div>
   );
 };
-
 export default ProjectIntegrationManagement;

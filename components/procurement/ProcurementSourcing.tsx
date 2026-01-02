@@ -94,5 +94,4 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
         </div>
     );
 };
-
 export default ProcurementSourcing;

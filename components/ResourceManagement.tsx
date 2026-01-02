@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { Users, FileText, BarChart2, Sliders, Box, ScrollText } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -136,3 +134,4 @@ const ResourceManagement: React.FC = () => {
     </div>
   );
 };
+export default ResourceManagement;

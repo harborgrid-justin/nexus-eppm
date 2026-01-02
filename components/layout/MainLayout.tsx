@@ -75,7 +75,10 @@ const MainLayout: React.FC = () => {
                     </div>
                  )}
                  <Suspense fallback={<SuspenseFallback />}>
-                   <Outlet />
+                   {/* Wrapping Outlet in a div ensures Suspense always has a single valid child, preventing #306 errors */}
+                   <div className="h-full w-full">
+                      <Outlet />
+                   </div>
                  </Suspense>
              </div>
            </ErrorBoundary>
@@ -89,5 +92,4 @@ const MainLayout: React.FC = () => {
     </div>
   );
 };
-
 export default MainLayout;

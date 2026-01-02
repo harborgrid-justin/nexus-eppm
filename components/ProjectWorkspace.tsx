@@ -13,7 +13,7 @@ import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
-const RiskManagement = lazy(() => import('./risk/RiskManagement'));
+const RiskManagement = lazy(() => import('./RiskManagement'));
 const IssueLog = lazy(() => import('./IssueLog'));
 const ScopeManagement = lazy(() => import('./ScopeManagement'));
 const StakeholderManagement = lazy(() => import('./StakeholderManagement'));

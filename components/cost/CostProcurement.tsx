@@ -238,5 +238,4 @@ const CostProcurement: React.FC<CostProcurementProps> = ({ projectId }) => {
     </div>
   );
 };
-
 export default CostProcurement;

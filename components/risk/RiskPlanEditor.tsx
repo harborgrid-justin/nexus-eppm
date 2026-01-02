@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { FileText, Save, Book, Lock, ShieldCheck, Activity, Settings, ListTree, Grid } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

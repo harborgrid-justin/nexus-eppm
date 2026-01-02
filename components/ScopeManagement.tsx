@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { Sliders, LayoutDashboard, FileText, List, Layers, Lock } from 'lucide-react';
 // FIX: Changed import to a named import as ErrorBoundary does not have a default export.
@@ -119,5 +117,4 @@ const ScopeManagement: React.FC = () => {
     </div>
   );
 };
-
 export default ScopeManagement;

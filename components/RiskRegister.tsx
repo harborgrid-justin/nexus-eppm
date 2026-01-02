@@ -1,6 +1,4 @@
 
-
-
 import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
 import { useData } from '../context/DataContext';
 import { ShieldAlert, Filter, ArrowUpRight, LayoutGrid, BarChart2, List, Download, Plus, DollarSign, Activity, AlertOctagon, Loader2 } from 'lucide-react';
@@ -104,3 +102,4 @@ const RiskRegister: React.FC = () => {
     </div>
   );
 };
+export default RiskRegister;

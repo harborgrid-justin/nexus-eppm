@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { BarChart2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';

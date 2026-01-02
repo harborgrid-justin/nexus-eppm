@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { Star, TrendingUp, DollarSign } from 'lucide-react';
@@ -57,5 +58,4 @@ const PortfolioValue: React.FC = () => {
     </div>
   );
 };
-
 export default PortfolioValue;

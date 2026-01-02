@@ -52,5 +52,4 @@ const PortfolioBalancing: React.FC = () => {
         </div>
     );
 };
-
 export default PortfolioBalancing;

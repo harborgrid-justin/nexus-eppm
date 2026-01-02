@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useTransition } from 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck, Coins } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -133,5 +134,4 @@ const QualityManagement: React.FC = () => {
     </div>
   );
 };
-
 export default QualityManagement;

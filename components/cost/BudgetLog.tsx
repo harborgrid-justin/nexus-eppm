@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { BudgetLogItem } from '../../types/index';
 import { Plus, CheckCircle, Clock, XCircle, Lock, Save, Landmark, History } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';

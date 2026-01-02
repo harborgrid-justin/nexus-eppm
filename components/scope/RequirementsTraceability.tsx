@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { ListChecks, Filter, Plus, Link, CheckCircle, Search, Lock } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Badge } from '../ui/Badge';
 

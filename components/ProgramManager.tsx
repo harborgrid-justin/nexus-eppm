@@ -95,5 +95,4 @@ const ProgramManager: React.FC<ProgramManagerProps> = ({ forcedProgramId }) => {
     </div>
   );
 };
-
 export default ProgramManager;

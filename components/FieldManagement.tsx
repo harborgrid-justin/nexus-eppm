@@ -1,16 +1,16 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useTransition } from 'react';
 import { HardHat, Clipboard, AlertTriangle, CheckSquare, CloudRain } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 
 // Sub-components
 import DailyLog from './field/DailyLog';
 import SafetyIncidentLog from './field/SafetyIncidentLog';
+import PunchList from './field/PunchList';
 
 const FieldManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
@@ -18,6 +18,7 @@ const FieldManagement: React.FC = () => {
   const theme = useTheme();
   const [activeGroup, setActiveGroup] = useState('daily');
   const [activeView, setActiveView] = useState('logs');
+  const [isPending, startTransition] = useTransition();
 
   const navGroups: NavGroup[] = useMemo(() => [
     { id: 'daily', label: 'Daily Reporting', items: [
@@ -34,16 +35,24 @@ const FieldManagement: React.FC = () => {
   const handleGroupChange = (groupId: string) => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
-      setActiveGroup(groupId);
-      setActiveView(newGroup.items[0].id);
+      startTransition(() => {
+        setActiveGroup(groupId);
+        setActiveView(newGroup.items[0].id);
+      });
     }
+  };
+
+  const handleItemChange = (itemId: string) => {
+      startTransition(() => {
+          setActiveView(itemId);
+      });
   };
 
   const renderContent = () => {
     switch (activeView) {
       case 'logs': return <DailyLog projectId={projectId} />;
       case 'incidents': return <SafetyIncidentLog projectId={projectId} />;
-      case 'punchlist': return <div className="p-8 text-center text-slate-500 italic">Punch List module loading...</div>;
+      case 'punchlist': return <PunchList projectId={projectId} />;
       default: return <DailyLog projectId={projectId} />;
     }
   };
@@ -63,11 +72,11 @@ const FieldManagement: React.FC = () => {
                 activeGroup={activeGroup}
                 activeItem={activeView}
                 onGroupChange={handleGroupChange}
-                onItemChange={setActiveView}
+                onItemChange={handleItemChange}
                 className="border-b border-slate-200"
             />
         </div>
-        <div className="flex-1 overflow-hidden relative">
+        <div className={`flex-1 overflow-hidden relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
           <ErrorBoundary name="Field Module">
             {renderContent()}
           </ErrorBoundary>
@@ -76,5 +85,4 @@ const FieldManagement: React.FC = () => {
     </div>
   );
 };
-
 export default FieldManagement;

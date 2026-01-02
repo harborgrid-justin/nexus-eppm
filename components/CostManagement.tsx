@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, ShoppingCart, MessageSquare } from 'lucide-react';

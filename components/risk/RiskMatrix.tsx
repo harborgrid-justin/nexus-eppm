@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { ArrowRight, ArrowUp } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

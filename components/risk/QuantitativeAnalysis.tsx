@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { BarChart2, RefreshCw, TrendingUp, Info, Play, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';

@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, Lock, CheckCircle, Clock, Activity as ActivityIcon } from 'lucide-react';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
+import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, CheckCircle, Clock, Activity as ActivityIcon } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency, formatDate, formatPercentage } from '../../utils/formatters';
@@ -9,6 +9,10 @@ import { calculateScopeCreep } from '../../utils/integrations/cost';
 import { checkTaskStagnation } from '../../utils/integrations/schedule';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useData } from '../../context/DataContext';
+
+// Sub-components
+import ProjectCharter from './ProjectCharter';
+import ChangeLog from './ChangeLog';
 
 const ProjectIntegrationManagement: React.FC = () => {
   const { project, summary, financials, riskProfile, qualityProfile, changeOrders } = useProjectWorkspace();
@@ -88,7 +92,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><BookOpen size={18} className="text-nexus-600"/> High-Level Charter</h3>
-             <button className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
+             <button onClick={() => setActiveTab('charter')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
            </div>
            <div className="p-6">
                <dl className="space-y-4">
@@ -104,6 +108,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><FileText size={18} className="text-nexus-600"/> Change Summary</h3>
+             <button onClick={() => setActiveTab('logs')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">View Log</button>
            </div>
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -153,15 +158,9 @@ const ProjectIntegrationManagement: React.FC = () => {
       </div>
       
       {activeTab === 'dashboard' && renderDashboard()}
-      {activeTab !== 'dashboard' && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center min-h-[400px] text-slate-400">
-              <ClipboardList size={48} className="opacity-10 mb-4" />
-              <p className="font-bold text-slate-500">Module loading...</p>
-              <p className="text-sm mt-1 max-w-xs text-center">Refining technical data views for {activeTab} section.</p>
-          </div>
-      )}
+      {activeTab === 'charter' && <ProjectCharter />}
+      {activeTab === 'logs' && <ChangeLog />}
     </div>
   );
 };
-
 export default ProjectIntegrationManagement;

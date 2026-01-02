@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Layers, ListChecks, FileWarning, CheckCircle, Target, Activity } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';

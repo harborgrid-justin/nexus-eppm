@@ -184,5 +184,4 @@ const LocationSettings: React.FC = () => {
         </div>
     );
 };
-
 export default LocationSettings;

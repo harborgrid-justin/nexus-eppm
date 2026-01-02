@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { ShieldAlert, RefreshCw } from 'lucide-react';
 import { calculateRiskExposure } from '../../utils/integrationUtils';
-import { Button } from '../ui/Button';
+import { Button } from '../../ui/Button';
 import { ReserveKPIs } from './reserves/ReserveKPIs';
 import { CompositionChart } from './reserves/CompositionChart';
 import { BurndownChart } from './reserves/BurndownChart';

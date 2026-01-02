@@ -105,5 +105,4 @@ const AuditLog: React.FC = () => {
         </div>
     );
 };
-
 export default AuditLog;

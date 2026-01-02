@@ -1,9 +1,9 @@
 
 import React, { useMemo } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { CustomBarChart } from '../charts/CustomBarChart';
 
 const RiskDashboard: React.FC = () => {

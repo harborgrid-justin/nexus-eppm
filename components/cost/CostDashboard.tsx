@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
 import { DollarSign, TrendingUp, TrendingDown, Layers, AlertTriangle, Zap, Coins, ShoppingCart } from 'lucide-react';
 import StatCard from '../shared/StatCard';
