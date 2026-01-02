@@ -78,7 +78,7 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
   if (!program) return null;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in duration-300`}>
         {/* AI Report SidePanel */}
         <SidePanel
             isOpen={isReportOpen}
@@ -124,12 +124,8 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
             )}
         </SidePanel>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-             <div>
-                 <h1 className={theme.typography.h1}>Program Dashboard</h1>
-                 <p className={theme.typography.small}>Executive oversight of {program.name}</p>
-             </div>
+        {/* Header - AI Button only, title is in parent */}
+        <div className="flex justify-end">
              <button 
                  onClick={handleGenerateReport}
                  disabled={isGenerating}

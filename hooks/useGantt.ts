@@ -32,7 +32,9 @@ export const useGantt = (initialProject: Project) => {
     if (!projectCalendar) return { ...initialProject, calendar: undefined };
     
     const adaptedCalendar: ProjectCalendar = {
-        id: projectCalendar.id, name: projectCalendar.name, holidays: projectCalendar.holidays.map(h => h.date),
+        id: projectCalendar.id, 
+        name: projectCalendar.name, 
+        holidays: (projectCalendar.holidays || []).map(h => h.date),
         workingDays: Object.entries(projectCalendar.workWeek).filter(([,v]) => (v as WorkDay).isWorkDay).map(([k,],i) => i) // Simple index mapping
     };
 

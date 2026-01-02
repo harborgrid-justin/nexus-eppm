@@ -2,15 +2,17 @@
 import React, { useState, useMemo, useEffect, useTransition } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-  Briefcase, ArrowLeft, LayoutDashboard, Gavel, Target, Star, Map, 
+  LayoutDashboard, Target, Star, Map, 
   Sliders, TrendingUp, Users, ShieldAlert, Flag, ShieldCheck, 
-  Server, Scale, AlertOctagon, RefreshCw, Truck, Layers, Loader2
+  Server, Scale, AlertOctagon, RefreshCw, Truck, Layers, Loader2, Gavel, Briefcase
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 import { StatusBadge } from './common/StatusBadge';
+import { PageHeader } from './common/PageHeader';
 import ProgramsRootDashboard from './program/ProgramsRootDashboard';
 import { getProgramModule } from './program/programModuleHelper';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface ProgramManagerProps {
     forcedProgramId?: string;
@@ -63,36 +65,82 @@ const ProgramManager: React.FC<ProgramManagerProps> = ({ forcedProgramId }) => {
     }
   };
 
+  const handleItemChange = (viewId: string) => {
+      startTransition(() => {
+          setActiveView(viewId);
+      });
+  };
+
+  // If no program selected, show list view
   if (!selectedProgram) {
-    return <ProgramsRootDashboard onSelectProgram={setSelectedProgramId} />;
-  }
-
-  const ModuleComponent = getProgramModule(activeView);
-
-  return (
-    <div className={`h-full w-full flex flex-col ${theme.colors.background} animate-in fade-in duration-300`}>
-        <div className={`${theme.colors.surface} border-b ${theme.colors.border} flex-shrink-0`}>
-            <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                    {!forcedProgramId && (
-                        <button onClick={() => setSelectedProgramId(null)} className="p-2 hover:bg-slate-100 rounded-full text-slate-500"><ArrowLeft size={20} /></button>
-                    )}
-                    <div>
-                        <h1 className="text-lg font-bold text-slate-900">{selectedProgram.name}</h1>
-                        <div className="flex items-center gap-2 text-xs text-slate-500"><span className="bg-slate-100 px-1.5 py-0.5 rounded border">Program</span><span>{selectedProgram.managerId}</span></div>
-                    </div>
-                </div>
-                <div className="hidden md:flex items-center gap-2">
-                    <div className="text-right mr-2"><p className="text-[10px] uppercase font-bold">Health</p><StatusBadge status={selectedProgram.health} variant="health"/></div>
+    return (
+        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+            <PageHeader 
+                title="Program Portfolio" 
+                subtitle="Strategic oversight of cross-functional initiatives."
+                icon={Briefcase}
+            />
+            <div className={theme.layout.panelContainer}>
+                <div className="flex-1 overflow-hidden">
+                    <ProgramsRootDashboard onSelectProgram={setSelectedProgramId} />
                 </div>
             </div>
-            <ModuleNavigation groups={navGroups} activeGroup={activeGroup} activeItem={activeView} onGroupChange={handleGroupChange} onItemChange={(view) => startTransition(() => setActiveView(view))} />
         </div>
-        <div className="flex-1 overflow-hidden relative">
-            {isPending && <div className="absolute inset-0 z-10 bg-white/50 flex items-center justify-center"><Loader2 className="animate-spin text-nexus-500" /></div>}
-            <ModuleComponent programId={selectedProgram.id} />
-        </div>
+    );
+  }
+
+  // If used as a sub-component (forcedId), we skip the outer PageContainer to avoid nesting padding
+  // If used as a standalone page (user clicked from root list), we wrap it
+  
+  const ModuleComponent = getProgramModule(activeView);
+  
+  const content = (
+    <div className={`h-full flex flex-col ${theme.colors.background}`}>
+         {/* Internal Header for Program Context if standalone */}
+         {!forcedProgramId && (
+             <div className="px-6 pt-6 pb-2">
+                <PageHeader 
+                    title={selectedProgram.name} 
+                    subtitle={`Program Manager: ${selectedProgram.managerId} • ${selectedProgram.category}`}
+                    icon={Layers}
+                    actions={
+                        <div className="flex items-center gap-2">
+                             <StatusBadge status={selectedProgram.health} variant="health"/>
+                             <button onClick={() => setSelectedProgramId(null)} className="text-sm text-slate-500 hover:text-slate-800 underline ml-4">Back to List</button>
+                        </div>
+                    }
+                />
+             </div>
+         )}
+         
+         {/* Navigation Panel */}
+         <div className={theme.layout.panelContainer}>
+            <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
+                <ModuleNavigation 
+                    groups={navGroups} 
+                    activeGroup={activeGroup} 
+                    activeItem={activeView} 
+                    onGroupChange={handleGroupChange} 
+                    onItemChange={handleItemChange} 
+                    className="bg-transparent border-0 shadow-none"
+                />
+            </div>
+            <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+                {isPending && <div className="absolute inset-0 z-10 bg-white/50 flex items-center justify-center"><Loader2 className="animate-spin text-nexus-500" /></div>}
+                <ErrorBoundary name={`Program: ${activeView}`}>
+                    <ModuleComponent programId={selectedProgram.id} />
+                </ErrorBoundary>
+            </div>
+         </div>
     </div>
+  );
+
+  if (forcedProgramId) return content;
+
+  return (
+      <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} flex flex-col h-full`}>
+          {content}
+      </div>
   );
 };
 export default ProgramManager;

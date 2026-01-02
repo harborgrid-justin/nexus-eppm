@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, RefObject } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 interface VirtualScrollOptions {
   totalItems: number;
@@ -11,47 +11,75 @@ interface VirtualScrollOptions {
 interface VirtualScrollResult {
   virtualItems: { index: number; offsetTop: number }[];
   totalHeight: number;
-  startIndex: number;
-  endIndex: number;
   isScrolling: boolean;
+  onScroll: (scrollTop: number) => void;
 }
 
 export const useVirtualScroll = (
-  scrollPosition: number,
+  initialScrollTop: number,
   options: VirtualScrollOptions
 ): VirtualScrollResult => {
   const { totalItems, itemHeight, containerHeight, buffer = 5 } = options;
+  const [scrollTop, setScrollTop] = useState(initialScrollTop);
   const [isScrolling, setIsScrolling] = useState(false);
-  
-  // Debounce scrolling state for performance optimizations during rapid movement
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // Optimized Scroll Handler using RAF (Principle 12)
+  const onScroll = (newScrollTop: number) => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
+      setScrollTop(newScrollTop);
+      setIsScrolling(true);
+      
+      // Debounce scrolling state end
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+    });
+  };
+
   useEffect(() => {
-    if (!isScrolling) return;
-    const timeout = setTimeout(() => setIsScrolling(false), 150);
-    return () => clearTimeout(timeout);
-  }, [scrollPosition, isScrolling]);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   // Calculate visible range
-  const startIndex = Math.max(0, Math.floor(scrollPosition / itemHeight) - buffer);
-  const endIndex = Math.min(
-    totalItems - 1,
-    Math.floor((scrollPosition + containerHeight) / itemHeight) + buffer
-  );
+  const { virtualItems, startIndex, endIndex } = useMemo(() => {
+    const startNode = Math.floor(scrollTop / itemHeight);
+    const visibleNodeCount = Math.ceil(containerHeight / itemHeight);
+    
+    const startIndex = Math.max(0, startNode - buffer);
+    const endIndex = Math.min(
+      totalItems - 1,
+      startNode + visibleNodeCount + buffer
+    );
 
-  const virtualItems = [];
-  for (let i = startIndex; i <= endIndex; i++) {
-    virtualItems.push({
-      index: i,
-      offsetTop: i * itemHeight
-    });
-  }
+    const items = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      items.push({
+        index: i,
+        offsetTop: i * itemHeight
+      });
+    }
+
+    return { virtualItems: items, startIndex, endIndex };
+  }, [scrollTop, totalItems, itemHeight, containerHeight, buffer]);
 
   const totalHeight = totalItems * itemHeight;
 
   return {
     virtualItems,
     totalHeight,
-    startIndex,
-    endIndex,
-    isScrolling
+    isScrolling,
+    onScroll
   };
 };

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -20,10 +21,6 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
 
   const metrics = useMemo(() => {
     const totalBudget = state.programs.reduce((acc, p) => acc + p.budget, 0);
-    // Note: 'spent' is not directly on Program in current mock data (it is calculated), 
-    // but assuming we can derive or use property if available. 
-    // For now we sum child projects manually if needed, or rely on program object if updated.
-    // In PortfolioPrograms it calculates spent from child projects.
     
     let totalSpent = 0;
     state.programs.forEach(prog => {
@@ -38,13 +35,7 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
   }, [state.programs, state.projects]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
-        {/* Header */}
-        <div>
-            <h1 className={theme.typography.h1}>Program Portfolio</h1>
-            <p className={theme.typography.small}>Oversight of {state.programs.length} strategic initiatives.</p>
-        </div>
-
+    <div className={`h-full overflow-y-auto p-6 space-y-8 animate-in fade-in duration-300`}>
         {/* Aggregate Stats */}
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard 

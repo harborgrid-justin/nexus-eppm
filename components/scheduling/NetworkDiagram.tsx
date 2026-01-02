@@ -22,7 +22,7 @@ const NetworkPaths: React.FC<{ nodes: NodeTask[], positions: Map<string, any>, t
                 <marker id="arrow-critical" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444" /></marker>
             </defs>
             {nodes.map(node => 
-                node.dependencies.map(dep => {
+                (node.dependencies || []).map(dep => {
                     const startPos = positions.get(dep.targetId);
                     const endPos = positions.get(node.id);
                     if (!startPos || !endPos) return null;
@@ -49,16 +49,28 @@ const NetworkDiagram: React.FC = () => {
   const [isPending, startTransition] = useTransition();
 
   const { nodes, levels } = useMemo(() => {
-    const tasks = project.tasks;
+    const tasks = project.tasks || [];
     const nodes: NodeTask[] = tasks.map(t => ({ ...t, children: [] as string[], level: -1 }));
     const nodeMap = new Map<string, NodeTask>(nodes.map(n => [n.id, n]));
-    tasks.forEach(task => task.dependencies.forEach(dep => nodeMap.get(dep.targetId)?.children.push(task.id)));
+    
+    tasks.forEach(task => {
+        (task.dependencies || []).forEach(dep => {
+            nodeMap.get(dep.targetId)?.children.push(task.id);
+        });
+    });
+
     const assignLevel = (id: string, level: number) => {
       const n = nodeMap.get(id);
       if (n && n.level < level) { n.level = level; n.children.forEach(c => assignLevel(c, level + 1)); }
     };
-    nodes.forEach(n => { if (n.dependencies.length === 0) assignLevel(n.id, 0); });
-    const levelsArr = nodes.reduce((acc, n) => { if (n.level === -1) n.level = 0; if (!acc[n.level]) acc[n.level] = []; acc[n.level].push(n); return acc; }, [] as NodeTask[][]);
+    
+    nodes.forEach(n => { if ((n.dependencies || []).length === 0) assignLevel(n.id, 0); });
+    const levelsArr = nodes.reduce((acc, n) => { 
+        if (n.level === -1) n.level = 0; 
+        if (!acc[n.level]) acc[n.level] = []; 
+        acc[n.level].push(n); 
+        return acc; 
+    }, [] as NodeTask[][]);
     return { nodes, levels: levelsArr };
   }, [project.tasks]);
   

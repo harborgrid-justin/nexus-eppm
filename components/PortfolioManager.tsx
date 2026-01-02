@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 // FIX: Added MessageSquare to the lucide-react imports.
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, MessageSquare, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageSquare, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -22,6 +22,8 @@ import { useData } from '../context/DataContext';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 import ProgramManager from './ProgramManager';
 import { useTheme } from '../context/ThemeContext';
+import { PageHeader } from './common/PageHeader';
+import { ErrorBoundary } from './ErrorBoundary';
 
 const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
@@ -85,17 +87,7 @@ const PortfolioManager: React.FC = () => {
 
   const renderContent = () => {
     if (drilledProgramId) {
-        return (
-            <div className="h-full flex flex-col relative animate-in slide-in-from-bottom-4">
-                <button 
-                    onClick={() => startTransition(() => setDrilledProgramId(null))}
-                    className="absolute top-4 left-4 z-[60] bg-white/90 backdrop-blur p-2 rounded-full border border-slate-200 shadow-md text-nexus-600 hover:bg-nexus-50 transition-all font-bold text-xs flex items-center gap-2"
-                >
-                    <ArrowLeft size={16}/> Back to Portfolio
-                </button>
-                <ProgramManager forcedProgramId={drilledProgramId} />
-            </div>
-        );
+        return <ProgramManager forcedProgramId={drilledProgramId} />;
     }
 
     switch(activeTab) {
@@ -119,24 +111,61 @@ const PortfolioManager: React.FC = () => {
     }
   };
 
-  return (
-    <div className={`h-full w-full flex flex-col ${theme.colors.background}`}>
-      {!drilledProgramId && (
-        <ModuleNavigation 
-            groups={navGroups}
-            activeGroup={activeGroup}
-            activeItem={activeTab}
-            onGroupChange={handleGroupChange}
-            onItemChange={handleItemChange}
-        />
-      )}
-      <div className="flex-1 overflow-hidden relative">
-         {isPending && (
-             <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px] z-20">
-                 <Loader2 className="animate-spin text-nexus-500" />
+  // Special case for full-screen drilldown to maintain context
+  if (drilledProgramId) {
+       return (
+         <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full animate-in slide-in-from-bottom-4 fade-in`}>
+             <PageHeader 
+                title="Program Detail" 
+                subtitle="Deep dive into program execution and governance."
+                icon={Layers}
+                actions={
+                    <button 
+                        onClick={() => startTransition(() => setDrilledProgramId(null))}
+                        className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-sm"
+                    >
+                        <ArrowLeft size={16}/> Back to Portfolio
+                    </button>
+                }
+             />
+             <div className={theme.layout.panelContainer}>
+                 {/* ProgramManager handles its own internal layout, but we wrap it in the panel for consistency */}
+                 <ProgramManager forcedProgramId={drilledProgramId} />
              </div>
-         )}
-         {renderContent()}
+         </div>
+       )
+  }
+
+  return (
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+      <PageHeader 
+        title="Portfolio Management" 
+        subtitle="Executive oversight, strategic alignment, and investment optimization."
+        icon={LayoutDashboard}
+      />
+      
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
+            <ModuleNavigation 
+                groups={navGroups}
+                activeGroup={activeGroup}
+                activeItem={activeTab}
+                onGroupChange={handleGroupChange}
+                onItemChange={handleItemChange}
+                className="bg-transparent border-0 shadow-none"
+            />
+        </div>
+        
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+             {isPending && (
+                 <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[1px] z-20">
+                     <Loader2 className="animate-spin text-nexus-500" />
+                 </div>
+             )}
+             <ErrorBoundary name="Portfolio Module">
+                {renderContent()}
+             </ErrorBoundary>
+        </div>
       </div>
     </div>
   );

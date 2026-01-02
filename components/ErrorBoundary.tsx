@@ -8,7 +8,7 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error;
+  error?: Error | string;
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -33,13 +33,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError) {
-      const errorMessage = this.state.error instanceof Error 
-        ? this.state.error.message 
-        : typeof this.state.error === 'string' 
-            ? this.state.error 
+      const { error } = this.state;
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : typeof error === 'string' 
+            ? error 
             : 'An unexpected error occurred.';
 
-      const errorStack = this.state.error instanceof Error ? this.state.error.stack : null;
+      const errorStack = error instanceof Error ? error.stack : null;
 
       return (
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">

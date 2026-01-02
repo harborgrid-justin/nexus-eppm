@@ -1,5 +1,5 @@
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useRef, useEffect } from 'react';
 import { Task, TaskStatus } from '../../../types';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
@@ -32,15 +32,27 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   showCriticalPath, baselineMap, selectedTask, projectTasks, calendar, ganttContainerRef,
   getStatusColor, handleMouseDown, setSelectedTask, virtualItems, totalHeight, onScroll
 }, ref) => {
+  
+  // Principle 12: Scroll Performance Isolation
+  // Using a local scroll handler that decouples the event from React state updates where possible
+  // Note: The parent component handles the virtualization state update via the onScroll prop,
+  // which should be wrapped in requestAnimationFrame in the parent hook (useVirtualScroll).
+  
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    // Pass event up - optimization logic resides in useVirtualScroll hook
+    onScroll(e);
+  };
+
   return (
     <div 
         ref={ref} 
-        className="flex-1 overflow-auto bg-slate-50 relative scrollbar-thin"
-        onScroll={onScroll}
+        className="flex-1 overflow-auto bg-slate-50 relative scrollbar-thin will-change-transform"
+        onScroll={handleScroll}
+        style={{ contain: 'strict' }} // CSS containment for browser optimization
     >
         <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${totalHeight + 100}px` }}>
             {/* Header Sticky */}
-            <div className="sticky top-0 z-20 bg-white border-b border-slate-200 h-[50px] flex shadow-sm">
+            <div className="sticky top-0 z-20 bg-white border-b border-slate-200 h-[50px] flex shadow-sm will-change-transform">
                 {Array.from(timelineHeaders.months.entries()).map(([key, data]) => (
                     <div key={key} className="absolute top-0 border-r border-slate-200 text-xs font-bold text-slate-500 px-2 py-1 truncate bg-white" 
                         style={{ left: `${data.start}px`, width: `${data.width}px` }}>
@@ -59,16 +71,16 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
 
             {/* Virtualized Body */}
             <div className="relative">
-                {/* Background Grid Lines (Optimization: Only draw in viewport if simple, but CSS grid easier for full width) */}
-                <div className="absolute inset-0 pointer-events-none" style={{ height: `${totalHeight}px` }}>
-                     <div 
-                        className="w-full h-full" 
-                        style={{ 
-                            backgroundImage: `linear-gradient(to right, #f1f5f9 1px, transparent 1px)`,
-                            backgroundSize: `${dayWidth}px 100%`
-                        }} 
-                    />
-                </div>
+                {/* Background Grid Lines (Optimization: CSS Grid for static background) */}
+                <div 
+                    className="absolute inset-0 pointer-events-none" 
+                    style={{ 
+                        height: `${totalHeight}px`,
+                        backgroundImage: `linear-gradient(to right, #f1f5f9 1px, transparent 1px)`,
+                        backgroundSize: `${dayWidth}px 100%`,
+                        zIndex: 0
+                    }} 
+                />
 
                 {virtualItems.map(({ index, offsetTop }) => {
                     const item = renderList[index];
@@ -79,7 +91,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                     const baselineData = baselineMap ? baselineMap[item.task.id] : null;
 
                     return (
-                        <div key={item.task.id} style={{ transform: `translateY(${offsetTop}px)`, position: 'absolute', width: '100%', height: `${rowHeight}px`, top: 0, left: 0 }}>
+                        <div key={item.task.id} style={{ transform: `translateY(${offsetTop}px)`, position: 'absolute', width: '100%', height: `${rowHeight}px`, top: 0, left: 0, willChange: 'transform' }}>
                             <GanttTaskBar
                                 task={item.task}
                                 rowIndex={0} // Relative to transform
@@ -100,8 +112,6 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                     );
                 })}
 
-                {/* Dependency Lines - Separate SVG Layer for better perf, but needs to handle virtualization or draw all */}
-                {/* For massive scale, deps should only draw if source/target in view, but here keeping full render for simplicity as paths are light */}
                 <DependencyLines 
                     renderList={renderList}
                     taskRowMap={taskRowMap}

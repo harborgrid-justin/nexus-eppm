@@ -1,5 +1,5 @@
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
 import { Project, Task, WBSNode } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
@@ -9,6 +9,7 @@ import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
 import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
 import { useTheme } from '../context/ThemeContext';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useVirtualScroll } from '../hooks/useVirtualScroll';
 
 const ROW_HEIGHT = 44;
 
@@ -16,20 +17,19 @@ const ProjectGantt: React.FC = () => {
   const { project: initialProject } = useProjectWorkspace();
   const theme = useTheme();
   
-  // Implementation 15: Split state by priority (Schedule logic vs Selection UI)
   const {
       project, viewMode, setViewMode, selectedTask, setSelectedTask, isTraceLogicOpen,
       setIsTraceLogicOpen, showCriticalPath, setShowCriticalPath, activeBaselineId,
       setActiveBaselineId, showResources, setShowResources, ganttContainerRef,
       expandedNodes, toggleNode, timelineHeaders, projectStart, projectEnd,
-      getStatusColor, handleMouseDown
+      getStatusColor, handleMouseDown, taskFilter, setTaskFilter
   } = useGantt(initialProject);
 
   const [showTaskList, setShowTaskList] = useState(true);
 
   // Flatten WBS and Tasks for virtualization
   const flatRenderList = useMemo(() => {
-    const list: any[] = [];
+    const list: ({ type: 'wbs', node: WBSNode, level: number } | { type: 'task', task: Task, level: number })[] = [];
     const traverse = (nodes: WBSNode[], level: number) => {
         nodes.forEach(node => {
             list.push({ type: 'wbs', node, level });
@@ -58,6 +58,47 @@ const ProjectGantt: React.FC = () => {
       return project.baselines.find(b => b.id === activeBaselineId)?.taskBaselines || null;
   }, [activeBaselineId, project.baselines]);
 
+  // --- Virtualization Logic ---
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(600); 
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Refs for sync scrolling
+  const listRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+      if (containerRef.current) {
+          setContainerHeight(containerRef.current.clientHeight);
+      }
+      const handleResize = () => {
+          if (containerRef.current) setContainerHeight(containerRef.current.clientHeight);
+      };
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const { virtualItems, totalHeight, onScroll } = useVirtualScroll(scrollTop, {
+      totalItems: flatRenderList.length,
+      itemHeight: ROW_HEIGHT,
+      containerHeight
+  });
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+      const top = e.currentTarget.scrollTop;
+      
+      // Update virtual state (which debounces internally)
+      onScroll(top);
+      setScrollTop(top);
+
+      // Immediate visual sync
+      if (e.target === listRef.current && timelineRef.current) {
+          timelineRef.current.scrollTop = top;
+      } else if (e.target === timelineRef.current && listRef.current) {
+          listRef.current.scrollTop = top;
+      }
+  }, [onScroll]);
+
   return (
     <div className={`flex flex-col h-full ${theme.colors.surface} rounded-lg overflow-hidden relative border ${theme.colors.border} shadow-sm flex-1`}>
       <GanttToolbar 
@@ -65,6 +106,8 @@ const ProjectGantt: React.FC = () => {
         setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
         showResources={showResources} setShowResources={setShowResources} onTraceLogic={() => setIsTraceLogicOpen(true)}
         isTaskSelected={!!selectedTask}
+        taskFilter={taskFilter}
+        setTaskFilter={setTaskFilter}
       />
       
       <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>
@@ -72,16 +115,22 @@ const ProjectGantt: React.FC = () => {
       </button>
 
       <div className="flex flex-1 overflow-hidden relative flex-col">
-        <div className="flex flex-1 overflow-hidden relative">
+        <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
             <GanttTaskList 
+                ref={listRef}
                 renderList={flatRenderList} 
                 showTaskList={showTaskList} 
                 expandedNodes={expandedNodes}
                 selectedTask={selectedTask} 
                 toggleNode={toggleNode} 
-                setSelectedTask={setSelectedTask} 
+                setSelectedTask={setSelectedTask}
+                virtualItems={virtualItems}
+                totalHeight={totalHeight}
+                rowHeight={ROW_HEIGHT}
+                onScroll={handleScroll}
             />
             <GanttTimeline 
+                ref={timelineRef}
                 timelineHeaders={timelineHeaders} 
                 renderList={flatRenderList} 
                 taskRowMap={taskRowMap}
@@ -98,6 +147,9 @@ const ProjectGantt: React.FC = () => {
                 getStatusColor={getStatusColor} 
                 handleMouseDown={handleMouseDown} 
                 setSelectedTask={setSelectedTask}
+                virtualItems={virtualItems}
+                totalHeight={totalHeight}
+                onScroll={handleScroll}
             />
         </div>
         {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}
