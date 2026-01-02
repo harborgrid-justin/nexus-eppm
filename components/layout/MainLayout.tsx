@@ -18,6 +18,7 @@ const MainLayout: React.FC = () => {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [isPulseOpen, setIsPulseOpen] = useState(false);
   
+  // Pattern 1: startTransition for critical interactions
   const [isPending, startTransition] = useTransition();
   
   const { state } = useData();
@@ -25,7 +26,6 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // The concept of `selectedProjectId` is now part of the URL, handled by the router's loader.
   const projectIdFromUrl = location.pathname.startsWith('/projectWorkspace/') ? location.pathname.split('/')[2] : null;
   const selectedProject = state.projects.find(p => p.id === projectIdFromUrl) || state.projects[0];
 
@@ -39,7 +39,6 @@ const MainLayout: React.FC = () => {
       });
   };
 
-  // The active tab is now derived from the URL path
   const activeTab = location.pathname.split('/')[1] || 'portfolio';
 
   return (
@@ -69,14 +68,14 @@ const MainLayout: React.FC = () => {
         <main className="flex-1 overflow-hidden relative">
            <ErrorBoundary name="Main Content">
              <div className="h-full w-full relative flex flex-col">
+                 {/* Visual indicator for background transitions */}
                  {isPending && (
-                    <div className="absolute inset-0 z-50 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
-                        <SuspenseFallback />
+                    <div className="absolute top-0 left-0 right-0 h-1 z-[100] overflow-hidden bg-nexus-100">
+                        <div className="h-full bg-nexus-600 animate-progress origin-left"></div>
                     </div>
                  )}
                  <Suspense fallback={<SuspenseFallback />}>
-                   {/* Wrapping Outlet in a div ensures Suspense always has a single valid child, preventing #306 errors */}
-                   <div className="h-full w-full">
+                   <div className={`h-full w-full transition-opacity duration-300 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
                       <Outlet />
                    </div>
                  </Suspense>

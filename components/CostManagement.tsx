@@ -15,7 +15,6 @@ import ReserveAnalysis from './cost/ReserveAnalysis';
 import CostProcurement from './cost/CostProcurement';
 import CostCommunications from './cost/CostCommunications'; 
 import { useTheme } from '../context/ThemeContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
@@ -88,22 +87,22 @@ const CostManagement: React.FC = () => {
   if (!project) return <div className={theme.layout.pagePadding}>Loading cost module...</div>;
 
   return (
-    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Cost Management" 
         subtitle="Plan, estimate, and control project costs with precision."
         icon={DollarSign}
       />
 
-      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
-        <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden">
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden bg-slate-50/50 ${theme.layout.headerBorder}`}>
             <ModuleNavigation 
                 groups={navGroups}
                 activeGroup={activeGroup}
                 activeItem={activeView}
                 onGroupChange={handleGroupChange}
                 onItemChange={handleItemChange}
-                className="border-b border-slate-200"
+                className="bg-transparent border-0 shadow-none"
             />
         </div>
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>

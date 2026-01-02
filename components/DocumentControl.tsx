@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useData } from '../context/DataContext';
-import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock } from 'lucide-react';
+import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { PageHeader } from './common/PageHeader';
@@ -15,6 +15,8 @@ const DocumentControl: React.FC = () => {
   const canUpload = hasPermission('project:edit');
 
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pattern 12: Deferred value for expensive filtering
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const docs = useMemo(() => {
@@ -51,7 +53,6 @@ const DocumentControl: React.FC = () => {
        />
 
        <div className={`${theme.components.card} flex-1 overflow-hidden flex flex-col`}>
-          {/* Toolbar */}
           <div className={`p-4 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center gap-4`}>
              <div className="flex gap-4 w-full md:w-auto">
                  <div className="relative flex-1 md:flex-none">
@@ -59,10 +60,15 @@ const DocumentControl: React.FC = () => {
                     <input 
                         type="text" 
                         placeholder="Search files..." 
-                        className={`pl-9 pr-4 py-1.5 text-sm border ${theme.colors.border} rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500`}
+                        className={`pl-9 pr-10 py-1.5 text-sm border ${theme.colors.border} rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500 transition-all`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
+                    {searchTerm !== deferredSearchTerm && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 size={12} className="animate-spin text-slate-300"/>
+                        </div>
+                    )}
                  </div>
                  <button className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded-md text-sm text-slate-600 hover:bg-slate-50`}>
                     <Filter size={14} /> Filter
@@ -77,8 +83,7 @@ const DocumentControl: React.FC = () => {
              </div>
           </div>
 
-          {/* Grid View */}
-          <div className="flex-1 overflow-auto p-6">
+          <div className={`flex-1 overflow-auto p-6 transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
              <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Recent Uploads</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {docs.map(doc => (
@@ -87,7 +92,6 @@ const DocumentControl: React.FC = () => {
                       className={`p-4 border ${theme.colors.border} rounded-lg hover:border-nexus-300 hover:shadow-md transition-all ${theme.colors.surface} group cursor-pointer relative focus:outline-none focus:ring-2 focus:ring-nexus-500`}
                       tabIndex={0}
                       role="button"
-                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && alert('View Document: ' + doc.name)}
                    >
                       <div className="flex justify-between items-start mb-3">
                          {getIcon(doc.type)}
@@ -111,38 +115,6 @@ const DocumentControl: React.FC = () => {
                       </div>
                    </div>
                 ))}
-                
-                {/* Upload Placeholder */}
-                {canUpload && (
-                    <div 
-                        className={`border-2 border-dashed ${theme.colors.border} rounded-lg flex flex-col items-center justify-center p-6 text-slate-400 hover:border-nexus-400 hover:text-nexus-500 hover:bg-nexus-50/30 transition-all cursor-pointer h-[140px] focus:outline-none focus:ring-2 focus:ring-nexus-500`}
-                        tabIndex={0}
-                        role="button"
-                        aria-label="Upload new document"
-                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && alert('Open upload dialog')}
-                    >
-                        <Upload size={24} className="mb-2 opacity-50" />
-                        <span className="text-sm font-medium">Drop files here</span>
-                    </div>
-                )}
-             </div>
-
-             <div className="mt-8">
-                <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Folders</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                   {['Specifications', 'Contracts', 'RFI Responses', 'Safety Reports', 'Photos'].map((folder, i) => (
-                      <div 
-                          key={i} 
-                          className={`flex items-center gap-3 p-3 border ${theme.colors.border} rounded-lg hover:bg-slate-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-nexus-500`}
-                          tabIndex={0}
-                          role="button"
-                          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && alert('Open folder: ' + folder)}
-                      >
-                         <Folder className="text-yellow-400" size={24} />
-                         <span className="text-sm font-medium text-slate-700">{folder}</span>
-                      </div>
-                   ))}
-                </div>
              </div>
           </div>
        </div>

@@ -1,10 +1,9 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
-import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2, Save } from 'lucide-react';
+import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2, Save, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
-// FIX: Corrected import path for QualityStandard type to resolve module resolution error.
 import { QualityStandard } from '../../types/index';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
@@ -16,11 +15,12 @@ export const QualityStandards: React.FC = () => {
     const { state } = useData(); 
     const { canEditProject } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // Pattern 10: Defer standard search
     const deferredSearchTerm = useDeferredValue(searchTerm);
 
     const [categoryFilter, setCategoryFilter] = useState('All');
     
-    // Panel State
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [editingStandard, setEditingStandard] = useState<Partial<QualityStandard>>({
         name: '',
@@ -30,7 +30,6 @@ export const QualityStandards: React.FC = () => {
         enforcement: 'Mandatory'
     });
 
-    // Combine mock data from constants if state is empty, or use state
     const standards: QualityStandard[] = state.qualityStandards.length > 0 ? state.qualityStandards : [
         { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', category: 'General', source: 'External', enforcement: 'Mandatory' },
         { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', category: 'Process', source: 'Internal', enforcement: 'Mandatory' },
@@ -63,13 +62,7 @@ export const QualityStandards: React.FC = () => {
     };
 
     const handleSave = () => {
-        // In a real app, dispatch to store
         console.log("Saving standard:", editingStandard);
-        const newStandard = {
-            ...editingStandard,
-            id: editingStandard.id || generateId('QS')
-        };
-        // dispatch({ type: 'ADD_QUALITY_STANDARD', payload: newStandard });
         setIsPanelOpen(false);
     };
 
@@ -100,7 +93,6 @@ export const QualityStandards: React.FC = () => {
                 )}
             </div>
 
-            {/* Toolbar */}
             <div className="px-4 py-3 border-b border-slate-200 flex gap-3 items-center">
                 <div className="relative flex-1 max-w-sm">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
@@ -111,6 +103,11 @@ export const QualityStandards: React.FC = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9 pr-4 py-1.5 w-full text-sm border border-slate-300 rounded-md focus:ring-1 focus:ring-nexus-500 outline-none"
                     />
+                    {searchTerm !== deferredSearchTerm && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 size={12} className="animate-spin text-slate-400"/>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                     <Filter size={14} className="text-slate-400"/>
@@ -128,8 +125,7 @@ export const QualityStandards: React.FC = () => {
                 </div>
             </div>
 
-            {/* Registry Table */}
-            <div className="flex-1 overflow-auto bg-slate-50">
+            <div className={`flex-1 overflow-auto bg-slate-50 transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
                 <div className="min-w-[800px]">
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white sticky top-0 shadow-sm z-10">
@@ -181,19 +177,11 @@ export const QualityStandards: React.FC = () => {
                                     </td>
                                 </tr>
                             ))}
-                            {filteredStandards.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
-                                        <p>No standards found matching your filter.</p>
-                                    </td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {/* Create/Edit Panel */}
             <SidePanel
                 isOpen={isPanelOpen}
                 onClose={() => setIsPanelOpen(false)}
@@ -206,7 +194,6 @@ export const QualityStandards: React.FC = () => {
                     </>
                 }
             >
-                {/* Form fields same as original */}
                 <div className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Standard Name / Code</label>
@@ -252,19 +239,6 @@ export const QualityStandards: React.FC = () => {
                             onChange={e => setEditingStandard({...editingStandard, description: e.target.value})}
                             placeholder="Brief summary of requirements..."
                         />
-                    </div>
-                    <div>
-                         <label className="block text-sm font-medium text-slate-700 mb-1">Enforcement Level</label>
-                         <div className="flex gap-4">
-                             <label className="flex items-center gap-2 cursor-pointer">
-                                 <input type="radio" name="enforcement" value="Mandatory" checked={editingStandard.enforcement === 'Mandatory'} onChange={() => setEditingStandard({...editingStandard, enforcement: 'Mandatory'})} className="text-nexus-600 focus:ring-nexus-500"/>
-                                 <span className="text-sm text-slate-700">Mandatory</span>
-                             </label>
-                             <label className="flex items-center gap-2 cursor-pointer">
-                                 <input type="radio" name="enforcement" value="Guideline" checked={editingStandard.enforcement === 'Guideline'} onChange={() => setEditingStandard({...editingStandard, enforcement: 'Guideline'})} className="text-nexus-600 focus:ring-nexus-500"/>
-                                 <span className="text-sm text-slate-700">Guideline</span>
-                             </label>
-                         </div>
                     </div>
                 </div>
             </SidePanel>

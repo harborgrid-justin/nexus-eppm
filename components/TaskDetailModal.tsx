@@ -1,10 +1,7 @@
 
-
-
 import React, { useMemo, useState } from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { Task, Project } from '../types/index';
-import { ShieldAlert, FileText, Calendar, Database } from 'lucide-react';
+import { ShieldAlert, FileText, Calendar, Database, ListChecks } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTaskForm } from '../hooks/useTaskForm';
 import { useData } from '../context/DataContext';
@@ -14,6 +11,7 @@ import { SidePanel } from './ui/SidePanel';
 import { TaskGeneralTab } from './tasks/detail/TaskGeneralTab';
 import { TaskScheduleTab } from './tasks/detail/TaskScheduleTab';
 import { TaskAdvancedTab } from './tasks/detail/TaskAdvancedTab';
+import { TaskStepsTab } from './tasks/detail/TaskStepsTab';
 import { checkMaterialAvailability } from '../utils/integrations/resource';
 
 interface TaskDetailModalProps {
@@ -26,7 +24,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
   const { state } = useData();
   const { canEditProject } = usePermissions();
   const isReadOnly = !canEditProject();
-  const [activeTab, setActiveTab] = useState<'general' | 'schedule' | 'advanced'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'schedule' | 'steps' | 'advanced'>('general');
 
   const {
     localTask, updateField, handleStatusChange, saveChanges, applicableCodes, linkedIssues, linkedExpenses, linkedRisks, canComplete, blockingNCRs
@@ -51,7 +49,12 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
     >
        <div className="space-y-6">
           <div className="flex border-b border-slate-200" role="tablist">
-              {[ { id: 'general', label: 'General', icon: FileText }, { id: 'schedule', label: 'Schedule', icon: Calendar }, { id: 'advanced', label: 'Advanced', icon: Database } ].map((tab) => (
+              {[ 
+                  { id: 'general', label: 'General', icon: FileText }, 
+                  { id: 'schedule', label: 'Schedule', icon: Calendar }, 
+                  { id: 'steps', label: 'Steps', icon: ListChecks },
+                  { id: 'advanced', label: 'Advanced', icon: Database } 
+              ].map((tab) => (
                   <button 
                     key={tab.id} 
                     role="tab"
@@ -73,6 +76,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
              )}
              {activeTab === 'schedule' && (
                  <TaskScheduleTab task={localTask} project={project} isReadOnly={isReadOnly} onUpdate={updateField} />
+             )}
+             {activeTab === 'steps' && (
+                 <TaskStepsTab task={localTask} isReadOnly={isReadOnly} onUpdate={updateField} />
              )}
              {activeTab === 'advanced' && (
                  <TaskAdvancedTab 

@@ -5,7 +5,7 @@ import {
   MonitorPlay, Globe, Shield, ChevronRight, PieChart, 
   Briefcase, HardHat, Users, Settings, Box, Cloud, GripVertical
 } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import * as Templates from './templates';
 
 const CATEGORIES = [

@@ -6,7 +6,7 @@ import {
   LayoutDashboard, CheckSquare, Globe, Layers, Users, ShieldAlert, FileText, Settings, 
   Network, Package, ChevronDown, ChevronRight, PieChart, FolderOpen, Palette, Server, MapPin, 
   Terminal, Calendar, GitPullRequest, Tag, Edit3, FileWarning, Receipt, Banknote, UserCog, 
-  Shield, CreditCard, Bell, History, Share2, Database, Briefcase, LayoutTemplate
+  Shield, CreditCard, Bell, History, Share2, Database, Briefcase, LayoutTemplate, Box
 } from 'lucide-react';
 
 interface SidebarNavProps {
@@ -49,7 +49,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
             id: 'strategy', 
             label: 'Portfolio & Strategy', 
             items: [
-                { id: 'portfolio', label: 'Executive Dashboard', icon: Globe }, 
+                { id: 'portfolio', label: 'Portfolio Management', icon: Globe }, 
                 { id: 'programs', label: 'Program Management', icon: PieChart },
                 { id: 'enterpriseRisks', label: 'Enterprise Risk', icon: ShieldAlert },
             ]
@@ -77,6 +77,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
             label: 'System Design', 
             items: [
                 { id: 'templates', label: 'UI Template Gallery', icon: LayoutTemplate },
+                { id: 'workbench', label: 'Component Workbench', icon: Box },
             ]
         },
         { 
@@ -135,7 +136,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
                             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium group transition-all duration-200 ${
                                 isActive 
                                 ? `${theme.colors.primary} text-white shadow-md shadow-slate-900/20` 
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                                : `text-slate-400 hover:${theme.colors.background} hover:${theme.colors.text.primary}`
                             }`}
                             title={item.label}
                         >

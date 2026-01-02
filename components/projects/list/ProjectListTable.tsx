@@ -8,6 +8,7 @@ import { ProgressBar } from '../../common/ProgressBar';
 import DataTable, { Column } from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
+import { GitBranch } from 'lucide-react';
 
 interface ProjectListTableProps {
   projects: Project[];
@@ -29,7 +30,10 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
       key: 'name', header: 'Project Name', sortable: true,
       render: (p) => (
         <div className="flex flex-col min-w-0 overflow-hidden">
-          <span className="text-sm font-semibold text-slate-900 truncate">{p.name}</span>
+          <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-900 truncate">{p.name}</span>
+              {p.isReflection && <GitBranch size={14} className="text-purple-500" title="Reflection Project" />}
+          </div>
           <span className="text-xs text-slate-500 font-mono truncate">{p.code}</span>
         </div>
       )

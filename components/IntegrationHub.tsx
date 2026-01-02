@@ -1,6 +1,4 @@
 
-
-
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
@@ -10,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
+import { PageHeader } from './common/PageHeader';
 
 const IntegrationHub: React.FC = () => {
   const { state, dispatch } = useData();
@@ -17,15 +16,12 @@ const IntegrationHub: React.FC = () => {
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-       <div className={theme.layout.header}>
-          <div>
-            <h1 className={theme.typography.h1}>
-              <Network className="text-nexus-600" /> Integration Hub
-            </h1>
-            <p className={theme.typography.small}>Manage connections to external enterprise systems.</p>
-          </div>
-          <Button variant="secondary" icon={RefreshCw}>Sync All</Button>
-       </div>
+       <PageHeader 
+          title="Integration Hub" 
+          subtitle="Manage connections to external enterprise systems." 
+          icon={Network} 
+          actions={<Button variant="secondary" icon={RefreshCw}>Sync All</Button>}
+       />
 
       <ErrorBoundary>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>

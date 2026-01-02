@@ -1,8 +1,5 @@
 
-
-
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
+import React, { useMemo, useCallback, useState } from 'react';
 import { Project, Task, WBSNode } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
@@ -18,16 +15,19 @@ const ROW_HEIGHT = 44;
 const ProjectGantt: React.FC = () => {
   const { project: initialProject } = useProjectWorkspace();
   const theme = useTheme();
+  
+  // Implementation 15: Split state by priority (Schedule logic vs Selection UI)
   const {
       project, viewMode, setViewMode, selectedTask, setSelectedTask, isTraceLogicOpen,
       setIsTraceLogicOpen, showCriticalPath, setShowCriticalPath, activeBaselineId,
       setActiveBaselineId, showResources, setShowResources, ganttContainerRef,
       expandedNodes, toggleNode, timelineHeaders, projectStart, projectEnd,
-      getStatusColor, handleMouseDown, taskFilter, setTaskFilter
+      getStatusColor, handleMouseDown
   } = useGantt(initialProject);
 
   const [showTaskList, setShowTaskList] = useState(true);
 
+  // Flatten WBS and Tasks for virtualization
   const flatRenderList = useMemo(() => {
     const list: any[] = [];
     const traverse = (nodes: WBSNode[], level: number) => {
@@ -35,7 +35,7 @@ const ProjectGantt: React.FC = () => {
             list.push({ type: 'wbs', node, level });
             if (expandedNodes.has(node.id)) {
                 project.tasks.filter(t => t.wbsCode.startsWith(node.wbsCode) || t.wbsCode === node.wbsCode)
-                  .forEach(task => { if(!list.some(i => i.type === 'task' && i.task.id === task.id)) list.push({ type: 'task', task, level: level + 1 }); });
+                  .forEach(task => list.push({ type: 'task', task, level: level + 1 }));
                 traverse(node.children, level + 1);
             }
         });
@@ -52,6 +52,7 @@ const ProjectGantt: React.FC = () => {
       return map;
   }, [flatRenderList]);
 
+  // Baseline Comparison Map
   const baselineMap = useMemo(() => {
       if (!activeBaselineId || !project.baselines) return null;
       return project.baselines.find(b => b.id === activeBaselineId)?.taskBaselines || null;
@@ -63,8 +64,9 @@ const ProjectGantt: React.FC = () => {
         project={project} viewMode={viewMode} setViewMode={setViewMode} showCriticalPath={showCriticalPath}
         setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
         showResources={showResources} setShowResources={setShowResources} onTraceLogic={() => setIsTraceLogicOpen(true)}
-        isTaskSelected={!!selectedTask} taskFilter={taskFilter} setTaskFilter={setTaskFilter}
+        isTaskSelected={!!selectedTask}
       />
+      
       <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>
         {showTaskList ? <X size={20} /> : <List size={20} />}
       </button>
@@ -72,15 +74,30 @@ const ProjectGantt: React.FC = () => {
       <div className="flex flex-1 overflow-hidden relative flex-col">
         <div className="flex flex-1 overflow-hidden relative">
             <GanttTaskList 
-                renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes}
-                selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask}
+                renderList={flatRenderList} 
+                showTaskList={showTaskList} 
+                expandedNodes={expandedNodes}
+                selectedTask={selectedTask} 
+                toggleNode={toggleNode} 
+                setSelectedTask={setSelectedTask} 
             />
             <GanttTimeline 
-                timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap}
-                projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT}
-                showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask}
-                projectTasks={project.tasks} calendar={(project as any).calendar} ganttContainerRef={ganttContainerRef}
-                getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask}
+                timelineHeaders={timelineHeaders} 
+                renderList={flatRenderList} 
+                taskRowMap={taskRowMap}
+                projectStart={projectStart} 
+                projectEnd={projectEnd} 
+                dayWidth={DAY_WIDTH} 
+                rowHeight={ROW_HEIGHT}
+                showCriticalPath={showCriticalPath} 
+                baselineMap={baselineMap} 
+                selectedTask={selectedTask}
+                projectTasks={project.tasks} 
+                calendar={(project as any).calendar} 
+                ganttContainerRef={ganttContainerRef}
+                getStatusColor={getStatusColor} 
+                handleMouseDown={handleMouseDown} 
+                setSelectedTask={setSelectedTask}
             />
         </div>
         {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}

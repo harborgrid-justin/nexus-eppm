@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 import { Sliders, LayoutDashboard, FileText, List, Layers, Lock } from 'lucide-react';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
@@ -67,15 +66,15 @@ const ScopeManagement: React.FC = () => {
   if (!project) return <div className={theme.layout.pagePadding}>Loading scope data...</div>;
 
   return (
-    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Scope Management" 
         subtitle="Define, validate, and control project scope and deliverables."
         icon={Sliders}
       />
 
-      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 ${theme.layout.headerBorder} z-10 bg-slate-50/50`}>
           <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
               {navStructure.map(group => (
                   <button

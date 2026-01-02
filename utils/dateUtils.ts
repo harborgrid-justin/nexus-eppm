@@ -1,22 +1,27 @@
 
+interface Calendar {
+    workingDays: number[]; // 0-6 (Sun-Sat)
+    holidays: string[]; // ISO Strings
+}
 
-
-// FIX: Corrected import path for ProjectCalendar type to resolve module resolution error.
-import { ProjectCalendar } from '../types/index';
-
-const isWeekend = (date: Date, calendar: ProjectCalendar): boolean => {
+const isWeekend = (date: Date, calendar: Calendar): boolean => {
   return !calendar.workingDays.includes(date.getDay());
 };
 
-const isHoliday = (date: Date, calendar: ProjectCalendar): boolean => {
+const isHoliday = (date: Date, calendar: Calendar): boolean => {
   return calendar.holidays.includes(toISODateString(date));
 };
 
-export const addWorkingDays = (startDate: Date, duration: number, calendar: ProjectCalendar): Date => {
+export const addWorkingDays = (startDate: Date, duration: number, calendar: Calendar): Date => {
   let currentDate = new Date(startDate);
   let daysAdded = 0;
-  while (daysAdded < duration) {
-    currentDate.setDate(currentDate.getDate() + 1);
+  
+  // Handle negative duration (backward pass)
+  const direction = duration >= 0 ? 1 : -1;
+  const absDuration = Math.abs(duration);
+
+  while (daysAdded < absDuration) {
+    currentDate.setDate(currentDate.getDate() + direction);
     if (!isWeekend(currentDate, calendar) && !isHoliday(currentDate, calendar)) {
       daysAdded++;
     }
@@ -24,12 +29,12 @@ export const addWorkingDays = (startDate: Date, duration: number, calendar: Proj
   return currentDate;
 };
 
-export const getWorkingDaysDiff = (start: string | Date, end: string | Date, calendar: ProjectCalendar): number => {
+export const getWorkingDaysDiff = (start: string | Date, end: string | Date, calendar: Calendar): number => {
   let startDate = new Date(start);
   let endDate = new Date(end);
   let days = 0;
   
-  if (startDate > endDate) return 0;
+  if (startDate > endDate) return 0; // Or negative logic
 
   while (startDate < endDate) {
     if (!isWeekend(startDate, calendar) && !isHoliday(startDate, calendar)) {
@@ -43,21 +48,11 @@ export const getWorkingDaysDiff = (start: string | Date, end: string | Date, cal
 
 export const getDaysDiff = (start: string | Date, end: string | Date): number => {
   const startDate = new Date(start);
-  startDate.setUTCHours(0, 0, 0, 0);
   const endDate = new Date(end);
-  endDate.setUTCHours(0, 0, 0, 0);
-  
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return 0;
-  }
-  
-  return Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
 };
 
 export const toISODateString = (date: Date): string => {
-  if (isNaN(date.getTime())) {
-    return '';
-  }
   return date.toISOString().split('T')[0];
 };
 

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { DollarSign, Truck, AlertCircle } from 'lucide-react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';

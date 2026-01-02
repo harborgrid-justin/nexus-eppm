@@ -1,7 +1,5 @@
 
-
-
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
 // FIX: Corrected import path for types to resolve module resolution errors.
 import { Project, Task, TaskStatus, WorkDay, ProjectCalendar } from '../types/index';
 import { useData } from '../context/DataContext';
@@ -19,7 +17,11 @@ export const useGantt = (initialProject: Project) => {
   const [showCriticalPath, setShowCriticalPath] = useState(true);
   const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject.baselines?.[0]?.id || null);
   const [showResources, setShowResources] = useState(false);
+  
+  // Pattern 2: useDeferredValue for filtering to keep UI responsive
   const [taskFilter, setTaskFilter] = useState('all');
+  const deferredTaskFilter = useDeferredValue(taskFilter);
+  
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(initialProject.wbs?.map(w => w.id) || []));
   
   const projectCalendar = useMemo(() => {
@@ -44,9 +46,9 @@ export const useGantt = (initialProject: Project) => {
   }, [initialProject, projectCalendar]);
 
   const filteredTasks = useMemo(() => {
-      if (taskFilter === 'all') return project.tasks;
-      return project.tasks.filter(t => taskFilter === 'critical' ? t.critical : t.status === taskFilter);
-  }, [project.tasks, taskFilter]);
+      if (deferredTaskFilter === 'all') return project.tasks;
+      return project.tasks.filter(t => deferredTaskFilter === 'critical' ? t.critical : t.status === deferredTaskFilter);
+  }, [project.tasks, deferredTaskFilter]);
   
   const { ganttContainerRef, handleMouseDown } = useGanttDrag(dispatch, project, DAY_WIDTH);
   

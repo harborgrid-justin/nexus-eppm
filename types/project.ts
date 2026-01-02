@@ -19,6 +19,14 @@ export interface Dependency {
   lag: number;
 }
 
+export interface ActivityStep {
+    id: string;
+    name: string;
+    weight: number; // 0-1 or 1-100, used to calculate physical % complete
+    completed: boolean;
+    completedDate?: string;
+}
+
 export interface Task {
   id: string;
   wbsCode: string;
@@ -41,8 +49,14 @@ export interface Task {
   udfValues?: Record<string, any>;
   primaryConstraint?: { type: string; date: string };
   totalFloat?: number;
-  steps?: any[];
+  freeFloat?: number;
+  steps?: ActivityStep[]; // P6 Parity: Activity Steps
   notebooks?: any[];
+  // CPM Calculated fields
+  earlyStart?: Date;
+  earlyFinish?: Date;
+  lateStart?: Date;
+  lateFinish?: Date;
 }
 
 export interface Baseline {
@@ -66,6 +80,7 @@ export interface WBSNode {
   description: string;
   children: WBSNode[];
   shape?: WBSNodeShape;
+  parentId?: string | null;
 }
 
 export interface Project {
@@ -91,7 +106,7 @@ export interface Project {
   issues?: Issue[];
   budgetLog?: BudgetLogItem[];
   funding?: ProjectFunding[];
-  paymentApplications?: any[]; // Re-using any from PaymentApplication definition
+  paymentApplications?: any[];
   costEstimates?: CostEstimate[];
   baselines?: Baseline[];
   risks?: Risk[];
@@ -120,5 +135,12 @@ export interface Project {
   qualityPlan?: any;
   costPlan?: any;
   notebooks?: any[];
-  [key: string]: any;
+  percentCompleteType?: 'Duration' | 'Physical' | 'Units';
+  dataDate?: string;
+  totalFloat?: number;
+  description?: string;
+  
+  // Reflection / What-If Props
+  isReflection?: boolean;
+  sourceProjectId?: string;
 }

@@ -1,13 +1,13 @@
 
 import { 
     DataJob, Extension, ActivityCode, Document, QualityStandard, Integration, 
-    StandardTemplate, UserDefinedField, WorkflowDefinition, GlobalChangeRule, CostBookItem 
+    StandardTemplate, UserDefinedField, WorkflowDefinition, GlobalChangeRule 
 } from './common';
 import { Project, Task, WBSNode, Baseline, WBSNodeShape } from './project';
 import { Resource, Timesheet, EnterpriseRole, EnterpriseSkill } from './resource';
 import { 
     Expense, ExpenseCategory, FundingSource, BudgetLogItem, ProjectFunding, CostEstimate, 
-    BudgetLineItem, ChangeOrder, Invoice, CostReport, CostMeeting, CostAlert
+    BudgetLineItem, ChangeOrder, Invoice, CostReport, CostMeeting, CostAlert, CostBookItem
 } from './finance';
 import { 
     Risk, Issue, RiskManagementPlan, RiskBreakdownStructureNode, IssueCode, PortfolioRisk, 
@@ -117,6 +117,8 @@ export type Action =
   | { type: 'PROJECT_IMPORT'; payload: Project[] }
   | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: Partial<Project> } }
   | { type: 'PROJECT_CLOSE'; payload: string }
+  | { type: 'PROJECT_CREATE_REFLECTION'; payload: { sourceProjectId: string } }
+  | { type: 'PROJECT_MERGE_REFLECTION'; payload: { reflectionId: string } }
   | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: RiskManagementPlan } }
   // TASK
   | { type: 'TASK_UPDATE'; payload: { projectId: string; task: Task } }

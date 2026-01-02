@@ -6,7 +6,7 @@ import { useData } from '../../context/DataContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { User, Role } from '../../types/auth';
-import { User as UserIcon, Mail, Shield, Building, Clock, LogOut, Camera } from 'lucide-react';
+import { User as UserIcon, Mail, Shield, Building, Clock, LogOut, Camera, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface UserProfileProps {
@@ -73,7 +73,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
                     </div>
                 </div>
                 <h3 className={`mt-3 text-xl font-bold ${theme.colors.text.primary}`}>{user.name}</h3>
-                <span className={`text-sm font-medium ${theme.colors.background} px-3 py-1 rounded-full mt-1 border ${theme.colors.border}`}>{user.role}</span>
+                <span className={`text-sm font-medium ${theme.colors.background} px-3 py-1 rounded-full mt-1 border ${theme.colors.border} ${theme.colors.text.secondary}`}>{user.role}</span>
             </div>
 
             {/* Form Fields */}
@@ -95,7 +95,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
                         onChange={e => setFormData({...formData, email: e.target.value})} 
                         disabled
                     />
-                    <p className="text-[10px] text-slate-400 mt-1 pl-1">Email is managed by Identity Provider (SSO).</p>
+                    <p className={`text-[10px] ${theme.colors.text.tertiary} mt-1 pl-1`}>Email is managed by Identity Provider (SSO).</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -135,12 +135,21 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
             </div>
             
             <div className={`pt-4 border-t ${theme.colors.border}`}>
-                <h4 className={`text-sm font-bold ${theme.colors.text.primary} mb-3`}>Preferences</h4>
+                <h4 className={`text-sm font-bold ${theme.colors.text.primary} mb-3`}>Interface & Preferences</h4>
                 <div className="space-y-3">
                     <label className={`flex items-center justify-between p-3 border ${theme.colors.border} rounded-lg cursor-pointer hover:${theme.colors.background}`}>
-                        <span className={`text-sm ${theme.colors.text.secondary}`}>Email Notifications</span>
-                        <input type="checkbox" className="rounded text-nexus-600 focus:ring-nexus-500" defaultChecked />
+                        <div className="flex items-center gap-3">
+                            {theme.mode === 'dark' ? <Moon size={18} className="text-purple-400" /> : <Sun size={18} className="text-orange-500" />}
+                            <span className={`text-sm ${theme.colors.text.secondary}`}>Dark Mode</span>
+                        </div>
+                        <input 
+                            type="checkbox" 
+                            className="rounded text-nexus-600 focus:ring-nexus-500" 
+                            checked={theme.mode === 'dark'}
+                            onChange={() => theme.setMode(theme.mode === 'dark' ? 'light' : 'dark')}
+                        />
                     </label>
+
                     <label className={`flex items-center justify-between p-3 border ${theme.colors.border} rounded-lg cursor-pointer hover:${theme.colors.background}`}>
                         <span className={`text-sm ${theme.colors.text.secondary}`}>Compact Density Mode</span>
                         <input 

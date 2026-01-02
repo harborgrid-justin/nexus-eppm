@@ -4,7 +4,7 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Layers, ListChecks, FileWarning, CheckCircle, Target, Activity } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { formatPercentage } from '../../utils/formatters';
 
 const ScopeDashboard: React.FC = () => {

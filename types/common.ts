@@ -126,11 +126,3 @@ export interface QualityStandard {
     enforcement: 'Mandatory' | 'Guideline';
     linkedWbsIds?: string[];
 }
-
-export interface CostBookItem {
-    id: string;
-    description: string;
-    type: 'Labor' | 'Material' | 'Equipment' | 'Subcontract';
-    unit: string;
-    rate: number;
-}

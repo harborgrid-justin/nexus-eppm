@@ -38,11 +38,14 @@ export interface Risk {
   
   // History
   history?: RiskHistoryItem[];
+  
+  // Alias for compatibility if needed, though prefer 'strategy'
+  responseStrategy?: 'Avoid' | 'Transfer' | 'Mitigate' | 'Accept' | 'Escalate';
 }
 
 export interface RiskHistoryItem {
   date: string;
-  userId: string; // FK to User
+  userId: string;
   action: string;
   change?: string;
 }
@@ -105,7 +108,6 @@ export interface PortfolioRisk {
   mitigationPlan: string;
 }
 
-// FIX: Added missing interface QualityReport
 export interface QualityReport {
   id: string;
   projectId: string;
@@ -116,7 +118,6 @@ export interface QualityReport {
   summary: string;
 }
 
-// FIX: Added missing interface NonConformanceReport
 export interface NonConformanceReport {
   id: string;
   projectId: string;
@@ -129,7 +130,6 @@ export interface NonConformanceReport {
   vendorId?: string;
 }
 
-// FIX: Added missing interface ProgramRisk
 export interface ProgramRisk {
   id: string;
   programId: string;

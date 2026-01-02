@@ -1,10 +1,9 @@
 
-import React, { useState, useRef } from 'react';
-import { UploadCloud, FileText, Loader2, Lock } from 'lucide-react';
+import React, { useState, useRef, useTransition } from 'react';
+import { UploadCloud, FileText, Loader2, Lock, CheckCircle } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useTheme } from '../../../context/ThemeContext';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { Project } from '../../../types';
 import { formatBytes } from '../../../utils/dataExchangeUtils';
 
 export const ImportPanel: React.FC = () => {
@@ -17,14 +16,10 @@ export const ImportPanel: React.FC = () => {
     const [importFile, setImportFile] = useState<File | null>(null);
     const [isImporting, setIsImporting] = useState(false);
     const [importProgress, setImportProgress] = useState(0);
+    const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFiles = (files: FileList | null) => { if (canExchange && files && files[0]) setImportFile(files[0]); };
-    const handleDrop = (e: React.DragEvent) => {
-        if (!canExchange) return;
-        e.preventDefault(); e.stopPropagation(); setDragActive(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFiles(e.dataTransfer.files);
-    };
     const handleDrag = (e: React.DragEvent) => {
         if (!canExchange) return;
         e.preventDefault(); e.stopPropagation();
@@ -36,55 +31,62 @@ export const ImportPanel: React.FC = () => {
         setIsImporting(true); setImportProgress(0);
         const jobId = `IMP-${Date.now()}`;
 
-        dispatch({ type: 'QUEUE_DATA_JOB', payload: { id: jobId, type: 'Import', format: 'JSON', status: 'In Progress', submittedBy: 'Current User', timestamp: new Date().toLocaleString(), details: `Uploading ${importFile.name}...`, fileName: importFile.name, fileSize: formatBytes(importFile.size), progress: 0 } });
+        // Pattern 20: Process import steps in transitions
+        startTransition(() => {
+            dispatch({ type: 'SYSTEM_QUEUE_DATA_JOB', payload: { id: jobId, type: 'Import', format: 'JSON', status: 'In Progress', submittedBy: 'Admin', timestamp: new Date().toLocaleString(), details: `Queueing ${importFile.name}...`, fileName: importFile.name, fileSize: formatBytes(importFile.size), progress: 0, isRead: false } as any });
+        });
 
         for (let i = 1; i <= 5; i++) {
             await new Promise(resolve => setTimeout(resolve, 600));
             const progress = (i / 5) * 100;
-            setImportProgress(progress);
-            dispatch({ type: 'UPDATE_DATA_JOB', payload: { jobId, status: 'In Progress', progress } });
+            // Pattern 21: High-frequency progress updates handled with transition protection
+            startTransition(() => {
+                setImportProgress(progress);
+                dispatch({ type: 'SYSTEM_UPDATE_DATA_JOB', payload: { jobId, status: 'In Progress', progress } as any });
+            });
         }
         
-        // Mock success
-        dispatch({ type: 'UPDATE_DATA_JOB', payload: { jobId, status: 'Completed', progress: 100, details: `Successfully processed ${importFile.name}` } });
-        setIsImporting(false); setImportFile(null);
+        startTransition(() => {
+            dispatch({ type: 'SYSTEM_UPDATE_DATA_JOB', payload: { jobId, status: 'Completed', progress: 100, details: `Successfully processed ${importFile.name}` } as any });
+            setIsImporting(false); setImportFile(null);
+        });
     };
 
     return (
-        <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6 flex flex-col relative h-full`}>
+        <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} p-6 flex flex-col relative h-full min-h-[400px]`}>
             {!canExchange && (
-                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-slate-500">
-                    <Lock size={32} className="mb-2 text-slate-400"/><p className="font-semibold">Access Restricted</p>
-                </div>
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-slate-500 font-bold uppercase tracking-widest"><Lock size={32} className="mb-2 text-slate-400"/> Restricted</div>
             )}
-            <h2 className={`${theme.typography.h2} mb-4 flex items-center gap-2`}><UploadCloud size={20} className="text-nexus-500" /> Import Data</h2>
+            <h2 className={`${theme.typography.h2} mb-4 flex items-center gap-2`}><UploadCloud size={20} className="text-nexus-500" /> Enterprise Ingestion Engine</h2>
             <div 
-                className={`flex-1 border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-all min-h-[300px] ${dragActive ? 'border-nexus-500 bg-nexus-50' : 'border-slate-300 hover:border-nexus-400 hover:bg-slate-50'}`}
-                onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
+                className={`flex-1 border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-all ${dragActive ? 'border-nexus-500 bg-nexus-50 shadow-inner' : 'border-slate-300 hover:border-nexus-400 hover:bg-slate-50'}`}
+                onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={(e) => { e.preventDefault(); setDragActive(false); handleFiles(e.dataTransfer.files); }}
             >
                 <input ref={fileInputRef} type="file" className="hidden" accept=".xml,.csv,.json,.xer" onChange={(e) => handleFiles(e.target.files)} />
                 {importFile ? (
-                    <div className="text-center w-full">
-                        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4"><FileText size={32} className="text-nexus-600" /></div>
-                        <p className="font-bold text-slate-800 break-all px-4">{importFile.name}</p>
-                        <p className="text-sm text-slate-500 mb-6">{formatBytes(importFile.size)}</p>
+                    <div className="text-center w-full max-w-sm">
+                        <div className="w-16 h-16 bg-nexus-50 text-nexus-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-nexus-100 shadow-sm"><FileText size={32} /></div>
+                        <p className="font-bold text-slate-800 truncate px-4">{importFile.name}</p>
+                        <p className="text-xs font-mono text-slate-400 mb-8">{formatBytes(importFile.size)}</p>
                         {isImporting ? (
-                            <div className="w-full max-w-xs mx-auto px-4">
-                                <div className="flex justify-between text-xs mb-1"><span className="text-slate-600">Processing...</span><span className="font-bold text-nexus-600">{importProgress.toFixed(0)}%</span></div>
-                                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden"><div className="bg-nexus-500 h-full transition-all duration-300" style={{ width: `${importProgress}%` }}></div></div>
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span className="text-slate-500">Schema Map: OK</span><span className="text-nexus-600">{importProgress.toFixed(0)}%</span></div>
+                                <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden shadow-inner"><div className="bg-nexus-500 h-full transition-all duration-300 shadow-lg shadow-nexus-500/50" style={{ width: `${importProgress}%` }}></div></div>
+                                {isPending && <p className="text-[9px] text-slate-400 animate-pulse font-bold">Synchronizing Global Indices...</p>}
                             </div>
                         ) : (
-                            <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
-                                <button onClick={() => setImportFile(null)} className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 w-full sm:w-auto">Cancel</button>
-                                <button onClick={handleImport} className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 shadow-sm w-full sm:w-auto`}>Start Import</button>
+                            <div className="flex gap-3">
+                                <button onClick={() => setImportFile(null)} className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">Cancel</button>
+                                <button onClick={handleImport} className="flex-1 px-4 py-2 bg-nexus-600 text-white rounded-lg text-xs font-bold hover:bg-nexus-700 shadow-lg shadow-nexus-600/30">Commit Import</button>
                             </div>
                         )}
                     </div>
                 ) : (
-                    <div className="text-center px-4">
-                        <UploadCloud size={48} className="mx-auto text-slate-300 mb-4" />
-                        <p className="text-lg font-semibold text-slate-700">Drag & drop files here</p>
-                        <button onClick={() => fileInputRef.current?.click()} className="mt-4 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 shadow-sm w-full sm:w-auto">Browse Files</button>
+                    <div className="text-center">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-100"><UploadCloud size={40} className="text-slate-300" /></div>
+                        <p className="text-lg font-bold text-slate-800">Transfer Records</p>
+                        <p className="text-sm text-slate-500 mt-1">Upload Primavera P6 XML, Microsoft Project, or CSV datasets.</p>
+                        <button onClick={() => fileInputRef.current?.click()} className="mt-8 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:border-nexus-400 hover:text-nexus-600 transition-all shadow-sm active:scale-95">Browse Local Storage</button>
                     </div>
                 )}
             </div>

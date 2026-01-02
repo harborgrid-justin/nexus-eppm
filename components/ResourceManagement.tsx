@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useTransition } from 'react';
 import { Users, FileText, BarChart2, Sliders, Box, ScrollText } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';
@@ -13,7 +12,6 @@ import ResourceHistogram from './resources/ResourceHistogram';
 import PhysicalResources from './resources/PhysicalResources';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
-// FIX: Corrected import path for Resource type to resolve module resolution error.
 import { Resource } from '../types/index';
 
 const ResourceManagement: React.FC = () => {
@@ -82,15 +80,15 @@ const ResourceManagement: React.FC = () => {
   if (!project) return <div className={theme.layout.pagePadding}>Loading resources...</div>;
 
   return (
-    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Resource Management" 
         subtitle="Plan, staff, and manage your project and enterprise resources."
         icon={Users}
       />
 
-      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 ${theme.layout.headerBorder} bg-slate-50/50 z-10`}>
           <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
               {navStructure.map(group => (
                   <button

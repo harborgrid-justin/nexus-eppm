@@ -1,7 +1,12 @@
 
 import { DataState, Action } from '../../types/actions';
 import { generateId } from '../../utils/formatters';
-import { Baseline, WBSNode } from '../../types/index';
+import { Baseline, WBSNode, Project } from '../../types/index';
+
+// Helper to deep clone project for reflection
+const cloneProject = (project: Project): Project => {
+    return JSON.parse(JSON.stringify(project));
+};
 
 export const projectReducer = (state: DataState, action: Action): DataState => {
   switch (action.type) {
@@ -48,6 +53,36 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             })
         };
     
+    // --- REFLECTION PROJECTS ---
+    case 'PROJECT_CREATE_REFLECTION': {
+        const sourceProject = state.projects.find(p => p.id === action.payload.sourceProjectId);
+        if (!sourceProject) return state;
+        
+        const reflection: Project = cloneProject(sourceProject);
+        reflection.id = generateId('REFL');
+        reflection.name = `${sourceProject.name} (Reflection)`;
+        reflection.isReflection = true;
+        reflection.sourceProjectId = sourceProject.id;
+        
+        return { ...state, projects: [...state.projects, reflection] };
+    }
+    
+    case 'PROJECT_MERGE_REFLECTION': {
+        const reflection = state.projects.find(p => p.id === action.payload.reflectionId);
+        if (!reflection || !reflection.sourceProjectId) return state;
+        
+        // In a real implementation, we would apply selective logic from comparison
+        // Here we overwrite source with reflection data (simplified merge)
+        const updatedSource = { ...reflection, id: reflection.sourceProjectId, isReflection: false, name: reflection.name.replace(' (Reflection)', '') };
+        
+        return {
+            ...state,
+            projects: state.projects
+                .map(p => p.id === reflection.sourceProjectId ? updatedSource : p)
+                .filter(p => p.id !== reflection.id) // Remove reflection after merge
+        };
+    }
+
     // --- BASELINE MANAGEMENT ---
     case 'BASELINE_SET': {
         const { projectId, name, type } = action.payload;

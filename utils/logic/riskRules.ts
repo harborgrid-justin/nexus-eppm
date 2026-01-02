@@ -35,12 +35,6 @@ export const applyRiskRules = (state: DataState, action: Action, alerts: SystemA
       });
   }
 
-  // Hook: Quality Trend (3 consecutive fails)
-  // Simplified check on latest report addition
-  if (action.type === 'TASK_UPDATE') { 
-     // Logic would normally inspect history. 
-  }
-
   // Hook: Safety Stand-down
   if (action.type === 'SYSTEM_LOG_SAFETY_INCIDENT') {
      alerts.push(createAlert('Blocker', 'Compliance', 'Safety Stand-down', 

@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, ClipboardList, CheckCircle, Clock, Activity as ActivityIcon } from 'lucide-react';
+import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, CheckCircle, Clock, Activity as ActivityIcon, GitBranch, GitMerge, FileDiff } from 'lucide-react';
 import StatCard from './shared/StatCard';
 import { useTheme } from '../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency, formatDate, formatPercentage } from '../utils/formatters';
@@ -9,6 +9,9 @@ import { calculateScopeCreep } from '../utils/integrations/cost';
 import { checkTaskStagnation } from '../utils/integrations/schedule';
 import { usePermissions } from '../hooks/usePermissions';
 import { useData } from '../context/DataContext';
+import { Button } from './ui/Button';
+import { SidePanel } from './ui/SidePanel';
+import ScheduleComparison from './schedule/ScheduleComparison';
 
 // Sub-components
 import ProjectCharter from './integration/ProjectCharter';
@@ -16,10 +19,11 @@ import ChangeLog from './integration/ChangeLog';
 
 const ProjectIntegrationManagement: React.FC = () => {
   const { project, summary, financials, riskProfile, qualityProfile, changeOrders } = useProjectWorkspace();
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isPending, startTransition] = useTransition();
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   
   const handleTabChange = (tab: string) => {
       startTransition(() => {
@@ -31,6 +35,13 @@ const ProjectIntegrationManagement: React.FC = () => {
       if(!project) return 'Unassigned';
       return state.resources.find(r => r.id === project.managerId)?.name || 'Unknown PM';
   }, [project, state.resources]);
+
+  const sourceProject = useMemo(() => {
+    if (project?.isReflection && project.sourceProjectId) {
+      return state.projects.find(p => p.id === project.sourceProjectId);
+    }
+    return null;
+  }, [project, state.projects]);
 
   const phase2Metrics = useMemo(() => {
       if(!project) return null;
@@ -47,6 +58,21 @@ const ProjectIntegrationManagement: React.FC = () => {
       </div>
     );
   }
+
+  const handleCreateReflection = () => {
+      if (confirm('Create a "What-If" reflection of this project? You can model changes safely without affecting the live schedule.')) {
+          dispatch({ type: 'PROJECT_CREATE_REFLECTION', payload: { sourceProjectId: project.id } });
+          alert("Reflection created. Switch to it from the project list to start modeling.");
+      }
+  };
+
+  const handleMergeReflection = () => {
+      if (confirm('Are you sure you want to merge these changes back to the live project? This action cannot be undone.')) {
+          dispatch({ type: 'PROJECT_MERGE_REFLECTION', payload: { reflectionId: project.id } });
+          // Ideally navigate back to source, but for now alert
+          alert("Changes merged successfully.");
+      }
+  };
 
   const renderDashboard = () => (
     <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -144,31 +170,48 @@ const ProjectIntegrationManagement: React.FC = () => {
     <div className={`h-full overflow-y-auto p-6 md:p-8 bg-slate-100/50 scrollbar-thin`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
-            <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
-            {project.name}
-          </h1>
+          <div className="flex items-center gap-3">
+             <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
+                <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
+                {project.name}
+             </h1>
+             {project.isReflection && <span className="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Reflection Mode</span>}
+          </div>
           <p className="text-slate-500 font-medium text-sm mt-1">{project.code} • {project.category}</p>
         </div>
-        <div className="flex bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-            {['dashboard', 'charter', 'logs'].map(tab => (
-                <button
-                    key={tab}
-                    onClick={() => handleTabChange(tab)}
-                    className={`px-5 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
-                >
-                    {tab}
-                </button>
-            ))}
+        <div className="flex gap-2">
+            {!project.isReflection && (
+                <Button onClick={handleCreateReflection} variant="secondary" icon={GitBranch} size="sm">Create Reflection</Button>
+            )}
+            {project.isReflection && (
+                <>
+                    <Button onClick={() => setIsComparisonOpen(true)} variant="secondary" icon={FileDiff} size="sm">Review Variance</Button>
+                    <Button onClick={handleMergeReflection} variant="primary" icon={GitMerge} size="sm">Merge to Source</Button>
+                </>
+            )}
+            <div className="flex bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+                {['dashboard', 'charter', 'logs'].map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => handleTabChange(tab)}
+                        className={`px-5 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all ${activeTab === tab ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`}
+                    >
+                        {tab}
+                    </button>
+                ))}
+            </div>
         </div>
       </div>
       
-      {/* Content Rendering with Transition */}
-      <div className={`transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'charter' && <ProjectCharter />}
-          {activeTab === 'logs' && <ChangeLog />}
-      </div>
+      {activeTab === 'dashboard' && renderDashboard()}
+      {activeTab === 'charter' && <ProjectCharter />}
+      {activeTab === 'logs' && <ChangeLog />}
+
+      {isComparisonOpen && sourceProject && (
+          <SidePanel isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} title="Comparison: Reflection vs Source" width="max-w-6xl">
+              <ScheduleComparison currentProject={project} baselineProject={sourceProject} />
+          </SidePanel>
+      )}
     </div>
   );
 };

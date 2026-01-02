@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useTransition } from 'react';
 import { ShieldCheck, LayoutDashboard, FileText, BadgeCheck, ClipboardList, Bug, Truck, Coins } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
@@ -84,15 +83,15 @@ const QualityManagement: React.FC = () => {
   if (!project) return <div className={theme.layout.pagePadding}>Loading quality module...</div>;
 
   return (
-    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Quality Management" 
         subtitle="Ensure project deliverables meet and exceed stakeholder expectations."
         icon={ShieldCheck}
       />
 
-      <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 ${theme.layout.headerBorder} z-10 bg-slate-50/50`}>
           <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
               {navStructure.map(group => (
                   <button

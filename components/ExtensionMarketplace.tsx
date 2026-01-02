@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Search, Download, CheckCircle, Package, Box, Radio, Calculator, Receipt, 
@@ -22,6 +22,10 @@ const ExtensionMarketplace: React.FC = () => {
   const { state, dispatch } = useData();
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pattern 2: useDeferredValue for filtering list
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  
   const theme = useTheme();
   const { hasPermission } = usePermissions();
   const canManageExtensions = hasPermission('system:configure');
@@ -31,11 +35,11 @@ const ExtensionMarketplace: React.FC = () => {
   const filteredExtensions = useMemo(() => {
       return state.extensions.filter(ext => {
         const matchesCategory = categoryFilter === 'All' || ext.category === categoryFilter;
-        const matchesSearch = ext.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                              ext.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = ext.name.toLowerCase().includes(deferredSearchTerm.toLowerCase()) || 
+                              ext.description.toLowerCase().includes(deferredSearchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
       });
-  }, [state.extensions, categoryFilter, searchTerm]);
+  }, [state.extensions, categoryFilter, deferredSearchTerm]);
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>

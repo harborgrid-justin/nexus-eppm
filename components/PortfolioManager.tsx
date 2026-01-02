@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
+// FIX: Added MessageSquare to the lucide-react imports.
+import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageCircle, MessageSquare, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -26,6 +27,8 @@ const PortfolioManager: React.FC = () => {
   const [activeGroup, setActiveGroup] = useState('dashboards');
   const [activeTab, setActiveTab] = useState('overview');
   const [drilledProgramId, setDrilledProgramId] = useState<string | null>(null);
+  
+  // Transition pattern for heavy strategic switches
   const [isPending, startTransition] = useTransition();
   const { state } = useData();
   const theme = useTheme();
@@ -47,7 +50,7 @@ const PortfolioManager: React.FC = () => {
       { id: 'financials', label: 'Financial Management', icon: TrendingUp },
       { id: 'value', label: 'Value & Benefits', icon: Star },
       { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
-      { id: 'communications', label: 'Communications', icon: MessageCircle },
+      { id: 'communications', label: 'Communications', icon: MessageSquare },
       { id: 'governance', label: 'Governance Board', icon: Gavel },
       { id: 'optimization', label: 'Review & Optimize', icon: RefreshCw },
     ]},
@@ -85,7 +88,7 @@ const PortfolioManager: React.FC = () => {
         return (
             <div className="h-full flex flex-col relative animate-in slide-in-from-bottom-4">
                 <button 
-                    onClick={() => setDrilledProgramId(null)}
+                    onClick={() => startTransition(() => setDrilledProgramId(null))}
                     className="absolute top-4 left-4 z-[60] bg-white/90 backdrop-blur p-2 rounded-full border border-slate-200 shadow-md text-nexus-600 hover:bg-nexus-50 transition-all font-bold text-xs flex items-center gap-2"
                 >
                     <ArrowLeft size={16}/> Back to Portfolio

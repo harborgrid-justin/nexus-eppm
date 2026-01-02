@@ -4,12 +4,13 @@ import { useLoaderData } from 'react-router-dom';
 import { 
   Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
   MessageSquare, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2, History, Activity,
-  HardHat
+  HardHat, GitBranch
 } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
 import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
+import SuspenseFallback from './layout/SuspenseFallback';
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
@@ -108,6 +109,11 @@ const ProjectWorkspace: React.FC = () => {
   return (
     <ProjectWorkspaceProvider value={projectData}>
         <div className={`h-full w-full flex flex-col ${theme.colors.background}`}>
+        {project.isReflection && (
+            <div className="bg-purple-600 text-white px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 shadow-sm z-50">
+                <GitBranch size={16} /> SANDBOX MODE: You are editing a Reflection Project. Changes are isolated until merged.
+            </div>
+        )}
         <ModuleNavigation 
             groups={navGroups} 
             activeGroup={activeGroup} 
@@ -117,22 +123,18 @@ const ProjectWorkspace: React.FC = () => {
         />
         <div className="flex-1 flex flex-col overflow-hidden relative">
             {activeArea === 'schedule' && (
-                <div className={`absolute top-4 right-6 flex ${theme.colors.surface} p-1 rounded-lg border ${theme.colors.border} z-30`}>
-                    <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md ${scheduleView === 'gantt' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500'}`} title="Gantt"><GanttChartSquare size={18} /></button>
-                    <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md ${scheduleView === 'network' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500'}`} title="Network"><Network size={18} /></button>
+                <div className={`absolute top-4 right-6 flex ${theme.colors.surface} p-1 rounded-lg border ${theme.colors.border} z-30 shadow-md`}>
+                    <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} title="Gantt"><GanttChartSquare size={18} /></button>
+                    <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} title="Network"><Network size={18} /></button>
                 </div>
             )}
+            
             <ErrorBoundary name={`${activeArea} Module`}>
-            <Suspense fallback={
-                <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                    <Loader2 className="animate-spin mb-2" size={32} />
-                    <span className="text-sm font-medium">Loading Workspace...</span>
-                </div>
-            }>
-                <div className={`h-full w-full ${isPending ? 'opacity-70 pointer-events-none' : 'opacity-100'} transition-opacity duration-200`}>
-                    {renderContent()}
-                </div>
-            </Suspense>
+                <Suspense fallback={<SuspenseFallback />}>
+                    <div className={`h-full w-full transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : 'opacity-100'}`}>
+                        {renderContent()}
+                    </div>
+                </Suspense>
             </ErrorBoundary>
         </div>
         </div>

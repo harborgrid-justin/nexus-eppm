@@ -10,6 +10,7 @@ import { calculatePortfolioSummary, calculateProjectData } from './utils/project
 
 // Lazy load components for code splitting
 const Dashboard = lazy(() => import('./components/Dashboard'));
+const PortfolioManager = lazy(() => import('./components/PortfolioManager'));
 const ProgramManager = lazy(() => import('./components/ProgramManager'));
 const ProjectList = lazy(() => import('./components/ProjectList'));
 const ProjectWorkspace = lazy(() => import('./components/ProjectWorkspace'));
@@ -21,6 +22,8 @@ const IntegrationHub = lazy(() => import('./components/IntegrationHub'));
 const ExtensionMarketplace = lazy(() => import('./components/ExtensionMarketplace'));
 const RiskRegister = lazy(() => import('./components/RiskRegister'));
 const Reports = lazy(() => import('./components/Reports'));
+const EnterpriseResources = lazy(() => import('./components/EnterpriseResources'));
+const ComponentWorkbench = lazy(() => import('./components/ComponentWorkbench'));
 const Error404Tmpl = lazy(() => import('./components/templates/SystemLayouts').then(m => ({ default: m.Error404Tmpl })));
 
 
@@ -101,12 +104,12 @@ export const routes: RouteObject[] = [
             {
                 index: true,
                 loader: dashboardLoader,
-                element: <Dashboard />,
+                element: <PortfolioManager />,
             },
             {
                 path: 'portfolio',
                 loader: dashboardLoader,
-                element: <Dashboard />,
+                element: <PortfolioManager />,
             },
             {
                 path: 'programs',
@@ -126,6 +129,10 @@ export const routes: RouteObject[] = [
                 element: <TeamWorkspace />,
             },
             {
+                path: 'resources',
+                element: <EnterpriseResources />,
+            },
+            {
                 path: 'admin',
                 element: <AdminSettings />,
             },
@@ -136,6 +143,10 @@ export const routes: RouteObject[] = [
             {
                 path: 'templates',
                 element: <TemplateGallery />
+            },
+            {
+                path: 'workbench',
+                element: <ComponentWorkbench />
             },
             {
                 path: 'dataExchange',

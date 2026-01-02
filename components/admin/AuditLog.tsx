@@ -1,15 +1,16 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { History, Shield, Filter, Search, Download, Clock, User } from 'lucide-react';
+import { History, Shield, Filter, Search, Download, Clock, User, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
 const AuditLog: React.FC = () => {
     const { state } = useData();
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // Pattern 11: useDeferredValue for intensive data search
     const deferredSearchTerm = useDeferredValue(searchTerm);
 
-    // Rule 12: No derived state in effects, calc during render
     const logs = useMemo(() => {
         const allLogs = state.governance.auditLog || [];
         if (!deferredSearchTerm) return allLogs;
@@ -47,15 +48,20 @@ const AuditLog: React.FC = () => {
                         placeholder="Filter by user, action, or details..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className="pl-10 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none transition-all"
                     />
+                    {searchTerm !== deferredSearchTerm && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 size={14} className="animate-spin text-slate-400"/>
+                        </div>
+                    )}
                 </div>
                 <button className="p-2 border border-slate-300 rounded-lg text-slate-500 hover:bg-slate-50">
                     <Filter size={18}/>
                 </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-white border border-slate-200 rounded-xl shadow-sm">
+            <div className={`flex-1 overflow-auto bg-white border border-slate-200 rounded-xl shadow-sm relative transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
                 <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50 sticky top-0 z-10">
                         <tr>

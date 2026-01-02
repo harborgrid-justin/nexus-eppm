@@ -186,3 +186,11 @@ export interface EVMMetrics {
   status: 'Ahead' | 'Behind' | 'On Track';
   costStatus: 'Under Budget' | 'Over Budget' | 'On Budget';
 }
+
+export interface CostBookItem {
+    id: string;
+    description: string;
+    type: 'Labor' | 'Material' | 'Equipment' | 'Subcontract';
+    unit: string;
+    rate: number;
+}

@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+
+import React, { useMemo, useState, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { 
@@ -15,6 +16,9 @@ const PortfolioCapacity: React.FC = () => {
     const [viewHorizon, setViewHorizon] = useState(6); // Months
     const [viewMode, setViewMode] = useState<'chart' | 'heatmap'>('chart');
     const [roleFilter, setRoleFilter] = useState('All');
+    
+    // Pattern 1: startTransition for heavy recalculation triggers
+    const [isPending, startTransition] = useTransition();
 
     // --- 1. Date & Bucket Generation ---
     const monthBuckets = useMemo(() => {
@@ -182,7 +186,14 @@ const PortfolioCapacity: React.FC = () => {
     );
 
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
+             {/* Progress indicator for calculation */}
+             {isPending && (
+                <div className="absolute top-0 left-0 w-full h-1 bg-nexus-100 z-50">
+                    <div className="h-full bg-nexus-500 animate-progress origin-left"></div>
+                </div>
+            )}
+            
             {/* Header Controls */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -196,7 +207,7 @@ const PortfolioCapacity: React.FC = () => {
                         {[3, 6, 12].map(m => (
                              <button 
                                 key={m}
-                                onClick={() => setViewHorizon(m)} 
+                                onClick={() => startTransition(() => setViewHorizon(m))} 
                                 className={`px-3 py-1.5 rounded transition-colors ${viewHorizon === m ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
                             >
                                 {m} Mo
@@ -222,7 +233,7 @@ const PortfolioCapacity: React.FC = () => {
                 </div>
             </div>
 
-            <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap} h-[500px]`}>
+            <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap} h-[500px] transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
                 {/* Main Visualization Area (2/3) */}
                 <div className={`lg:col-span-2 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm flex flex-col overflow-hidden`}>
                     

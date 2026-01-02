@@ -1,10 +1,7 @@
 
-
-
 import React, { useState, useDeferredValue, useMemo } from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { Resource, EnterpriseRole } from '../../types/index';
-import { Plus, Filter, Lock, Calendar, UserCog, Briefcase } from 'lucide-react';
+import { Plus, Filter, Lock, Calendar, UserCog, Briefcase, Loader2 } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useData } from '../../context/DataContext';
 import { Badge } from '../ui/Badge';
@@ -18,6 +15,8 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
   const { hasPermission } = usePermissions();
   const canEdit = hasPermission('resource:write') || hasPermission('project:edit');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pattern 9: Defer search for large resource pool
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const getCalendarName = (calId: string) => {
@@ -73,9 +72,12 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
                 placeholder="Search resources by name or skill..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full sm:w-80 pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nexus-500 text-sm shadow-sm"
+                className="w-full sm:w-80 pl-4 pr-10 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nexus-500 text-sm shadow-sm transition-all"
               />
-              <Filter size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  {searchTerm !== deferredSearchTerm && <Loader2 size={12} className="animate-spin text-slate-300"/>}
+                  <Filter size={14} className="text-slate-400"/>
+              </div>
            </div>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
@@ -94,7 +96,7 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className={`flex-1 overflow-y-auto scrollbar-thin transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
         <div className="min-w-[1000px]">
             <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
@@ -160,7 +162,7 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
         </div>
       </div>
       
-      <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+      <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-1">
                   <UserCog size={14} className="text-nexus-500"/>

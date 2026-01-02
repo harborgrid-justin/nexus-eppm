@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, ShoppingCart, MessageSquare } from 'lucide-react';
 import CostDashboard from './CostDashboard';
 import CostPlanEditor from './CostPlanEditor';
@@ -14,8 +14,7 @@ import EarnedValue from './EarnedValue';
 import ReserveAnalysis from './ReserveAnalysis';
 import CostProcurement from './CostProcurement';
 import CostCommunications from './CostCommunications'; 
-import { useTheme } from '../context/ThemeContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
+import { useTheme } from '../../context/ThemeContext';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { PageHeader } from '../common/PageHeader';
 import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
@@ -25,6 +24,8 @@ const CostManagement: React.FC = () => {
   const projectId = project.id;
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
+  
+  // Transition pattern for sub-module views
   const [isPending, startTransition] = useTransition();
   const theme = useTheme();
 

@@ -1,9 +1,12 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export type Density = 'comfortable' | 'compact';
+export type ThemeMode = 'light' | 'dark';
 
 export interface Theme {
+  mode: ThemeMode;
+  setMode: (m: ThemeMode) => void;
   density: Density;
   setDensity: (d: Density) => void;
   colors: {
@@ -75,44 +78,74 @@ export interface Theme {
   };
 }
 
-export const defaultTheme = (density: Density = 'comfortable'): Theme => {
+const getTheme = (mode: ThemeMode, density: Density): Theme => {
   const isCompact = density === 'compact';
+  const isDark = mode === 'dark';
   
-  return {
-    density,
-    setDensity: () => {},
-    colors: {
-      background: 'bg-slate-50', 
-      surface: 'bg-white',
-      border: 'border-slate-200',
+  const colors = {
+      background: isDark ? 'bg-slate-950' : 'bg-slate-50', 
+      surface: isDark ? 'bg-slate-900' : 'bg-white',
+      border: isDark ? 'border-slate-800' : 'border-slate-200',
       primary: 'bg-nexus-600',
-      primaryHover: 'hover:bg-nexus-700',
+      primaryHover: 'hover:bg-nexus-500',
       accentBg: 'bg-nexus-600',
-      accentText: 'text-nexus-600',
+      accentText: 'text-nexus-500',
       text: {
-          primary: 'text-slate-900',
-          secondary: 'text-slate-500',
-          tertiary: 'text-slate-400',
-          inverted: 'text-white'
+          primary: isDark ? 'text-slate-100' : 'text-slate-900',
+          secondary: isDark ? 'text-slate-400' : 'text-slate-500',
+          tertiary: isDark ? 'text-slate-600' : 'text-slate-400',
+          inverted: isDark ? 'text-slate-900' : 'text-white'
       },
       semantic: {
-          success: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'text-emerald-500' },
-          warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: 'text-amber-500' },
-          danger: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', icon: 'text-red-500' },
-          info: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: 'text-blue-500' },
-          neutral: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', icon: 'text-slate-400' },
+          success: { 
+              bg: isDark ? 'bg-emerald-900/30' : 'bg-emerald-50', 
+              text: isDark ? 'text-emerald-400' : 'text-emerald-700', 
+              border: isDark ? 'border-emerald-800' : 'border-emerald-200', 
+              icon: isDark ? 'text-emerald-400' : 'text-emerald-500' 
+          },
+          warning: { 
+              bg: isDark ? 'bg-amber-900/30' : 'bg-amber-50', 
+              text: isDark ? 'text-amber-400' : 'text-amber-700', 
+              border: isDark ? 'border-amber-800' : 'border-amber-200', 
+              icon: isDark ? 'text-amber-400' : 'text-amber-500' 
+          },
+          danger: { 
+              bg: isDark ? 'bg-red-900/30' : 'bg-red-50', 
+              text: isDark ? 'text-red-400' : 'text-red-700', 
+              border: isDark ? 'border-red-800' : 'border-red-200', 
+              icon: isDark ? 'text-red-400' : 'text-red-500' 
+          },
+          info: { 
+              bg: isDark ? 'bg-blue-900/30' : 'bg-blue-50', 
+              text: isDark ? 'text-blue-400' : 'text-blue-700', 
+              border: isDark ? 'border-blue-800' : 'border-blue-200', 
+              icon: isDark ? 'text-blue-400' : 'text-blue-500' 
+          },
+          neutral: { 
+              bg: isDark ? 'bg-slate-800' : 'bg-slate-100', 
+              text: isDark ? 'text-slate-400' : 'text-slate-700', 
+              border: isDark ? 'border-slate-700' : 'border-slate-200', 
+              icon: isDark ? 'text-slate-600' : 'text-slate-400' 
+          },
       }
-    },
+  };
+
+  return {
+    mode,
+    setMode: () => {},
+    density,
+    setDensity: () => {},
+    colors,
     charts: {
         palette: ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6', '#f97316'],
-        grid: '#e2e8f0', 
+        grid: isDark ? '#334155' : '#e2e8f0', 
         tooltip: {
-            backgroundColor: '#fff',
+            backgroundColor: isDark ? '#1e293b' : '#fff',
             borderRadius: '8px',
-            border: '1px solid #e2e8f0',
+            border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
             fontSize: '12px',
-            color: '#1e293b'
+            color: isDark ? '#f8fafc' : '#1e293b'
         }
     },
     layout: {
@@ -123,17 +156,17 @@ export const defaultTheme = (density: Density = 'comfortable'): Theme => {
       borderRadius: isCompact ? 'rounded-lg' : 'rounded-xl',
       shadow: 'shadow-sm',
       inputHeight: isCompact ? 'h-8 text-xs' : 'h-10 text-sm',
-      headerBorder: 'border-b border-slate-200',
+      headerBorder: `border-b ${colors.border}`,
       cardPadding: isCompact ? 'p-3 md:p-4' : 'p-5 md:p-6',
-      panelContainer: `flex flex-col h-full bg-white ${isCompact ? 'rounded-lg' : 'rounded-xl'} border border-slate-200 shadow-sm overflow-hidden`,
+      panelContainer: `flex flex-col h-full ${colors.surface} ${isCompact ? 'rounded-lg' : 'rounded-xl'} border ${colors.border} shadow-sm overflow-hidden`,
       headerHeight: isCompact ? 'h-14' : 'h-16',
     },
     components: {
-        card: `bg-white border border-slate-200 ${isCompact ? 'rounded-lg' : 'rounded-xl'} shadow-sm transition-all duration-200`,
+        card: `${colors.surface} border ${colors.border} ${isCompact ? 'rounded-lg' : 'rounded-xl'} shadow-sm transition-all duration-200`,
         table: {
-            header: `bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200 ${isCompact ? 'px-3 py-2 text-[10px]' : 'px-6 py-3 text-xs'}`,
-            row: `hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0`,
-            cell: `${isCompact ? 'px-3 py-2 text-xs' : 'px-6 py-4 text-sm'} text-slate-700 whitespace-nowrap`
+            header: `${isDark ? 'bg-slate-800' : 'bg-slate-50'} ${colors.text.secondary} font-bold uppercase tracking-wider border-b ${colors.border} ${isCompact ? 'px-3 py-2 text-[10px]' : 'px-6 py-3 text-xs'}`,
+            row: `hover:${isDark ? 'bg-slate-800/50' : 'bg-slate-50'} transition-colors border-b ${isDark ? 'border-slate-800' : 'border-slate-100'} last:border-0`,
+            cell: `${isCompact ? 'px-3 py-2 text-xs' : 'px-6 py-4 text-sm'} ${colors.text.primary} whitespace-nowrap`
         },
         button: {
             base: "inline-flex items-center justify-center font-bold tracking-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] rounded-lg",
@@ -149,31 +182,45 @@ export const defaultTheme = (density: Density = 'comfortable'): Theme => {
     },
     typography: {
       h1: isCompact 
-        ? 'text-lg font-bold tracking-tight text-slate-900' 
-        : 'text-2xl md:text-3xl font-black tracking-tight text-slate-900',
+        ? `text-lg font-bold tracking-tight ${colors.text.primary}` 
+        : `text-2xl md:text-3xl font-black tracking-tight ${colors.text.primary}`,
       h2: isCompact 
-        ? 'text-base font-bold tracking-tight text-slate-800' 
-        : 'text-xl font-bold tracking-tight text-slate-800',
-      h3: 'text-base font-bold text-slate-800',
-      heading: 'text-lg md:text-xl font-bold text-slate-900 tracking-tight',
-      subtext: 'text-xs md:text-sm text-slate-500',
-      body: 'text-sm text-slate-600 leading-relaxed',
-      small: 'text-xs text-slate-500 font-medium',
-      label: 'text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest',
-      value: 'font-mono font-bold text-slate-900',
-      mono: 'font-mono text-slate-500',
+        ? `text-base font-bold tracking-tight ${colors.text.primary}`
+        : `text-xl font-bold tracking-tight ${colors.text.primary}`,
+      h3: `text-base font-bold ${colors.text.primary}`,
+      heading: `text-lg md:text-xl font-bold ${colors.text.primary} tracking-tight`,
+      subtext: `text-xs md:text-sm ${colors.text.secondary}`,
+      body: `text-sm ${colors.text.tertiary} leading-relaxed`,
+      small: `text-xs ${colors.text.secondary} font-medium`,
+      label: `text-[10px] md:text-xs font-bold ${colors.text.secondary} uppercase tracking-widest`,
+      value: `font-mono font-bold ${colors.text.primary}`,
+      mono: `font-mono ${colors.text.secondary}`,
     }
   };
 };
 
-const ThemeContext = createContext<Theme>(defaultTheme());
+const ThemeContext = createContext<Theme>(getTheme('light', 'comfortable'));
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [density, setDensity] = useState<Density>('comfortable');
+  const [mode, setMode] = useState<ThemeMode>('light');
   
+  useEffect(() => {
+      // Sync document background color for full page coverage
+      if (mode === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.body.style.backgroundColor = '#020617'; // slate-950
+      } else {
+          document.documentElement.classList.remove('dark');
+          document.body.style.backgroundColor = '#f8fafc'; // slate-50
+      }
+  }, [mode]);
+
+  const themeValue = { ...getTheme(mode, density), setDensity, setMode };
+
   return (
-    <ThemeContext.Provider value={{ ...defaultTheme(density), setDensity }}>
-      <div className={`${density === 'compact' ? 'density-compact' : ''} text-slate-900 h-full`}>
+    <ThemeContext.Provider value={themeValue}>
+      <div className={`${density === 'compact' ? 'density-compact' : ''} ${mode} h-full transition-colors duration-300 ease-in-out`}>
         {children}
       </div>
     </ThemeContext.Provider>

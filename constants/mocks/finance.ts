@@ -1,5 +1,5 @@
 
-import { Expense, ExpenseCategory, BudgetLogItem, FundingSource, ProjectFunding, CostEstimate, BudgetLineItem, CostReport, CostMeeting, CostAlert, Invoice } from '../../types/index';
+import { Expense, ExpenseCategory, BudgetLogItem, FundingSource, ProjectFunding, CostEstimate, BudgetLineItem, CostReport, CostMeeting, CostAlert, Invoice, CostBookItem, ChangeOrder } from '../../types/index';
 
 export const MOCK_EXPENSE_CATEGORIES: ExpenseCategory[] = [
   { id: 'EC-01', name: 'Materials', scope: 'Global' },
@@ -85,3 +85,21 @@ export const MOCK_COST_ALERTS: CostAlert[] = [
 ];
 
 export const MOCK_INVOICES: Invoice[] = [];
+
+export const MOCK_COST_BOOK: CostBookItem[] = [
+    { id: 'CB-01', description: 'Concrete Grade 40', type: 'Material', unit: 'CY', rate: 1200 },
+    { id: 'CB-02', description: 'Senior Engineer', type: 'Labor', unit: 'HR', rate: 150 },
+];
+
+export const MOCK_CHANGE_ORDERS: ChangeOrder[] = [
+    { 
+        id: 'CO-001', projectId: 'P1001', title: 'Additional Excavation', description: 'Rock removal in Sector 4 required heavier equipment.', 
+        justification: 'Unforeseen subsurface condition.', amount: 45000, scheduleImpactDays: 5, status: 'Approved', 
+        stage: 'Execution', priority: 'High', category: 'Unforeseen Condition', submitterId: 'Mike Ross', dateSubmitted: '2024-03-10', history: []
+    },
+    { 
+        id: 'CO-002', projectId: 'P1001', title: 'Material Upgrade', description: 'Upgrade lobby flooring to marble per client request.', 
+        justification: 'Client preference.', amount: 120000, scheduleImpactDays: 10, status: 'Pending Approval', 
+        stage: 'CCB Review', priority: 'Medium', category: 'Client Request', submitterId: 'Jessica Pearson', dateSubmitted: '2024-05-15', history: []
+    }
+];

@@ -4,7 +4,7 @@ export interface Resource {
   userId?: string; // Link to System User (Auth)
   name: string;
   role: string;
-  type: 'Human' | 'Equipment' | 'Material';
+  type: 'Human' | 'Equipment' | 'Material' | 'Labor' | 'Non-Labor'; // Expanded to cover all uses
   status: 'Active' | 'Inactive';
   capacity: number; // For Humans/Equipment (hrs)
   allocated: number;

@@ -1,6 +1,5 @@
 
 import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
-// FIX: Corrected import path for Project type to resolve module resolution error.
 import { Project } from '../types/index';
 import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2 } from 'lucide-react';
 import { usePortfolioState } from '../hooks';
@@ -24,6 +23,8 @@ const ProjectList: React.FC = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pattern 2: useDeferredValue for intensive filtering
   const deferredSearchTerm = useDeferredValue(searchTerm);
   
   const [viewMode, setViewMode] = useState<'list' | 'eps' | 'create'>('list');
@@ -58,7 +59,7 @@ const ProjectList: React.FC = () => {
   }
 
   return (
-    <div className={`${theme.layout.pagePadding} h-full flex flex-col overflow-hidden`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col overflow-hidden`}>
       <PageHeader 
         title="Enterprise Projects" 
         subtitle="Manage active project portfolio, track execution, and monitor delivery health."
@@ -70,8 +71,8 @@ const ProjectList: React.FC = () => {
         )}
       />
 
-      <div className={`${theme.components.card} flex-1 flex flex-col min-h-0 overflow-hidden`}>
-        <div className={`p-4 border-b ${theme.colors.border} bg-slate-50/50`}>
+      <div className={theme.layout.panelContainer}>
+        <div className={`p-4 ${theme.layout.headerBorder} bg-slate-50/50`}>
             <FilterBar 
                 searchValue={searchTerm} 
                 onSearch={setSearchTerm} 
@@ -89,9 +90,9 @@ const ProjectList: React.FC = () => {
             />
         </div>
 
-        <div className={`flex-1 overflow-hidden flex flex-col relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
-          {isPending && (
-             <div className="absolute inset-0 flex items-center justify-center z-50 bg-white/50 backdrop-blur-[1px]">
+        <div className={`flex-1 overflow-hidden flex flex-col relative ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
+          {(isPending || searchTerm !== deferredSearchTerm) && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-white/30 backdrop-blur-[1px]">
                 <Loader2 className="animate-spin text-nexus-500" size={32} />
              </div>
           )}
@@ -107,14 +108,14 @@ const ProjectList: React.FC = () => {
           ) : (
              <>
                 {viewMode === 'list' && (
-                   <>
+                   <div className="h-full overflow-hidden">
                      <div className="hidden lg:block h-full overflow-hidden">
                        <ProjectListTable projects={filteredProjects} onSelect={handleSelectProject} />
                      </div>
-                     <div className="lg:hidden flex-1 overflow-y-auto bg-slate-50/50 scrollbar-thin">
+                     <div className="lg:hidden h-full overflow-y-auto bg-slate-50/50 scrollbar-thin">
                        <ProjectListCards projects={filteredProjects} onSelect={handleSelectProject} />
                      </div>
-                   </>
+                   </div>
                 )}
                 {viewMode === 'eps' && (
                    <div className="flex-1 h-full overflow-auto bg-white">

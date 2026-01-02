@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
 import { AlertOctagon, ArrowUpRight, Folder, Shield, CheckCircle, Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
@@ -22,6 +22,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
   const [filterStatus, setFilterStatus] = useState('All');
   
   const [currentIssue, setCurrentIssue] = useState<Partial<ProgramIssue>>({
@@ -89,12 +90,14 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
       }
   };
 
-  const filteredIssues = programIssues.filter(issue => {
-      const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            issue.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === 'All' || issue.status === filterStatus;
-      return matchesSearch && matchesStatus;
-  });
+  const filteredIssues = useMemo(() => {
+      return programIssues.filter(issue => {
+          const matchesSearch = issue.title.toLowerCase().includes(deferredSearchTerm.toLowerCase()) || 
+                                issue.description.toLowerCase().includes(deferredSearchTerm.toLowerCase());
+          const matchesStatus = filterStatus === 'All' || issue.status === filterStatus;
+          return matchesSearch && matchesStatus;
+      });
+  }, [programIssues, deferredSearchTerm, filterStatus]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
