@@ -12,27 +12,24 @@ interface ErrorBoundaryState {
   error?: Error | string;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false
-    };
-  }
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
+    hasError: false
+  };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  public static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
-  handleRetry = () => {
+  private handleRetry = () => {
     this.setState({ hasError: false, error: undefined });
   };
 
-  render() {
+  public render() {
     if (this.state.hasError) {
       const { error } = this.state;
       const errorMessage = error instanceof Error 

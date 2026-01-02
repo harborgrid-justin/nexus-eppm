@@ -1,21 +1,32 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, Suspense } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useTheme } from '../../context/ThemeContext';
 import { 
-  Activity, TrendingUp, AlertTriangle, CheckCircle, 
-  Calendar, DollarSign, Layers, PieChart as PieIcon, ArrowUpRight, Sparkles, Loader2
+  Activity, TrendingUp, AlertTriangle, 
+  DollarSign, Layers, PieChart as PieIcon, ArrowUpRight, Sparkles, Loader2
 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ComposedChart, Line } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Line, ComposedChart } from 'recharts';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
+import { Skeleton } from '../ui/Skeleton';
 
 interface ProgramDashboardProps {
   programId: string;
 }
+
+const ChartSkeleton = () => (
+    <div className="w-full h-full flex items-end gap-2 p-4 animate-pulse">
+        <div className="w-full h-[40%] bg-slate-100 rounded-t"></div>
+        <div className="w-full h-[70%] bg-slate-100 rounded-t"></div>
+        <div className="w-full h-[50%] bg-slate-100 rounded-t"></div>
+        <div className="w-full h-[85%] bg-slate-100 rounded-t"></div>
+        <div className="w-full h-[60%] bg-slate-100 rounded-t"></div>
+    </div>
+);
 
 const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
   const { 
@@ -29,7 +40,7 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
   const theme = useTheme();
   
   // AI Integration
-  const { generateProgramReport, report, isGenerating, error, reset } = useGeminiAnalysis();
+  const { generateProgramReport, report, isGenerating, error } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
 
   const handleGenerateReport = () => {
@@ -75,7 +86,11 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
         });
   }, [programFinancials.allocations, projects]);
 
-  if (!program) return null;
+  if (!program) return (
+      <div className="p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} height={120} />)}
+      </div>
+  );
 
   return (
     <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in duration-300`}>
@@ -106,25 +121,14 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
 
             {report && !isGenerating && (
                 <div className="prose prose-sm prose-slate max-w-none">
-                    {report.split('\n').filter(line => line.trim() !== '').map((line, i) => {
-                        if (line.startsWith('### ')) return <h3 key={i} className={`text-lg font-bold mt-6 mb-2 ${theme.colors.text.primary}`}>{line.substring(4)}</h3>;
-                        if (line.startsWith('## ')) return <h2 key={i} className={`text-xl font-extrabold mt-8 mb-4 ${theme.colors.text.primary} border-b pb-2`}>{line.substring(3)}</h2>;
-                        if (line.startsWith('# ')) return <h1 key={i} className={`text-2xl font-black mt-4 mb-6 ${theme.colors.text.primary}`}>{line.substring(2)}</h1>;
-                        
-                        if (line.trim().startsWith('* ') || line.trim().startsWith('- ')) return (
-                            <div key={i} className="flex items-start my-2 pl-4">
-                                <span className="text-nexus-600 mr-3 mt-1.5 text-xs">●</span>
-                                <p className={`${theme.colors.text.primary} flex-1 leading-relaxed`}>{line.trim().substring(2)}</p>
-                            </div>
-                        );
-                        
-                        return <p key={i} className={`my-4 leading-relaxed ${theme.colors.text.secondary}`}>{line}</p>;
-                    })}
+                    {report.split('\n').filter(line => line.trim() !== '').map((line, i) => (
+                        <p key={i} className={`my-4 leading-relaxed ${theme.colors.text.secondary}`}>{line}</p>
+                    ))}
                 </div>
             )}
         </SidePanel>
 
-        {/* Header - AI Button only, title is in parent */}
+        {/* Header - AI Button */}
         <div className="flex justify-end">
              <button 
                  onClick={handleGenerateReport}
@@ -169,7 +173,7 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {/* Financial Performance Chart */}
-            <div className={`lg:col-span-2 ${theme.components.card} p-6`}>
+            <div className={`lg:col-span-2 ${theme.components.card} p-6 flex flex-col h-[400px]`}>
                 <div className="flex justify-between items-center mb-6">
                     <h3 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
                         <DollarSign size={18} className="text-nexus-600"/> Financial Performance by Project
@@ -180,18 +184,20 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                         <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-400 rounded-sm"></span> Forecast</span>
                     </div>
                 </div>
-                <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={financialChartData} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                            <XAxis dataKey="name" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
-                            <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
-                            <Bar dataKey="Budget" fill="#cbd5e1" barSize={20} radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="Actuals" fill={theme.charts.palette[0]} barSize={20} radius={[4, 4, 0, 0]} />
-                            <Line type="monotone" dataKey="Forecast" stroke={theme.charts.palette[5]} strokeWidth={2} dot={{r: 4}} />
-                        </ComposedChart>
-                    </ResponsiveContainer>
+                <div className="flex-1 w-full min-h-0">
+                    <Suspense fallback={<ChartSkeleton />}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart data={financialChartData} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                                <XAxis dataKey="name" tick={{fontSize: 12}} />
+                                <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
+                                <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
+                                <Bar dataKey="Budget" fill="#cbd5e1" barSize={20} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="Actuals" fill={theme.charts.palette[0]} barSize={20} radius={[4, 4, 0, 0]} />
+                                <Line type="monotone" dataKey="Forecast" stroke={theme.charts.palette[5]} strokeWidth={2} dot={{r: 4}} />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </Suspense>
                 </div>
             </div>
 
@@ -241,50 +247,8 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                                 <p className={`text-xs ${theme.colors.text.secondary} mt-0.5`}>Linked to: {obj.linkedStrategicGoalId}</p>
                             </li>
                         ))}
+                        {programObjectives.length === 0 && <li className="text-xs text-slate-400 italic">No specific objectives defined.</li>}
                     </ul>
-                </div>
-            </div>
-        </div>
-
-        {/* Recent Timeline / Gates */}
-        <div className={`${theme.components.card} overflow-hidden`}>
-            <div className={`px-6 py-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
-                <h3 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
-                    <Calendar size={18} className="text-nexus-600"/> Upcoming Milestones & Gates
-                </h3>
-                <button className="text-xs font-medium text-nexus-600 hover:text-nexus-700 flex items-center gap-1">
-                    View Roadmap <ArrowUpRight size={14}/>
-                </button>
-            </div>
-            <div className="p-6">
-                <div className="relative flex items-center justify-between">
-                    {/* Line */}
-                    <div className={`absolute left-0 right-0 top-4 h-1 ${theme.colors.background} z-0`}></div>
-                    
-                    {/* Items */}
-                    {[
-                        { label: 'Q1 Review', date: 'Mar 15', status: 'Complete' },
-                        { label: 'Design Freeze', date: 'Apr 01', status: 'Complete' },
-                        { label: 'Budget Cycle', date: 'May 15', status: 'In Progress' },
-                        { label: 'Phase 2 Gate', date: 'Jun 30', status: 'Pending' },
-                        { label: 'Go-Live', date: 'Dec 15', status: 'Pending' },
-                    ].map((m) => (
-                        <div key={m.label} className="relative z-10 flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center bg-white ${
-                                m.status === 'Complete' ? 'border-green-500' :
-                                m.status === 'In Progress' ? 'border-blue-500' : 'border-slate-300'
-                            }`}>
-                                <div className={`w-2.5 h-2.5 rounded-full ${
-                                    m.status === 'Complete' ? 'bg-green-500' :
-                                    m.status === 'In Progress' ? 'bg-blue-500' : 'bg-slate-300'
-                                }`}></div>
-                            </div>
-                            <div className="mt-2 text-center">
-                                <p className={`text-xs font-bold ${theme.colors.text.primary}`}>{m.label}</p>
-                                <p className={`text-[10px] ${theme.colors.text.secondary}`}>{m.date}</p>
-                            </div>
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>

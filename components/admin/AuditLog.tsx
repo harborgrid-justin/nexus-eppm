@@ -1,11 +1,14 @@
 
-import React, { useState, useDeferredValue, useMemo } from 'react';
+import React, { useState, useDeferredValue, useMemo, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { History, Shield, Filter, Search, Download, Clock, User, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { useVirtualScroll } from '../../hooks/useVirtualScroll';
+import { useTheme } from '../../context/ThemeContext';
 
 const AuditLog: React.FC = () => {
     const { state } = useData();
+    const theme = useTheme();
     const [searchTerm, setSearchTerm] = useState('');
     
     // Pattern 11: useDeferredValue for intensive data search
@@ -22,6 +25,28 @@ const AuditLog: React.FC = () => {
             log.details.toLowerCase().includes(term)
         );
     }, [state.governance.auditLog, deferredSearchTerm]);
+
+    // Virtualization Setup
+    const parentRef = useRef<HTMLDivElement>(null);
+    const [containerHeight, setContainerHeight] = useState(600);
+    const ROW_HEIGHT = 64; // Fixed height for log rows
+
+    useEffect(() => {
+        if (parentRef.current) {
+            setContainerHeight(parentRef.current.clientHeight);
+        }
+        const observer = new ResizeObserver(entries => {
+            if (entries[0]) setContainerHeight(entries[0].contentRect.height);
+        });
+        if (parentRef.current) observer.observe(parentRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    const { virtualItems, totalHeight, onScroll } = useVirtualScroll(0, {
+        totalItems: logs.length,
+        itemHeight: ROW_HEIGHT,
+        containerHeight
+    });
 
     return (
         <div className="space-y-6 h-full flex flex-col">
@@ -61,52 +86,66 @@ const AuditLog: React.FC = () => {
                 </button>
             </div>
 
-            <div className={`flex-1 overflow-auto bg-white border border-slate-200 rounded-xl shadow-sm relative transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
-                <table className="min-w-full divide-y divide-slate-200">
-                    <thead className="bg-slate-50 sticky top-0 z-10">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase w-48 whitespace-nowrap">Timestamp</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase w-40 whitespace-nowrap">User</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase w-40 whitespace-nowrap">Action</th>
-                            <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase min-w-[200px]">Change Detail</th>
-                            <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase whitespace-nowrap">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {logs.map((log, i) => (
-                            <tr key={i} className="hover:bg-slate-50 transition-colors focus:bg-slate-50 outline-none" tabIndex={0} role="row">
-                                <td className="px-6 py-4 whitespace-nowrap">
+            <div className={`flex-1 overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm relative flex flex-col transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
+                {/* Header */}
+                <div className="grid grid-cols-[180px_160px_160px_1fr_100px] bg-slate-50 border-b border-slate-200 sticky top-0 z-10 font-bold text-xs text-slate-500 uppercase tracking-wider px-4 py-3">
+                    <div>Timestamp</div>
+                    <div>User</div>
+                    <div>Action</div>
+                    <div>Change Detail</div>
+                    <div className="text-right">Status</div>
+                </div>
+
+                {/* Virtual List */}
+                <div 
+                    ref={parentRef}
+                    className="flex-1 overflow-y-auto scrollbar-thin relative"
+                    onScroll={(e) => onScroll(e.currentTarget.scrollTop)}
+                >
+                    <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
+                        {virtualItems.map(({ index, offsetTop }) => {
+                            const log = logs[index];
+                            return (
+                                <div 
+                                    key={index}
+                                    className="absolute top-0 left-0 w-full grid grid-cols-[180px_160px_160px_1fr_100px] items-center px-4 border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                                    style={{ 
+                                        height: `${ROW_HEIGHT}px`,
+                                        transform: `translateY(${offsetTop}px)`
+                                    }}
+                                >
                                     <div className="flex items-center gap-2 text-xs text-slate-500">
                                         <Clock size={12}/>
                                         {log.date}
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold">
+                                        <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold shrink-0">
                                             {log.user.charAt(0)}
                                         </div>
-                                        <span className="text-sm font-medium text-slate-800">{log.user}</span>
+                                        <span className="text-sm font-medium text-slate-800 truncate" title={log.user}>{log.user}</span>
                                     </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter bg-slate-100 px-2 py-0.5 rounded">
-                                        {log.action}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-sm text-slate-600">
-                                    {log.details}
-                                </td>
-                                <td className="px-6 py-4 text-right whitespace-nowrap">
-                                    <Badge variant="success">Verified</Badge>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {logs.length === 0 && (
-                    <div className="p-12 text-center text-slate-400">No activity recorded for this period.</div>
-                )}
+                                    <div>
+                                        <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter bg-slate-100 px-2 py-0.5 rounded truncate inline-block max-w-full">
+                                            {log.action}
+                                        </span>
+                                    </div>
+                                    <div className="text-sm text-slate-600 truncate" title={log.details}>
+                                        {log.details}
+                                    </div>
+                                    <div className="text-right">
+                                        <Badge variant="success">Verified</Badge>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    {logs.length === 0 && (
+                        <div className="h-full flex items-center justify-center text-slate-400">
+                            No activity recorded for this period.
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

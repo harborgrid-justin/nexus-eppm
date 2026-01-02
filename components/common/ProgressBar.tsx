@@ -30,8 +30,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     barColor = colorClass;
   } else if (thresholds) {
     // Use semantic colors from theme
-    if (percentage > 100) barColor = theme.colors.semantic.danger.bg.replace('bg-', 'bg-').replace('-50', '-600'); // Approximating solid from light token
-    else if (percentage > 90) barColor = 'bg-red-500'; // Semantic mapping
+    if (percentage > 100) barColor = theme.colors.semantic.danger.bg.replace('bg-', 'bg-').replace('-50', '-600'); 
+    else if (percentage > 90) barColor = 'bg-red-500'; 
     else if (percentage > 75) barColor = 'bg-amber-500';
     else barColor = 'bg-emerald-500';
   }

@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpDown, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { Skeleton } from '../ui/Skeleton';
 
 export interface Column<T> {
   key: string;
@@ -20,6 +21,7 @@ interface DataTableProps<T> {
   keyField: keyof T;
   emptyMessage?: string;
   isLoading?: boolean;
+  rowsPerPage?: number; // Used for skeleton count
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -35,7 +37,8 @@ function DataTable<T>({
   onRowClick, 
   keyField, 
   emptyMessage = "No records found.",
-  isLoading = false
+  isLoading = false,
+  rowsPerPage = 5
 }: DataTableProps<T>) {
   const theme = useTheme();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
@@ -65,11 +68,31 @@ function DataTable<T>({
 
   if (isLoading) {
     return (
-      <div className={`flex items-center justify-center h-64 ${theme.components.card}`}>
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin"></div>
-          <p className={theme.typography.small}>Loading records...</p>
-        </div>
+      <div className={`${theme.components.card} flex flex-col h-full w-full min-w-0 overflow-hidden`}>
+         <div className="overflow-x-auto flex-1 scrollbar-thin">
+            <table className="min-w-full divide-y divide-slate-100 table-fixed">
+              <thead className={`${theme.colors.background}/80 backdrop-blur-sm sticky top-0 z-10`}>
+                 <tr>
+                    {columns.map((col, idx) => (
+                        <th key={idx} className={theme.components.table.header}>
+                            <div className="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+                        </th>
+                    ))}
+                 </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                  {[...Array(rowsPerPage)].map((_, i) => (
+                      <tr key={i} className={theme.components.table.row}>
+                          {columns.map((_, cIdx) => (
+                              <td key={cIdx} className={theme.components.table.cell}>
+                                  <Skeleton height={16} width="80%" className="rounded" />
+                              </td>
+                          ))}
+                      </tr>
+                  ))}
+              </tbody>
+            </table>
+         </div>
       </div>
     );
   }

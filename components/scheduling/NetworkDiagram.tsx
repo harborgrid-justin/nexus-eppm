@@ -1,10 +1,9 @@
 
-import React, { useMemo, Suspense, useTransition } from 'react';
+import React, { useMemo, Suspense, useTransition, useRef, useState, useEffect } from 'react';
 import { Project, Task, Dependency } from '../../types/index';
 import { Diamond, Loader2, Share2, ZoomIn, ZoomOut, Maximize2, Move } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-// FIX: Added missing imports for Button and Badge.
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
@@ -46,9 +45,17 @@ const NetworkPaths: React.FC<{ nodes: NodeTask[], positions: Map<string, any>, t
 const NetworkDiagram: React.FC = () => {
   const { project } = useProjectWorkspace();
   const theme = useTheme();
-  const [isPending, startTransition] = useTransition();
+  
+  // Ref for direct DOM manipulation (Principle 11)
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const offset = useRef({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number | null>(null);
 
   const { nodes, levels } = useMemo(() => {
+    if (!project) return { nodes: [], levels: [] };
     const tasks = project.tasks || [];
     const nodes: NodeTask[] = tasks.map(t => ({ ...t, children: [] as string[], level: -1 }));
     const nodeMap = new Map<string, NodeTask>(nodes.map(n => [n.id, n]));
@@ -72,7 +79,7 @@ const NetworkDiagram: React.FC = () => {
         return acc; 
     }, [] as NodeTask[][]);
     return { nodes, levels: levelsArr };
-  }, [project.tasks]);
+  }, [project?.tasks]);
   
   const nodePositions = useMemo(() => {
     const pos = new Map<string, { x: number, y: number, width: number, height: number }>();
@@ -82,11 +89,53 @@ const NetworkDiagram: React.FC = () => {
     return pos;
   }, [levels]);
 
+  // --- RAF Optimized Panning ---
+  const updateTransform = () => {
+    if (canvasRef.current) {
+        canvasRef.current.style.transform = `translate(${offset.current.x}px, ${offset.current.y}px)`;
+    }
+    rafId.current = null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+    if (containerRef.current) containerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    
+    const deltaX = e.clientX - lastMousePos.current.x;
+    const deltaY = e.clientY - lastMousePos.current.y;
+    
+    offset.current.x += deltaX;
+    offset.current.y += deltaY;
+    
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+
+    if (!rafId.current) {
+        rafId.current = requestAnimationFrame(updateTransform);
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+    if (containerRef.current) containerRef.current.style.cursor = 'grab';
+    if (rafId.current) cancelAnimationFrame(rafId.current);
+  };
+
+  useEffect(() => {
+      return () => {
+          if (rafId.current) cancelAnimationFrame(rafId.current);
+      };
+  }, []);
+
   if (!project) return null;
 
   return (
     <div className={`h-full w-full flex flex-col ${theme.colors.background} overflow-hidden`}>
-      <div className="p-4 border-b bg-white flex justify-between items-center z-20 shadow-sm">
+      <div className="p-4 border-b bg-white flex justify-between items-center z-20 shadow-sm flex-shrink-0">
           <div className="flex items-center gap-4">
               <div className="p-2 bg-nexus-50 text-nexus-600 rounded-lg shadow-sm"><Share2 size={24}/></div>
               <div>
@@ -103,9 +152,19 @@ const NetworkDiagram: React.FC = () => {
           </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-slate-100/30 p-10 scrollbar-thin">
-        <div className="relative" style={{ width: levels.length * 280 + 300, height: Math.max(...levels.map(l => l.length)) * 140 + 300 }}>
-            {/* Pattern 26: Suspense for heavy path calculation */}
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-hidden bg-slate-100/30 relative cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <div 
+            ref={canvasRef}
+            className="absolute top-0 left-0 transition-transform duration-75 ease-linear origin-top-left"
+            style={{ width: levels.length * 280 + 500, height: Math.max(...levels.map(l => l.length)) * 140 + 500 }}
+        >
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50"><Loader2 className="animate-spin text-slate-300" size={64}/></div>}>
                 <NetworkPaths nodes={nodes} positions={nodePositions} tasks={project.tasks} />
             </Suspense>
@@ -114,7 +173,7 @@ const NetworkDiagram: React.FC = () => {
               const pos = nodePositions.get(node.id);
               if (!pos) return null;
               return (
-                <div key={node.id} className={`absolute p-4 rounded-xl shadow-lg border-2 transition-all hover:scale-105 hover:shadow-2xl z-10 cursor-pointer ${node.critical ? 'border-red-500 bg-white ring-4 ring-red-500/10' : 'border-slate-200 bg-white hover:border-nexus-400'}`} style={{ left: pos.x, top: pos.y, width: pos.width, height: pos.height }}>
+                <div key={node.id} className={`absolute p-4 rounded-xl shadow-lg border-2 z-10 cursor-pointer ${node.critical ? 'border-red-500 bg-white ring-4 ring-red-500/10' : 'border-slate-200 bg-white hover:border-nexus-400'}`} style={{ left: pos.x, top: pos.y, width: pos.width, height: pos.height }}>
                     <div className="flex justify-between items-start mb-1">
                         <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-tighter">{node.wbsCode}</span>
                         {node.critical && <Badge variant="danger" className="scale-75 origin-top-right">Critical</Badge>}
@@ -132,10 +191,10 @@ const NetworkDiagram: React.FC = () => {
       </div>
       
       {/* Interaction Hint Overlay */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-3 backdrop-blur-md shadow-2xl border border-white/10 select-none animate-in slide-in-from-bottom-4">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-3 backdrop-blur-md shadow-2xl border border-white/10 select-none pointer-events-none">
           <div className="flex items-center gap-1.5 text-nexus-400"><Move size={14}/> Click & Drag to Pan</div>
           <div className="w-px h-3 bg-white/20"></div>
-          <div className="flex items-center gap-1.5 text-nexus-400"><Share2 size={14}/> Click Node to Trace Logic</div>
+          <div className="flex items-center gap-1.5 text-nexus-400"><Share2 size={14}/> Node Layout</div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import React, { useMemo, useState, useEffect, useDeferredValue } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Loader2, Filter } from 'lucide-react';
+import { Skeleton } from '../ui/Skeleton';
 
 interface ResourceCapacityProps {
   projectResources: Resource[] | undefined;
@@ -14,6 +15,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
   
   // Pattern 18: useDeferredValue for the intensive heatmap computation
   const deferredResources = useDeferredValue(projectResources);
+  const isStale = projectResources !== deferredResources;
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -23,6 +25,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
 
   const allocationData = useMemo(() => {
       const data: Record<string, number[]> = {};
+      // Ensure we operate on the deferred value to keep UI responsive
       if (!deferredResources || !currentYear) return {};
 
       deferredResources.forEach(res => {
@@ -58,14 +61,38 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
     return 'bg-red-100 text-red-800 hover:bg-red-200';
   };
   
-  if (!deferredResources || !currentYear) return <div className="flex h-full items-center justify-center text-slate-400 font-bold"><Loader2 className="animate-spin mr-2"/> Preparing Heatmap...</div>;
+  // Skeleton Loading State (Principle 1: Zero Layout Shift)
+  if (!deferredResources || !currentYear) {
+      return (
+          <div className="h-full flex flex-col">
+              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+                  <Skeleton width={200} height={20} />
+                  <Skeleton width={150} height={20} />
+              </div>
+              <div className="flex-1 p-4 overflow-hidden">
+                   {/* Table Header Skeleton */}
+                   <div className="flex mb-4 gap-2">
+                       <Skeleton width={250} height={32} />
+                       {[...Array(12)].map((_, i) => <Skeleton key={i} className="flex-1" height={32} />)}
+                   </div>
+                   {/* Table Rows Skeleton */}
+                   {[...Array(10)].map((_, i) => (
+                       <div key={i} className="flex mb-2 gap-2">
+                           <Skeleton width={250} height={40} />
+                           {[...Array(12)].map((_, j) => <Skeleton key={j} className="flex-1" height={40} variant="rect"/>)}
+                       </div>
+                   ))}
+              </div>
+          </div>
+      );
+  }
 
   return (
-    <div className={`h-full flex flex-col transition-opacity duration-300 ${projectResources !== deferredResources ? 'opacity-60' : 'opacity-100'}`}>
+    <div className={`h-full flex flex-col transition-opacity duration-300 ${isStale ? 'opacity-60' : 'opacity-100'}`}>
       <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50/50">
         <h3 className="font-bold text-slate-700 text-sm">Resource Allocation Index ({currentYear})</h3>
         <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-tighter">
-          {projectResources !== deferredResources && <span className="text-nexus-600 animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Recalculating Matrix...</span>}
+          {isStale && <span className="text-nexus-600 animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Recalculating Matrix...</span>}
           <div className="flex gap-2">
             <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 bg-green-100 border rounded"></div> Under</span>
             <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 bg-nexus-100 border rounded"></div> Optimal</span>
