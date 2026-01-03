@@ -1,5 +1,5 @@
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useMemo } from 'react';
 import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ExchangeDashboard } from './data/ExchangeDashboard';
@@ -9,15 +9,45 @@ import { JobHistory } from './data/JobHistory';
 import { SchemaGapAnalysis } from './data/SchemaGapAnalysis';
 import { ExportPanel } from './data/ExportPanel';
 import { ImportPanel } from './data/ImportPanel';
+import { PageHeader } from '../common/PageHeader';
+import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 const DataExchange: React.FC = () => {
     const theme = useTheme();
+    const [activeGroup, setActiveGroup] = useState('operations');
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isPending, startTransition] = useTransition();
 
-    const handleTabChange = (id: string) => {
+    const navGroups: NavGroup[] = useMemo(() => [
+        { id: 'operations', label: 'Operations', items: [
+            { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
+            { id: 'history', label: 'Job Logs', icon: History },
+        ]},
+        { id: 'configuration', label: 'Configuration', items: [
+            { id: 'schema', label: 'Schema Map', icon: Map },
+            { id: 'designer', label: 'Integration Designer', icon: GitMerge },
+            { id: 'connectors', label: 'Connectors', icon: Network },
+        ]},
+        { id: 'tools', label: 'Tools', items: [
+            { id: 'import', label: 'Import', icon: UploadCloud },
+            { id: 'export', label: 'Export', icon: Download },
+        ]}
+    ], []);
+
+    const handleGroupChange = (groupId: string) => {
+        const newGroup = navGroups.find(g => g.id === groupId);
+        if (newGroup?.items.length) {
+            startTransition(() => {
+                setActiveGroup(groupId);
+                setActiveTab(newGroup.items[0].id);
+            });
+        }
+    };
+
+    const handleItemChange = (itemId: string) => {
         startTransition(() => {
-            setActiveTab(id);
+            setActiveTab(itemId);
         });
     };
 
@@ -35,43 +65,30 @@ const DataExchange: React.FC = () => {
     };
 
     return (
-        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} flex flex-col h-full`}>
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4">
-                <div>
-                    <h1 className={theme.typography.h1}>
-                        <Database className="text-nexus-600" /> Data Exchange Hub
-                    </h1>
-                    <p className={theme.typography.small}>Enterprise ETL orchestration, connectivity, and schema mapping.</p>
+        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+            <PageHeader 
+                title="Data Exchange Hub" 
+                subtitle="Enterprise ETL orchestration, connectivity, and schema mapping."
+                icon={Database}
+            />
+
+            <div className={theme.layout.panelContainer}>
+                <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
+                    <ModuleNavigation 
+                        groups={navGroups}
+                        activeGroup={activeGroup}
+                        activeItem={activeTab}
+                        onGroupChange={handleGroupChange}
+                        onItemChange={handleItemChange}
+                        className="bg-transparent border-0 shadow-none"
+                    />
                 </div>
                 
-                <div className={`${theme.colors.surface} border ${theme.colors.border} p-1 rounded-lg flex shadow-sm overflow-x-auto max-w-full scrollbar-hide`}>
-                    {[
-                        { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-                        { id: 'schema', label: 'Schema Map', icon: Map },
-                        { id: 'designer', label: 'Integration Designer', icon: GitMerge },
-                        { id: 'connectors', label: 'Connectors', icon: Network },
-                        { id: 'import', label: 'Import', icon: UploadCloud },
-                        { id: 'export', label: 'Export', icon: Download },
-                        { id: 'history', label: 'Logs', icon: History },
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => handleTabChange(tab.id)}
-                            className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-md transition-all whitespace-nowrap ${
-                                activeTab === tab.id 
-                                ? `${theme.colors.background} text-nexus-700 shadow-sm ring-1 ring-slate-200` 
-                                : `${theme.colors.text.secondary} hover:${theme.colors.text.primary} hover:bg-slate-50`
-                            }`}
-                        >
-                            <tab.icon size={16} />
-                            {tab.label}
-                        </button>
-                    ))}
+                <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+                    <ErrorBoundary name="Data Exchange">
+                        {renderContent()}
+                    </ErrorBoundary>
                 </div>
-            </div>
-
-            <div className={`flex-1 overflow-hidden min-h-0 relative transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
-                {renderContent()}
             </div>
         </div>
     );

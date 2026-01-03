@@ -13,11 +13,11 @@ import {
     PieChart, Smartphone, Tablet, Monitor, Lock, Download, Upload, 
     MoreHorizontal, ThumbsUp, ThumbsDown, Zap, ArrowRight, ArrowLeft, RefreshCw,
     Play, Pause, X, MapPin, Search, Plus, Filter, Layout, Smile, Frown, Meh, Globe, RotateCcw, Box, Truck,
-    ChevronLeft, ChevronRight, AlertTriangle
+    ChevronLeft, ChevronRight, AlertTriangle, CheckCircle, Clock, Database, ShieldCheck
 } from 'lucide-react';
 import { ProgressBar } from '../common/ProgressBar';
 import StatCard from '../shared/StatCard';
-import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ScatterChart, Scatter, ZAxis, BarChart, Bar } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ScatterChart, Scatter, ZAxis, BarChart, Bar, AreaChart, Area } from 'recharts';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8">
@@ -410,7 +410,78 @@ export const EmptyDashboardTmpl: React.FC = () => (
     </div>
 );
 
-export const SystemHealthTmpl: React.FC = () => <div className="p-8 text-center text-slate-400 italic">System Health placeholder.</div>;
+export const SystemHealthTmpl: React.FC = () => {
+    const theme = useTheme();
+    const metrics = [
+        { name: 'Database Latency', value: 12, unit: 'ms', threshold: 50, trend: [10, 11, 12, 11, 13, 12, 12] },
+        { name: 'API Error Rate', value: 0.05, unit: '%', threshold: 1, trend: [0.01, 0.02, 0.05, 0.04, 0.05] },
+        { name: 'Memory Usage', value: 65, unit: '%', threshold: 80, trend: [60, 62, 65, 68, 65] },
+    ];
+
+    return (
+        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding}`}>
+            <TemplateHeader number="56" title="System Health" subtitle="Operational metrics & status" />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                {metrics.map((m, i) => (
+                    <Card key={i} className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <p className="text-sm font-bold text-slate-500 uppercase">{m.name}</p>
+                                <h4 className={`text-3xl font-black ${m.value > m.threshold ? 'text-red-500' : 'text-slate-800'}`}>
+                                    {m.value}<span className="text-lg font-medium text-slate-400 ml-1">{m.unit}</span>
+                                </h4>
+                            </div>
+                            <div className={`p-2 rounded-full ${m.value > m.threshold ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                                {m.value > m.threshold ? <AlertTriangle size={20}/> : <CheckCircle size={20}/>}
+                            </div>
+                        </div>
+                        <div className="h-16 w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={m.trend.map((v, idx) => ({ idx, val: v }))}>
+                                    <Area type="monotone" dataKey="val" stroke={m.value > m.threshold ? '#ef4444' : '#10b981'} fill={m.value > m.threshold ? '#fecaca' : '#d1fae5'} strokeWidth={2} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+
+            <Card className="overflow-hidden">
+                <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                        <Server size={18}/> Service Status
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs">
+                        <span className="flex items-center gap-1 text-green-600 font-bold"><div className="w-2 h-2 rounded-full bg-green-500"></div> Operational</span>
+                        <span className="flex items-center gap-1 text-yellow-600 font-bold"><div className="w-2 h-2 rounded-full bg-yellow-500"></div> Degraded</span>
+                        <span className="flex items-center gap-1 text-red-600 font-bold"><div className="w-2 h-2 rounded-full bg-red-500"></div> Down</span>
+                    </div>
+                </div>
+                <div className="divide-y divide-slate-100">
+                    {[
+                        { name: 'Primary API Gateway', status: 'Operational', uptime: '99.99%', latency: '45ms' },
+                        { name: 'Auth Service (SSO)', status: 'Operational', uptime: '99.95%', latency: '120ms' },
+                        { name: 'Search Indexer', status: 'Degraded', uptime: '98.50%', latency: '850ms' },
+                        { name: 'Notification Worker', status: 'Operational', uptime: '100%', latency: 'N/A' },
+                    ].map((svc, i) => (
+                        <div key={i} className="p-4 flex items-center justify-between hover:bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-2.5 h-2.5 rounded-full ${svc.status === 'Operational' ? 'bg-green-500' : svc.status === 'Degraded' ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
+                                <span className="font-bold text-slate-800 text-sm">{svc.name}</span>
+                            </div>
+                            <div className="flex gap-8 text-xs text-slate-500 font-mono">
+                                <span>UPTIME: {svc.uptime}</span>
+                                <span className={svc.status === 'Degraded' ? 'text-yellow-600 font-bold' : ''}>LATENCY: {svc.latency}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </Card>
+        </div>
+    );
+};
+
 export const ApiPlaygroundTmpl: React.FC = () => <div className="p-8 text-center text-slate-400 italic">API Playground placeholder.</div>;
 export const OnboardingChecklistTmpl: React.FC = () => <div className="p-8 text-center text-slate-400 italic">Onboarding Checklist placeholder.</div>;
 

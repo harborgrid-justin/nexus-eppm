@@ -1,11 +1,11 @@
 
 import React, { useMemo } from 'react';
 import { ShieldCheck, Bug, CheckCircle, AlertTriangle, TrendingUp, Activity, Target, Layers } from 'lucide-react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { formatPercentage } from '../../utils/formatters';
 import { QualityReport } from '../../types/index';
 

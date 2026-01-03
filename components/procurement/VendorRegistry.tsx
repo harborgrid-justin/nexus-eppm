@@ -1,7 +1,7 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useProcurementData } from '../../hooks';
-import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock } from 'lucide-react';
+import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -44,16 +44,19 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
   }, [vendors, deferredSearchTerm]);
 
   return (
-    <div className="h-full flex flex-col">
-        <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}/50 flex flex-col md:flex-row justify-between items-center gap-3`}>
+    <div className={`h-full flex flex-col ${theme.colors.background}`}>
+        <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.surface} flex flex-col md:flex-row justify-between items-center gap-3 shadow-sm z-10`}>
             <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                <Input 
-                    isSearch 
-                    placeholder="Search vendors..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full md:w-64" 
-                />
+                <div className="relative w-full md:w-64">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Input 
+                        isSearch 
+                        placeholder="Search vendors..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9" 
+                    />
+                </div>
                 <Button variant="secondary" size="md" icon={Filter} className="w-full md:w-auto">Status</Button>
             </div>
             {canEditProcurement ? (
@@ -64,7 +67,8 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                 </div>
             )}
         </div>
-        <div className="flex-1 overflow-auto">
+        
+        <div className={`flex-1 overflow-auto ${theme.colors.surface} ${theme.layout.cardPadding} m-4 rounded-xl border ${theme.colors.border} p-0`}>
             <div className="min-w-[800px]">
                 <table className="min-w-full divide-y divide-slate-200">
                     <thead className={`${theme.colors.background} sticky top-0`}>
@@ -81,7 +85,7 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                         {filteredVendors.map(v => (
                             <tr 
                                 key={v.id} 
-                                className={`${theme.components.table.row} cursor-pointer focus:bg-slate-50 outline-none`}
+                                className={`${theme.components.table.row} cursor-pointer hover:${theme.colors.background} outline-none`}
                                 onClick={() => handleRowClick(v.id)}
                                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRowClick(v.id)}
                                 tabIndex={0}
@@ -96,7 +100,7 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                                 <td className={theme.components.table.cell}>{getStatusBadge(v.status)}</td>
                                 <td className={theme.components.table.cell}>
                                     <div className="flex items-center gap-2">
-                                        <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden`}>
+                                        <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
                                             <div className={`h-full ${v.performanceScore > 80 ? 'bg-green-500' : v.performanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${v.performanceScore}%`}}></div>
                                         </div>
                                         <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
@@ -108,6 +112,9 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                         ))}
                     </tbody>
                 </table>
+                {filteredVendors.length === 0 && (
+                    <div className="p-12 text-center text-slate-400">No vendors found.</div>
+                )}
             </div>
         </div>
     </div>

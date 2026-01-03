@@ -21,7 +21,7 @@ const ScopeSection = ({ title, icon: Icon, children, isOpen, onToggle }: any) =>
                 </div>
                 {isOpen ? <ChevronDown size={16} className={theme.colors.text.tertiary} /> : <ChevronRight size={16} className={theme.colors.text.tertiary} />}
             </button>
-            {isOpen && <div className="p-6 animate-in slide-in-from-top-2 duration-200">{children}</div>}
+            {isOpen && <div className={`p-6 animate-in slide-in-from-top-2 duration-200 ${theme.colors.surface}`}>{children}</div>}
         </div>
     );
 };
@@ -40,7 +40,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
     const toggle = (key: keyof typeof sections) => setSections(prev => ({ ...prev, [key]: !prev[key] }));
 
     return (
-        <div className={`h-full flex flex-col ${theme.colors.background}/50`}>
+        <div className={`h-full flex flex-col ${theme.colors.background}`}>
             <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center ${theme.colors.surface}`}>
                 <h3 className={`font-semibold ${theme.colors.text.primary} text-sm flex items-center gap-2`}>
                     <FileText size={18} className="text-nexus-600" /> Project Scope Statement
@@ -63,7 +63,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                     <div className="space-y-4">
                         <p className={`text-sm ${theme.colors.text.secondary}`}>Describe the characteristics of the product, service, or result.</p>
                         <textarea 
-                            className={`w-full h-32 p-4 border ${theme.colors.border} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background}`}
+                            className={`w-full h-32 p-4 border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background} outline-none`}
                             placeholder="Detailed description of the project scope..."
                             disabled={!canEditProject()}
                         />
@@ -74,7 +74,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                     <div className="space-y-4">
                         <p className={`text-sm ${theme.colors.text.secondary}`}>List the unique and verifiable products, results, or capabilities.</p>
                         <textarea 
-                            className={`w-full h-32 p-4 border ${theme.colors.border} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background}`}
+                            className={`w-full h-32 p-4 border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background} outline-none`}
                             placeholder="- Deliverable 1&#10;- Deliverable 2"
                             disabled={!canEditProject()}
                         />
@@ -85,7 +85,7 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                     <div className="space-y-4">
                         <p className={`text-sm ${theme.colors.text.secondary}`}>Explicitly state what is out of scope to manage stakeholder expectations.</p>
                         <textarea 
-                            className={`w-full h-32 p-4 border ${theme.colors.border} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background}`}
+                            className={`w-full h-32 p-4 border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background} outline-none`}
                             placeholder="The following items are out of scope..."
                             disabled={!canEditProject()}
                         />
@@ -97,11 +97,11 @@ const ScopeStatement: React.FC<ScopeStatementProps> = ({ projectId }) => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className={`block text-xs font-bold ${theme.colors.text.secondary} mb-1 uppercase`}>Constraints</label>
-                                <textarea className={`w-full h-24 p-2 border ${theme.colors.border} rounded-md text-sm`} placeholder="Budget, Schedule, Resources..." disabled={!canEditProject()}/>
+                                <textarea className={`w-full h-24 p-2 border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} rounded-md text-sm outline-none`} placeholder="Budget, Schedule, Resources..." disabled={!canEditProject()}/>
                             </div>
                             <div>
                                 <label className={`block text-xs font-bold ${theme.colors.text.secondary} mb-1 uppercase`}>Assumptions</label>
-                                <textarea className={`w-full h-24 p-2 border ${theme.colors.border} rounded-md text-sm`} placeholder="Market conditions, Approvals..." disabled={!canEditProject()}/>
+                                <textarea className={`w-full h-24 p-2 border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} rounded-md text-sm outline-none`} placeholder="Market conditions, Approvals..." disabled={!canEditProject()}/>
                             </div>
                         </div>
                     </div>

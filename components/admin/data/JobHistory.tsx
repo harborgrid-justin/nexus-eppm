@@ -22,13 +22,15 @@ export const JobHistory: React.FC = () => {
         setExpandedJobId(expandedJobId === id ? null : id);
     };
 
+    const dataJobs = state.dataJobs || [];
+
     return (
         <div className={theme.layout.panelContainer}>
             <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center bg-slate-50`}>
                 <h2 className={theme.typography.h2}>Job History & Audit Log</h2>
                 <div className="flex gap-2 text-xs">
-                     <span className="font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">Total Jobs: {state.dataJobs.length}</span>
-                     <span className="font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded">Errors: {state.dataJobs.filter(j => j.status === 'Failed').length}</span>
+                     <span className="font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">Total Jobs: {dataJobs.length}</span>
+                     <span className="font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded">Errors: {dataJobs.filter(j => j.status === 'Failed').length}</span>
                 </div>
             </div>
             <div className="flex-1 overflow-auto">
@@ -45,7 +47,7 @@ export const JobHistory: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">
-                            {state.dataJobs.length > 0 ? state.dataJobs.map(job => (
+                            {dataJobs.length > 0 ? dataJobs.map(job => (
                                 <React.Fragment key={job.id}>
                                     <tr className={`hover:bg-slate-50 transition-colors cursor-pointer ${expandedJobId === job.id ? 'bg-slate-50' : ''}`} onClick={() => toggleExpand(job.id)}>
                                         <td className="px-4 py-4 text-slate-400">

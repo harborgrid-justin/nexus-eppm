@@ -3,9 +3,10 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   Layout, LayoutDashboard, List, FormInput, 
   MonitorPlay, Globe, Shield, ChevronRight, PieChart, 
-  Briefcase, HardHat, Users, Settings, Box, Cloud, GripVertical
+  Briefcase, HardHat, Users, Settings, Box, Cloud, Grid
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { PageHeader } from './common/PageHeader';
 import * as Templates from './templates';
 
 const CATEGORIES = [
@@ -237,80 +238,89 @@ const TemplateGallery: React.FC = () => {
   const selectedLabel = allItems.find(i => i.id === selectedTemplateId)?.label;
 
   return (
-    <div className={`flex h-full ${theme.colors.background} overflow-hidden`}>
-      {/* Sidebar Navigation */}
-      <div 
-        className={`relative ${theme.colors.surface} border-r ${theme.colors.border} flex flex-col h-full flex-shrink-0`}
-        style={{ width: sidebarWidth }}
-      >
-        {/* Resize Handle */}
-        <div 
-           className="absolute top-0 bottom-0 right-0 w-1 cursor-col-resize hover:bg-nexus-500 z-50 transition-colors"
-           onMouseDown={startResizing}
-        ></div>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+      <PageHeader 
+        title="Template Gallery" 
+        subtitle="Catalog of 90+ enterprise-grade UI patterns and layouts."
+        icon={Grid}
+      />
+      
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex h-full ${theme.colors.background} overflow-hidden`}>
+          {/* Sidebar Navigation */}
+          <div 
+            className={`relative ${theme.colors.surface} border-r ${theme.colors.border} flex flex-col h-full flex-shrink-0 z-10`}
+            style={{ width: sidebarWidth }}
+          >
+            {/* Resize Handle */}
+            <div 
+              className="absolute top-0 bottom-0 right-0 w-1 cursor-col-resize hover:bg-nexus-500 z-50 transition-colors"
+              onMouseDown={startResizing}
+            ></div>
 
-        <div className={`p-4 border-b ${theme.colors.border}`}>
-          <h2 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2 truncate`}>
-            <Layout className="text-nexus-600 flex-shrink-0" /> Design System
-          </h2>
-          <p className={`text-xs ${theme.colors.text.secondary} mt-1 truncate`}>90 Enterprise Layout Templates</p>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
-          {CATEGORIES.map(category => (
-            <div key={category.id} className="mb-2">
-              <button 
-                onClick={() => setActiveCategory(activeCategory === category.id ? '' : category.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider hover:bg-slate-50 rounded-lg transition-colors truncate`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <category.icon size={14} className="flex-shrink-0" /> <span className="truncate">{category.label}</span>
-                </div>
-                <ChevronRight size={14} className={`transition-transform flex-shrink-0 ${activeCategory === category.id ? 'rotate-90' : ''}`}/>
-              </button>
-              
-              {activeCategory === category.id && (
-                <div className={`mt-1 ml-2 pl-2 border-l-2 ${theme.colors.border} space-y-1`}>
-                  {category.items.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => setSelectedTemplateId(item.id)}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all truncate ${
-                        selectedTemplateId === item.id 
-                        ? `${theme.colors.accentBg.replace('bg-', 'bg-').replace('600', '50')} ${theme.colors.accentText} font-medium` 
-                        : `${theme.colors.text.secondary} hover:bg-slate-50 hover:${theme.colors.text.primary}`
-                      }`}
-                      title={item.label}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+            <div className={`p-4 border-b ${theme.colors.border}`}>
+              <h2 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2 truncate`}>
+                <Layout className="text-nexus-600 flex-shrink-0" /> Categories
+              </h2>
             </div>
-          ))}
-        </div>
-      </div>
+            
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
+              {CATEGORIES.map(category => (
+                <div key={category.id} className="mb-2">
+                  <button 
+                    onClick={() => setActiveCategory(activeCategory === category.id ? '' : category.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider hover:bg-slate-50 rounded-lg transition-colors truncate`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <category.icon size={14} className="flex-shrink-0" /> <span className="truncate">{category.label}</span>
+                    </div>
+                    <ChevronRight size={14} className={`transition-transform flex-shrink-0 ${activeCategory === category.id ? 'rotate-90' : ''}`}/>
+                  </button>
+                  
+                  {activeCategory === category.id && (
+                    <div className={`mt-1 ml-2 pl-2 border-l-2 ${theme.colors.border} space-y-1`}>
+                      {category.items.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSelectedTemplateId(item.id)}
+                          className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all truncate ${
+                            selectedTemplateId === item.id 
+                            ? `${theme.colors.accentBg.replace('bg-', 'bg-').replace('600', '50')} ${theme.colors.accentText} font-medium` 
+                            : `${theme.colors.text.secondary} hover:bg-slate-50 hover:${theme.colors.text.primary}`
+                          }`}
+                          title={item.label}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Main Preview Area */}
-      <div className="flex-1 flex flex-col h-full min-w-0">
-        <div className={`h-12 ${theme.colors.surface} border-b ${theme.colors.border} flex items-center px-6 justify-between flex-shrink-0`}>
-           <div className="flex items-center gap-2 overflow-hidden">
-              <span className={`text-xs font-bold ${theme.colors.background} ${theme.colors.text.secondary} px-2 py-1 rounded border ${theme.colors.border} uppercase flex-shrink-0`}>Preview</span>
-              <span className={`font-bold ${theme.colors.text.primary} truncate`}>{selectedLabel}</span>
-           </div>
-           <div className={`text-xs ${theme.colors.text.tertiary} font-mono hidden sm:block truncate ml-4`}>
-              src/components/templates/{selectedTemplateId}.tsx
-           </div>
-        </div>
-
-        <div className={`flex-1 p-8 overflow-hidden ${theme.colors.background}/50 relative`}>
-           <div className={`absolute inset-4 ${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} overflow-hidden ring-1 ring-slate-900/5`}>
-              {/* Render Selected Template */}
-              <div className="h-full w-full overflow-hidden">
-                 <SelectedComponent />
+          {/* Main Preview Area */}
+          <div className="flex-1 flex flex-col h-full min-w-0">
+            <div className={`h-12 ${theme.colors.surface} border-b ${theme.colors.border} flex items-center px-6 justify-between flex-shrink-0`}>
+              <div className="flex items-center gap-2 overflow-hidden">
+                  <span className={`text-xs font-bold ${theme.colors.background} ${theme.colors.text.secondary} px-2 py-1 rounded border ${theme.colors.border} uppercase flex-shrink-0`}>Preview</span>
+                  <span className={`font-bold ${theme.colors.text.primary} truncate`}>{selectedLabel}</span>
               </div>
-           </div>
+              <div className={`text-xs ${theme.colors.text.tertiary} font-mono hidden sm:block truncate ml-4`}>
+                  src/components/templates/{selectedTemplateId}.tsx
+              </div>
+            </div>
+
+            <div className={`flex-1 p-8 overflow-hidden ${theme.colors.background}/50 relative`}>
+              <div className={`absolute inset-4 ${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} overflow-hidden ring-1 ring-slate-900/5`}>
+                  {/* Render Selected Template */}
+                  <div className="h-full w-full overflow-hidden">
+                    <SelectedComponent />
+                  </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

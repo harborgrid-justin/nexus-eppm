@@ -1,96 +1,158 @@
 
-import React from 'react';
-import { Network, Plus, Check, Settings, Trash2, Key, Globe, Database, Server, Link, Activity, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Network, Plus, Check, Settings, Trash2, Key, Globe, Database, Server, Link, Activity, RefreshCw, Save, X } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
+import { SidePanel } from '../../ui/SidePanel';
+import { Input } from '../../ui/Input';
 
-// Static configuration moved outside component (Rule 8)
 const CONNECTORS = [
-    { id: 1, name: 'SAP S/4HANA Finance', type: 'ERP', status: 'Active', protocol: 'OData v4', lastSync: '2m ago', icon: Database, health: 'Good' },
-    { id: 2, name: 'Oracle Primavera P6', type: 'Schedule', status: 'Active', protocol: 'SOAP/Web Services', lastSync: '1h ago', icon: Server, health: 'Good' },
-    { id: 3, name: 'Microsoft Project Online', type: 'Schedule', status: 'Error', protocol: 'REST API', lastSync: '1d ago', icon: Globe, health: 'Critical' },
-    { id: 4, name: 'Autodesk Construction Cloud', type: 'Docs', status: 'Inactive', protocol: 'Forge API', lastSync: '-', icon: Link, health: 'Unknown' },
-    { id: 5, name: 'Legacy Mainframe', type: 'Data', status: 'Active', protocol: 'JDBC', lastSync: '4h ago', icon: Server, health: 'Warning' },
+    { id: 1, name: 'SAP S/4HANA Finance', type: 'ERP', status: 'Active', protocol: 'OData v4', lastSync: '2m ago', icon: Database, health: 'Good', endpoint: 'https://api.sap.corp/odata/v4' },
+    { id: 2, name: 'Oracle Primavera P6', type: 'Schedule', status: 'Active', protocol: 'SOAP/Web Services', lastSync: '1h ago', icon: Server, health: 'Good', endpoint: 'https://p6.oraclecloud.com/ws' },
+    { id: 3, name: 'Microsoft Project Online', type: 'Schedule', status: 'Error', protocol: 'REST API', lastSync: '1d ago', icon: Globe, health: 'Critical', endpoint: 'https://graph.microsoft.com/v1.0' },
+    { id: 4, name: 'Autodesk Construction Cloud', type: 'Docs', status: 'Inactive', protocol: 'Forge API', lastSync: '-', icon: Link, health: 'Unknown', endpoint: 'https://developer.api.autodesk.com' },
+    { id: 5, name: 'Legacy Mainframe', type: 'Data', status: 'Active', protocol: 'JDBC', lastSync: '4h ago', icon: Server, health: 'Warning', endpoint: 'jdbc:db2://mainframe:50000/DATA' },
 ];
 
 export const ConnectorConfig: React.FC = () => {
     const theme = useTheme();
+    const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [editingConn, setEditingConn] = useState<any>(null);
+    const [isTesting, setIsTesting] = useState(false);
 
-    const handleHealthCheck = (id: number) => {
-        alert(`Initiating health check handshake for Connector #${id}...`);
+    const handleOpen = (conn: any) => {
+        setEditingConn(conn || { name: '', type: 'ERP', protocol: 'REST', endpoint: '' });
+        setIsPanelOpen(true);
     };
 
-    const handleSyncAll = () => {
-        alert("Initiating full synchronization across all active connectors...");
+    const handleTestConnection = () => {
+        setIsTesting(true);
+        setTimeout(() => {
+            setIsTesting(false);
+            alert("Connection Successful! Latency: 45ms");
+        }, 1500);
     };
 
     return (
         <div className="h-full flex flex-col space-y-6">
-            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${theme.colors.surface} p-4 rounded-xl border ${theme.colors.border} shadow-sm gap-4`}>
-                <div>
-                    <h3 className="font-bold text-slate-800 text-lg">System Connectors</h3>
-                    <p className="text-sm text-slate-500">Manage API keys, endpoints, and authentication capabilities (REST, SOAP, JDBC).</p>
+            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm gap-4`}>
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200">
+                        <Network size={24} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-slate-800 text-lg">System Connectors</h3>
+                        <p className="text-sm text-slate-500">Manage API endpoints, authentication, and sync intervals.</p>
+                    </div>
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                    <Button variant="secondary" icon={RefreshCw} onClick={handleSyncAll} className="flex-1 sm:flex-none">Sync All</Button>
-                    <Button icon={Plus} className="flex-1 sm:flex-none">Add Connector</Button>
-                </div>
+                <Button icon={Plus} onClick={() => handleOpen(null)}>Add Connector</Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-4 px-1">
                 {CONNECTORS.map(conn => (
                     <div key={conn.id} className={`${theme.components.card} p-6 group hover:border-nexus-300 transition-all flex flex-col`}>
                         <div className="flex justify-between items-start mb-4">
                             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600 group-hover:text-nexus-600 group-hover:bg-nexus-50 transition-colors">
                                 <conn.icon size={24} />
                             </div>
-                            <Badge variant={conn.status === 'Active' ? 'success' : conn.status === 'Error' ? 'danger' : 'neutral'}>
-                                {conn.status}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                {conn.health === 'Good' && <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>}
+                                {conn.health === 'Warning' && <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>}
+                                {conn.health === 'Critical' && <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>}
+                            </div>
                         </div>
                         
                         <h4 className="font-bold text-slate-900 text-lg mb-1">{conn.name}</h4>
-                        <div className="flex items-center gap-2 mb-4">
-                             <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{conn.protocol}</span>
-                             {conn.health === 'Good' && <Activity size={14} className="text-green-500" title="Health: Good"/>}
-                             {conn.health === 'Warning' && <Activity size={14} className="text-yellow-500" title="Health: Warning"/>}
-                             {conn.health === 'Critical' && <Activity size={14} className="text-red-500" title="Health: Critical"/>}
-                        </div>
+                        <p className="text-xs text-slate-500 font-mono truncate mb-4">{conn.endpoint}</p>
                         
-                        <div className="space-y-3 pt-4 border-t border-slate-100 mt-auto">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Last Sync:</span>
-                                <span className="font-medium text-slate-800">{conn.lastSync}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Auth Type:</span>
-                                <span className="font-medium text-slate-800">OAuth 2.0</span>
-                            </div>
+                        <div className="flex gap-2 mb-6">
+                             <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.type}</span>
+                             <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.protocol}</span>
                         </div>
 
-                        <div className="mt-6 flex gap-2">
-                            <button className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2">
-                                <Settings size={14}/> Config
+                        <div className="mt-auto pt-4 border-t border-slate-100 flex gap-2">
+                            <button onClick={() => handleOpen(conn)} className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
+                                <Settings size={14}/> Configure
                             </button>
-                            <button 
-                                onClick={() => handleHealthCheck(conn.id)}
-                                className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2"
-                                title="Run Health Check"
-                            >
-                                <RefreshCw size={14}/> Test
+                            <button className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
+                                <RefreshCw size={14}/> Sync Now
                             </button>
                         </div>
                     </div>
                 ))}
-
-                {/* Add New Placeholder */}
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-400 hover:border-nexus-300 hover:bg-slate-50 transition-all cursor-pointer min-h-[250px]">
-                    <Network size={48} className="mb-4 opacity-20"/>
-                    <h4 className="font-bold">New Connection</h4>
-                    <p className="text-sm text-center mt-1">Select from 50+ pre-built adaptors</p>
-                </div>
             </div>
+
+            <SidePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                title={editingConn?.id ? "Configure Connector" : "New Connection"}
+                width="md:w-[500px]"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                        <Button onClick={() => setIsPanelOpen(false)} icon={Save}>Save Connection</Button>
+                    </>
+                }
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Connector Name</label>
+                        <Input value={editingConn?.name} onChange={e => setEditingConn({...editingConn, name: e.target.value})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Type</label>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.type}>
+                                <option>ERP</option>
+                                <option>Schedule</option>
+                                <option>CRM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Protocol</label>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.protocol}>
+                                <option>REST API</option>
+                                <option>SOAP / WSDL</option>
+                                <option>OData</option>
+                                <option>JDBC (Direct DB)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Endpoint URL</label>
+                        <div className="relative">
+                            <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                            <Input className="pl-9 font-mono text-xs" value={editingConn?.endpoint} />
+                        </div>
+                    </div>
+                    
+                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <Key size={14}/> Authentication
+                        </h4>
+                        <div className="space-y-3">
+                             <select className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white mb-2">
+                                <option>OAuth 2.0 (Client Creds)</option>
+                                <option>Basic Auth</option>
+                                <option>API Key</option>
+                            </select>
+                            <Input type="password" placeholder="Client ID / Username" />
+                            <Input type="password" placeholder="Client Secret / Key" />
+                        </div>
+                    </div>
+
+                    <Button 
+                        variant="secondary" 
+                        className={`w-full ${isTesting ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : ''}`} 
+                        onClick={handleTestConnection}
+                        disabled={isTesting}
+                    >
+                        {isTesting ? <RefreshCw className="animate-spin mr-2 h-4 w-4"/> : <Activity className="mr-2 h-4 w-4"/>}
+                        {isTesting ? "Handshaking..." : "Test Connectivity"}
+                    </Button>
+                </div>
+            </SidePanel>
         </div>
     );
 };

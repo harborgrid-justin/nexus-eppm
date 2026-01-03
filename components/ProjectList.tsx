@@ -14,6 +14,7 @@ import { ProjectListCards } from './projects/list/ProjectListCards';
 import { EpsTreeView } from './projects/list/EpsTreeView';
 import { EmptyState } from './common/EmptyState';
 import { useNavigate } from 'react-router-dom';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
 const ProjectList: React.FC = () => {
   const { projects } = usePortfolioState();
@@ -23,11 +24,10 @@ const ProjectList: React.FC = () => {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Pattern 2: useDeferredValue for intensive filtering
   const deferredSearchTerm = useDeferredValue(searchTerm);
   
-  const [viewMode, setViewMode] = useState<'list' | 'eps' | 'create'>('list');
+  const [activeGroup, setActiveGroup] = useState('views');
+  const [activeView, setActiveView] = useState('list');
   const [isPending, startTransition] = useTransition();
 
   const filteredProjects = useMemo(() => 
@@ -40,13 +40,7 @@ const ProjectList: React.FC = () => {
   const handleCreateProject = (newProject: Project) => {
     dispatch({ type: 'PROJECT_IMPORT', payload: [newProject] });
     startTransition(() => {
-        setViewMode('list');
-    });
-  };
-
-  const handleViewChange = (mode: 'list' | 'eps' | 'create') => {
-    startTransition(() => {
-      setViewMode(mode);
+        setActiveView('list');
     });
   };
 
@@ -54,40 +48,59 @@ const ProjectList: React.FC = () => {
     navigate(`/projectWorkspace/${projectId}`);
   };
 
-  if (viewMode === 'create') {
-      return <ProjectWizard onClose={() => handleViewChange('list')} onSave={handleCreateProject} />;
+  const navGroups: NavGroup[] = useMemo(() => [
+      { id: 'views', label: 'View Mode', items: [
+          { id: 'list', label: 'Flat List', icon: ListIcon },
+          { id: 'eps', label: 'EPS Hierarchy', icon: Layers }
+      ]}
+  ], []);
+
+  const handleViewChange = (viewId: string) => {
+      startTransition(() => {
+          if (viewId === 'create') {
+              // Handle create specifically if we added it to nav, but better as action button
+          } else {
+              setActiveView(viewId);
+          }
+      });
+  };
+
+  if (activeView === 'create') {
+      return <ProjectWizard onClose={() => setActiveView('list')} onSave={handleCreateProject} />;
   }
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col overflow-hidden`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col`}>
       <PageHeader 
         title="Enterprise Projects" 
         subtitle="Manage active project portfolio, track execution, and monitor delivery health."
         icon={Briefcase}
         actions={canEditProject() && (
-            <button onClick={() => handleViewChange('create')} className={`px-4 py-2 ${theme.colors.primary} ${theme.colors.primaryHover} rounded-lg text-sm font-semibold text-white flex items-center gap-2 shadow-sm active:scale-95 transition-all`}>
+            <button onClick={() => setActiveView('create')} className={`px-4 py-2 ${theme.colors.primary} ${theme.colors.primaryHover} rounded-lg text-sm font-semibold text-white flex items-center gap-2 shadow-sm active:scale-95 transition-all`}>
                 <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
             </button>
         )}
       />
 
       <div className={theme.layout.panelContainer}>
-        <div className={`p-4 ${theme.layout.headerBorder} bg-slate-50/50`}>
-            <FilterBar 
-                searchValue={searchTerm} 
-                onSearch={setSearchTerm} 
-                searchPlaceholder="Search projects..."
-                actions={
-                    <div className="bg-slate-200/60 p-1 rounded-lg flex text-[11px] font-bold">
-                        <button onClick={() => handleViewChange('list')} className={`px-4 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
-                            <ListIcon size={14}/> Flat List
-                        </button>
-                        <button onClick={() => handleViewChange('eps')} className={`px-4 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === 'eps' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}>
-                            <Layers size={14}/> EPS Hierarchy
-                        </button>
-                    </div>
-                }
-            />
+        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center`}>
+            <div className="flex-1">
+                <ModuleNavigation 
+                    groups={navGroups}
+                    activeGroup={activeGroup}
+                    activeItem={activeView}
+                    onGroupChange={() => {}} // Single group
+                    onItemChange={handleViewChange}
+                    className="bg-transparent border-0 shadow-none"
+                />
+            </div>
+            <div className="p-2 md:pr-4">
+                <FilterBar 
+                    searchValue={searchTerm} 
+                    onSearch={setSearchTerm} 
+                    searchPlaceholder="Search projects..."
+                />
+            </div>
         </div>
 
         <div className={`flex-1 overflow-hidden flex flex-col relative ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
@@ -107,7 +120,7 @@ const ProjectList: React.FC = () => {
              </div>
           ) : (
              <>
-                {viewMode === 'list' && (
+                {activeView === 'list' && (
                    <div className="h-full overflow-hidden">
                      <div className="hidden lg:block h-full overflow-hidden">
                        <ProjectListTable projects={filteredProjects} onSelect={handleSelectProject} />
@@ -117,7 +130,7 @@ const ProjectList: React.FC = () => {
                      </div>
                    </div>
                 )}
-                {viewMode === 'eps' && (
+                {activeView === 'eps' && (
                    <div className="flex-1 h-full overflow-auto bg-white">
                        <EpsTreeView projects={filteredProjects} onSelect={handleSelectProject} />
                    </div>

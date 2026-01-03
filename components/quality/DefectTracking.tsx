@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Bug, Plus, Lock, AlertOctagon } from 'lucide-react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { DefectList } from './defects/DefectList';

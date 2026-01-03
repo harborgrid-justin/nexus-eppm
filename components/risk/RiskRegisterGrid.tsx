@@ -99,7 +99,7 @@ export const RiskRegisterGrid: React.FC = () => {
   ], [state.resources, theme]);
 
   return (
-    <div className="h-full flex flex-col relative">
+    <div className={`h-full flex flex-col relative ${theme.colors.background}`}>
       <RiskForm 
           isOpen={isFormOpen} 
           onClose={() => setIsFormOpen(false)} 
@@ -116,7 +116,7 @@ export const RiskRegisterGrid: React.FC = () => {
         />
       )}
       
-      <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center ${theme.colors.background}/50 flex-shrink-0 gap-3`}>
+      <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center ${theme.colors.surface} flex-shrink-0 gap-3 shadow-sm`}>
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           <Input 
             isSearch 
@@ -130,7 +130,7 @@ export const RiskRegisterGrid: React.FC = () => {
         <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto" onClick={handleCreate}>Add Risk</Button>
       </div>
 
-      <div className="flex-1 overflow-hidden p-4">
+      <div className={`flex-1 overflow-hidden p-4 ${theme.colors.background}`}>
         <DataTable<Risk>
           data={filteredRisks}
           columns={columns}
