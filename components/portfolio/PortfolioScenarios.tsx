@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { Layers, Plus, Save, RotateCcw, CheckCircle, Sparkles, Loader2, Info } from 'lucide-react';
@@ -7,9 +8,11 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Cart
 import { generatePortfolioOptimization } from '../../services/geminiService';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
+import { useData } from '../../context/DataContext';
 
 const PortfolioScenarios: React.FC = () => {
   const { scenarios, projects } = usePortfolioData();
+  const { dispatch } = useData();
   const theme = useTheme();
   const [activeScenarioId, setActiveScenarioId] = useState(scenarios[0].id);
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>(scenarios[0].selectedComponentIds);
@@ -41,6 +44,21 @@ const PortfolioScenarios: React.FC = () => {
     setIsAiLoading(false);
   };
 
+  const handleSaveScenario = () => {
+      const updatedScenario = {
+          ...activeScenario,
+          selectedComponentIds: selectedProjectIds,
+          metrics: {
+              totalCost: scenarioResults.totalCost,
+              totalROI: 15, // Mock recalc
+              strategicAlignmentScore: scenarioResults.avgStrat,
+              riskExposure: scenarioResults.avgRisk
+          }
+      };
+      dispatch({ type: 'UPDATE_PORTFOLIO_SCENARIO', payload: updatedScenario });
+      alert("Scenario updated.");
+  };
+
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -49,10 +67,24 @@ const PortfolioScenarios: React.FC = () => {
                 <h2 className={theme.typography.h2}>Strategic Scenario Modeling</h2>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                    {scenarios.map(s => (
+                        <button 
+                            key={s.id} 
+                            onClick={() => { setActiveScenarioId(s.id); setSelectedProjectIds(s.selectedComponentIds); }}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${activeScenarioId === s.id ? 'bg-white shadow text-nexus-700' : 'text-slate-500'}`}
+                        >
+                            {s.name}
+                        </button>
+                    ))}
+                </div>
                 <Button variant="secondary" onClick={handleAskAi} disabled={isAiLoading} icon={Sparkles} className="flex-1 sm:flex-none">
                     {isAiLoading ? 'Analyzing...' : 'Ask AI Advisor'}
                 </Button>
-                <button className={`flex-1 sm:flex-none px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 shadow-md flex items-center justify-center gap-2`}>
+                <button 
+                    onClick={handleSaveScenario}
+                    className={`flex-1 sm:flex-none px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 shadow-md flex items-center justify-center gap-2`}
+                >
                     <Save size={16}/> Save
                 </button>
             </div>
@@ -114,10 +146,10 @@ const PortfolioScenarios: React.FC = () => {
                     <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 shadow-sm animate-in zoom-in-95">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="font-bold text-indigo-900 flex items-center gap-2"><Sparkles className="text-indigo-600" size={20}/> AI Advisor: Efficient Frontier Suggestion</h3>
-                            <button onClick={() => setAiAdvice(null)} className="text-indigo-400 hover:text-indigo-600"><RotateCcw size={16}/></button>
+                            <button onClick={() => setAiAdvice(null)} className="text-indigo-400 hover:text-indigo-500"><RotateCcw size={16}/></button>
                         </div>
                         <div className="prose prose-sm text-indigo-900 leading-relaxed max-w-none">
-                            {aiAdvice.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+                            {aiAdvice.split('\n').map((line, i) => <p key={i} className="mb-2 last:mb-0">{line}</p>)}
                         </div>
                     </div>
                 )}

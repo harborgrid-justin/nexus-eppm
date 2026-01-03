@@ -1,8 +1,5 @@
 
-
-
 import React from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { Project, AIAnalysisResult } from '../types/index';
 import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2 } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
@@ -31,7 +28,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
 
   return (
     <div 
-      className={`fixed inset-y-0 right-0 w-[450px] ${theme.colors.surface} shadow-2xl border-l ${theme.colors.border} transform transition-transform duration-300 z-50 flex flex-col`}
+      className={`h-full w-full ${theme.colors.surface} flex flex-col relative`}
       role="dialog"
       aria-label="AI Project Assistant"
       aria-modal="true"
@@ -59,7 +56,7 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
           <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
             <h3 className="font-semibold text-slate-800 flex items-center gap-2">
               <FileText size={16} className="text-nexus-600" />
-              Project Analysis
+              Project Analysis: {project.name}
             </h3>
             {isLoading ? (
                <Loader2 className="animate-spin text-nexus-500" size={16} />

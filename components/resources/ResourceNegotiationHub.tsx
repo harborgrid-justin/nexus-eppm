@@ -8,46 +8,54 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../common/ProgressBar';
 import { formatCompactCurrency } from '../../utils/formatters';
-
-interface ResourceRequest {
-    id: string;
-    projectId: string;
-    projectName: string;
-    requesterName: string;
-    role: string;
-    quantity: number;
-    startDate: string;
-    endDate: string;
-    status: 'Pending' | 'Approved' | 'Rejected' | 'Partial';
-    impact: number; // Mock utilization impact %
-}
-
-// Mock Data for Requests
-const MOCK_REQUESTS: ResourceRequest[] = [
-    { id: 'REQ-101', projectId: 'P1001', projectName: 'Downtown Metro Hub', requesterName: 'Mike Ross', role: 'Senior Engineer', quantity: 2, startDate: '2024-07-01', endDate: '2024-12-31', status: 'Pending', impact: 15 },
-    { id: 'REQ-102', projectId: 'P1002', projectName: 'Global ERP Migration', requesterName: 'Jessica Pearson', role: 'Solution Architect', quantity: 1, startDate: '2024-08-01', endDate: '2024-10-30', status: 'Pending', impact: 40 },
-    { id: 'REQ-103', projectId: 'P1003', projectName: 'Solar Farm Alpha', requesterName: 'Mike Ross', role: 'Civil Engineer', quantity: 4, startDate: '2024-06-15', endDate: '2024-09-15', status: 'Approved', impact: 85 },
-];
+import { ResourceRequest } from '../../types';
 
 const ResourceNegotiationHub: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'manager' | 'requester'>('manager');
 
-    const selectedReq = MOCK_REQUESTS.find(r => r.id === selectedReqId);
+    // Use live requests from state instead of mocks
+    const requests = state.resourceRequests;
+    
+    const selectedReq = requests.find(r => r.id === selectedReqId);
 
-    // Mock Impact Calculation
+    // Dynamic Impact Calculation
     const impactData = useMemo(() => {
         if (!selectedReq) return null;
-        // Simulate utilization data
+        
+        // Calculate Utilization impact
+        const totalRoleCapacity = state.resources
+            .filter(r => r.role === selectedReq.role && r.status === 'Active')
+            .reduce((sum, r) => sum + (r.capacity || 160), 0);
+            
+        const currentRoleLoad = state.resources
+            .filter(r => r.role === selectedReq.role && r.status === 'Active')
+            .reduce((sum, r) => sum + (r.allocated || 0), 0);
+            
+        // Assume request adds (Quantity * 160) hours of demand if month duration is roughly 1
+        // Simplified heuristic: Quantity * 40 hours/week * 4 weeks
+        const requestLoad = selectedReq.quantity * 160;
+
+        const currentUtilization = totalRoleCapacity > 0 ? (currentRoleLoad / totalRoleCapacity) * 100 : 0;
+        const newUtilization = totalRoleCapacity > 0 ? ((currentRoleLoad + requestLoad) / totalRoleCapacity) * 100 : 0;
+
         return {
-            currentUtilization: 75,
-            newUtilization: 75 + selectedReq.impact,
+            currentUtilization: Math.round(currentUtilization),
+            newUtilization: Math.round(newUtilization),
             roleCount: state.resources.filter(r => r.role === selectedReq.role).length,
             available: state.resources.filter(r => r.role === selectedReq.role && r.status === 'Active').length
         };
     }, [selectedReq, state.resources]);
+
+    const handleUpdateStatus = (status: ResourceRequest['status']) => {
+        if (!selectedReq) return;
+        dispatch({
+            type: 'RESOURCE_REQUEST_UPDATE',
+            payload: { ...selectedReq, status }
+        });
+    };
 
     return (
         <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
@@ -76,7 +84,7 @@ const ResourceNegotiationHub: React.FC = () => {
             <div className="flex flex-1 gap-6 overflow-hidden">
                 {/* Request List */}
                 <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 scrollbar-thin">
-                    {MOCK_REQUESTS.map(req => (
+                    {requests.map(req => (
                         <Card 
                             key={req.id} 
                             className={`p-4 cursor-pointer transition-all border-l-4 ${selectedReqId === req.id ? 'border-nexus-500 ring-1 ring-nexus-500/20' : 'border-transparent hover:border-slate-300'}`}
@@ -106,6 +114,11 @@ const ResourceNegotiationHub: React.FC = () => {
                             </div>
                         </Card>
                     ))}
+                    {requests.length === 0 && (
+                        <div className="p-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                            No active resource requests.
+                        </div>
+                    )}
                 </div>
 
                 {/* Impact Analysis Panel */}
@@ -154,12 +167,33 @@ const ResourceNegotiationHub: React.FC = () => {
                         </Card>
 
                         <div className="space-y-3">
-                            <Button className="w-full justify-center" icon={UserCheck} disabled={impactData?.newUtilization > 100}>
+                            <Button 
+                                className="w-full justify-center" 
+                                icon={UserCheck} 
+                                disabled={selectedReq.status === 'Approved' || (impactData && impactData.newUtilization > 120)}
+                                onClick={() => handleUpdateStatus('Approved')}
+                            >
                                 Hard Book Allocation
                             </Button>
                             <div className="grid grid-cols-2 gap-3">
-                                <Button variant="secondary" className="w-full justify-center" icon={Clock}>Soft Book</Button>
-                                <Button variant="danger" className="w-full justify-center" icon={XCircle}>Reject</Button>
+                                <Button 
+                                    variant="secondary" 
+                                    className="w-full justify-center" 
+                                    icon={Clock}
+                                    onClick={() => handleUpdateStatus('Soft Booked')}
+                                    disabled={selectedReq.status === 'Soft Booked'}
+                                >
+                                    Soft Book
+                                </Button>
+                                <Button 
+                                    variant="danger" 
+                                    className="w-full justify-center" 
+                                    icon={XCircle}
+                                    onClick={() => handleUpdateStatus('Rejected')}
+                                    disabled={selectedReq.status === 'Rejected'}
+                                >
+                                    Reject
+                                </Button>
                             </div>
                         </div>
 

@@ -7,11 +7,6 @@ import { StrategicDrivers } from './balancing/StrategicDrivers';
 import { ValueRiskChart } from './balancing/ValueRiskChart';
 import { EfficientFrontierChart } from './balancing/EfficientFrontierChart';
 
-export const CATEGORY_COLORS: Record<string, string> = {
-  'Innovation & Growth': '#0ea5e9', 'Operational Efficiency': '#22c55e',
-  'Regulatory & Compliance': '#eab308', 'Keep the Lights On': '#64748b'
-};
-
 const PortfolioBalancing: React.FC = () => {
     const { state } = useData();
     const theme = useTheme();

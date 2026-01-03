@@ -1,6 +1,6 @@
+
 import React from 'react';
-import { QualityReport } from '../../../types';
-import { InspectionChecklist } from '../QualityControlLog';
+import { QualityReport, InspectionChecklist } from '../../../types';
 import { CheckSquare, Square, X, Camera, MessageSquare } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 

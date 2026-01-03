@@ -1,68 +1,54 @@
 
-import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
-import { useData } from '../context/DataContext';
+import React from 'react';
 import { ShieldAlert, Filter, ArrowUpRight, LayoutGrid, BarChart2, List, Download, Plus, DollarSign, Activity, AlertOctagon, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
-import { Risk } from '../types/index';
 import { PageHeader } from './common/PageHeader';
 import { formatCurrency } from '../utils/formatters';
 import { RiskDetailPanel as RiskDetailModal } from './risk/RiskDetailPanel';
 import { RiskListView } from './risk/views/RiskListView';
 import { RiskMatrixView } from './risk/views/RiskMatrixView';
 import { RiskAnalyticsView } from './risk/views/RiskAnalyticsView';
-
-const enrichRiskData = (risk: Risk, projects: any[]) => {
-  const project = projects.find(p => p.id === risk.projectId);
-  const probPercent = risk.probabilityValue ? risk.probabilityValue * 0.2 : 0.5;
-  const financial = risk.financialImpact || 50000; 
-  return { ...risk, projectName: project ? project.name : 'Unknown', projectCode: project ? project.code : 'N/A', financialImpact: financial, emv: financial * probPercent };
-};
+import { useRiskRegisterLogic } from '../hooks/domain/useRiskRegisterLogic';
 
 const RiskRegister: React.FC = () => {
-  const { state } = useData();
   const theme = useTheme();
   
-  const [viewMode, setViewMode] = useState<'list' | 'matrix' | 'analytics'>('list');
-  const [isPending, startTransition] = useTransition();
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const deferredSearchTerm = useDeferredValue(searchTerm);
-
-  const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
-  const [filters, setFilters] = useState({ category: 'All', minScore: 0, owner: 'All' });
-
-  const enterpriseRisks = useMemo(() => state.risks.map(r => enrichRiskData(r, state.projects)), [state.risks, state.projects]);
-  
-  // Defer computing the filter to prevent blocking the search input
-  const filteredRisks = useMemo(() => enterpriseRisks.filter(r => 
-      (r.description.toLowerCase().includes(deferredSearchTerm.toLowerCase()) || r.projectName.toLowerCase().includes(deferredSearchTerm.toLowerCase())) &&
-      (filters.category === 'All' || r.category === filters.category) &&
-      (r.score >= filters.minScore) &&
-      (filters.owner === 'All' || r.ownerId === filters.owner)
-  ), [enterpriseRisks, deferredSearchTerm, filters]);
-
-  const metrics = useMemo(() => ({
-    totalExposure: filteredRisks.reduce((sum, r) => sum + r.emv, 0),
-    criticalCount: filteredRisks.filter(r => r.score >= 15).length,
-    escalatedCount: filteredRisks.filter(r => r.isEscalated).length
-  }), [filteredRisks]);
-
-  const handleViewChange = (mode: 'list' | 'matrix' | 'analytics') => {
-      startTransition(() => {
-          setViewMode(mode);
-      });
-  };
+  // Consuming the business logic hook
+  const {
+    viewMode,
+    searchTerm,
+    deferredSearchTerm,
+    selectedRiskId,
+    isPending,
+    filteredRisks,
+    metrics,
+    setSearchTerm,
+    setSelectedRiskId,
+    handleViewChange
+  } = useRiskRegisterLogic();
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
-      {selectedRiskId && <RiskDetailModal riskId={selectedRiskId} projectId={enterpriseRisks.find(r => r.id === selectedRiskId)?.projectId || ''} onClose={() => setSelectedRiskId(null)} />}
-      <PageHeader title="Enterprise Risk Register" subtitle="Centralized governance of uncertainty." icon={ShieldAlert} actions={<><Button variant="outline" size="sm" icon={Download}>Export</Button><Button variant="primary" size="sm" icon={Plus}>New Risk</Button></>} />
+      {selectedRiskId && (
+        <RiskDetailModal 
+            riskId={selectedRiskId} 
+            projectId={filteredRisks.find(r => r.id === selectedRiskId)?.projectId || ''} 
+            onClose={() => setSelectedRiskId(null)} 
+        />
+      )}
+      
+      <PageHeader 
+        title="Enterprise Risk Register" 
+        subtitle="Centralized governance of uncertainty." 
+        icon={ShieldAlert} 
+        actions={<><Button variant="outline" size="sm" icon={Download}>Export</Button><Button variant="primary" size="sm" icon={Plus}>New Risk</Button></>} 
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
          <div className={`${theme.components.card} p-4 flex items-center justify-between`}><div><p className="text-xs text-slate-500 uppercase font-bold">Total EMV</p><p className="text-xl font-bold">{formatCurrency(metrics.totalExposure)}</p></div><DollarSign className="text-slate-300"/></div>
-         <div className={`${theme.components.card} p-4 flex items-center justify-between`}><div><p className="text-xs text-slate-500 uppercase font-bold">Active Risks</p><p className="text-xl font-bold">{filteredRisks.length}</p></div><Activity className="text-blue-400"/></div>
+         <div className={`${theme.components.card} p-4 flex items-center justify-between`}><div><p className="text-xs text-slate-500 uppercase font-bold">Active Risks</p><p className="text-xl font-bold">{metrics.activeCount}</p></div><Activity className="text-blue-400"/></div>
          <div className={`${theme.components.card} p-4 flex items-center justify-between`}><div><p className="text-xs text-slate-500 uppercase font-bold">Critical</p><p className="text-xl font-bold text-red-600">{metrics.criticalCount}</p></div><AlertOctagon className="text-red-400"/></div>
          <div className={`${theme.components.card} p-4 flex items-center justify-between`}><div><p className="text-xs text-slate-500 uppercase font-bold">Escalated</p><p className="text-xl font-bold text-orange-500">{metrics.escalatedCount}</p></div><ArrowUpRight className="text-orange-400"/></div>
       </div>

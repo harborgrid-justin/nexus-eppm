@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useData } from '../../../context/DataContext';
 import { 
     GitMerge, ArrowRight, Save, RefreshCw, Layers, 
     Code, Shield, Clock, AlertTriangle, FileCode, Check, Plus,
@@ -8,28 +10,23 @@ import {
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
-
-// Mock Schema Definitions for Internal Modules
-const NEXUS_SCHEMAS: Record<string, string[]> = {
-    'Project': ['id', 'name', 'status', 'budget', 'startDate', 'endDate', 'managerId'],
-    'Task': ['id', 'name', 'duration', 'progress', 'status', 'wbsCode'],
-    'Resource': ['id', 'name', 'role', 'rate', 'capacity'],
-    'Risk': ['id', 'description', 'probability', 'impact', 'score'],
-    'Financials': ['id', 'costCode', 'amount', 'vendor', 'invoiceDate']
-};
+import { NEXUS_SCHEMAS } from '../../../constants/index';
+import { EtlMapping } from '../../../types';
 
 export const IntegrationDesigner: React.FC = () => {
     const theme = useTheme();
+    const { state, dispatch } = useData();
     const [activeTab, setActiveTab] = useState<'mapping' | 'transform' | 'orchestration' | 'governance'>('mapping');
     const [targetEntity, setTargetEntity] = useState('Project');
     
-    // Mapping State
-    const [mappings, setMappings] = useState([
-        { id: 1, source: 'EXTERNAL_ID', target: 'id', transform: 'Direct', type: 'String' },
-        { id: 2, source: 'PROJ_NAME', target: 'name', transform: 'Trim Whitespace', type: 'String' },
-        { id: 3, source: 'BUDGET_AMT', target: 'budget', transform: 'Currency(USD)', type: 'Number' },
-        { id: 4, source: 'START_DT', target: 'startDate', transform: 'Date(ISO8601)', type: 'Date' },
-    ]);
+    // Mapping State populated from global store
+    const [mappings, setMappings] = useState<EtlMapping[]>([]);
+
+    useEffect(() => {
+        if(state.etlMappings && state.etlMappings.length > 0) {
+            setMappings(state.etlMappings);
+        }
+    }, [state.etlMappings]);
 
     const availableTargets = NEXUS_SCHEMAS[targetEntity] || [];
 
@@ -51,6 +48,11 @@ export const IntegrationDesigner: React.FC = () => {
         setMappings(mappings.map(m => m.id === id ? { ...m, target: newTarget } : m));
     };
 
+    const handleSaveConfig = () => {
+        dispatch({ type: 'SYSTEM_SAVE_ETL_MAPPINGS', payload: mappings });
+        alert("ETL Configuration Saved to System Core.");
+    };
+
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
             {/* Header */}
@@ -69,7 +71,7 @@ export const IntegrationDesigner: React.FC = () => {
                 </div>
                 <div className="flex gap-3">
                      <Button variant="outline" icon={PlayCircle}>Test Pipeline</Button>
-                     <Button icon={Save}>Save Config</Button>
+                     <Button icon={Save} onClick={handleSaveConfig}>Save Config</Button>
                 </div>
             </div>
 

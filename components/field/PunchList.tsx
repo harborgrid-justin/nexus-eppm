@@ -1,34 +1,21 @@
+
 import React, { useState, useMemo } from 'react';
+import { useData } from '../../context/DataContext';
 import { CheckSquare, Filter, Plus, MapPin, Camera, User, CheckCircle, Circle, Search, MoreHorizontal } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import DataTable, { Column } from '../common/DataTable';
-
-interface PunchItem {
-    id: string;
-    description: string;
-    location: string;
-    assignee: string;
-    status: 'Open' | 'Resolved' | 'Closed';
-    priority: 'High' | 'Medium' | 'Low';
-    dateIdentified: string;
-    image?: boolean;
-}
-
-const MOCK_PUNCH_ITEMS: PunchItem[] = [
-    { id: 'PL-001', description: 'Paint scratch on north wall', location: 'Lobby', assignee: 'Painting Co.', status: 'Open', priority: 'Low', dateIdentified: '2024-06-15', image: true },
-    { id: 'PL-002', description: 'Door alignment issue', location: 'Room 101', assignee: 'Doors Inc.', status: 'Resolved', priority: 'Medium', dateIdentified: '2024-06-12' },
-    { id: 'PL-003', description: 'Missing outlet cover', location: 'Conference A', assignee: 'Sparky Elec', status: 'Open', priority: 'Low', dateIdentified: '2024-06-10' },
-    { id: 'PL-004', description: 'HVAC Vent rattling', location: 'Corridor B', assignee: 'AirFlow', status: 'Open', priority: 'High', dateIdentified: '2024-06-08' },
-    { id: 'PL-005', description: 'Cracked tile', location: 'Restroom 2', assignee: 'Tile Masters', status: 'Closed', priority: 'Medium', dateIdentified: '2024-06-01', image: true },
-];
+import { PunchItem } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
+    const { state, dispatch } = useData();
     const theme = useTheme();
-    const [items, setItems] = useState<PunchItem[]>(MOCK_PUNCH_ITEMS);
     const [filter, setFilter] = useState('All');
     const [search, setSearch] = useState('');
+
+    const items = state.punchList.filter(p => p.projectId === projectId);
 
     const filteredItems = useMemo(() => {
         return items.filter(item => {
@@ -39,14 +26,23 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
         });
     }, [items, filter, search]);
 
-    const handleStatusToggle = (id: string) => {
-        setItems(prev => prev.map(item => {
-            if (item.id === id) {
-                const nextStatus = item.status === 'Open' ? 'Resolved' : item.status === 'Resolved' ? 'Closed' : 'Open';
-                return { ...item, status: nextStatus };
-            }
-            return item;
-        }));
+    const handleStatusToggle = (item: PunchItem) => {
+        const nextStatus = item.status === 'Open' ? 'Resolved' : item.status === 'Resolved' ? 'Closed' : 'Open';
+        dispatch({ type: 'FIELD_UPDATE_PUNCH_ITEM', payload: { ...item, status: nextStatus } });
+    };
+
+    const handleAddItem = () => {
+        const newItem: PunchItem = {
+            id: generateId('PL'),
+            projectId,
+            description: 'New Punch Item',
+            location: 'TBD',
+            assignee: 'Unassigned',
+            status: 'Open',
+            priority: 'Medium',
+            dateIdentified: new Date().toISOString().split('T')[0]
+        };
+        dispatch({ type: 'FIELD_ADD_PUNCH_ITEM', payload: newItem });
     };
 
     const columns: Column<PunchItem>[] = [
@@ -86,7 +82,7 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
             key: 'status', header: 'Status', width: 'w-32',
             render: (i) => (
                 <button 
-                    onClick={(e) => { e.stopPropagation(); handleStatusToggle(i.id); }}
+                    onClick={(e) => { e.stopPropagation(); handleStatusToggle(i); }}
                     className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold transition-all ${
                         i.status === 'Open' ? 'bg-red-50 text-red-700 hover:bg-red-100' :
                         i.status === 'Resolved' ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' :
@@ -132,7 +128,7 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     <Button variant="outline" size="sm" icon={Filter}>Filter</Button>
-                    <Button variant="primary" size="sm" icon={Plus}>Add Item</Button>
+                    <Button variant="primary" size="sm" icon={Plus} onClick={handleAddItem}>Add Item</Button>
                 </div>
             </div>
 

@@ -19,6 +19,8 @@ const DataExchange = lazy(() => import('./components/admin/DataExchange'));
 const TeamWorkspace = lazy(() => import('./components/TeamWorkspace'));
 const ComponentWorkbench = lazy(() => import('./components/ComponentWorkbench'));
 const TemplateGallery = lazy(() => import('./components/TemplateGallery'));
+const SearchPage = lazy(() => import('./components/pages/SearchPage'));
+const AiPage = lazy(() => import('./components/pages/AiPage'));
 
 // Category III Adds
 const ResourceNegotiationHub = lazy(() => import('./components/resources/ResourceNegotiationHub'));
@@ -45,6 +47,8 @@ export const routes: RouteObject[] = [
             { path: 'myWork', element: <TeamWorkspace /> },
             { path: 'workbench', element: <ComponentWorkbench /> },
             { path: 'templates', element: <TemplateGallery /> },
+            { path: 'search', element: <SearchPage /> },
+            { path: 'ai', element: <AiPage /> },
             
             // New Category III Routes
             { path: 'negotiation', element: <ResourceNegotiationHub /> },

@@ -78,7 +78,7 @@ export interface UserDefinedField {
 
 export interface StandardTemplate {
     id: string;
-    category: 'Risk' | 'Quality' | 'Scope' | 'Procurement';
+    category: 'Risk' | 'Quality' | 'Scope' | 'Procurement' | 'Cost' | 'Schedule';
     name: string;
     description: string;
     content: any; // Flexible content structure
@@ -125,4 +125,12 @@ export interface QualityStandard {
     source: 'Internal' | 'External' | 'Regulatory';
     enforcement: 'Mandatory' | 'Guideline';
     linkedWbsIds?: string[];
+}
+
+export interface EtlMapping {
+    id: number;
+    source: string;
+    target: string;
+    transform: string;
+    type: string;
 }

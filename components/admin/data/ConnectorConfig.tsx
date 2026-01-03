@@ -6,14 +6,7 @@ import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
 import { SidePanel } from '../../ui/SidePanel';
 import { Input } from '../../ui/Input';
-
-const CONNECTORS = [
-    { id: 1, name: 'SAP S/4HANA Finance', type: 'ERP', status: 'Active', protocol: 'OData v4', lastSync: '2m ago', icon: Database, health: 'Good', endpoint: 'https://api.sap.corp/odata/v4' },
-    { id: 2, name: 'Oracle Primavera P6', type: 'Schedule', status: 'Active', protocol: 'SOAP/Web Services', lastSync: '1h ago', icon: Server, health: 'Good', endpoint: 'https://p6.oraclecloud.com/ws' },
-    { id: 3, name: 'Microsoft Project Online', type: 'Schedule', status: 'Error', protocol: 'REST API', lastSync: '1d ago', icon: Globe, health: 'Critical', endpoint: 'https://graph.microsoft.com/v1.0' },
-    { id: 4, name: 'Autodesk Construction Cloud', type: 'Docs', status: 'Inactive', protocol: 'Forge API', lastSync: '-', icon: Link, health: 'Unknown', endpoint: 'https://developer.api.autodesk.com' },
-    { id: 5, name: 'Legacy Mainframe', type: 'Data', status: 'Active', protocol: 'JDBC', lastSync: '4h ago', icon: Server, health: 'Warning', endpoint: 'jdbc:db2://mainframe:50000/DATA' },
-];
+import { MOCK_CONNECTORS } from '../../../constants/index';
 
 export const ConnectorConfig: React.FC = () => {
     const theme = useTheme();
@@ -50,7 +43,7 @@ export const ConnectorConfig: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-4 px-1">
-                {CONNECTORS.map(conn => (
+                {MOCK_CONNECTORS.map(conn => (
                     <div key={conn.id} className={`${theme.components.card} p-6 group hover:border-nexus-300 transition-all flex flex-col`}>
                         <div className="flex justify-between items-start mb-4">
                             <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600 group-hover:text-nexus-600 group-hover:bg-nexus-50 transition-colors">

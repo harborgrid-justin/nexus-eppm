@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Copy, AlertTriangle } from 'lucide-react';
+import { useData } from '../../../context/DataContext';
 
 interface CostPlanTemplatePanelProps {
     isOpen: boolean;
@@ -11,12 +12,11 @@ interface CostPlanTemplatePanelProps {
 }
 
 export const CostPlanTemplatePanel: React.FC<CostPlanTemplatePanelProps> = ({ isOpen, onClose, onApply }) => {
+    const { state } = useData();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-    const templates = [
-        { id: 'gov_standard', name: 'Government Standard (EVM)', description: 'ANSI/EIA-748 EVMS guidelines.' },
-        { id: 'agile_lean', name: 'Agile / Lean Costing', description: 'Focus on burn rate and throughput.' },
-        { id: 'construction_fixed', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs.' }
-    ];
+    
+    // Filter for Cost templates
+    const templates = state.standardTemplates.filter(t => t.category === 'Cost');
 
     return (
         <SidePanel
@@ -41,6 +41,7 @@ export const CostPlanTemplatePanel: React.FC<CostPlanTemplatePanelProps> = ({ is
                             <p className="text-sm font-medium text-slate-500">{t.description}</p>
                         </div>
                     ))}
+                    {templates.length === 0 && <div className="text-center text-slate-400 p-8 italic">No Cost Strategy templates defined.</div>}
                 </div>
             </div>
         </SidePanel>

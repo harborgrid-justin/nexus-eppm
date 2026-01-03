@@ -3,16 +3,9 @@ import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpDown, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Skeleton } from '../ui/Skeleton';
+import { Column, SortConfig } from '../../types/ui';
 
-export interface Column<T> {
-  key: string;
-  header: string;
-  width?: string;
-  align?: 'left' | 'center' | 'right';
-  render?: (item: T) => React.ReactNode;
-  sortable?: boolean;
-  className?: string;
-}
+export type { Column };
 
 interface DataTableProps<T> {
   data: T[];
@@ -22,13 +15,6 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   isLoading?: boolean;
   rowsPerPage?: number; // Used for skeleton count
-}
-
-type SortDirection = 'asc' | 'desc' | null;
-
-interface SortConfig {
-  key: string;
-  direction: SortDirection;
 }
 
 function DataTable<T>({ 
@@ -44,7 +30,7 @@ function DataTable<T>({
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
 
   const handleSort = (key: string) => {
-    let direction: SortDirection = 'asc';
+    let direction: 'asc' | 'desc' | null = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     } else if (sortConfig.key === key && sortConfig.direction === 'desc') {

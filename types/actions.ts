@@ -17,24 +17,19 @@ import {
     Contract, Solicitation, ProcurementPlan, ProcurementPackage,
     SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis,
     GlobalChangeRule, Invoice, Timesheet, EnterpriseSkill, Benefit,
-    RiskBreakdownStructureNode, WorkflowStep, Vendor, Baseline
+    RiskBreakdownStructureNode, WorkflowStep, Vendor, Baseline,
+    BPDefinition, BPRecord, CostSheetColumn, CostSheetRow, UnifierState,
+    ResourceRequest, DailyLogEntry, SafetyIncident, PunchItem,
+    RoadmapItem, RoadmapLane, KanbanTask, ExtensionDataState, EtlMapping
 } from './index';
 
-import { BPDefinition, BPRecord, CostSheetColumn, CostSheetRow } from './unifier';
-
-export interface UnifierState {
-    definitions: BPDefinition[];
-    records: BPRecord[];
-    costSheet: {
-        columns: CostSheetColumn[];
-        rows: CostSheetRow[];
-    };
-}
+export { UnifierState };
 
 export interface DataState {
     projects: Project[];
     programs: Program[];
     resources: Resource[];
+    resourceRequests: ResourceRequest[];
     risks: Risk[];
     issues: Issue[];
     budgetItems: BudgetLineItem[];
@@ -105,9 +100,24 @@ export interface DataState {
     rbs: RiskBreakdownStructureNode[];
     vendors: Vendor[];
     unifier: UnifierState;
+    // Field Management
+    dailyLogs: DailyLogEntry[];
+    safetyIncidents: SafetyIncident[];
+    punchList: PunchItem[];
+    // Strategy & Collaboration
+    roadmapLanes: RoadmapLane[];
+    roadmapItems: RoadmapItem[];
+    kanbanTasks: KanbanTask[];
+    // Extensions
+    extensionData: ExtensionDataState;
+    // Admin & Config
+    etlMappings: EtlMapping[];
 }
 
 export type Action =
+    // System Lifecycle
+    | { type: 'RESET_SYSTEM' }
+
     // Project & Task Management
     | { type: 'PROJECT_IMPORT'; payload: Project[] }
     | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: Partial<Project> } }
@@ -128,9 +138,13 @@ export type Action =
     | { type: 'ADD_INVOICE'; payload: Invoice }
     | { type: 'UPDATE_INVOICE'; payload: Invoice }
     | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
+    | { type: 'TRANSFER_BUDGET'; payload: { projectId: string; sourceItemId: string; targetItemId: string; amount: number; reason: string } }
     | { type: 'ADD_EXPENSE'; payload: Expense }
     | { type: 'UPDATE_EXPENSE'; payload: Expense }
     | { type: 'DELETE_EXPENSE'; payload: string }
+    | { type: 'ADD_BUDGET_ITEM'; payload: BudgetLineItem }
+    | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetLineItem }
+    | { type: 'DELETE_BUDGET_ITEM'; payload: string }
 
     // Procurement
     | { type: 'ADD_VENDOR'; payload: Vendor }
@@ -148,7 +162,7 @@ export type Action =
     | { type: 'UPDATE_QUALITY_REPORT'; payload: QualityReport }
     | { type: 'ADD_NCR'; payload: NonConformanceReport }
     | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
-    | { type: 'ADD_QUALITY_STANDARD'; payload: ProgramQualityStandard } // Reuse type for global
+    | { type: 'ADD_QUALITY_STANDARD'; payload: ProgramQualityStandard }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any }
 
     // Documents
@@ -213,7 +227,10 @@ export type Action =
     | { type: 'RESOURCE_ADD'; payload: Resource }
     | { type: 'RESOURCE_UPDATE'; payload: Resource }
     | { type: 'RESOURCE_DELETE'; payload: string }
-    | { type: 'SUBMIT_TIMESHEET'; payload: any }
+    | { type: 'SUBMIT_TIMESHEET'; payload: Timesheet }
+    | { type: 'UPDATE_TIMESHEET'; payload: Timesheet }
+    | { type: 'RESOURCE_REQUEST_ADD'; payload: ResourceRequest }
+    | { type: 'RESOURCE_REQUEST_UPDATE'; payload: ResourceRequest }
     | { type: 'UPDATE_USER'; payload: User }
     | { type: 'ADD_USER'; payload: User }
     | { type: 'DELETE_USER'; payload: string }
@@ -224,6 +241,7 @@ export type Action =
     | { type: 'SYSTEM_TOGGLE_INTEGRATION'; payload: string }
     | { type: 'SYSTEM_INSTALL_EXTENSION'; payload: string }
     | { type: 'SYSTEM_ACTIVATE_EXTENSION'; payload: string }
+    | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
     | { type: 'GOVERNANCE_UPDATE_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_ADD_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_DELETE_CURRENCY'; payload: string }
@@ -240,14 +258,38 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
     | { type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES'; payload: GlobalChangeRule[] }
     | { type: 'MARK_ALERT_READ'; payload: string }
+    | { type: 'ADD_PORTFOLIO_SCENARIO'; payload: PortfolioScenario }
+    | { type: 'UPDATE_PORTFOLIO_SCENARIO'; payload: PortfolioScenario }
 
-    // Risks
+    // Risks & Issues
     | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
     | { type: 'ADD_RISK'; payload: Risk }
+    | { type: 'DELETE_RISK'; payload: string }
     | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: any }
     | { type: 'UPDATE_RBS_NODE_PARENT'; payload: any }
+    | { type: 'ADD_ISSUE'; payload: Issue }
+    | { type: 'UPDATE_ISSUE'; payload: Issue }
+    | { type: 'DELETE_ISSUE'; payload: string }
+
+    // Field Management
+    | { type: 'FIELD_ADD_LOG'; payload: DailyLogEntry }
+    | { type: 'FIELD_UPDATE_LOG'; payload: DailyLogEntry }
+    | { type: 'FIELD_ADD_INCIDENT'; payload: SafetyIncident }
+    | { type: 'FIELD_UPDATE_INCIDENT'; payload: SafetyIncident }
+    | { type: 'FIELD_ADD_PUNCH_ITEM'; payload: PunchItem }
+    | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: PunchItem }
 
     // Unifier
     | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: BPRecord; action: string; user: any } }
     | { type: 'UNIFIER_UPDATE_COST_SHEET'; payload: { projectId: string; costCode: string; columnId: string; amount: number; operator: string } }
+
+    // Strategy & Collaboration
+    | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string; status: string } }
+    | { type: 'KANBAN_ADD_TASK'; payload: KanbanTask }
+    | { type: 'ROADMAP_UPDATE_ITEM'; payload: RoadmapItem }
+    
+    // Extensions
+    | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: Partial<ExtensionDataState['financial']> }
+    | { type: 'EXTENSION_UPDATE_CONSTRUCTION'; payload: Partial<ExtensionDataState['construction']> }
+    | { type: 'EXTENSION_UPDATE_GOVERNMENT'; payload: Partial<ExtensionDataState['government']> }
 ;

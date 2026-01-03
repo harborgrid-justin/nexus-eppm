@@ -1,7 +1,8 @@
 import { Project, TaskStatus } from '../types/project';
 import { BudgetLineItem, ChangeOrder } from '../types/finance';
 import { PurchaseOrder } from '../types/procurement';
-import { Risk, QualityReport, NonConformanceReport } from '../types/risk';
+import { Risk } from '../types/risk';
+import { QualityReport, NonConformanceReport } from '../types/quality';
 import { Stakeholder, CommunicationLog } from '../types/project_subtypes';
 import { DataState } from '../types/actions';
 import { MOCK_RISK_PLAN } from '../constants/index';

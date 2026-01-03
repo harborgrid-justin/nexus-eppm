@@ -4,6 +4,7 @@ import { CostEstimate, CostEstimateItem } from '../../../types';
 import { Plus, Trash2, Book } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import { useTheme } from '../../../context/ThemeContext';
+import { RESOURCE_TYPES } from '../../../constants/index';
 
 interface EstimateWorksheetProps {
   estimate: CostEstimate;
@@ -13,8 +14,6 @@ interface EstimateWorksheetProps {
   onUpdateItem: (id: string, field: keyof CostEstimateItem, value: any) => void;
   onDeleteItem: (id: string) => void;
 }
-
-const RESOURCE_TYPES = ['Labor', 'Material', 'Equipment', 'Subcontract', 'Other'];
 
 export const EstimateWorksheet: React.FC<EstimateWorksheetProps> = ({ 
     estimate, setEstimate, onOpenLookup, onAddCustom, onUpdateItem, onDeleteItem 

@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { StatusVariant } from '../../types/ui';
 
-export type StatusVariant = 'health' | 'status' | 'priority' | 'custom';
+export type { StatusVariant };
 
 interface StatusBadgeProps {
   status: string;
@@ -41,6 +42,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       if (['high', 'critical', 'urgent'].includes(s)) colors = theme.colors.semantic.danger;
       else if (['medium'].includes(s)) colors = theme.colors.semantic.warning;
       else if (['low'].includes(s)) colors = theme.colors.semantic.info;
+  } else if (variant === 'success') {
+      colors = theme.colors.semantic.success;
+  } else if (variant === 'warning') {
+      colors = theme.colors.semantic.warning;
+  } else if (variant === 'danger') {
+      colors = theme.colors.semantic.danger;
+  } else if (variant === 'info') {
+      colors = theme.colors.semantic.info;
   } else {
       // General Status
       if (['approved', 'active', 'completed', 'paid', 'met', 'resolved', 'success'].includes(s)) colors = theme.colors.semantic.success;

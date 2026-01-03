@@ -5,18 +5,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useData } from '../../context/DataContext';
+import { DEFAULT_NOTIFICATION_PREFERENCES } from '../../constants/index';
 
 const NotificationSettings: React.FC = () => {
     const theme = useTheme();
     const { dispatch } = useData();
-    const [preferences, setPreferences] = useState([
-        { id: 'fin', label: 'Financial Breaches', email: true, app: true, sms: false },
-        { id: 'risk', label: 'New High Risks', email: true, app: true, sms: true },
-        { id: 'sched', label: 'Schedule Delays', email: false, app: true, sms: false },
-        { id: 'qual', label: 'NCR Findings', email: true, app: true, sms: false },
-        { id: 'gov', label: 'Governance Decisions', email: true, app: true, sms: false },
-        { id: 'system', label: 'System Maintenance', email: true, app: false, sms: false },
-    ]);
+    const [preferences, setPreferences] = useState(DEFAULT_NOTIFICATION_PREFERENCES);
 
     const togglePref = (id: string, channel: 'email' | 'app' | 'sms') => {
         const pref = preferences.find(p => p.id === id);

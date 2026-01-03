@@ -1,7 +1,7 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
+import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { DollarSign, LayoutDashboard, FileText, Calculator, Landmark, FileDiff, Receipt, BarChart2, Banknote, ShieldAlert, ShoppingCart, MessageSquare } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
 import CostEstimating from './cost/CostEstimating';
@@ -17,54 +17,22 @@ import CostCommunications from './cost/CostCommunications';
 import { useTheme } from '../context/ThemeContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import { PageHeader } from './common/PageHeader';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation } from './common/ModuleNavigation';
+import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
 
 const CostManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
   const projectId = project.id;
-  const [activeGroup, setActiveGroup] = useState('overview');
-  const [activeView, setActiveView] = useState('dashboard');
-  const [isPending, startTransition] = useTransition();
   const theme = useTheme();
 
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'overview', label: 'Overview', items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    ]},
-    { id: 'planning', label: 'Planning & Setup', items: [
-        { id: 'plan', label: 'Cost Plan', icon: FileText },
-        { id: 'estimating', label: 'Estimating', icon: Calculator },
-        { id: 'cbs', label: 'Budget View', icon: BarChart2 },
-        { id: 'reserves', label: 'Reserve Analysis', icon: ShieldAlert },
-    ]},
-    { id: 'control', label: 'Control & Execution', items: [
-        { id: 'budgetLog', label: 'Budget Log', icon: Landmark },
-        { id: 'funding', label: 'Funding & Reconciliation', icon: Banknote },
-        { id: 'procurement', label: 'Procurement (Fin)', icon: ShoppingCart },
-        { id: 'expenses', label: 'Expenses', icon: Receipt },
-        { id: 'changes', label: 'Change Orders', icon: FileDiff },
-    ]},
-    { id: 'monitoring', label: 'Monitoring', items: [
-        { id: 'evm', label: 'Earned Value', icon: BarChart2 },
-        { id: 'communications', label: 'Communications', icon: MessageSquare },
-    ]},
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (viewId: string) => {
-      startTransition(() => {
-          setActiveView(viewId);
-      });
-  };
+  const {
+      activeGroup,
+      activeView,
+      isPending,
+      navGroups,
+      handleGroupChange,
+      handleItemChange
+  } = useCostManagementLogic();
 
   const renderContent = () => {
     switch(activeView) {

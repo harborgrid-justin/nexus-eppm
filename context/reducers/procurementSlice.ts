@@ -29,14 +29,6 @@ export const procurementSlice = (state: DataState, action: Action): DataState =>
     case 'UPDATE_SOLICITATION':
         return { ...state, solicitations: state.solicitations.map(s => s.id === action.payload.id ? action.payload : s) };
 
-    // Legacy Fallback for Expense Actions (Financials, but closely related)
-    case 'ADD_EXPENSE':
-        return { ...state, expenses: [...state.expenses, action.payload] };
-    case 'UPDATE_EXPENSE':
-        return { ...state, expenses: state.expenses.map(e => e.id === action.payload.id ? action.payload : e) };
-    case 'DELETE_EXPENSE':
-        return { ...state, expenses: state.expenses.filter(e => e.id !== action.payload) };
-
     default:
       return state;
   }

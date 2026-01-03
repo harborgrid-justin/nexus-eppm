@@ -1,7 +1,6 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
-// FIX: Added MessageSquare to the lucide-react imports.
-import { LayoutDashboard, TrendingUp, BarChart2, Layers, BookOpen, ListOrdered, PieChart, Star, ShieldAlert, MessageSquare, RefreshCw, Map as MapIcon, Gavel, Leaf, ArrowLeft, Loader2 } from 'lucide-react';
+import React from 'react';
+import { LayoutDashboard, Loader2, ArrowLeft, Layers } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -19,71 +18,28 @@ import PortfolioGovernance from './portfolio/PortfolioGovernance';
 import PortfolioESG from './portfolio/PortfolioESG';
 import PortfolioPrograms from './portfolio/PortfolioPrograms';
 import { useData } from '../context/DataContext';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation } from './common/ModuleNavigation';
 import ProgramManager from './ProgramManager';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ErrorBoundary } from './ErrorBoundary';
+import { usePortfolioManagerLogic } from '../hooks/domain/usePortfolioManagerLogic';
 
 const PortfolioManager: React.FC = () => {
-  const [activeGroup, setActiveGroup] = useState('dashboards');
-  const [activeTab, setActiveTab] = useState('overview');
-  const [drilledProgramId, setDrilledProgramId] = useState<string | null>(null);
-  
-  // Transition pattern for heavy strategic switches
-  const [isPending, startTransition] = useTransition();
   const { state } = useData();
   const theme = useTheme();
 
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'dashboards', label: 'Dashboards', items: [
-      { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
-      { id: 'programs', label: 'Program Portfolio', icon: Layers },
-      { id: 'esg', label: 'ESG & Compliance', icon: Leaf }
-    ]},
-    { id: 'strategy', label: 'Strategy & Selection', items: [
-      { id: 'framework', label: 'Strategic Framework', icon: BookOpen },
-      { id: 'roadmap', label: 'Strategic Roadmap', icon: MapIcon },
-      { id: 'prioritization', label: 'Prioritization', icon: ListOrdered },
-      { id: 'scenarios', label: 'Scenario Planning', icon: Layers },
-      { id: 'balancing', label: 'Balancing', icon: PieChart },
-    ]},
-    { id: 'performance', label: 'Performance', items: [
-      { id: 'financials', label: 'Financial Management', icon: TrendingUp },
-      { id: 'value', label: 'Value & Benefits', icon: Star },
-      { id: 'capacity', label: 'Resource Capacity', icon: BarChart2 },
-      { id: 'communications', label: 'Communications', icon: MessageSquare },
-      { id: 'governance', label: 'Governance Board', icon: Gavel },
-      { id: 'optimization', label: 'Review & Optimize', icon: RefreshCw },
-    ]},
-    { id: 'monitoring', label: 'Monitoring & Control', items: [
-      { id: 'risks', label: 'Portfolio Risks', icon: ShieldAlert },
-    ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveTab(newGroup.items[0].id);
-        setDrilledProgramId(null); 
-      });
-    }
-  };
-
-  const handleItemChange = (tabId: string) => {
-    startTransition(() => {
-        setActiveTab(tabId);
-        setDrilledProgramId(null);
-    });
-  };
-
-  const handleProgramDrillDown = (programId: string) => {
-    startTransition(() => {
-      setDrilledProgramId(programId);
-    });
-  };
+  const {
+    activeGroup,
+    activeTab,
+    drilledProgramId,
+    isPending,
+    navGroups,
+    handleGroupChange,
+    handleItemChange,
+    handleProgramDrillDown,
+    clearDrillDown
+  } = usePortfolioManagerLogic();
 
   const renderContent = () => {
     if (drilledProgramId) {
@@ -121,7 +77,7 @@ const PortfolioManager: React.FC = () => {
                 icon={Layers}
                 actions={
                     <button 
-                        onClick={() => startTransition(() => setDrilledProgramId(null))}
+                        onClick={clearDrillDown}
                         className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-sm"
                     >
                         <ArrowLeft size={16}/> Back to Portfolio

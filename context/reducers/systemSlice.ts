@@ -29,6 +29,12 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
                  ...state,
                  extensions: state.extensions.map(e => e.id === action.payload ? { ...e, status: 'Active' } : e)
              };
+        case 'SYSTEM_SAVE_ETL_MAPPINGS':
+             return {
+                 ...state,
+                 etlMappings: action.payload
+             };
+             
         // Governance Actions
         case 'GOVERNANCE_UPDATE_CURRENCY':
              return {
@@ -81,7 +87,6 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
                  }
              };
         case 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE':
-            // Logic handled in UI state mostly or mock backend
             return state;
         case 'GOVERNANCE_ADD_STRATEGIC_GOAL':
             return { ...state, strategicGoals: [...state.strategicGoals, action.payload] };
@@ -97,10 +102,23 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
             return { ...state, integratedChanges: state.integratedChanges.map(c => c.id === action.payload.id ? action.payload : c) };
         case 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES':
             return { ...state, globalChangeRules: action.payload };
-        
-        // Legacy actions mapped to system
-        case 'ADD_INVOICE':
-            return { ...state, invoices: [...state.invoices, action.payload] };
+
+        // Portfolio Scenarios
+        case 'ADD_PORTFOLIO_SCENARIO':
+            return { ...state, portfolioScenarios: [...state.portfolioScenarios, action.payload] };
+        case 'UPDATE_PORTFOLIO_SCENARIO':
+            return { ...state, portfolioScenarios: state.portfolioScenarios.map(s => s.id === action.payload.id ? action.payload : s) };
+
+        // Timesheets
+        case 'SUBMIT_TIMESHEET': {
+            // Check if timesheet exists
+            const exists = state.timesheets.some(t => t.id === action.payload.id);
+            if (exists) {
+                 return { ...state, timesheets: state.timesheets.map(t => t.id === action.payload.id ? action.payload : t) };
+            } else {
+                 return { ...state, timesheets: [...state.timesheets, action.payload] };
+            }
+        }
 
         default: return state;
     }

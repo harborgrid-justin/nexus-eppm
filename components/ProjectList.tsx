@@ -1,9 +1,6 @@
 
-import React, { useMemo, useState, useDeferredValue, useTransition } from 'react';
-import { Project } from '../types/index';
+import React, { useMemo } from 'react';
 import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2 } from 'lucide-react';
-import { usePortfolioState } from '../hooks';
-import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { FilterBar } from './common/FilterBar';
@@ -13,40 +10,26 @@ import { ProjectListTable } from './projects/list/ProjectListTable';
 import { ProjectListCards } from './projects/list/ProjectListCards';
 import { EpsTreeView } from './projects/list/EpsTreeView';
 import { EmptyState } from './common/EmptyState';
-import { useNavigate } from 'react-router-dom';
 import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { useProjectListLogic } from '../hooks/domain/useProjectListLogic';
 
 const ProjectList: React.FC = () => {
-  const { projects } = usePortfolioState();
-  const { dispatch } = useData();
   const theme = useTheme();
   const { canEditProject } = usePermissions();
-  const navigate = useNavigate();
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const deferredSearchTerm = useDeferredValue(searchTerm);
   
-  const [activeGroup, setActiveGroup] = useState('views');
-  const [activeView, setActiveView] = useState('list');
-  const [isPending, startTransition] = useTransition();
-
-  const filteredProjects = useMemo(() => 
-    projects.filter(p => 
-      p.name.toLowerCase().includes(deferredSearchTerm.toLowerCase()) || 
-      p.code.toLowerCase().includes(deferredSearchTerm.toLowerCase())
-    ), 
-  [projects, deferredSearchTerm]);
-
-  const handleCreateProject = (newProject: Project) => {
-    dispatch({ type: 'PROJECT_IMPORT', payload: [newProject] });
-    startTransition(() => {
-        setActiveView('list');
-    });
-  };
-
-  const handleSelectProject = (projectId: string) => {
-    navigate(`/projectWorkspace/${projectId}`);
-  };
+  const {
+      searchTerm,
+      setSearchTerm,
+      deferredSearchTerm,
+      activeGroup,
+      activeView,
+      setActiveView,
+      isPending,
+      filteredProjects,
+      handleCreateProject,
+      handleSelectProject,
+      handleViewChange
+  } = useProjectListLogic();
 
   const navGroups: NavGroup[] = useMemo(() => [
       { id: 'views', label: 'View Mode', items: [
@@ -54,16 +37,6 @@ const ProjectList: React.FC = () => {
           { id: 'eps', label: 'EPS Hierarchy', icon: Layers }
       ]}
   ], []);
-
-  const handleViewChange = (viewId: string) => {
-      startTransition(() => {
-          if (viewId === 'create') {
-              // Handle create specifically if we added it to nav, but better as action button
-          } else {
-              setActiveView(viewId);
-          }
-      });
-  };
 
   if (activeView === 'create') {
       return <ProjectWizard onClose={() => setActiveView('list')} onSave={handleCreateProject} />;

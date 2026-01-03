@@ -19,7 +19,7 @@ interface AppHeaderProps {
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
-    activeTab, projectId, isPulseOpen, isAiOpen, onSidebarOpen, onPaletteOpen, onPulseOpen, onAiToggle, onNavigate
+    activeTab, projectId, isPulseOpen, onSidebarOpen, onPulseOpen, onNavigate
 }) => {
     const theme = useTheme();
     const enableAi = useFeatureFlag('enableAi');
@@ -28,12 +28,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                onPaletteOpen();
+                onNavigate('search');
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onPaletteOpen]);
+    }, [onNavigate]);
 
     return (
         <header className={`${theme.layout.headerHeight} ${theme.colors.surface} ${theme.colors.border} border-b flex justify-between items-center px-4 md:px-6 flex-shrink-0 z-20 shadow-sm`}>
@@ -43,7 +43,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
            </div>
 
            <div className="flex items-center gap-3 md:gap-5">
-              <div className="hidden md:flex items-center bg-slate-100 rounded-lg px-3 py-1.5 border border-transparent hover:border-slate-300 transition-colors w-64 cursor-text" onClick={onPaletteOpen}>
+              <div 
+                  className="hidden md:flex items-center bg-slate-100 rounded-lg px-3 py-1.5 border border-transparent hover:border-slate-300 transition-colors w-64 cursor-pointer" 
+                  onClick={() => onNavigate('search')}
+              >
                   <Search size={14} className="text-slate-400 mr-2"/>
                   <span className="text-xs text-slate-500">Search (Cmd+K)</span>
               </div>
@@ -58,8 +61,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
 
               {enableAi && (
-                <button onClick={onAiToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${isAiOpen ? 'bg-nexus-50 border-nexus-200 text-nexus-700 shadow-inner' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 shadow-sm'}`}>
-                    <Sparkles size={14} className={isAiOpen ? 'text-nexus-600' : 'text-yellow-500'} />
+                <button 
+                    onClick={() => onNavigate('ai')} 
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700 shadow-inner' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 shadow-sm'}`}
+                >
+                    <Sparkles size={14} className={activeTab === 'ai' ? 'text-nexus-600' : 'text-yellow-500'} />
                     <span className="hidden sm:inline">AI Advisor</span>
                 </button>
               )}

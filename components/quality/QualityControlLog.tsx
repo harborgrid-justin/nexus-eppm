@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { QualityReport } from '../../types/index';
+import { QualityReport, InspectionChecklist } from '../../types/index';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { ControlLogHeader } from './control/ControlLogHeader';
@@ -10,14 +10,6 @@ import { CreateInspectionPanel } from './control/CreateInspectionPanel';
 
 interface QualityControlLogProps {
   qualityReports: QualityReport[] | undefined;
-}
-
-export interface InspectionChecklist {
-  id: string;
-  items: { label: string; status: 'Pass' | 'Fail' | 'N/A'; comment?: string }[];
-  photos: number;
-  inspector: string;
-  approver: string;
 }
 
 const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports = [] }) => {

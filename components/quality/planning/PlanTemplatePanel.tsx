@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Copy, AlertTriangle } from 'lucide-react';
+import { useData } from '../../../context/DataContext';
 
 interface PlanTemplatePanelProps {
     isOpen: boolean;
@@ -11,12 +12,11 @@ interface PlanTemplatePanelProps {
 }
 
 export const PlanTemplatePanel: React.FC<PlanTemplatePanelProps> = ({ isOpen, onClose, onApply }) => {
+    const { state } = useData();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-    const templates = [
-        { id: 'iso_9001', name: 'ISO 9001:2015 Compliant', description: 'Standard QMS structure with rigorous documentation.' },
-        { id: 'lean_six_sigma', name: 'Lean / Six Sigma', description: 'Focus on defect reduction and process capability.' },
-        { id: 'usace_cqc', name: 'USACE CQC Plan', description: 'Contractor Quality Control for federal projects.' }
-    ];
+    
+    // Filter for Quality templates
+    const templates = state.standardTemplates.filter(t => t.category === 'Quality');
 
     return (
         <SidePanel
@@ -41,6 +41,7 @@ export const PlanTemplatePanel: React.FC<PlanTemplatePanelProps> = ({ isOpen, on
                             <p className="text-sm font-medium text-slate-500">{t.description}</p>
                         </div>
                     ))}
+                    {templates.length === 0 && <div className="text-center text-slate-400 p-8 italic">No Quality Plan templates defined.</div>}
                 </div>
             </div>
         </SidePanel>

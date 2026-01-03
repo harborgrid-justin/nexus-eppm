@@ -11,6 +11,7 @@ import { useData } from '../../context/DataContext';
 import { Project } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { SidePanel } from '../ui/SidePanel';
+import { PORTFOLIO_CATEGORIES } from '../../constants/index';
 
 // --- Scoring Model Logic ---
 const SCORING_MODEL = [
@@ -32,13 +33,6 @@ const calculateScore = (scores: Record<string, number>): number => {
   }, 0);
   return Math.round(totalScore * 100);
 };
-
-const PORTFOLIO_CATEGORIES = [
-  'Innovation & Growth',
-  'Operational Efficiency',
-  'Regulatory & Compliance',
-  'Keep the Lights On'
-];
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();

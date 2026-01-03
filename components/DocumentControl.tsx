@@ -1,30 +1,20 @@
 
-import React, { useState, useMemo, useDeferredValue } from 'react';
-import { useData } from '../context/DataContext';
+import React from 'react';
 import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { usePermissions } from '../hooks/usePermissions';
 import { PageHeader } from './common/PageHeader';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useDocumentControlLogic } from '../hooks/domain/useDocumentControlLogic';
 
 const DocumentControl: React.FC = () => {
-  const { project } = useProjectWorkspace();
-  const { getProjectDocs } = useData();
   const theme = useTheme();
-  const { hasPermission } = usePermissions();
-  const canUpload = hasPermission('project:edit');
-
-  const [searchTerm, setSearchTerm] = useState('');
   
-  // Pattern 12: Deferred value for expensive filtering
-  const deferredSearchTerm = useDeferredValue(searchTerm);
-
-  const docs = useMemo(() => {
-    if (!project) return [];
-    const allDocs = getProjectDocs(project.id);
-    if (!deferredSearchTerm) return allDocs;
-    return allDocs.filter(doc => doc.name.toLowerCase().includes(deferredSearchTerm.toLowerCase()));
-  }, [project, getProjectDocs, deferredSearchTerm]);
+  const {
+    searchTerm,
+    setSearchTerm,
+    deferredSearchTerm,
+    docs,
+    canUpload
+  } = useDocumentControlLogic();
 
   const getIcon = (type: string) => {
      switch(type) {

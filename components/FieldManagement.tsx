@@ -1,11 +1,12 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
-import { HardHat, Clipboard, AlertTriangle, CheckSquare, CloudRain } from 'lucide-react';
+import React from 'react';
+import { HardHat } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation } from './common/ModuleNavigation';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useFieldManagementLogic } from '../hooks/domain/useFieldManagementLogic';
 
 // Sub-components
 import DailyLog from './field/DailyLog';
@@ -16,37 +17,15 @@ const FieldManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
   const projectId = project.id;
   const theme = useTheme();
-  const [activeGroup, setActiveGroup] = useState('daily');
-  const [activeView, setActiveView] = useState('logs');
-  const [isPending, startTransition] = useTransition();
-
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'daily', label: 'Daily Reporting', items: [
-      { id: 'logs', label: 'Daily Logs', icon: Clipboard }
-    ]},
-    { id: 'safety', label: 'Safety (HSE)', items: [
-      { id: 'incidents', label: 'Incident Log', icon: AlertTriangle }
-    ]},
-    { id: 'inspections', label: 'Field QA', items: [
-      { id: 'punchlist', label: 'Punch List', icon: CheckSquare }
-    ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (itemId: string) => {
-      startTransition(() => {
-          setActiveView(itemId);
-      });
-  };
+  
+  const {
+      activeGroup,
+      activeView,
+      isPending,
+      navGroups,
+      handleGroupChange,
+      handleItemChange
+  } = useFieldManagementLogic();
 
   const renderContent = () => {
     switch (activeView) {

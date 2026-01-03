@@ -1,19 +1,9 @@
 
 import React, { useRef, useEffect } from 'react';
-import { LucideIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { NavGroup, NavItem } from '../../types/ui';
 
-export interface NavItem {
-  id: string;
-  label: string;
-  icon?: LucideIcon;
-}
-
-export interface NavGroup {
-  id: string;
-  label: string;
-  items: NavItem[];
-}
+export type { NavGroup, NavItem };
 
 interface ModuleNavigationProps {
   groups: NavGroup[];

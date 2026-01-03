@@ -1,3 +1,4 @@
+
 import { DataState } from '../types/actions';
 import { 
     MOCK_PROJECTS, MOCK_RESOURCES, MOCK_RISKS, MOCK_ISSUES, MOCK_BUDGET_ITEMS, 
@@ -18,14 +19,77 @@ import {
     MOCK_SOLICITATIONS, MOCK_PROCUREMENT_PLANS, MOCK_PROCUREMENT_PACKAGES,
     MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_INVOICES, MOCK_TIMESHEETS,
     MOCK_ENTERPRISE_SKILLS, MOCK_RBS, MOCK_QUALITY_STANDARDS,
-    MOCK_VENDORS
+    MOCK_VENDORS,
+    MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA
 } from '../constants/index';
-import { MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA } from '../constants/mocks/unifier';
+
+import { ResourceRequest } from '../types/resource';
+import { RoadmapLane, RoadmapItem, KanbanTask, StandardTemplate, EtlMapping } from '../types';
+
+const MOCK_RESOURCE_REQUESTS: ResourceRequest[] = [
+    { id: 'REQ-101', projectId: 'P1001', projectName: 'Downtown Metro Hub', requesterName: 'Mike Ross', role: 'Senior Engineer', quantity: 2, startDate: '2024-07-01', endDate: '2024-12-31', status: 'Pending' },
+    { id: 'REQ-102', projectId: 'P1002', projectName: 'Global ERP Migration', requesterName: 'Jessica Pearson', role: 'Solution Architect', quantity: 1, startDate: '2024-08-01', endDate: '2024-10-30', status: 'Pending' },
+    { id: 'REQ-103', projectId: 'P1003', projectName: 'Solar Farm Alpha', requesterName: 'Mike Ross', role: 'Civil Engineer', quantity: 4, startDate: '2024-06-15', endDate: '2024-09-15', status: 'Approved' },
+];
+
+const MOCK_ROADMAP_LANES: RoadmapLane[] = [
+    {
+        id: 'lane1', title: 'Market Expansion', owner: 'Sales & Marketing', milestones: [ { id: 'm1', name: 'Go/No-Go Decision', date: '2024-04-01', type: 'decision' } ]
+    },
+    {
+        id: 'lane2', title: 'Operational Efficiency', owner: 'Operations', milestones: [ { id: 'm2', name: 'System Go-Live', date: '2024-08-25', type: 'release' } ]
+    },
+    {
+        id: 'lane3', title: 'Digital Transformation', owner: 'IT & Engineering', milestones: []
+    }
+];
+
+const MOCK_ROADMAP_ITEMS: RoadmapItem[] = [
+    { id: 'item1', laneId: 'lane1', name: 'APAC Launch Campaign', start: '2024-02-15', end: '2024-05-30', type: 'product', status: 'On Track', owner: 'J. Doe' },
+    { id: 'item2', laneId: 'lane1', name: 'LATAM Market Research', start: '2024-01-10', end: '2024-03-20', type: 'strategic', status: 'Complete', owner: 'S. Smith' },
+    { id: 'item3', laneId: 'lane1', name: 'EU Partnership Finalized', start: '2024-07-01', end: '2024-09-15', type: 'strategic', status: 'At Risk', owner: 'A. Wong' },
+    { id: 'item4', laneId: 'lane2', name: 'Automated Reporting System', start: '2024-03-01', end: '2024-08-30', type: 'platform', status: 'On Track', owner: 'M. Ross' },
+    { id: 'item5', laneId: 'lane2', name: 'Warehouse Logistics Upgrade', start: '2024-09-01', end: '2024-12-20', type: 'platform', status: 'Planned', owner: 'L. Litt' },
+    { id: 'item6', laneId: 'lane3', name: 'Cloud Migration Phase 2', start: '2024-05-10', end: '2024-11-15', type: 'tech', status: 'On Track', owner: 'C. Build' },
+    { id: 'item7', laneId: 'lane3', name: 'Mobile App Rearchitecture', start: '2024-01-20', end: '2024-06-10', type: 'product', status: 'Complete', owner: 'D. Staff' },
+];
+
+const MOCK_KANBAN_TASKS: KanbanTask[] = [
+    { id: '1', title: 'Implement API caching', status: 'todo', priority: 'Medium' },
+    { id: '2', title: 'Refactor Auth', status: 'todo', priority: 'High' },
+    { id: '3', title: 'Design System Update', status: 'progress', priority: 'Low' },
+    { id: '4', title: 'User Testing', status: 'review', priority: 'Medium' },
+    { id: '5', title: 'Deploy v2', status: 'done', priority: 'High' }
+];
+
+const INITIAL_TEMPLATES: StandardTemplate[] = [
+    ...MOCK_TEMPLATES,
+    // Risk Templates
+    { id: 'pmi_standard', category: 'Risk', name: 'PMI Standard Risk Plan', description: 'Aligns with PMBOK Guide 7th Edition.', content: {} },
+    { id: 'agile_risk', category: 'Risk', name: 'Agile Risk Management', description: 'Lightweight, iterative risk handling.', content: {} },
+    { id: 'construction_heavy', category: 'Risk', name: 'Construction (Heavy Civil)', description: 'Emphasis on safety and environmental risks.', content: {} },
+    // Cost Templates
+    { id: 'gov_standard', category: 'Cost', name: 'Government Standard (EVM)', description: 'ANSI/EIA-748 EVMS guidelines.', content: {} },
+    { id: 'agile_lean', category: 'Cost', name: 'Agile / Lean Costing', description: 'Focus on burn rate and throughput.', content: {} },
+    { id: 'construction_fixed', category: 'Cost', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs.', content: {} },
+    // Quality Templates
+    { id: 'iso_9001', category: 'Quality', name: 'ISO 9001:2015 Compliant', description: 'Standard QMS structure with rigorous documentation.', content: {} },
+    { id: 'lean_six_sigma', category: 'Quality', name: 'Lean / Six Sigma', description: 'Focus on defect reduction and process capability.', content: {} },
+    { id: 'usace_cqc', category: 'Quality', name: 'USACE CQC Plan', description: 'Contractor Quality Control for federal projects.', content: {} },
+];
+
+const INITIAL_MAPPINGS: EtlMapping[] = [
+    { id: 1, source: 'EXTERNAL_ID', target: 'id', transform: 'Direct', type: 'String' },
+    { id: 2, source: 'PROJ_NAME', target: 'name', transform: 'Trim Whitespace', type: 'String' },
+    { id: 3, source: 'BUDGET_AMT', target: 'budget', transform: 'Currency(USD)', type: 'Number' },
+    { id: 4, source: 'START_DT', target: 'startDate', transform: 'Date(ISO8601)', type: 'Date' },
+];
 
 export const initialState: DataState = {
   projects: MOCK_PROJECTS,
   programs: MOCK_PROGRAMS,
   resources: MOCK_RESOURCES,
+  resourceRequests: MOCK_RESOURCE_REQUESTS,
   risks: MOCK_RISKS,
   issues: MOCK_ISSUES,
   budgetItems: MOCK_BUDGET_ITEMS,
@@ -53,7 +117,7 @@ export const initialState: DataState = {
   expenseCategories: MOCK_EXPENSE_CATEGORIES,
   issueCodes: MOCK_ISSUE_CODES,
   costBook: MOCK_COST_BOOK,
-  standardTemplates: MOCK_TEMPLATES,
+  standardTemplates: INITIAL_TEMPLATES,
   governance: {
       alerts: [],
       auditLog: [],
@@ -133,5 +197,67 @@ export const initialState: DataState = {
           columns: COST_SHEET_COLUMNS,
           rows: COST_SHEET_DATA
       }
-  }
+  },
+  dailyLogs: [
+    { id: 'LOG-001', projectId: 'P1001', date: '2024-06-20', weather: { condition: 'Sunny', temperature: '72°F' }, workLogs: [], delays: [], submittedBy: 'Foreman' }
+  ],
+  safetyIncidents: [],
+  punchList: [],
+  roadmapLanes: MOCK_ROADMAP_LANES,
+  roadmapItems: MOCK_ROADMAP_ITEMS,
+  kanbanTasks: MOCK_KANBAN_TASKS,
+  extensionData: {
+      financial: {
+          allocation: [
+            { name: 'Digital', size: 45000000, color: '#3b82f6' },
+            { name: 'Infrastructure', size: 35000000, color: '#10b981' },
+            { name: 'Compliance', size: 15000000, color: '#f59e0b' },
+            { name: 'Maintenance', size: 10000000, color: '#64748b' },
+            { name: 'R&D', size: 25000000, color: '#8b5cf6' },
+          ],
+          cashFlow: [
+            { month: 'Jan', Operating: 4000, Investing: -2400, Financing: 1000 },
+            { month: 'Feb', Operating: 3000, Investing: -1398, Financing: 2210 },
+            { month: 'Mar', Operating: 2000, Investing: -9800, Financing: 2290 },
+            { month: 'Apr', Operating: 2780, Investing: -3908, Financing: 2000 },
+            { month: 'May', Operating: 1890, Investing: -4800, Financing: 2181 },
+            { month: 'Jun', Operating: 2390, Investing: -3800, Financing: 2500 },
+          ],
+          regulatoryAudits: [
+            { id: 'AUD-001', control: 'SOX 404 - Change Mgmt', status: 'Pass', date: '2024-05-15' },
+            { id: 'AUD-002', control: 'Basel III - Capital Req', status: 'Pass', date: '2024-05-10' },
+            { id: 'AUD-003', control: 'GDPR - Data Privacy', status: 'Finding', date: '2024-04-22' },
+          ]
+      },
+      construction: {
+          submittals: [
+            { status: 'Open', count: 45 },
+            { status: 'In Review', count: 12 },
+            { status: 'Approved', count: 88 },
+            { status: 'Rejected', count: 5 },
+          ]
+      },
+      government: {
+          fundsFlow: [
+            { name: 'Appropriated', value: 50000000 },
+            { name: 'Apportioned', value: 48000000 },
+            { name: 'Allotted', value: 45000000 },
+            { name: 'Committed', value: 30000000 },
+            { name: 'Obligated', value: 25000000 },
+            { name: 'Expended', value: 12000000 },
+          ],
+          fiscalYears: [
+            { year: 'FY24', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
+            { year: 'FY25', phase: 'Budgeting', status: 'Enactment', color: 'bg-blue-500' },
+            { year: 'FY26', phase: 'Programming', status: 'POM Dev', color: 'bg-yellow-500' },
+            { year: 'FY27', phase: 'Planning', status: 'Strat Guidance', color: 'bg-slate-400' },
+          ],
+          appropriations: [
+             { type: '3010 - Aircraft Procurement', years: '3 Year', exp: 'FY26', available: 12500000 },
+             { type: '3600 - RDT&E', years: '2 Year', exp: 'FY25', available: 4500000 },
+             { type: '3400 - O&M', years: '1 Year', exp: 'FY24', available: 800000 },
+          ]
+      }
+  },
+  etlMappings: INITIAL_MAPPINGS
 };

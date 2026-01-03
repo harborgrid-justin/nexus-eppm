@@ -1,17 +1,12 @@
 
-import React, { useState, useMemo, Suspense, lazy, useTransition } from 'react';
-import { useParams } from 'react-router-dom';
-import { 
-  Briefcase, Sliders, GanttChartSquare, DollarSign, AlertTriangle, Users,
-  MessageSquare, ShoppingCart, ShieldCheck, Network, FileWarning, Folder, Loader2, History, Activity,
-  HardHat, GitBranch
-} from 'lucide-react';
+import React, { Suspense, lazy } from 'react';
+import { Network, GanttChartSquare, Loader2, GitBranch } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
 import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
-import { useProjectState } from '../hooks/useProjectState';
 import SuspenseFallback from './layout/SuspenseFallback';
+import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLogic';
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
@@ -31,59 +26,19 @@ const ScheduleHealthReport = lazy(() => import('./scheduling/ScheduleHealthRepor
 const FieldManagement = lazy(() => import('./FieldManagement'));
 
 const ProjectWorkspace: React.FC = () => {
-  const { projectId } = useParams();
-  const projectData = useProjectState(projectId || null);
-  
   const theme = useTheme();
-  const [activeGroup, setActiveGroup] = useState('overview');
-  const [activeArea, setActiveArea] = useState('integration');
-  const [scheduleView, setScheduleView] = useState<'gantt' | 'network'>('gantt');
   
-  const [isPending, startTransition] = useTransition();
-
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'overview', label: 'Overview', items: [
-        { id: 'integration', label: 'Dashboard', icon: Briefcase }
-    ] },
-    { id: 'planning', label: 'Planning', items: [
-        { id: 'scope', label: 'Scope', icon: Sliders },
-        { id: 'schedule', label: 'Schedule', icon: GanttChartSquare },
-        { id: 'cost', label: 'Cost', icon: DollarSign },
-        { id: 'quality', label: 'Quality', icon: ShieldCheck },
-    ]},
-    { id: 'advanced', label: 'Advanced Tools', items: [
-        { id: 'baseline', label: 'Baseline Manager', icon: History },
-        { id: 'health', label: 'Logic Health', icon: Activity },
-    ]},
-    { id: 'execution', label: 'Execution', items: [
-        { id: 'resources', label: 'Resources', icon: Users },
-        { id: 'procurement', label: 'Procurement', icon: ShoppingCart },
-        { id: 'documents', label: 'Docs', icon: Folder },
-        { id: 'field', label: 'Field', icon: HardHat },
-    ]},
-    { id: 'monitoring', label: 'Control', items: [
-        { id: 'risk', label: 'Risk', icon: AlertTriangle },
-        { id: 'issues', label: 'Issues', icon: FileWarning },
-        { id: 'stakeholder', label: 'Stakeholders', icon: Users },
-        { id: 'communications', label: 'Comms', icon: MessageSquare },
-    ]}
-  ], []);
-  
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveArea(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (itemId: string) => {
-      startTransition(() => {
-          setActiveArea(itemId);
-      });
-  };
+  const {
+      projectData,
+      activeGroup,
+      activeArea,
+      scheduleView,
+      setScheduleView,
+      isPending,
+      navGroups,
+      handleGroupChange,
+      handleItemChange
+  } = useProjectWorkspaceLogic();
 
   if (!projectData) {
       return (

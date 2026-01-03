@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Map as MapIcon, Link as LinkIcon, AlertTriangle, Calendar, Flag, Activity, Loader2, ArrowRight } from 'lucide-react';
+import { Map as MapIcon, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { getDaysDiff } from '../../utils/dateUtils';
 
@@ -10,7 +10,7 @@ interface ProgramRoadmapProps {
 }
 
 const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
-  const { program, projects, programDependencies } = useProgramData(programId);
+  const { program, projects } = useProgramData(programId);
   const theme = useTheme();
   
   const [today, setToday] = useState<Date | null>(null);
@@ -18,6 +18,18 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
   useEffect(() => {
     setToday(new Date());
   }, []);
+
+  // FIX: Hooks must be called before any early returns
+  const years = useMemo(() => {
+      if (!program) return [];
+      const start = new Date(program.startDate);
+      const end = new Date(program.endDate);
+      const yr = [];
+      const startYear = start.getFullYear();
+      const endYear = end.getFullYear();
+      for(let y = startYear; y <= endYear; y++) yr.push(y);
+      return yr;
+  }, [program]);
 
   if (!program || !today) return <div className="flex h-full items-center justify-center text-slate-400 font-bold uppercase tracking-widest"><Loader2 className="animate-spin mr-2"/> Painting Roadmap...</div>;
 
@@ -35,14 +47,6 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
       const w = (getDaysDiff(new Date(s), new Date(e)) / totalDuration) * 100;
       return Math.max(1, isNaN(w) ? 1 : w);
   };
-
-  const years = useMemo(() => {
-      const yr = [];
-      const startYear = start.getFullYear();
-      const endYear = end.getFullYear();
-      for(let y = startYear; y <= endYear; y++) yr.push(y);
-      return yr;
-  }, [start, end]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-500 scrollbar-thin`}>
@@ -108,4 +112,3 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
 };
 
 export default ProgramRoadmap;
-    

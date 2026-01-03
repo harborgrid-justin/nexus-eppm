@@ -2,7 +2,7 @@
 import React from 'react';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { useTheme } from '../../../context/ThemeContext';
-import { CATEGORY_COLORS } from '../PortfolioBalancing';
+import { PORTFOLIO_CATEGORY_COLORS } from '../../../constants/index';
 
 interface ValueRiskChartProps {
     data: any[];
@@ -37,7 +37,7 @@ export const ValueRiskChart: React.FC<ValueRiskChartProps> = ({ data }) => {
                     <ReferenceLine y={15} stroke={theme.colors.border} strokeDasharray="3 3" />
                     <Scatter name="Projects" data={data}>
                         {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[entry.category] || '#8884d8'} />
+                            <Cell key={`cell-${index}`} fill={PORTFOLIO_CATEGORY_COLORS[entry.category] || '#8884d8'} />
                         ))}
                     </Scatter>
                 </ScatterChart>

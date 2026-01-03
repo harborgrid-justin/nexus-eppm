@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Calculator, Info } from 'lucide-react';
 import { generateId } from '../../utils/formatters';
+import { ESTIMATE_CLASSES } from '../../constants/index';
 
 interface CreateEstimateModalProps {
   isOpen: boolean;
@@ -15,14 +16,6 @@ interface CreateEstimateModalProps {
   wbsId: string;
   wbsName: string;
 }
-
-const ESTIMATE_CLASSES = [
-    { id: 'Class 5 (ROM)', label: 'Class 5: Rough Order of Magnitude', contingency: 30, description: 'Concept screening (0-2% definition)' },
-    { id: 'Class 4 (Preliminary)', label: 'Class 4: Preliminary / Feasibility', contingency: 20, description: 'Study or feasibility (1-15% definition)' },
-    { id: 'Class 3 (Budget)', label: 'Class 3: Budget Authorization', contingency: 15, description: 'Budget authorization (10-40% definition)' },
-    { id: 'Class 2 (Control)', label: 'Class 2: Control / Bid', contingency: 10, description: 'Control or bid/tender (30-75% definition)' },
-    { id: 'Class 1 (Definitive)', label: 'Class 1: Definitive / Check', contingency: 5, description: 'Check estimate or change order (65-100% definition)' },
-];
 
 export const CreateEstimateModal: React.FC<CreateEstimateModalProps> = ({ 
     isOpen, onClose, onSave, projectId, wbsId, wbsName 

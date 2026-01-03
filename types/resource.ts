@@ -26,6 +26,19 @@ export interface Resource {
   serialNumber?: string;
 }
 
+export interface ResourceRequest {
+    id: string;
+    projectId: string;
+    projectName: string; // Denormalized for ease
+    requesterName: string;
+    role: string;
+    quantity: number;
+    startDate: string;
+    endDate: string;
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Partial' | 'Soft Booked';
+    notes?: string;
+}
+
 export interface EnterpriseRole {
     id: string;
     title: string;

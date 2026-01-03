@@ -1,33 +1,33 @@
 
-import React, { useState, useDeferredValue, useMemo } from 'react';
+import React from 'react';
 import { Resource } from '../../types/index';
 import { Plus, Filter, Lock, Calendar, UserCog, Briefcase, Loader2, Edit2, Trash2 } from 'lucide-react';
-import { usePermissions } from '../../hooks/usePermissions';
 import { useData } from '../../context/DataContext';
 import { Badge } from '../ui/Badge';
 import { ResourceFormPanel } from './ResourceFormPanel';
+import { useResourcePoolLogic } from '../../hooks/domain/useResourcePoolLogic';
 
 interface ResourcePoolProps {
   resources: Resource[] | undefined;
 }
 
 const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
-  const { state, dispatch } = useData();
-  const { hasPermission } = usePermissions();
-  const canEdit = hasPermission('resource:write') || hasPermission('project:edit');
-  const [searchTerm, setSearchTerm] = useState('');
+  const { state } = useData(); // Needed for roles lookup in badge, otherwise logic is in hook
   
-  // Panel State
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [editingResource, setEditingResource] = useState<Partial<Resource> | null>(null);
-
-  // Pattern 9: Defer search for large resource pool
-  const deferredSearchTerm = useDeferredValue(searchTerm);
-
-  const getCalendarName = (calId: string) => {
-      const cal = state.calendars.find(c => c.id === calId);
-      return cal ? cal.name : 'Standard';
-  };
+  const {
+      searchTerm,
+      deferredSearchTerm,
+      isPanelOpen,
+      editingResource,
+      filteredResources,
+      canEdit,
+      setSearchTerm,
+      handleOpenPanel,
+      handleSaveResource,
+      handleDeleteResource,
+      closePanel,
+      getCalendarName
+  } = useResourcePoolLogic(resources);
 
   const getRoleBadge = (roleTitle: string) => {
       const roleDef = state.roles.find(r => r.title === roleTitle);
@@ -46,38 +46,6 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
               )}
           </div>
       );
-  };
-
-  const filteredResources = useMemo(() => {
-    if (!resources) return [];
-    if (!deferredSearchTerm) return resources;
-    const lowerTerm = deferredSearchTerm.toLowerCase();
-    return resources.filter(r => 
-        r.name.toLowerCase().includes(lowerTerm) || 
-        r.role.toLowerCase().includes(lowerTerm) ||
-        r.skills.some(s => s.toLowerCase().includes(lowerTerm))
-    );
-  }, [resources, deferredSearchTerm]);
-
-  // CRUD Handlers
-  const handleOpenPanel = (resource?: Resource) => {
-      setEditingResource(resource ? { ...resource } : null);
-      setIsPanelOpen(true);
-  };
-
-  const handleSaveResource = (resource: Resource) => {
-      if (editingResource?.id) {
-          dispatch({ type: 'RESOURCE_UPDATE', payload: resource });
-      } else {
-          dispatch({ type: 'RESOURCE_ADD', payload: resource });
-      }
-      setIsPanelOpen(false);
-  };
-
-  const handleDeleteResource = (id: string) => {
-      if (confirm("Are you sure you want to remove this resource?")) {
-          dispatch({ type: 'RESOURCE_DELETE', payload: id });
-      }
   };
 
   if (!resources) {
@@ -221,7 +189,7 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
 
       <ResourceFormPanel 
         isOpen={isPanelOpen} 
-        onClose={() => setIsPanelOpen(false)} 
+        onClose={closePanel} 
         onSave={handleSaveResource}
         editingResource={editingResource}
       />

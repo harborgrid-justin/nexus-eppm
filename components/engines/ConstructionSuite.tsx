@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useData } from '../../context/DataContext';
 import { HardHat, Clipboard, CloudRain, Truck, Box, FileText, AlertTriangle, Hammer, Ruler, Map } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,28 +11,34 @@ import { MapRenderer } from './renderers/MapRenderer';
 
 const ConstructionSuite: React.FC = () => {
   const theme = useTheme();
+  const { state } = useData();
   const [activeTab, setActiveTab] = useState<'field' | 'submittals' | 'bim' | 'gis'>('field');
 
-  // --- MOCK DATA ---
-  const safetyStats = [
-    { type: 'Near Miss', count: 12 },
-    { type: 'First Aid', count: 4 },
-    { type: 'Medical Only', count: 1 },
-    { type: 'Lost Time', count: 0 },
-  ];
+  // Derive Safety Stats from real data in Phase 6
+  const safetyStats = useMemo(() => {
+      const counts: Record<string, number> = {};
+      state.safetyIncidents.forEach(inc => {
+          counts[inc.type] = (counts[inc.type] || 0) + 1;
+      });
+      return Object.entries(counts).map(([type, count]) => ({ type, count }));
+  }, [state.safetyIncidents]);
 
-  const submittalData = [
-    { status: 'Open', count: 45 },
-    { status: 'In Review', count: 12 },
-    { status: 'Approved', count: 88 },
-    { status: 'Rejected', count: 5 },
-  ];
+  const { submittals } = state.extensionData.construction;
 
-  const dailyLogs = [
-    { id: '1', date: 'Today', weather: 'Sunny, 72°F', workers: 142, hours: 1136, incidents: 0 },
-    { id: '2', date: 'Yesterday', weather: 'Cloudy, 68°F', workers: 138, hours: 1104, incidents: 0 },
-    { id: '3', date: '2 days ago', weather: 'Rain, 62°F', workers: 95, hours: 760, incidents: 1 },
-  ];
+  // Use real DailyLogs if available, otherwise aggregate for demo
+  const dailyLogs = useMemo(() => {
+     // Aggregate real logs from state.dailyLogs
+     return state.dailyLogs.slice(0, 3).map(log => ({
+         id: log.id,
+         date: log.date,
+         weather: `${log.weather.condition}, ${log.weather.temperature}`,
+         workers: log.workLogs.reduce((sum, w) => sum + w.headcount, 0),
+         hours: log.workLogs.reduce((sum, w) => sum + w.hours, 0),
+         incidents: state.safetyIncidents.filter(i => i.date === log.date).length
+     }));
+  }, [state.dailyLogs, state.safetyIncidents]);
+
+  const openRFIsCount = state.communicationLogs.filter(c => c.type === 'RFI' && c.status === 'Open').length;
 
   // --- RENDERERS ---
 
@@ -40,8 +47,8 @@ const ConstructionSuite: React.FC = () => {
         {/* Top Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Manpower on Site" value="142" subtext="Across 12 Subcontractors" icon={HardHat} />
-            <StatCard title="Open RFIs" value="8" subtext="3 Critical Priority" icon={FileText} trend="down" />
-            <StatCard title="Safety Incidents" value="0" subtext="Days since last incident: 145" icon={AlertTriangle} />
+            <StatCard title="Open RFIs" value={openRFIsCount} subtext="Critical Priority" icon={FileText} trend="down" />
+            <StatCard title="Safety Incidents" value={state.safetyIncidents.length} subtext="Total Recorded" icon={AlertTriangle} />
             <StatCard title="Equipment Active" value="24" subtext="Heavy Machinery" icon={Truck} />
         </div>
 
@@ -66,6 +73,7 @@ const ConstructionSuite: React.FC = () => {
                             </div>
                         </div>
                     ))}
+                    {dailyLogs.length === 0 && <p className="text-sm text-slate-400 italic">No logs recorded.</p>}
                 </div>
                 <button className="w-full mt-4 py-2 text-sm border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50">View Full Log History</button>
             </div>
@@ -117,7 +125,7 @@ const ConstructionSuite: React.FC = () => {
                 {activeTab === 'submittals' && (
                     <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {submittalData.map(d => (
+                            {submittals.map(d => (
                                 <Card key={d.status} className="p-4 text-center">
                                     <h4 className="text-slate-500 text-xs font-bold uppercase">{d.status}</h4>
                                     <p className="text-3xl font-bold text-slate-800 mt-2">{d.count}</p>

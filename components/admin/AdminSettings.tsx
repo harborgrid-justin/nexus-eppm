@@ -3,7 +3,7 @@ import React, { useState, useMemo, useTransition } from 'react';
 import { 
   Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, 
   Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
-  Terminal, Globe, Layers, MapPin, History, RefreshCw, Loader2
+  Terminal, Globe, Layers, MapPin, History, RefreshCw, Loader2, Database, AlertCircle
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import EpsObsSettings from './EpsObsSettings';
@@ -34,6 +34,7 @@ const AdminSettings: React.FC = () => {
   const [isApplying, setIsApplying] = useState(false);
   const [isPending, startTransition] = useTransition();
   const theme = useTheme();
+  const { dispatch } = useData();
 
   const handleGlobalApply = () => {
       setIsApplying(true);
@@ -41,6 +42,13 @@ const AdminSettings: React.FC = () => {
           setIsApplying(false);
           alert("Global enterprise parameters synchronized across all projects and programs.");
       }, 1500);
+  };
+
+  const handleResetSystem = () => {
+      if (confirm("DANGER: This will wipe all local data and restore the factory demo dataset. This action cannot be undone. Are you sure?")) {
+          dispatch({ type: 'RESET_SYSTEM' });
+          alert("System reset complete.");
+      }
   };
 
   const navGroups: NavGroup[] = useMemo(() => [
@@ -125,13 +133,23 @@ const AdminSettings: React.FC = () => {
         subtitle="Configure global system logic and enterprise data definitions."
         icon={Settings}
         actions={
-            <button 
-              onClick={handleGlobalApply}
-              className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all active:scale-95`}
-            >
-              <RefreshCw size={16} className={isApplying ? 'animate-spin' : ''}/>
-              {isApplying ? 'Synchronizing...' : 'Apply Global Changes'}
-            </button>
+            <div className="flex gap-2">
+                <button 
+                  onClick={handleResetSystem}
+                  className={`flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95`}
+                  title="Restore Factory Defaults"
+                >
+                  <Database size={16} />
+                  Reset Database
+                </button>
+                <button 
+                  onClick={handleGlobalApply}
+                  className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white rounded-lg font-bold shadow-md hover:shadow-lg transition-all active:scale-95`}
+                >
+                  <RefreshCw size={16} className={isApplying ? 'animate-spin' : ''}/>
+                  {isApplying ? 'Synchronizing...' : 'Apply Global Changes'}
+                </button>
+            </div>
         }
       />
       

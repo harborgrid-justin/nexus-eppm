@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
-import { Users, FileText, BarChart2, Sliders, Box, ScrollText } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Users } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
@@ -12,7 +12,9 @@ import ResourceHistogram from './resources/ResourceHistogram';
 import PhysicalResources from './resources/PhysicalResources';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
+import { ModuleNavigation } from './common/ModuleNavigation';
 import { Resource } from '../types/index';
+import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
 
 const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
@@ -24,45 +26,15 @@ const ResourceManagement: React.FC = () => {
   }, [projectResources]);
 
   const theme = useTheme();
-  const [activeGroup, setActiveGroup] = useState('planning');
-  const [activeView, setActiveView] = useState('plan');
-  const [isPending, startTransition] = useTransition();
-
-  const navStructure = useMemo(() => [
-    { id: 'planning', label: 'Planning & Setup', items: [
-      { id: 'plan', label: 'Resource Plan', icon: FileText },
-      { id: 'charter', label: 'Team Charter', icon: ScrollText },
-      { id: 'pool', label: 'Resource Pool', icon: Users },
-    ]},
-    { id: 'analysis', label: 'Analysis & Optimization', items: [
-      { id: 'capacity', label: 'Capacity Planning', icon: BarChart2 },
-      { id: 'histogram', label: 'Resource Histogram', icon: BarChart2 },
-      { id: 'leveling', label: 'Leveling', icon: Sliders },
-    ]},
-    { id: 'physical', label: 'Physical Resources', items: [
-      { id: 'physical_tracking', label: 'Materials & Equipment', icon: Box }
-    ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navStructure.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const activeGroupItems = useMemo(() => {
-    return navStructure.find(g => g.id === activeGroup)?.items || [];
-  }, [activeGroup, navStructure]);
   
-  const handleViewChange = (viewId: string) => {
-      startTransition(() => {
-          setActiveView(viewId);
-      });
-  };
+  const {
+      activeGroup,
+      activeView,
+      isPending,
+      navStructure,
+      handleGroupChange,
+      handleViewChange
+  } = useResourceManagementLogic();
 
   const renderContent = () => {
     switch(activeView) {
@@ -89,39 +61,14 @@ const ResourceManagement: React.FC = () => {
 
       <div className={theme.layout.panelContainer}>
         <div className={`flex-shrink-0 ${theme.layout.headerBorder} bg-slate-50/50 z-10`}>
-          <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
-              {navStructure.map(group => (
-                  <button
-                      key={group.id}
-                      onClick={() => handleGroupChange(group.id)}
-                      className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
-                          activeGroup === group.id
-                          ? `${theme.colors.primary} text-white shadow-sm`
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                  >
-                      {group.label}
-                  </button>
-              ))}
-          </div>
-          <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide" role="tablist">
-            {activeGroupItems.map(item => (
-              <button
-                key={item.id}
-                role="tab"
-                aria-selected={activeView === item.id}
-                onClick={() => handleViewChange(item.id)}
-                className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded-t ${
-                  activeView === item.id
-                    ? 'border-nexus-600 text-nexus-600'
-                    : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-                }`}
-              >
-                <item.icon size={16} />
-                <span>{item.label}</span>
-              </button>
-            ))}
-          </nav>
+          <ModuleNavigation 
+              groups={navStructure}
+              activeGroup={activeGroup}
+              activeItem={activeView}
+              onGroupChange={handleGroupChange}
+              onItemChange={handleViewChange}
+              className="bg-transparent border-0 shadow-none"
+          />
         </div>
         <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
           <ErrorBoundary>

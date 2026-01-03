@@ -67,3 +67,12 @@ export interface CostSheetRow {
   description: string;
   [columnId: string]: any; // Values for dynamic columns
 }
+
+export interface UnifierState {
+    definitions: BPDefinition[];
+    records: BPRecord[];
+    costSheet: {
+        columns: CostSheetColumn[];
+        rows: CostSheetRow[];
+    };
+}

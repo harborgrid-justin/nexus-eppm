@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { CheckSquare, Clock, ListTodo } from 'lucide-react';
 import MyTasks from './team/MyTasks';
 import Timesheet from './team/Timesheet';
+import { useTeamWorkspaceLogic } from '../hooks/domain/useTeamWorkspaceLogic';
 
 const TeamWorkspace: React.FC = () => {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<'tasks' | 'timesheet'>('tasks');
+  const { activeTab, setActiveTab } = useTeamWorkspaceLogic();
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>

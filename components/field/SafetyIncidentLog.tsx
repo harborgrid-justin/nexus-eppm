@@ -1,24 +1,45 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { useData } from '../../context/DataContext';
 import { AlertTriangle, Plus, ShieldCheck, Activity, Search } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import StatCard from '../shared/StatCard';
+import { SafetyIncident } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 interface SafetyIncidentLogProps {
   projectId: string;
 }
 
 const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
+  const { state, dispatch } = useData();
   const theme = useTheme();
+  
+  const incidents = state.safetyIncidents.filter(i => i.projectId === projectId);
+  
+  const handleAddIncident = () => {
+      const newIncident: SafetyIncident = {
+          id: generateId('INC'),
+          projectId,
+          date: new Date().toISOString().split('T')[0],
+          type: 'Near Miss',
+          description: 'New Incident Report',
+          location: 'Site',
+          status: 'Open',
+          reportedBy: 'User'
+      };
+      dispatch({ type: 'FIELD_ADD_INCIDENT', payload: newIncident });
+  };
 
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}/50`}>
        {/* Stats */}
        <div className={`p-6 grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
            <StatCard title="Days Without Incident" value="142" icon={ShieldCheck} trend="up" />
-           <StatCard title="TRIR (YTD)" value="0.5" subtext="Total Recordable Rate" icon={Activity} />
-           <StatCard title="Open Observations" value="3" icon={AlertTriangle} />
+           <StatCard title="Total Incidents" value={incidents.length} subtext="Project Lifetime" icon={Activity} />
+           <StatCard title="Open Observations" value={incidents.filter(i => i.status === 'Open').length} icon={AlertTriangle} />
        </div>
 
        {/* List */}
@@ -32,7 +53,7 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
                             <input type="text" placeholder="Search..." className="pl-9 pr-4 py-1.5 text-sm border border-slate-300 rounded-md w-48" />
                        </div>
                    </div>
-                   <Button size="sm" icon={Plus} variant="danger">Report Incident</Button>
+                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident}>Report Incident</Button>
                </div>
                <div className="flex-1 overflow-auto">
                    <table className="min-w-full divide-y divide-slate-100">
@@ -46,20 +67,18 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
                            </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-100">
-                           <tr className={theme.components.table.row}>
-                               <td className={theme.components.table.cell}>2024-05-12</td>
-                               <td className={theme.components.table.cell}><Badge variant="warning">Near Miss</Badge></td>
-                               <td className={`${theme.components.table.cell} ${theme.colors.text.primary}`}>Dropped tool from scaffolding. No injuries.</td>
-                               <td className={theme.components.table.cell}>Sector 4</td>
-                               <td className={theme.components.table.cell}><Badge variant="success">Closed</Badge></td>
-                           </tr>
-                           <tr className={theme.components.table.row}>
-                               <td className={theme.components.table.cell}>2024-06-01</td>
-                               <td className={theme.components.table.cell}><Badge variant="info">First Aid</Badge></td>
-                               <td className={`${theme.components.table.cell} ${theme.colors.text.primary}`}>Minor cut on hand while handling material.</td>
-                               <td className={theme.components.table.cell}>Laydown Yard</td>
-                               <td className={theme.components.table.cell}><Badge variant="neutral">Review</Badge></td>
-                           </tr>
+                           {incidents.map(inc => (
+                               <tr key={inc.id} className={theme.components.table.row}>
+                                   <td className={theme.components.table.cell}>{inc.date}</td>
+                                   <td className={theme.components.table.cell}><Badge variant={inc.type === 'Near Miss' ? 'warning' : 'danger'}>{inc.type}</Badge></td>
+                                   <td className={`${theme.components.table.cell} ${theme.colors.text.primary}`}>{inc.description}</td>
+                                   <td className={theme.components.table.cell}>{inc.location}</td>
+                                   <td className={theme.components.table.cell}><Badge variant={inc.status === 'Closed' ? 'success' : 'neutral'}>{inc.status}</Badge></td>
+                               </tr>
+                           ))}
+                           {incidents.length === 0 && (
+                               <tr><td colSpan={5} className="p-8 text-center text-slate-400">No incidents recorded.</td></tr>
+                           )}
                        </tbody>
                    </table>
                </div>

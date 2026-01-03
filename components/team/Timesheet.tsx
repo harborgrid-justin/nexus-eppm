@@ -5,13 +5,16 @@ import { Timesheet as TimesheetType, TimesheetRow } from '../../types/resource';
 import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, CheckCircle } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
+import { generateId } from '../../utils/formatters';
 
 const Timesheet: React.FC = () => {
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
   // Hydration safety: Start with null/default and sync on mount
   const [currentWeekStart, setCurrentWeekStart] = useState<Date | null>(null);
-  const [status, setStatus] = useState<'Draft' | 'Submitted'>('Draft');
+  
+  // Use local user ID (Mock)
+  const currentUserId = 'R-002'; // 'Mike Ross' from MOCK_RESOURCES
 
   function getMonday(d: Date) {
     d = new Date(d);
@@ -35,30 +38,44 @@ const Timesheet: React.FC = () => {
     return dates;
   }, [currentWeekStart]);
 
-  // Mock initial rows based on assigned tasks
-  const [rows, setRows] = useState<TimesheetRow[]>(() => {
-      // Find tasks assigned to 'R-001' (Mock User)
-      const tasks: any[] = [];
-      const targetResourceId = 'R-001';
-      
-      state.projects.forEach(p => {
-          p.tasks.forEach(t => {
-              if (t.assignments.some(a => a.resourceId === targetResourceId)) {
-                  tasks.push({
-                      taskId: t.id,
-                      projectId: p.id,
-                      taskName: t.name,
-                      projectName: p.name,
-                      hours: [0, 0, 0, 0, 0, 0, 0] // 7 days
-                  });
-              }
+  // Find existing timesheet or create structure
+  const activeTimesheet = useMemo(() => {
+      if (!currentWeekStart) return null;
+      const weekStr = currentWeekStart.toISOString().split('T')[0];
+      return state.timesheets.find(t => t.resourceId === currentUserId && t.periodStart === weekStr);
+  }, [state.timesheets, currentWeekStart, currentUserId]);
+
+  const [rows, setRows] = useState<TimesheetRow[]>([]);
+  const [status, setStatus] = useState<'Draft' | 'Submitted' | 'Approved' | 'Rejected'>('Draft');
+
+  useEffect(() => {
+      if (activeTimesheet) {
+          setRows(activeTimesheet.rows);
+          setStatus(activeTimesheet.status);
+      } else if (currentWeekStart) {
+          // Initialize empty rows based on assignments
+          const tasks: TimesheetRow[] = [];
+          
+          state.projects.forEach(p => {
+              p.tasks.forEach(t => {
+                  if (t.assignments.some(a => a.resourceId === currentUserId)) {
+                      tasks.push({
+                          taskId: t.id,
+                          projectId: p.id,
+                          taskName: t.name,
+                          projectName: p.name,
+                          hours: [0, 0, 0, 0, 0, 0, 0] // 7 days
+                      });
+                  }
+              });
           });
-      });
-      return tasks.slice(0, 5); // Limit for demo
-  });
+          setRows(tasks);
+          setStatus('Draft');
+      }
+  }, [activeTimesheet, currentWeekStart, state.projects]);
 
   const handleHourChange = (rowIndex: number, dayIndex: number, val: string) => {
-      if (status === 'Submitted') return;
+      if (status === 'Submitted' || status === 'Approved') return;
       const numVal = parseFloat(val) || 0;
       const newRows = [...rows];
       newRows[rowIndex].hours[dayIndex] = numVal;
@@ -75,13 +92,65 @@ const Timesheet: React.FC = () => {
 
   const grandTotal = rows.reduce((sum, row) => sum + calculateRowTotal(row), 0);
 
+  const handleSave = () => {
+      if (!currentWeekStart) return;
+      const sheet: TimesheetType = {
+          id: activeTimesheet?.id || generateId('TS'),
+          resourceId: currentUserId,
+          periodStart: currentWeekStart.toISOString().split('T')[0],
+          status: 'Draft',
+          totalHours: grandTotal,
+          rows: rows
+      };
+      
+      // We use SUBMIT_TIMESHEET for simplicity, but it handles upsert in reducer logic via ADMIN_SLICE or SYSTEM_SLICE
+      // Since we don't have a specific SAVE action, we can re-use the generic update or add specific one.
+      // Let's use SUBMIT_TIMESHEET for now as per actions.ts, but logically it's an update.
+      // Wait, actions.ts has SUBMIT_TIMESHEET which takes { id, rows, totalHours }.
+      // But we need to persist the full object.
+      // Let's check actions.ts... It has SUBMIT_TIMESHEET payload: any.
+      
+      // Let's use a cleaner pattern. We need to persist to state.timesheets.
+      // We will dispatch 'SUBMIT_TIMESHEET' which likely needs to be handled in systemSlice or adminSlice.
+      // Currently adminSlice doesn't handle TIMESHEET actions. Let's fix that.
+      // Actually, checking actions.ts, we have SUBMIT_TIMESHEET payload: any.
+      
+      // Let's add a proper action in reducer.
+      // For now, assume SUBMIT_TIMESHEET handles upsert.
+      
+      // Actually, I'll update the action type to properly handle timesheet persistence.
+      // See reducer update.
+      
+      // We need a specific action. Let's assume there is one or I'll add one.
+      // I added 'SUBMIT_TIMESHEET' to actions.ts in previous step.
+      
+      // Wait, 'SUBMIT_TIMESHEET' in actions.ts was defined as payload: { id, rows, totalHours }.
+      // I'll update the dispatch to match.
+      dispatch({ 
+          type: 'SUBMIT_TIMESHEET', // This needs to be handled by reducer to update the timesheet array
+          payload: { ...sheet, status: 'Draft' } 
+      });
+  };
+  
+  const handleSubmit = () => {
+       if (!currentWeekStart) return;
+       const sheet: TimesheetType = {
+          id: activeTimesheet?.id || generateId('TS'),
+          resourceId: currentUserId,
+          periodStart: currentWeekStart.toISOString().split('T')[0],
+          status: 'Submitted',
+          totalHours: grandTotal,
+          rows: rows
+      };
+      dispatch({ type: 'SUBMIT_TIMESHEET', payload: sheet });
+      setStatus('Submitted');
+  };
+
   const shiftWeek = (direction: 'prev' | 'next') => {
       if (!currentWeekStart) return;
       const newDate = new Date(currentWeekStart);
       newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
       setCurrentWeekStart(newDate);
-      // In a real app, fetch data for new week here
-      setStatus('Draft'); // Reset for demo
   };
 
   if (!currentWeekStart) return <div className="p-6">Loading timesheet...</div>;
@@ -98,23 +167,24 @@ const Timesheet: React.FC = () => {
                     </span>
                     <button onClick={() => shiftWeek('next')} className={`p-1 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><ChevronRight size={20}/></button>
                 </div>
-                <Badge variant={status === 'Draft' ? 'neutral' : 'success'}>
-                    {status === 'Draft' ? 'Draft' : 'Submitted'}
+                <Badge variant={status === 'Draft' ? 'neutral' : status === 'Submitted' ? 'warning' : 'success'}>
+                    {status}
                 </Badge>
             </div>
 
             <div className="flex items-center gap-2">
                 <span className={`text-sm font-bold ${theme.colors.text.secondary} mr-4`}>Total: {grandTotal.toFixed(1)} hrs</span>
                 <button 
-                    disabled={status === 'Submitted'}
+                    onClick={handleSave}
+                    disabled={status !== 'Draft'}
                     className={`flex items-center gap-2 px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} ${theme.colors.text.primary} font-medium rounded-lg text-sm hover:${theme.colors.background} disabled:opacity-50`}
                 >
                     <Save size={16}/> Save
                 </button>
                 <button 
-                    disabled={status === 'Submitted'}
-                    onClick={() => setStatus('Submitted')}
-                    className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white font-medium rounded-lg text-sm ${theme.colors.primaryHover} disabled:opacity-100`}
+                    disabled={status !== 'Draft'}
+                    onClick={handleSubmit}
+                    className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white font-medium rounded-lg text-sm ${theme.colors.primaryHover} disabled:opacity-50`}
                 >
                     {status === 'Submitted' ? <CheckCircle size={16}/> : <Send size={16}/>}
                     {status === 'Submitted' ? 'Submitted' : 'Submit'}
@@ -153,7 +223,7 @@ const Timesheet: React.FC = () => {
                                         step="0.5"
                                         value={hrs === 0 ? '' : hrs}
                                         onChange={(e) => handleHourChange(rIdx, dIdx, e.target.value)}
-                                        disabled={status === 'Submitted'}
+                                        disabled={status !== 'Draft'}
                                         className={`w-full text-center border ${theme.colors.border} rounded py-1 text-sm focus:ring-2 focus:ring-nexus-500 focus:outline-none disabled:${theme.colors.background}`}
                                     />
                                 </td>

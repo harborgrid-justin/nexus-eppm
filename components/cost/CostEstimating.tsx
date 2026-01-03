@@ -12,16 +12,12 @@ import { WbsTree } from './estimating/WbsTree';
 import { EstimateHeader } from './estimating/EstimateHeader';
 import { BasisOfEstimate } from './estimating/BasisOfEstimate';
 import { Calculator } from 'lucide-react';
+import { ESTIMATE_CLASSES } from '../../constants/index';
 
 interface CostEstimatingProps {
   projectId: string;
 }
 
-export const ESTIMATE_CLASSES = [
-    { id: 'Class 5 (ROM)', accuracy: '-50% to +100%' }, { id: 'Class 4 (Preliminary)', accuracy: '-30% to +50%' },
-    { id: 'Class 3 (Budget)', accuracy: '-20% to +30%' }, { id: 'Class 2 (Control)', accuracy: '-15% to +20%' },
-    { id: 'Class 1 (Definitive)', accuracy: '-10% to +15%' },
-];
 const COLORS = ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const CostEstimating: React.FC<CostEstimatingProps> = ({ projectId }) => {

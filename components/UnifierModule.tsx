@@ -1,70 +1,39 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
+import React from 'react';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 import { CostSheet } from './unifier/CostSheet';
 import { BusinessProcessForm } from './unifier/BusinessProcessForm';
 import { SidePanel } from './ui/SidePanel';
-import { BPRecord } from '../types/unifier';
-import { Table, Plus, Layers, LayoutTemplate, Briefcase } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Plus, Briefcase, LayoutTemplate } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation } from './common/ModuleNavigation';
 import { ErrorBoundary } from './ErrorBoundary';
+import { useUnifierLogic } from '../hooks/domain/useUnifierLogic';
 
 const UnifierModule: React.FC = () => {
-  const { state, dispatch } = useData();
-  const { user } = useAuth();
+  const { state } = useData();
   const theme = useTheme();
   
-  const [activeGroup, setActiveGroup] = useState('controls');
-  const [activeTab, setActiveTab] = useState<'CostSheet' | 'BPs'>('CostSheet');
-  const [selectedBP, setSelectedBP] = useState<string>('bp_co'); // Default to Change Orders
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<BPRecord | undefined>(undefined);
-  const [isPending, startTransition] = useTransition();
-
-  // Mock Project Context for demo purposes
-  const projectId = 'P1001'; 
-
-  const activeDefinition = state.unifier.definitions.find(d => d.id === selectedBP);
-  const records = state.unifier.records.filter(r => r.bpDefId === selectedBP && r.projectId === projectId);
-
-  const navGroups: NavGroup[] = useMemo(() => [
-      { id: 'controls', label: 'Project Controls', items: [
-          { id: 'CostSheet', label: 'Master Cost Sheet', icon: Table },
-          { id: 'BPs', label: 'Business Processes', icon: Layers },
-      ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    // Single group for now
-    setActiveGroup(groupId);
-  };
-
-  const handleTabChange = (tabId: string) => {
-      startTransition(() => {
-        setActiveTab(tabId as 'CostSheet' | 'BPs');
-      });
-  };
-
-  const handleCreate = () => {
-    setEditingRecord(undefined);
-    setIsFormOpen(true);
-  };
-
-  const handleEdit = (rec: BPRecord) => {
-    setEditingRecord(rec);
-    setIsFormOpen(true);
-  };
-
-  const handleSaveRecord = (record: BPRecord, action: string) => {
-     dispatch({ 
-         type: 'UNIFIER_UPDATE_BP_RECORD', 
-         payload: { record, action, user } 
-     });
-     setIsFormOpen(false);
-  };
+  const {
+      activeGroup,
+      activeTab,
+      selectedBP,
+      isFormOpen,
+      editingRecord,
+      isPending,
+      projectId,
+      activeDefinition,
+      records,
+      navGroups,
+      handleGroupChange,
+      handleTabChange,
+      handleCreate,
+      handleEdit,
+      handleSaveRecord,
+      setSelectedBP,
+      setIsFormOpen
+  } = useUnifierLogic();
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>

@@ -5,6 +5,9 @@ import { Card } from '../ui/Card';
 import { Search, Filter, Plus, MoreVertical, ChevronRight, Folder, MoreHorizontal, LayoutGrid, List as ListIcon, MapPin, Download } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { useData } from '../../context/DataContext';
+import { generateId } from '../../utils/formatters';
+import { KanbanTask } from '../../types';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8 border-b border-slate-200 pb-6">
@@ -17,6 +20,9 @@ const TemplateHeader = ({ number, title, subtitle }: { number: string, title: st
         </div>
     </div>
 );
+
+// ... (MockToolbar, StandardGridTmpl, TreeHierarchyTmpl unchanged, but need to be included or imported if split. 
+// Assuming file replacement, I will include them to keep the file valid.)
 
 const MockToolbar = ({ onSearch }: { onSearch: (val: string) => void }) => {
     const theme = useTheme();
@@ -42,9 +48,6 @@ const MockToolbar = ({ onSearch }: { onSearch: (val: string) => void }) => {
     );
 };
 
-/**
- * 6. Standard Data Grid
- */
 export const StandardGridTmpl: React.FC = () => {
     const theme = useTheme();
     const [rows, setRows] = useState([...Array(10)].map((_, i) => ({ id: i, name: `Enterprise Initiative ${i+1}` })));
@@ -112,9 +115,6 @@ export const StandardGridTmpl: React.FC = () => {
     );
 };
 
-/**
- * 7. Tree Hierarchy
- */
 export const TreeHierarchyTmpl: React.FC = () => {
     const theme = useTheme();
     const [selectedNode, setSelectedNode] = useState<number | null>(1);
@@ -201,37 +201,40 @@ export const TreeHierarchyTmpl: React.FC = () => {
     );
 };
 
-/**
- * 8. Kanban Board
- */
 export const KanbanBoardTmpl: React.FC = () => {
     const theme = useTheme();
-    const [tasks, setTasks] = useState([
-        { id: 1, title: 'Implement API caching', col: 'todo' },
-        { id: 2, title: 'Refactor Auth', col: 'todo' },
-        { id: 3, title: 'Design System Update', col: 'progress' },
-        { id: 4, title: 'User Testing', col: 'review' },
-        { id: 5, title: 'Deploy v2', col: 'done' }
-    ]);
-    const [draggedTaskId, setDraggedTaskId] = useState<number | null>(null);
+    const { state, dispatch } = useData();
+    const tasks = state.kanbanTasks || [];
+    
+    const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
     const [dragOverCol, setDragOverCol] = useState<string | null>(null);
 
-    const moveTask = (id: number, targetCol: string) => {
-        setTasks(tasks.map(t => t.id === id ? { ...t, col: targetCol } : t));
+    const moveTask = (id: string, targetCol: string) => {
+        dispatch({ type: 'KANBAN_MOVE_TASK', payload: { taskId: id, status: targetCol } });
     };
 
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: number) => {
-        e.dataTransfer.setData('text/plain', taskId.toString());
+    const addTask = () => {
+        const newTask: KanbanTask = {
+            id: generateId('TASK'),
+            title: 'New Task',
+            status: 'todo',
+            priority: 'Medium'
+        };
+        dispatch({ type: 'KANBAN_ADD_TASK', payload: newTask });
+    };
+
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, taskId: string) => {
+        e.dataTransfer.setData('text/plain', taskId);
         setDraggedTaskId(taskId);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault(); // Necessary to allow dropping
+        e.preventDefault(); 
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetCol: string) => {
         e.preventDefault();
-        const taskId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const taskId = e.dataTransfer.getData('text/plain');
         moveTask(taskId, targetCol);
         setDragOverCol(null);
     };
@@ -247,7 +250,7 @@ export const KanbanBoardTmpl: React.FC = () => {
         <div className={`h-full flex flex-col ${theme.layout.pagePadding} overflow-hidden`}>
             <div className="flex justify-between items-center mb-6 flex-shrink-0">
                 <TemplateHeader number="08" title="Sprint Board" subtitle="Agile execution view" />
-                <Button icon={Plus} onClick={() => setTasks([...tasks, { id: Date.now(), title: 'New Task', col: 'todo' }])}>Add Card</Button>
+                <Button icon={Plus} onClick={addTask}>Add Card</Button>
             </div>
             
             <div className={`flex-1 flex ${theme.layout.gridGap} overflow-x-auto pb-4`}>
@@ -262,10 +265,10 @@ export const KanbanBoardTmpl: React.FC = () => {
                     >
                         <div className={`p-4 font-bold text-slate-700 text-sm flex justify-between items-center border-t-4 rounded-t-xl bg-white border-b border-slate-200 ${col.color}`}>
                             {col.label} 
-                            <span className="bg-slate-100 px-2 py-0.5 rounded-full text-xs font-bold text-slate-500 border border-slate-200">{tasks.filter(t => t.col === col.id).length}</span>
+                            <span className="bg-slate-100 px-2 py-0.5 rounded-full text-xs font-bold text-slate-500 border border-slate-200">{tasks.filter(t => t.status === col.id).length}</span>
                         </div>
                         <div className="p-3 space-y-3 overflow-y-auto flex-1 scrollbar-thin">
-                            {tasks.filter(t => t.col === col.id).map(card => (
+                            {tasks.filter(t => t.status === col.id).map(card => (
                                 <div 
                                     key={card.id} 
                                     draggable="true"
@@ -279,7 +282,7 @@ export const KanbanBoardTmpl: React.FC = () => {
                                     </div>
                                 </div>
                             ))}
-                             {dragOverCol === col.id && tasks.filter(t => t.col === col.id).length === 0 && (
+                             {dragOverCol === col.id && tasks.filter(t => t.status === col.id).length === 0 && (
                                 <div className="h-24 rounded-lg border-2 border-dashed border-nexus-300 bg-nexus-50/50 flex items-center justify-center text-xs text-nexus-500 font-medium">
                                     Drop here
                                 </div>
@@ -292,9 +295,7 @@ export const KanbanBoardTmpl: React.FC = () => {
     );
 };
 
-/**
- * 9. Master-Detail List
- */
+// ... (MasterDetailTmpl and SplitPaneTmpl remain unchanged) ...
 export const MasterDetailTmpl: React.FC = () => {
     const theme = useTheme();
     const [selectedItem, setSelectedItem] = useState(1);
@@ -371,9 +372,6 @@ export const MasterDetailTmpl: React.FC = () => {
     );
 };
 
-/**
- * 10. Split Pane (Map/List)
- */
 export const SplitPaneTmpl: React.FC = () => {
     const theme = useTheme();
     const [selectedAsset, setSelectedAsset] = useState<number | null>(null);

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useData } from '../../context/DataContext';
 import { Banknote, Calendar, Layers, FileText, ArrowRight, PieChart } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Sankey } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,25 +10,10 @@ import { formatCompactCurrency } from '../../utils/formatters';
 
 const GovBudgetSuite: React.FC = () => {
   const theme = useTheme();
+  const { state } = useData();
   const [activeTab, setActiveTab] = useState<'ppbe' | 'funds' | 'forms'>('ppbe');
 
-  // --- MOCK DATA FOR FUNDS ---
-  const fundsFlow = [
-    { name: 'Appropriated', value: 50000000 },
-    { name: 'Apportioned', value: 48000000 },
-    { name: 'Allotted', value: 45000000 },
-    { name: 'Committed', value: 30000000 },
-    { name: 'Obligated', value: 25000000 },
-    { name: 'Expended', value: 12000000 },
-  ];
-
-  // --- MOCK DATA FOR PPBE CALENDAR ---
-  const fiscalYears = [
-    { year: 'FY24', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
-    { year: 'FY25', phase: 'Budgeting', status: 'Enactment', color: 'bg-blue-500' },
-    { year: 'FY26', phase: 'Programming', status: 'POM Dev', color: 'bg-yellow-500' },
-    { year: 'FY27', phase: 'Planning', status: 'Strat Guidance', color: 'bg-slate-400' },
-  ];
+  const { fundsFlow, fiscalYears, appropriations } = state.extensionData.government;
 
   const renderPPBECalendar = () => (
     <div className="space-y-8">
@@ -62,11 +48,7 @@ const GovBudgetSuite: React.FC = () => {
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="font-bold text-slate-800 mb-4">Color of Money (Appropriation Status)</h3>
             <div className="space-y-4">
-                {[
-                    { type: '3010 - Aircraft Procurement', years: '3 Year', exp: 'FY26', available: 12500000 },
-                    { type: '3600 - RDT&E', years: '2 Year', exp: 'FY25', available: 4500000 },
-                    { type: '3400 - O&M', years: '1 Year', exp: 'FY24', available: 800000 },
-                ].map((approp) => (
+                {appropriations.map((approp) => (
                     <div key={approp.type} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
                         <div>
                             <p className="font-bold text-sm text-slate-800">{approp.type}</p>

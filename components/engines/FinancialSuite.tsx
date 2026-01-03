@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useData } from '../../context/DataContext';
 import { Landmark, TrendingUp, PieChart, ShieldCheck, Scale, DollarSign, Activity } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Treemap } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,31 +10,10 @@ import { formatCompactCurrency } from '../../utils/formatters';
 
 const FinancialSuite: React.FC = () => {
   const theme = useTheme();
+  const { state } = useData();
   const [activeTab, setActiveTab] = useState<'allocation' | 'cashflow' | 'audit'>('allocation');
 
-  // --- MOCK DATA ---
-  const allocationData = [
-    { name: 'Digital', size: 45000000, color: '#3b82f6' },
-    { name: 'Infrastructure', size: 35000000, color: '#10b981' },
-    { name: 'Compliance', size: 15000000, color: '#f59e0b' },
-    { name: 'Maintenance', size: 10000000, color: '#64748b' },
-    { name: 'R&D', size: 25000000, color: '#8b5cf6' },
-  ];
-
-  const cashFlowData = [
-    { month: 'Jan', Operating: 4000, Investing: -2400, Financing: 1000 },
-    { month: 'Feb', Operating: 3000, Investing: -1398, Financing: 2210 },
-    { month: 'Mar', Operating: 2000, Investing: -9800, Financing: 2290 },
-    { month: 'Apr', Operating: 2780, Investing: -3908, Financing: 2000 },
-    { month: 'May', Operating: 1890, Investing: -4800, Financing: 2181 },
-    { month: 'Jun', Operating: 2390, Investing: -3800, Financing: 2500 },
-  ];
-
-  const auditLogs = [
-    { id: 'AUD-001', control: 'SOX 404 - Change Mgmt', status: 'Pass', date: '2024-05-15' },
-    { id: 'AUD-002', control: 'Basel III - Capital Req', status: 'Pass', date: '2024-05-10' },
-    { id: 'AUD-003', control: 'GDPR - Data Privacy', status: 'Finding', date: '2024-04-22' },
-  ];
+  const { allocation, cashFlow, regulatoryAudits } = state.extensionData.financial;
 
   // --- RENDERERS ---
 
@@ -51,11 +31,11 @@ const FinancialSuite: React.FC = () => {
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><PieChart size={18}/> Capital Allocation Heatmap</h3>
                 <ResponsiveContainer width="100%" height="100%">
                     <Treemap
-                        data={allocationData}
+                        data={allocation}
                         dataKey="size"
                         stroke="#fff"
                         fill="#8884d8"
-                        content={<CustomizedContent colors={allocationData} />}
+                        content={<CustomizedContent colors={allocation} />}
                     />
                 </ResponsiveContainer>
             </div>
@@ -97,7 +77,7 @@ const FinancialSuite: React.FC = () => {
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-[500px]">
           <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2"><Scale size={18}/> Cash Flow Forecasting</h3>
           <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cashFlowData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={cashFlow} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="month" />
                   <YAxis />
@@ -149,7 +129,7 @@ const FinancialSuite: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {auditLogs.map(log => (
+                            {regulatoryAudits.map(log => (
                                 <tr key={log.id}>
                                     <td className="px-6 py-4 text-sm font-mono text-slate-500">{log.id}</td>
                                     <td className="px-6 py-4 text-sm font-medium text-slate-900">{log.control}</td>
