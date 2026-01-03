@@ -4,7 +4,7 @@ import {
     Database, AlertTriangle, CheckCircle, Search, 
     DollarSign, Users, Briefcase, Truck, Target, GitBranch, 
     RefreshCw, Eye, Settings, Layers, Book, Activity, HardHat, Shield,
-    Scale, Leaf
+    Scale, Leaf, LayoutTemplate
 } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
 import { useTheme } from '../../../context/ThemeContext';
@@ -100,9 +100,16 @@ export const SchemaGapAnalysis: React.FC = () => {
         const schedRules = state.governance?.scheduling ? Object.keys(state.governance.scheduling) : [];
         const resDefaults = state.governance?.resourceDefaults ? Object.keys(state.governance.resourceDefaults) : [];
         const secPolicy = state.governance?.security ? Object.keys(state.governance.security) : [];
+        const exchangeRates = state.governance?.exchangeRates ? Object.keys(state.governance.exchangeRates) : [];
         const gcRules = state.globalChangeRules || [];
         const costBook = state.costBook || [];
         const templates = state.standardTemplates || [];
+        
+        // Unifier
+        const bpDefs = state.unifier?.definitions || [];
+        const bpRecords = state.unifier?.records || [];
+        const costSheetCols = state.unifier?.costSheet?.columns || [];
+        const costSheetRows = state.unifier?.costSheet?.rows || [];
 
         return [
         {
@@ -125,6 +132,20 @@ export const SchemaGapAnalysis: React.FC = () => {
                 { name: 'Lesson Learned', status: projects.some(p => p.lessonsLearned?.length) ? 'Live' : 'Gap', records: projects.reduce((acc, p) => acc + (p.lessonsLearned?.length || 0), 0) },
                 { name: 'Team Charter', status: projects.some(p => p.teamCharter) ? 'Live' : 'Gap', records: projects.filter(p => !!p.teamCharter).length },
                 { name: 'Project Stakeholder', status: stakeholders.length > 0 ? 'Live' : 'Gap', records: stakeholders.length },
+            ]
+        },
+        {
+            name: 'Business Process Automation',
+            icon: LayoutTemplate,
+            description: 'Workflow engine, business process records, and shell configuration.',
+            entities: [
+                { name: 'BP Definition', status: bpDefs.length > 0 ? 'Live' : 'Gap', records: bpDefs.length },
+                { name: 'BP Record', status: bpRecords.length > 0 ? 'Live' : 'Gap', records: bpRecords.length },
+                { name: 'Workflow History', status: bpRecords.some(r => r.workflowHistory?.length) ? 'Live' : 'Gap', records: bpRecords.reduce((acc, r) => acc + (r.workflowHistory?.length || 0), 0) },
+                { name: 'Cost Sheet Column', status: costSheetCols.length > 0 ? 'Live' : 'Gap', records: costSheetCols.length },
+                { name: 'Cost Sheet Row', status: costSheetRows.length > 0 ? 'Live' : 'Gap', records: costSheetRows.length },
+                { name: 'Shell Template', status: 'Gap', records: 0 },
+                { name: 'Data Picker', status: 'Gap', records: 0 },
             ]
         },
         {
@@ -301,8 +322,9 @@ export const SchemaGapAnalysis: React.FC = () => {
                 { name: 'Expense Category', status: expCats.length > 0 ? 'Live' : 'Gap', records: expCats.length },
                 { name: 'Issue Code', status: issueCodes.length > 0 ? 'Live' : 'Gap', records: issueCodes.length },
                 { name: 'Scheduling Rule', status: schedRules.length > 0 ? 'Live' : 'Gap', records: schedRules.length },
-                { name: 'Resource Defaults', status: resDefaults.length > 0 ? 'Live' : 'Gap', records: resDefaults.length },
+                { name: 'Resource Default', status: resDefaults.length > 0 ? 'Live' : 'Gap', records: resDefaults.length },
                 { name: 'Security Policy', status: secPolicy.length > 0 ? 'Live' : 'Gap', records: secPolicy.length },
+                { name: 'Currency Rate', status: exchangeRates.length > 0 ? 'Live' : 'Gap', records: exchangeRates.length },
                 { name: 'Global Change Rule', status: gcRules.length > 0 ? 'Live' : 'Gap', records: gcRules.length },
                 { name: 'Document', status: documents.length > 0 ? 'Live' : 'Gap', records: documents.length },
                 { name: 'API Token', status: 'Gap', records: 0 },

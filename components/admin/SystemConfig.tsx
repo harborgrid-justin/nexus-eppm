@@ -143,5 +143,3 @@ const SystemConfigPanel: React.FC = () => {
     </div>
   );
 };
-
-export default SystemConfigPanel;

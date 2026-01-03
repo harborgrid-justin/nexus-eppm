@@ -8,9 +8,11 @@ import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
+import { useTheme } from '../../context/ThemeContext';
 
 const CalendarEditor: React.FC = () => {
     const { state, dispatch } = useData();
+    const theme = useTheme();
     const [selectedCalendarId, setSelectedCalendarId] = useState<string>(state.calendars[0]?.id);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [editingCalendar, setEditingCalendar] = useState<Partial<GlobalCalendar> | null>(null);
@@ -42,7 +44,7 @@ const CalendarEditor: React.FC = () => {
         } as GlobalCalendar;
 
         dispatch({
-            type: editingCalendar.id ? 'UPDATE_CALENDAR' : 'ADD_CALENDAR',
+            type: editingCalendar.id ? 'ADMIN_UPDATE_CALENDAR' : 'ADMIN_ADD_CALENDAR',
             payload: calToSave
         });
         setIsPanelOpen(false);
@@ -54,13 +56,13 @@ const CalendarEditor: React.FC = () => {
             return;
         }
         if (confirm("Delete this calendar? Resources linked to it will revert to the Standard Calendar.")) {
-            dispatch({ type: 'DELETE_CALENDAR', payload: id });
+            dispatch({ type: 'ADMIN_DELETE_CALENDAR', payload: id });
             setSelectedCalendarId(state.calendars[0].id);
         }
     };
 
     const renderWorkDay = (dayName: string, workDay: WorkDay) => (
-        <div key={dayName} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border border-slate-200 rounded-lg bg-white gap-2">
+        <div key={dayName} className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 border ${theme.colors.border} rounded-lg ${theme.colors.surface} gap-2`}>
             <div className="flex items-center gap-3">
                 <input 
                     type="checkbox" 
@@ -68,17 +70,17 @@ const CalendarEditor: React.FC = () => {
                     readOnly
                     className="w-4 h-4 rounded border-slate-300 text-nexus-600 cursor-default"
                 />
-                <span className="text-sm font-medium text-slate-700 capitalize w-24">{dayName}</span>
+                <span className={`text-sm font-medium ${theme.colors.text.primary} capitalize w-24`}>{dayName}</span>
             </div>
             <div className="flex-1 flex flex-wrap gap-2 sm:justify-end">
                 {workDay.isWorkDay ? (
                     workDay.intervals.map((interval, idx) => (
-                        <span key={idx} className="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-xs font-mono text-slate-600 border border-slate-200">
+                        <span key={idx} className={`inline-flex items-center px-2 py-1 rounded ${theme.colors.background} text-xs font-mono ${theme.colors.text.secondary} border ${theme.colors.border}`}>
                             {interval.start} - {interval.end}
                         </span>
                     ))
                 ) : (
-                    <span className="text-xs text-slate-400 italic px-2 py-1">Non-work</span>
+                    <span className={`text-xs ${theme.colors.text.tertiary} italic px-2 py-1`}>Non-work</span>
                 )}
             </div>
         </div>
@@ -86,18 +88,18 @@ const CalendarEditor: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm gap-4">
+            <div className={`flex flex-col md:flex-row justify-between items-start md:items-center ${theme.colors.background} p-4 rounded-xl border ${theme.colors.border} shadow-sm gap-4`}>
                 <div>
-                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <h3 className={`text-lg font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
                         <CalendarIcon className="text-nexus-600" size={20}/> Enterprise Calendars
                     </h3>
-                    <p className="text-sm text-slate-500">Define global working hours, holidays, and exceptions.</p>
+                    <p className={`text-sm ${theme.colors.text.secondary}`}>Define global working hours, holidays, and exceptions.</p>
                 </div>
                 <div className="flex flex-wrap gap-2 w-full md:w-auto">
                     <select 
                         value={selectedCalendarId}
                         onChange={(e) => setSelectedCalendarId(e.target.value)}
-                        className="bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-nexus-500 flex-1 md:flex-none"
+                        className={`${theme.colors.surface} border ${theme.colors.border} text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-nexus-500 flex-1 md:flex-none ${theme.colors.text.primary}`}
                     >
                         {state.calendars.map(c => <option key={c.id} value={c.id}>{c.name} {c.isDefault ? '(Default)' : ''}</option>)}
                     </select>
@@ -108,33 +110,33 @@ const CalendarEditor: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full overflow-hidden">
                 <Card className="flex flex-col h-full overflow-hidden min-h-[300px]">
-                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                        <h4 className="font-bold text-slate-700 flex items-center gap-2 text-xs uppercase tracking-widest"><Clock size={16}/> Work Week Baseline</h4>
+                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
+                        <h4 className={`font-bold ${theme.colors.text.secondary} flex items-center gap-2 text-xs uppercase tracking-widest`}><Clock size={16}/> Work Week Baseline</h4>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 scrollbar-thin">
+                    <div className={`flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30 scrollbar-thin`}>
                         {days.map(day => renderWorkDay(day as string, selectedCalendar.workWeek[day]))}
                     </div>
                 </Card>
 
                 <Card className="flex flex-col h-full overflow-hidden min-h-[300px]">
-                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                        <h4 className="font-bold text-slate-700 flex items-center gap-2 text-xs uppercase tracking-widest"><CalendarIcon size={16}/> Public Holidays</h4>
+                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
+                        <h4 className={`font-bold ${theme.colors.text.secondary} flex items-center gap-2 text-xs uppercase tracking-widest`}><CalendarIcon size={16}/> Public Holidays</h4>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-white sticky top-0 z-10">
+                            <thead className={`${theme.colors.surface} sticky top-0 z-10`}>
                                 <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase">Name</th>
-                                    <th className="px-4 py-2 text-center text-xs font-medium text-slate-500 uppercase">Type</th>
+                                    <th className={theme.components.table.header}>Date</th>
+                                    <th className={theme.components.table.header}>Name</th>
+                                    <th className={theme.components.table.header + " text-center"}>Type</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
+                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} ${theme.colors.surface}`}>
                                 {selectedCalendar.holidays.map((holiday, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50">
-                                        <td className="px-4 py-3 text-sm font-mono text-slate-600 whitespace-nowrap">{holiday.date}</td>
-                                        <td className="px-4 py-3 text-sm font-medium text-slate-800">{holiday.name}</td>
-                                        <td className="px-4 py-3 text-center">
+                                    <tr key={idx} className={theme.components.table.row}>
+                                        <td className={`${theme.components.table.cell} font-mono ${theme.colors.text.secondary}`}>{holiday.date}</td>
+                                        <td className={theme.components.table.cell}>{holiday.name}</td>
+                                        <td className={`${theme.components.table.cell} text-center`}>
                                             <span className={`text-[10px] px-2 py-1 rounded-full ${holiday.isRecurring ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}`}>
                                                 {holiday.isRecurring ? 'Recurring' : 'One-time'}
                                             </span>
@@ -164,14 +166,14 @@ const CalendarEditor: React.FC = () => {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-xs font-black text-slate-500 mb-1 uppercase tracking-widest">Calendar Name</label>
+                        <label className={theme.typography.label + " block mb-1"}>Calendar Name</label>
                         <Input value={editingCalendar?.name} onChange={e => setEditingCalendar({...editingCalendar!, name: e.target.value})} placeholder="e.g. London Office Standard" />
                     </div>
                     <div>
-                        <label className="block text-xs font-black text-slate-500 mb-2 uppercase tracking-widest">Working Days</label>
+                        <label className={theme.typography.label + " block mb-2"}>Working Days</label>
                         <div className="grid grid-cols-2 gap-2">
                             {days.map(day => (
-                                <label key={day} className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${editingCalendar?.workWeek?.[day].isWorkDay ? 'bg-nexus-50 border-nexus-300 ring-1 ring-nexus-500/10' : 'bg-white border-slate-200'}`}>
+                                <label key={day} className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${editingCalendar?.workWeek?.[day].isWorkDay ? 'bg-nexus-50 border-nexus-300 ring-1 ring-nexus-500/10' : `${theme.colors.surface} ${theme.colors.border}`}`}>
                                     <span className="text-sm font-bold capitalize">{day}</span>
                                     <input 
                                         type="checkbox" 

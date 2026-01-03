@@ -3,6 +3,7 @@ import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react'
 import { Project, Task, WBSNode } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
+import ScheduleLog from './scheduling/ScheduleLog';
 import { List, X } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
@@ -22,7 +23,9 @@ const ProjectGantt: React.FC = () => {
       setIsTraceLogicOpen, showCriticalPath, setShowCriticalPath, activeBaselineId,
       setActiveBaselineId, showResources, setShowResources, ganttContainerRef,
       expandedNodes, toggleNode, timelineHeaders, projectStart, projectEnd,
-      getStatusColor, handleMouseDown, taskFilter, setTaskFilter
+      getStatusColor, handleMouseDown, taskFilter, setTaskFilter,
+      // Scheduling
+      isScheduling, runSchedule, scheduleLog, scheduleStats, isLogOpen, setIsLogOpen, dataDate
   } = useGantt(initialProject);
 
   const [showTaskList, setShowTaskList] = useState(true);
@@ -101,6 +104,8 @@ const ProjectGantt: React.FC = () => {
 
   return (
     <div className={`flex flex-col h-full ${theme.colors.surface} rounded-lg overflow-hidden relative border ${theme.colors.border} shadow-sm flex-1`}>
+      <ScheduleLog isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} log={scheduleLog} stats={scheduleStats} />
+      
       <GanttToolbar 
         project={project} viewMode={viewMode} setViewMode={setViewMode} showCriticalPath={showCriticalPath}
         setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
@@ -108,6 +113,11 @@ const ProjectGantt: React.FC = () => {
         isTaskSelected={!!selectedTask}
         taskFilter={taskFilter}
         setTaskFilter={setTaskFilter}
+        // Scheduling Props
+        onSchedule={runSchedule}
+        isScheduling={isScheduling}
+        onViewLog={() => setIsLogOpen(true)}
+        dataDate={dataDate}
       />
       
       <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>

@@ -20,6 +20,11 @@ const TeamWorkspace = lazy(() => import('./components/TeamWorkspace'));
 const ComponentWorkbench = lazy(() => import('./components/ComponentWorkbench'));
 const TemplateGallery = lazy(() => import('./components/TemplateGallery'));
 
+// Category III Adds
+const ResourceNegotiationHub = lazy(() => import('./components/resources/ResourceNegotiationHub'));
+const StrategicAlignmentBoard = lazy(() => import('./components/portfolio/StrategicAlignmentBoard'));
+const PivotAnalytics = lazy(() => import('./components/reports/PivotAnalytics'));
+
 export const routes: RouteObject[] = [
     {
         path: '/',
@@ -40,6 +45,11 @@ export const routes: RouteObject[] = [
             { path: 'myWork', element: <TeamWorkspace /> },
             { path: 'workbench', element: <ComponentWorkbench /> },
             { path: 'templates', element: <TemplateGallery /> },
+            
+            // New Category III Routes
+            { path: 'negotiation', element: <ResourceNegotiationHub /> },
+            { path: 'strategy-board', element: <StrategicAlignmentBoard /> },
+            { path: 'analytics', element: <PivotAnalytics /> },
         ]
     },
     { path: '/login', element: <LoginPage /> }

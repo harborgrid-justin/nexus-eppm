@@ -1,6 +1,6 @@
 
 import React, { useState, useTransition, useMemo } from 'react';
-import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud } from 'lucide-react';
+import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud, FileCode, Grid, Server } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ExchangeDashboard } from './data/ExchangeDashboard';
 import { IntegrationDesigner } from './data/IntegrationDesigner';
@@ -9,6 +9,9 @@ import { JobHistory } from './data/JobHistory';
 import { SchemaGapAnalysis } from './data/SchemaGapAnalysis';
 import { ExportPanel } from './data/ExportPanel';
 import { ImportPanel } from './data/ImportPanel';
+import { ExcelSync } from './data/ExcelSync';
+import { XerParser } from './data/XerParser';
+import { ErpConnector } from './data/ErpConnector';
 import { PageHeader } from '../common/PageHeader';
 import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
@@ -24,13 +27,18 @@ const DataExchange: React.FC = () => {
             { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
             { id: 'history', label: 'Job Logs', icon: History },
         ]},
+        { id: 'import_tools', label: 'Ingestion Tools', items: [
+            { id: 'excel', label: 'Excel Sync', icon: Grid },
+            { id: 'xer', label: 'Schedule Parser', icon: FileCode },
+            { id: 'import', label: 'Data Import', icon: UploadCloud },
+        ]},
         { id: 'configuration', label: 'Configuration', items: [
+            { id: 'erp', label: 'ERP Gateways', icon: Server },
             { id: 'schema', label: 'Schema Map', icon: Map },
             { id: 'designer', label: 'Integration Designer', icon: GitMerge },
             { id: 'connectors', label: 'Connectors', icon: Network },
         ]},
-        { id: 'tools', label: 'Tools', items: [
-            { id: 'import', label: 'Import', icon: UploadCloud },
+        { id: 'exports', label: 'Outbound', items: [
             { id: 'export', label: 'Export', icon: Download },
         ]}
     ], []);
@@ -54,6 +62,9 @@ const DataExchange: React.FC = () => {
     const renderContent = () => {
         switch(activeTab) {
             case 'dashboard': return <ExchangeDashboard />;
+            case 'excel': return <ExcelSync />;
+            case 'xer': return <XerParser />;
+            case 'erp': return <ErpConnector />;
             case 'designer': return <IntegrationDesigner />;
             case 'connectors': return <ConnectorConfig />;
             case 'schema': return <SchemaGapAnalysis />;
@@ -68,7 +79,7 @@ const DataExchange: React.FC = () => {
         <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
             <PageHeader 
                 title="Data Exchange Hub" 
-                subtitle="Enterprise ETL orchestration, connectivity, and schema mapping."
+                subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."
                 icon={Database}
             />
 

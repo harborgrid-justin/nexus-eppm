@@ -34,7 +34,7 @@ const UserManagement: React.FC = () => {
 
   const handleSave = (userToSave: User) => {
     dispatch({
-        type: userToSave.id.startsWith('U-') ? 'UPDATE_USER' : 'ADD_USER',
+        type: userToSave.id.startsWith('U-') ? 'ADMIN_UPDATE_USER' : 'ADMIN_ADD_USER',
         payload: userToSave
     });
     if (userToSave.id) updateUserRole(userToSave.id, userToSave.role as Role);
@@ -43,7 +43,7 @@ const UserManagement: React.FC = () => {
 
   const handleDelete = (id: string) => {
       if (confirm("Permanently remove this user?")) {
-          dispatch({ type: 'DELETE_USER', payload: id });
+          dispatch({ type: 'ADMIN_DELETE_USER', payload: id });
       }
   };
 

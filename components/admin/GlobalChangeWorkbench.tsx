@@ -44,7 +44,7 @@ const GlobalChangeWorkbench: React.FC = () => {
     const handleCommit = () => {
         if (!simulationResult) return;
         if (confirm(`WARNING: This will modify ${simulationResult.affectedTasks} tasks across ${simulationResult.affectedProjects} projects. This action cannot be undone. Continue?`)) {
-            dispatch({ type: 'UPDATE_GLOBAL_CHANGE_RULES', payload: rules });
+            dispatch({ type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES', payload: rules });
             alert("Global Change Committed. Audit log updated.");
             setSimulationResult(null);
         }

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
-import { Users, BarChart2, Box } from 'lucide-react';
+import { Users, BarChart2, Box, ArrowRightLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
@@ -10,6 +10,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';
 import PhysicalResources from './resources/PhysicalResources';
+import ResourceNegotiationHub from './resources/ResourceNegotiationHub';
 
 const EnterpriseResources: React.FC = () => {
     const { state } = useData();
@@ -22,6 +23,7 @@ const EnterpriseResources: React.FC = () => {
         { id: 'overview', label: 'Human Resources', items: [
             { id: 'pool', label: 'Global Pool', icon: Users },
             { id: 'capacity', label: 'Capacity Heatmap', icon: BarChart2 },
+            { id: 'negotiation', label: 'Negotiation Hub', icon: ArrowRightLeft },
         ]},
         { id: 'assets', label: 'Physical Assets', items: [
             { id: 'physical', label: 'Equipment & Material', icon: Box },
@@ -48,6 +50,7 @@ const EnterpriseResources: React.FC = () => {
         switch(activeView) {
             case 'pool': return <ResourcePool resources={state.resources} />;
             case 'capacity': return <ResourceCapacity projectResources={state.resources} />;
+            case 'negotiation': return <ResourceNegotiationHub />;
             case 'physical': return <PhysicalResources />;
             default: return <ResourcePool resources={state.resources} />;
         }

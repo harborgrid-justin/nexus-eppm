@@ -1,14 +1,16 @@
 
 import React, { useState } from 'react';
-import { HardHat, Clipboard, CloudRain, Truck, Box, FileText, AlertTriangle, Hammer, Ruler, CheckCircle } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { HardHat, Clipboard, CloudRain, Truck, Box, FileText, AlertTriangle, Hammer, Ruler, Map } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
 import StatCard from '../shared/StatCard';
+import { Viewer3DRenderer } from './renderers/Viewer3DRenderer';
+import { MapRenderer } from './renderers/MapRenderer';
 
 const ConstructionSuite: React.FC = () => {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<'field' | 'submittals' | 'bim'>('field');
+  const [activeTab, setActiveTab] = useState<'field' | 'submittals' | 'bim' | 'gis'>('field');
 
   // --- MOCK DATA ---
   const safetyStats = [
@@ -87,36 +89,6 @@ const ConstructionSuite: React.FC = () => {
     </div>
   );
 
-  const renderBIM = () => (
-      <div className="flex flex-col h-[600px] bg-slate-900 rounded-xl overflow-hidden relative">
-          <div className="absolute inset-0 grid grid-cols-12 gap-px opacity-20 pointer-events-none">
-              {[...Array(144)].map((_, i) => <div key={i} className="border border-nexus-500/30"></div>)}
-          </div>
-          <div className="absolute top-4 left-4 z-10 bg-slate-800/80 backdrop-blur p-4 rounded-lg border border-slate-700 text-white">
-              <h3 className="font-bold flex items-center gap-2"><Box size={18} className="text-nexus-400"/> 3D Model Viewer</h3>
-              <p className="text-xs text-slate-400 mt-1">Federated Model v4.2 (Arch + Struct + MEP)</p>
-              <div className="mt-4 space-y-2">
-                  <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                      <input type="checkbox" checked readOnly className="rounded border-slate-600 bg-slate-700 text-nexus-500" /> Architectural
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                      <input type="checkbox" checked readOnly className="rounded border-slate-600 bg-slate-700 text-nexus-500" /> Structural
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                      <input type="checkbox" className="rounded border-slate-600 bg-slate-700 text-nexus-500" /> MEP
-                  </label>
-              </div>
-          </div>
-          <div className="flex-1 flex items-center justify-center text-slate-500">
-              <div className="text-center">
-                  <Box size={64} className="mx-auto mb-4 opacity-50 animate-pulse"/>
-                  <p>WebGL BIM Engine Initialized</p>
-                  <p className="text-xs mt-2">Loading model geometry...</p>
-              </div>
-          </div>
-      </div>
-  );
-
   return (
     <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
         <div className="flex justify-between items-center mb-6">
@@ -129,27 +101,36 @@ const ConstructionSuite: React.FC = () => {
             <div className="flex bg-white border border-slate-200 rounded-lg p-1">
                 <button onClick={() => setActiveTab('field')} className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'field' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Field Mgmt</button>
                 <button onClick={() => setActiveTab('submittals')} className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'submittals' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>Submittals & RFIs</button>
-                <button onClick={() => setActiveTab('bim')} className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'bim' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>BIM Viewer</button>
+                <button onClick={() => setActiveTab('bim')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'bim' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}><Box size={14}/> BIM</button>
+                <button onClick={() => setActiveTab('gis')} className={`px-4 py-2 text-sm font-medium rounded-md flex items-center gap-2 ${activeTab === 'gis' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}><Map size={14}/> GIS</button>
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-            {activeTab === 'field' && renderFieldManagement()}
-            {activeTab === 'bim' && renderBIM()}
-            {activeTab === 'submittals' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {submittalData.map(d => (
-                        <Card key={d.status} className="p-4 text-center">
-                            <h4 className="text-slate-500 text-xs font-bold uppercase">{d.status}</h4>
-                            <p className="text-3xl font-bold text-slate-800 mt-2">{d.count}</p>
-                        </Card>
-                    ))}
-                    <div className="col-span-full mt-4 p-8 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400">
-                        <Ruler size={32} className="mb-2"/>
-                        <p>Detailed Submittal Log & Spec Section View</p>
+        <div className="flex-1 overflow-hidden relative rounded-xl border border-slate-200 shadow-sm bg-white">
+            <div className="absolute inset-0 overflow-y-auto">
+                {activeTab === 'field' && <div className="p-6">{renderFieldManagement()}</div>}
+                
+                {activeTab === 'bim' && <Viewer3DRenderer extensionVersion="4.2" />}
+                
+                {activeTab === 'gis' && <MapRenderer extensionName="Construction Site Map" />}
+
+                {activeTab === 'submittals' && (
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {submittalData.map(d => (
+                                <Card key={d.status} className="p-4 text-center">
+                                    <h4 className="text-slate-500 text-xs font-bold uppercase">{d.status}</h4>
+                                    <p className="text-3xl font-bold text-slate-800 mt-2">{d.count}</p>
+                                </Card>
+                            ))}
+                            <div className="col-span-full mt-4 p-8 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400">
+                                <Ruler size={32} className="mb-2"/>
+                                <p>Detailed Submittal Log & Spec Section View</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     </div>
   );

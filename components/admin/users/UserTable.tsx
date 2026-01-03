@@ -21,10 +21,10 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
             header: 'User',
             render: (user) => (
                 <div className="flex items-center gap-3">
-                    <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+                    <img src={user.avatar} alt={user.name} className={`w-8 h-8 rounded-full border ${theme.colors.border}`} />
                     <div>
-                        <div className="font-medium text-slate-800">{user.name}</div>
-                        <div className="text-xs text-slate-500">{user.email}</div>
+                        <div className={`font-medium ${theme.colors.text.primary}`}>{user.name}</div>
+                        <div className={`text-xs ${theme.colors.text.tertiary}`}>{user.email}</div>
                     </div>
                 </div>
             )
@@ -54,7 +54,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
                 </div>
             )
         }
-    ], [onEdit, onDelete]);
+    ], [onEdit, onDelete, theme]);
 
     return (
         <DataTable

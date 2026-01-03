@@ -25,26 +25,26 @@ export const FundingSourceGrid: React.FC<FundingSourceGridProps> = ({ onEdit, on
                                 <DollarSign size={20} />
                             </div>
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => onEdit(source)} className="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-nexus-600">
+                                <button onClick={() => onEdit(source)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-nexus-600`}>
                                     <Edit2 size={14} />
                                 </button>
-                                <button onClick={() => onDelete(source.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500">
+                                <button onClick={() => onDelete(source.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.tertiary} hover:text-red-500`}>
                                     <Trash2 size={14} />
                                 </button>
                             </div>
                         </div>
-                        <h4 className="font-bold text-slate-800 text-lg mb-1">{source.name}</h4>
-                        <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full uppercase tracking-wider">{source.type}</span>
-                        <p className="text-sm text-slate-600 mt-3 line-clamp-2">{source.description}</p>
+                        <h4 className={`font-bold ${theme.colors.text.primary} text-lg mb-1`}>{source.name}</h4>
+                        <span className={`text-xs font-bold ${theme.colors.text.secondary} ${theme.colors.background} px-2 py-0.5 rounded-full uppercase tracking-wider`}>{source.type}</span>
+                        <p className={`text-sm ${theme.colors.text.secondary} mt-3 line-clamp-2`}>{source.description}</p>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Authorized Amount</p>
-                        <p className="text-xl font-mono font-black text-slate-900">{formatCurrency(source.totalAuthorized)}</p>
+                    <div className={`mt-4 pt-4 border-t ${theme.colors.border}`}>
+                        <p className={`text-xs ${theme.colors.text.tertiary} font-bold uppercase tracking-widest mb-1`}>Authorized Amount</p>
+                        <p className={`text-xl font-mono font-black ${theme.colors.text.primary}`}>{formatCurrency(source.totalAuthorized)}</p>
                     </div>
                 </div>
             ))}
             {state.fundingSources.length === 0 && (
-                <div className="col-span-full py-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                <div className={`col-span-full py-12 text-center ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl`}>
                     No funding sources defined.
                 </div>
             )}

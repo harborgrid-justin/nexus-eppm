@@ -1,9 +1,6 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { ActivityCode, ActivityCodeScope, ActivityCodeValue } from '../../types/index';
 import { Tag, Plus, Edit2, Trash2, Save, Globe, Building, Briefcase, Settings, Palette, Info } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
@@ -109,9 +106,9 @@ export const ActivityCodeSettings: React.FC = () => {
     return (
         <div className={`flex flex-col md:flex-row h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} overflow-hidden shadow-sm`}>
             {/* Left Rail: Definitions */}
-            <div className={`w-full md:w-[320px] lg:w-[380px] border-b md:border-b-0 md:border-r ${theme.colors.border} flex flex-col bg-slate-50/50 flex-shrink-0`}>
-                <div className={`p-4 border-b ${theme.colors.border} bg-white`}>
-                    <div className="flex bg-slate-100 p-1 rounded-lg">
+            <div className={`w-full md:w-[320px] lg:w-[380px] border-b md:border-b-0 md:border-r ${theme.colors.border} flex flex-col ${theme.colors.background} flex-shrink-0`}>
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.surface}`}>
+                    <div className={`${theme.colors.background} p-1 rounded-lg border ${theme.colors.border} flex`}>
                        {[
                            { id: 'Global', icon: Globe },
                            { id: 'Project', icon: Briefcase }
@@ -119,7 +116,7 @@ export const ActivityCodeSettings: React.FC = () => {
                          <button 
                             key={tab.id}
                             onClick={() => { setActiveScope(tab.id as any); setSelectedCodeId(null); }}
-                            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-md transition-all ${activeScope === tab.id ? 'bg-white shadow text-nexus-600' : 'text-slate-500 hover:text-slate-800'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-md transition-all ${activeScope === tab.id ? `${theme.colors.surface} shadow ${theme.colors.primary.replace('bg-', 'text-')}` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
                          >
                             <tab.icon size={14} /> {tab.id}
                          </button>
@@ -127,9 +124,9 @@ export const ActivityCodeSettings: React.FC = () => {
                     </div>
                 </div>
                 
-                 <div className="p-4 flex justify-between items-center border-b border-slate-100">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Code Registry</h3>
-                    <button onClick={() => handleOpenDefinitionPanel()} className={`p-1.5 ${theme.colors.primary} text-white rounded-lg ${theme.colors.primaryHover} shadow-sm transition-all`}>
+                 <div className={`p-4 flex justify-between items-center border-b ${theme.colors.border}`}>
+                    <h3 className={theme.typography.label}>Code Registry</h3>
+                    <button onClick={() => handleOpenDefinitionPanel()} className={`p-1.5 ${theme.colors.primary} ${theme.colors.text.inverted} rounded-lg ${theme.colors.primaryHover} shadow-sm transition-all`}>
                        <Plus size={16} />
                     </button>
                  </div>
@@ -139,34 +136,34 @@ export const ActivityCodeSettings: React.FC = () => {
                         <div 
                            key={code.id} 
                            onClick={() => setSelectedCodeId(code.id)}
-                           className={`p-4 rounded-xl cursor-pointer transition-all border group ${selectedCodeId === code.id ? 'bg-white border-nexus-200 shadow-sm ring-1 ring-nexus-500/10' : 'bg-transparent border-transparent hover:bg-white hover:border-slate-200'}`}
+                           className={`p-4 rounded-xl cursor-pointer transition-all border group ${selectedCodeId === code.id ? `${theme.colors.surface} ${theme.colors.border} shadow-sm ring-1 ring-nexus-500/10` : 'border-transparent hover:border-slate-200 hover:bg-slate-50/10'}`}
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <span className={`font-bold text-sm ${selectedCodeId === code.id ? 'text-nexus-700' : 'text-slate-800'}`}>{code.name}</span>
-                                    <p className="text-[10px] text-slate-400 mt-1 font-mono">{code.id}</p>
+                                    <span className={`font-bold text-sm ${selectedCodeId === code.id ? 'text-nexus-600' : theme.colors.text.primary}`}>{code.name}</span>
+                                    <p className={`text-[10px] ${theme.colors.text.tertiary} mt-1 font-mono`}>{code.id}</p>
                                 </div>
                                 <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                    <button onClick={(e) => { e.stopPropagation(); handleOpenDefinitionPanel(code); }} className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-nexus-600"><Edit2 size={12}/></button>
-                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteDefinition(code.id); }} className="p-1 hover:bg-red-50 rounded text-slate-400 hover:text-red-500"><Trash2 size={12}/></button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleOpenDefinitionPanel(code); }} className={`p-1 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-nexus-600`}><Edit2 size={12}/></button>
+                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteDefinition(code.id); }} className={`p-1 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-red-500`}><Trash2 size={12}/></button>
                                 </div>
                             </div>
                         </div>
                     ))}
                     {filteredCodes.length === 0 && (
-                        <div className="p-12 text-center text-slate-400 text-xs italic">No {activeScope} codes defined.</div>
+                        <div className={`p-12 text-center ${theme.colors.text.tertiary} text-xs italic`}>No {activeScope} codes defined.</div>
                     )}
                 </div>
             </div>
 
             {/* Right Panel: Dictionary Values */}
-            <div className="flex-1 flex flex-col bg-white min-w-0">
+            <div className={`flex-1 flex flex-col ${theme.colors.surface} min-w-0`}>
                 {selectedCode ? (
                     <>
-                        <div className={`p-4 md:p-6 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/30 gap-4`}>
+                        <div className={`p-4 md:p-6 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-start sm:items-center ${theme.colors.background} gap-4`}>
                             <div>
-                                <h2 className="text-xl font-bold text-slate-900">{selectedCode.name}</h2>
-                                <p className="text-xs text-slate-500 mt-1 uppercase tracking-tight font-semibold">Scope: <span className="text-nexus-600">{selectedCode.scope}</span> • {selectedCode.values.length} Dictionary Values</p>
+                                <h2 className={theme.typography.h2}>{selectedCode.name}</h2>
+                                <p className={`text-xs ${theme.colors.text.secondary} mt-1 uppercase tracking-tight font-semibold`}>Scope: <span className="text-nexus-600">{selectedCode.scope}</span> • {selectedCode.values.length} Dictionary Values</p>
                             </div>
                              <div className="flex gap-2 w-full sm:w-auto">
                                 <Button size="sm" variant="secondary" icon={Settings} onClick={() => handleOpenDefinitionPanel(selectedCode)} className="flex-1 sm:flex-none">Settings</Button>
@@ -176,40 +173,40 @@ export const ActivityCodeSettings: React.FC = () => {
 
                         <div className="flex-1 overflow-y-auto">
                            <table className="min-w-full divide-y divide-slate-100">
-                             <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                             <thead className={`${theme.colors.background} border-b ${theme.colors.border} sticky top-0 z-10`}>
                                <tr>
-                                 <th className="px-4 md:px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase w-16 text-center">Swatch</th>
-                                 <th className="px-4 md:px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase">Code Value</th>
-                                 <th className="hidden sm:table-cell px-4 md:px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase">Description</th>
-                                 <th className="px-4 md:px-6 py-3 text-right text-[10px] font-black text-slate-400 uppercase">Actions</th>
+                                 <th className={theme.components.table.header + " text-center w-16"}>Swatch</th>
+                                 <th className={theme.components.table.header}>Code Value</th>
+                                 <th className={theme.components.table.header + " hidden sm:table-cell"}>Description</th>
+                                 <th className={theme.components.table.header + " text-right"}>Actions</th>
                                </tr>
                              </thead>
-                             <tbody className="divide-y divide-slate-50">
+                             <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                {selectedCode.values.map((val, idx) => (
-                                 <tr key={val.id} className="hover:bg-slate-50 group">
-                                   <td className="px-4 md:px-6 py-4 flex justify-center">
+                                 <tr key={val.id} className={theme.components.table.row + " group"}>
+                                   <td className={theme.components.table.cell + " flex justify-center"}>
                                        <div 
                                           className="w-5 h-5 rounded-md border border-black/10 shadow-sm transition-transform hover:scale-110" 
                                           style={{ backgroundColor: val.color || '#e2e8f0' }}
                                           title={val.color || 'No color'}
                                        ></div>
                                    </td>
-                                   <td className="px-4 md:px-6 py-4">
-                                       <span className="text-sm font-bold text-slate-800 font-mono tracking-tight bg-slate-100 px-2 py-1 rounded block w-fit">{val.value}</span>
-                                       <span className="sm:hidden text-xs text-slate-500 mt-1 block truncate max-w-[150px]">{val.description}</span>
+                                   <td className={theme.components.table.cell}>
+                                       <span className={`text-sm font-bold ${theme.colors.text.primary} font-mono tracking-tight ${theme.colors.background} px-2 py-1 rounded block w-fit border ${theme.colors.border}`}>{val.value}</span>
+                                       <span className={`sm:hidden text-xs ${theme.colors.text.secondary} mt-1 block truncate max-w-[150px]`}>{val.description}</span>
                                    </td>
-                                   <td className="hidden sm:table-cell px-4 md:px-6 py-4 text-sm text-slate-500 max-w-md truncate">{val.description || <span className="italic text-slate-300">No description provided</span>}</td>
-                                   <td className="px-4 md:px-6 py-4 text-right">
+                                   <td className={theme.components.table.cell + " hidden sm:table-cell text-sm text-slate-500 max-w-md truncate"}>{val.description || <span className="italic opacity-50">No description provided</span>}</td>
+                                   <td className={theme.components.table.cell + " text-right"}>
                                       <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                         <button onClick={() => handleOpenValuePanel(val, idx)} className="p-1.5 hover:bg-slate-200 rounded text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
-                                         <button onClick={() => handleDeleteValue(idx)} className="p-1.5 hover:bg-red-50 rounded text-red-500"><Trash2 size={14}/></button>
+                                         <button onClick={() => handleOpenValuePanel(val, idx)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary} hover:text-nexus-600`}><Edit2 size={14}/></button>
+                                         <button onClick={() => handleDeleteValue(idx)} className={`p-1.5 hover:${theme.colors.background} rounded text-red-500`}><Trash2 size={14}/></button>
                                       </div>
                                    </td>
                                  </tr>
                                ))}
                                {selectedCode.values.length === 0 && (
                                    <tr>
-                                       <td colSpan={4} className="py-20 text-center text-slate-400 italic text-sm">No values defined in this dictionary.</td>
+                                       <td colSpan={4} className={`py-20 text-center ${theme.colors.text.tertiary} italic text-sm`}>No values defined in this dictionary.</td>
                                    </tr>
                                )}
                              </tbody>
@@ -217,10 +214,10 @@ export const ActivityCodeSettings: React.FC = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="flex items-center justify-center h-full text-slate-400 bg-slate-50/50 p-4">
+                    <div className={`flex items-center justify-center h-full ${theme.colors.text.tertiary} ${theme.colors.background} p-4`}>
                         <div className="text-center">
                             <Tag size={64} className="mx-auto mb-4 opacity-10"/>
-                            <h3 className="text-lg font-bold text-slate-700">Select Activity Code</h3>
+                            <h3 className={`text-lg font-bold ${theme.colors.text.secondary}`}>Select Activity Code</h3>
                             <p className="text-sm max-w-xs mt-2 mx-auto">Relational Activity Codes allow complex filtering and visual grouping across the enterprise.</p>
                         </div>
                     </div>
@@ -242,7 +239,7 @@ export const ActivityCodeSettings: React.FC = () => {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Definition Name</label>
+                        <label className={theme.typography.label + " block mb-1"}>Definition Name</label>
                         <Input 
                             value={editingDefinition?.name} 
                             onChange={e => setEditingDefinition({...editingDefinition!, name: e.target.value})} 
@@ -250,9 +247,9 @@ export const ActivityCodeSettings: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Standard Scope</label>
+                        <label className={theme.typography.label + " block mb-1"}>Standard Scope</label>
                         <select 
-                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white font-medium text-slate-700 outline-none focus:ring-2 focus:ring-nexus-500"
+                            className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} font-medium ${theme.colors.text.primary} outline-none focus:ring-2 focus:ring-nexus-500`}
                             value={editingDefinition?.scope}
                             onChange={e => setEditingDefinition({...editingDefinition!, scope: e.target.value as any})}
                         >
@@ -260,9 +257,9 @@ export const ActivityCodeSettings: React.FC = () => {
                             <option value="Project">Project Specific (Private)</option>
                         </select>
                     </div>
-                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3">
-                        <Info size={20} className="text-blue-600 shrink-0 mt-0.5"/>
-                        <p className="text-[10px] text-blue-800 leading-relaxed font-bold uppercase tracking-tight">
+                    <div className={`p-4 ${theme.colors.semantic.info.bg} border ${theme.colors.semantic.info.border} rounded-xl flex gap-3`}>
+                        <Info size={20} className={`${theme.colors.semantic.info.text} shrink-0 mt-0.5`}/>
+                        <p className={`text-[10px] ${theme.colors.semantic.info.text} leading-relaxed font-bold uppercase tracking-tight`}>
                             Global codes are standardized across all business units. Project codes are only available for the selected initiative.
                         </p>
                     </div>
@@ -284,7 +281,7 @@ export const ActivityCodeSettings: React.FC = () => {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Code Value (ID)</label>
+                        <label className={theme.typography.label + " block mb-1"}>Code Value (ID)</label>
                         <Input 
                             value={editingValue?.value} 
                             onChange={e => setEditingValue({...editingValue!, value: e.target.value.toUpperCase()})} 
@@ -293,7 +290,7 @@ export const ActivityCodeSettings: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Long Description</label>
+                        <label className={theme.typography.label + " block mb-1"}>Long Description</label>
                         <Input 
                             value={editingValue?.description} 
                             onChange={e => setEditingValue({...editingValue!, description: e.target.value})} 
@@ -301,7 +298,7 @@ export const ActivityCodeSettings: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest">Visual Marker (Hex Color)</label>
+                        <label className={theme.typography.label + " block mb-2"}>Visual Marker (Hex Color)</label>
                         <div className="flex gap-4 items-center">
                             <input 
                                 type="color" 
@@ -316,12 +313,10 @@ export const ActivityCodeSettings: React.FC = () => {
                                 placeholder="#FFFFFF"
                             />
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-2">This color will be used in Gantt bars and dashboard analytics.</p>
+                        <p className={`text-[10px] ${theme.colors.text.tertiary} mt-2`}>This color will be used in Gantt bars and dashboard analytics.</p>
                     </div>
                 </div>
             </SidePanel>
         </div>
     );
 };
-
-export default ActivityCodeSettings;

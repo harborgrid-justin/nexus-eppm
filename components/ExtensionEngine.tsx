@@ -1,8 +1,5 @@
 
-
-
 import React, { lazy, Suspense, useMemo } from 'react';
-// FIX: Corrected import path for Extension type to resolve module resolution error.
 import { Extension } from '../types/index';
 import { 
   LayoutDashboard, Map as MapIcon, Database, Box, FileText, Settings, 
@@ -11,7 +8,6 @@ import {
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import { useTheme } from '../context/ThemeContext';
 
@@ -22,6 +18,7 @@ const ConstructionSuite = lazy(() => import('./engines/ConstructionSuite'));
 const FinancialSuite = lazy(() => import('./engines/FinancialSuite'));
 const FedGovSuite = lazy(() => import('./engines/FedGovSuite'));
 const StateGovSuite = lazy(() => import('./engines/StateGovSuite'));
+const IoTStream = lazy(() => import('./iot/IoTStream').then(module => ({ default: module.IoTStream })));
 
 interface ExtensionEngineProps {
   extension: Extension;
@@ -86,6 +83,14 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
       return (
           <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
               <StateGovSuite />
+          </Suspense>
+      );
+  }
+  
+  if (extension.id === 'iot_smart_site') { // Example if we add an IoT extension ID
+      return (
+          <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+              <IoTStream />
           </Suspense>
       );
   }
