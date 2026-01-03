@@ -22,10 +22,13 @@ export interface Document {
 export interface Integration {
   id: string;
   name: string;
-  type: string;
-  status: 'Connected' | 'Disconnected';
+  type: string; // e.g. ERP, Schedule, CRM
+  status: 'Connected' | 'Disconnected' | 'Active' | 'Inactive' | 'Error';
   lastSync: string;
-  logo: React.ReactNode; 
+  logo: React.ReactNode | string; // Updated to allow string identifiers for dynamic icon lookup
+  protocol?: 'REST API' | 'SOAP / WSDL' | 'OData' | 'JDBC' | 'OData v4';
+  endpoint?: string;
+  health?: 'Good' | 'Warning' | 'Critical' | 'Unknown';
 }
 
 export interface DataJob {

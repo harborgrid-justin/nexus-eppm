@@ -20,7 +20,8 @@ import {
     RiskBreakdownStructureNode, WorkflowStep, Vendor, Baseline,
     BPDefinition, BPRecord, CostSheetColumn, CostSheetRow, UnifierState,
     ResourceRequest, DailyLogEntry, SafetyIncident, PunchItem,
-    RoadmapItem, RoadmapLane, KanbanTask, ExtensionDataState, EtlMapping
+    RoadmapItem, RoadmapLane, KanbanTask, ExtensionDataState, EtlMapping,
+    OrganizationProfile, NotificationPreference, SystemMetric, ServiceStatus
 } from './index';
 
 export { UnifierState };
@@ -112,6 +113,12 @@ export interface DataState {
     extensionData: ExtensionDataState;
     // Admin & Config
     etlMappings: EtlMapping[];
+    // System Monitoring
+    systemMonitoring: {
+        metrics: SystemMetric[];
+        services: ServiceStatus[];
+        throughput: { time: string; records: number }[];
+    };
 }
 
 export type Action =
@@ -242,6 +249,8 @@ export type Action =
     | { type: 'SYSTEM_INSTALL_EXTENSION'; payload: string }
     | { type: 'SYSTEM_ACTIVATE_EXTENSION'; payload: string }
     | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
+    | { type: 'SYSTEM_ADD_INTEGRATION'; payload: Integration }
+    | { type: 'SYSTEM_UPDATE_INTEGRATION'; payload: Integration }
     | { type: 'GOVERNANCE_UPDATE_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_ADD_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_DELETE_CURRENCY'; payload: string }
@@ -249,7 +258,8 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_INFLATION_RATE'; payload: number }
     | { type: 'GOVERNANCE_UPDATE_SYSTEM_SCHEDULING'; payload: any }
     | { type: 'GOVERNANCE_MARK_ALERT_READ'; payload: string }
-    | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: { id: string; field: string; value: boolean } }
+    | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: Partial<OrganizationProfile> }
     | { type: 'GOVERNANCE_ADD_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL'; payload: string }

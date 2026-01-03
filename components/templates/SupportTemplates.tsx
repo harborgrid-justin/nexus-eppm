@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -25,31 +25,42 @@ const TemplateHeader = ({ number, title, subtitle }: { number: string, title: st
 
 export const TeamDirectoryTmpl: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    const [search, setSearch] = useState('');
+
+    const filteredUsers = state.users.filter(u => 
+        u.name.toLowerCase().includes(search.toLowerCase()) || 
+        u.email.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding}`}>
             <div className="flex justify-between items-center mb-6">
                 <TemplateHeader number="41" title="Team Directory" subtitle="Project stakeholders and resources" />
                 <div className="relative w-64">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                    <Input placeholder="Search people..." className="pl-9"/>
+                    <Input placeholder="Search people..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)}/>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                    <Card key={i} className="p-6 text-center hover:shadow-md transition-shadow">
+                {filteredUsers.map(user => (
+                    <Card key={user.id} className="p-6 text-center hover:shadow-md transition-shadow">
                         <div className="w-20 h-20 bg-slate-200 rounded-full mx-auto mb-4 overflow-hidden border-2 border-white shadow-sm">
-                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`} alt="User" />
+                            <img src={user.avatar} alt={user.name} />
                         </div>
-                        <h3 className="font-bold text-slate-900">User Name {i}</h3>
-                        <p className="text-xs text-nexus-600 font-bold uppercase tracking-wider mb-4">Senior Engineer</p>
+                        <h3 className="font-bold text-slate-900">{user.name}</h3>
+                        <p className="text-xs text-nexus-600 font-bold uppercase tracking-wider mb-4">{user.role}</p>
                         <div className="text-sm text-slate-500 space-y-2 text-left bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            <div className="flex items-center gap-2"><Mail size={14}/> user{i}@nexus.com</div>
-                            <div className="flex items-center gap-2"><Phone size={14}/> +1 (555) 010-{i}</div>
-                            <div className="flex items-center gap-2"><MapPin size={14}/> New York, NY</div>
+                            <div className="flex items-center gap-2 truncate" title={user.email}><Mail size={14} className="shrink-0"/> {user.email}</div>
+                            <div className="flex items-center gap-2"><Phone size={14} className="shrink-0"/> +1 (555) 010-XXXX</div>
+                            <div className="flex items-center gap-2"><MapPin size={14} className="shrink-0"/> {user.department || 'HQ'}</div>
                         </div>
                         <Button className="w-full mt-4" variant="secondary" size="sm">View Profile</Button>
                     </Card>
                 ))}
+                {filteredUsers.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-slate-400">No users found.</div>
+                )}
             </div>
         </div>
     );
@@ -244,17 +255,13 @@ export const WorkflowDesignerTmpl: React.FC = () => {
 
 export const IntegrationStatusTmpl: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding}`}>
             <TemplateHeader number="47" title="Integration Health" subtitle="Connector status and sync logs" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                    { name: 'SAP S/4HANA', type: 'ERP', status: 'Healthy', lastSync: '5m ago', color: 'green' },
-                    { name: 'Primavera P6', type: 'Schedule', status: 'Healthy', lastSync: '1h ago', color: 'green' },
-                    { name: 'Salesforce', type: 'CRM', status: 'Error', lastSync: '2d ago', color: 'red' },
-                    { name: 'Jira', type: 'Dev', status: 'Healthy', lastSync: '10m ago', color: 'green' },
-                    { name: 'SharePoint', type: 'Docs', status: 'Warning', lastSync: '4h ago', color: 'yellow' },
-                ].map((conn, i) => (
+                {state.integrations.map((conn, i) => (
                     <Card key={i} className="p-6">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
@@ -264,7 +271,7 @@ export const IntegrationStatusTmpl: React.FC = () => {
                                     <p className="text-xs text-slate-500 uppercase tracking-wider">{conn.type}</p>
                                 </div>
                             </div>
-                            <div className={`w-3 h-3 rounded-full bg-${conn.color}-500 shadow-sm ring-2 ring-white`}></div>
+                            <div className={`w-3 h-3 rounded-full ${conn.status === 'Connected' ? 'bg-green-500' : 'bg-red-500'} shadow-sm ring-2 ring-white`}></div>
                         </div>
                         <div className="flex justify-between items-center text-sm pt-4 border-t border-slate-100">
                             <span className="text-slate-500">Last Sync</span>

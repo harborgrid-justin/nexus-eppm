@@ -4,9 +4,11 @@ import React from 'react';
 import { Database, Server, Globe, Link } from 'lucide-react';
 
 export const MOCK_INTEGRATIONS: Integration[] = [
-  { id: 'INT-01', name: 'SAP S/4HANA', type: 'ERP', status: 'Connected', lastSync: '15m ago', logo: 'SAP' },
-  { id: 'INT-02', name: 'Oracle Primavera', type: 'Scheduling', status: 'Connected', lastSync: '1h ago', logo: 'P6' },
-  { id: 'INT-03', name: 'Autodesk BIM 360', type: 'Document', status: 'Disconnected', lastSync: '2d ago', logo: 'BIM' },
+  { id: 'INT-01', name: 'SAP S/4HANA Finance', type: 'ERP', status: 'Connected', lastSync: '2m ago', logo: 'SAP', protocol: 'OData v4', endpoint: 'https://api.sap.corp/odata/v4', health: 'Good' },
+  { id: 'INT-02', name: 'Oracle Primavera P6', type: 'Schedule', status: 'Connected', lastSync: '1h ago', logo: 'P6', protocol: 'SOAP / WSDL', endpoint: 'https://p6.oraclecloud.com/ws', health: 'Good' },
+  { id: 'INT-03', name: 'Microsoft Project Online', type: 'Schedule', status: 'Error', lastSync: '1d ago', logo: 'MSP', protocol: 'REST API', endpoint: 'https://graph.microsoft.com/v1.0', health: 'Critical' },
+  { id: 'INT-04', name: 'Autodesk Construction Cloud', type: 'Document', status: 'Disconnected', lastSync: '2d ago', logo: 'BIM', protocol: 'REST API', endpoint: 'https://developer.api.autodesk.com', health: 'Unknown' },
+  { id: 'INT-05', name: 'Legacy Mainframe', type: 'Data', status: 'Active', lastSync: '4h ago', logo: 'DB2', protocol: 'JDBC', endpoint: 'jdbc:db2://mainframe:50000/DATA', health: 'Warning' },
 ];
 
 export const MOCK_GOVERNANCE_ROLES: GovernanceRole[] = [
@@ -20,10 +22,5 @@ export const MOCK_GOVERNANCE_EVENTS: GovernanceEvent[] = [
     { id: 'GE-2', programId: 'PRG-001', name: 'Architecture Board', type: 'Technical Review', frequency: 'Quarterly', nextDate: '2024-08-01' }
 ];
 
-export const MOCK_CONNECTORS = [
-    { id: 1, name: 'SAP S/4HANA Finance', type: 'ERP', status: 'Active', protocol: 'OData v4', lastSync: '2m ago', icon: Database, health: 'Good', endpoint: 'https://api.sap.corp/odata/v4' },
-    { id: 2, name: 'Oracle Primavera P6', type: 'Schedule', status: 'Active', protocol: 'SOAP/Web Services', lastSync: '1h ago', icon: Server, health: 'Good', endpoint: 'https://p6.oraclecloud.com/ws' },
-    { id: 3, name: 'Microsoft Project Online', type: 'Schedule', status: 'Error', protocol: 'REST API', lastSync: '1d ago', icon: Globe, health: 'Critical', endpoint: 'https://graph.microsoft.com/v1.0' },
-    { id: 4, name: 'Autodesk Construction Cloud', type: 'Docs', status: 'Inactive', protocol: 'Forge API', lastSync: '-', icon: Link, health: 'Unknown', endpoint: 'https://developer.api.autodesk.com' },
-    { id: 5, name: 'Legacy Mainframe', type: 'Data', status: 'Active', protocol: 'JDBC', lastSync: '4h ago', icon: Server, health: 'Warning', endpoint: 'jdbc:db2://mainframe:50000/DATA' },
-];
+// Deprecated: Use MOCK_INTEGRATIONS instead
+export const MOCK_CONNECTORS = [];

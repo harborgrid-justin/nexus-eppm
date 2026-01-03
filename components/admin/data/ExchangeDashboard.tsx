@@ -1,25 +1,20 @@
 
-import React, { useTransition, useDeferredValue, useMemo, Suspense } from 'react';
-import { Activity, CheckCircle, XCircle, Server, Database, ArrowRight, HardDrive, Cloud, Zap, Loader2 } from 'lucide-react';
+import React, { useTransition, useDeferredValue, Suspense } from 'react';
+import { Activity, CheckCircle, Server, Database, HardDrive, Cloud, Zap, Loader2 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import StatCard from '../../shared/StatCard';
 import { useTheme } from '../../../context/ThemeContext';
-import { Badge } from '../../ui/Badge';
-
-const THROUGHPUT_DATA = [
-    { time: '08:00', records: 1200 }, { time: '10:00', records: 4200 },
-    { time: '12:00', records: 1500 }, { time: '14:00', records: 5100 },
-    { time: '16:00', records: 3900 },
-];
+import { useData } from '../../../context/DataContext';
 
 export const ExchangeDashboard: React.FC = () => {
     const theme = useTheme();
-    // Pattern 22: startTransition for dashboard specific view toggles
+    const { state } = useData();
     const [isPending, startTransition] = useTransition();
     const [metricRange, setMetricRange] = React.useState('24h');
     
-    // Pattern 23: useDeferredValue for chart data re-shaping
-    const deferredData = useDeferredValue(THROUGHPUT_DATA);
+    // Retrieve centralized metrics
+    const throughputData = state.systemMonitoring.throughput || [];
+    const deferredData = useDeferredValue(throughputData);
 
     return (
         <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">

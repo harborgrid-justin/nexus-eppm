@@ -19,6 +19,13 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
                     i.id === action.payload ? { ...i, status: i.status === 'Connected' ? 'Disconnected' : 'Connected' } : i
                 )
             };
+        case 'SYSTEM_ADD_INTEGRATION':
+            return { ...state, integrations: [...state.integrations, action.payload] };
+        case 'SYSTEM_UPDATE_INTEGRATION':
+            return { 
+                ...state, 
+                integrations: state.integrations.map(i => i.id === action.payload.id ? action.payload : i) 
+            };
         case 'SYSTEM_INSTALL_EXTENSION':
              return {
                  ...state,
@@ -87,7 +94,23 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
                  }
              };
         case 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE':
-            return state;
+             return {
+                 ...state,
+                 governance: {
+                     ...state.governance,
+                     notificationPreferences: state.governance.notificationPreferences.map(p => 
+                        p.id === action.payload.id ? { ...p, [action.payload.field]: action.payload.value } : p
+                     )
+                 }
+             };
+        case 'GOVERNANCE_UPDATE_ORG_PROFILE':
+             return {
+                 ...state,
+                 governance: {
+                     ...state.governance,
+                     organization: { ...state.governance.organization, ...action.payload }
+                 }
+             };
         case 'GOVERNANCE_ADD_STRATEGIC_GOAL':
             return { ...state, strategicGoals: [...state.strategicGoals, action.payload] };
         case 'GOVERNANCE_UPDATE_STRATEGIC_GOAL':

@@ -1,22 +1,43 @@
 
 import React, { useState } from 'react';
-import { Network, Plus, Check, Settings, Trash2, Key, Globe, Database, Server, Link, Activity, RefreshCw, Save, X } from 'lucide-react';
+import { useData } from '../../../context/DataContext';
+import { Network, Plus, Settings, RefreshCw, Save, Key, Globe, Database, Server, Link, Activity } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
-import { Badge } from '../../ui/Badge';
 import { SidePanel } from '../../ui/SidePanel';
 import { Input } from '../../ui/Input';
-import { MOCK_CONNECTORS } from '../../../constants/index';
+import { Integration } from '../../../types';
+import { generateId } from '../../../utils/formatters';
 
 export const ConnectorConfig: React.FC = () => {
+    const { state, dispatch } = useData();
     const theme = useTheme();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [editingConn, setEditingConn] = useState<any>(null);
+    const [editingConn, setEditingConn] = useState<Partial<Integration> | null>(null);
     const [isTesting, setIsTesting] = useState(false);
 
-    const handleOpen = (conn: any) => {
-        setEditingConn(conn || { name: '', type: 'ERP', protocol: 'REST', endpoint: '' });
+    const handleOpen = (conn: Integration | null) => {
+        setEditingConn(conn || { name: '', type: 'ERP', protocol: 'REST API', endpoint: '', health: 'Unknown' });
         setIsPanelOpen(true);
+    };
+
+    const handleSave = () => {
+        if (!editingConn?.name) return;
+        const connToSave = {
+            ...editingConn,
+            id: editingConn.id || generateId('INT'),
+            status: editingConn.status || 'Active',
+            lastSync: editingConn.lastSync || 'Never',
+            // Default icon map logic for new items
+            logo: editingConn.logo || 'Server'
+        } as Integration;
+
+        if (editingConn.id) {
+            dispatch({ type: 'SYSTEM_UPDATE_INTEGRATION', payload: connToSave });
+        } else {
+            dispatch({ type: 'SYSTEM_ADD_INTEGRATION', payload: connToSave });
+        }
+        setIsPanelOpen(false);
     };
 
     const handleTestConnection = () => {
@@ -25,6 +46,15 @@ export const ConnectorConfig: React.FC = () => {
             setIsTesting(false);
             alert("Connection Successful! Latency: 45ms");
         }, 1500);
+    };
+
+    const getIcon = (type: string) => {
+        switch(type) {
+            case 'ERP': return Database;
+            case 'Schedule': return Server;
+            case 'Document': return Link;
+            default: return Globe;
+        }
     };
 
     return (
@@ -43,37 +73,41 @@ export const ConnectorConfig: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-4 px-1">
-                {MOCK_CONNECTORS.map(conn => (
-                    <div key={conn.id} className={`${theme.components.card} p-6 group hover:border-nexus-300 transition-all flex flex-col`}>
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600 group-hover:text-nexus-600 group-hover:bg-nexus-50 transition-colors">
-                                <conn.icon size={24} />
+                {state.integrations.map(conn => {
+                    const Icon = getIcon(conn.type);
+                    return (
+                        <div key={conn.id} className={`${theme.components.card} p-6 group hover:border-nexus-300 transition-all flex flex-col`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 text-slate-600 group-hover:text-nexus-600 group-hover:bg-nexus-50 transition-colors">
+                                    <Icon size={24} />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {conn.health === 'Good' && <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>}
+                                    {conn.health === 'Warning' && <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>}
+                                    {conn.health === 'Critical' && <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>}
+                                    {(!conn.health || conn.health === 'Unknown') && <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {conn.health === 'Good' && <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>}
-                                {conn.health === 'Warning' && <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>}
-                                {conn.health === 'Critical' && <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>}
+                            
+                            <h4 className="font-bold text-slate-900 text-lg mb-1">{conn.name}</h4>
+                            <p className="text-xs text-slate-500 font-mono truncate mb-4">{conn.endpoint || 'No Endpoint Configured'}</p>
+                            
+                            <div className="flex gap-2 mb-6">
+                                 <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.type}</span>
+                                 <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.protocol || 'REST'}</span>
                             </div>
-                        </div>
-                        
-                        <h4 className="font-bold text-slate-900 text-lg mb-1">{conn.name}</h4>
-                        <p className="text-xs text-slate-500 font-mono truncate mb-4">{conn.endpoint}</p>
-                        
-                        <div className="flex gap-2 mb-6">
-                             <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.type}</span>
-                             <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.protocol}</span>
-                        </div>
 
-                        <div className="mt-auto pt-4 border-t border-slate-100 flex gap-2">
-                            <button onClick={() => handleOpen(conn)} className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
-                                <Settings size={14}/> Configure
-                            </button>
-                            <button className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
-                                <RefreshCw size={14}/> Sync Now
-                            </button>
+                            <div className="mt-auto pt-4 border-t border-slate-100 flex gap-2">
+                                <button onClick={() => handleOpen(conn)} className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
+                                    <Settings size={14}/> Configure
+                                </button>
+                                <button className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
+                                    <RefreshCw size={14}/> Sync Now
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <SidePanel
@@ -84,7 +118,7 @@ export const ConnectorConfig: React.FC = () => {
                 footer={
                     <>
                         <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
-                        <Button onClick={() => setIsPanelOpen(false)} icon={Save}>Save Connection</Button>
+                        <Button onClick={handleSave} icon={Save}>Save Connection</Button>
                     </>
                 }
             >
@@ -96,19 +130,22 @@ export const ConnectorConfig: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Type</label>
-                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.type}>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.type} onChange={e => setEditingConn({...editingConn, type: e.target.value})}>
                                 <option>ERP</option>
                                 <option>Schedule</option>
                                 <option>CRM</option>
+                                <option>Document</option>
+                                <option>Data</option>
                             </select>
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Protocol</label>
-                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.protocol}>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingConn?.protocol} onChange={e => setEditingConn({...editingConn, protocol: e.target.value as any})}>
                                 <option>REST API</option>
                                 <option>SOAP / WSDL</option>
                                 <option>OData</option>
-                                <option>JDBC (Direct DB)</option>
+                                <option>OData v4</option>
+                                <option>JDBC</option>
                             </select>
                         </div>
                     </div>
@@ -116,7 +153,7 @@ export const ConnectorConfig: React.FC = () => {
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Endpoint URL</label>
                         <div className="relative">
                             <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                            <Input className="pl-9 font-mono text-xs" value={editingConn?.endpoint} />
+                            <Input className="pl-9 font-mono text-xs" value={editingConn?.endpoint} onChange={e => setEditingConn({...editingConn, endpoint: e.target.value})} />
                         </div>
                     </div>
                     

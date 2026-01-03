@@ -29,7 +29,6 @@ export interface ResourceGlobals {
   allowOvertimeInPlanning: boolean;
 }
 
-// Added SecurityPolicy interface to support governance security settings
 export interface SecurityPolicy {
   mfa: boolean;
   passwordComplexity: string;
@@ -38,6 +37,42 @@ export interface SecurityPolicy {
   allowPublicLinks: boolean;
   enforceHttps: boolean;
   loginRetries: number;
+}
+
+export interface OrganizationProfile {
+    name: string;
+    shortName: string;
+    taxId: string;
+    fiscalYearStart: string;
+    timezone: string;
+    language: string;
+    currency: string;
+    logoUrl?: string;
+}
+
+export interface NotificationPreference {
+    id: string;
+    label: string;
+    email: boolean;
+    app: boolean;
+    sms: boolean;
+}
+
+export interface SystemMetric {
+    id: string;
+    name: string;
+    value: number;
+    unit: string;
+    threshold: number;
+    trend: number[];
+}
+
+export interface ServiceStatus {
+    id: string;
+    name: string;
+    status: 'Operational' | 'Degraded' | 'Down';
+    uptime: string;
+    latency: string;
 }
 
 export interface GovernanceState {
@@ -50,6 +85,7 @@ export interface GovernanceState {
   vendorBlacklist: string[];
   scheduling: SchedulingLogic;
   resourceDefaults: ResourceGlobals;
-  // Added security property to resolve errors in DataContext and rootReducer
   security: SecurityPolicy;
+  organization: OrganizationProfile;
+  notificationPreferences: NotificationPreference[];
 }

@@ -20,7 +20,8 @@ import {
     MOCK_SUPPLIER_REVIEWS, MOCK_CLAIMS, MOCK_INVOICES, MOCK_TIMESHEETS,
     MOCK_ENTERPRISE_SKILLS, MOCK_RBS, MOCK_QUALITY_STANDARDS,
     MOCK_VENDORS,
-    MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA
+    MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA,
+    DEFAULT_NOTIFICATION_PREFERENCES
 } from '../constants/index';
 
 import { ResourceRequest } from '../types/resource';
@@ -148,7 +149,17 @@ export const initialState: DataState = {
           allowPublicLinks: false,
           enforceHttps: true,
           loginRetries: 5
-      }
+      },
+      organization: {
+          name: 'Acme Corp Construction',
+          shortName: 'ACME',
+          taxId: 'XX-XXXXXXX',
+          fiscalYearStart: 'January',
+          timezone: 'UTC -5 (Eastern Time)',
+          language: 'English (US)',
+          currency: 'USD ($)'
+      },
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES
   },
   strategicGoals: [],
   strategicDrivers: MOCK_STRATEGIC_DRIVERS,
@@ -259,5 +270,24 @@ export const initialState: DataState = {
           ]
       }
   },
-  etlMappings: INITIAL_MAPPINGS
+  etlMappings: INITIAL_MAPPINGS,
+  systemMonitoring: {
+      metrics: [
+        { id: 'cpu', name: 'CPU Usage', value: 42, unit: '%', threshold: 80, trend: [35, 38, 42, 45, 42] },
+        { id: 'mem', name: 'Memory Usage', value: 65, unit: '%', threshold: 85, trend: [60, 62, 65, 64, 65] },
+        { id: 'net', name: 'Network I/O', value: 1.2, unit: 'GB/s', threshold: 2, trend: [0.8, 0.9, 1.1, 1.3, 1.2] },
+        { id: 'err', name: 'API Error Rate', value: 0.05, unit: '%', threshold: 1, trend: [0.01, 0.04, 0.02, 0.06, 0.05] },
+      ],
+      services: [
+        { id: 'gateway', name: 'Primary API Gateway', status: 'Operational', uptime: '99.99%', latency: '45ms' },
+        { id: 'auth', name: 'Auth Service (SSO)', status: 'Operational', uptime: '99.95%', latency: '120ms' },
+        { id: 'search', name: 'Search Indexer', status: 'Degraded', uptime: '98.50%', latency: '850ms' },
+        { id: 'worker', name: 'Notification Worker', status: 'Operational', uptime: '100%', latency: 'N/A' },
+      ],
+      throughput: [
+          { time: '08:00', records: 1200 }, { time: '10:00', records: 4200 },
+          { time: '12:00', records: 1500 }, { time: '14:00', records: 5100 },
+          { time: '16:00', records: 3900 },
+      ]
+  }
 };
