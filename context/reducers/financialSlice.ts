@@ -27,6 +27,11 @@ export const financialReducer = (state: DataState, action: Action): DataState =>
         return { ...state, invoices: state.invoices.map(i => i.id === action.payload.id ? action.payload : i) };
     
     // Change Orders
+    case 'ADD_CHANGE_ORDER':
+        return { ...state, changeOrders: [...state.changeOrders, action.payload] };
+    case 'UPDATE_CHANGE_ORDER':
+        return { ...state, changeOrders: state.changeOrders.map(c => c.id === action.payload.id ? action.payload : c) };
+    
     case 'APPROVE_CHANGE_ORDER': {
         const { projectId, changeOrderId } = action.payload;
         // Find CO

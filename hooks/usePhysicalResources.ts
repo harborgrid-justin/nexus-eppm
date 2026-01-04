@@ -39,9 +39,8 @@ export const usePhysicalResources = () => {
   }, [equipment]);
 
   const financialValuation = useMemo(() => {
-      // Mock calculation for inventory value
-      return 2400000; 
-  }, []);
+      return materials.reduce((sum, m) => sum + ((m.availableQuantity || 0) * m.hourlyRate), 0);
+  }, [materials]);
 
   return {
     equipment,

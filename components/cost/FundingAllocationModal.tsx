@@ -9,7 +9,7 @@ interface FundingAllocationModalProps {
   projectId: string;
   sources: FundingSource[];
   onClose: () => void;
-  onSave: (funding: Partial<ProjectFunding>) => void;
+  onSave: (funding: ProjectFunding) => void;
 }
 
 const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ projectId, sources, onClose, onSave }) => {
@@ -36,7 +36,13 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
         approverId: 'CurrentUser' // In real app, from context
     };
 
-    onSave({ ...formData, transactions: [initialTransaction] });
+    const finalFunding = { 
+        ...formData, 
+        id: `PF-${Date.now()}`, 
+        transactions: [initialTransaction] 
+    } as ProjectFunding;
+
+    onSave(finalFunding);
     onClose();
   };
 

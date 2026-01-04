@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { AlertTriangle, Plus, ShieldCheck, Activity, Search } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,6 +8,7 @@ import { Badge } from '../ui/Badge';
 import StatCard from '../shared/StatCard';
 import { SafetyIncident } from '../../types';
 import { generateId } from '../../utils/formatters';
+import { getDaysDiff } from '../../utils/dateUtils';
 
 interface SafetyIncidentLogProps {
   projectId: string;
@@ -17,8 +18,22 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
   const { state, dispatch } = useData();
   const theme = useTheme();
   
-  const incidents = state.safetyIncidents.filter(i => i.projectId === projectId);
+  const incidents = useMemo(() => 
+    state.safetyIncidents.filter(i => i.projectId === projectId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  , [state.safetyIncidents, projectId]);
   
+  const daysWithoutIncident = useMemo(() => {
+      const today = new Date();
+      if (incidents.length === 0) {
+          // If no incidents, calculate from Project Start
+          const project = state.projects.find(p => p.id === projectId);
+          if (project) return getDaysDiff(new Date(project.startDate), today);
+          return 0;
+      }
+      const lastDate = new Date(incidents[0].date);
+      return Math.max(0, getDaysDiff(lastDate, today));
+  }, [incidents, state.projects, projectId]);
+
   const handleAddIncident = () => {
       const newIncident: SafetyIncident = {
           id: generateId('INC'),
@@ -37,7 +52,7 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
     <div className={`h-full flex flex-col ${theme.colors.background}/50`}>
        {/* Stats */}
        <div className={`p-6 grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
-           <StatCard title="Days Without Incident" value="142" icon={ShieldCheck} trend="up" />
+           <StatCard title="Days Without Incident" value={daysWithoutIncident} icon={ShieldCheck} trend="up" />
            <StatCard title="Total Incidents" value={incidents.length} subtext="Project Lifetime" icon={Activity} />
            <StatCard title="Open Observations" value={incidents.filter(i => i.status === 'Open').length} icon={AlertTriangle} />
        </div>

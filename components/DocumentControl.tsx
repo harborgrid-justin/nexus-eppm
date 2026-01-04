@@ -1,12 +1,18 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { useDocumentControlLogic } from '../hooks/domain/useDocumentControlLogic';
+import { useData } from '../context/DataContext';
+import { generateId, formatFileSize } from '../utils/formatters';
+import { Document } from '../types';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 
 const DocumentControl: React.FC = () => {
   const theme = useTheme();
+  const { dispatch } = useData();
+  const { project } = useProjectWorkspace(); // Get active project context
   
   const {
     searchTerm,
@@ -15,6 +21,8 @@ const DocumentControl: React.FC = () => {
     docs,
     canUpload
   } = useDocumentControlLogic();
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getIcon = (type: string) => {
      switch(type) {
@@ -25,6 +33,31 @@ const DocumentControl: React.FC = () => {
      }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && project) {
+          // Simulate upload process
+          const docType = file.name.split('.').pop()?.toUpperCase() || 'DOC';
+          const newDoc: Document = {
+              id: generateId('DOC'),
+              projectId: project.id,
+              name: file.name,
+              type: docType,
+              size: formatFileSize(file.size),
+              version: '1.0',
+              uploadedBy: 'Current User', // In real app, use auth context
+              status: 'Draft',
+              url: '#'
+          };
+
+          dispatch({ type: 'UPLOAD_DOCUMENT', payload: newDoc });
+      }
+  };
+
+  const triggerUpload = () => {
+      fileInputRef.current?.click();
+  };
+
   return (
     <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
        <PageHeader
@@ -32,9 +65,20 @@ const DocumentControl: React.FC = () => {
             subtitle="Central repository for all project specifications, drawings, and reports."
             icon={Folder}
             actions={canUpload ? (
-                <button className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg flex items-center gap-2 ${theme.colors.primaryHover} shadow-sm text-sm font-medium`}>
-                    <Upload size={16} /> <span className="hidden sm:inline">Upload Document</span>
-                </button>
+                <>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        onChange={handleFileUpload} 
+                    />
+                    <button 
+                        onClick={triggerUpload}
+                        className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg flex items-center gap-2 ${theme.colors.primaryHover} shadow-sm text-sm font-medium`}
+                    >
+                        <Upload size={16} /> <span className="hidden sm:inline">Upload Document</span>
+                    </button>
+                </>
               ) : (
                 <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
                     <Lock size={14} /> Upload Restricted
@@ -105,6 +149,13 @@ const DocumentControl: React.FC = () => {
                       </div>
                    </div>
                 ))}
+                {docs.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                        <Folder size={48} className="mx-auto mb-4 opacity-20"/>
+                        <p>No documents found.</p>
+                        {canUpload && <button onClick={triggerUpload} className="text-nexus-600 font-bold hover:underline mt-2">Upload your first file</button>}
+                    </div>
+                )}
              </div>
           </div>
        </div>

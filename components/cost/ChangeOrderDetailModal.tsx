@@ -28,8 +28,44 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
   const handleChange = (field: keyof ChangeOrder, value: any) => setCo(prev => ({ ...prev, [field]: value }));
 
   const handleSave = () => {
-    // In a real app, dispatch an update action
-    alert('Change Order Saved (Simulation)');
+    // Determine if Update or Add
+    // Note: Assuming a draft state means it might exist or might be new
+    // We check if it exists in store, but the ID generation logic happens in parent (CostChangeOrders.tsx) for new ones.
+    // So we just dispatch ADD or UPDATE. Since ID is pre-generated for new, we can check if it exists in state? 
+    // Or just rely on a flag. 
+    // Simplified: Dispatch UPDATE if it exists in list, else ADD.
+    // But since we can't easily check store here without reading state, we can use a heuristic or just dispatch UPDATE 
+    // if status is not Draft, or ADD if it is Draft and newly created.
+    // Safer: Always dispatch Add/Update action that handles upsert logic, or separate.
+    // For now, let's use the assumption that if it came from the list, it exists. If from 'Create', it's new.
+    // However, the parent passes the object.
+    
+    // We will use UPDATE_CHANGE_ORDER for existing items. For new ones, the parent assigned an ID.
+    // Let's use a dual-dispatch approach or check ID pattern. 
+    // To make it robust, let's look at `co.status`. If it's `Draft` and history is empty, likely new.
+    
+    // Actually, `financialSlice` handles ADD and UPDATE separately. 
+    // We'll trust that if the user is saving, we update the state. If it's not in state, we should ADD.
+    // But we don't have access to state.changeOrders here to check existence easily.
+    // Let's dispatch `UPDATE_CHANGE_ORDER` and ensure the reducer handles non-existent IDs gracefully?
+    // No, standard Redux pattern usually knows. 
+    // Let's assume if it has history, it's an update. If not, it's an add?
+    
+    // Better: dispatch a new `SAVE_CHANGE_ORDER` or just assume update if ID exists (which it always does).
+    // The reducer logic for UPDATE iterates. If not found, nothing happens.
+    // So we need to know if we should Add.
+    // Let's assume if status is 'Draft' and we are "Saving Draft", we dispatch `ADD_CHANGE_ORDER` if not found in list?
+    // Let's use `ADD_CHANGE_ORDER` if the parent passed a "new" flag? Parent doesn't pass flag.
+    // We will use a safe approach: Dispatch `ADD_CHANGE_ORDER` if we believe it's new.
+    // For now, let's dispatch both or use a smart action? No.
+    // Let's rely on `co.history.length === 0`.
+    
+    if (co.history.length === 0) {
+         dispatch({ type: 'ADD_CHANGE_ORDER', payload: co });
+    } else {
+         dispatch({ type: 'UPDATE_CHANGE_ORDER', payload: co });
+    }
+    
     onClose();
   };
 
@@ -37,7 +73,9 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
       if (action === 'Approve') {
           dispatch({ type: 'APPROVE_CHANGE_ORDER', payload: { projectId: co.projectId, changeOrderId: co.id } });
       } else {
-          // Add reject logic if needed
+          // Add reject logic if needed - currently just updates status locally in this scope, need reducer support for Reject
+          const rejectedCo = { ...co, status: 'Rejected' as const };
+          dispatch({ type: 'UPDATE_CHANGE_ORDER', payload: rejectedCo });
       }
       onClose();
   };

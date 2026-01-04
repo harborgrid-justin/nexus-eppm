@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Flag, CheckSquare, RefreshCw, FileCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,8 +10,15 @@ interface ProgramClosureProps {
 }
 
 const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
-  const { transitionItems } = useProgramData(programId);
+  const { transitionItems, program } = useProgramData(programId);
   const theme = useTheme();
+
+  const sustainmentPeriod = useMemo(() => {
+      if (!program) return "TBD";
+      const endDate = new Date(program.endDate);
+      const endYear = endDate.getFullYear();
+      return `FY${endYear + 1} - FY${endYear + 3}`;
+  }, [program]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -52,6 +59,11 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                                         </td>
                                     </tr>
                                 ))}
+                                {transitionItems.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="text-center p-8 text-slate-400 italic">No transition items defined.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -87,7 +99,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                         <p className="mb-1 text-slate-400 text-xs uppercase">Benefit Owner</p>
                         <p className="mb-3">Director of Operations</p>
                         <p className="mb-1 text-slate-400 text-xs uppercase">Measurement Period</p>
-                        <p>FY2026 - FY2028</p>
+                        <p>{sustainmentPeriod}</p>
                     </div>
                 </div>
             </div>

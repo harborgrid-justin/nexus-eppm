@@ -57,6 +57,35 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
       }
   };
 
+  // Helper to generate dynamic impact bullets based on category
+  const getImpactItems = (change: IntegratedChangeRequest | null, category: 'Systems' | 'Process' | 'People') => {
+      if (!change) return [];
+      
+      const impacts = [];
+      const hasArea = (area: string) => change.impactAreas.includes(area as any);
+
+      if (category === 'Systems' && hasArea('Systems')) {
+          impacts.push(`${change.type} Configuration Update`);
+          impacts.push("Integration Interface Adjustments");
+      }
+      if (category === 'Systems' && hasArea('Data')) {
+          impacts.push("Schema Migration / Patch");
+      }
+      
+      if (category === 'Process' && hasArea('Process')) {
+          impacts.push("Standard Operating Procedure (SOP) Revision");
+          impacts.push("Compliance Workflow Trigger");
+      }
+      
+      if (category === 'People' && hasArea('Roles')) {
+          impacts.push("User Role Permissions Update");
+          impacts.push("Training Requirement Identified");
+      }
+
+      if (impacts.length === 0) impacts.push("No direct impact identified in this domain.");
+      return impacts;
+  };
+
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
         <div className="flex items-center gap-2 mb-2">
@@ -142,25 +171,25 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                         <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
                              <h4 className="text-blue-900 font-bold mb-2 flex items-center gap-2"><Settings size={16}/> Systems</h4>
                              <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
-                                 <li>Legacy ERP (Decommission)</li>
-                                 <li>SAP S/4HANA (New Implementation)</li>
-                                 <li>Data Warehouse (Interface Update)</li>
+                                 {getImpactItems(selectedChange, 'Systems').map((item, i) => (
+                                     <li key={i}>{item}</li>
+                                 ))}
                              </ul>
                         </div>
                         <div className="p-4 bg-purple-50 border border-purple-100 rounded-lg">
                              <h4 className="text-purple-900 font-bold mb-2 flex items-center gap-2"><Activity size={16}/> Processes</h4>
                              <ul className="text-sm text-purple-800 list-disc list-inside space-y-1">
-                                 <li>Month-End Close (Modified)</li>
-                                 <li>Procure-to-Pay (Re-engineered)</li>
-                                 <li>Inventory Valuation (Automated)</li>
+                                 {getImpactItems(selectedChange, 'Process').map((item, i) => (
+                                     <li key={i}>{item}</li>
+                                 ))}
                              </ul>
                         </div>
                          <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg">
-                             <h4 className="text-orange-900 font-bold mb-2 flex items-center gap-2"><Network size={16}/> Data & Roles</h4>
+                             <h4 className="text-orange-900 font-bold mb-2 flex items-center gap-2"><Network size={16}/> People & Roles</h4>
                              <ul className="text-sm text-orange-800 list-disc list-inside space-y-1">
-                                 <li>Customer Master Data (Migration)</li>
-                                 <li>Finance Controller (Role Change)</li>
-                                 <li>AP Clerk (New Responsibilities)</li>
+                                 {getImpactItems(selectedChange, 'People').map((item, i) => (
+                                     <li key={i}>{item}</li>
+                                 ))}
                              </ul>
                         </div>
                     </div>

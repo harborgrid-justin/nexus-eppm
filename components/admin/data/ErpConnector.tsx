@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Database, ArrowRight, Lock, CheckCircle, XCircle, DollarSign, RefreshCw } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Database, Lock, CheckCircle, XCircle, RefreshCw, Unlock } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../utils/formatters';
 import { useData } from '../../../context/DataContext';
@@ -9,6 +9,15 @@ export const ErpConnector: React.FC = () => {
     const theme = useTheme();
     const { state } = useData();
     const transactions = state.extensionData.erpTransactions || [];
+
+    // Derive active change order to display in the gate visual
+    // We pick the most recently updated change order for demo purposes
+    const latestChangeOrder = useMemo(() => {
+        const cos = state.changeOrders;
+        return cos.length > 0 ? cos[cos.length - 1] : null;
+    }, [state.changeOrders]);
+
+    const gateStatus = latestChangeOrder?.status === 'Approved' ? 'Open' : 'Locked';
 
     return (
         <div className="h-full p-6 overflow-y-auto">
@@ -30,43 +39,55 @@ export const ErpConnector: React.FC = () => {
                     <div className="absolute top-0 right-0 p-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                     
                     <h3 className="text-lg font-bold mb-8 flex items-center gap-2">
-                        <Lock className="text-yellow-500"/> Cost Gate Logic Flow
+                        {gateStatus === 'Open' ? <Unlock className="text-green-500"/> : <Lock className="text-yellow-500"/>} Cost Gate Logic Flow
                     </h3>
                     
                     <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
                         {/* Nexus Side */}
-                        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 w-64 text-center">
+                        <div className={`bg-slate-800 p-6 rounded-xl border w-64 text-center transition-colors ${gateStatus === 'Open' ? 'border-green-500/30' : 'border-slate-700'}`}>
                             <div className="text-nexus-400 font-bold mb-2">NEXUS PPM</div>
                             <div className="text-xs text-slate-400 uppercase tracking-widest mb-4">Source</div>
                             <div className="bg-slate-700 p-3 rounded mb-2">
-                                <p className="text-xs text-slate-300">Change Order #1042</p>
-                                <p className="font-mono font-bold text-white mt-1">$45,000</p>
+                                <p className="text-xs text-slate-300">
+                                    {latestChangeOrder ? latestChangeOrder.title : 'No Pending Changes'}
+                                </p>
+                                <p className="font-mono font-bold text-white mt-1">
+                                    {latestChangeOrder ? formatCurrency(latestChangeOrder.amount) : '$0.00'}
+                                </p>
                             </div>
-                            <div className="text-[10px] text-slate-500">Status: Approved</div>
+                            <div className={`text-[10px] font-bold uppercase ${latestChangeOrder?.status === 'Approved' ? 'text-green-400' : 'text-yellow-500'}`}>
+                                Status: {latestChangeOrder ? latestChangeOrder.status : 'Idle'}
+                            </div>
                         </div>
 
                         {/* The Gate */}
                         <div className="flex-1 flex flex-col items-center">
                             <div className="h-1 w-full bg-slate-700 relative">
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 p-2 rounded-full border-2 border-yellow-500 z-10">
-                                    <Lock size={24} className="text-yellow-500" />
+                                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 p-3 rounded-full border-4 z-10 transition-all duration-500 ${gateStatus === 'Open' ? 'border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.5)]' : 'border-yellow-500'}`}>
+                                    {gateStatus === 'Open' ? <CheckCircle size={24} className="text-green-500" /> : <Lock size={24} className="text-yellow-500" />}
                                 </div>
                             </div>
-                            <div className="mt-4 bg-yellow-500/10 border border-yellow-500/30 p-3 rounded text-center">
-                                <p className="text-xs font-bold text-yellow-500 uppercase">Validation Rule</p>
-                                <p className="text-xs text-yellow-200 mt-1">Check PO Limit &lt; Budget Cap</p>
+                            <div className={`mt-4 border p-3 rounded text-center transition-colors ${gateStatus === 'Open' ? 'bg-green-500/10 border-green-500/30' : 'bg-yellow-500/10 border-yellow-500/30'}`}>
+                                <p className={`text-xs font-bold uppercase ${gateStatus === 'Open' ? 'text-green-500' : 'text-yellow-500'}`}>
+                                    {gateStatus === 'Open' ? 'Validation Passed' : 'Validation Pending'}
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">Check PO Limit &lt; Budget Cap</p>
                             </div>
                         </div>
 
                         {/* ERP Side */}
-                        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 w-64 text-center">
+                        <div className={`bg-slate-800 p-6 rounded-xl border w-64 text-center transition-opacity duration-500 ${gateStatus === 'Open' ? 'opacity-100 border-blue-500/30' : 'opacity-50 border-slate-700'}`}>
                             <div className="text-blue-400 font-bold mb-2">SAP S/4HANA</div>
                             <div className="text-xs text-slate-400 uppercase tracking-widest mb-4">Destination</div>
                             <div className="bg-slate-700 p-3 rounded mb-2">
-                                <p className="text-xs text-slate-300">PO #99210</p>
-                                <p className="font-mono font-bold text-green-400 mt-1">Committed</p>
+                                <p className="text-xs text-slate-300">
+                                    {gateStatus === 'Open' ? 'GL Journal Entry' : 'Waiting for Data...'}
+                                </p>
+                                <p className="font-mono font-bold text-green-400 mt-1">
+                                    {gateStatus === 'Open' ? 'Committed' : '---'}
+                                </p>
                             </div>
-                            <div className="text-[10px] text-slate-500">Ledger Updated</div>
+                            <div className="text-[10px] text-slate-500">{gateStatus === 'Open' ? 'Ledger Updated' : 'Standby'}</div>
                         </div>
                     </div>
                 </div>

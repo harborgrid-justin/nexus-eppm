@@ -9,11 +9,12 @@ import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Cartesian
 import FundingAllocationModal from './FundingAllocationModal';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
+import { ProjectFunding as ProjectFundingType } from '../../types';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
 export const ProjectFunding: React.FC = () => {
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const { project, financials } = useProjectWorkspace();
     const projectId = project.id;
     const [viewMode, setViewMode] = useState<'reconciliation' | 'sources'>('reconciliation');
@@ -88,6 +89,11 @@ export const ProjectFunding: React.FC = () => {
         });
     }, [project, fundingSummary]);
 
+    const handleSaveFunding = (funding: ProjectFundingType) => {
+        dispatch({ type: 'ADD_PROJECT_FUNDING', payload: { projectId, funding } });
+        setIsModalOpen(false);
+    };
+
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
             {isModalOpen && (
@@ -95,10 +101,7 @@ export const ProjectFunding: React.FC = () => {
                     projectId={projectId} 
                     sources={state.fundingSources} 
                     onClose={() => setIsModalOpen(false)} 
-                    onSave={(funding) => {
-                        // Logic to save allocation would go here
-                        console.log("Saving funding allocation:", funding);
-                    }} 
+                    onSave={handleSaveFunding} 
                 />
             )}
 

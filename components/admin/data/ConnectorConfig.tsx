@@ -44,8 +44,32 @@ export const ConnectorConfig: React.FC = () => {
         setIsTesting(true);
         setTimeout(() => {
             setIsTesting(false);
-            alert("Connection Successful! Latency: 45ms");
+            if (editingConn && editingConn.name) {
+                 // Update the specific connector status if it exists, or just alert for new
+                 alert("Connection Successful! Latency: 45ms");
+                 // If we are editing an existing connection, update its status in real-time
+                 if(editingConn.id) {
+                     dispatch({ 
+                         type: 'SYSTEM_UPDATE_INTEGRATION', 
+                         payload: { ...editingConn, health: 'Good', lastSync: 'Just now' } as Integration 
+                     });
+                 }
+            }
         }, 1500);
+    };
+
+    const handleSync = (conn: Integration) => {
+        // Trigger a sync for a specific connector from the grid
+        dispatch({ 
+             type: 'SYSTEM_UPDATE_INTEGRATION', 
+             payload: { ...conn, lastSync: 'Syncing...', health: 'Unknown' } 
+        });
+        setTimeout(() => {
+             dispatch({ 
+                 type: 'SYSTEM_UPDATE_INTEGRATION', 
+                 payload: { ...conn, lastSync: 'Just now', health: 'Good' } 
+             });
+        }, 2000);
     };
 
     const getIcon = (type: string) => {
@@ -95,14 +119,18 @@ export const ConnectorConfig: React.FC = () => {
                             <div className="flex gap-2 mb-6">
                                  <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.type}</span>
                                  <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 uppercase">{conn.protocol || 'REST'}</span>
+                                 <span className="text-[10px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded border border-slate-100 uppercase ml-auto">{conn.lastSync}</span>
                             </div>
 
                             <div className="mt-auto pt-4 border-t border-slate-100 flex gap-2">
                                 <button onClick={() => handleOpen(conn)} className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
                                     <Settings size={14}/> Configure
                                 </button>
-                                <button className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
-                                    <RefreshCw size={14}/> Sync Now
+                                <button 
+                                    onClick={() => handleSync(conn)}
+                                    className="flex-1 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    <RefreshCw size={14} className={conn.lastSync === 'Syncing...' ? 'animate-spin' : ''}/> Sync Now
                                 </button>
                             </div>
                         </div>

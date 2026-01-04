@@ -1,6 +1,6 @@
 
 import React, { useTransition, useDeferredValue, Suspense } from 'react';
-import { Activity, CheckCircle, Server, Database, HardDrive, Cloud, Zap, Loader2 } from 'lucide-react';
+import { Activity, CheckCircle, Server, Database, HardDrive, Cloud, Zap, Loader2, Plus } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import StatCard from '../../shared/StatCard';
 import { useTheme } from '../../../context/ThemeContext';
@@ -8,20 +8,38 @@ import { useData } from '../../../context/DataContext';
 
 export const ExchangeDashboard: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData();
+    const { state, dispatch } = useData(); // Dispatch needed for future add action
     const [isPending, startTransition] = useTransition();
     const [metricRange, setMetricRange] = React.useState('24h');
     
     // Retrieve centralized metrics
     const throughputData = state.systemMonitoring.throughput || [];
     const deferredData = useDeferredValue(throughputData);
+    const services = state.systemMonitoring.services || [];
+
+    const getServiceIcon = (name: string) => {
+        if (name.includes('Database') || name.includes('DB')) return Database;
+        if (name.includes('Cloud') || name.includes('Bridge')) return Cloud;
+        if (name.includes('Storage') || name.includes('ETL')) return HardDrive;
+        return Server;
+    };
+
+    const getStatusColor = (status: string) => {
+        if (status === 'Operational') return 'text-green-500';
+        if (status === 'Degraded') return 'text-orange-500';
+        return 'text-red-500';
+    };
+
+    const handleAddService = () => {
+        alert("Provisioning Wizard not implemented in this demo.");
+    };
 
     return (
         <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard title="Portfolio Ingestion" value="1.2M" subtext="24h Volume" icon={Activity} trend="up" />
                 <StatCard title="API Integrity" value="99.8%" subtext="14 Faults Logged" icon={CheckCircle} />
-                <StatCard title="Active Sockets" value="8/12" subtext="Healthy Handshake" icon={Server} />
+                <StatCard title="Active Sockets" value={`${services.filter(s => s.status === 'Operational').length}/${services.length || 12}`} subtext="Healthy Handshake" icon={Server} />
                 <StatCard title="Sync Latency" value="142ms" subtext="Avg Payload Wait" icon={Zap} trend="down" />
             </div>
 
@@ -56,27 +74,41 @@ export const ExchangeDashboard: React.FC = () => {
                 </div>
 
                 <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm overflow-y-auto h-[400px] flex flex-col`}>
-                    <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest mb-6">Service Health Registry</h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">Service Health Registry</h3>
+                        <button onClick={handleAddService} className="text-slate-400 hover:text-nexus-600 transition-colors" title="Register Service">
+                            <Plus size={16}/>
+                        </button>
+                    </div>
                     <div className="space-y-4 flex-1">
-                        {[
-                            { name: 'SAP Finance Gateway', status: 'Healthy', load: '45%', icon: Database, color: 'text-green-500' },
-                            { name: 'Primavera SOAP Adaptor', status: 'Healthy', load: '12%', icon: Server, color: 'text-green-500' },
-                            { name: 'SharePoint OCM Bridge', status: 'Syncing', load: '88%', icon: Cloud, color: 'text-blue-500' },
-                            { name: 'Legacy Mainframe ETL', status: 'Warning', load: '95%', icon: HardDrive, color: 'text-orange-500' },
-                        ].map((node, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-sm transition-all group cursor-default">
-                                <div className="flex items-center gap-4">
-                                    <div className={`p-2 rounded-xl transition-colors ${node.status === 'Warning' ? 'bg-orange-50 text-orange-600' : 'bg-white border shadow-sm text-slate-400 group-hover:text-nexus-600'}`}>
-                                        <node.icon size={18} />
+                        {services.length > 0 ? services.map((node, i) => {
+                            const Icon = getServiceIcon(node.name);
+                            return (
+                                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-sm transition-all group cursor-default">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-2 rounded-xl transition-colors bg-white border shadow-sm text-slate-400 group-hover:text-nexus-600`}>
+                                            <Icon size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-800">{node.name}</p>
+                                            <p className={`text-[10px] font-black uppercase ${getStatusColor(node.status)}`}>{node.status}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-800">{node.name}</p>
-                                        <p className={`text-[10px] font-black uppercase ${node.color}`}>{node.status}</p>
+                                    <div className="text-right">
+                                        <span className={`font-mono text-xs font-black text-slate-400 block`}>Latency: {node.latency}</span>
+                                        <span className="text-[10px] text-slate-400">Up: {node.uptime}</span>
                                     </div>
                                 </div>
-                                <span className={`font-mono text-xs font-black ${parseInt(node.load) > 90 ? 'text-red-500' : 'text-slate-400'}`}>{node.load}</span>
+                            );
+                        }) : (
+                            <div className="flex flex-col items-center justify-center h-full text-slate-400 border-2 border-dashed border-slate-200 rounded-xl p-4">
+                                <Server size={32} className="mb-2 opacity-30"/>
+                                <p className="text-xs font-medium text-center">No external services monitored.</p>
+                                <button onClick={handleAddService} className="mt-4 text-xs font-bold text-nexus-600 bg-nexus-50 px-3 py-1.5 rounded-lg hover:bg-nexus-100 transition-colors">
+                                    Register Service Endpoint
+                                </button>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>

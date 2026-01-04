@@ -24,7 +24,7 @@ import {
     OrganizationProfile, NotificationPreference, SystemMetric, ServiceStatus,
     RiskManagementPlan, SecurityPolicy, SchedulingLogic, Task, CostEstimate,
     WBSNode, MaterialReceipt, PortfolioCommunicationItem, QualityStandard,
-    ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle
+    ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle, ProjectFunding
 } from './index';
 
 export type { UnifierState };
@@ -174,6 +174,8 @@ export type Action =
     | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: CostEstimate } }
     | { type: 'ADD_INVOICE'; payload: Invoice }
     | { type: 'UPDATE_INVOICE'; payload: Invoice }
+    | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
+    | { type: 'UPDATE_CHANGE_ORDER'; payload: ChangeOrder }
     | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
     | { type: 'TRANSFER_BUDGET'; payload: { projectId: string; sourceItemId: string; targetItemId: string; amount: number; reason: string } }
     | { type: 'ADD_EXPENSE'; payload: Expense }
@@ -182,6 +184,7 @@ export type Action =
     | { type: 'ADD_BUDGET_ITEM'; payload: BudgetLineItem }
     | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetLineItem }
     | { type: 'DELETE_BUDGET_ITEM'; payload: string }
+    | { type: 'ADD_PROJECT_FUNDING'; payload: { projectId: string; funding: ProjectFunding } }
 
     // Procurement
     | { type: 'ADD_VENDOR'; payload: Vendor }

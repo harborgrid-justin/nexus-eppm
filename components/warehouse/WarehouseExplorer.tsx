@@ -7,6 +7,8 @@ import { Button } from '../ui/Button';
 import DataTable from '../common/DataTable';
 import { Input } from '../ui/Input';
 import { SidePanel } from '../ui/SidePanel';
+import { formatCurrency, formatDate } from '../../utils/formatters';
+import { Badge } from '../ui/Badge';
 
 type Domain = 'Strategy & Portfolio' | 'Program Mgmt' | 'Project Controls' | 'Financials' | 'Resources & Supply' | 'Field Ops' | 'Configuration' | 'Unifier / BP';
 
@@ -91,6 +93,32 @@ export const WarehouseExplorer: React.FC = () => {
             sortable: true,
             render: (item: any) => {
                 const val = item[key];
+                
+                // Smart Rendering based on key/value characteristics
+                if (typeof val === 'number') {
+                    if (key.toLowerCase().includes('budget') || key.toLowerCase().includes('cost') || key.toLowerCase().includes('amount') || key.toLowerCase().includes('price')) {
+                        return <span className="font-mono text-nexus-700">{formatCurrency(val)}</span>;
+                    }
+                    return <span className="font-mono">{val}</span>;
+                }
+                
+                if (typeof val === 'string') {
+                    // Date detection
+                    if (val.match(/^\d{4}-\d{2}-\d{2}/)) {
+                        return <span className="text-slate-500 text-xs">{val.split('T')[0]}</span>;
+                    }
+                    // Status detection
+                    if (key.toLowerCase() === 'status' || key.toLowerCase() === 'health' || key.toLowerCase() === 'priority') {
+                         let variant: any = 'neutral';
+                         const v = val.toLowerCase();
+                         if (['active', 'approved', 'open', 'good', 'completed'].includes(v)) variant = 'success';
+                         else if (['warning', 'pending', 'draft', 'medium'].includes(v)) variant = 'warning';
+                         else if (['critical', 'rejected', 'error', 'failed', 'high'].includes(v)) variant = 'danger';
+                         
+                         return <Badge variant={variant}>{val}</Badge>;
+                    }
+                }
+                
                 return <span className="truncate block max-w-xs" title={String(val)}>{String(val ?? '-')}</span>;
             }
         }));

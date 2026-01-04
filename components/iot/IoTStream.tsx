@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Radio, Activity, Truck, AlertTriangle, Cpu, MapPin, Zap } from 'lucide-react';
+import { Radio, Activity, Truck, AlertTriangle, Cpu, MapPin, Zap, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, LineChart, Line, YAxis } from 'recharts';
 import { useData } from '../../context/DataContext';
@@ -90,23 +90,10 @@ export const IoTStream: React.FC = () => {
                          </div>
                      </div>
                  )) : (
-                     // Fallback mock alerts if no real ones
-                     <>
-                        <div className="bg-yellow-900/20 border border-yellow-900/50 p-3 rounded-lg flex items-center gap-3">
-                            <Zap className="text-yellow-500" size={20}/>
-                            <div>
-                                <p className="text-xs text-yellow-400 font-bold">POWER WARNING</p>
-                                <p className="text-[10px] text-yellow-300">Generator fuel low (Site B)</p>
-                            </div>
-                        </div>
-                        <div className="bg-blue-900/20 border border-blue-900/50 p-3 rounded-lg flex items-center gap-3">
-                            <Truck className="text-blue-500" size={20}/>
-                            <div>
-                                <p className="text-xs text-blue-400 font-bold">LOGISTICS</p>
-                                <p className="text-[10px] text-blue-300">Concrete delivery en route</p>
-                            </div>
-                        </div>
-                     </>
+                     <div className="col-span-3 bg-slate-900/30 border border-slate-800 p-3 rounded-lg flex items-center justify-center gap-3 text-slate-500 text-xs italic">
+                         <Info size={16} className="text-slate-600"/>
+                         No active supply chain alerts detected in stream.
+                     </div>
                  )}
              </div>
         </div>

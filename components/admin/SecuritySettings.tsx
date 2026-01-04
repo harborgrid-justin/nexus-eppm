@@ -6,9 +6,11 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const SecuritySettings: React.FC = () => {
     const { state, dispatch } = useData();
+    const { user } = useAuth();
     const theme = useTheme();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     
@@ -26,6 +28,9 @@ const SecuritySettings: React.FC = () => {
     const runSecurityAudit = () => {
         alert("Security scan initiated. Scanning for over-privileged users and inactive sessions...");
     };
+
+    // Generate a visual hash based on the current user ID to simulate a linked key
+    const systemTokenMask = user ? `nx_live_${user.id.substring(0,4)}...${Date.now().toString().substring(8)}_secure` : 'nx_live_...';
 
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
@@ -167,7 +172,7 @@ const SecuritySettings: React.FC = () => {
                         </div>
                         <p className="text-xs text-slate-300">Enterprise Service Key</p>
                         <div className="mt-1 p-2 bg-black/40 rounded-lg border border-white/5 font-mono text-xs break-all">
-                            nx_live_51P2...00abc_secure_v2
+                            {systemTokenMask}
                         </div>
                         <button className="mt-4 text-[10px] font-black uppercase text-nexus-400 hover:text-nexus-300 underline">Regenerate Token</button>
                     </div>

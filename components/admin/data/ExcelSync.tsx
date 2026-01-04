@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { Save, Download, Upload, CheckCircle, Grid, FilePlus } from 'lucide-react';
+import { Upload, CheckCircle, Grid, FilePlus, ArrowDownCircle } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useData } from '../../../context/DataContext';
 import { Button } from '../../ui/Button';
 
 export const ExcelSync: React.FC = () => {
     const theme = useTheme();
-    const { dispatch } = useData();
+    const { state, dispatch } = useData();
     
     // Empty state init - Clean slate (Phase 2 requirement)
     const [data, setData] = useState<string[][]>([
@@ -19,6 +19,7 @@ export const ExcelSync: React.FC = () => {
         ['', '', '', '', '', '', ''],
     ]);
     const [selectedCell, setSelectedCell] = useState<{r: number, c: number} | null>(null);
+    const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
     const loadTemplate = () => {
         setData([
@@ -29,6 +30,27 @@ export const ExcelSync: React.FC = () => {
             ['', '', '', '', '', '', ''],
             ['', '', '', '', '', '', ''],
         ]);
+    };
+
+    const handleLoadProject = () => {
+        if (!selectedProjectId) return;
+        const project = state.projects.find(p => p.id === selectedProjectId);
+        if (!project) return;
+
+        const header = ['ID', 'Task Name', 'Duration', 'Start Date', 'Finish Date', 'Resource', 'Cost'];
+        const rows = project.tasks.map(t => [
+            t.id,
+            t.name,
+            String(t.duration),
+            t.startDate,
+            t.endDate,
+            t.assignments[0]?.resourceId || '',
+            String((t.work || 0) * 100) // Mock cost logic
+        ]);
+
+        // Pad with empty rows
+        const emptyRows = Array(Math.max(0, 20 - rows.length)).fill(['', '', '', '', '', '', '']);
+        setData([header, ...rows, ...emptyRows]);
     };
 
     const handlePaste = (e: React.ClipboardEvent) => {
@@ -99,16 +121,32 @@ export const ExcelSync: React.FC = () => {
     return (
         <div className="h-full flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
             {/* Toolbar */}
-            <div className="p-3 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div className="p-3 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center bg-slate-50 gap-3">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-green-700 font-bold">
                         <Grid size={18} />
                         <span>Excel Sync Adapter</span>
                     </div>
-                    <div className="h-6 w-px bg-slate-300"></div>
-                    <p className="text-xs text-slate-500">
-                        Paste cells directly from Excel (Ctrl+V). First row is header.
-                    </p>
+                    <div className="h-6 w-px bg-slate-300 hidden md:block"></div>
+                    
+                    <div className="flex items-center gap-2">
+                        <select 
+                            className="text-xs border border-slate-300 rounded-md py-1 px-2 w-40"
+                            value={selectedProjectId}
+                            onChange={(e) => setSelectedProjectId(e.target.value)}
+                        >
+                            <option value="">Load from Project...</option>
+                            {state.projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </select>
+                        <button 
+                            onClick={handleLoadProject}
+                            disabled={!selectedProjectId}
+                            className="p-1 text-slate-500 hover:text-nexus-600 disabled:opacity-30"
+                            title="Load Project Data"
+                        >
+                            <ArrowDownCircle size={16}/>
+                        </button>
+                    </div>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline" size="sm" icon={FilePlus} onClick={loadTemplate}>Load Template</Button>

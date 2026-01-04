@@ -52,6 +52,16 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
                 return p;
             })
         };
+    case 'ADD_PROJECT_FUNDING':
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id === action.payload.projectId) {
+                     return { ...p, funding: [...(p.funding || []), action.payload.funding] };
+                }
+                return p;
+            })
+        };
     
     // --- REFLECTION PROJECTS ---
     case 'PROJECT_CREATE_REFLECTION': {

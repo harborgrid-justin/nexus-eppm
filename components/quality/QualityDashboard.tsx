@@ -23,22 +23,29 @@ const QualityDashboard: React.FC = () => {
   }, [qualityReports]);
 
   const trendData = useMemo(() => {
-    // Mock monthly trend data
-    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(month => ({
-        month,
-        Pass: Math.floor(Math.random() * 50) + 40,
-        Fail: Math.floor(Math.random() * 10) + 1,
-    }));
-  }, []);
+    if (!qualityReports || qualityReports.length === 0) return [];
 
-  if (!qualityProfile || !paretoData || !trendData) {
-    return (
-      <div className="flex items-center justify-center h-full">
-          <Activity size={24} className="animate-pulse text-slate-300 mr-2" />
-          <span className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aggregating Quality Metrics...</span>
-      </div>
-    );
-  }
+    const timeMap: Record<string, { pass: number; fail: number }> = {};
+    
+    // Sort reports by date
+    const sortedReports = [...qualityReports].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    sortedReports.forEach(report => {
+        const date = new Date(report.date);
+        const key = date.toLocaleString('default', { month: 'short' }); // Group by month for now
+        
+        if (!timeMap[key]) timeMap[key] = { pass: 0, fail: 0 };
+        
+        if (report.status === 'Pass') timeMap[key].pass += 1;
+        else if (report.status === 'Fail') timeMap[key].fail += 1;
+    });
+
+    return Object.entries(timeMap).map(([month, counts]) => ({
+        month,
+        Pass: counts.pass,
+        Fail: counts.fail
+    }));
+  }, [qualityReports]);
 
   const trendDataSimple = trendData.map(d => ({
       name: d.month,
@@ -47,13 +54,22 @@ const QualityDashboard: React.FC = () => {
   }));
 
   const healthRadar = [
-      { subject: 'Product', A: 92, fullMark: 100 },
-      { subject: 'Process', A: 85, fullMark: 100 },
-      { subject: 'Supplier', A: 78, fullMark: 100 },
-      { subject: 'Safety', A: 98, fullMark: 100 },
-      { subject: 'Audit', A: 88, fullMark: 100 },
-      { subject: 'Feedback', A: 90, fullMark: 100 },
+      { subject: 'Product', A: qualityProfile?.passRate || 0, fullMark: 100 },
+      { subject: 'Process', A: 85, fullMark: 100 }, // Metric to be implemented in Phase 5
+      { subject: 'Supplier', A: 78, fullMark: 100 }, // Metric to be implemented in Phase 5
+      { subject: 'Safety', A: 98, fullMark: 100 }, // Metric to be implemented in Phase 5
+      { subject: 'Audit', A: 88, fullMark: 100 }, // Metric to be implemented in Phase 5
+      { subject: 'Feedback', A: 90, fullMark: 100 }, // Metric to be implemented in Phase 5
   ];
+
+  if (!qualityProfile) {
+    return (
+      <div className="flex items-center justify-center h-full">
+          <Activity size={24} className="animate-pulse text-slate-300 mr-2" />
+          <span className="text-slate-400 font-bold uppercase tracking-widest text-xs">Aggregating Quality Metrics...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full overflow-y-auto p-8 space-y-8 animate-in fade-in duration-500 scrollbar-thin">
@@ -81,10 +97,9 @@ const QualityDashboard: React.FC = () => {
             />
             <StatCard 
                 title="Rework Exposure" 
-                value="$12.5k" 
-                subtext="Estimated Cost of Poor Quality" 
+                value="$0" 
+                subtext="Cost of Poor Quality (Requires Finance Link)" 
                 icon={AlertTriangle} 
-                trend="down" 
             />
         </div>
 
@@ -98,13 +113,17 @@ const QualityDashboard: React.FC = () => {
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border">Frequency Sorted</span>
                 </div>
                 <div className="flex-1 min-h-0">
-                    <CustomBarChart 
-                        data={paretoData}
-                        xAxisKey="name"
-                        dataKey="count"
-                        barColor="#ef4444"
-                        height={250}
-                    />
+                    {paretoData.length > 0 ? (
+                        <CustomBarChart 
+                            data={paretoData}
+                            xAxisKey="name"
+                            dataKey="count"
+                            barColor="#ef4444"
+                            height={250}
+                        />
+                    ) : (
+                        <div className="flex h-full items-center justify-center text-slate-400 text-sm">No defect data available.</div>
+                    )}
                 </div>
             </div>
 
@@ -139,13 +158,19 @@ const QualityDashboard: React.FC = () => {
                 </div>
             </div>
             <div className="h-[300px]">
-                <CustomBarChart 
-                    data={trendDataSimple}
-                    xAxisKey="name"
-                    dataKey="Pass"
-                    barColor="#10b981"
-                    height={280}
-                />
+                {trendDataSimple.length > 0 ? (
+                    <CustomBarChart 
+                        data={trendDataSimple}
+                        xAxisKey="name"
+                        dataKey="Pass"
+                        barColor="#10b981"
+                        height={280}
+                    />
+                ) : (
+                    <div className="flex h-full items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">
+                        No inspection history recorded.
+                    </div>
+                )}
             </div>
         </div>
     </div>

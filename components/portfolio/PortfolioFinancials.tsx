@@ -1,10 +1,11 @@
 
 import React, { useMemo } from 'react';
 import { Project } from '../../types';
-import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
+import { formatCompactCurrency, formatCurrency, formatDate } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, ReferenceLine } from 'recharts';
-import { DollarSign, TrendingUp, Lock } from 'lucide-react';
+import { DollarSign, TrendingUp, Lock, Unlock, AlertCircle } from 'lucide-react';
+import { useData } from '../../context/DataContext';
 
 interface PortfolioFinancialsProps {
   projects: Project[];
@@ -12,6 +13,7 @@ interface PortfolioFinancialsProps {
 
 const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) => {
   const theme = useTheme();
+  const { state } = useData();
 
   // --- 1. Cost vs Value Analysis Data ---
   const scatterData = useMemo(() => projects.map(p => ({
@@ -25,15 +27,11 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
   // --- 2. Multi-Year Budget Data (Simulated) ---
   const annualData = useMemo(() => {
       const years = [2024, 2025, 2026];
-      // Rule 1: Deterministic simulation based on project data summation rather than random
-      // Uses the project ID to create a stable pseudo-random factor
       return years.map(year => {
           const budget = projects.reduce((sum, p) => {
-              // Create a stable spread factor based on project ID char codes
               const seed = p.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
               const spreadFactor = (seed % 100) / 100; // 0.00 - 0.99
               
-              // Shift budget emphasis based on year and factor
               let yearlyAllocation = 0;
               if (year === 2024) yearlyAllocation = p.budget * (0.4 + (spreadFactor * 0.1));
               if (year === 2025) yearlyAllocation = p.budget * (0.3 + (spreadFactor * 0.1));
@@ -42,8 +40,8 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
               return sum + yearlyAllocation;
           }, 0);
 
-          const actuals = year === 2024 ? budget * 0.82 : 0; // Fixed 82% burn rate for current year
-          const forecast = budget * 1.05; // 5% variance forecast
+          const actuals = year === 2024 ? budget * 0.82 : 0; 
+          const forecast = budget * 1.05; 
 
           return { 
               year, 
@@ -61,6 +59,25 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
     const remaining = totalBudget - totalSpent;
     return { totalBudget, totalSpent, remaining };
   }, [projects]);
+
+  // --- 4. Funding Gates (Dynamic) ---
+  const fundingGates = useMemo(() => {
+      // Aggregate stage gates from all programs that are 'Funding' type
+      const allGates = state.programStageGates
+          .filter(g => g.type === 'Funding')
+          .sort((a,b) => new Date(a.plannedDate).getTime() - new Date(b.plannedDate).getTime())
+          .slice(0, 5); // Show next 5
+
+      return allGates.map(g => ({
+          id: g.id,
+          name: g.name,
+          date: g.actualDate || g.plannedDate,
+          status: g.status,
+          // Mock amount mapping if not present in StageGate type directly, 
+          // in real app this would link to ProgramBudgetAllocation
+          amount: g.status === 'Approved' ? 'Released' : 'Pending' 
+      }));
+  }, [state.programStageGates]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -87,7 +104,7 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
             <div className="absolute right-4 top-4 text-slate-100"><TrendingUp size={48} /></div>
             <h3 className={`text-sm font-bold ${theme.colors.text.secondary} uppercase tracking-wider mb-2 relative z-10`}>YTD Actuals</h3>
             <p className={`text-3xl font-bold ${theme.colors.text.primary} relative z-10`}>{formatCompactCurrency(stats.totalSpent)}</p>
-            <p className={`text-xs ${theme.colors.text.secondary} mt-2 relative z-10`}>82% of Annual CapEx</p>
+            <p className={`text-xs ${theme.colors.text.secondary} mt-2 relative z-10`}>{stats.totalBudget > 0 ? ((stats.totalSpent/stats.totalBudget)*100).toFixed(0) : 0}% of Annual CapEx</p>
         </div>
         <div className={`${theme.components.card} p-6 relative overflow-hidden`}>
             <div className="absolute right-4 top-4 text-slate-100"><Lock size={48} /></div>
@@ -101,7 +118,7 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
           {/* Cost-Value Analysis */}
           <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[400px]`}>
             <h3 className={`text-lg font-bold ${theme.colors.text.primary} mb-2`}>Cost-Value Analysis</h3>
-            <p className={`text-xs ${theme.colors.text.secondary} mb-6`}>Bubble Size = Risk Exposure. Identify High Cost / Low Value projects for review.</p>
+            <p className={`text-xs ${theme.colors.text.secondary} mb-6`}>Bubble Size = Risk Exposure. Identify High Cost / Low Value projects.</p>
             <ResponsiveContainer width="100%" height="300px">
               <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -138,38 +155,39 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
 
       {/* Funding Gates */}
       <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-          <h3 className={`text-lg font-bold ${theme.colors.text.primary} mb-6 flex items-center gap-2`}><Lock size={20} className="text-nexus-600"/> Funding Gates & Approvals</h3>
+          <h3 className={`text-lg font-bold ${theme.colors.text.primary} mb-6 flex items-center gap-2`}><Lock size={20} className="text-nexus-600"/> Upcoming Funding Gates</h3>
           <div className="overflow-x-auto">
-              <div className="flex gap-8 min-w-[800px] relative">
-                  {/* Timeline Line */}
-                  <div className={`absolute top-6 left-0 right-0 h-1 ${theme.colors.background} z-0`}></div>
-                  
-                  {[
-                      { name: 'Initial Proposal', date: 'Q4 2023', status: 'Approved', amount: '$5M' },
-                      { name: 'Phase 1: Design', date: 'Q1 2024', status: 'Approved', amount: '$12M' },
-                      { name: 'Phase 2: Construction', date: 'Q3 2024', status: 'Pending', amount: '$25M' },
-                      { name: 'Phase 3: Closeout', date: 'Q2 2025', status: 'Locked', amount: '$3M' },
-                  ].map((gate, idx) => (
-                      <div key={idx} className="flex-1 relative z-10 flex flex-col items-center text-center">
-                          <div className={`w-12 h-12 rounded-full border-4 flex items-center justify-center ${theme.colors.surface} mb-3 shadow-sm ${
-                              gate.status === 'Approved' ? 'border-green-500 text-green-600' :
-                              gate.status === 'Pending' ? 'border-yellow-500 text-yellow-600' :
-                              'border-slate-300 text-slate-400'
-                          }`}>
-                              {gate.status === 'Locked' ? <Lock size={18}/> : <DollarSign size={18}/>}
+              {fundingGates.length > 0 ? (
+                  <div className="flex gap-8 min-w-[800px] relative">
+                      {/* Timeline Line */}
+                      <div className={`absolute top-6 left-0 right-0 h-1 ${theme.colors.background} z-0`}></div>
+                      
+                      {fundingGates.map((gate, idx) => (
+                          <div key={idx} className="flex-1 relative z-10 flex flex-col items-center text-center group">
+                              <div className={`w-12 h-12 rounded-full border-4 flex items-center justify-center ${theme.colors.surface} mb-3 shadow-sm transition-transform group-hover:scale-110 ${
+                                  gate.status === 'Approved' ? 'border-green-500 text-green-600' :
+                                  gate.status === 'Conditional' ? 'border-yellow-500 text-yellow-600' :
+                                  gate.status === 'Rejected' ? 'border-red-500 text-red-500' :
+                                  'border-slate-300 text-slate-400'
+                              }`}>
+                                  {gate.status === 'Approved' ? <Unlock size={18}/> : gate.status === 'Rejected' ? <AlertCircle size={18}/> : <Lock size={18}/>}
+                              </div>
+                              <h4 className={`font-bold ${theme.colors.text.primary} text-sm line-clamp-1 w-32`}>{gate.name}</h4>
+                              <p className={`text-xs ${theme.colors.text.secondary} mb-1`}>{formatDate(gate.date)}</p>
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                  gate.status === 'Approved' ? 'bg-green-100 text-green-700' :
+                                  gate.status === 'Conditional' ? 'bg-yellow-100 text-yellow-700' :
+                                  gate.status === 'Rejected' ? 'bg-red-100 text-red-700' :
+                                  'bg-slate-100 text-slate-500'
+                              }`}>
+                                  {gate.amount} • {gate.status}
+                              </span>
                           </div>
-                          <h4 className={`font-bold ${theme.colors.text.primary} text-sm`}>{gate.name}</h4>
-                          <p className={`text-xs ${theme.colors.text.secondary} mb-1`}>{gate.date}</p>
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              gate.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                              gate.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-slate-100 text-slate-500'
-                          }`}>
-                              {gate.amount} • {gate.status}
-                          </span>
-                      </div>
-                  ))}
-              </div>
+                      ))}
+                  </div>
+              ) : (
+                  <div className="p-8 text-center text-slate-400 italic">No funding gates scheduled.</div>
+              )}
           </div>
       </div>
     </div>
