@@ -1,13 +1,12 @@
+
 import React, { createContext, useContext, ReactNode } from 'react';
-// FIX: Import missing types for the context data shape
-import { Project, Risk, BudgetLineItem, ChangeOrder, Stakeholder, RiskManagementPlan, PurchaseOrder, QualityReport, NonConformanceReport, CommunicationLog, Resource } from '../types/index';
+import { Project, Risk, BudgetLineItem, ChangeOrder, Stakeholder, RiskManagementPlan, PurchaseOrder, QualityReport, NonConformanceReport, CommunicationLog, Resource, EVMMetrics, Issue } from '../types/index';
 
 // Define a comprehensive type for all data related to a project workspace
 export interface ProjectWorkspaceData {
     project: Project;
     risks: Risk[];
-    issues: any[];
-    // FIX: Corrected type from BudgetLogItem to BudgetLineItem
+    issues: Issue[];
     budgetItems: BudgetLineItem[];
     changeOrders: ChangeOrder[];
     purchaseOrders: PurchaseOrder[];
@@ -15,13 +14,11 @@ export interface ProjectWorkspaceData {
     nonConformanceReports: NonConformanceReport[];
     communicationLogs: CommunicationLog[];
     assignedResources: Resource[];
-    summary: any;
-    financials: any;
-    riskProfile: any;
-    qualityProfile: any;
-    // FIX: Added missing stakeholders property
+    summary: { totalTasks: number; completedTasks: number; overallProgress: number; delayedTasks?: number } | null;
+    financials: { totalPlanned: number; revisedBudget: number; totalActual: number; totalCommitted: number; approvedCOAmount: number; pendingCOAmount: number; variance: number; budgetUtilization: number; evm: EVMMetrics; solvency: string } | null;
+    riskProfile: { totalRisks: number; highImpactRisks: number; openRisks: number; exposure: number };
+    qualityProfile: { totalReports: number; failedReports: number; passRate: number; openDefects: number; totalDefects: number };
     stakeholders: Stakeholder[];
-    // FIX: Added missing riskPlan property
     riskPlan: RiskManagementPlan;
 }
 

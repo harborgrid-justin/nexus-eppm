@@ -10,7 +10,7 @@ import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLog
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
-const RiskManagement = lazy(() => import('./RiskManagement'));
+const ProjectRiskManager = lazy(() => import('./risk/ProjectRiskManager')); // Updated import
 const IssueLog = lazy(() => import('./IssueLog'));
 const ScopeManagement = lazy(() => import('./ScopeManagement'));
 const StakeholderManagement = lazy(() => import('./StakeholderManagement'));
@@ -59,7 +59,7 @@ const ProjectWorkspace: React.FC = () => {
       case 'scope': return <ScopeManagement />;
       case 'schedule': return scheduleView === 'gantt' ? <ProjectGantt /> : <NetworkDiagram />;
       case 'cost': return <CostManagement />;
-      case 'risk': return <RiskManagement />;
+      case 'risk': return <ProjectRiskManager />; // Updated component
       case 'issues': return <IssueLog />;
       case 'stakeholder': return <StakeholderManagement />;
       case 'procurement': return <ProcurementManagement />;

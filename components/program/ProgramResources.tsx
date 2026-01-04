@@ -14,18 +14,59 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
   const { state } = useData();
   const theme = useTheme();
 
-  // Mock calculation of shared resource load
-  // In a real app, this would aggregate assignments from all program projects
-  const roleDistribution = useMemo(() => [
-      { role: 'System Architect', demand: 120, capacity: 100, status: 'Overloaded' },
-      { role: 'Civil Engineer', demand: 450, capacity: 500, status: 'Healthy' },
-      { role: 'Project Manager', demand: 90, capacity: 100, status: 'Healthy' },
-      { role: 'Safety Inspector', demand: 110, capacity: 80, status: 'Critical' }
-  ], []);
+  // Dynamic calculation of resource load aggregation
+  const roleDistribution = useMemo(() => {
+    const roleStats: Record<string, { demand: number; capacity: number }> = {};
+    
+    // 1. Calculate Capacity by Role (Global or Filtered if needed)
+    state.resources.forEach(r => {
+        if (!roleStats[r.role]) roleStats[r.role] = { demand: 0, capacity: 0 };
+        roleStats[r.role].capacity += (r.capacity || 160);
+    });
+
+    // 2. Calculate Demand from Program Projects
+    projects.forEach(p => {
+        p.tasks.forEach(t => {
+            // Only count active/future demand
+            if (t.status !== 'Completed') {
+                t.assignments.forEach(a => {
+                    const res = state.resources.find(r => r.id === a.resourceId);
+                    if (res) {
+                        // Assignment units (percentage) * 160h (monthly base)
+                        // Simplified heuristic for aggregate view
+                        const demandHours = (a.units / 100) * 160; 
+                        if (roleStats[res.role]) {
+                            roleStats[res.role].demand += demandHours;
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    // 3. Transform to array and determine status
+    const results = Object.entries(roleStats).map(([role, stats]) => {
+        const util = stats.capacity > 0 ? stats.demand / stats.capacity : 0;
+        let status = 'Healthy';
+        if (util > 1.1) status = 'Critical';
+        else if (util > 0.9) status = 'Overloaded';
+        
+        return { role, demand: Math.round(stats.demand), capacity: stats.capacity, status };
+    });
+
+    // Return top 5 roles by demand
+    return results.sort((a,b) => b.demand - a.demand).slice(0, 5); 
+  }, [state.resources, projects]);
 
   const criticalResources = useMemo(() => {
-    return state.resources.filter(r => r.allocated > r.capacity * 1.1).slice(0, 5);
-  }, [state.resources]);
+    // Filter resources allocated to this program that are over-allocated
+    const programResourceIds = new Set<string>();
+    projects.forEach(p => p.tasks.forEach(t => t.assignments.forEach(a => programResourceIds.add(a.resourceId))));
+
+    return state.resources
+        .filter(r => programResourceIds.has(r.id) && r.allocated > r.capacity * 1.1)
+        .slice(0, 5);
+  }, [state.resources, projects]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -65,6 +106,9 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                             </div>
                         </div>
                     ))}
+                    {roleDistribution.length === 0 && (
+                        <div className="p-8 text-center text-slate-400 italic text-sm">No active resource assignments found in program.</div>
+                    )}
                 </div>
             </div>
 
@@ -85,7 +129,7 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                                         <p className="font-bold text-slate-800 text-sm">{res.name}</p>
                                         <p className="text-xs text-slate-500">{res.role}</p>
                                         <div className="mt-1 text-xs text-red-600 font-semibold">
-                                            Over-allocated across P1001 & P1002
+                                            Over-allocated ({Math.round(res.allocated/res.capacity*100)}%)
                                         </div>
                                     </div>
                                 </li>

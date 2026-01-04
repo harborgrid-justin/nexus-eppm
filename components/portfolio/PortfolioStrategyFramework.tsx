@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Users, Shield, Scale, BookOpen, BarChart2, Briefcase, FileText, ArrowRight, Layers, Plus, MoreHorizontal, Move, Edit2, Trash2
@@ -21,14 +20,18 @@ const SCORING_MODEL = [
   { id: 'feasibility', name: 'Resource Feasibility', weight: 0.1, description: 'Availability of skills and resources.' },
 ];
 
-const MOCK_PROJECT_SCORES: Record<string, Record<string, number>> = {
-  'P1001': { strategic: 9, financial: 7, risk: 4, feasibility: 6 },
+const calculateProjectScores = (project: Project): Record<string, number> => {
+    return {
+        strategic: project.strategicImportance || 5,
+        financial: project.financialValue || 5,
+        risk: project.riskScore ? Math.max(1, 10 - Math.ceil(project.riskScore / 5)) : 5, // Normalize 0-25 risk to 1-10 inverse
+        feasibility: project.resourceFeasibility || 5
+    };
 };
 
-const calculateScore = (scores: Record<string, number>): number => {
+const calculateWeightedScore = (scores: Record<string, number>): number => {
   const totalScore = SCORING_MODEL.reduce((acc, criterion) => {
-    // For 'risk', a lower input is better, so we invert it for scoring (10 - score)
-    const score = criterion.id === 'risk' ? 10 - (scores[criterion.id] || 0) : (scores[criterion.id] || 0);
+    const score = scores[criterion.id] || 0;
     return acc + (score / 10) * criterion.weight;
   }, 0);
   return Math.round(totalScore * 100);
@@ -44,7 +47,7 @@ const PortfolioStrategyFramework: React.FC = () => {
 
   const handleMoveCategory = (projectId: string, newCategory: string) => {
       dispatch({
-          type: 'UPDATE_PROJECT',
+          type: 'PROJECT_UPDATE',
           payload: {
               projectId,
               updatedData: { category: newCategory }
@@ -114,9 +117,14 @@ const PortfolioStrategyFramework: React.FC = () => {
             <div>
               <h3 className={`${theme.typography.h3} mb-4`}>Strategic Objectives</h3>
               <ul className="space-y-2 text-sm">
-                <li className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>Increase Market Share by 10% in EU</li>
-                <li className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>Achieve 15% Operational Efficiency Gain</li>
-                <li className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>Meet new ESG Compliance Standards</li>
+                {state.strategicGoals.length > 0 ? state.strategicGoals.map(goal => (
+                    <li key={goal.id} className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>
+                        <span className="font-bold block mb-1">{goal.name}</span>
+                        <span className="text-slate-500">{goal.description}</span>
+                    </li>
+                )) : (
+                    <li className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border} text-slate-400 italic`}>No strategic goals defined.</li>
+                )}
               </ul>
             </div>
             <div>
@@ -142,27 +150,33 @@ const PortfolioStrategyFramework: React.FC = () => {
             </div>
           </div>
           <div className={`mt-8 pt-6 border-t ${theme.colors.border}`}>
-            <h3 className={`${theme.typography.h3} mb-4`}>Example Project Evaluation</h3>
+            <h3 className={`${theme.typography.h3} mb-4`}>Project Evaluation</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className={`border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <th className={`p-2 text-left font-bold ${theme.colors.text.secondary}`}>Project</th>
-                    {SCORING_MODEL.map(c => <th key={c.id} className={`p-2 text-center font-bold ${theme.colors.text.secondary}`}>{c.name}</th>)}
+                    {SCORING_MODEL.map(c => <th key={c.id} className={`p-2 text-center font-bold ${theme.colors.text.secondary}`}>{c.name.split(' ')[0]}</th>)}
                     <th className="p-2 text-center font-black text-nexus-800 bg-nexus-50">Weighted Score</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {Object.entries(MOCK_PROJECT_SCORES).map(([projectId, scores]) => {
-                    const project = getProjectById(projectId);
+                  {state.projects.map((project) => {
+                    const scores = calculateProjectScores(project);
                     return (
-                      <tr key={projectId}>
-                        <td className={`p-2 font-medium ${theme.colors.text.primary}`}>{project?.name || projectId}</td>
-                        {SCORING_MODEL.map(c => <td key={c.id} className={`p-2 text-center ${theme.colors.text.secondary}`}>{scores[c.id]} / 10</td>)}
-                        <td className="p-2 text-center font-bold text-lg text-nexus-700 bg-nexus-50/50">{calculateScore(scores)}</td>
+                      <tr key={project.id}>
+                        <td className={`p-2 font-medium ${theme.colors.text.primary}`}>
+                            {project.name}
+                            <div className="text-[10px] text-slate-400">{project.code}</div>
+                        </td>
+                        {SCORING_MODEL.map(c => <td key={c.id} className={`p-2 text-center ${theme.colors.text.secondary}`}>{scores[c.id]}</td>)}
+                        <td className="p-2 text-center font-bold text-lg text-nexus-700 bg-nexus-50/50">{calculateWeightedScore(scores)}</td>
                       </tr>
                     )
                   })}
+                  {state.projects.length === 0 && (
+                      <tr><td colSpan={6} className="p-4 text-center text-slate-400">No active projects to evaluate.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>

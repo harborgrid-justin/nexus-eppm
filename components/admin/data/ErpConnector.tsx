@@ -3,9 +3,12 @@ import React from 'react';
 import { Database, ArrowRight, Lock, CheckCircle, XCircle, DollarSign, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../utils/formatters';
+import { useData } from '../../../context/DataContext';
 
 export const ErpConnector: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    const transactions = state.extensionData.erpTransactions || [];
 
     return (
         <div className="h-full p-6 overflow-y-auto">
@@ -85,27 +88,26 @@ export const ErpConnector: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            <tr className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-mono text-xs">TX-99201</td>
-                                <td className="px-6 py-4">Invoice Payment</td>
-                                <td className="px-6 py-4 text-right font-mono">{formatCurrency(12500)}</td>
-                                <td className="px-6 py-4 text-center"><CheckCircle size={16} className="text-green-500 inline"/></td>
-                                <td className="px-6 py-4 text-xs font-mono text-slate-600">200 OK - Doc 44021 Posted</td>
-                            </tr>
-                            <tr className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-mono text-xs">TX-99202</td>
-                                <td className="px-6 py-4">Change Order</td>
-                                <td className="px-6 py-4 text-right font-mono">{formatCurrency(150000)}</td>
-                                <td className="px-6 py-4 text-center"><XCircle size={16} className="text-red-500 inline"/></td>
-                                <td className="px-6 py-4 text-xs font-mono text-red-600">403 Forbidden - Budget Exceeded</td>
-                            </tr>
-                            <tr className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-mono text-xs">TX-99203</td>
-                                <td className="px-6 py-4">Resource Rate Update</td>
-                                <td className="px-6 py-4 text-right font-mono">-</td>
-                                <td className="px-6 py-4 text-center"><CheckCircle size={16} className="text-green-500 inline"/></td>
-                                <td className="px-6 py-4 text-xs font-mono text-slate-600">200 OK - Master Data Sync</td>
-                            </tr>
+                            {transactions.map(tx => (
+                                <tr key={tx.id} className="hover:bg-slate-50">
+                                    <td className="px-6 py-4 font-mono text-xs">{tx.id}</td>
+                                    <td className="px-6 py-4">{tx.type}</td>
+                                    <td className="px-6 py-4 text-right font-mono">
+                                        {typeof tx.amount === 'number' ? formatCurrency(tx.amount) : tx.amount}
+                                    </td>
+                                    <td className="px-6 py-4 text-center">
+                                        {tx.status === 'Success' ? <CheckCircle size={16} className="text-green-500 inline"/> : 
+                                         tx.status === 'Failed' ? <XCircle size={16} className="text-red-500 inline"/> : 
+                                         <RefreshCw size={16} className="text-yellow-500 inline animate-spin"/>}
+                                    </td>
+                                    <td className={`px-6 py-4 text-xs font-mono ${tx.status === 'Failed' ? 'text-red-600' : 'text-slate-600'}`}>
+                                        {tx.response}
+                                    </td>
+                                </tr>
+                            ))}
+                            {transactions.length === 0 && (
+                                <tr><td colSpan={5} className="p-4 text-center text-slate-400">No ERP transactions logged.</td></tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

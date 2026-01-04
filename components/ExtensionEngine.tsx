@@ -20,6 +20,10 @@ const FedGovSuite = lazy(() => import('./engines/FedGovSuite'));
 const StateGovSuite = lazy(() => import('./engines/StateGovSuite'));
 const IoTStream = lazy(() => import('./iot/IoTStream').then(module => ({ default: module.IoTStream })));
 
+// Renderers
+const Viewer3DRenderer = lazy(() => import('./engines/renderers/Viewer3DRenderer').then(m => ({ default: m.Viewer3DRenderer })));
+const MapRenderer = lazy(() => import('./engines/renderers/MapRenderer').then(m => ({ default: m.MapRenderer })));
+
 interface ExtensionEngineProps {
   extension: Extension;
 }
@@ -87,7 +91,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
       );
   }
   
-  if (extension.id === 'iot_smart_site') { // Example if we add an IoT extension ID
+  if (extension.id === 'iot_smart_site') { 
       return (
           <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
               <IoTStream />
@@ -96,6 +100,22 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
   }
 
   // --- GENERIC RENDERERS based on viewType ---
+  
+  if (extension.viewType === 'viewer3d') {
+      return (
+        <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+           <Viewer3DRenderer extensionVersion={extension.version} />
+        </Suspense>
+      );
+  }
+
+  if (extension.viewType === 'map') {
+      return (
+        <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-nexus-500"/></div>}>
+           <MapRenderer extensionName={extension.name} />
+        </Suspense>
+      );
+  }
   
   const renderToolbar = () => (
     <div className={`p-4 border-b ${theme.colors.border} bg-slate-50 flex justify-between items-center`}>
@@ -177,35 +197,6 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
     </div>
   );
 
-  const renderMap = () => (
-     <div className="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/-74.006,40.7128,12,0/800x600?access_token=pk.mock')] bg-cover opacity-50"></div>
-        <div className="bg-white/90 backdrop-blur p-8 rounded-xl shadow-lg text-center z-10 max-w-md">
-           <MapIcon size={48} className="mx-auto text-nexus-500 mb-4" />
-           <h3 className="text-xl font-bold text-slate-900">Geospatial Engine</h3>
-           <p className="text-slate-500 mt-2">
-             Map interface loaded for {extension.name}. Real-time telemetry overlay enabled.
-           </p>
-        </div>
-     </div>
-  );
-
-  const render3D = () => (
-    <div className="flex-1 bg-slate-900 relative flex items-center justify-center">
-       <div className="grid grid-cols-12 gap-1 absolute inset-0 opacity-20 pointer-events-none">
-          {[...Array(144)].map((_, i) => <div key={i} className="border border-nexus-500/30"></div>)}
-       </div>
-       <div className="text-center text-slate-300 z-10">
-          <Box size={64} className="mx-auto text-nexus-500 mb-6 animate-pulse" />
-          <h3 className="text-2xl font-light">3D Model Context</h3>
-          <p className="text-slate-500 mt-2 max-w-sm">
-             Loading BIM dataset v{extension.version}...<br/>
-             WebGL rendering engine initialized.
-          </p>
-       </div>
-    </div>
-  );
-
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-300">
       {/* Header */}
@@ -228,8 +219,6 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
          {extension.viewType === 'dashboard' && renderDashboard()}
          {extension.viewType === 'grid' && renderGrid()}
          {extension.viewType === 'form' && renderGrid()} {/* Fallback for form to grid for now */}
-         {extension.viewType === 'map' && renderMap()}
-         {extension.viewType === 'viewer3d' && render3D()}
       </div>
     </div>
   );

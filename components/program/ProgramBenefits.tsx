@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Star, TrendingUp, DollarSign, Clock } from 'lucide-react';
@@ -7,6 +7,7 @@ import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
+import { Badge } from '../ui/Badge';
 
 interface ProgramBenefitsProps {
   programId: string;
@@ -26,13 +27,32 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   const plannedValue = programBenefits.reduce((sum, b) => sum + b.value, 0);
   const realizationRate = plannedValue > 0 ? (realizedValue / plannedValue) * 100 : 0;
 
-  // Mock Trend Data
-  const trendData = [
-      { month: 'Q1', planned: plannedValue * 0.2, actual: realizedValue * 0.1 },
-      { month: 'Q2', planned: plannedValue * 0.4, actual: realizedValue * 0.3 },
-      { month: 'Q3', planned: plannedValue * 0.7, actual: realizedValue * 0.6 },
-      { month: 'Q4', planned: plannedValue, actual: realizedValue }
-  ];
+  // Calculate Trend Data (Simulated S-Curve based on actual totals)
+  const trendData = useMemo(() => {
+      const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+      const data = [];
+      let cumulativePlanned = 0;
+      let cumulativeRealized = 0;
+      
+      // Distribute value over 4 quarters
+      // In a real app, this would be aggregated from benefit line item dates
+      for(let i=0; i<4; i++) {
+          // Weighted towards back-end
+          const incrementPlanned = plannedValue * (i === 0 ? 0.1 : i === 1 ? 0.2 : i === 2 ? 0.3 : 0.4);
+          // Lagging realization
+          const incrementRealized = realizedValue * (i === 0 ? 0.05 : i === 1 ? 0.15 : i === 2 ? 0.3 : 0.5);
+          
+          cumulativePlanned += incrementPlanned;
+          cumulativeRealized += incrementRealized;
+          
+          data.push({
+              month: quarters[i],
+              planned: Math.round(cumulativePlanned),
+              actual: Math.round(cumulativeRealized)
+          });
+      }
+      return data;
+  }, [plannedValue, realizedValue]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
@@ -87,12 +107,18 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
                                     <td className="px-6 py-3 text-xs text-slate-500">{b.componentId}</td>
                                     <td className="px-6 py-3 text-sm text-right font-mono">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
                                     <td className="px-6 py-3 text-right">
-                                        <span className={`px-2 py-1 text-xs rounded-full ${
-                                            b.status === 'Realized' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                                        }`}>{b.status}</span>
+                                        <Badge variant={
+                                            b.status === 'Realized' ? 'success' : 
+                                            b.status === 'In Progress' ? 'info' : 'neutral'
+                                        }>{b.status}</Badge>
                                     </td>
                                 </tr>
                             ))}
+                            {programBenefits.length === 0 && (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-400 italic">No benefits defined for this program.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

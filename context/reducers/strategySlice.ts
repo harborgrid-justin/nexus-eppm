@@ -27,6 +27,24 @@ export const strategyReducer = (state: DataState, action: Action): DataState => 
             kanbanTasks: [...state.kanbanTasks, action.payload]
         };
 
+    case 'ADD_PORTFOLIO_COMM_ITEM':
+        return {
+            ...state,
+            portfolioCommunicationPlan: [...state.portfolioCommunicationPlan, action.payload]
+        };
+    
+    case 'ADD_ACTIVITY':
+        return {
+            ...state,
+            activities: [action.payload, ...state.activities]
+        };
+
+    case 'ADD_TEAM_EVENT':
+        return {
+            ...state,
+            teamEvents: [...state.teamEvents, action.payload]
+        };
+
     default:
         return state;
   }

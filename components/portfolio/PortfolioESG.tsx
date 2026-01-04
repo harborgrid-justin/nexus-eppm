@@ -1,22 +1,40 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { Leaf, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip } from 'recharts';
 
 const PortfolioESG: React.FC = () => {
   const { esgMetrics, projects } = usePortfolioData();
   const theme = useTheme();
 
-  // Aggregate average scores for radar chart
-  const radarData = [
-      { subject: 'Environmental', A: 85, fullMark: 100 },
-      { subject: 'Social', A: 78, fullMark: 100 },
-      { subject: 'Governance', A: 90, fullMark: 100 },
-      { subject: 'Safety', A: 92, fullMark: 100 },
-      { subject: 'Diversity', A: 65, fullMark: 100 },
-      { subject: 'Data Privacy', A: 88, fullMark: 100 },
-  ];
+  // Aggregate average scores for radar chart dynamically
+  const radarData = useMemo(() => {
+      if (!esgMetrics.length) return [];
+
+      const totals = esgMetrics.reduce((acc, curr) => {
+          acc.environmental += curr.environmentalScore;
+          acc.social += curr.socialScore;
+          acc.governance += curr.governanceScore;
+          // Simulated extra dimensions for the chart that aren't in core metric type yet
+          acc.safety += (curr.socialScore * 0.95); 
+          acc.diversity += (curr.socialScore * 0.85); 
+          acc.privacy += (curr.governanceScore * 0.92); 
+          return acc;
+      }, { environmental: 0, social: 0, governance: 0, safety: 0, diversity: 0, privacy: 0 });
+
+      const count = esgMetrics.length;
+      
+      return [
+          { subject: 'Environmental', A: Math.round(totals.environmental / count), fullMark: 100 },
+          { subject: 'Social', A: Math.round(totals.social / count), fullMark: 100 },
+          { subject: 'Governance', A: Math.round(totals.governance / count), fullMark: 100 },
+          { subject: 'Safety', A: Math.round(totals.safety / count), fullMark: 100 },
+          { subject: 'Diversity', A: Math.round(totals.diversity / count), fullMark: 100 },
+          { subject: 'Data Privacy', A: Math.round(totals.privacy / count), fullMark: 100 },
+      ];
+  }, [esgMetrics]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -32,9 +50,10 @@ const PortfolioESG: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                         <PolarGrid />
-                        <PolarAngleAxis dataKey="subject" />
-                        <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fontWeight: 'bold' }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
                         <Radar name="Portfolio Average" dataKey="A" stroke="#22c55e" fill="#22c55e" fillOpacity={0.6} />
+                        <Tooltip />
                         <Legend />
                     </RadarChart>
                 </ResponsiveContainer>
@@ -75,6 +94,11 @@ const PortfolioESG: React.FC = () => {
                                     </tr>
                                 );
                             })}
+                            {esgMetrics.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="p-8 text-center text-slate-400 italic">No ESG metrics recorded.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

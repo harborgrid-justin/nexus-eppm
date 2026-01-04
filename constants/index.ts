@@ -14,3 +14,4 @@ export * from './mocks/governance';
 export * from './mocks/business';
 export * from './mocks/unifier';
 export * from './dictionaries';
+export * from './mocks/strategy';

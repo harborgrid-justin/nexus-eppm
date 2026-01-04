@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Shield, Lock, Fingerprint, Globe, ShieldAlert, CheckCircle, Save, Key, Wifi, Clock, AlertTriangle, UserX, RotateCcw } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -11,19 +12,14 @@ const SecuritySettings: React.FC = () => {
     const theme = useTheme();
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     
-    // Policy State (In real app, this is synced with state.governance.security)
-    const [policies, setPolicies] = useState({
-        mfa: true,
-        passwordComplexity: 'High',
-        sessionLimit: 30,
-        ipLock: false,
-        allowPublicLinks: false,
-        enforceHttps: true,
-        loginRetries: 5
-    });
+    const [policies, setPolicies] = useState(state.governance.security);
+
+    useEffect(() => {
+        setPolicies(state.governance.security);
+    }, [state.governance.security]);
 
     const handleSave = () => {
-        dispatch({ type: 'UPDATE_SECURITY_POLICY', payload: policies });
+        dispatch({ type: 'GOVERNANCE_UPDATE_SECURITY_POLICY', payload: policies });
         alert("Security policy updated. Changes will take effect at next login session.");
     };
 

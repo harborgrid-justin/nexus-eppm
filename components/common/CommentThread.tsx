@@ -3,18 +3,31 @@ import React, { useState } from 'react';
 import { MessageSquare, Send } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
-export const CommentThread: React.FC = () => {
+interface Comment {
+    id: number;
+    user: string;
+    text: string;
+    time: string;
+}
+
+interface CommentThreadProps {
+    comments?: Comment[];
+}
+
+export const CommentThread: React.FC<CommentThreadProps> = ({ comments: initialComments = [] }) => {
   const theme = useTheme();
-  const [comments, setComments] = useState([
-      { id: 1, user: 'Mike Ross', text: 'Please review the attached specs.', time: '2h ago' },
-      { id: 2, user: 'Jessica P.', text: 'Looks good. Proceed.', time: '1h ago' }
+  const { user } = useAuth();
+  const [comments, setComments] = useState<Comment[]>(initialComments.length > 0 ? initialComments : [
+      // Fallback mock if empty to show UI
+      { id: 1, user: 'System', text: 'Thread started.', time: 'Just now' }
   ]);
   const [input, setInput] = useState('');
 
   const post = () => {
       if(!input) return;
-      setComments([...comments, { id: Date.now(), user: 'Me', text: input, time: 'Just now' }]);
+      setComments([...comments, { id: Date.now(), user: user?.name || 'Me', text: input, time: 'Just now' }]);
       setInput('');
   };
 
@@ -31,6 +44,7 @@ export const CommentThread: React.FC = () => {
                       <p className={theme.colors.text.secondary}>{c.text}</p>
                   </div>
               ))}
+              {comments.length === 0 && <p className="text-center text-slate-400 text-xs italic">No comments yet.</p>}
           </div>
           <div className="flex gap-2">
               <input 
@@ -38,6 +52,7 @@ export const CommentThread: React.FC = () => {
                 placeholder="Add a comment..." 
                 value={input}
                 onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && post()}
               />
               <Button size="sm" icon={Send} onClick={post} className="px-3"></Button>
           </div>

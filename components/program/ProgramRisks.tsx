@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -11,6 +10,7 @@ import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { ProgramRisk } from '../../types';
 import { generateId } from '../../utils/formatters';
+import { EmptyState } from '../common/EmptyState';
 
 interface ProgramRisksProps {
   programId: string;
@@ -92,85 +92,97 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
                 <div className="p-4 border-b border-slate-200 bg-slate-50">
                     <h3 className="font-bold text-slate-800">Program Risk Register (Systemic)</h3>
                 </div>
-                <div className="flex-1 overflow-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                                <th className="px-4 py-3 w-10"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {programRisks.map(risk => (
-                                <tr key={risk.id} className="hover:bg-slate-50 group">
-                                    <td className="px-4 py-3 text-sm font-medium text-slate-900">
-                                        {risk.description}
-                                        <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-slate-600">{risk.category}</td>
-                                    <td className="px-4 py-3 text-center">
-                                        <span className={`inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 ${risk.score >= 12 ? 'bg-red-500' : 'bg-yellow-500'}`}>
-                                            {risk.score}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3"><Badge variant="neutral">{risk.status}</Badge></td>
-                                    <td className="px-4 py-3 text-right">
-                                        <button onClick={() => handleDeleteRisk(risk.id)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Trash2 size={14}/>
-                                        </button>
-                                    </td>
+                {programRisks.length > 0 ? (
+                    <div className="flex-1 overflow-auto">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-white">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                                    <th className="px-4 py-3 w-10"></th>
                                 </tr>
-                            ))}
-                            {programRisks.length === 0 && (
-                                <tr><td colSpan={5} className="p-6 text-center text-sm text-slate-500 italic">No program risks recorded.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {programRisks.map(risk => (
+                                    <tr key={risk.id} className="hover:bg-slate-50 group">
+                                        <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                                            {risk.description}
+                                            <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-slate-600">{risk.category}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <span className={`inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 ${risk.score >= 12 ? 'bg-red-500' : 'bg-yellow-500'}`}>
+                                                {risk.score}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3"><Badge variant="neutral">{risk.status}</Badge></td>
+                                        <td className="px-4 py-3 text-right">
+                                            <button onClick={() => handleDeleteRisk(risk.id)} className="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Trash2 size={14}/>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col justify-center">
+                        <EmptyState 
+                            title="No Systemic Risks" 
+                            description="Track cross-cutting threats here."
+                            icon={ShieldAlert}
+                            action={<Button size="sm" variant="ghost" onClick={() => setIsModalOpen(true)}>Log First Risk</Button>}
+                        />
+                    </div>
+                )}
             </div>
 
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
                 <div className="p-4 border-b border-slate-200 bg-red-50">
                     <h3 className="font-bold text-red-900">Escalated Project Risks</h3>
                 </div>
                 <div className="flex-1 overflow-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk Description</th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {escalatedRisks.map(risk => {
-                                const proj = projects.find(p => p.id === risk.projectId);
-                                return (
-                                    <tr key={risk.id} className="hover:bg-slate-50">
-                                        <td className="px-4 py-3 text-sm text-slate-600">{proj?.name || risk.projectId}</td>
-                                        <td className="px-4 py-3 text-sm font-medium text-slate-900">{risk.description}</td>
-                                        <td className="px-4 py-3 text-center">
-                                            <span className="inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 bg-red-600">
-                                                {risk.score}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            {escalatedRisks.length === 0 && (
+                     {escalatedRisks.length > 0 ? (
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-white">
                                 <tr>
-                                    <td colSpan={3} className="px-4 py-8 text-center text-slate-500 italic">No escalated risks at this time.</td>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk Description</th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {escalatedRisks.map(risk => {
+                                    const proj = projects.find(p => p.id === risk.projectId);
+                                    return (
+                                        <tr key={risk.id} className="hover:bg-slate-50">
+                                            <td className="px-4 py-3 text-sm text-slate-600">{proj?.name || risk.projectId}</td>
+                                            <td className="px-4 py-3 text-sm font-medium text-slate-900">{risk.description}</td>
+                                            <td className="px-4 py-3 text-center">
+                                                <span className="inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 bg-red-600">
+                                                    {risk.score}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    ) : (
+                         <div className="flex-1 h-full flex flex-col justify-center">
+                             <div className="text-center p-8 text-slate-400 italic">
+                                <AlertOctagon size={32} className="mx-auto mb-2 opacity-30"/>
+                                <p>No escalated project risks.</p>
+                             </div>
+                         </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -3,6 +3,13 @@ import { DataState, Action } from '../../types/actions';
 
 export const programReducer = (state: DataState, action: Action): DataState => {
   switch (action.type) {
+    case 'ADD_PROGRAM':
+      return { ...state, programs: [...state.programs, action.payload] };
+    case 'UPDATE_PROGRAM':
+      return { 
+          ...state, 
+          programs: state.programs.map(p => p.id === action.payload.id ? action.payload : p) 
+      };
     case 'PROGRAM_ADD_STAKEHOLDER':
       return { ...state, programStakeholders: [action.payload, ...state.programStakeholders] };
     case 'PROGRAM_UPDATE_STAKEHOLDER':

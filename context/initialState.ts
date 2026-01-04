@@ -21,11 +21,12 @@ import {
     MOCK_ENTERPRISE_SKILLS, MOCK_RBS, MOCK_QUALITY_STANDARDS,
     MOCK_VENDORS,
     MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA,
-    DEFAULT_NOTIFICATION_PREFERENCES
+    DEFAULT_NOTIFICATION_PREFERENCES,
+    MOCK_STRATEGIC_GOALS
 } from '../constants/index';
 
 import { ResourceRequest } from '../types/resource';
-import { RoadmapLane, RoadmapItem, KanbanTask, StandardTemplate, EtlMapping } from '../types';
+import { RoadmapLane, RoadmapItem, KanbanTask, StandardTemplate, EtlMapping, MaterialReceipt, PortfolioCommunicationItem, ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle } from '../types';
 
 const MOCK_RESOURCE_REQUESTS: ResourceRequest[] = [
     { id: 'REQ-101', projectId: 'P1001', projectName: 'Downtown Metro Hub', requesterName: 'Mike Ross', role: 'Senior Engineer', quantity: 2, startDate: '2024-07-01', endDate: '2024-12-31', status: 'Pending' },
@@ -34,15 +35,9 @@ const MOCK_RESOURCE_REQUESTS: ResourceRequest[] = [
 ];
 
 const MOCK_ROADMAP_LANES: RoadmapLane[] = [
-    {
-        id: 'lane1', title: 'Market Expansion', owner: 'Sales & Marketing', milestones: [ { id: 'm1', name: 'Go/No-Go Decision', date: '2024-04-01', type: 'decision' } ]
-    },
-    {
-        id: 'lane2', title: 'Operational Efficiency', owner: 'Operations', milestones: [ { id: 'm2', name: 'System Go-Live', date: '2024-08-25', type: 'release' } ]
-    },
-    {
-        id: 'lane3', title: 'Digital Transformation', owner: 'IT & Engineering', milestones: []
-    }
+    { id: 'lane1', title: 'Market Expansion', owner: 'Sales & Marketing', milestones: [ { id: 'm1', name: 'Go/No-Go Decision', date: '2024-04-01', type: 'decision' } ] },
+    { id: 'lane2', title: 'Operational Efficiency', owner: 'Operations', milestones: [ { id: 'm2', name: 'System Go-Live', date: '2024-08-25', type: 'release' } ] },
+    { id: 'lane3', title: 'Digital Transformation', owner: 'IT & Engineering', milestones: [] }
 ];
 
 const MOCK_ROADMAP_ITEMS: RoadmapItem[] = [
@@ -65,15 +60,12 @@ const MOCK_KANBAN_TASKS: KanbanTask[] = [
 
 const INITIAL_TEMPLATES: StandardTemplate[] = [
     ...MOCK_TEMPLATES,
-    // Risk Templates
     { id: 'pmi_standard', category: 'Risk', name: 'PMI Standard Risk Plan', description: 'Aligns with PMBOK Guide 7th Edition.', content: {} },
     { id: 'agile_risk', category: 'Risk', name: 'Agile Risk Management', description: 'Lightweight, iterative risk handling.', content: {} },
     { id: 'construction_heavy', category: 'Risk', name: 'Construction (Heavy Civil)', description: 'Emphasis on safety and environmental risks.', content: {} },
-    // Cost Templates
     { id: 'gov_standard', category: 'Cost', name: 'Government Standard (EVM)', description: 'ANSI/EIA-748 EVMS guidelines.', content: {} },
     { id: 'agile_lean', category: 'Cost', name: 'Agile / Lean Costing', description: 'Focus on burn rate and throughput.', content: {} },
     { id: 'construction_fixed', category: 'Cost', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs.', content: {} },
-    // Quality Templates
     { id: 'iso_9001', category: 'Quality', name: 'ISO 9001:2015 Compliant', description: 'Standard QMS structure with rigorous documentation.', content: {} },
     { id: 'lean_six_sigma', category: 'Quality', name: 'Lean / Six Sigma', description: 'Focus on defect reduction and process capability.', content: {} },
     { id: 'usace_cqc', category: 'Quality', name: 'USACE CQC Plan', description: 'Contractor Quality Control for federal projects.', content: {} },
@@ -84,6 +76,91 @@ const INITIAL_MAPPINGS: EtlMapping[] = [
     { id: 2, source: 'PROJ_NAME', target: 'name', transform: 'Trim Whitespace', type: 'String' },
     { id: 3, source: 'BUDGET_AMT', target: 'budget', transform: 'Currency(USD)', type: 'Number' },
     { id: 4, source: 'START_DT', target: 'startDate', transform: 'Date(ISO8601)', type: 'Date' },
+];
+
+const MOCK_MATERIAL_RECEIPTS: MaterialReceipt[] = [
+    { id: 'MRR-1024', projectId: 'P1001', itemId: 'I-01', itemName: 'Steel Beams (W12x40)', vendorId: 'V-01', quantity: 50, rejectedQuantity: 0, status: 'Accepted', dateReceived: '2024-06-15', inspectorId: 'R-005' },
+    { id: 'MRR-1025', projectId: 'P1001', itemId: 'I-02', itemName: 'Pre-cast Panels', vendorId: 'V-02', quantity: 12, rejectedQuantity: 1, status: 'Conditional', dateReceived: '2024-06-12', inspectorId: 'R-005' },
+    { id: 'MRR-1026', projectId: 'P1003', itemId: 'I-03', itemName: 'HVAC Units', vendorId: 'V-03', quantity: 4, rejectedQuantity: 0, status: 'Accepted', dateReceived: '2024-06-10', inspectorId: 'R-006' },
+];
+
+const MOCK_PORTFOLIO_COMM_PLAN: PortfolioCommunicationItem[] = [
+    { id: '1', item: 'Performance Report', audience: 'Executive', frequency: 'Monthly', channel: 'Dashboard', owner: 'Portfolio Mgr' },
+    { id: '2', item: 'Resource Review', audience: 'PMO', frequency: 'Bi-Weekly', channel: 'Meeting', owner: 'Resource Mgr' },
+    { id: '3', item: 'Benefits Update', audience: 'Executive', frequency: 'Quarterly', channel: 'Report', owner: 'Sponsor' },
+    { id: '4', item: 'Risk Sync', audience: 'Team', frequency: 'Weekly', channel: 'Workshop', owner: 'Program Mgr' },
+];
+
+const MOCK_ACTIVITIES: ActivityItem[] = [
+    {
+        id: 1,
+        userId: 'U-003',
+        userName: 'Jessica Pearson',
+        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jessica',
+        action: 'approved the budget baseline',
+        target: 'FY24 CapEx Plan',
+        type: 'approval',
+        content: 'Looks good. Proceed with Phase 1 procurement immediately to lock in material rates.',
+        timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        likes: 4,
+        comments: 1
+    },
+    {
+        id: 2,
+        userId: 'SYSTEM',
+        userName: 'System',
+        userAvatar: '',
+        action: 'detected a schedule variance',
+        target: 'Foundation Pour',
+        type: 'alert',
+        content: 'SPI dropped below 0.85. Critical path impact estimated at +4 days.',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        likes: 0,
+        comments: 2
+    },
+    {
+        id: 3,
+        userId: 'U-002',
+        userName: 'Mike Ross',
+        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
+        action: 'uploaded a document',
+        target: 'Site_Survey_v2.pdf',
+        type: 'upload',
+        content: '',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+        likes: 2,
+        comments: 0
+    }
+];
+
+const MOCK_TEAM_EVENTS: TeamEvent[] = [
+    { id: 1, date: new Date().toISOString(), title: 'Sprint Review', type: 'Meeting', duration: 1 },
+    { id: 2, date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), title: 'Code Freeze', type: 'Milestone', duration: 1 },
+    { id: 3, date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), title: 'Mike PTO', type: 'Leave', duration: 3 },
+    { id: 4, date: new Date(Date.now() + 19 * 24 * 60 * 60 * 1000).toISOString(), title: 'Client Demo', type: 'Meeting', duration: 1 },
+    { id: 5, date: new Date(Date.now() + 23 * 24 * 60 * 60 * 1000).toISOString(), title: 'Phase 2 Go-Live', type: 'Milestone', duration: 1 },
+];
+
+const MOCK_PIPELINE_STAGES: PipelineStage[] = [
+    { id: '1', name: 'Build', status: 'success', duration: '2m 14s', logs: ['Compiling assets...', 'Minifying JS...', 'Build successful'] },
+    { id: '2', name: 'Unit Test', status: 'success', duration: '45s', logs: ['Running Jest...', '142 tests passed'] },
+    { id: '3', name: 'Integration', status: 'running', duration: '1m 20s', logs: ['Connecting to DB...', 'Seeding data...'] },
+    { id: '4', name: 'Deploy Staging', status: 'pending', duration: '-', logs: [] },
+    { id: '5', name: 'Deploy Prod', status: 'pending', duration: '-', logs: [] }
+];
+
+const MOCK_KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
+    { 
+        id: 'SOP-2024-001', 
+        title: 'Change Order Approval Process', 
+        category: 'Finance', 
+        content: '<p>Standard procedure for financial variances...</p>', 
+        authorId: 'U-001',
+        lastUpdated: '2024-10-12',
+        views: 1204,
+        tags: ['Finance', 'Process', 'Compliance', 'Audit'],
+        sopNumber: 'SOP-2024-001'
+    }
 ];
 
 export const initialState: DataState = {
@@ -159,9 +236,20 @@ export const initialState: DataState = {
           language: 'English (US)',
           currency: 'USD ($)'
       },
-      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
+      billing: {
+          licenseType: 'Enterprise Plus',
+          renewalDate: '2024-12-31',
+          seatLimit: 250,
+          storageLimitGB: 1000,
+          history: [
+              { id: 'INV-4021', date: '2024-06-01', description: 'Enterprise Portfolio Plan (Annual)', amount: 12500, status: 'Paid' },
+              { id: 'INV-3982', date: '2024-05-12', description: 'Add-on: AI Insights Pack', amount: 2500, status: 'Paid' },
+              { id: 'INV-3810', date: '2024-04-01', description: 'Seat Expansion Pack (+100)', amount: 4500, status: 'Paid' },
+          ]
+      }
   },
-  strategicGoals: [],
+  strategicGoals: MOCK_STRATEGIC_GOALS,
   strategicDrivers: MOCK_STRATEGIC_DRIVERS,
   portfolioScenarios: MOCK_PORTFOLIO_SCENARIOS,
   governanceDecisions: MOCK_GOVERNANCE_DECISIONS,
@@ -201,93 +289,175 @@ export const initialState: DataState = {
   benefits: MOCK_BENEFITS,
   rbs: MOCK_RBS,
   vendors: MOCK_VENDORS,
+  qualityStandards: MOCK_QUALITY_STANDARDS,
   unifier: {
       definitions: MOCK_BP_DEFS,
       records: MOCK_BP_RECORDS,
       costSheet: {
           columns: COST_SHEET_COLUMNS,
           rows: COST_SHEET_DATA
-      }
+      },
+      cashFlowCurves: [],
+      fundAllocations: []
   },
-  dailyLogs: [
-    { id: 'LOG-001', projectId: 'P1001', date: '2024-06-20', weather: { condition: 'Sunny', temperature: '72°F' }, workLogs: [], delays: [], submittedBy: 'Foreman' }
-  ],
+  dailyLogs: [],
   safetyIncidents: [],
   punchList: [],
   roadmapLanes: MOCK_ROADMAP_LANES,
   roadmapItems: MOCK_ROADMAP_ITEMS,
   kanbanTasks: MOCK_KANBAN_TASKS,
+  portfolioCommunicationPlan: MOCK_PORTFOLIO_COMM_PLAN,
+  materialReceipts: MOCK_MATERIAL_RECEIPTS,
+  activities: MOCK_ACTIVITIES,
+  teamEvents: MOCK_TEAM_EVENTS,
+  pipelineStages: MOCK_PIPELINE_STAGES,
+  knowledgeBase: MOCK_KNOWLEDGE_ARTICLES,
+  etlMappings: INITIAL_MAPPINGS,
+  systemMonitoring: {
+      metrics: [],
+      services: [],
+      throughput: Array.from({length: 24}, (_, i) => ({ time: `${i}:00`, records: Math.floor(Math.random() * 5000) + 1000 }))
+  },
+  staging: {
+      activeImportId: null,
+      entityType: 'Project',
+      records: [],
+      isProcessing: false,
+      summary: { total: 0, valid: 0, error: 0 }
+  },
+  // Extension Mock Data
   extensionData: {
       financial: {
           allocation: [
-            { name: 'Digital', size: 45000000, color: '#3b82f6' },
-            { name: 'Infrastructure', size: 35000000, color: '#10b981' },
-            { name: 'Compliance', size: 15000000, color: '#f59e0b' },
-            { name: 'Maintenance', size: 10000000, color: '#64748b' },
-            { name: 'R&D', size: 25000000, color: '#8b5cf6' },
+              { name: 'Growth', size: 450, color: '#0ea5e9' },
+              { name: 'Run', size: 320, color: '#22c55e' },
+              { name: 'Transform', size: 210, color: '#eab308' },
+              { name: 'Regulatory', size: 120, color: '#64748b' }
           ],
           cashFlow: [
-            { month: 'Jan', Operating: 4000, Investing: -2400, Financing: 1000 },
-            { month: 'Feb', Operating: 3000, Investing: -1398, Financing: 2210 },
-            { month: 'Mar', Operating: 2000, Investing: -9800, Financing: 2290 },
-            { month: 'Apr', Operating: 2780, Investing: -3908, Financing: 2000 },
-            { month: 'May', Operating: 1890, Investing: -4800, Financing: 2181 },
-            { month: 'Jun', Operating: 2390, Investing: -3800, Financing: 2500 },
+              { month: 'Jan', Operating: 120, Investing: -45, Financing: 30 },
+              { month: 'Feb', Operating: 115, Investing: -50, Financing: 20 },
+              { month: 'Mar', Operating: 130, Investing: -60, Financing: 10 },
+              { month: 'Apr', Operating: 125, Investing: -30, Financing: 50 },
           ],
           regulatoryAudits: [
-            { id: 'AUD-001', control: 'SOX 404 - Change Mgmt', status: 'Pass', date: '2024-05-15' },
-            { id: 'AUD-002', control: 'Basel III - Capital Req', status: 'Pass', date: '2024-05-10' },
-            { id: 'AUD-003', control: 'GDPR - Data Privacy', status: 'Finding', date: '2024-04-22' },
+              { id: 'AUD-001', control: 'SOX 404', status: 'Pass', date: '2024-03-15' },
+              { id: 'AUD-002', control: 'GDPR Data', status: 'Fail', date: '2024-02-10' },
+          ],
+          initiatives: [
+              { name: 'AI Modernization', budget: 15000000, npv: 25000000 },
+              { name: 'Cloud Migration', budget: 8500000, npv: 12000000 },
           ]
       },
       construction: {
           submittals: [
-            { status: 'Open', count: 45 },
-            { status: 'In Review', count: 12 },
-            { status: 'Approved', count: 88 },
-            { status: 'Rejected', count: 5 },
+              { status: 'Open', count: 12 },
+              { status: 'Approved', count: 45 },
+              { status: 'Rejected', count: 3 },
+              { status: 'Pending', count: 8 },
           ]
       },
       government: {
           fundsFlow: [
-            { name: 'Appropriated', value: 50000000 },
-            { name: 'Apportioned', value: 48000000 },
-            { name: 'Allotted', value: 45000000 },
-            { name: 'Committed', value: 30000000 },
-            { name: 'Obligated', value: 25000000 },
-            { name: 'Expended', value: 12000000 },
+              { name: 'Appropriated', value: 50000000 },
+              { name: 'Apportioned', value: 48000000 },
+              { name: 'Allotted', value: 45000000 },
+              { name: 'Committed', value: 42000000 },
+              { name: 'Obligated', value: 38000000 },
+              { name: 'Expended', value: 25000000 },
           ],
           fiscalYears: [
-            { year: 'FY24', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
-            { year: 'FY25', phase: 'Budgeting', status: 'Enactment', color: 'bg-blue-500' },
-            { year: 'FY26', phase: 'Programming', status: 'POM Dev', color: 'bg-yellow-500' },
-            { year: 'FY27', phase: 'Planning', status: 'Strat Guidance', color: 'bg-slate-400' },
+              { year: 'FY2023', phase: 'Execution', status: 'Active', color: 'bg-green-500' },
+              { year: 'FY2024', phase: 'Enactment', status: 'Pending', color: 'bg-blue-500' },
+              { year: 'FY2025', phase: 'Formulation', status: 'Draft', color: 'bg-purple-500' },
+              { year: 'FY2026', phase: 'Planning', status: 'Future', color: 'bg-slate-400' },
           ],
           appropriations: [
-             { type: '3010 - Aircraft Procurement', years: '3 Year', exp: 'FY26', available: 12500000 },
-             { type: '3600 - RDT&E', years: '2 Year', exp: 'FY25', available: 4500000 },
-             { type: '3400 - O&M', years: '1 Year', exp: 'FY24', available: 800000 },
+              { type: 'O&M', years: '1 Year', exp: 'Sep 30', available: 12500000 },
+              { type: 'RDT&E', years: '2 Years', exp: 'Sep 30 (Next)', available: 25000000 },
+              { type: 'Procurement', years: '3 Years', exp: 'Sep 30 (+2)', available: 45000000 },
+          ],
+          treasuryStats: [
+              { year: '2021', revenue: 3.8, outlay: 6.8 },
+              { year: '2022', revenue: 4.9, outlay: 6.2 },
+              { year: '2023', revenue: 4.4, outlay: 6.1 },
+          ],
+          acquisitionPrograms: [
+              { name: 'Next Gen Fighter', milestone: 'MS-B', costVariance: 12 },
+              { name: 'Cyber Defense Net', milestone: 'MS-C', costVariance: -5 },
+              { name: 'Logistics ERP', milestone: 'IOC', costVariance: 2 },
+          ],
+          defenseStats: {
+              readiness: '92%',
+              personnel: '1.3M',
+              budget: '$842B',
+              cyberStatus: 'Secure',
+              logisticsStatus: 'Warning'
+          },
+          energyStats: {
+              gridLoad: '450 GW',
+              capacity: '1200 GW',
+              reserve: '650M BBL',
+              renewablePercent: 24,
+              renewableTarget: 40,
+              mix: [
+                  { source: 'Nuclear', output: 18, target: 20 },
+                  { source: 'Coal', output: 19, target: 5 },
+                  { source: 'Renewable', output: 24, target: 45 },
+                  { source: 'Gas', output: 38, target: 30 },
+              ]
+          }
+      },
+      dod: {
+          milestones: [
+              { id: 'A', name: 'Material Solution', date: '2022-01-15', status: 'Complete', desc: 'Need identified' },
+              { id: 'B', name: 'Engineering Dev', date: '2023-06-01', status: 'Complete', desc: 'Contract awarded' },
+              { id: 'C', name: 'Production', date: '2025-01-01', status: 'Pending', desc: 'Low rate init' },
+          ],
+          phases: [
+              { name: 'Materiel Solution Analysis', duration: '12mo', status: 'Complete' },
+              { name: 'Tech Maturation (TMRR)', duration: '24mo', status: 'Complete' },
+              { name: 'Engineering & Mfg (EMD)', duration: '36mo', status: 'In Progress' },
+              { name: 'Production & Deployment', duration: '48mo', status: 'Planned' },
+              { name: 'Operations & Support', duration: '20yr', status: 'Planned' },
+          ],
+          evmsData: [
+              { period: 'Jan', BCWS: 100, BCWP: 95, ACWP: 98 },
+              { period: 'Feb', BCWS: 200, BCWP: 190, ACWP: 205 },
+              { period: 'Mar', BCWS: 300, BCWP: 280, ACWP: 310 },
+              { period: 'Apr', BCWS: 400, BCWP: 350, ACWP: 420 },
+              { period: 'May', BCWS: 500, BCWP: 420, ACWP: 530 },
+          ],
+          quadChart: {
+              performance: [],
+              schedule: [],
+              cost: [],
+              technical: []
+          }
+      },
+      erpTransactions: [
+          { id: 'TX-1001', type: 'PO Requisition', amount: 12500, status: 'Success', response: 'PO #4021 created' },
+          { id: 'TX-1002', type: 'Invoice Payment', amount: 4500, status: 'Success', response: 'Payment cleared' },
+          { id: 'TX-1003', type: 'Budget Transfer', amount: 5000, status: 'Failed', response: 'Insufficient funds in source cost center' },
+      ],
+      bim: {
+          tree: [
+              { id: '1', name: 'Architecture', visible: true, children: [
+                  { id: '1.1', name: 'Walls', visible: true, children: [] },
+                  { id: '1.2', name: 'Floors', visible: true, children: [] }
+              ]},
+              { id: '2', name: 'Structure', visible: true, children: [
+                  { id: '2.1', name: 'Beams', visible: true, children: [] },
+                  { id: '2.2', name: 'Columns', visible: true, children: [] }
+              ]},
+              { id: '3', name: 'MEP', visible: false, children: [] }
+          ]
+      },
+      gis: {
+          features: [
+              { id: 'f1', name: 'Site Boundary', type: 'Polygon', coordinates: '10,10 100,10 100,100 10,100', properties: { fill: 'rgba(0,0,255,0.1)', stroke: 'blue' } },
+              { id: 'f2', name: 'Exclusion Zone', type: 'Polygon', coordinates: '40,40 60,40 60,60 40,60', properties: { fill: 'rgba(255,0,0,0.2)', stroke: 'red' } }
           ]
       }
-  },
-  etlMappings: INITIAL_MAPPINGS,
-  systemMonitoring: {
-      metrics: [
-        { id: 'cpu', name: 'CPU Usage', value: 42, unit: '%', threshold: 80, trend: [35, 38, 42, 45, 42] },
-        { id: 'mem', name: 'Memory Usage', value: 65, unit: '%', threshold: 85, trend: [60, 62, 65, 64, 65] },
-        { id: 'net', name: 'Network I/O', value: 1.2, unit: 'GB/s', threshold: 2, trend: [0.8, 0.9, 1.1, 1.3, 1.2] },
-        { id: 'err', name: 'API Error Rate', value: 0.05, unit: '%', threshold: 1, trend: [0.01, 0.04, 0.02, 0.06, 0.05] },
-      ],
-      services: [
-        { id: 'gateway', name: 'Primary API Gateway', status: 'Operational', uptime: '99.99%', latency: '45ms' },
-        { id: 'auth', name: 'Auth Service (SSO)', status: 'Operational', uptime: '99.95%', latency: '120ms' },
-        { id: 'search', name: 'Search Indexer', status: 'Degraded', uptime: '98.50%', latency: '850ms' },
-        { id: 'worker', name: 'Notification Worker', status: 'Operational', uptime: '100%', latency: 'N/A' },
-      ],
-      throughput: [
-          { time: '08:00', records: 1200 }, { time: '10:00', records: 4200 },
-          { time: '12:00', records: 1500 }, { time: '14:00', records: 5100 },
-          { time: '16:00', records: 3900 },
-      ]
   }
 };

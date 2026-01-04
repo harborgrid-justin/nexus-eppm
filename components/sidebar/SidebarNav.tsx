@@ -2,7 +2,7 @@
 import React from 'react';
 import { 
   Globe, PieChart, ShieldAlert, LayoutTemplate, Briefcase, 
-  Users, Settings, Database, Grid, Box, CheckSquare, FileText
+  Users, Settings, Database, Grid, Box, CheckSquare, FileText, HardDrive, Rocket
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -16,6 +16,13 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
     const theme = useTheme();
 
     const navStructure = [
+        {
+            id: 'start',
+            label: 'Onboarding',
+            items: [
+                { id: 'getting-started', label: 'Getting Started', icon: Rocket }
+            ]
+        },
         { 
             id: 'strategy', 
             label: 'Portfolio & Strategy', 
@@ -40,6 +47,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
             id: 'config',
             label: 'System & Admin',
             items: [
+                { id: 'warehouse', label: 'Data Warehouse', icon: HardDrive },
                 { id: 'dataExchange', label: 'Data Exchange', icon: Database },
                 { id: 'admin', label: 'Administration', icon: Settings },
                 { id: 'workbench', label: 'UI Workbench', icon: Box },

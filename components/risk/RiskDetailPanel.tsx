@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 // FIX: Corrected import path
 import { Risk, RiskResponseAction, RiskHistoryItem } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Save, AlertTriangle } from 'lucide-react';
+import { Save, AlertTriangle, Activity } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { RiskDetailsTab } from './details/RiskDetailsTab';
 import { RiskResponseTab } from './details/RiskResponseTab';
 import { RiskHistoryTab } from './details/RiskHistoryTab';
+import { AuditTrail } from '../common/AuditTrail';
+import { CommentThread } from '../common/CommentThread';
 
 interface RiskDetailPanelProps {
   riskId: string;
@@ -21,7 +23,7 @@ export const RiskDetailPanel: React.FC<RiskDetailPanelProps> = ({ riskId, projec
   const { state, dispatch } = useData();
   const { canEditProject } = usePermissions();
   const [risk, setRisk] = useState<Risk | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'response' | 'history'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'response' | 'history' | 'activity'>('details');
 
   const isReadOnly = !canEditProject();
 
@@ -66,7 +68,7 @@ export const RiskDetailPanel: React.FC<RiskDetailPanelProps> = ({ riskId, projec
       }
     >
         <div className="flex border-b border-slate-200">
-            {['details', 'response', 'history'].map((tab) => (
+            {['details', 'response', 'history', 'activity'].map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab as any)} className={`py-3 px-4 text-sm font-medium border-b-2 ${activeTab === tab ? 'border-nexus-600 text-nexus-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
@@ -76,6 +78,12 @@ export const RiskDetailPanel: React.FC<RiskDetailPanelProps> = ({ riskId, projec
             {activeTab === 'details' && <RiskDetailsTab risk={risk} setRisk={setRisk} isReadOnly={isReadOnly} projectId={projectId} />}
             {activeTab === 'response' && <RiskResponseTab risk={risk} setRisk={setRisk} isReadOnly={isReadOnly} />}
             {activeTab === 'history' && <RiskHistoryTab risk={risk} />}
+            {activeTab === 'activity' && (
+                <div className="space-y-6">
+                    <CommentThread />
+                    <AuditTrail logs={risk.history || []} />
+                </div>
+            )}
         </div>
     </SidePanel>
   );

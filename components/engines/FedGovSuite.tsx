@@ -6,29 +6,17 @@ import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency } from '../../utils/formatters';
+import { useData } from '../../context/DataContext';
 
 type Department = 'Treasury' | 'Defense' | 'Energy' | 'Transportation';
 
 const FedGovSuite: React.FC = () => {
   const theme = useTheme();
+  const { state } = useData();
   const [activeDept, setActiveDept] = useState<Department>('Treasury');
 
-  // --- MOCK DATA ---
-  const treasuryData = [
-    { year: '2020', revenue: 3.4, outlay: 6.5 },
-    { year: '2021', revenue: 4.0, outlay: 6.8 },
-    { year: '2022', revenue: 4.9, outlay: 6.2 },
-    { year: '2023', revenue: 4.4, outlay: 6.1 },
-    { year: '2024', revenue: 4.8, outlay: 6.3 }, // Est
-  ];
-
-  const energyData = [
-    { source: 'Fossil', output: 60, target: 40 },
-    { source: 'Nuclear', output: 20, target: 20 },
-    { source: 'Renewable', output: 20, target: 40 },
-  ];
-
-  // --- RENDERERS ---
+  // Load from state.extensionData.government
+  const { treasuryStats, acquisitionPrograms, appropriations, fundsFlow, defenseStats, energyStats } = state.extensionData.government;
 
   const renderTreasury = () => (
     <div className="space-y-6">
@@ -42,7 +30,7 @@ const FedGovSuite: React.FC = () => {
         <div className={`${theme.components.card} p-6 h-[400px]`}>
             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Landmark size={18} className="text-green-700"/> Federal Receipts vs Outlays (Trillions)</h3>
             <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={treasuryData}>
+                <AreaChart data={treasuryStats}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="year" />
                     <YAxis />
@@ -63,17 +51,17 @@ const FedGovSuite: React.FC = () => {
                 <div className="flex justify-between items-start">
                     <div>
                         <p className="text-slate-400 text-xs uppercase tracking-widest font-bold">Global Readiness</p>
-                        <h3 className="text-3xl font-bold mt-1">DEFCON 4</h3>
+                        <h3 className="text-3xl font-bold mt-1">{defenseStats.readiness}</h3>
                     </div>
                     <Shield size={32} className="text-blue-400" />
                 </div>
                 <div className="mt-4 flex gap-2">
-                    <span className="bg-green-600 px-2 py-1 text-xs rounded font-bold">Cyber: Secure</span>
-                    <span className="bg-yellow-600 px-2 py-1 text-xs rounded font-bold">Logistics: Strain</span>
+                    <span className="bg-green-600 px-2 py-1 text-xs rounded font-bold">Cyber: {defenseStats.cyberStatus}</span>
+                    <span className="bg-yellow-600 px-2 py-1 text-xs rounded font-bold">Logistics: {defenseStats.logisticsStatus}</span>
                 </div>
             </div>
-            <StatCard title="Active Personnel" value="1.3M" subtext="Across all branches" icon={Users} />
-            <StatCard title="Procurement Budget" value="$168B" subtext="FY24 Authorized" icon={DollarSign} />
+            <StatCard title="Active Personnel" value={defenseStats.personnel} subtext="Across all branches" icon={Users} />
+            <StatCard title="Procurement Budget" value={defenseStats.budget} subtext="FY24 Authorized" icon={DollarSign} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -88,21 +76,17 @@ const FedGovSuite: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        <tr className="group">
-                            <td className="py-3 font-medium text-slate-800">F-35 Lightning II</td>
-                            <td className="py-3 text-slate-600">Full Rate Prod.</td>
-                            <td className="py-3 text-right text-green-600">-2.1%</td>
-                        </tr>
-                        <tr className="group">
-                            <td className="py-3 font-medium text-slate-800">Columbia Class Sub</td>
-                            <td className="py-3 text-slate-600">Design / Build</td>
-                            <td className="py-3 text-right text-red-600">+4.5%</td>
-                        </tr>
-                        <tr className="group">
-                            <td className="py-3 font-medium text-slate-800">B-21 Raider</td>
-                            <td className="py-3 text-slate-600">LRIP</td>
-                            <td className="py-3 text-right text-green-600">On Budget</td>
-                        </tr>
+                        {acquisitionPrograms && acquisitionPrograms.length > 0 ? acquisitionPrograms.map((prog, i) => (
+                            <tr key={i} className="group hover:bg-slate-50">
+                                <td className="py-3 font-medium text-slate-800">{prog.name}</td>
+                                <td className="py-3 text-slate-600">{prog.milestone}</td>
+                                <td className={`py-3 text-right font-bold ${prog.costVariance > 0 ? 'text-red-600' : prog.costVariance < 0 ? 'text-green-600' : 'text-slate-600'}`}>
+                                    {prog.costVariance > 0 ? `+${prog.costVariance}%` : prog.costVariance < 0 ? `${prog.costVariance}%` : 'On Budget'}
+                                </td>
+                            </tr>
+                        )) : (
+                            <tr><td colSpan={3} className="py-4 text-center text-slate-400">No acquisition programs found.</td></tr>
+                        )}
                     </tbody>
                 </table>
             </Card>
@@ -121,15 +105,15 @@ const FedGovSuite: React.FC = () => {
   const renderEnergy = () => (
       <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <StatCard title="Grid Load" value="450 GW" subtext="92% Capacity" icon={Zap} />
-              <StatCard title="Strategic Reserve" value="350M BBL" subtext="Petroleum" icon={Layers} trend="down" />
-              <StatCard title="Renewable Gen" value="24%" subtext="Target: 40% by 2030" icon={Activity} trend="up" />
+              <StatCard title="Grid Load" value={energyStats.gridLoad} subtext={`${energyStats.capacity} Capacity`} icon={Zap} />
+              <StatCard title="Strategic Reserve" value={energyStats.reserve} subtext="Petroleum" icon={Layers} trend="down" />
+              <StatCard title="Renewable Gen" value={`${energyStats.renewablePercent}%`} subtext={`Target: ${energyStats.renewableTarget}% by 2030`} icon={Activity} trend="up" />
               <StatCard title="Nuclear Plants" value="93" subtext="Operating Units" icon={Shield} />
           </div>
           <div className={`${theme.components.card} p-6 h-[400px]`}>
               <h3 className="font-bold text-slate-800 mb-4">Energy Mix Transition</h3>
               <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={energyData}>
+                  <BarChart data={energyStats.mix}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="source" />
                       <YAxis unit="%" />

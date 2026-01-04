@@ -1,18 +1,27 @@
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { TrendingDown } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
 
 export const RiskTrendAnalysis: React.FC = () => {
   const theme = useTheme();
-  const data = [
-      { month: 'Jan', exposure: 120000 },
-      { month: 'Feb', exposure: 115000 },
-      { month: 'Mar', exposure: 98000 },
-      { month: 'Apr', exposure: 85000 },
-      { month: 'May', exposure: 92000 },
-      { month: 'Jun', exposure: 78000 },
-  ];
+  const { state } = useData();
+
+  const data = useMemo(() => {
+      // Simulate historical trend from current risk set
+      const totalExposure = state.risks.reduce((sum, r) => sum + (r.emv || 0), 0);
+      
+      return [
+          { month: 'Jan', exposure: totalExposure * 1.2 },
+          { month: 'Feb', exposure: totalExposure * 1.15 },
+          { month: 'Mar', exposure: totalExposure * 1.1 },
+          { month: 'Apr', exposure: totalExposure * 0.95 },
+          { month: 'May', exposure: totalExposure * 1.05 },
+          { month: 'Jun', exposure: totalExposure }, // Current
+      ];
+  }, [state.risks]);
 
   return (
     <div className={`${theme.components.card} ${theme.layout.cardPadding} h-64 flex flex-col`}>

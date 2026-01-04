@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { GitPullRequest, Plus, Settings, Trash2 } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { WorkflowDefinition, WorkflowStep } from '../../types';
@@ -18,6 +18,8 @@ const WorkflowDesigner: React.FC = () => {
     const [editingWorkflow, setEditingWorkflow] = useState<Partial<WorkflowDefinition> | null>(null);
     const [isStepPanelOpen, setIsStepPanelOpen] = useState(false);
     const [editingStep, setEditingStep] = useState<Partial<WorkflowStep> | null>(null);
+    // Track index for editing existing steps
+    const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
 
     const activeWorkflow = useMemo(() => state.workflows.find(w => w.id === activeWorkflowId), [state.workflows, activeWorkflowId]);
 
@@ -27,46 +29,74 @@ const WorkflowDesigner: React.FC = () => {
     };
 
     const handleSaveWorkflow = (wfToSave: WorkflowDefinition) => {
-        dispatch({ type: wfToSave.id.startsWith('WF') ? 'UPDATE_WORKFLOW' : 'ADD_WORKFLOW', payload: wfToSave });
+        dispatch({ type: wfToSave.id.startsWith('WF') ? 'ADMIN_UPDATE_WORKFLOW' : 'ADMIN_ADD_WORKFLOW', payload: wfToSave });
         setIsPanelOpen(false);
         if (!activeWorkflowId) setActiveWorkflowId(wfToSave.id);
     };
 
     const handleDeleteWorkflow = (id: string) => {
         if (confirm("Delete workflow?")) {
-            dispatch({ type: 'DELETE_WORKFLOW', payload: id });
+            dispatch({ type: 'ADMIN_DELETE_WORKFLOW', payload: id });
             if (activeWorkflowId === id) setActiveWorkflowId(state.workflows.find(w => w.id !== id)?.id || '');
         }
+    };
+
+    const handleOpenStepPanel = (step?: WorkflowStep, index: number | null = null) => {
+        setEditingStep(step || { name: '', type: 'Approval', role: '', requirements: [] });
+        setEditingStepIndex(index);
+        setIsStepPanelOpen(true);
     };
 
     const handleSaveStep = (stepToSave: WorkflowStep, index: number | null) => {
         if (!activeWorkflow) return;
         const updatedSteps = [...activeWorkflow.steps];
-        if (index !== null) { updatedSteps[index] = stepToSave; } 
-        else { updatedSteps.push(stepToSave); }
-        dispatch({ type: 'UPDATE_WORKFLOW', payload: { ...activeWorkflow, steps: updatedSteps } });
+        
+        if (index !== null && index >= 0) { 
+            updatedSteps[index] = stepToSave; 
+        } else { 
+            updatedSteps.push(stepToSave); 
+        }
+        
+        dispatch({ type: 'ADMIN_UPDATE_WORKFLOW', payload: { ...activeWorkflow, steps: updatedSteps } });
         setIsStepPanelOpen(false);
+    };
+
+    const handleDeleteStep = (index: number) => {
+        if (!activeWorkflow) return;
+        const updatedSteps = activeWorkflow.steps.filter((_, i) => i !== index);
+        dispatch({ type: 'ADMIN_UPDATE_WORKFLOW', payload: { ...activeWorkflow, steps: updatedSteps } });
     };
 
     return (
         <div className="h-full flex flex-col space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl border">
+            <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <select value={activeWorkflowId || ''} onChange={e => setActiveWorkflowId(e.target.value)} className="font-bold text-lg bg-transparent">
-                        {state.workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
-                    </select>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Definition:</label>
+                    {state.workflows.length > 0 ? (
+                        <select 
+                            value={activeWorkflowId || ''} 
+                            onChange={e => setActiveWorkflowId(e.target.value)} 
+                            className={`font-bold text-lg bg-transparent border-b border-dashed border-slate-300 hover:border-nexus-500 focus:outline-none cursor-pointer ${theme.colors.text.primary}`}
+                        >
+                            {state.workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
+                        </select>
+                    ) : (
+                        <span className="text-sm text-slate-400 italic">No workflows defined.</span>
+                    )}
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="secondary" size="sm" icon={Settings} onClick={() => activeWorkflow && handleOpenWorkflowPanel(activeWorkflow)}>Settings</Button>
+                    <Button variant="secondary" size="sm" icon={Settings} onClick={() => activeWorkflow && handleOpenWorkflowPanel(activeWorkflow)} disabled={!activeWorkflow}>Settings</Button>
                     <Button size="sm" icon={Plus} onClick={() => handleOpenWorkflowPanel()}>New Workflow</Button>
                 </div>
             </div>
+            
             <WorkflowCanvas 
                 workflow={activeWorkflow}
-                onAddStep={() => setIsStepPanelOpen(true)}
-                onEditStep={(step, index) => { setEditingStep(step); setIsStepPanelOpen(true); }}
-                onDeleteStep={(index) => {}}
+                onAddStep={() => handleOpenStepPanel()}
+                onEditStep={(step, idx) => handleOpenStepPanel(step, idx)}
+                onDeleteStep={handleDeleteStep}
             />
+            
             <WorkflowPanel 
                 isOpen={isPanelOpen} 
                 onClose={() => setIsPanelOpen(false)} 
@@ -74,11 +104,12 @@ const WorkflowDesigner: React.FC = () => {
                 onSave={handleSaveWorkflow}
                 onDelete={handleDeleteWorkflow}
             />
+            
             <StepPanel 
                 isOpen={isStepPanelOpen}
-                onClose={() => setIsStepPanelOpen(false)}
+                onClose={() => setIsStepPanelOpen(false)} 
                 step={editingStep}
-                onSave={(step, index) => handleSaveStep(step, index)}
+                onSave={(step) => handleSaveStep(step, editingStepIndex)}
             />
         </div>
     );

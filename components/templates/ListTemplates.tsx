@@ -21,9 +21,6 @@ const TemplateHeader = ({ number, title, subtitle }: { number: string, title: st
     </div>
 );
 
-// ... (MockToolbar, StandardGridTmpl, TreeHierarchyTmpl unchanged, but need to be included or imported if split. 
-// Assuming file replacement, I will include them to keep the file valid.)
-
 const MockToolbar = ({ onSearch }: { onSearch: (val: string) => void }) => {
     const theme = useTheme();
     return (
@@ -295,7 +292,6 @@ export const KanbanBoardTmpl: React.FC = () => {
     );
 };
 
-// ... (MasterDetailTmpl and SplitPaneTmpl remain unchanged) ...
 export const MasterDetailTmpl: React.FC = () => {
     const theme = useTheme();
     const [selectedItem, setSelectedItem] = useState(1);

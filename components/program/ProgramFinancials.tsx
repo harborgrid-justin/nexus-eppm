@@ -26,13 +26,18 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const remainingBudget = aggregateMetrics.totalBudget - aggregateMetrics.totalSpent;
   const projectNamesMap = new Map(projects.map(p => [p.id, p.name]));
 
-  // Prepare chart data
-  const chartData = programFinancials.allocations.map(a => ({
-      name: projectNamesMap.get(a.projectId) || a.projectId,
-      Allocated: a.allocated,
-      Spent: a.spent,
-      Forecast: a.forecast
-  }));
+  // Live aggregation: Link chart data directly to Project current state
+  const chartData = programFinancials.allocations.map(a => {
+      const liveProject = projects.find(p => p.id === a.projectId);
+      return {
+          name: liveProject ? liveProject.code : a.projectId,
+          Allocated: a.allocated,
+          // Use live project spend if available, else fallback to allocation record
+          Spent: liveProject ? liveProject.spent : a.spent,
+          // Simple Forecast calculation: Spend + (Budget - Spend) * 1.1 (10% contingency)
+          Forecast: liveProject ? liveProject.budget * 1.05 : a.forecast
+      };
+  });
 
   const handleOpenAllocationPanel = () => {
       setEditAllocations(JSON.parse(JSON.stringify(programFinancials.allocations)));

@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { 
     MessageSquare, Calendar, FileText, Send, CheckCircle, 
     Clock, AlertTriangle, Users, Download, Eye, Bell 
 } from 'lucide-react';
-import { MOCK_COST_REPORTS, MOCK_COST_MEETINGS, MOCK_COST_ALERTS } from '../../constants/mocks/finance';
 import { formatCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 
@@ -16,12 +15,13 @@ interface CostCommunicationsProps {
 
 const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) => {
   const theme = useTheme();
+  const { state } = useData(); // Access global state
   const [activeTab, setActiveTab] = useState<'reports' | 'meetings' | 'alerts'>('reports');
 
-  // Filter mocks by project ID (using mock data for now as it's not fully in State yet)
-  const reports = MOCK_COST_REPORTS.filter(r => r.projectId === projectId);
-  const meetings = MOCK_COST_MEETINGS.filter(m => m.projectId === projectId);
-  const alerts = MOCK_COST_ALERTS.filter(a => a.projectId === projectId);
+  // Filter real state by project ID
+  const reports = useMemo(() => state.costReports.filter(r => r.projectId === projectId), [state.costReports, projectId]);
+  const meetings = useMemo(() => state.costMeetings.filter(m => m.projectId === projectId), [state.costMeetings, projectId]);
+  const alerts = useMemo(() => state.costAlerts.filter(a => a.projectId === projectId), [state.costAlerts, projectId]);
 
   const getReportStatusColor = (status: string) => {
       switch(status) {
@@ -89,7 +89,7 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                               </td>
                               <td className="px-6 py-4 text-sm text-slate-600">{report.type}</td>
                               <td className="px-6 py-4">
-                                  <Badge variant={getReportStatusColor(report.status)}>{report.status}</Badge>
+                                  <Badge variant={getReportStatusColor(report.status) as any}>{report.status}</Badge>
                               </td>
                               <td className="px-6 py-4 text-xs text-slate-500">
                                   {report.distributedToIds?.length > 0 ? report.distributedToIds.join(', ') : '-'}
@@ -104,6 +104,9 @@ const CostCommunications: React.FC<CostCommunicationsProps> = ({ projectId }) =>
                               </td>
                           </tr>
                       ))}
+                      {reports.length === 0 && (
+                          <tr><td colSpan={5} className="p-8 text-center text-slate-400 text-sm">No cost reports found.</td></tr>
+                      )}
                   </tbody>
               </table>
           </div>

@@ -1,28 +1,42 @@
+
 import React from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useTheme } from '../../../context/ThemeContext';
+import { formatCurrency } from '../../../utils/formatters';
 
-export const BurndownChart: React.FC<{ data: any }> = () => {
+interface BurndownChartProps {
+    data: {
+        drawdowns: { contingency: number; management: number };
+        totalReserves: number;
+        // In real app, we'd pass a timeseries history here.
+        // For now, we will simulate a trend based on the current aggregate usage
+        // because history isn't fully in the data model yet.
+    };
+}
+
+export const BurndownChart: React.FC<BurndownChartProps> = ({ data }) => {
     const theme = useTheme();
-    // Mock burndown data
-    const data = [
-        { month: 'Jan', reserve: 500000 },
-        { month: 'Feb', reserve: 480000 },
-        { month: 'Mar', reserve: 480000 },
-        { month: 'Apr', reserve: 450000 },
-        { month: 'May', reserve: 420000 },
-        { month: 'Jun', reserve: 410000 },
+
+    // Simulate trend based on current total usage. 
+    // In production, this should come from a history log.
+    const totalUsed = data.drawdowns.contingency + data.drawdowns.management;
+    const remaining = data.totalReserves - totalUsed;
+    const chartData = [
+        { month: 'Start', reserve: data.totalReserves },
+        { month: 'Current', reserve: remaining },
+        // Simple linear projection
+        { month: 'Forecast', reserve: Math.max(0, remaining - (totalUsed * 0.2)) } 
     ];
 
     return (
         <div className={`${theme.components.card} ${theme.layout.cardPadding} h-80`}>
             <h3 className="font-bold text-slate-800 mb-4">Reserve Burndown Trend</h3>
             <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
+                    <YAxis tickFormatter={(val) => formatCurrency(val)} width={80} />
+                    <Tooltip formatter={(val: number) => formatCurrency(val)} />
                     <Legend />
                     <Area type="monotone" dataKey="reserve" stroke="#8b5cf6" fill="#ddd6fe" name="Available Reserve" />
                 </AreaChart>

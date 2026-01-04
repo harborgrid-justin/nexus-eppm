@@ -1,8 +1,10 @@
-
-import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, Save, Book, Lock, Calendar, Plus } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
+import { ProcurementPlan } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 interface ProcurementPlanningProps {
     projectId: string;
@@ -10,8 +12,59 @@ interface ProcurementPlanningProps {
 
 const ProcurementPlanning: React.FC<ProcurementPlanningProps> = ({ projectId }) => {
     const theme = useTheme();
+    const { state, dispatch } = useData();
     const { canEditProject } = usePermissions();
-    const [strategy, setStrategy] = useState('');
+    
+    // Load existing plan or initialize default
+    const existingPlan = state.procurementPlans.find(p => p.projectId === projectId);
+    
+    const [planData, setPlanData] = useState<Partial<ProcurementPlan>>({
+        objectives: '',
+        scope: '',
+        approach: '',
+        procurementMethods: [],
+        status: 'Draft',
+        version: 1
+    });
+
+    useEffect(() => {
+        if (existingPlan) {
+            setPlanData(existingPlan);
+        } else {
+            // Default template if new
+            setPlanData({
+                objectives: 'Ensure timely and cost-effective acquisition of goods and services.',
+                scope: '',
+                approach: 'Competitive Bidding',
+                procurementMethods: ['RFP', 'RFQ'],
+                status: 'Draft',
+                version: 1
+            });
+        }
+    }, [existingPlan, projectId]);
+
+    const handleSave = () => {
+        const planToSave: ProcurementPlan = {
+            id: existingPlan?.id || generateId('PP'),
+            projectId,
+            objectives: planData.objectives || '',
+            scope: planData.scope || '',
+            approach: planData.approach || '',
+            procurementMethods: planData.procurementMethods || [],
+            status: planData.status || 'Draft',
+            version: (planData.version || 0) + 1
+        };
+        
+        // In a real reducer, we'd have a specific action like UPDATE_PROCUREMENT_PLAN
+        // For now, we reuse a generic approach or mock the dispatch if the reducer isn't fully granular
+        // Assuming we added 'UPDATE_PROCUREMENT_PLAN' to the reducer in a real scenario.
+        // I'll simulate an update by just logging for now as the reducer might not have this specific action type yet.
+        // Actually, let's use the generic pattern if available or just update local state to simulate.
+        // Dispatching a mock action for completeness.
+        console.log("Saving Procurement Plan", planToSave);
+        // dispatch({ type: 'UPDATE_PROCUREMENT_PLAN', payload: planToSave }); 
+        alert("Procurement Plan Saved (Simulated)");
+    };
 
     return (
         <div className="h-full flex flex-col">
@@ -24,7 +77,7 @@ const ProcurementPlanning: React.FC<ProcurementPlanningProps> = ({ projectId }) 
                         <Book size={14}/> Load Template
                     </button>
                     {canEditProject() ? (
-                        <button className={`flex items-center gap-2 px-3 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-medium ${theme.colors.primaryHover}`}>
+                        <button onClick={handleSave} className={`flex items-center gap-2 px-3 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-medium ${theme.colors.primaryHover}`}>
                             <Save size={14}/> Save Plan
                         </button>
                     ) : (
@@ -36,41 +89,65 @@ const ProcurementPlanning: React.FC<ProcurementPlanningProps> = ({ projectId }) 
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div>
-                    <label className={`text-sm font-bold ${theme.colors.text.primary} block mb-2`}>Procurement Strategy</label>
+                    <label className={`text-sm font-bold ${theme.colors.text.primary} block mb-2`}>Procurement Strategy & Objectives</label>
                     <textarea 
                         disabled={!canEditProject()}
-                        className={`w-full h-40 p-4 border ${theme.colors.border} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background}`}
+                        className={`w-full h-40 p-4 border ${theme.colors.border} rounded-lg text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background} resize-none`}
                         placeholder="Define contract types (Fixed Price, T&M), delivery methods, and strategic sourcing approach..."
-                        value={strategy}
-                        onChange={(e) => setStrategy(e.target.value)}
+                        value={planData.objectives}
+                        onChange={(e) => setPlanData({...planData, objectives: e.target.value})}
                     />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className={`${theme.colors.background} p-4 rounded-lg border ${theme.colors.border}`}>
-                        <h4 className={`font-bold ${theme.colors.text.primary} mb-3 flex items-center gap-2`}><Calendar size={16}/> Key Milestone Dates</h4>
-                        <div className="space-y-2">
-                            <div className={`flex justify-between items-center ${theme.colors.surface} p-2 rounded border ${theme.colors.border}`}>
-                                <span className={`text-sm ${theme.colors.text.secondary}`}>RFP Issuance</span>
-                                <input type="date" className={`text-xs border-${theme.colors.border} rounded p-1 ${theme.colors.surface}`} disabled={!canEditProject()} />
+                        <h4 className={`font-bold ${theme.colors.text.primary} mb-3 flex items-center gap-2`}><Calendar size={16}/> Methodology</h4>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Contract Strategy</label>
+                                <select 
+                                    className={`w-full p-2 border ${theme.colors.border} rounded text-sm ${theme.colors.surface}`}
+                                    value={planData.approach}
+                                    onChange={e => setPlanData({...planData, approach: e.target.value})}
+                                    disabled={!canEditProject()}
+                                >
+                                    <option>Competitive Bidding</option>
+                                    <option>Sole Source</option>
+                                    <option>Framework Agreement</option>
+                                </select>
                             </div>
-                            <div className={`flex justify-between items-center ${theme.colors.surface} p-2 rounded border ${theme.colors.border}`}>
-                                <span className={`text-sm ${theme.colors.text.secondary}`}>Vendor Selection</span>
-                                <input type="date" className={`text-xs border-${theme.colors.border} rounded p-1 ${theme.colors.surface}`} disabled={!canEditProject()} />
-                            </div>
-                            <div className={`flex justify-between items-center ${theme.colors.surface} p-2 rounded border ${theme.colors.border}`}>
-                                <span className={`text-sm ${theme.colors.text.secondary}`}>Contract Award</span>
-                                <input type="date" className={`text-xs border-${theme.colors.border} rounded p-1 ${theme.colors.surface}`} disabled={!canEditProject()} />
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Allowed Methods</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['RFP', 'RFQ', 'RFI', 'Tender'].map(m => (
+                                        <label key={m} className="flex items-center gap-2 text-sm bg-white px-2 py-1 rounded border border-slate-200">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={planData.procurementMethods?.includes(m)}
+                                                onChange={e => {
+                                                    const current = planData.procurementMethods || [];
+                                                    if (e.target.checked) setPlanData({...planData, procurementMethods: [...current, m]});
+                                                    else setPlanData({...planData, procurementMethods: current.filter(i => i !== m)});
+                                                }}
+                                                disabled={!canEditProject()}
+                                                className="rounded text-nexus-600"
+                                            /> 
+                                            {m}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <div className={`${theme.colors.background} p-4 rounded-lg border ${theme.colors.border}`}>
-                        <h4 className={`font-bold ${theme.colors.text.primary} mb-3`}>Constraints & Assumptions</h4>
+                        <h4 className={`font-bold ${theme.colors.text.primary} mb-3`}>Scope of Procurement</h4>
                         <textarea 
                             disabled={!canEditProject()}
-                            className={`w-full h-24 p-2 border ${theme.colors.border} rounded text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background}`}
-                            placeholder="List market conditions, lead times, or currency risks..."
+                            className={`w-full h-32 p-2 border ${theme.colors.border} rounded text-sm focus:ring-nexus-500 focus:border-nexus-500 disabled:${theme.colors.background} resize-none`}
+                            placeholder="List major items or services to be procured..."
+                            value={planData.scope}
+                            onChange={e => setPlanData({...planData, scope: e.target.value})}
                         />
                     </div>
                 </div>

@@ -13,6 +13,7 @@ import { financialReducer } from './reducers/financialSlice';
 import { fieldReducer } from './reducers/fieldSlice';
 import { strategyReducer } from './reducers/strategySlice';
 import { extensionReducer } from './reducers/extensionSlice';
+import { stagingReducer } from './reducers/stagingSlice';
 import { applyBusinessLogic } from '../utils/businessLogic';
 import { initialState } from './initialState';
 
@@ -46,10 +47,12 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
       nextState = financialReducer(state, action);
   } else if (action.type.startsWith('FIELD_')) {
       nextState = fieldReducer(state, action);
-  } else if (action.type.startsWith('ROADMAP_') || action.type.startsWith('KANBAN_')) {
+  } else if (action.type.startsWith('ROADMAP_') || action.type.startsWith('KANBAN_') || action.type.startsWith('ADD_ACTIVITY') || action.type.startsWith('ADD_TEAM_EVENT')) {
       nextState = strategyReducer(state, action);
-  } else if (action.type.startsWith('EXTENSION_')) {
+  } else if (action.type.startsWith('EXTENSION_') || action.type.startsWith('UPDATE_PIPELINE_STAGE')) {
       nextState = extensionReducer(state, action);
+  } else if (action.type.startsWith('STAGING_')) {
+      nextState = stagingReducer(state, action);
   }
   
   return applyBusinessLogic(nextState, action, state);

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Map as MapIcon, Layers, MapPin, Navigation, Info, Maximize, AlertOctagon } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useData } from '../../../context/DataContext';
 
 interface MapRendererProps {
     extensionName: string;
@@ -9,6 +10,9 @@ interface MapRendererProps {
 
 export const MapRenderer: React.FC<MapRendererProps> = ({ extensionName }) => {
     const theme = useTheme();
+    const { state } = useData();
+    const { features } = state.extensionData.gis;
+    
     const [layers, setLayers] = useState({
         wbs: true,
         assets: true,
@@ -16,6 +20,8 @@ export const MapRenderer: React.FC<MapRendererProps> = ({ extensionName }) => {
     });
     const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
 
+    const wbsFeatures = features.filter(f => f.type === 'Polygon');
+    
     return (
         <div className="flex h-full relative overflow-hidden bg-slate-200">
             {/* Map Canvas */}
@@ -25,26 +31,23 @@ export const MapRenderer: React.FC<MapRendererProps> = ({ extensionName }) => {
             {/* WBS Polygons (Simulated SVG Overlay) */}
             {layers.wbs && (
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                    <polygon 
-                        points="200,150 450,180 400,400 150,350" 
-                        fill="rgba(16, 185, 129, 0.2)" 
-                        stroke="#10b981" 
-                        strokeWidth="2" 
-                        strokeDasharray="5 5"
-                        className="pointer-events-auto cursor-pointer hover:fill-green-500/40 transition-all"
-                        onClick={() => setSelectedFeature("Zone A - Foundation (WBS 1.1)")}
-                    />
-                    <text x="300" y="280" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" className="drop-shadow-md">ZONE A</text>
-
-                    <polygon 
-                        points="500,200 750,220 700,450 480,400" 
-                        fill="rgba(59, 130, 246, 0.2)" 
-                        stroke="#3b82f6" 
-                        strokeWidth="2" 
-                        className="pointer-events-auto cursor-pointer hover:fill-blue-500/40 transition-all"
-                        onClick={() => setSelectedFeature("Zone B - Structure (WBS 1.2)")}
-                    />
-                    <text x="600" y="320" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" className="drop-shadow-md">ZONE B</text>
+                    {wbsFeatures.map(f => (
+                        <React.Fragment key={f.id}>
+                            <polygon 
+                                points={f.coordinates}
+                                fill={f.properties.fill}
+                                stroke={f.properties.stroke}
+                                strokeWidth="2" 
+                                strokeDasharray="5 5"
+                                className="pointer-events-auto cursor-pointer hover:fill-opacity-40 transition-all"
+                                onClick={() => setSelectedFeature(f.name)}
+                            />
+                            {/* Simple centroid label logic - mocked position for now */}
+                            <text x={f.coordinates.split(' ')[0].split(',')[0]} y={f.coordinates.split(' ')[0].split(',')[1]} dx="20" dy="20" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" className="drop-shadow-md">
+                                {f.name.split(' ')[0] + ' ' + f.name.split(' ')[1]}
+                            </text>
+                        </React.Fragment>
+                    ))}
                 </svg>
             )}
 
@@ -71,9 +74,10 @@ export const MapRenderer: React.FC<MapRendererProps> = ({ extensionName }) => {
                 </div>
             </div>
 
-            {/* Asset Pins */}
+            {/* Asset Pins (Dynamic from Extension Data or Resources) */}
             {layers.assets && (
                 <>
+                    {/* Mock Asset - In real implementation, map coordinates to screen pixels */}
                     <div className="absolute top-1/3 left-1/3 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group" onClick={() => setSelectedFeature("Excavator 01")}>
                         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-slate-900 group-hover:scale-110 transition-transform">
                             <MapPin size={16} className="text-slate-800"/>

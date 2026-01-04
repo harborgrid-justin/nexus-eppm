@@ -4,7 +4,7 @@ import { useProgramData } from '../../hooks/useProgramData';
 import { useTheme } from '../../context/ThemeContext';
 import { 
   Activity, TrendingUp, AlertTriangle, 
-  DollarSign, Layers, PieChart as PieIcon, ArrowUpRight, Sparkles, Loader2
+  DollarSign, Layers, PieChart as PieIcon, ArrowUpRight, Sparkles, Loader2, BarChart2, Target
 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Line, ComposedChart } from 'recharts';
@@ -13,6 +13,8 @@ import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Skeleton } from '../ui/Skeleton';
+import { EmptyState } from '../common/EmptyState';
+import { calculateProjectProgress } from '../../utils/calculations';
 
 interface ProgramDashboardProps {
   programId: string;
@@ -56,7 +58,7 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
     return { activeRisks: active, highRisks: high };
   }, [programRisks]);
   
-  // Project Health Distribution
+  // Project Health Distribution (Live Data)
   const healthData = useMemo(() => {
     const counts = { Good: 0, Warning: 0, Critical: 0 };
     projects.forEach(p => {
@@ -71,26 +73,31 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
     ];
   }, [projects]);
 
-  // Financial Chart Data
+  // Financial Chart Data (Calculated from Projects, NOT Allocations if missing)
   const financialChartData = useMemo(() => {
-    return programFinancials.allocations
-        .filter(a => a.projectId !== 'Unallocated Reserve')
-        .map(a => {
-            const proj = projects.find(p => p.id === a.projectId);
-            return {
-                name: proj?.code || a.projectId,
-                Budget: a.allocated,
-                Actuals: a.spent,
-                Forecast: a.forecast
-            };
-        });
-  }, [programFinancials.allocations, projects]);
+      // Prioritize actual projects for the visual chart
+      return projects.map(p => {
+          const progress = calculateProjectProgress(p) / 100;
+          return {
+              name: p.code,
+              Budget: p.budget,
+              Actuals: p.spent,
+              // Simple forecast: Spent / Progress (CPI=1 assumption)
+              Forecast: progress > 0 ? p.spent / progress : p.budget
+          };
+      });
+  }, [projects]);
 
   if (!program) return (
       <div className="p-8 grid grid-cols-1 md:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => <Skeleton key={i} height={120} />)}
       </div>
   );
+
+  // Fallback metrics if projects list is empty but program exists
+  const displayTotalBudget = aggregateMetrics.totalBudget || program.budget;
+  const displayTotalSpent = aggregateMetrics.totalSpent;
+  const burnRate = displayTotalBudget > 0 ? (displayTotalSpent / displayTotalBudget) * 100 : 0;
 
   return (
     <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in duration-300`}>
@@ -151,8 +158,8 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
             />
             <StatCard 
                 title="Budget Consumed" 
-                value={formatCompactCurrency(aggregateMetrics.totalSpent)} 
-                subtext={`of ${formatCompactCurrency(aggregateMetrics.totalBudget)} Total`} 
+                value={formatCompactCurrency(displayTotalSpent)} 
+                subtext={`of ${formatCompactCurrency(displayTotalBudget)} Total`} 
                 icon={DollarSign} 
             />
             <StatCard 
@@ -163,9 +170,9 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                 trend={highRisks > 0 ? 'down' : 'up'}
             />
             <StatCard 
-                title="Benefits Realized" 
-                value="65%" 
-                subtext="Target: 75% by Q4" 
+                title="Portfolio Burn" 
+                value={`${burnRate.toFixed(1)}%`} 
+                subtext="Utilization" 
                 icon={TrendingUp} 
                 trend="up"
             />
@@ -186,17 +193,25 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                 </div>
                 <div className="flex-1 w-full min-h-0">
                     <Suspense fallback={<ChartSkeleton />}>
-                        <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={financialChartData} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                <XAxis dataKey="name" tick={{fontSize: 12}} />
-                                <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
-                                <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
-                                <Bar dataKey="Budget" fill="#cbd5e1" barSize={20} radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="Actuals" fill={theme.charts.palette[0]} barSize={20} radius={[4, 4, 0, 0]} />
-                                <Line type="monotone" dataKey="Forecast" stroke={theme.charts.palette[5]} strokeWidth={2} dot={{r: 4}} />
-                            </ComposedChart>
-                        </ResponsiveContainer>
+                        {financialChartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart data={financialChartData} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                                    <XAxis dataKey="name" tick={{fontSize: 12}} />
+                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
+                                    <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
+                                    <Bar dataKey="Budget" fill="#cbd5e1" barSize={20} radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="Actuals" fill={theme.charts.palette[0]} barSize={20} radius={[4, 4, 0, 0]} />
+                                    <Line type="monotone" dataKey="Forecast" stroke={theme.charts.palette[5]} strokeWidth={2} dot={{r: 4}} />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState 
+                                title="No Financial Data" 
+                                description="Allocate budgets to projects to see financial performance."
+                                icon={BarChart2}
+                            />
+                        )}
                     </Suspense>
                 </div>
             </div>
@@ -204,51 +219,63 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
             {/* Strategic Alignment / Health */}
             <div className="space-y-6">
                 {/* Health Distribution */}
-                <div className={`${theme.components.card} p-6`}>
+                <div className={`${theme.components.card} p-6 h-[190px] flex flex-col`}>
                     <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
                         <PieIcon size={18} className="text-nexus-600"/> Project Health
                     </h3>
-                    <div className="space-y-3">
-                        {healthData.map(item => (
-                            <div key={item.name} className="flex items-center justify-between">
-                                <span className={`text-sm font-medium ${theme.colors.text.secondary} flex items-center gap-2`}>
-                                    <span className={`w-2.5 h-2.5 rounded-full ${
-                                        item.name === 'Good' ? 'bg-green-500' : 
-                                        item.name === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'
-                                    }`}></span>
-                                    {item.name}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-24 h-2 ${theme.colors.background} rounded-full overflow-hidden`}>
-                                        <div 
-                                            className={`h-full ${
-                                                item.name === 'Good' ? 'bg-green-500' : 
-                                                item.name === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'
-                                            }`} 
-                                            style={{ width: `${projects.length > 0 ? (item.value / projects.length) * 100 : 0}%` }}
-                                        ></div>
+                    {projects.length > 0 ? (
+                        <div className="space-y-3 overflow-auto">
+                            {healthData.map(item => (
+                                <div key={item.name} className="flex items-center justify-between">
+                                    <span className={`text-sm font-medium ${theme.colors.text.secondary} flex items-center gap-2`}>
+                                        <span className={`w-2.5 h-2.5 rounded-full ${
+                                            item.name === 'Good' ? 'bg-green-500' : 
+                                            item.name === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'
+                                        }`}></span>
+                                        {item.name}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`w-24 h-2 ${theme.colors.background} rounded-full overflow-hidden`}>
+                                            <div 
+                                                className={`h-full ${
+                                                    item.name === 'Good' ? 'bg-green-500' : 
+                                                    item.name === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'
+                                                }`} 
+                                                style={{ width: `${projects.length > 0 ? (item.value / projects.length) * 100 : 0}%` }}
+                                            ></div>
+                                        </div>
+                                        <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{item.value}</span>
                                     </div>
-                                    <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{item.value}</span>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                             <p className="text-xs text-slate-400 italic">No projects linked.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Key Objectives */}
-                <div className={`${theme.components.card} p-6`}>
+                <div className={`${theme.components.card} p-6 h-[186px] flex flex-col`}>
                     <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
                         <Layers size={18} className="text-nexus-600"/> Strategic Objectives
                     </h3>
-                    <ul className="space-y-3">
-                        {programObjectives.map(obj => (
-                            <li key={obj.id} className="text-sm border-l-2 border-nexus-300 pl-3 py-1">
-                                <p className={`font-medium ${theme.colors.text.primary}`}>{obj.description}</p>
-                                <p className={`text-xs ${theme.colors.text.secondary} mt-0.5`}>Linked to: {obj.linkedStrategicGoalId}</p>
-                            </li>
-                        ))}
-                        {programObjectives.length === 0 && <li className="text-xs text-slate-400 italic">No specific objectives defined.</li>}
-                    </ul>
+                    {programObjectives.length > 0 ? (
+                        <ul className="space-y-3 overflow-auto pr-1">
+                            {programObjectives.map(obj => (
+                                <li key={obj.id} className="text-sm border-l-2 border-nexus-300 pl-3 py-1">
+                                    <p className={`font-medium ${theme.colors.text.primary} line-clamp-2`}>{obj.description}</p>
+                                    <p className={`text-xs ${theme.colors.text.secondary} mt-0.5`}>Linked to: {obj.linkedStrategicGoalId}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center">
+                             <Target size={24} className="text-slate-300 mb-2"/>
+                             <p className="text-xs text-slate-400">No objectives defined.</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

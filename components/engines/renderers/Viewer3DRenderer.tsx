@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Layers, Eye, EyeOff, Search, Settings, Maximize2, Move, Rotate3D, Info, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useData } from '../../../context/DataContext';
 
 interface Viewer3DRendererProps {
     extensionVersion: string;
@@ -9,29 +10,18 @@ interface Viewer3DRendererProps {
 
 export const Viewer3DRenderer: React.FC<Viewer3DRendererProps> = ({ extensionVersion }) => {
     const theme = useTheme();
+    const { state } = useData();
     const [selectedPart, setSelectedPart] = useState<string | null>(null);
-    const [modelTree, setModelTree] = useState([
-        { id: 'ARCH', name: 'Architectural', visible: true, children: [
-            { id: 'WL', name: 'Walls', visible: true },
-            { id: 'WD', name: 'Windows', visible: true },
-            { id: 'DR', name: 'Doors', visible: true }
-        ]},
-        { id: 'STR', name: 'Structural', visible: true, children: [
-            { id: 'BM', name: 'Beams', visible: true },
-            { id: 'CL', name: 'Columns', visible: true },
-            { id: 'FD', name: 'Foundation', visible: true }
-        ]},
-        { id: 'MEP', name: 'MEP', visible: false, children: [
-            { id: 'HVAC', name: 'Ductwork', visible: false },
-            { id: 'PL', name: 'Piping', visible: false }
-        ]}
-    ]);
+    
+    // Fallback if data is missing
+    const modelTree = state.extensionData.bim?.tree || [];
+    
+    // We maintain local state for toggles to avoid dispatching for purely visual toggles (unless we want persistence)
+    const [localTree, setLocalTree] = useState(modelTree);
 
     const toggleVisibility = (id: string) => {
-        // Simple toggle logic for demo
-        const newTree = [...modelTree];
-        // Deep search and toggle would go here
-        setModelTree(newTree.map(cat => cat.id === id ? { ...cat, visible: !cat.visible } : cat));
+        const newTree = localTree.map(cat => cat.id === id ? { ...cat, visible: !cat.visible } : cat);
+        setLocalTree(newTree);
     };
 
     return (
@@ -90,7 +80,7 @@ export const Viewer3DRenderer: React.FC<Viewer3DRendererProps> = ({ extensionVer
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 text-sm text-slate-400">
-                    {modelTree.map(cat => (
+                    {localTree.length > 0 ? localTree.map(cat => (
                         <div key={cat.id} className="mb-2">
                             <div className="flex items-center justify-between p-2 hover:bg-slate-900 rounded cursor-pointer group">
                                 <span className="font-bold text-slate-300">{cat.name}</span>
@@ -98,7 +88,7 @@ export const Viewer3DRenderer: React.FC<Viewer3DRendererProps> = ({ extensionVer
                                     {cat.visible ? <Eye size={14}/> : <EyeOff size={14}/>}
                                 </button>
                             </div>
-                            {cat.visible && (
+                            {cat.visible && cat.children && (
                                 <div className="ml-4 border-l border-slate-800 pl-2 space-y-1">
                                     {cat.children.map(child => (
                                         <div 
@@ -113,7 +103,9 @@ export const Viewer3DRenderer: React.FC<Viewer3DRendererProps> = ({ extensionVer
                                 </div>
                             )}
                         </div>
-                    ))}
+                    )) : (
+                        <div className="p-4 text-center text-slate-600 text-xs">No model loaded.</div>
+                    )}
                 </div>
 
                 {/* Properties Panel */}

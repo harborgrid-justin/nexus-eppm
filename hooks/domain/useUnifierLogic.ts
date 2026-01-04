@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { BPRecord } from '../../types/unifier';
-import { Table, Layers } from 'lucide-react';
+import { Table, Layers, TrendingUp, Banknote, Edit3, Settings } from 'lucide-react';
 import { NavGroup } from '../../components/common/ModuleNavigation';
 
 export const useUnifierLogic = () => {
@@ -15,13 +15,12 @@ export const useUnifierLogic = () => {
   const [isPending, startTransition] = useTransition();
 
   const activeGroup = searchParams.get('unifierGroup') || 'controls';
-  const activeTab = (searchParams.get('view') as 'CostSheet' | 'BPs') || 'CostSheet';
+  const activeTab = searchParams.get('view') || 'CostSheet';
 
-  const [selectedBP, setSelectedBP] = useState<string>('bp_co'); // Keep local state for BP selection as it's a detail view
+  const [selectedBP, setSelectedBP] = useState<string>('bp_co'); 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<BPRecord | undefined>(undefined);
 
-  // Mock Project Context for demo purposes
   const projectId = 'P1001'; 
 
   const activeDefinition = useMemo(() => 
@@ -33,14 +32,25 @@ export const useUnifierLogic = () => {
   [state.unifier.records, selectedBP, projectId]);
 
   const navGroups: NavGroup[] = useMemo(() => [
-      { id: 'controls', label: 'Project Controls', items: [
+      { id: 'controls', label: 'Cost Controls', items: [
           { id: 'CostSheet', label: 'Master Cost Sheet', icon: Table },
-          { id: 'BPs', label: 'Business Processes', icon: Layers },
+          { id: 'CashFlow', label: 'Cash Flow', icon: TrendingUp },
+          { id: 'Funding', label: 'Funding Manager', icon: Banknote },
+      ]},
+      { id: 'automation', label: 'Business Processes', items: [
+          { id: 'BPs', label: 'Logs & Records', icon: Layers },
+      ]},
+      { id: 'admin', label: 'Configuration', items: [
+          { id: 'uDesigner', label: 'uDesigner', icon: Edit3 },
+          { id: 'Admin', label: 'Admin', icon: Settings },
       ]}
   ], []);
 
   const handleGroupChange = (groupId: string) => {
-    // Single group, logical placeholder
+      const group = navGroups.find(g => g.id === groupId);
+      if(group && group.items.length > 0) {
+          handleTabChange(group.items[0].id);
+      }
   };
 
   const handleTabChange = (tabId: string) => {
@@ -62,11 +72,20 @@ export const useUnifierLogic = () => {
   };
 
   const handleSaveRecord = (record: BPRecord, action: string) => {
+     if (!user) return;
      dispatch({ 
          type: 'UNIFIER_UPDATE_BP_RECORD', 
          payload: { record, action, user } 
      });
      setIsFormOpen(false);
+  };
+
+  const setSelectedBPWrapper = (id: string) => {
+    setSelectedBP(id);
+  };
+
+  const setIsFormOpenWrapper = (isOpen: boolean) => {
+    setIsFormOpen(isOpen);
   };
 
   return {
@@ -85,7 +104,7 @@ export const useUnifierLogic = () => {
       handleCreate,
       handleEdit,
       handleSaveRecord,
-      setSelectedBP,
-      setIsFormOpen
+      setSelectedBP: setSelectedBPWrapper,
+      setIsFormOpen: setIsFormOpenWrapper
   };
 };

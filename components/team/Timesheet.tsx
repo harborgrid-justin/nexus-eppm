@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Timesheet as TimesheetType, TimesheetRow } from '../../types/resource';
-import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, CheckCircle, Lock } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
 import { generateId } from '../../utils/formatters';
@@ -10,10 +10,9 @@ import { generateId } from '../../utils/formatters';
 const Timesheet: React.FC = () => {
   const { state, dispatch } = useData();
   const theme = useTheme();
-  // Hydration safety: Start with null/default and sync on mount
   const [currentWeekStart, setCurrentWeekStart] = useState<Date | null>(null);
   
-  // Use local user ID (Mock)
+  // Use local user ID (Mock - in real app this comes from AuthContext)
   const currentUserId = 'R-002'; // 'Mike Ross' from MOCK_RESOURCES
 
   function getMonday(d: Date) {
@@ -47,18 +46,18 @@ const Timesheet: React.FC = () => {
 
   const [rows, setRows] = useState<TimesheetRow[]>([]);
   const [status, setStatus] = useState<'Draft' | 'Submitted' | 'Approved' | 'Rejected'>('Draft');
+  const isEditable = status === 'Draft' || status === 'Rejected';
 
   useEffect(() => {
       if (activeTimesheet) {
           setRows(activeTimesheet.rows);
           setStatus(activeTimesheet.status);
       } else if (currentWeekStart) {
-          // Initialize empty rows based on assignments
+          // Initialize empty rows based on assignments from Project Tasks
           const tasks: TimesheetRow[] = [];
-          
           state.projects.forEach(p => {
               p.tasks.forEach(t => {
-                  if (t.assignments.some(a => a.resourceId === currentUserId)) {
+                  if (t.assignments && t.assignments.some(a => a.resourceId === currentUserId)) {
                       tasks.push({
                           taskId: t.id,
                           projectId: p.id,
@@ -75,75 +74,46 @@ const Timesheet: React.FC = () => {
   }, [activeTimesheet, currentWeekStart, state.projects]);
 
   const handleHourChange = (rowIndex: number, dayIndex: number, val: string) => {
-      if (status === 'Submitted' || status === 'Approved') return;
-      const numVal = parseFloat(val) || 0;
+      if (!isEditable) return;
+      
+      let numVal = parseFloat(val);
+      if (isNaN(numVal) || numVal < 0) numVal = 0;
+      if (numVal > 24) numVal = 24; // Cap daily hours
+
       const newRows = [...rows];
+      // Create deep copy of hours array to avoid mutation issues
+      newRows[rowIndex] = { ...newRows[rowIndex], hours: [...newRows[rowIndex].hours] };
       newRows[rowIndex].hours[dayIndex] = numVal;
       setRows(newRows);
   };
 
   const calculateDailyTotal = (dayIndex: number) => {
-      return rows.reduce((sum, row) => sum + row.hours[dayIndex], 0);
+      return rows.reduce((sum, row) => sum + (row.hours[dayIndex] || 0), 0);
   };
 
   const calculateRowTotal = (row: TimesheetRow) => {
-      return row.hours.reduce((sum, h) => sum + h, 0);
+      return row.hours.reduce((sum, h) => sum + (h || 0), 0);
   };
 
   const grandTotal = rows.reduce((sum, row) => sum + calculateRowTotal(row), 0);
 
-  const handleSave = () => {
+  const saveSheet = (newStatus: TimesheetType['status']) => {
       if (!currentWeekStart) return;
+      
       const sheet: TimesheetType = {
           id: activeTimesheet?.id || generateId('TS'),
           resourceId: currentUserId,
           periodStart: currentWeekStart.toISOString().split('T')[0],
-          status: 'Draft',
+          status: newStatus,
           totalHours: grandTotal,
           rows: rows
       };
       
-      // We use SUBMIT_TIMESHEET for simplicity, but it handles upsert in reducer logic via ADMIN_SLICE or SYSTEM_SLICE
-      // Since we don't have a specific SAVE action, we can re-use the generic update or add specific one.
-      // Let's use SUBMIT_TIMESHEET for now as per actions.ts, but logically it's an update.
-      // Wait, actions.ts has SUBMIT_TIMESHEET which takes { id, rows, totalHours }.
-      // But we need to persist the full object.
-      // Let's check actions.ts... It has SUBMIT_TIMESHEET payload: any.
-      
-      // Let's use a cleaner pattern. We need to persist to state.timesheets.
-      // We will dispatch 'SUBMIT_TIMESHEET' which likely needs to be handled in systemSlice or adminSlice.
-      // Currently adminSlice doesn't handle TIMESHEET actions. Let's fix that.
-      // Actually, checking actions.ts, we have SUBMIT_TIMESHEET payload: any.
-      
-      // Let's add a proper action in reducer.
-      // For now, assume SUBMIT_TIMESHEET handles upsert.
-      
-      // Actually, I'll update the action type to properly handle timesheet persistence.
-      // See reducer update.
-      
-      // We need a specific action. Let's assume there is one or I'll add one.
-      // I added 'SUBMIT_TIMESHEET' to actions.ts in previous step.
-      
-      // Wait, 'SUBMIT_TIMESHEET' in actions.ts was defined as payload: { id, rows, totalHours }.
-      // I'll update the dispatch to match.
       dispatch({ 
-          type: 'SUBMIT_TIMESHEET', // This needs to be handled by reducer to update the timesheet array
-          payload: { ...sheet, status: 'Draft' } 
+          type: 'SUBMIT_TIMESHEET', 
+          payload: sheet
       });
-  };
-  
-  const handleSubmit = () => {
-       if (!currentWeekStart) return;
-       const sheet: TimesheetType = {
-          id: activeTimesheet?.id || generateId('TS'),
-          resourceId: currentUserId,
-          periodStart: currentWeekStart.toISOString().split('T')[0],
-          status: 'Submitted',
-          totalHours: grandTotal,
-          rows: rows
-      };
-      dispatch({ type: 'SUBMIT_TIMESHEET', payload: sheet });
-      setStatus('Submitted');
+      setStatus(newStatus);
   };
 
   const shiftWeek = (direction: 'prev' | 'next') => {
@@ -173,22 +143,31 @@ const Timesheet: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${theme.colors.text.secondary} mr-4`}>Total: {grandTotal.toFixed(1)} hrs</span>
-                <button 
-                    onClick={handleSave}
-                    disabled={status !== 'Draft'}
-                    className={`flex items-center gap-2 px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} ${theme.colors.text.primary} font-medium rounded-lg text-sm hover:${theme.colors.background} disabled:opacity-50`}
-                >
-                    <Save size={16}/> Save
-                </button>
-                <button 
-                    disabled={status !== 'Draft'}
-                    onClick={handleSubmit}
-                    className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white font-medium rounded-lg text-sm ${theme.colors.primaryHover} disabled:opacity-50`}
-                >
-                    {status === 'Submitted' ? <CheckCircle size={16}/> : <Send size={16}/>}
-                    {status === 'Submitted' ? 'Submitted' : 'Submit'}
-                </button>
+                <div className={`text-sm font-bold ${theme.colors.text.secondary} mr-4 flex items-center gap-2`}>
+                   <span>Total:</span>
+                   <span className="text-xl font-black text-nexus-600">{grandTotal.toFixed(1)}</span>
+                   <span className="text-xs font-normal">hrs</span>
+                </div>
+                {isEditable ? (
+                    <>
+                        <button 
+                            onClick={() => saveSheet('Draft')}
+                            className={`flex items-center gap-2 px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} ${theme.colors.text.primary} font-medium rounded-lg text-sm hover:${theme.colors.background} disabled:opacity-50`}
+                        >
+                            <Save size={16}/> Save Draft
+                        </button>
+                        <button 
+                            onClick={() => saveSheet('Submitted')}
+                            className={`flex items-center gap-2 px-4 py-2 ${theme.colors.primary} text-white font-medium rounded-lg text-sm ${theme.colors.primaryHover} shadow-sm active:scale-95 transition-all`}
+                        >
+                            <Send size={16}/> Submit
+                        </button>
+                    </>
+                ) : (
+                    <div className="flex items-center gap-2 text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+                        <Lock size={14}/> Period Locked
+                    </div>
+                )}
             </div>
         </div>
 
@@ -197,11 +176,15 @@ const Timesheet: React.FC = () => {
             <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
                 <thead className={`${theme.colors.background} sticky top-0 z-10`}>
                     <tr>
-                        <th className={`${theme.components.table.header} w-64 border-r`}>Task / Project</th>
+                        <th className={`${theme.components.table.header} w-64 border-r sticky left-0 z-20 ${theme.colors.background} shadow-sm`}>Task / Project</th>
                         {weekDates.map((date, i) => (
-                            <th key={i} className={`${theme.components.table.header} w-24 text-center`}>
-                                <div>{date.toLocaleDateString('en-US', {weekday: 'short'})}</div>
-                                <div className="text-[10px] font-normal">{date.getDate()}</div>
+                            <th key={i} className={`${theme.components.table.header} w-24 text-center border-r`}>
+                                <div className={date.getDay() === 0 || date.getDay() === 6 ? 'text-slate-400' : ''}>
+                                    {date.toLocaleDateString('en-US', {weekday: 'short'})}
+                                </div>
+                                <div className={`text-[10px] font-normal ${date.toDateString() === new Date().toDateString() ? 'bg-nexus-600 text-white px-1.5 rounded-full' : ''}`}>
+                                    {date.getDate()}
+                                </div>
                             </th>
                         ))}
                         <th className={`${theme.components.table.header} w-24 text-center`}>Total</th>
@@ -209,13 +192,13 @@ const Timesheet: React.FC = () => {
                 </thead>
                 <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-','divide-')}`}>
                     {rows.map((row, rIdx) => (
-                        <tr key={rIdx} className={`hover:${theme.colors.background}`}>
-                            <td className={`px-4 py-3 border-r ${theme.colors.border}`}>
+                        <tr key={rIdx} className={`hover:${theme.colors.background} group`}>
+                            <td className={`px-4 py-3 border-r ${theme.colors.border} sticky left-0 z-10 bg-white group-hover:bg-slate-50`}>
                                 <div className={`font-medium text-sm ${theme.colors.text.primary} truncate max-w-[200px]`} title={row.taskName}>{row.taskName}</div>
                                 <div className={`text-xs ${theme.colors.text.secondary} truncate max-w-[200px]`}>{row.projectName}</div>
                             </td>
                             {row.hours.map((hrs, dIdx) => (
-                                <td key={dIdx} className="p-2 text-center">
+                                <td key={dIdx} className="p-2 text-center border-r border-slate-50">
                                     <input 
                                         type="number" 
                                         min="0"
@@ -223,21 +206,21 @@ const Timesheet: React.FC = () => {
                                         step="0.5"
                                         value={hrs === 0 ? '' : hrs}
                                         onChange={(e) => handleHourChange(rIdx, dIdx, e.target.value)}
-                                        disabled={status !== 'Draft'}
-                                        className={`w-full text-center border ${theme.colors.border} rounded py-1 text-sm focus:ring-2 focus:ring-nexus-500 focus:outline-none disabled:${theme.colors.background}`}
+                                        disabled={!isEditable}
+                                        className={`w-full text-center border ${theme.colors.border} rounded py-1 text-sm focus:ring-2 focus:ring-nexus-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-500 transition-colors ${hrs > 8 ? 'text-orange-600 font-bold bg-orange-50/50' : ''}`}
                                     />
                                 </td>
                             ))}
-                            <td className={`px-4 py-3 text-center font-bold text-sm ${theme.colors.text.primary} ${theme.colors.background}`}>
+                            <td className={`px-4 py-3 text-center font-bold text-sm ${theme.colors.text.primary} bg-slate-50/50`}>
                                 {calculateRowTotal(row).toFixed(1)}
                             </td>
                         </tr>
                     ))}
                     {/* Totals Row */}
-                    <tr className={`${theme.colors.background} font-bold ${theme.colors.text.primary}`}>
-                        <td className={`px-4 py-3 border-r ${theme.colors.border} text-right text-xs uppercase`}>Daily Total</td>
+                    <tr className={`${theme.colors.background} font-bold ${theme.colors.text.primary} sticky bottom-0 z-20 shadow-[0_-2px_5px_rgba(0,0,0,0.05)]`}>
+                        <td className={`px-4 py-3 border-r ${theme.colors.border} text-right text-xs uppercase sticky left-0 z-30 ${theme.colors.background}`}>Daily Total</td>
                         {weekDates.map((_, i) => (
-                            <td key={i} className="px-2 py-3 text-center text-sm">
+                            <td key={i} className="px-2 py-3 text-center text-sm border-r border-slate-200">
                                 {calculateDailyTotal(i).toFixed(1)}
                             </td>
                         ))}

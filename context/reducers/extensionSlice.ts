@@ -27,6 +27,11 @@ export const extensionReducer = (state: DataState, action: Action): DataState =>
                 government: { ...state.extensionData.government, ...action.payload }
             }
         };
+    case 'UPDATE_PIPELINE_STAGE':
+        return {
+            ...state,
+            pipelineStages: state.pipelineStages.map(s => s.id === action.payload.id ? action.payload : s)
+        };
     default:
         return state;
   }

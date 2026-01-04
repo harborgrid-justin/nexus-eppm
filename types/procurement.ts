@@ -125,3 +125,16 @@ export interface MakeOrBuyAnalysis {
   rationale: string;
   decision: 'Make' | 'Buy';
 }
+
+export interface MaterialReceipt {
+  id: string;
+  projectId: string;
+  vendorId: string;
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  rejectedQuantity: number;
+  status: 'Accepted' | 'Rejected' | 'Conditional';
+  dateReceived: string;
+  inspectorId: string;
+}

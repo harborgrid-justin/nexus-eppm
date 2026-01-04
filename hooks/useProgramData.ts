@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { 
-    // FIX: Correctly import ProgramVendorSummary type.
     ProgramVendorSummary,
     Program
 } from '../types/index';
@@ -42,8 +41,6 @@ export const useProgramData = (programId: string | null) => {
 
   // --- ARTIFACTS FROM STATE ---
   const programDependencies = useMemo(() => {
-      // Logic could be expanded to filter relevant deps, for now assuming filtering by program scope logic if needed
-      // but simpler to return global list filtered by relevant projects
       const projectIds = projects.map(p => p.id);
       return state.programDependencies.filter(d => projectIds.includes(d.sourceProjectId) || projectIds.includes(d.targetProjectId));
   }, [state.programDependencies, projects]);
@@ -53,10 +50,6 @@ export const useProgramData = (programId: string | null) => {
   [state.programOutcomes, programId]);
 
   const programChangeRequests = useMemo(() =>
-      // Mock logic: Assuming PCRs don't have programId directly in current type definition but we can infer or they do
-      // Actually ProgramChangeRequest doesn't have programId in type? Let's check types.
-      // Assuming state stores all, and we filter. The mock data didn't have programId. 
-      // For now, returning all as per previous mock behavior or filtering if property exists.
       state.programChangeRequests, 
   [state.programChangeRequests]);
 
@@ -98,12 +91,38 @@ export const useProgramData = (programId: string | null) => {
     state.integratedChanges.filter(c => c.programId === programId),
   [state.integratedChanges, programId]);
 
-  // --- MOCKED PROGRAM VENDORS (Computed) ---
-  const programVendors: ProgramVendorSummary[] = useMemo(() => [
-      { vendorId: 'V-001', name: 'Steel Suppliers Inc.', totalContractValue: 12500000, activeContractsCount: 2, avgPerformanceScore: 88, criticalIssuesCount: 0, strategicAlignment: 'Medium' },
-      { vendorId: 'V-002', name: 'Heavy Equipment Co.', totalContractValue: 5000000, activeContractsCount: 1, avgPerformanceScore: 95, criticalIssuesCount: 0, strategicAlignment: 'High' },
-      { vendorId: 'V-Tech', name: 'TechSol Inc.', totalContractValue: 8000000, activeContractsCount: 1, avgPerformanceScore: 72, criticalIssuesCount: 2, strategicAlignment: 'High' }
-  ], []);
+  // --- COMPUTED PROGRAM VENDORS ---
+  const programVendors: ProgramVendorSummary[] = useMemo(() => {
+      const projectIds = projects.map(p => p.id);
+      // Find all contracts related to projects in this program
+      const relevantContracts = state.contracts.filter(c => projectIds.includes(c.projectId));
+      
+      // Group by Vendor
+      const vendorMap = new Map<string, ProgramVendorSummary>();
+
+      relevantContracts.forEach(contract => {
+          if (!vendorMap.has(contract.vendorId)) {
+              const vendor = state.vendors.find(v => v.id === contract.vendorId);
+              vendorMap.set(contract.vendorId, {
+                  vendorId: contract.vendorId,
+                  name: vendor?.name || contract.vendorId,
+                  totalContractValue: 0,
+                  activeContractsCount: 0,
+                  avgPerformanceScore: vendor?.performanceScore || 0,
+                  criticalIssuesCount: 0, // Would need Issue -> Vendor link for precision, defaulting 0
+                  strategicAlignment: vendor?.riskLevel === 'Low' ? 'High' : 'Medium'
+              });
+          }
+          
+          const entry = vendorMap.get(contract.vendorId)!;
+          entry.totalContractValue += contract.contractValue;
+          if (contract.status === 'Active') {
+              entry.activeContractsCount += 1;
+          }
+      });
+
+      return Array.from(vendorMap.values());
+  }, [state.contracts, state.vendors, projects]);
 
   const aggregateMetrics = useMemo(() => {
       const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);

@@ -1,54 +1,80 @@
-import React, { useState } from 'react';
-import { Landmark, TrendingUp, Shield, Zap, Truck, DollarSign, Activity, Globe, Scale, Users, Layers } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+import React, { useState, useMemo } from 'react';
+import { Landmark, Truck, Users, LayoutDashboard } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
-import StatCard from '../shared/StatCard';
+import { Badge } from '../ui/Badge';
 import { formatCompactCurrency } from '../../utils/formatters';
+import { useData } from '../../context/DataContext';
+import { calculateProjectProgress } from '../../utils/calculations';
+import { ProgressBar } from '../common/ProgressBar';
 
 type Department = 'Governor' | 'DOT' | 'HHS' | 'Education';
 
 const StateGovSuite: React.FC = () => {
   const theme = useTheme();
-  // FIX: Renamed state variable to avoid confusion, though original error was for `activeDept` which was incorrect. The logic uses `activeAgency`.
+  const { state } = useData();
   const [activeAgency, setActiveAgency] = useState<Department>('Governor');
 
-  // --- MOCK DATA ---
-  // FIX: Removed large unused mock data arrays
+  // Dynamic Filtering Logic
+  const getProjectsByCategory = (keywords: string[]) => {
+      return state.projects.filter(p => 
+          keywords.some(k => (p.category || '').toLowerCase().includes(k.toLowerCase()) || (p.name || '').toLowerCase().includes(k.toLowerCase()))
+      );
+  };
 
-  // --- RENDERERS ---
-  // FIX: Replaced federal-specific render functions with placeholders for state agencies.
-  const renderGovernor = () => (
-    <div className="p-12 text-center text-slate-500">
-        <Landmark size={64} className="mx-auto mb-4 text-slate-300"/>
-        <h3 className="text-xl font-bold text-slate-700">Governor's Office Dashboard</h3>
-        <p className="max-w-md mx-auto mt-2">State-wide initiatives and budget overview.</p>
-    </div>
-  );
-
-  const renderDOT = () => (
-      <div className="p-12 text-center text-slate-500">
-          <Truck size={64} className="mx-auto mb-4 text-slate-300"/>
-          <h3 className="text-xl font-bold text-slate-700">Department of Transportation</h3>
-          <p className="max-w-md mx-auto mt-2">Integrating highway project trackers, and rail safety metrics.</p>
-      </div>
-  );
-
-  const renderHHS = () => (
-      <div className="p-12 text-center text-slate-500">
-          <Users size={64} className="mx-auto mb-4 text-slate-300"/>
-          <h3 className="text-xl font-bold text-slate-700">Health & Human Services</h3>
-          <p className="max-w-md mx-auto mt-2">Public health initiatives and program status.</p>
-      </div>
-  );
-
-  const renderEducation = () => (
-      <div className="p-12 text-center text-slate-500">
-          <Landmark size={64} className="mx-auto mb-4 text-slate-300"/>
-          <h3 className="text-xl font-bold text-slate-700">Department of Education</h3>
-          <p className="max-w-md mx-auto mt-2">State education program funding and performance.</p>
-      </div>
-  );
+  const renderAgencyDashboard = (title: string, keywords: string[], icon: React.ReactNode) => {
+      const relevantProjects = keywords.length === 0 ? state.projects : getProjectsByCategory(keywords);
+      const totalBudget = relevantProjects.reduce((sum, p) => sum + p.budget, 0);
+      const activeCount = relevantProjects.filter(p => p.status === 'Active').length;
+      
+      return (
+        <div className="p-6 space-y-6 animate-in fade-in duration-300">
+             <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+                 <div className="p-4 bg-slate-100 rounded-full text-slate-500">{icon}</div>
+                 <div>
+                     <h3 className="text-2xl font-bold text-slate-800">{title}</h3>
+                     <p className="text-slate-500 mt-1">{activeCount} Active Initiatives • {formatCompactCurrency(totalBudget)} Total Budget</p>
+                 </div>
+             </div>
+             
+             {relevantProjects.length > 0 ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     {relevantProjects.map(p => {
+                         const progress = calculateProjectProgress(p);
+                         return (
+                             <Card key={p.id} className="p-5 flex flex-col justify-between h-full hover:border-nexus-300 transition-colors">
+                                 <div>
+                                     <div className="flex justify-between items-start mb-2">
+                                         <h4 className="font-bold text-slate-900 line-clamp-2">{p.name}</h4>
+                                         <Badge variant={p.health === 'Good' ? 'success' : p.health === 'Warning' ? 'warning' : 'danger'}>{p.health}</Badge>
+                                     </div>
+                                     <p className="text-xs text-slate-500 font-mono mb-4">{p.code}</p>
+                                 </div>
+                                 <div>
+                                     <div className="flex justify-between text-xs mb-1">
+                                        <span className="text-slate-500 font-medium">Progress</span>
+                                        <span className="font-bold text-slate-700">{progress}%</span>
+                                     </div>
+                                     <ProgressBar value={progress} size="sm" />
+                                     <div className="mt-3 pt-3 border-t border-slate-100 flex justify-between text-xs">
+                                         <span className="text-slate-500">Budget: {formatCompactCurrency(p.budget)}</span>
+                                         <span className="text-slate-500">Spent: {formatCompactCurrency(p.spent)}</span>
+                                     </div>
+                                 </div>
+                             </Card>
+                         )
+                     })}
+                 </div>
+             ) : (
+                 <div className="p-16 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
+                     <p className="font-medium">No active projects found for this agency.</p>
+                     <p className="text-xs mt-1">Check project categories or create new initiatives.</p>
+                 </div>
+             )}
+        </div>
+      );
+  };
 
   return (
     <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
@@ -57,12 +83,11 @@ const StateGovSuite: React.FC = () => {
                 <h1 className={theme.typography.h1}>
                     <Landmark className="text-blue-800" /> State Government Platform
                 </h1>
-                <p className={theme.typography.small}>State Agency Management System</p>
+                <p className={theme.typography.small}>Agency Capital Program Management</p>
             </div>
-            {/* FIX: Replaced federal department buttons with state agency buttons and corrected state management calls */}
             <div className={`flex ${theme.colors.surface} border border-slate-200 rounded-lg p-1`}>
                 <button onClick={() => setActiveAgency('Governor')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md ${activeAgency === 'Governor' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>
-                    <Landmark size={14}/> Governor's Office
+                    <Landmark size={14}/> Executive
                 </button>
                 <button onClick={() => setActiveAgency('DOT')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md ${activeAgency === 'DOT' ? 'bg-orange-50 text-orange-700 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>
                     <Truck size={14}/> DOT
@@ -71,21 +96,19 @@ const StateGovSuite: React.FC = () => {
                     <Users size={14}/> HHS
                 </button>
                 <button onClick={() => setActiveAgency('Education')} className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md ${activeAgency === 'Education' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>
-                    <Landmark size={14}/> Education
+                    <LayoutDashboard size={14}/> Education
                 </button>
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
-            {/* FIX: Replaced federal department rendering logic with state agency logic */}
-            {activeAgency === 'Governor' && renderGovernor()}
-            {activeAgency === 'DOT' && renderDOT()}
-            {activeAgency === 'HHS' && renderHHS()}
-            {activeAgency === 'Education' && renderEducation()}
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 rounded-xl border border-slate-200">
+            {activeAgency === 'Governor' && renderAgencyDashboard("Governor's Office Dashboard", [], <Landmark size={32}/>)}
+            {activeAgency === 'DOT' && renderAgencyDashboard("Department of Transportation", ['Infrastructure', 'Transport', 'Road', 'Bridge'], <Truck size={32}/>)}
+            {activeAgency === 'HHS' && renderAgencyDashboard("Health & Human Services", ['Health', 'Medical', 'Clinic'], <Users size={32}/>)}
+            {activeAgency === 'Education' && renderAgencyDashboard("Department of Education", ['School', 'Education', 'University'], <LayoutDashboard size={32}/>)}
         </div>
     </div>
   );
 };
 
-// FIX: Exported the correct component name
 export default StateGovSuite;

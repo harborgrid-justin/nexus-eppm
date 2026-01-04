@@ -13,7 +13,7 @@ const FinancialSuite: React.FC = () => {
   const { state } = useData();
   const [activeTab, setActiveTab] = useState<'allocation' | 'cashflow' | 'audit'>('allocation');
 
-  const { allocation, cashFlow, regulatoryAudits } = state.extensionData.financial;
+  const { allocation, cashFlow, regulatoryAudits, initiatives } = state.extensionData.financial;
 
   // --- RENDERERS ---
 
@@ -42,32 +42,32 @@ const FinancialSuite: React.FC = () => {
             
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h3 className="font-bold text-slate-800 mb-4">Top Investment Initiatives</h3>
-                <table className="min-w-full text-sm">
-                    <thead className="bg-slate-50 text-slate-500">
-                        <tr>
-                            <th className="px-4 py-2 text-left">Initiative</th>
-                            <th className="px-4 py-2 text-right">Budget</th>
-                            <th className="px-4 py-2 text-right">NPV</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        <tr>
-                            <td className="px-4 py-3 font-medium">Core Banking Migration</td>
-                            <td className="px-4 py-3 text-right font-mono text-slate-600">$45.0M</td>
-                            <td className="px-4 py-3 text-right font-bold text-green-600">$12.5M</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-3 font-medium">AI Fraud Detection</td>
-                            <td className="px-4 py-3 text-right font-mono text-slate-600">$18.2M</td>
-                            <td className="px-4 py-3 text-right font-bold text-green-600">$8.4M</td>
-                        </tr>
-                        <tr>
-                            <td className="px-4 py-3 font-medium">Branch Modernization</td>
-                            <td className="px-4 py-3 text-right font-mono text-slate-600">$12.0M</td>
-                            <td className="px-4 py-3 text-right font-bold text-yellow-600">$1.2M</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div className="overflow-auto max-h-[320px]">
+                    <table className="min-w-full text-sm">
+                        <thead className="bg-slate-50 text-slate-500 sticky top-0">
+                            <tr>
+                                <th className="px-4 py-2 text-left">Initiative</th>
+                                <th className="px-4 py-2 text-right">Budget</th>
+                                <th className="px-4 py-2 text-right">NPV</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {initiatives && initiatives.length > 0 ? initiatives.map((init, i) => (
+                                <tr key={i}>
+                                    <td className="px-4 py-3 font-medium">{init.name}</td>
+                                    <td className="px-4 py-3 text-right font-mono text-slate-600">{formatCompactCurrency(init.budget)}</td>
+                                    <td className={`px-4 py-3 text-right font-bold ${init.npv > 5000000 ? 'text-green-600' : 'text-yellow-600'}`}>
+                                        {formatCompactCurrency(init.npv)}
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={3} className="p-4 text-center text-slate-400">No initiatives tracked.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

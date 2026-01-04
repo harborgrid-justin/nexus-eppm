@@ -3,7 +3,7 @@ import React, { useState, useMemo, useTransition } from 'react';
 import { 
   Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, 
   Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
-  Terminal, Globe, Layers, MapPin, History, RefreshCw, Loader2, Database, AlertCircle
+  Terminal, Layers, MapPin, History, RefreshCw, Database
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import EpsObsSettings from './EpsObsSettings';

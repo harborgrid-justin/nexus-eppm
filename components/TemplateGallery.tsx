@@ -188,7 +188,7 @@ const CATEGORIES = [
           { id: 'TabletDashTmpl', label: '87. Tablet Dashboard', component: Templates.TabletDashTmpl },
           { id: 'KioskModeTmpl', label: '88. Kiosk Mode', component: Templates.KioskModeTmpl },
           { id: 'CommandCenterTmpl', label: '89. Command Center', component: Templates.CommandCenterTmpl },
-          { id: 'MaintenanceTmpl', label: '90. Maint Overlay', component: Templates.MaintenanceTmpl },
+          { id: 'MaintenanceOverlayTmpl', label: '90. Maint Overlay', component: Templates.MaintenanceOverlayTmpl },
       ]
   }
 ];

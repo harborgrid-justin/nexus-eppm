@@ -1,13 +1,13 @@
-
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { User, Role } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Search } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { useData } from '../../context/DataContext';
 import { UserTable } from './users/UserTable';
 import { UserPanel } from './users/UserPanel';
+import { EmptyState } from '../common/EmptyState';
 
 const UserManagement: React.FC = () => {
   const theme = useTheme();
@@ -49,13 +49,13 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col">
-        <div className={`p-4 ${theme.layout.headerBorder} flex-col md:flex-row justify-between items-center ${theme.colors.background} gap-4`}>
+        <div className={`p-4 ${theme.layout.headerBorder} flex flex-col md:flex-row justify-between items-center ${theme.colors.background} gap-4`}>
             <input
                 type="text"
                 placeholder="Search directory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-80 pl-4 pr-10 py-2 border rounded-lg"
+                className="w-full md:w-80 pl-4 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none"
             />
             <Button icon={UserPlus} onClick={() => handleOpenPanel()} className="w-full md:w-auto">
                 Provision User
@@ -63,11 +63,22 @@ const UserManagement: React.FC = () => {
         </div>
 
         <div className={`flex-1 overflow-auto p-4 ${theme.colors.background}/50`}>
-            <UserTable 
-                users={filteredUsers}
-                onEdit={handleOpenPanel}
-                onDelete={handleDelete}
-            />
+            {filteredUsers.length > 0 ? (
+                <UserTable 
+                    users={filteredUsers}
+                    onEdit={handleOpenPanel}
+                    onDelete={handleDelete}
+                />
+            ) : (
+                <div className="h-full flex flex-col justify-center">
+                    <EmptyState 
+                        title="No Users Found" 
+                        description={searchTerm ? `No users match "${searchTerm}"` : "The user directory is empty."}
+                        icon={Search}
+                        action={searchTerm ? undefined : <Button size="sm" onClick={() => handleOpenPanel()}>Add User</Button>}
+                    />
+                </div>
+            )}
         </div>
         
         <UserPanel 

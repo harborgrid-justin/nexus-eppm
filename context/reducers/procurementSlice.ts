@@ -29,6 +29,10 @@ export const procurementSlice = (state: DataState, action: Action): DataState =>
     case 'UPDATE_SOLICITATION':
         return { ...state, solicitations: state.solicitations.map(s => s.id === action.payload.id ? action.payload : s) };
 
+    // Material Receipts
+    case 'ADD_MATERIAL_RECEIPT':
+        return { ...state, materialReceipts: [...state.materialReceipts, action.payload] };
+
     default:
       return state;
   }

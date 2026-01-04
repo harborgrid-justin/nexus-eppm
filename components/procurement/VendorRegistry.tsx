@@ -1,7 +1,8 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useProcurementData } from '../../hooks';
-import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search } from 'lucide-react';
+import { useData } from '../../context/DataContext';
+import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search, Briefcase } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
@@ -14,6 +15,7 @@ interface VendorRegistryProps {
 
 const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
   const { vendors } = useProcurementData(projectId);
+  const { state } = useData();
   const theme = useTheme();
   const { hasPermission } = usePermissions();
   const canEditProcurement = hasPermission('financials:write');
@@ -35,13 +37,20 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
   };
 
   const filteredVendors = useMemo(() => {
-    if (!deferredSearchTerm) return vendors;
-    const term = deferredSearchTerm.toLowerCase();
-    return vendors.filter(v => 
-        v.name.toLowerCase().includes(term) ||
-        v.category.toLowerCase().includes(term)
-    );
-  }, [vendors, deferredSearchTerm]);
+    let list = vendors;
+    if (deferredSearchTerm) {
+        const term = deferredSearchTerm.toLowerCase();
+        list = vendors.filter(v => 
+            v.name.toLowerCase().includes(term) ||
+            v.category.toLowerCase().includes(term)
+        );
+    }
+    // Calculate contracts count
+    return list.map(v => ({
+        ...v,
+        activeContracts: state.contracts.filter(c => c.vendorId === v.id && c.status === 'Active').length
+    }));
+  }, [vendors, deferredSearchTerm, state.contracts]);
 
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}`}>
@@ -76,8 +85,8 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                             <th className={theme.components.table.header}>Vendor Name</th>
                             <th className={theme.components.table.header}>Category</th>
                             <th className={theme.components.table.header}>Status</th>
+                            <th className={theme.components.table.header + ' text-center'}>Active Contracts</th>
                             <th className={theme.components.table.header}>Performance</th>
-                            <th className={theme.components.table.header}>Location</th>
                             <th className={theme.components.table.header}>Last Audit</th>
                         </tr>
                     </thead>
@@ -98,6 +107,13 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                                 </td>
                                 <td className={theme.components.table.cell}>{v.category}</td>
                                 <td className={theme.components.table.cell}>{getStatusBadge(v.status)}</td>
+                                <td className={theme.components.table.cell + ' text-center'}>
+                                    {v.activeContracts > 0 ? (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                                            <Briefcase size={10} /> {v.activeContracts}
+                                        </span>
+                                    ) : <span className="text-slate-400 text-xs">-</span>}
+                                </td>
                                 <td className={theme.components.table.cell}>
                                     <div className="flex items-center gap-2">
                                         <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
@@ -106,7 +122,6 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                                         <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
                                     </div>
                                 </td>
-                                <td className={theme.components.table.cell}>{v.location || 'N/A'}</td>
                                 <td className={theme.components.table.cell}>{v.lastAudit || 'Never'}</td>
                             </tr>
                         ))}

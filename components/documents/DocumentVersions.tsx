@@ -1,13 +1,21 @@
+
 import React from 'react';
 import { History, Download } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
 
-export const DocumentVersions: React.FC = () => {
+export const DocumentVersions: React.FC<{ documentId?: string }> = ({ documentId }) => {
   const theme = useTheme();
+  const { state } = useData();
+  
+  // Find document to get version info, or default
+  const doc = state.documents.find(d => d.id === documentId);
+  const currentVersion = doc?.version || '1.0';
+
+  // Mock history generation based on current version
   const history = [
-      { v: '1.2', date: '2024-06-20', user: 'Mike Ross', notes: 'Final Review' },
-      { v: '1.1', date: '2024-06-15', user: 'Mike Ross', notes: 'Added structural calcs' },
-      { v: '1.0', date: '2024-06-01', user: 'Jessica P.', notes: 'Initial Upload' },
+      { v: currentVersion, date: 'Just now', user: doc?.uploadedBy || 'System', notes: 'Current Version' },
+      { v: (parseFloat(currentVersion) - 0.1).toFixed(1), date: '2 days ago', user: 'System', notes: 'Previous Draft' }
   ];
 
   return (

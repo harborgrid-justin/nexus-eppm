@@ -5,34 +5,14 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { useData } from '../../context/DataContext';
 
 const DoDSuite: React.FC = () => {
   const theme = useTheme();
+  const { state } = useData();
   const [activeTab, setActiveTab] = useState<'acquisition' | 'evms' | 'risk'>('acquisition');
 
-  // --- MOCK DATA FOR ACQUISITION ---
-  const milestones = [
-    { id: 'A', name: 'Milestone A', date: 'Q1 2023', status: 'Complete', desc: 'Material Solution Decision' },
-    { id: 'B', name: 'Milestone B', date: 'Q3 2024', status: 'Upcoming', desc: 'Engineering & Mfg Development' },
-    { id: 'C', name: 'Milestone C', date: 'Q2 2026', status: 'Planned', desc: 'Production & Deployment' },
-  ];
-
-  const phases = [
-    { name: 'Materiel Solution Analysis', duration: '18 mo', status: 'Complete' },
-    { name: 'Tech Maturation & Risk Reduction', duration: '24 mo', status: 'In Progress' },
-    { name: 'Engineering & Mfg Development', duration: '36 mo', status: 'Planned' },
-    { name: 'Production & Deployment', duration: '48 mo', status: 'Planned' },
-    { name: 'Operations & Support', duration: '20 yr', status: 'Planned' },
-  ];
-
-  // --- MOCK DATA FOR EVMS (ANSI/EIA-748) ---
-  const evmsData = [
-    { period: 'Jan', BCWS: 100, BCWP: 95, ACWP: 90 },
-    { period: 'Feb', BCWS: 200, BCWP: 190, ACWP: 195 },
-    { period: 'Mar', BCWS: 300, BCWP: 295, ACWP: 310 },
-    { period: 'Apr', BCWS: 400, BCWP: 380, ACWP: 420 },
-    { period: 'May', BCWS: 500, BCWP: 450, ACWP: 550 }, // slipping
-  ];
+  const { milestones, phases, evmsData } = state.extensionData.dod;
 
   // --- RENDERERS ---
 

@@ -23,8 +23,9 @@ const ReserveAnalysis: React.FC = () => {
 
     const drawdowns = (project.budgetLog || []).reduce((acc, log) => {
         if (log.status === 'Approved') {
-            if (log.source === 'Contingency') acc.contingency += Math.abs(log.amount);
-            if (log.source === 'Management Reserve') acc.management += Math.abs(log.amount);
+            // Simple heuristic mapping
+            if (log.source === 'Contingency' || log.description.toLowerCase().includes('contingency')) acc.contingency += Math.abs(log.amount);
+            if (log.source === 'Management Reserve' || log.description.toLowerCase().includes('management')) acc.management += Math.abs(log.amount);
         }
         return acc;
     }, { contingency: 0, management: 0 });

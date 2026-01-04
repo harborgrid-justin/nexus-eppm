@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { StrategicGoal, ProgramObjective } from '../../types';
 import { generateId } from '../../utils/formatters';
 import { StrategicGoalForm } from './StrategicGoalForm';
 import { ProgramObjectiveForm } from './ProgramObjectiveForm';
+import { EmptyState } from '../common/EmptyState';
+import { Button } from '../ui/Button';
 
 interface ProgramStrategyProps {
   programId: string;
@@ -93,26 +94,30 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         <Plus size={12}/> Add Goal
                     </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {strategicGoals.map(goal => (
-                        <div key={goal.id} className="p-5 bg-slate-800 text-white rounded-xl shadow-lg relative group">
-                            <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => handleEditGoal(goal)} className="p-1 hover:bg-slate-700 rounded"><Edit2 size={14}/></button>
-                                <button onClick={() => handleDeleteGoal(goal.id)} className="p-1 hover:bg-red-900 rounded"><Trash2 size={14}/></button>
+                {strategicGoals.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {strategicGoals.map(goal => (
+                            <div key={goal.id} className="p-5 bg-slate-800 text-white rounded-xl shadow-lg relative group">
+                                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleEditGoal(goal)} className="p-1 hover:bg-slate-700 rounded"><Edit2 size={14}/></button>
+                                    <button onClick={() => handleDeleteGoal(goal.id)} className="p-1 hover:bg-red-900 rounded"><Trash2 size={14}/></button>
+                                </div>
+                                <h4 className="font-bold text-lg pr-12">{goal.name}</h4>
+                                <p className="text-sm text-slate-300 mt-2">{goal.description}</p>
+                                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-slate-300">
+                                    <ArrowDown size={24} />
+                                </div>
                             </div>
-                            <h4 className="font-bold text-lg pr-12">{goal.name}</h4>
-                            <p className="text-sm text-slate-300 mt-2">{goal.description}</p>
-                            <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-slate-300">
-                                <ArrowDown size={24} />
-                            </div>
-                        </div>
-                    ))}
-                    {strategicGoals.length === 0 && (
-                        <div className={`col-span-2 p-8 border-2 border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center text-slate-400`}>
-                            No strategic goals defined for this program.
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyState 
+                        title="No Strategic Goals" 
+                        description="Define high-level organizational goals to align your program."
+                        icon={Target}
+                        action={<Button size="sm" onClick={handleAddGoal} icon={Plus}>Define Goal</Button>}
+                    />
+                )}
             </div>
 
             {/* Layer 2: Program Objectives */}
@@ -123,65 +128,75 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         <Plus size={12}/> Add Objective
                     </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {programObjectives.map(obj => {
-                        const parentGoal = strategicGoals.find(g => g.id === obj.linkedStrategicGoalId);
-                        return (
-                            <div key={obj.id} className="p-5 bg-nexus-50 border-2 border-nexus-200 rounded-xl shadow-sm relative group">
-                                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleEditObj(obj)} className="p-1 hover:bg-nexus-100 rounded text-slate-600"><Edit2 size={14}/></button>
-                                    <button onClick={() => handleDeleteObj(obj.id)} className="p-1 hover:bg-red-100 rounded text-red-500"><Trash2 size={14}/></button>
+                {programObjectives.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {programObjectives.map(obj => {
+                            const parentGoal = strategicGoals.find(g => g.id === obj.linkedStrategicGoalId);
+                            return (
+                                <div key={obj.id} className="p-5 bg-nexus-50 border-2 border-nexus-200 rounded-xl shadow-sm relative group">
+                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => handleEditObj(obj)} className="p-1 hover:bg-nexus-100 rounded text-slate-600"><Edit2 size={14}/></button>
+                                        <button onClick={() => handleDeleteObj(obj.id)} className="p-1 hover:bg-red-100 rounded text-red-500"><Trash2 size={14}/></button>
+                                    </div>
+                                    <div className="text-xs font-bold text-nexus-600 uppercase mb-1 flex items-center gap-1">
+                                        <Target size={12}/> Supports: {parentGoal?.name || 'Unlinked'}
+                                    </div>
+                                    <p className="font-medium text-slate-800 pr-12">{obj.description}</p>
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                        {obj.linkedProjectIds.map(pid => (
+                                            <span key={pid} className="text-[10px] bg-white border border-nexus-100 px-1.5 py-0.5 rounded text-slate-500">{projects.find(p=>p.id===pid)?.name || pid}</span>
+                                        ))}
+                                    </div>
+                                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-nexus-300">
+                                        <ArrowDown size={24} />
+                                    </div>
                                 </div>
-                                <div className="text-xs font-bold text-nexus-600 uppercase mb-1 flex items-center gap-1">
-                                    <Target size={12}/> Supports: {parentGoal?.name || 'Unlinked'}
-                                </div>
-                                <p className="font-medium text-slate-800 pr-12">{obj.description}</p>
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                    {obj.linkedProjectIds.map(pid => (
-                                        <span key={pid} className="text-[10px] bg-white border border-nexus-100 px-1.5 py-0.5 rounded text-slate-500">{projects.find(p=>p.id===pid)?.name || pid}</span>
-                                    ))}
-                                </div>
-                                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-nexus-300">
-                                    <ArrowDown size={24} />
-                                </div>
-                            </div>
-                        );
-                    })}
-                    {programObjectives.length === 0 && (
-                        <div className="col-span-2 p-8 border-2 border-dashed border-nexus-200 rounded-xl flex items-center justify-center text-nexus-400 bg-nexus-50/30">
-                            No objectives defined.
-                        </div>
-                    )}
-                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <EmptyState 
+                        title="No Program Objectives" 
+                        description="Break down strategic goals into actionable program objectives."
+                        icon={Shield}
+                        action={<Button size="sm" variant="secondary" onClick={handleAddObj} icon={Plus}>Add Objective</Button>}
+                    />
+                )}
             </div>
 
             {/* Layer 3: Project Deliverables */}
             <div>
                 <h3 className={`${theme.typography.label} text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {projects.map(proj => {
-                        // Find which objective this project supports
-                        const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
-                        
-                        return (
-                            <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Folder size={16} className="text-slate-400"/>
-                                    <h4 className="font-bold text-sm text-slate-900">{proj.name}</h4>
+                {projects.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {projects.map(proj => {
+                            // Find which objective this project supports
+                            const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
+                            
+                            return (
+                                <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Folder size={16} className="text-slate-400"/>
+                                        <h4 className="font-bold text-sm text-slate-900">{proj.name}</h4>
+                                    </div>
+                                    {linkedObj ? (
+                                        <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
+                                            <CheckSquare size={12}/> Aligned: {linkedObj.description.substring(0, 20)}...
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
+                                            ⚠ No direct strategic link
+                                        </div>
+                                    )}
                                 </div>
-                                {linkedObj ? (
-                                    <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
-                                        <CheckSquare size={12}/> Aligned: {linkedObj.description.substring(0, 20)}...
-                                    </div>
-                                ) : (
-                                    <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
-                                        ⚠ No direct strategic link
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="p-8 text-center text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                         No projects linked to this program yet.
+                    </div>
+                )}
             </div>
         </div>
 

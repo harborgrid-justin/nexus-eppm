@@ -23,3 +23,12 @@ export interface RoadmapMilestone {
     date: string;
     type: 'decision' | 'release';
 }
+
+export interface PortfolioCommunicationItem {
+  id: string;
+  item: string;
+  audience: 'Executive' | 'PMO' | 'Team';
+  frequency: string;
+  channel: string;
+  owner: string;
+}

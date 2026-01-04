@@ -16,11 +16,13 @@ const RiskManagement = lazy(() => import('./components/risk/RiskManagement'));
 const Reports = lazy(() => import('./components/Reports'));
 const AdminSettings = lazy(() => import('./components/admin/AdminSettings'));
 const DataExchange = lazy(() => import('./components/admin/DataExchange'));
+const DataWarehouse = lazy(() => import('./components/DataWarehouse')); 
 const TeamWorkspace = lazy(() => import('./components/TeamWorkspace'));
 const ComponentWorkbench = lazy(() => import('./components/ComponentWorkbench'));
 const TemplateGallery = lazy(() => import('./components/TemplateGallery'));
 const SearchPage = lazy(() => import('./components/pages/SearchPage'));
 const AiPage = lazy(() => import('./components/pages/AiPage'));
+const GettingStarted = lazy(() => import('./components/getting_started/GettingStarted').then(module => ({ default: module.GettingStarted })));
 
 // Category III Adds
 const ResourceNegotiationHub = lazy(() => import('./components/resources/ResourceNegotiationHub'));
@@ -34,6 +36,7 @@ export const routes: RouteObject[] = [
         errorElement: <RouteError />,
         children: [
             { index: true, element: <Navigate to="/portfolio" replace /> },
+            { path: 'getting-started', element: <GettingStarted /> },
             { path: 'portfolio', element: <PortfolioManager /> },
             { path: 'programs', element: <ProgramManager /> },
             { path: 'projectList', element: <ProjectList /> },
@@ -44,6 +47,7 @@ export const routes: RouteObject[] = [
             { path: 'reports', element: <Reports /> },
             { path: 'admin', element: <AdminSettings /> },
             { path: 'dataExchange', element: <DataExchange /> },
+            { path: 'warehouse', element: <DataWarehouse /> },
             { path: 'myWork', element: <TeamWorkspace /> },
             { path: 'workbench', element: <ComponentWorkbench /> },
             { path: 'templates', element: <TemplateGallery /> },

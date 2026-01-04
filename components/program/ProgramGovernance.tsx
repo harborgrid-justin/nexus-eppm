@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -10,6 +9,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GovernanceRole } from '../../types';
 import { generateId } from '../../utils/formatters';
+import { EmptyState } from '../common/EmptyState';
 
 interface ProgramGovernanceProps {
   programId: string;
@@ -55,9 +55,11 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
   const sponsor = governanceRoles.find(r => r.role === 'Sponsor');
   const steering = governanceRoles.find(r => r.role === 'Steering Committee');
   const programMgr = governanceRoles.find(r => r.role === 'Program Manager');
+  
+  const hasCoreRoles = sponsor || steering || programMgr;
 
-  const RoleCard = ({ role, colorClass, isPrimary }: { role: GovernanceRole | undefined, colorClass?: string, isPrimary?: boolean }) => {
-      if (!role) return <div className={`w-64 h-32 border border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center ${theme.colors.text.tertiary} text-xs`}>Role Not Assigned</div>;
+  const RoleCard = ({ role, isPrimary }: { role: GovernanceRole | undefined, isPrimary?: boolean }) => {
+      if (!role) return <div className={`w-64 h-32 border border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center ${theme.colors.text.tertiary} text-xs italic bg-slate-50/50`}>Role Not Assigned</div>;
       
       const cardClasses = isPrimary 
         ? `${theme.colors.primary} ${theme.colors.text.inverted}`
@@ -89,45 +91,56 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
         </div>
         <p className={`${theme.colors.text.secondary} text-sm mb-6`}>Established decision-making authority, escalation paths, and approval gates.</p>
 
-        <div className={`${theme.colors.surface} p-8 rounded-xl border ${theme.colors.border} shadow-sm flex flex-col items-center relative overflow-hidden`}>
-            <h3 className="text-lg font-bold text-slate-800 mb-8 absolute left-6 top-6 flex items-center gap-2">
-                <Users size={18} className="text-blue-500"/> Governance Structure
-            </h3>
-            
-            <div className="w-full overflow-x-auto pb-4">
-              <div className="flex flex-col items-center min-w-[800px]">
-                <div className="flex gap-12 items-start z-10">
-                    <RoleCard role={steering} />
-                    <div className="flex flex-col items-center space-y-8">
-                        <RoleCard role={sponsor} isPrimary />
-                        <div className={`h-8 w-0.5 ${theme.colors.background}`}></div>
-                        <RoleCard role={programMgr} />
-                    </div>
-                </div>
-                
-                <div className="mt-8 w-full max-w-4xl">
-                     <h4 className={`text-sm font-bold ${theme.colors.text.secondary} uppercase tracking-wider mb-4 text-center border-t ${theme.colors.border} pt-4`}>Extended Governance Team</h4>
-                     <div className="grid grid-cols-3 gap-4">
-                         {governanceRoles.filter(r => !['Sponsor', 'Steering Committee', 'Program Manager'].includes(r.role)).map(role => (
-                             <div key={role.id} className={`p-3 ${theme.colors.background} border ${theme.colors.border} rounded-lg relative group`}>
-                                 <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="font-bold text-sm text-slate-700">{role.role}</p>
-                                        <p className="text-xs text-slate-500">{role.assigneeId}</p>
+        <div className={`${theme.colors.surface} p-8 rounded-xl border ${theme.colors.border} shadow-sm flex flex-col items-center relative overflow-hidden min-h-[400px] justify-center`}>
+            {hasCoreRoles ? (
+                <>
+                    <h3 className="text-lg font-bold text-slate-800 mb-8 absolute left-6 top-6 flex items-center gap-2">
+                        <Users size={18} className="text-blue-500"/> Governance Structure
+                    </h3>
+                    
+                    <div className="w-full overflow-x-auto pb-4">
+                    <div className="flex flex-col items-center min-w-[800px]">
+                        <div className="flex gap-12 items-start z-10">
+                            <RoleCard role={steering} />
+                            <div className="flex flex-col items-center space-y-8">
+                                <RoleCard role={sponsor} isPrimary />
+                                <div className={`h-8 w-0.5 ${theme.colors.background}`}></div>
+                                <RoleCard role={programMgr} />
+                            </div>
+                        </div>
+                        
+                        <div className="mt-8 w-full max-w-4xl">
+                            <h4 className={`text-sm font-bold ${theme.colors.text.secondary} uppercase tracking-wider mb-4 text-center border-t ${theme.colors.border} pt-4`}>Extended Governance Team</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                                {governanceRoles.filter(r => !['Sponsor', 'Steering Committee', 'Program Manager'].includes(r.role)).map(role => (
+                                    <div key={role.id} className={`p-3 ${theme.colors.background} border ${theme.colors.border} rounded-lg relative group`}>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="font-bold text-sm text-slate-700">{role.role}</p>
+                                                <p className="text-xs text-slate-500">{role.assigneeId}</p>
+                                            </div>
+                                            <button onClick={() => handleDeleteRole(role.id)} className={`${theme.colors.text.tertiary} hover:text-red-500 opacity-0 group-hover:opacity-100`}>
+                                                <X size={14}/>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button onClick={() => handleDeleteRole(role.id)} className={`${theme.colors.text.tertiary} hover:text-red-500 opacity-0 group-hover:opacity-100`}>
-                                        <X size={14}/>
-                                    </button>
-                                 </div>
-                             </div>
-                         ))}
-                         {governanceRoles.filter(r => !['Sponsor', 'Steering Committee', 'Program Manager'].includes(r.role)).length === 0 && (
-                             <div className="col-span-3 text-center text-xs text-slate-400 italic">No additional roles defined.</div>
-                         )}
-                     </div>
-                </div>
-              </div>
-            </div>
+                                ))}
+                                {governanceRoles.filter(r => !['Sponsor', 'Steering Committee', 'Program Manager'].includes(r.role)).length === 0 && (
+                                    <div className="col-span-3 text-center text-xs text-slate-400 italic">No additional roles defined.</div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </>
+            ) : (
+                <EmptyState 
+                    title="Governance Structure Undefined" 
+                    description="Define the core leadership team to establish program authority."
+                    icon={Gavel}
+                    action={<Button size="sm" variant="ghost" onClick={() => setIsRolePanelOpen(true)}>Add Sponsor or Manager</Button>}
+                />
+            )}
             
             <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
         </div>
@@ -138,25 +151,31 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                     <Calendar size={18} className="text-green-500"/> Governance Cadence
                 </h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {governanceEvents.map(event => (
-                    <div key={event.id} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg hover:border-nexus-300 transition-colors`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-3 ${theme.colors.surface} rounded-full shadow-sm ${theme.colors.text.secondary}`}>
-                                <Clock size={20}/>
+            {governanceEvents.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {governanceEvents.map(event => (
+                        <div key={event.id} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg hover:border-nexus-300 transition-colors`}>
+                            <div className="flex items-center gap-3">
+                                <div className={`p-3 ${theme.colors.surface} rounded-full shadow-sm ${theme.colors.text.secondary}`}>
+                                    <Clock size={20}/>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-800">{event.name}</p>
+                                    <p className="text-xs text-slate-500 uppercase tracking-wide mt-0.5">{event.type}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-sm font-bold text-slate-800">{event.name}</p>
-                                <p className="text-xs text-slate-500 uppercase tracking-wide mt-0.5">{event.type}</p>
+                            <div className="text-right">
+                                <p className="text-sm font-mono font-bold text-nexus-700">{event.nextDate}</p>
+                                <span className="text-[10px] uppercase font-bold text-slate-400">{event.frequency}</span>
                             </div>
                         </div>
-                        <div className="text-right">
-                            <p className="text-sm font-mono font-bold text-nexus-700">{event.nextDate}</p>
-                            <span className="text-[10px] uppercase font-bold text-slate-400">{event.frequency}</span>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="p-8 text-center text-slate-400 italic text-sm">
+                    No recurring governance events scheduled.
+                </div>
+            )}
         </Card>
 
         <SidePanel

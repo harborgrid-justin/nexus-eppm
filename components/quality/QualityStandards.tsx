@@ -1,4 +1,3 @@
-
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { BadgeCheck, Plus, Lock, Globe, Building, Scale, Search, Filter, Link as LinkIcon, Trash2, Save, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -30,12 +29,7 @@ export const QualityStandards: React.FC = () => {
         enforcement: 'Mandatory'
     });
 
-    const standards: QualityStandard[] = state.qualityStandards.length > 0 ? state.qualityStandards : [
-        { id: 'QS-01', name: 'ISO 9001:2015', description: 'International standard for a quality management system (QMS).', category: 'General', source: 'External', enforcement: 'Mandatory' },
-        { id: 'QS-02', name: 'Corporate QC Policy v3.2', description: 'Internal quality control procedures for all projects.', category: 'Process', source: 'Internal', enforcement: 'Mandatory' },
-        { id: 'QS-03', name: 'ASTM C143', description: 'Standard Test Method for Slump of Hydraulic-Cement Concrete.', category: 'Material', source: 'External', enforcement: 'Mandatory' },
-        { id: 'QS-04', name: 'OSHA 1926', description: 'Safety and Health Regulations for Construction.', category: 'Safety', source: 'Regulatory', enforcement: 'Mandatory' },
-    ];
+    const standards: QualityStandard[] = state.qualityStandards || [];
 
     const filteredStandards = useMemo(() => {
         const term = deferredSearchTerm.toLowerCase();

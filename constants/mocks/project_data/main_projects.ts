@@ -7,6 +7,7 @@ export const MOCK_PROJECT_1: Project = {
     name: 'Downtown Metro Hub',
     code: 'P-24-001',
     managerId: 'R-002',
+    programId: 'PRG-001', // Linked to Smart City Initiative
     epsId: 'EPS-INFRA',
     obsId: 'OBS-NA',
     calendarId: 'CAL-STD',
@@ -47,7 +48,19 @@ export const MOCK_PROJECT_1: Project = {
             ]
         }
     ],
-    reserves: { contingencyReserve: 250000, managementReserve: 150000 }
+    reserves: { contingencyReserve: 250000, managementReserve: 150000 },
+    costOfQuality: {
+        preventionCosts: 25000,
+        appraisalCosts: 15000,
+        internalFailureCosts: 5000,
+        externalFailureCosts: 0
+    },
+    coqHistory: [
+        { period: 'Q1', preventionCosts: 5000, appraisalCosts: 5000, internalFailureCosts: 15000, externalFailureCosts: 2000 },
+        { period: 'Q2', preventionCosts: 8000, appraisalCosts: 7000, internalFailureCosts: 12000, externalFailureCosts: 1000 },
+        { period: 'Q3', preventionCosts: 12000, appraisalCosts: 8000, internalFailureCosts: 6000, externalFailureCosts: 500 },
+        { period: 'Q4', preventionCosts: 15000, appraisalCosts: 8000, internalFailureCosts: 4000, externalFailureCosts: 0 },
+    ]
 };
 
 export const MOCK_PROJECT_2: Project = {
@@ -55,6 +68,7 @@ export const MOCK_PROJECT_2: Project = {
     name: 'Global ERP Migration',
     code: 'IT-24-005',
     managerId: 'R-001',
+    programId: 'PRG-001', // Linked to Smart City Initiative (as Backend Infrastructure)
     epsId: 'EPS-IT',
     obsId: 'OBS-PMO',
     calendarId: 'CAL-STD',
@@ -88,6 +102,7 @@ export const MOCK_PROJECT_3: Project = {
     name: 'Solar Farm Alpha',
     code: 'NRG-23-010',
     managerId: 'R-002',
+    // Deliberately no Program ID (Standalone Project)
     epsId: 'EPS-INFRA',
     obsId: 'OBS-NA',
     calendarId: 'CAL-247',

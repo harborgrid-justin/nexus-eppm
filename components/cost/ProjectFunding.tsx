@@ -53,6 +53,41 @@ export const ProjectFunding: React.FC = () => {
         }));
     }, [projectFundingSources]);
 
+    // Derived chart data for reconciliation
+    const reconciliationData = useMemo(() => {
+        if (!project) return [];
+        const start = new Date(project.startDate);
+        const end = new Date(project.endDate);
+        const months = [];
+        let curr = new Date(start);
+        
+        while (curr <= end) {
+            months.push(new Date(curr));
+            curr.setMonth(curr.getMonth() + 1);
+        }
+        
+        // Mocking cumulative spend curve logic - in real app, aggregate from cost/budget log
+        let cumulativeSpend = 0;
+        let cumulativeFunding = 0;
+        
+        return months.slice(0, 12).map((date, i) => { // limit to 12 months for view
+             const monthKey = date.toLocaleDateString('default', { month: 'short' });
+             
+             // Simple linear mock for spend based on project progress
+             const monthlySpend = (project.spent || 0) / 12 * (i < 6 ? 1 : 0); 
+             cumulativeSpend += monthlySpend;
+             
+             // Cumulative Funding release based on total released
+             cumulativeFunding = (fundingSummary.released / 12) * (i + 1);
+             
+             return {
+                 name: monthKey,
+                 Limit: cumulativeFunding, 
+                 Spend: cumulativeSpend
+             };
+        });
+    }, [project, fundingSummary]);
+
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
             {isModalOpen && (
@@ -92,19 +127,14 @@ export const ProjectFunding: React.FC = () => {
                         </h3>
                         <div className="flex-1 min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart data={[
-                                    { name: 'Jan', Limit: 500000, Spend: 420000 },
-                                    { name: 'Feb', Limit: 500000, Spend: 480000 },
-                                    { name: 'Mar', Limit: 800000, Spend: 550000 },
-                                    { name: 'Apr', Limit: 800000, Spend: 720000 },
-                                ]}>
+                                <ComposedChart data={reconciliationData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="name" />
                                     <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
                                     <Tooltip formatter={(val: number) => formatCurrency(val)} />
                                     <Legend />
                                     <Area type="stepAfter" dataKey="Limit" stroke="#10b981" fill="#dcfce7" name="Funding Limit" />
-                                    <Bar dataKey="Spend" fill="#0ea5e9" barSize={30} name="Actual Spend" radius={[4,4,0,0]} />
+                                    <Bar dataKey="Spend" fill="#0ea5e9" barSize={30} name="Cumulative Spend" radius={[4,4,0,0]} />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>

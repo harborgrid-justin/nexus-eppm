@@ -1,23 +1,67 @@
 
 import React from 'react';
-import { UploadCloud, CheckCircle, AlertTriangle, ArrowRight, Database, Play, Lock } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertTriangle, ArrowRight, Database, Play, Lock, Trash2 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useData } from '../../../context/DataContext';
 import { Button } from '../../ui/Button';
-import { useImportLogic } from '../../../hooks/domain/useImportLogic';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { formatBytes } from '../../../utils/dataExchangeUtils';
 
 export const ImportPanel: React.FC = () => {
     const theme = useTheme();
-    const {
-        step,
-        stagedData,
-        importProgress,
-        fileInputRef,
-        canExchange,
-        handleFiles,
-        handleCommit,
-        reset,
-        triggerFileUpload
-    } = useImportLogic();
+    const { state, dispatch } = useData();
+    const { hasPermission } = usePermissions();
+    const canExchange = hasPermission('system:configure');
+    
+    // Derived from Global State now
+    const { records, summary, activeImportId } = state.staging;
+    const step = !activeImportId ? 'upload' : (records.length > 0 ? 'staging' : 'complete'); 
+
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleFiles = (files: FileList | null) => { 
+        if (canExchange && files && files[0]) {
+            // Mock parsing delay
+            setTimeout(() => {
+                const mockParsed = [
+                    { ID: 'P-101', Name: 'Alpha Project', Budget: '50000', Status: 'Active' },
+                    { ID: 'P-102', Name: 'Beta Project', Budget: 'Invalid', Status: 'Planning' }, 
+                    { ID: 'P-103', Name: '', Budget: '120000', Status: 'Active' }, 
+                    { ID: 'P-104', Name: 'Gamma Expansion', Budget: '750000', Status: 'Active' },
+                ];
+                dispatch({ type: 'STAGING_INIT', payload: { type: 'Project', data: mockParsed } });
+            }, 800);
+        }
+    };
+
+    const handleCommit = () => {
+        // Dispatch commit action for selected records
+        const idsToCommit = records.filter(r => r.status === 'Valid').map(r => r.id);
+        dispatch({ type: 'STAGING_COMMIT_SELECTED', payload: idsToCommit });
+        
+        // Log job
+        dispatch({ 
+            type: 'SYSTEM_QUEUE_DATA_JOB', 
+            payload: { 
+                id: `IMP-${Date.now()}`, 
+                type: 'Import', 
+                format: 'JSON', 
+                status: 'Completed', 
+                submittedBy: 'Admin', 
+                timestamp: new Date().toLocaleString(), 
+                details: `Imported ${idsToCommit.length} records.`, 
+                progress: 100 
+            } as any 
+        });
+    };
+
+    const handleClear = () => {
+        dispatch({ type: 'STAGING_CLEAR' });
+    };
+
+    const triggerFileUpload = () => {
+        fileInputRef.current?.click();
+    };
 
     if (!canExchange) {
         return (
@@ -45,9 +89,9 @@ export const ImportPanel: React.FC = () => {
                 </div>
                 {step === 'staging' && (
                     <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
-                         <span className="text-slate-500">Total: {stagedData.length}</span>
-                         <span className="text-green-600">Valid: {stagedData.filter(r => r._status === 'Valid').length}</span>
-                         <span className="text-red-600">Errors: {stagedData.filter(r => r._status === 'Error').length}</span>
+                         <span className="text-slate-500">Total: {summary.total}</span>
+                         <span className="text-green-600">Valid: {summary.valid}</span>
+                         <span className="text-red-600">Errors: {summary.error}</span>
                     </div>
                 )}
             </div>
@@ -87,19 +131,19 @@ export const ImportPanel: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {stagedData.map((row, idx) => (
-                                        <tr key={idx} className={row._status === 'Error' ? 'bg-red-50' : 'hover:bg-slate-50'}>
+                                    {records.map((row, idx) => (
+                                        <tr key={idx} className={row.status === 'Error' ? 'bg-red-50' : 'hover:bg-slate-50'}>
                                             <td className="px-4 py-3">
-                                                {row._status === 'Valid' ? 
+                                                {row.status === 'Valid' ? 
                                                     <CheckCircle size={16} className="text-green-500"/> : 
                                                     <AlertTriangle size={16} className="text-red-500"/>
                                                 }
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.ID}</td>
-                                            <td className="px-4 py-3 text-sm font-medium text-slate-800">{row.Name || <span className="text-red-400 italic">Missing</span>}</td>
-                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.Budget}</td>
+                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.data.ID}</td>
+                                            <td className="px-4 py-3 text-sm font-medium text-slate-800">{row.data.Name || <span className="text-red-400 italic">Missing</span>}</td>
+                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.data.Budget}</td>
                                             <td className="px-4 py-3 text-xs text-red-600 font-bold">
-                                                {row._errors?.join(', ')}
+                                                {row.errors?.join(', ')}
                                             </td>
                                         </tr>
                                     ))}
@@ -108,45 +152,12 @@ export const ImportPanel: React.FC = () => {
                         </div>
                     </div>
                 )}
-
-                {/* STEP 3: IMPORTING */}
-                {step === 'importing' && (
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="w-full max-w-md text-center">
-                             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-slate-100 relative">
-                                 <Database size={32} className="text-nexus-600" />
-                                 <div className="absolute inset-0 border-4 border-nexus-100 rounded-full"></div>
-                                 <div className="absolute inset-0 border-4 border-nexus-600 rounded-full border-t-transparent animate-spin"></div>
-                             </div>
-                             <h3 className="text-xl font-bold text-slate-800 mb-2">Importing Data...</h3>
-                             <p className="text-slate-500 mb-6">Writing records to the enterprise ledger.</p>
-                             <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                                 <div className="h-full bg-nexus-600 transition-all duration-300" style={{ width: `${importProgress}%` }}></div>
-                             </div>
-                             <p className="text-xs font-mono text-slate-400 mt-2">{importProgress.toFixed(0)}% Complete</p>
-                        </div>
-                    </div>
-                )}
-
-                {/* STEP 4: COMPLETE */}
-                {step === 'complete' && (
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-in zoom-in">
-                            <CheckCircle size={48} />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900 mb-2">Import Successful</h3>
-                        <p className="text-slate-500 max-w-sm text-center mb-8">
-                            The data has been successfully mapped, validated, and committed to the database.
-                        </p>
-                        <Button onClick={reset} icon={ArrowRight}>Import More</Button>
-                    </div>
-                )}
             </div>
 
             {/* Footer Actions (Only for Staging) */}
             {step === 'staging' && (
                 <div className="p-6 bg-white border-t border-slate-200 flex justify-end gap-3">
-                    <Button variant="secondary" onClick={reset}>Cancel</Button>
+                    <Button variant="danger" onClick={handleClear} icon={Trash2}>Discard</Button>
                     <Button onClick={handleCommit} icon={Play}>Commit Valid Records</Button>
                 </div>
             )}

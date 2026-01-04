@@ -3,9 +3,14 @@ import React, { useState } from 'react';
 import { FileCode, Upload, ArrowRight, CheckCircle, List, Calendar, Activity, AlertTriangle, Layers, Play } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
+import { useData } from '../../../context/DataContext';
+import { useNavigate } from 'react-router-dom';
 
 export const XerParser: React.FC = () => {
     const theme = useTheme();
+    const { dispatch } = useData();
+    const navigate = useNavigate();
+    
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<'idle' | 'parsing' | 'complete'>('idle');
     const [stats, setStats] = useState({ projects: 0, wbs: 0, activities: 0, relationships: 0 });
@@ -19,6 +24,7 @@ export const XerParser: React.FC = () => {
 
     const runParser = () => {
         setStatus('parsing');
+        // Simulate complex binary parsing
         setTimeout(() => {
             setStats({
                 projects: 1,
@@ -28,6 +34,32 @@ export const XerParser: React.FC = () => {
             });
             setStatus('complete');
         }, 2000);
+    };
+
+    const handlePushToStaging = () => {
+        // Mock the result of parsing the XER file into the Staging format
+        // In a real app, this would be the output of the WASM parser
+        const parsedData = [
+            { Name: 'Detailed Engineering', Duration: 20, Start: '2024-01-01', Finish: '2024-01-20' },
+            { Name: 'Procurement Cycle', Duration: 45, Start: '2024-01-15', Finish: '2024-02-28' },
+            { Name: 'Construction Phase 1', Duration: 120, Start: '2024-03-01', Finish: '2024-07-01' },
+            { Name: 'Commissioning', Duration: 30, Start: '2024-07-01', Finish: '2024-08-01' }
+        ];
+
+        dispatch({ 
+            type: 'STAGING_INIT', 
+            payload: { 
+                type: 'Task', // We are importing Tasks
+                data: parsedData 
+            } 
+        });
+
+        // Navigate to the Import Wizard tab to review/commit
+        // We assume the parent component handles tab switching or we navigate to the route
+        // Since DataExchange manages tabs internally via state, we might need to alert the user
+        // or if we are in a route-based view (future), navigate.
+        // For now, simple alert and state update.
+        alert("Schedule data pushed to Staging Area. Please switch to 'Data Import' tab to review and commit.");
     };
 
     return (
@@ -123,13 +155,13 @@ export const XerParser: React.FC = () => {
                                 <p className="pl-8">ACT: A1010 "Review Cycle" (5d)</p>
                                 <p className="pl-4 text-blue-300">WBS: 2 "Procurement"</p>
                                 <p className="pl-8">ACT: A2000 "Long Lead Items" (45d)</p>
-                                <p className="pl-12 text-slate-500">... 1234 more lines</p>
+                                <p className="pl-12 text-slate-500">... {stats.activities} more lines</p>
                              </div>
                         </div>
 
                         <div className="flex justify-end gap-3 mt-8">
                             <Button variant="secondary" onClick={() => setStatus('idle')}>Discard</Button>
-                            <Button icon={ArrowRight} onClick={() => alert("Proceeding to Field Mapping...")}>Map Fields & Import</Button>
+                            <Button icon={ArrowRight} onClick={handlePushToStaging}>Map Fields & Import</Button>
                         </div>
                     </div>
                 )}

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Coins, TrendingDown, ArrowUpRight, CheckCircle, AlertTriangle } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ComposedChart } from 'recharts';
@@ -25,18 +26,20 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
     const totalCoQ = goodQualityCost + poorQualityCost;
     const budgetPercent = project.budget > 0 ? (totalCoQ / project.budget) * 100 : 0;
 
-    // Mock trend data if not present on project
+    // Use real data if available, otherwise mock a trend based on current snapshot
     const trendData = useMemo(() => {
         if (project.coqHistory && project.coqHistory.length > 0) return project.coqHistory;
         
-        // Generate mock trend showing "Investment in Prevention reduces Failure"
+        // Generate trend based on current snapshot distribution
+        // Prevention high = declining failure trend mock
+        const isMature = goodQualityCost > poorQualityCost;
+        
         return [
-            { period: 'Q1', preventionCosts: 5000, appraisalCosts: 5000, internalFailureCosts: 15000, externalFailureCosts: 2000 },
-            { period: 'Q2', preventionCosts: 8000, appraisalCosts: 7000, internalFailureCosts: 12000, externalFailureCosts: 1000 },
-            { period: 'Q3', preventionCosts: 12000, appraisalCosts: 8000, internalFailureCosts: 6000, externalFailureCosts: 500 },
-            { period: 'Q4', preventionCosts: 15000, appraisalCosts: 8000, internalFailureCosts: 4000, externalFailureCosts: 0 },
+            { period: 'Q1', preventionCosts: coq.preventionCosts * 0.8, appraisalCosts: coq.appraisalCosts * 0.8, internalFailureCosts: isMature ? coq.internalFailureCosts * 1.5 : coq.internalFailureCosts * 0.8, externalFailureCosts: coq.externalFailureCosts },
+            { period: 'Q2', preventionCosts: coq.preventionCosts * 0.9, appraisalCosts: coq.appraisalCosts * 0.9, internalFailureCosts: isMature ? coq.internalFailureCosts * 1.2 : coq.internalFailureCosts * 0.9, externalFailureCosts: coq.externalFailureCosts },
+            { period: 'Q3', preventionCosts: coq.preventionCosts, appraisalCosts: coq.appraisalCosts, internalFailureCosts: coq.internalFailureCosts, externalFailureCosts: coq.externalFailureCosts },
         ];
-    }, [project.coqHistory]);
+    }, [project.coqHistory, coq, goodQualityCost, poorQualityCost]);
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -112,8 +115,8 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
                                     <span className="font-bold text-green-700">{formatCurrency(goodQualityCost)}</span>
                                 </div>
                                 <div className={`w-full ${theme.colors.background} h-3 rounded-full overflow-hidden flex`}>
-                                    <div className="bg-green-500 h-full" style={{ width: `${(coq.preventionCosts / totalCoQ) * 100}%` }} title="Prevention"></div>
-                                    <div className="bg-blue-500 h-full" style={{ width: `${(coq.appraisalCosts / totalCoQ) * 100}%` }} title="Appraisal"></div>
+                                    <div className="bg-green-500 h-full" style={{ width: `${totalCoQ > 0 ? (coq.preventionCosts / totalCoQ) * 100 : 0}%` }} title="Prevention"></div>
+                                    <div className="bg-blue-500 h-full" style={{ width: `${totalCoQ > 0 ? (coq.appraisalCosts / totalCoQ) * 100 : 0}%` }} title="Appraisal"></div>
                                 </div>
                                 <div className="flex justify-between text-xs text-slate-400 mt-1">
                                     <span>Prevention: {formatCompactCurrency(coq.preventionCosts)}</span>
@@ -127,8 +130,8 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
                                     <span className="font-bold text-red-700">{formatCurrency(poorQualityCost)}</span>
                                 </div>
                                 <div className={`w-full ${theme.colors.background} h-3 rounded-full overflow-hidden flex`}>
-                                    <div className="bg-yellow-500 h-full" style={{ width: `${(coq.internalFailureCosts / totalCoQ) * 100}%` }} title="Internal Failure"></div>
-                                    <div className="bg-red-600 h-full" style={{ width: `${(coq.externalFailureCosts / totalCoQ) * 100}%` }} title="External Failure"></div>
+                                    <div className="bg-yellow-500 h-full" style={{ width: `${totalCoQ > 0 ? (coq.internalFailureCosts / totalCoQ) * 100 : 0}%` }} title="Internal Failure"></div>
+                                    <div className="bg-red-600 h-full" style={{ width: `${totalCoQ > 0 ? (coq.externalFailureCosts / totalCoQ) * 100 : 0}%` }} title="External Failure"></div>
                                 </div>
                                 <div className="flex justify-between text-xs text-slate-400 mt-1">
                                     <span>Internal Fail: {formatCompactCurrency(coq.internalFailureCosts)}</span>

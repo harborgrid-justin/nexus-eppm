@@ -1,6 +1,6 @@
 
 import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
-import { Project, Task, WBSNode } from '../types/index';
+import { Project, Task, WBSNode, GlobalCalendar, WorkDay } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
 import ScheduleLog from './scheduling/ScheduleLog';
@@ -11,11 +11,13 @@ import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
 import { useTheme } from '../context/ThemeContext';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useVirtualScroll } from '../hooks/useVirtualScroll';
+import { useData } from '../context/DataContext';
 
 const ROW_HEIGHT = 44;
 
 const ProjectGantt: React.FC = () => {
   const { project: initialProject } = useProjectWorkspace();
+  const { state } = useData();
   const theme = useTheme();
   
   const {
@@ -60,6 +62,28 @@ const ProjectGantt: React.FC = () => {
       if (!activeBaselineId || !project.baselines) return null;
       return project.baselines.find(b => b.id === activeBaselineId)?.taskBaselines || null;
   }, [activeBaselineId, project.baselines]);
+
+  // Calendar Resolution
+  const projectCalendar = useMemo(() => {
+      const globalCal = state.calendars.find(c => c.id === project.calendarId) || state.calendars[0];
+      // Convert GlobalCalendar to the structure required by utilities (simple array of working days)
+      const workingDays: number[] = [];
+      const dayMap: Record<string, number> = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
+      
+      Object.entries(globalCal.workWeek).forEach(([dayName, workDay]) => {
+          if ((workDay as WorkDay).isWorkDay) {
+              const dayIdx = dayMap[dayName.toLowerCase()];
+              if (dayIdx !== undefined) workingDays.push(dayIdx);
+          }
+      });
+
+      return {
+          id: globalCal.id,
+          name: globalCal.name,
+          workingDays,
+          holidays: globalCal.holidays.map(h => h.date)
+      };
+  }, [project.calendarId, state.calendars]);
 
   // --- Virtualization Logic ---
   const [scrollTop, setScrollTop] = useState(0);
@@ -152,7 +176,7 @@ const ProjectGantt: React.FC = () => {
                 baselineMap={baselineMap} 
                 selectedTask={selectedTask}
                 projectTasks={project.tasks} 
-                calendar={(project as any).calendar} 
+                calendar={projectCalendar} 
                 ganttContainerRef={ganttContainerRef}
                 getStatusColor={getStatusColor} 
                 handleMouseDown={handleMouseDown} 

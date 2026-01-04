@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { QualityReport, InspectionChecklist } from '../../types/index';
-import { usePermissions } from '../../hooks/usePermissions';
-import { useTheme } from '../../context/ThemeContext';
+import { QualityReport, InspectionChecklist } from '../../../types';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { useTheme } from '../../../context/ThemeContext';
 import { ControlLogHeader } from './control/ControlLogHeader';
 import { ControlLogTable } from './control/ControlLogTable';
 import { ControlLogDetail } from './control/ControlLogDetail';
@@ -22,17 +21,11 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports = 
     filterStatus === 'All' || r.status === filterStatus
   );
 
-  const getMockChecklist = (id: string): InspectionChecklist => ({
-    id, items: [
-      { label: 'Surface Preparation', status: 'Pass' },
-      { label: 'Dimensional Tolerance (+/- 5mm)', status: 'Pass' },
-      { label: 'Material Certifications Verified', status: 'Pass' },
-      { label: 'Installation Torque Check', status: 'Fail', comment: 'Bolt #4 under-torqued' },
-    ], photos: 3, inspector: 'Mike Ross', approver: 'Sarah Chen'
-  });
-
+  // Note: In a real implementation, we would fetch the checklist from an API based on report ID.
+  // Since we don't have checklist data in the global state for every report, we pass undefined
+  // to the detail view, which will render a "No checklist" state, staying true to the data model.
   const selectedReport = filteredReports.find(r => r.id === selectedReportId);
-  const checklist = selectedReport ? getMockChecklist(selectedReport.id) : null;
+  const checklist = undefined; 
 
   return (
     <div className="h-full flex flex-col bg-slate-50/30 overflow-hidden">
@@ -51,7 +44,7 @@ const QualityControlLog: React.FC<QualityControlLogProps> = ({ qualityReports = 
               selectedReportId={selectedReportId}
             />
           </div>
-          {selectedReportId && selectedReport && checklist && (
+          {selectedReportId && selectedReport && (
             <ControlLogDetail
               report={selectedReport}
               checklist={checklist}

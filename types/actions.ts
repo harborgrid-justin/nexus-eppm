@@ -21,10 +21,29 @@ import {
     BPDefinition, BPRecord, CostSheetColumn, CostSheetRow, UnifierState,
     ResourceRequest, DailyLogEntry, SafetyIncident, PunchItem,
     RoadmapItem, RoadmapLane, KanbanTask, ExtensionDataState, EtlMapping,
-    OrganizationProfile, NotificationPreference, SystemMetric, ServiceStatus
+    OrganizationProfile, NotificationPreference, SystemMetric, ServiceStatus,
+    RiskManagementPlan, SecurityPolicy, SchedulingLogic, Task, CostEstimate,
+    WBSNode, MaterialReceipt, PortfolioCommunicationItem, QualityStandard,
+    ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle
 } from './index';
 
-export { UnifierState };
+export type { UnifierState };
+
+export interface StagingRecord {
+    id: string;
+    data: any;
+    status: 'Valid' | 'Error' | 'Pending';
+    errors: string[];
+    selected: boolean;
+}
+
+export interface StagingState {
+    activeImportId: string | null;
+    entityType: 'Project' | 'Task' | 'Resource' | 'Finance';
+    records: StagingRecord[];
+    isProcessing: boolean;
+    summary: { total: number; valid: number; error: number };
+}
 
 export interface DataState {
     projects: Project[];
@@ -100,6 +119,7 @@ export interface DataState {
     benefits: Benefit[];
     rbs: RiskBreakdownStructureNode[];
     vendors: Vendor[];
+    qualityStandards: QualityStandard[];
     unifier: UnifierState;
     // Field Management
     dailyLogs: DailyLogEntry[];
@@ -109,6 +129,14 @@ export interface DataState {
     roadmapLanes: RoadmapLane[];
     roadmapItems: RoadmapItem[];
     kanbanTasks: KanbanTask[];
+    portfolioCommunicationPlan: PortfolioCommunicationItem[];
+    activities: ActivityItem[];
+    teamEvents: TeamEvent[];
+    // DevOps & Knowledge
+    pipelineStages: PipelineStage[];
+    knowledgeBase: KnowledgeArticle[];
+    // Procurement Ops
+    materialReceipts: MaterialReceipt[];
     // Extensions
     extensionData: ExtensionDataState;
     // Admin & Config
@@ -119,6 +147,8 @@ export interface DataState {
         services: ServiceStatus[];
         throughput: { time: string; records: number }[];
     };
+    // Import Staging Buffer
+    staging: StagingState;
 }
 
 export type Action =
@@ -128,20 +158,20 @@ export type Action =
     // Project & Task Management
     | { type: 'PROJECT_IMPORT'; payload: Project[] }
     | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: Partial<Project> } }
-    | { type: 'TASK_UPDATE'; payload: { projectId: string; task: any } }
+    | { type: 'TASK_UPDATE'; payload: { projectId: string; task: Task } }
     | { type: 'PROJECT_CLOSE'; payload: string }
     | { type: 'PROJECT_CREATE_REFLECTION'; payload: { sourceProjectId: string } }
     | { type: 'PROJECT_MERGE_REFLECTION'; payload: { reflectionId: string } }
     | { type: 'BASELINE_SET'; payload: { projectId: string; name: string; type?: Baseline['type'] } }
     | { type: 'BASELINE_UPDATE'; payload: { projectId: string; baselineId: string; name: string; type: Baseline['type'] } }
     | { type: 'BASELINE_DELETE'; payload: { projectId: string; baselineId: string } }
-    | { type: 'WBS_ADD_NODE'; payload: { projectId: string; parentId: string | null; newNode: any } }
-    | { type: 'WBS_UPDATE_NODE'; payload: { projectId: string; nodeId: string; updatedData: any } }
+    | { type: 'WBS_ADD_NODE'; payload: { projectId: string; parentId: string | null; newNode: WBSNode } }
+    | { type: 'WBS_UPDATE_NODE'; payload: { projectId: string; nodeId: string; updatedData: Partial<WBSNode> } }
     | { type: 'WBS_REPARENT'; payload: { projectId: string; nodeId: string; newParentId: string | null } }
     | { type: 'WBS_UPDATE_SHAPE'; payload: { projectId: string; nodeId: string; shape: string } }
 
     // Financials
-    | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: any } }
+    | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: CostEstimate } }
     | { type: 'ADD_INVOICE'; payload: Invoice }
     | { type: 'UPDATE_INVOICE'; payload: Invoice }
     | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
@@ -163,6 +193,7 @@ export type Action =
     | { type: 'UPDATE_PURCHASE_ORDER'; payload: PurchaseOrder }
     | { type: 'ADD_SOLICITATION'; payload: Solicitation }
     | { type: 'UPDATE_SOLICITATION'; payload: Solicitation }
+    | { type: 'ADD_MATERIAL_RECEIPT'; payload: MaterialReceipt }
 
     // Quality & Safety
     | { type: 'ADD_QUALITY_REPORT'; payload: QualityReport }
@@ -170,7 +201,7 @@ export type Action =
     | { type: 'ADD_NCR'; payload: NonConformanceReport }
     | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
     | { type: 'ADD_QUALITY_STANDARD'; payload: ProgramQualityStandard }
-    | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any }
+    | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: SafetyIncident }
 
     // Documents
     | { type: 'UPLOAD_DOCUMENT'; payload: Document }
@@ -178,6 +209,8 @@ export type Action =
     | { type: 'VERSION_DOCUMENT'; payload: { documentId: string; version: string } }
 
     // Program Management
+    | { type: 'ADD_PROGRAM'; payload: Program }
+    | { type: 'UPDATE_PROGRAM'; payload: Program }
     | { type: 'PROGRAM_ADD_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_UPDATE_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_DELETE_STAKEHOLDER'; payload: string }
@@ -254,9 +287,9 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_ADD_CURRENCY'; payload: { code: string; rate: number } }
     | { type: 'GOVERNANCE_DELETE_CURRENCY'; payload: string }
-    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: Partial<SecurityPolicy> }
     | { type: 'GOVERNANCE_UPDATE_INFLATION_RATE'; payload: number }
-    | { type: 'GOVERNANCE_UPDATE_SYSTEM_SCHEDULING'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_SYSTEM_SCHEDULING'; payload: Partial<SchedulingLogic> }
     | { type: 'GOVERNANCE_MARK_ALERT_READ'; payload: string }
     | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: { id: string; field: string; value: boolean } }
     | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: Partial<OrganizationProfile> }
@@ -270,13 +303,20 @@ export type Action =
     | { type: 'MARK_ALERT_READ'; payload: string }
     | { type: 'ADD_PORTFOLIO_SCENARIO'; payload: PortfolioScenario }
     | { type: 'UPDATE_PORTFOLIO_SCENARIO'; payload: PortfolioScenario }
+    | { type: 'ADD_PORTFOLIO_COMM_ITEM'; payload: PortfolioCommunicationItem }
+
+    // Staging & Import
+    | { type: 'STAGING_INIT'; payload: { type: StagingState['entityType'], data: any[] } }
+    | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string; data: any } }
+    | { type: 'STAGING_COMMIT_SELECTED'; payload: string[] } // IDs to commit
+    | { type: 'STAGING_CLEAR' }
 
     // Risks & Issues
     | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
     | { type: 'ADD_RISK'; payload: Risk }
     | { type: 'DELETE_RISK'; payload: string }
-    | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: any }
-    | { type: 'UPDATE_RBS_NODE_PARENT'; payload: any }
+    | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: RiskManagementPlan } }
+    | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
     | { type: 'ADD_ISSUE'; payload: Issue }
     | { type: 'UPDATE_ISSUE'; payload: Issue }
     | { type: 'DELETE_ISSUE'; payload: string }
@@ -290,13 +330,16 @@ export type Action =
     | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: PunchItem }
 
     // Unifier
-    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: BPRecord; action: string; user: any } }
+    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: BPRecord; action: string; user: User } }
     | { type: 'UNIFIER_UPDATE_COST_SHEET'; payload: { projectId: string; costCode: string; columnId: string; amount: number; operator: string } }
 
     // Strategy & Collaboration
     | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string; status: string } }
     | { type: 'KANBAN_ADD_TASK'; payload: KanbanTask }
     | { type: 'ROADMAP_UPDATE_ITEM'; payload: RoadmapItem }
+    | { type: 'ADD_ACTIVITY'; payload: ActivityItem }
+    | { type: 'ADD_TEAM_EVENT'; payload: TeamEvent }
+    | { type: 'UPDATE_PIPELINE_STAGE'; payload: PipelineStage }
     
     // Extensions
     | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: Partial<ExtensionDataState['financial']> }

@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { Project } from '../../types/index';
 import { useFinancials } from '../../hooks/useFinancials';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-// FIX: Imported missing formatCompactCurrency function
 import { formatCompactCurrency } from '../../utils/formatters';
 
 interface CashFlowForecastProps {

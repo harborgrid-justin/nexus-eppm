@@ -83,6 +83,16 @@
       .clip-chevron {
         clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%);
       }
+
+      /* 3D Perspective Grid for Viewer */
+      .perspective-grid {
+        background-image: 
+          linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), 
+          linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 40px 40px;
+        transform: perspective(500px) rotateX(60deg) scale(2);
+        transform-origin: 50% 100%;
+      }
     </style>
   <script type="importmap">
 {
@@ -95,7 +105,8 @@
     "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
     "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
-    "recharts": "https://esm.sh/recharts@^3.5.1"
+    "recharts": "https://esm.sh/recharts@^3.5.1",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0"
   }
 }
 </script>

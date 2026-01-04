@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -12,14 +11,18 @@ const PortfolioCommunications: React.FC = () => {
     const { state } = useData();
     const [activeAudience, setActiveAudience] = useState<'Executive' | 'PMO' | 'Team'>('Executive');
 
-    const commPlan = [
-        { id: '1', item: 'Performance Report', audience: 'Executive', freq: 'Monthly', channel: 'Dashboard', owner: 'Portfolio Mgr' },
-        { id: '2', item: 'Resource Review', audience: 'PMO', freq: 'Bi-Weekly', channel: 'Meeting', owner: 'Resource Mgr' },
-        { id: '3', item: 'Benefits Update', audience: 'Executive', freq: 'Quarterly', channel: 'Report', owner: 'Sponsor' },
-        { id: '4', item: 'Risk Sync', audience: 'Team', freq: 'Weekly', channel: 'Workshop', owner: 'Program Mgr' },
-    ];
+    // Use centralized plan from DataContext
+    const commPlan = state.portfolioCommunicationPlan || [];
     
-    const audiencePlan = commPlan.filter(c => c.audience === activeAudience);
+    // Filter locally based on UI state
+    const audiencePlan = commPlan.filter(c => c.audience === activeAudience).map(item => ({
+        id: item.id,
+        item: item.item,
+        audience: item.audience,
+        freq: item.frequency,
+        channel: item.channel,
+        owner: item.owner
+    }));
 
     return (
         <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in`}>

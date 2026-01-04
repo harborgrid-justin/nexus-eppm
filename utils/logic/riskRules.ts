@@ -38,7 +38,7 @@ export const applyRiskRules = (state: DataState, action: Action, alerts: SystemA
   // Hook: Safety Stand-down
   if (action.type === 'SYSTEM_LOG_SAFETY_INCIDENT') {
      alerts.push(createAlert('Blocker', 'Compliance', 'Safety Stand-down', 
-        `Safety incident reported at ${action.payload.locationId}. Work stoppage in effect.`));
+        `Safety incident reported at ${action.payload.location}. Work stoppage in effect.`));
   }
 
   // Hook 10: Auto Risk Escalation (Existing)

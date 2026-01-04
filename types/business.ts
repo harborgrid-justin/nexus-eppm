@@ -75,6 +75,23 @@ export interface ServiceStatus {
     latency: string;
 }
 
+export interface BillingRecord {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  status: 'Paid' | 'Pending' | 'Overdue';
+  invoiceUrl?: string;
+}
+
+export interface BillingState {
+    licenseType: 'Enterprise' | 'Enterprise Plus' | 'Standard';
+    renewalDate: string;
+    seatLimit: number;
+    storageLimitGB: number;
+    history: BillingRecord[];
+}
+
 export interface GovernanceState {
   alerts: SystemAlert[];
   auditLog: any[];
@@ -88,4 +105,25 @@ export interface GovernanceState {
   security: SecurityPolicy;
   organization: OrganizationProfile;
   notificationPreferences: NotificationPreference[];
+  billing: BillingState;
+}
+
+export interface PipelineStage {
+    id: string;
+    name: string;
+    status: 'pending' | 'running' | 'success' | 'failed';
+    duration: string;
+    logs: string[];
+}
+
+export interface KnowledgeArticle {
+    id: string;
+    title: string;
+    category: string;
+    content: string; // HTML/Markdown
+    authorId: string;
+    lastUpdated: string;
+    views: number;
+    tags: string[];
+    sopNumber?: string;
 }

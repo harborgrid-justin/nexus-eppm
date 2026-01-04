@@ -10,7 +10,7 @@ import { useData } from '../../context/DataContext';
 
 const ProcurementDashboard: React.FC = () => {
   const { purchaseOrders } = useProjectWorkspace();
-  const { state } = useData(); // For contracts, claims which are not in workspace context yet
+  const { state } = useData(); 
   const theme = useTheme();
 
   const metrics = useMemo(() => {
@@ -19,13 +19,25 @@ const ProcurementDashboard: React.FC = () => {
     const activeContracts = state.contracts.filter(c => c.status === 'Active').length;
     const openClaims = state.claims.filter(c => c.status === 'Open' || c.status === 'Under Review').length;
 
-    const spendData = state.contracts.map(c => ({
-        name: c.vendorId, // Simplified for mock
-        val: c.contractValue
-    }));
+    // Aggregate spend by Vendor ID
+    const vendorSpendMap: Record<string, number> = {};
+    state.contracts.forEach(c => {
+        vendorSpendMap[c.vendorId] = (vendorSpendMap[c.vendorId] || 0) + c.contractValue;
+    });
+
+    const spendData = Object.entries(vendorSpendMap)
+        .map(([id, val]) => {
+            const vendor = state.vendors.find(v => v.id === id);
+            return {
+                name: vendor ? vendor.name : id,
+                val
+            };
+        })
+        .sort((a, b) => b.val - a.val) // Sort highest spend first
+        .slice(0, 10); // Top 10
 
     return { totalContractValue, totalPOSpend, activeContracts, openClaims, spendData };
-  }, [state.contracts, purchaseOrders, state.claims]);
+  }, [state.contracts, purchaseOrders, state.claims, state.vendors]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
@@ -38,7 +50,7 @@ const ProcurementDashboard: React.FC = () => {
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
-                <h3 className={`${theme.typography.h3} mb-4`}>Contract Value Distribution</h3>
+                <h3 className={`${theme.typography.h3} mb-4`}>Top Vendors by Contract Value</h3>
                 <CustomBarChart 
                     data={metrics.spendData}
                     xAxisKey="name"
@@ -49,8 +61,8 @@ const ProcurementDashboard: React.FC = () => {
             </div>
              <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm flex flex-col items-center justify-center text-slate-400`}>
                 <BarChart2 size={48} className="mb-4 opacity-20" />
-                <p className="text-sm font-medium">Additional Analysis</p>
-                <p className="text-xs mt-1 text-center max-w-xs">Spend by Category, Vendor Performance Trends, and Cycle Time analysis available in the Analytics module.</p>
+                <p className="text-sm font-medium">Performance Analytics</p>
+                <p className="text-xs mt-1 text-center max-w-xs">Detailed vendor scoring and cycle time analysis available in the full Analytics module.</p>
             </div>
         </div>
     </div>

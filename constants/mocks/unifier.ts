@@ -53,7 +53,8 @@ export const MOCK_BP_RECORDS: BPRecord[] = [
     title: 'Additional Excavation',
     data: { amount: 45000, reason: 'Hit rock', cost_code: '10-000' },
     auditTrail: [],
-    workflowHistory: []
+    workflowHistory: [],
+    lineItems: []
   },
   {
     id: 'PAY-001',
@@ -63,7 +64,8 @@ export const MOCK_BP_RECORDS: BPRecord[] = [
     title: 'Pay App #1 - June',
     data: { period_start: '2024-06-01', period_end: '2024-06-30', total_claimed: 125000, vendor: 'Acme Corp' },
     auditTrail: [],
-    workflowHistory: []
+    workflowHistory: [],
+    lineItems: []
   }
 ];
 

@@ -1,4 +1,3 @@
-
 import { DataState, Action } from '../../types/actions';
 
 export const systemReducer = (state: DataState, action: Action): DataState => {

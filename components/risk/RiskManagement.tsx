@@ -14,21 +14,26 @@ import RiskMatrix from './RiskMatrix';
 import QuantitativeAnalysis from './QuantitativeAnalysis';
 import PortfolioRisks from '../portfolio/PortfolioRisks'; // Reuse portfolio risk view for enterprise
 
+// Enterprise-Specific Views
+import SystemicRiskDashboard from './enterprise/SystemicRiskDashboard';
+import { GlobalRiskRegister } from './enterprise/GlobalRiskRegister';
+import { GlobalRiskMatrix } from './enterprise/GlobalRiskMatrix';
+import { GlobalQuantitativeAnalysis } from './enterprise/GlobalQuantitativeAnalysis';
+
 const RiskManagement: React.FC = () => {
-  const { state } = useData();
   const theme = useTheme();
   
   const [activeGroup, setActiveGroup] = useState('enterprise');
-  const [activeView, setActiveView] = useState('portfolio');
+  const [activeView, setActiveView] = useState('dashboard');
   const [isPending, startTransition] = useTransition();
 
   const navGroups: NavGroup[] = useMemo(() => [
     { id: 'enterprise', label: 'Enterprise & Portfolio', items: [
-      { id: 'portfolio', label: 'Portfolio Risks', icon: ShieldAlert },
       { id: 'dashboard', label: 'Systemic Dashboard', icon: LayoutDashboard },
+      { id: 'portfolio', label: 'Portfolio Risks', icon: ShieldAlert },
     ]},
     { id: 'analysis', label: 'Analysis & Aggregation', items: [
-      { id: 'register', label: 'All Project Risks', icon: List },
+      { id: 'register', label: 'Global Risk Register', icon: List },
       { id: 'matrix', label: 'Global Heatmap', icon: Sigma },
       { id: 'quantitative', label: 'Quantitative Model', icon: BarChart2 },
     ]}
@@ -52,24 +57,12 @@ const RiskManagement: React.FC = () => {
 
   const renderContent = () => {
     switch(activeView) {
+      case 'dashboard': return <SystemicRiskDashboard />;
       case 'portfolio': return <PortfolioRisks />;
-      // Note: These sub-components currently expect ProjectContext. 
-      // In a real refactor, they would accept props or use a different context.
-      // For this visual alignment, we will mount them. Ideally they should be updated to handle 'no project' 
-      // or we provide a dummy context if we can't refactor them all right now.
-      // However, since we are doing a layout refactor, let's assume we want to show the UI structure.
-      // The current implementations of RiskDashboard, etc. use `useProjectWorkspace`.
-      // To make them work here without crashing, we would need to refactor them to use `useData` or accept props.
-      // For now, I will use placeholders for the ones strictly coupled to project context to avoid runtime errors,
-      // except PortfolioRisks which is safe.
-      
-      // Ideally: Refactor RiskRegisterGrid to accept `risks` prop.
-      // Let's assume we render PortfolioRisks for the main view and simple placeholders for others to demonstrate layout.
-      case 'dashboard': return <div className="p-8 text-center text-slate-400">Enterprise Risk Dashboard (Aggregation View)</div>;
-      case 'register': return <div className="p-8 text-center text-slate-400">Global Risk Register (All Projects)</div>;
-      case 'matrix': return <div className="p-8 text-center text-slate-400">Enterprise Heatmap</div>;
-      case 'quantitative': return <div className="p-8 text-center text-slate-400">Monte Carlo Simulation (Portfolio Level)</div>;
-      default: return <PortfolioRisks />;
+      case 'register': return <GlobalRiskRegister />;
+      case 'matrix': return <GlobalRiskMatrix />;
+      case 'quantitative': return <GlobalQuantitativeAnalysis />;
+      default: return <SystemicRiskDashboard />;
     }
   };
 
