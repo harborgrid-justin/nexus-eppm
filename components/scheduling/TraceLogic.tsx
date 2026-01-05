@@ -1,6 +1,5 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
-// FIX: Corrected import path to avoid module resolution conflict.
 import { Project, Task, Dependency } from '../../types/index';
 import { X, Diamond, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

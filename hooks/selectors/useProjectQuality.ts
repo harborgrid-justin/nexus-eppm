@@ -1,6 +1,5 @@
 
 import { useMemo } from 'react';
-// FIX: Correctly import QualityReport and NonConformanceReport types.
 import { QualityReport, NonConformanceReport } from '../../types/index';
 
 export const useProjectQuality = (qualityReports: QualityReport[], nonConformanceReports: NonConformanceReport[]) => {

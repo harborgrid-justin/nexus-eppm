@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
-// FIX: Corrected import path to avoid module resolution conflict.
 import { Project } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
@@ -20,7 +20,6 @@ const STEPS = [
   { id: 4, label: 'Team Charter', icon: Users },
 ];
 
-// FIX: Changed from named to default export
 const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const { state } = useData();
   const [currentStep, setCurrentStep] = useState(1);

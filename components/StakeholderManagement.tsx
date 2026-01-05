@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { 
@@ -16,7 +14,6 @@ import { Badge } from './ui/Badge';
 import { StakeholderDashboard } from './stakeholder/StakeholderDashboard';
 import { EngagementMatrix } from './stakeholder/EngagementMatrix';
 import { FinancialAuthority } from './stakeholder/FinancialAuthority';
-// FIX: Corrected import path for EnrichedStakeholder type to resolve module resolution error.
 import { EnrichedStakeholder } from '../types/index';
 
 const StakeholderManagement: React.FC = () => {

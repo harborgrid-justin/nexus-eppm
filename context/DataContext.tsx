@@ -1,12 +1,13 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { 
-    Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode, DataState, Action
+    Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode
 } from '../types/index';
 import { User } from '../types/auth';
 import { MOCK_RISK_PLAN } from '../constants/index';
 import { initialState } from './initialState';
 import { rootReducer } from './rootReducer';
+import { Action, DataState } from '../types';
 
 const DataContext = createContext<{
   state: DataState;
@@ -16,31 +17,8 @@ const DataContext = createContext<{
   getActivityCodesForProject: (projectId: string) => ActivityCode[];
 } | undefined>(undefined);
 
-// Lazy initializer to hydration from local storage
-const init = (defaultState: DataState): DataState => {
-  if (typeof window === 'undefined') return defaultState;
-  try {
-    const stored = localStorage.getItem('NEXUS_STATE');
-    if (stored) {
-      return JSON.parse(stored);
-    }
-  } catch (e) {
-    console.warn("Failed to rehydrate state from local storage:", e);
-  }
-  return defaultState;
-};
-
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(rootReducer, initialState, init);
-
-  // Persist state changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('NEXUS_STATE', JSON.stringify(state));
-    } catch (e) {
-      console.error("State size exceeded LocalStorage limits. Persistence paused.", e);
-    }
-  }, [state]);
+  const [state, dispatch] = useReducer(rootReducer, initialState);
 
   const getRiskPlan = useCallback((projectId: string) => MOCK_RISK_PLAN, []);
   

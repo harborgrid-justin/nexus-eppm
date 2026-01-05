@@ -1,8 +1,5 @@
 
-
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-// FIX: Corrected import path for Industry type to resolve module resolution error.
 import { Industry } from '../types/index';
 
 interface IndustryContextType {

@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// FIX: Corrected import path for RiskBreakdownStructureNode type to resolve module resolution error.
 import { RiskBreakdownStructureNode } from '../../types/index';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 

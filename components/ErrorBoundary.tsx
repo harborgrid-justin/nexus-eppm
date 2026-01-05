@@ -9,42 +9,57 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error | string;
+  error?: Error | string | unknown;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined
-  };
+  // FIX: Added constructor to properly initialize state and handle props.
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined
+    };
+  }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+    // FIX: Correctly access props via 'this.props' after adding constructor.
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
   handleRetry = () => {
+    // FIX: Correctly access setState via 'this.setState' after adding constructor.
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
     if (this.state.hasError) {
       const { error } = this.state;
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : typeof error === 'string' 
-            ? error 
-            : 'An unexpected error occurred.';
+      let errorMessage = 'An unexpected error occurred.';
+      let errorStack = null;
 
-      const errorStack = error instanceof Error ? error.stack : null;
+      if (error instanceof Error) {
+          errorMessage = error.message;
+          errorStack = error.stack;
+      } else if (typeof error === 'string') {
+          errorMessage = error;
+      } else if (typeof error === 'object' && error !== null) {
+          try {
+              errorMessage = JSON.stringify(error, null, 2);
+          } catch (e) {
+              errorMessage = 'Non-serializable error object caught';
+          }
+      }
 
       return (
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
+          {/* FIX: Correctly access props via 'this.props' after adding constructor. */}
           <h2 className="font-bold flex items-center gap-2"><AlertTriangle size={20} /> Error in {this.props.name || 'Component'}</h2>
-          <p className="text-sm mt-2">{errorMessage}</p>
+          <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
           {errorStack && (
              <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 overflow-auto max-h-32 text-red-800 font-mono">
                 {errorStack}
@@ -60,6 +75,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
+    // FIX: Correctly access props via 'this.props' after adding constructor.
     return this.props.children;
   }
 }

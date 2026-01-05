@@ -2,7 +2,6 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
 import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import { useTheme } from '../context/ThemeContext';
 import { Card } from './ui/Card';

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { Banknote, Plus } from 'lucide-react';
-// FIX: Corrected import path to avoid module resolution conflict.
 import { FundingSource } from '../../types/index';
 import { Button } from '../ui/Button';
 import { FundingSourceGrid } from './funding/FundingSourceGrid';

@@ -1,8 +1,5 @@
 
-
-
 import { useMemo } from 'react';
-// FIX: Corrected import path for Resource type to resolve module resolution error.
 import { Resource } from '../types/index';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 

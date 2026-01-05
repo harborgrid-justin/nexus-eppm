@@ -32,7 +32,7 @@ const StatCardSkeleton = () => (
   </Card>
 );
 
-const ChartSkeleton = ({ height = 300 }) => (
+const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
   <div className="w-full flex flex-col items-center justify-center animate-pulse space-y-4" style={{ height }}>
     <div className="flex items-end gap-2 w-full h-3/4 px-4 pb-4 border-b border-slate-100">
        {[...Array(6)].map((_, i) => (
@@ -82,24 +82,46 @@ const Dashboard: React.FC = () => {
       });
   };
 
+  const aiPanelTitle = (
+    <span className="flex items-center gap-2">
+      <Sparkles size={18} className="text-nexus-500" /> AI Analysis
+    </span>
+  );
+
   return (
     <div className={`h-full overflow-y-auto scrollbar-thin p-6`}>
-      <SidePanel isOpen={isReportOpen} onClose={() => { setIsReportOpen(false); reset(); }} width="md:w-[600px]" title={<span className="flex items-center gap-2"><Sparkles size={18} className="text-nexus-500" /> AI Analysis</span>} footer={<Button onClick={() => setIsReportOpen(false)}>Close</Button>}>
-           {isGenerating ? <div className="flex flex-col items-center justify-center py-20"><Loader2 className="animate-spin text-nexus-500 mb-4" size={40} /><p>Analyzing Portfolio...</p></div> : 
-            report && <div className="prose prose-sm max-w-none">{report.split('\n').map((l, i) => <p key={i}>{l}</p>)}</div>}
+      <SidePanel 
+        isOpen={isReportOpen} 
+        onClose={() => { setIsReportOpen(false); reset(); }} 
+        width="md:w-[600px]" 
+        title={aiPanelTitle} 
+        footer={<Button onClick={() => setIsReportOpen(false)}>Close</Button>}
+      >
+           {isGenerating ? (
+               <div className="flex flex-col items-center justify-center py-20">
+                   <Loader2 className="animate-spin text-nexus-500 mb-4" size={40} />
+                   <p>Analyzing Portfolio...</p>
+               </div>
+           ) : (
+               report && (
+                   <div className={`prose prose-sm max-w-none ${theme.colors.text.secondary}`}>
+                       {report.split('\n').map((l, i) => <p key={i}>{l}</p>)}
+                   </div>
+               )
+           )}
       </SidePanel>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-           <h3 className="text-lg font-bold text-slate-800">Executive Overview</h3>
-           <p className="text-sm text-slate-500">Key performance indicators across the enterprise.</p>
+           <h3 className={`text-lg font-bold ${theme.colors.text.primary}`}>Executive Overview</h3>
+           <p className={`text-sm ${theme.colors.text.secondary}`}>Key performance indicators across the enterprise.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-           <div className="bg-slate-100 p-1 rounded-lg flex">
-              <button onClick={() => handleViewChange('financial')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'financial' ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-500'}`}>Financial</button>
-              <button onClick={() => handleViewChange('strategic')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-500'}`}>Strategic</button>
+           <div className={`${theme.colors.background} p-1 rounded-lg flex border ${theme.colors.border}`}>
+              <button onClick={() => handleViewChange('financial')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'financial' ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>Financial</button>
+              <button onClick={() => handleViewChange('strategic')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>Strategic</button>
            </div>
-           <button onClick={handleGenerateReport} disabled={isGenerating} className={`px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm hover:bg-slate-50 text-slate-700`}><Sparkles size={16} className="text-yellow-500"/> AI Summary</button>
+           <button onClick={handleGenerateReport} disabled={isGenerating} className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm hover:${theme.colors.background} ${theme.colors.text.primary}`}><Sparkles size={16} className="text-yellow-500"/> AI Summary</button>
            {hasPermission('project:create') && <button className={`px-4 py-2 ${theme.colors.primary} rounded-lg text-sm font-bold text-white flex items-center gap-2 shadow-sm ${theme.colors.primaryHover}`}><Plus size={16} /> New Project</button>}
         </div>
       </div>

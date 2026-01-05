@@ -4,7 +4,6 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { ArrowRight, ArrowUp } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-// FIX: Corrected import path to avoid module resolution conflict.
 import { Risk } from '../../types/index';
 
 const RiskMatrix: React.FC = () => {

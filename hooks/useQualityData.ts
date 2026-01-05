@@ -1,8 +1,5 @@
 
-
-
 import { useMemo } from 'react';
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { QualityReport, NonConformanceReport } from '../types/index';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 

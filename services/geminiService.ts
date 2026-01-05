@@ -1,8 +1,5 @@
 
-
-
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-// FIX: Corrected import path for types to resolve module resolution errors.
 import { Project, AIAnalysisResult, Program } from '../types/index';
 
 const getAiClient = () => {

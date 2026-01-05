@@ -1,9 +1,6 @@
 
-
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-// FIX: Changed import to a named import as ErrorBoundary does not have a default export.
 import { ErrorBoundary } from './ErrorBoundary';
 import ProcurementDashboard from './procurement/ProcurementDashboard';
 import VendorRegistry from './procurement/VendorRegistry';

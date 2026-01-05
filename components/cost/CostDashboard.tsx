@@ -9,7 +9,6 @@ import { getDaysDiff } from '../../utils/dateUtils';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, Bar } from 'recharts';
 import { calculateRiskExposure } from '../../utils/integrationUtils';
 import { useTheme } from '../../context/ThemeContext';
-// FIX: Added missing import for Card component.
 import { Card } from '../ui/Card';
 
 const CostDashboard: React.FC = () => {

@@ -1,9 +1,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
-// FIX: Corrected import path
 import { Task, Project, TaskStatus } from '../types/index';
 import { useData } from '../context/DataContext';
-// FIX: Correctly import canCompleteTask utility.
 import { canCompleteTask } from '../utils/integrations/quality';
 
 export const useTaskForm = (task: Task, project: Project, onClose: () => void) => {

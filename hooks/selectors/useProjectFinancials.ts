@@ -1,8 +1,6 @@
 
 import { useMemo } from 'react';
-// FIX: Correctly import Project, BudgetLineItem, ChangeOrder, and PurchaseOrder types.
 import { Project, BudgetLineItem, ChangeOrder, PurchaseOrder } from '../../types/index';
-// FIX: Correctly import utility functions.
 import { calculateEVM, calculateCommittedCost, checkFundingSolvency } from '../../utils/integrations/cost';
 
 export const useProjectFinancials = (

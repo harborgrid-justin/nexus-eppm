@@ -1,7 +1,6 @@
 
 import { useMemo } from 'react';
 import { Risk } from '../../types/index';
-// FIX: Correctly import utility function.
 import { calculateRiskExposure } from '../../utils/integrations/risk';
 
 export const useProjectRisks = (risks: Risk[]) => {

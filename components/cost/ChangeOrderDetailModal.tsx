@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// FIX: Corrected import path to avoid module resolution conflict.
 import { ChangeOrder, ChangeOrderHistoryItem } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Save, CheckCircle, FileText, AlertTriangle, GitPullRequest } from 'lucide-react';
@@ -34,19 +33,7 @@ const ChangeOrderDetailModal: React.FC<ChangeOrderDetailModalProps> = ({ changeO
     // So we just dispatch ADD or UPDATE. Since ID is pre-generated for new, we can check if it exists in state? 
     // Or just rely on a flag. 
     // Simplified: Dispatch UPDATE if it exists in list, else ADD.
-    // But since we can't easily check store here without reading state, we can use a heuristic or just dispatch UPDATE 
-    // if status is not Draft, or ADD if it is Draft and newly created.
-    // Safer: Always dispatch Add/Update action that handles upsert logic, or separate.
-    // For now, let's use the assumption that if it came from the list, it exists. If from 'Create', it's new.
-    // However, the parent passes the object.
-    
-    // We will use UPDATE_CHANGE_ORDER for existing items. For new ones, the parent assigned an ID.
-    // Let's use a dual-dispatch approach or check ID pattern. 
-    // To make it robust, let's look at `co.status`. If it's `Draft` and history is empty, likely new.
-    
-    // Actually, `financialSlice` handles ADD and UPDATE separately. 
-    // We'll trust that if the user is saving, we update the state. If it's not in state, we should ADD.
-    // But we don't have access to state.changeOrders here to check existence easily.
+    // But we can't easily check store here without reading state.
     // Let's dispatch `UPDATE_CHANGE_ORDER` and ensure the reducer handles non-existent IDs gracefully?
     // No, standard Redux pattern usually knows. 
     // Let's assume if it has history, it's an update. If not, it's an add?

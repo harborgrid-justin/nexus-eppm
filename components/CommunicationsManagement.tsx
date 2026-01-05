@@ -1,6 +1,4 @@
 
-
-
 import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useData } from '../context/DataContext';
@@ -8,7 +6,6 @@ import { MessageCircle, Plus, Mail, Users, Phone, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { PageHeader } from './common/PageHeader';
-// FIX: Corrected import path for CommunicationLog type to resolve module resolution error.
 import { CommunicationLog } from '../types/index';
 
 const CommunicationsManagement: React.FC = () => {

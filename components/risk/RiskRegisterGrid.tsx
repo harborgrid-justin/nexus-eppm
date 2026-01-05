@@ -2,7 +2,6 @@
 import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Plus, Filter } from 'lucide-react';
-// FIX: Changed import to correct file and aliased for usage.
 import { RiskDetailPanel as RiskDetailModal } from './RiskDetailPanel'; 
 import { useTheme } from '../../context/ThemeContext';
 import { Risk } from '../../types/index';

@@ -1,7 +1,5 @@
 
-// FIX: Direct import to avoid circular dependency with TaskStatus enum
 import { Project, TaskStatus } from '../types/project';
-// The helper functions here only need types, but TaskStatus is a value (Enum)
 import { getDaysDiff } from './dateUtils';
 
 export const calculateProjectProgress = (project: Project): number => {

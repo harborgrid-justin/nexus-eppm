@@ -1,6 +1,5 @@
 
 import { useMemo } from 'react';
-// FIX: Correctly import Project and TaskStatus types.
 import { Project, TaskStatus } from '../../types';
 
 export const useProjectSummary = (project: Project | undefined) => {

@@ -1,9 +1,6 @@
 
-
-
 import React from 'react';
 import { useIndustry } from '../context/IndustryContext';
-// FIX: Corrected import path for Industry type to resolve module resolution error.
 import { Industry } from '../types/index';
 import { Building, Code, BookOpen, ChevronDown } from 'lucide-react';
 

@@ -1,5 +1,5 @@
+
 import React, { useState, useEffect } from 'react';
-// FIX: Corrected import path
 import { Risk, RiskResponseAction, RiskHistoryItem } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Save, AlertTriangle, Activity } from 'lucide-react';
@@ -18,7 +18,6 @@ interface RiskDetailPanelProps {
   onClose: () => void;
 }
 
-// FIX: Changed to a named export to resolve module resolution error.
 export const RiskDetailPanel: React.FC<RiskDetailPanelProps> = ({ riskId, projectId, onClose }) => {
   const { state, dispatch } = useData();
   const { canEditProject } = usePermissions();
