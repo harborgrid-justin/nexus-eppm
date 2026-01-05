@@ -133,19 +133,19 @@ export const IntegrationDesigner: React.FC = () => {
     }, [mappings, targetEntity, testPayload]);
 
     return (
-        <div className="h-full flex flex-col bg-slate-50/50">
+        <div className="h-full flex flex-col">
             {/* Header */}
-            <div className={`p-6 border-b ${theme.colors.border} bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm`}>
+            <div className={`p-6 border-b ${theme.colors.border} ${theme.colors.surface} flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm`}>
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200">
                         <GitMerge size={24} />
                     </div>
                     <div>
                         <div className="flex items-center gap-3">
-                            <h3 className="font-bold text-slate-900 text-xl">ETL Pipeline Designer</h3>
+                            <h3 className={`font-bold ${theme.colors.text.primary} text-xl`}>ETL Pipeline Designer</h3>
                             <Badge variant="success">v2.4 Active</Badge>
                         </div>
-                        <p className="text-sm text-slate-500 mt-1">Orchestrate data flow from External Sources to Nexus Core Modules.</p>
+                        <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>Orchestrate data flow from External Sources to Nexus Core Modules.</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -155,31 +155,31 @@ export const IntegrationDesigner: React.FC = () => {
             </div>
 
             {/* Config Bar */}
-            <div className="px-6 py-4 bg-white border-b border-slate-200 flex items-center gap-6 overflow-x-auto">
+            <div className={`px-6 py-4 ${theme.colors.surface} border-b ${theme.colors.border} flex items-center gap-6 overflow-x-auto`}>
                 <div className="flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Source Connector</label>
-                    <select className="bg-slate-50 border border-slate-300 rounded-lg py-1.5 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-purple-500">
+                    <label className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-widest mb-1`}>Source Connector</label>
+                    <select className={`${theme.colors.background} border ${theme.colors.border} rounded-lg py-1.5 px-3 text-sm font-bold ${theme.colors.text.primary} outline-none focus:ring-2 focus:ring-purple-500`}>
                         <option>SAP S/4HANA (ERP)</option>
                         <option>Oracle P6 (Schedule)</option>
                         <option>Salesforce (CRM)</option>
                         <option>Flat File (CSV)</option>
                     </select>
                 </div>
-                <ArrowRight className="text-slate-300" />
+                <ArrowRight className={theme.colors.text.tertiary} />
                 <div className="flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Target Module</label>
+                    <label className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-widest mb-1`}>Target Module</label>
                     <select 
-                        className="bg-slate-50 border border-slate-300 rounded-lg py-1.5 px-3 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-nexus-500"
+                        className={`${theme.colors.background} border ${theme.colors.border} rounded-lg py-1.5 px-3 text-sm font-bold ${theme.colors.text.primary} outline-none focus:ring-2 focus:ring-nexus-500`}
                         value={targetEntity}
                         onChange={(e) => setTargetEntity(e.target.value)}
                     >
                         {Object.keys(NEXUS_SCHEMAS).map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
                 </div>
-                <div className="h-8 w-px bg-slate-200 mx-2"></div>
+                <div className={`h-8 w-px ${theme.colors.border} mx-2`}></div>
                 
                 {/* Tabs */}
-                <div className="flex bg-slate-100 p-1 rounded-lg">
+                <div className={`flex ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border}`}>
                     {[
                         { id: 'mapping', label: 'Schema Map', icon: Shuffle },
                         { id: 'transform', label: 'Transformation', icon: Variable },
@@ -191,8 +191,8 @@ export const IntegrationDesigner: React.FC = () => {
                             onClick={() => setActiveTab(tab.id as any)}
                             className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-md transition-all ${
                                 activeTab === tab.id 
-                                ? 'bg-white text-nexus-700 shadow-sm' 
-                                : 'text-slate-500 hover:text-slate-800'
+                                ? `${theme.colors.surface} text-nexus-700 shadow-sm` 
+                                : `${theme.colors.text.tertiary} hover:${theme.colors.text.primary}`
                             }`}
                         >
                             <tab.icon size={14}/> {tab.label}
@@ -202,11 +202,11 @@ export const IntegrationDesigner: React.FC = () => {
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 overflow-hidden p-6 relative">
+            <div className={`flex-1 overflow-hidden p-6 relative ${theme.colors.background}/50`}>
                 {activeTab === 'mapping' && (
                     <div className="h-full flex flex-col md:flex-row gap-6">
-                        <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                            <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-[1fr_120px_1fr_50px] gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        <div className={`flex-1 flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden`}>
+                            <div className={`p-4 ${theme.colors.background} border-b ${theme.colors.border} grid grid-cols-[1fr_120px_1fr_50px] gap-4 text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest`}>
                                 <div className="pl-4">Source Field (External)</div>
                                 <div className="text-center">Transform</div>
                                 <div>Target Field (Nexus {targetEntity})</div>
@@ -215,12 +215,12 @@ export const IntegrationDesigner: React.FC = () => {
                             
                             <div className="flex-1 overflow-y-auto p-2 space-y-2">
                                 {mappings.map((map) => (
-                                    <div key={map.id} className="grid grid-cols-[1fr_120px_1fr_50px] gap-4 items-center p-3 rounded-lg border border-slate-100 hover:border-nexus-300 hover:shadow-md transition-all group bg-white">
+                                    <div key={map.id} className={`grid grid-cols-[1fr_120px_1fr_50px] gap-4 items-center p-3 rounded-lg border border-transparent hover:${theme.colors.border} hover:shadow-md transition-all group ${theme.colors.surface}`}>
                                         {/* Source */}
                                         <div className="flex items-center gap-3">
-                                            <div className="p-1.5 bg-slate-100 rounded text-slate-500"><Database size={14}/></div>
+                                            <div className={`p-1.5 ${theme.colors.background} rounded ${theme.colors.text.tertiary}`}><Database size={14}/></div>
                                             <input 
-                                                className="w-full bg-transparent font-mono text-sm text-slate-700 font-bold outline-none border-b border-transparent focus:border-nexus-500"
+                                                className={`w-full bg-transparent font-mono text-sm ${theme.colors.text.primary} font-bold outline-none border-b border-transparent focus:border-nexus-500`}
                                                 value={map.source}
                                                 onChange={(e) => handleSourceChange(map.id, e.target.value)}
                                                 placeholder="SOURCE_COLUMN"
@@ -265,7 +265,7 @@ export const IntegrationDesigner: React.FC = () => {
                                 
                                 <button 
                                     onClick={handleAddMapping}
-                                    className="w-full py-3 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 font-bold text-sm hover:border-nexus-400 hover:text-nexus-600 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                                    className={`w-full py-3 border-2 border-dashed ${theme.colors.border} rounded-lg ${theme.colors.text.tertiary} font-bold text-sm hover:border-nexus-400 hover:text-nexus-600 hover:${theme.colors.surface} transition-all flex items-center justify-center gap-2`}
                                 >
                                     <Plus size={16}/> Add Field Map
                                 </button>
@@ -299,7 +299,7 @@ export const IntegrationDesigner: React.FC = () => {
                 )}
 
                 {activeTab === 'transform' && (
-                    <div className="h-full flex items-center justify-center text-slate-400">
+                    <div className={`h-full flex items-center justify-center ${theme.colors.text.tertiary}`}>
                          <div className="text-center">
                              <Variable size={48} className="mx-auto mb-4 opacity-20"/>
                              <p>Advanced Scripting Mode Available in Enterprise Plan</p>

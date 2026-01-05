@@ -21,7 +21,7 @@ export const ImportPanel: React.FC = () => {
 
     if (!canExchange) {
         return (
-            <div className="h-full flex items-center justify-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
+            <div className={`h-full flex items-center justify-center ${theme.colors.background} border-2 border-dashed ${theme.colors.border} rounded-xl ${theme.colors.text.tertiary}`}>
                 <div className="text-center">
                     <Lock size={48} className="mx-auto mb-4 opacity-50"/>
                     <p className="font-bold uppercase tracking-widest">Access Restricted</p>
@@ -33,19 +33,19 @@ export const ImportPanel: React.FC = () => {
     return (
         <div className={`${theme.colors.surface} rounded-xl shadow-sm border ${theme.colors.border} flex flex-col h-full overflow-hidden`}>
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 bg-white flex justify-between items-center">
+            <div className={`p-6 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center`}>
                 <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${step === 'complete' ? 'bg-green-100 text-green-600' : 'bg-nexus-50 text-nexus-600'}`}>
                         {step === 'complete' ? <CheckCircle size={24}/> : <UploadCloud size={24}/>}
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">Data Import Wizard</h2>
-                        <p className="text-sm text-slate-500">Bulk create or update records via CSV/JSON.</p>
+                        <h2 className={`text-xl font-bold ${theme.colors.text.primary}`}>Data Import Wizard</h2>
+                        <p className={`text-sm ${theme.colors.text.secondary}`}>Bulk create or update records via CSV/JSON.</p>
                     </div>
                 </div>
                 {step === 'staging' && (
                     <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
-                         <span className="text-slate-500">Total: {summary.total}</span>
+                         <span className={theme.colors.text.secondary}>Total: {summary.total}</span>
                          <span className="text-green-600">Valid: {summary.valid}</span>
                          <span className="text-red-600">Errors: {summary.error}</span>
                     </div>
@@ -53,12 +53,12 @@ export const ImportPanel: React.FC = () => {
             </div>
 
             {/* Content Body */}
-            <div className="flex-1 p-8 bg-slate-50/50 overflow-hidden flex flex-col relative">
+            <div className={`flex-1 p-8 ${theme.colors.background}/50 overflow-hidden flex flex-col relative`}>
                 
                 {/* STEP 1: UPLOAD */}
                 {step === 'upload' && (
                     <div 
-                        className="flex-1 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center hover:border-nexus-400 hover:bg-nexus-50/10 transition-all cursor-pointer bg-white group"
+                        className={`flex-1 border-2 border-dashed ${theme.colors.border} rounded-xl flex flex-col items-center justify-center hover:border-nexus-400 hover:bg-nexus-50/10 transition-all cursor-pointer ${theme.colors.surface} group`}
                         onClick={triggerFileUpload}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
@@ -67,38 +67,38 @@ export const ImportPanel: React.FC = () => {
                         <div className="w-20 h-20 bg-nexus-50 rounded-full flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform">
                             <UploadCloud size={40} className="text-nexus-500" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-700">Drop files here or click to browse</h3>
-                        <p className="text-sm text-slate-400 mt-2">Supports .CSV, .JSON, .XML (Max 50MB)</p>
+                        <h3 className={`text-lg font-bold ${theme.colors.text.primary}`}>Drop files here or click to browse</h3>
+                        <p className={`text-sm ${theme.colors.text.secondary} mt-2`}>Supports .CSV, .JSON, .XML (Max 50MB)</p>
                     </div>
                 )}
 
                 {/* STEP 2: STAGING GRID */}
                 {step === 'staging' && (
-                    <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <div className={`flex-1 flex flex-col overflow-hidden ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm`}>
                         <div className="flex-1 overflow-auto">
                             <table className="min-w-full divide-y divide-slate-200">
-                                <thead className="bg-slate-50 sticky top-0">
+                                <thead className={`${theme.colors.background} sticky top-0`}>
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Status</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">ID</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Name</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Budget</th>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Issues</th>
+                                        <th className={theme.components.table.header}>Status</th>
+                                        <th className={theme.components.table.header}>ID</th>
+                                        <th className={theme.components.table.header}>Name</th>
+                                        <th className={theme.components.table.header}>Budget</th>
+                                        <th className={theme.components.table.header}>Issues</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                     {records.map((row, idx) => (
-                                        <tr key={idx} className={row.status === 'Error' ? 'bg-red-50' : 'hover:bg-slate-50'}>
-                                            <td className="px-4 py-3">
+                                        <tr key={idx} className={row.status === 'Error' ? 'bg-red-50' : `hover:${theme.colors.background}`}>
+                                            <td className={theme.components.table.cell}>
                                                 {row.status === 'Valid' ? 
                                                     <CheckCircle size={16} className="text-green-500"/> : 
                                                     <AlertTriangle size={16} className="text-red-500"/>
                                                 }
                                             </td>
-                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.data.ID}</td>
-                                            <td className="px-4 py-3 text-sm font-medium text-slate-800">{row.data.Name || <span className="text-red-400 italic">Missing</span>}</td>
-                                            <td className="px-4 py-3 text-sm font-mono text-slate-600">{row.data.Budget}</td>
-                                            <td className="px-4 py-3 text-xs text-red-600 font-bold">
+                                            <td className={`${theme.components.table.cell} font-mono ${theme.colors.text.secondary}`}>{row.data.ID}</td>
+                                            <td className={`${theme.components.table.cell} font-medium ${theme.colors.text.primary}`}>{row.data.Name || <span className="text-red-400 italic">Missing</span>}</td>
+                                            <td className={`${theme.components.table.cell} font-mono ${theme.colors.text.secondary}`}>{row.data.Budget}</td>
+                                            <td className={`${theme.components.table.cell} text-red-600 font-bold text-xs`}>
                                                 {row.errors?.join(', ')}
                                             </td>
                                         </tr>
@@ -112,7 +112,7 @@ export const ImportPanel: React.FC = () => {
 
             {/* Footer Actions (Only for Staging) */}
             {step === 'staging' && (
-                <div className="p-6 bg-white border-t border-slate-200 flex justify-end gap-3">
+                <div className={`p-6 ${theme.colors.surface} border-t ${theme.colors.border} flex justify-end gap-3`}>
                     <Button variant="danger" onClick={handleClear} icon={Trash2}>Discard</Button>
                     <Button onClick={handleCommit} icon={Play}>Commit Valid Records</Button>
                 </div>

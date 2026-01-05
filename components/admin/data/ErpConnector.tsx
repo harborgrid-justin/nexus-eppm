@@ -24,10 +24,10 @@ export const ErpConnector: React.FC = () => {
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <h2 className={`text-2xl font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
                             <Database className="text-blue-600"/> Universal ERP Connector
                         </h2>
-                        <p className="text-slate-500 text-sm mt-1">SAP / Oracle Financials Gateway</p>
+                        <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>SAP / Oracle Financials Gateway</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-200 text-xs font-bold uppercase tracking-wider">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> Live Sync
@@ -93,13 +93,13 @@ export const ErpConnector: React.FC = () => {
                 </div>
 
                 {/* Transaction Log */}
-                <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                        <h4 className="font-bold text-slate-700 text-sm uppercase tracking-widest">Recent Transactions</h4>
+                <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden`}>
+                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
+                        <h4 className={`font-bold ${theme.colors.text.secondary} text-sm uppercase tracking-widest`}>Recent Transactions</h4>
                         <button className="text-xs font-bold text-nexus-600 flex items-center gap-1 hover:underline"><RefreshCw size={12}/> Refresh Log</button>
                     </div>
                     <table className="min-w-full text-sm">
-                        <thead className="bg-white text-slate-500">
+                        <thead className={`${theme.colors.background} ${theme.colors.text.secondary}`}>
                             <tr>
                                 <th className="px-6 py-3 text-left font-bold">Transaction ID</th>
                                 <th className="px-6 py-3 text-left font-bold">Type</th>
@@ -108,12 +108,12 @@ export const ErpConnector: React.FC = () => {
                                 <th className="px-6 py-3 text-left font-bold">ERP Response</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className={`divide-y ${theme.colors.border.replace('border-','divide-')}`}>
                             {transactions.map(tx => (
-                                <tr key={tx.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4 font-mono text-xs">{tx.id}</td>
-                                    <td className="px-6 py-4">{tx.type}</td>
-                                    <td className="px-6 py-4 text-right font-mono">
+                                <tr key={tx.id} className={`hover:${theme.colors.background}`}>
+                                    <td className={`px-6 py-4 font-mono text-xs ${theme.colors.text.tertiary}`}>{tx.id}</td>
+                                    <td className={`px-6 py-4 ${theme.colors.text.primary}`}>{tx.type}</td>
+                                    <td className={`px-6 py-4 text-right font-mono ${theme.colors.text.primary}`}>
                                         {typeof tx.amount === 'number' ? formatCurrency(tx.amount) : tx.amount}
                                     </td>
                                     <td className="px-6 py-4 text-center">
@@ -127,7 +127,7 @@ export const ErpConnector: React.FC = () => {
                                 </tr>
                             ))}
                             {transactions.length === 0 && (
-                                <tr><td colSpan={5} className="p-4 text-center text-slate-400">No ERP transactions logged.</td></tr>
+                                <tr><td colSpan={5} className={`p-4 text-center ${theme.colors.text.tertiary}`}>No ERP transactions logged.</td></tr>
                             )}
                         </tbody>
                     </table>

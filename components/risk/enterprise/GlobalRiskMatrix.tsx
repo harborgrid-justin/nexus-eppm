@@ -39,14 +39,14 @@ export const GlobalRiskMatrix: React.FC = () => {
 
     return (
         <div className={`h-full flex flex-col items-center justify-center p-8 ${theme.colors.background} overflow-auto`}>
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-4xl w-full">
+            <div className={`${theme.colors.surface} p-8 rounded-2xl shadow-sm border ${theme.colors.border} max-w-4xl w-full`}>
                 <div className="flex justify-between items-end mb-6">
                     <div>
                         <h2 className={theme.typography.h2}>Global Risk Heatmap</h2>
                         <p className={theme.typography.small}>Density of risks across probability and impact dimensions.</p>
                     </div>
                     {hoveredCell && (
-                        <div className="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded animate-in fade-in">
+                        <div className={`text-sm font-bold ${theme.colors.text.secondary} ${theme.colors.background} px-3 py-1 rounded animate-in fade-in`}>
                             {matrix[hoveredCell] || 0} Risks in this zone
                         </div>
                     )}
@@ -54,7 +54,7 @@ export const GlobalRiskMatrix: React.FC = () => {
                 
                 <div className="flex gap-4">
                     <div className="flex flex-col justify-center items-center w-8">
-                        <span className="font-bold text-slate-400 uppercase tracking-widest text-xs -rotate-90 whitespace-nowrap">Probability</span>
+                        <span className={`font-bold ${theme.colors.text.tertiary} uppercase tracking-widest text-xs -rotate-90 whitespace-nowrap`}>Probability</span>
                     </div>
                     
                     <div className="flex-1">
@@ -80,7 +80,7 @@ export const GlobalRiskMatrix: React.FC = () => {
                                 })
                             )}
                         </div>
-                        <div className="text-center font-bold text-slate-400 uppercase tracking-widest text-xs mt-4">Impact</div>
+                        <div className={`text-center font-bold ${theme.colors.text.tertiary} uppercase tracking-widest text-xs mt-4`}>Impact</div>
                     </div>
                 </div>
             </div>

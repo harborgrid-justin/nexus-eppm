@@ -29,7 +29,7 @@ export const ExchangeDashboard: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm flex flex-col h-[400px]`}>
+                <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col h-[400px]`}>
                     <div className="flex justify-between items-center mb-8">
                         <div>
                             <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest flex items-center gap-2`}>
@@ -37,9 +37,9 @@ export const ExchangeDashboard: React.FC = () => {
                             </h3>
                             {isPending && <span className="text-[10px] text-nexus-500 animate-pulse font-bold">Querying Log Lake...</span>}
                         </div>
-                        <div className={`bg-slate-100 p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight`}>
+                        <div className={`${theme.colors.background} p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight`}>
                             {['24h', '7d', '30d'].map(r => (
-                                <button key={r} onClick={() => changeMetricRange(r)} className={`px-2 py-1 rounded transition-all ${metricRange === r ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-400'}`}>{r}</button>
+                                <button key={r} onClick={() => changeMetricRange(r)} className={`px-2 py-1 rounded transition-all ${metricRange === r ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>{r}</button>
                             ))}
                         </div>
                     </div>
@@ -58,10 +58,10 @@ export const ExchangeDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm overflow-y-auto h-[400px] flex flex-col`}>
+                <div className={`${theme.components.card} ${theme.layout.cardPadding} overflow-y-auto h-[400px] flex flex-col`}>
                     <div className="flex justify-between items-center mb-6">
                         <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest`}>Service Health Registry</h3>
-                        <button onClick={handleAddService} className={`text-slate-400 hover:text-nexus-600 transition-colors`} title="Register Service">
+                        <button onClick={handleAddService} className={`${theme.colors.text.secondary} hover:text-nexus-600 transition-colors`} title="Register Service">
                             <Plus size={16}/>
                         </button>
                     </div>

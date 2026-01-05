@@ -17,7 +17,7 @@ const StrategicAlignmentBoard: React.FC = () => {
                     <h2 className={theme.typography.h2}>Strategic Alignment Board</h2>
                     <p className={theme.typography.small}>Balance investment across strategic pillars.</p>
                 </div>
-                <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg text-sm text-slate-600">
+                <div className={`flex items-center gap-2 ${theme.colors.background} p-2 rounded-lg text-sm ${theme.colors.text.secondary} border ${theme.colors.border}`}>
                     <Target size={16}/> Total Portfolio: <strong>{formatCompactCurrency(totalPortfolioBudget)}</strong>
                 </div>
             </div>
@@ -25,19 +25,19 @@ const StrategicAlignmentBoard: React.FC = () => {
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
                 <div className="flex h-full gap-4 min-w-max">
                     {boardData.map(column => (
-                        <div key={column.id} className="w-80 flex flex-col h-full bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
+                        <div key={column.id} className={`w-80 flex flex-col h-full ${theme.colors.background} rounded-xl border ${theme.colors.border} shadow-sm`}>
                             {/* Column Header */}
-                            <div className={`p-4 border-b border-slate-200 rounded-t-xl ${
-                                column.title.includes('Growth') ? 'bg-blue-50 border-blue-200' :
-                                column.title.includes('Efficiency') ? 'bg-green-50 border-green-200' :
-                                column.title.includes('Compliance') ? 'bg-purple-50 border-purple-200' : 'bg-slate-100'
+                            <div className={`p-4 border-b ${theme.colors.border} rounded-t-xl ${
+                                column.title.includes('Growth') ? 'bg-blue-50/50' :
+                                column.title.includes('Efficiency') ? 'bg-green-50/50' :
+                                column.title.includes('Compliance') ? 'bg-purple-50/50' : `${theme.colors.surface}`
                             }`}>
-                                <h3 className="font-bold text-slate-800 text-sm mb-1">{column.title}</h3>
+                                <h3 className={`font-bold ${theme.colors.text.primary} text-sm mb-1`}>{column.title}</h3>
                                 <div className="flex justify-between items-center text-xs">
-                                    <span className="text-slate-500 font-medium">{column.projects.length} Projects</span>
-                                    <span className="font-mono font-bold text-slate-900">{formatCompactCurrency(column.totalBudget)}</span>
+                                    <span className={`${theme.colors.text.secondary} font-medium`}>{column.projects.length} Projects</span>
+                                    <span className={`font-mono font-bold ${theme.colors.text.primary}`}>{formatCompactCurrency(column.totalBudget)}</span>
                                 </div>
-                                <div className="w-full bg-white/50 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div className={`w-full ${theme.colors.surface}/50 h-1.5 rounded-full mt-2 overflow-hidden`}>
                                     <div className="h-full bg-slate-800 opacity-20" style={{ width: `${Math.min(100, (column.totalBudget / 20000000) * 100)}%` }}></div>
                                 </div>
                             </div>
@@ -47,7 +47,7 @@ const StrategicAlignmentBoard: React.FC = () => {
                                 {column.projects.map(proj => (
                                     <Card 
                                         key={proj.id} 
-                                        className="p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-nexus-300 group relative border border-slate-200 bg-white"
+                                        className={`p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-nexus-300 group relative border ${theme.colors.border} ${theme.colors.surface}`}
                                         draggable
                                     >
                                         <div className="absolute top-3 right-3 text-slate-300 opacity-0 group-hover:opacity-100">
@@ -55,10 +55,10 @@ const StrategicAlignmentBoard: React.FC = () => {
                                         </div>
                                         <div className="mb-2">
                                             <span className="text-[10px] font-mono text-slate-400">{proj.code}</span>
-                                            <h4 className="font-bold text-sm text-slate-900 leading-tight">{proj.name}</h4>
+                                            <h4 className={`font-bold text-sm ${theme.colors.text.primary} leading-tight`}>{proj.name}</h4>
                                         </div>
-                                        <div className="flex justify-between items-center pt-2 border-t border-slate-50">
-                                            <div className="flex items-center gap-1 text-xs font-mono text-slate-600">
+                                        <div className={`flex justify-between items-center pt-2 border-t ${theme.colors.border.replace('border-','border-slate-')}50`}>
+                                            <div className={`flex items-center gap-1 text-xs font-mono ${theme.colors.text.secondary}`}>
                                                 <DollarSign size={10}/> {formatCompactCurrency(proj.budget)}
                                             </div>
                                             {proj.strategicImportance < 5 && (
@@ -81,7 +81,7 @@ const StrategicAlignmentBoard: React.FC = () => {
                                     </Card>
                                 ))}
                                 {column.projects.length === 0 && (
-                                    <div className="h-24 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400 italic">
+                                    <div className={`h-24 border-2 border-dashed ${theme.colors.border} rounded-lg flex items-center justify-center text-xs ${theme.colors.text.tertiary} italic`}>
                                         Drop projects here
                                     </div>
                                 )}
@@ -93,5 +93,3 @@ const StrategicAlignmentBoard: React.FC = () => {
         </div>
     );
 };
-
-export default StrategicAlignmentBoard;

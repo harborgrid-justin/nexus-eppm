@@ -39,25 +39,25 @@ export const JobHistory: React.FC = () => {
                         <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
                             <tr>
                             <th className="w-10 px-4 py-3"></th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Job ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type / Format</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Submitted By</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Timestamp</th>
+                            <th className={theme.components.table.header}>Job ID</th>
+                            <th className={theme.components.table.header}>Type / Format</th>
+                            <th className={theme.components.table.header}>Status</th>
+                            <th className={theme.components.table.header}>Submitted By</th>
+                            <th className={theme.components.table.header}>Timestamp</th>
                             </tr>
                         </thead>
                         <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                             {dataJobs.length > 0 ? dataJobs.map(job => (
                                 <React.Fragment key={job.id}>
                                     <tr className={`hover:${theme.colors.background} transition-colors cursor-pointer ${expandedJobId === job.id ? `${theme.colors.background}` : ''}`} onClick={() => toggleExpand(job.id)}>
-                                        <td className="px-4 py-4 text-slate-400">
+                                        <td className={`px-4 py-4 ${theme.colors.text.tertiary}`}>
                                             {expandedJobId === job.id ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
                                         </td>
-                                        <td className="px-6 py-4 text-xs font-mono text-slate-500">{job.id}</td>
+                                        <td className={`px-6 py-4 text-xs font-mono ${theme.colors.text.secondary}`}>{job.id}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className={`font-bold ${theme.colors.text.primary} text-sm`}>{job.type}</span>
-                                                <span className="text-[10px] text-slate-400 uppercase tracking-wider">{job.format}</span>
+                                                <span className={`text-[10px] ${theme.colors.text.tertiary} uppercase tracking-wider`}>{job.format}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -67,36 +67,36 @@ export const JobHistory: React.FC = () => {
                                             </div>
                                             {job.status === 'In Progress' && <div className="w-20 h-1 bg-slate-200 rounded-full mt-1 overflow-hidden"><div className="bg-nexus-500 h-full transition-all duration-300" style={{ width: `${job.progress || 0}%` }}></div></div>}
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{job.submittedBy}</td>
-                                        <td className="px-6 py-4 text-xs text-slate-500">{job.timestamp}</td>
+                                        <td className={`px-6 py-4 text-sm ${theme.colors.text.secondary}`}>{job.submittedBy}</td>
+                                        <td className={`px-6 py-4 text-xs ${theme.colors.text.tertiary}`}>{job.timestamp}</td>
                                     </tr>
                                     {expandedJobId === job.id && (
                                         <tr>
                                             <td colSpan={6} className={`${theme.colors.background}/50 p-6 border-b border-slate-200 shadow-inner`}>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                     <div className="space-y-4">
-                                                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                        <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
                                                             <FileText size={14}/> Execution Details
                                                         </h4>
                                                         <div className={`${theme.colors.surface} p-4 rounded-lg border ${theme.colors.border} space-y-2 text-sm ${theme.colors.text.secondary}`}>
                                                             <div className="grid grid-cols-2 gap-4">
                                                                 <div>
-                                                                    <p className="text-xs text-slate-400 uppercase font-bold">File Name</p>
+                                                                    <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>File Name</p>
                                                                     <p className={`${theme.colors.text.primary} font-mono truncate`}>{job.fileName || 'system_generated.dat'}</p>
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-xs text-slate-400 uppercase font-bold">Size</p>
+                                                                    <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>Size</p>
                                                                     <p className={`${theme.colors.text.primary} font-mono`}>{job.fileSize || '42 KB'}</p>
                                                                 </div>
                                                             </div>
-                                                            <div className="pt-2 border-t border-slate-100 mt-2">
-                                                                <p className="text-xs text-slate-400 uppercase font-bold mb-1">Result Message</p>
+                                                            <div className={`pt-2 border-t ${theme.colors.border} mt-2`}>
+                                                                <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold mb-1`}>Result Message</p>
                                                                 <p className={theme.colors.text.primary}>{job.details}</p>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div className="space-y-4">
-                                                        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                        <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
                                                             <Terminal size={14}/> Engine Log
                                                         </h4>
                                                         <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs font-mono text-green-400 overflow-y-auto max-h-40">

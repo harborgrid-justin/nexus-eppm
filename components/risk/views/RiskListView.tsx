@@ -47,7 +47,7 @@ export const RiskListView: React.FC<RiskListViewProps> = ({ risks, onSelectRisk 
   return (
     <div className={`h-full flex flex-col ${theme.components.card} overflow-hidden`}>
         {/* Header - Mimic Table Header */}
-        <div className={`flex items-center h-12 border-b ${theme.colors.border} bg-slate-50/80 backdrop-blur-sm px-4 sticky top-0 z-10 text-xs font-bold text-slate-500 uppercase tracking-wider`}>
+        <div className={`flex items-center h-12 border-b ${theme.colors.border} ${theme.colors.background}/95 backdrop-blur-sm px-4 sticky top-0 z-10 text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider`}>
             <div className="w-24 flex-shrink-0">Risk ID</div>
             <div className="flex-1">Description / Project</div>
             <div className="w-24 text-center">Score</div>
@@ -69,18 +69,18 @@ export const RiskListView: React.FC<RiskListViewProps> = ({ risks, onSelectRisk 
                         <div 
                             key={r.id}
                             onClick={() => onSelectRisk(r.id)}
-                            className={`absolute top-0 left-0 w-full flex items-center px-4 border-b ${theme.colors.border} hover:${theme.colors.background} cursor-pointer transition-colors border-l-4 border-l-transparent hover:border-l-nexus-500 box-border`}
+                            className={`absolute top-0 left-0 w-full flex items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} hover:${theme.colors.background} cursor-pointer transition-colors border-l-4 border-l-transparent hover:border-l-nexus-500 box-border`}
                             style={{ 
                                 height: `${ROW_HEIGHT}px`,
                                 transform: `translateY(${offsetTop}px)`
                             }}
                         >
-                            <div className="w-24 flex-shrink-0 font-mono text-xs text-slate-500">{r.id}</div>
+                            <div className={`w-24 flex-shrink-0 font-mono text-xs ${theme.colors.text.tertiary}`}>{r.id}</div>
                             <div className="flex-1 min-w-0 pr-4">
-                                <div className="text-sm font-medium text-slate-900 truncate" title={r.description}>
+                                <div className={`text-sm font-medium ${theme.colors.text.primary} truncate`} title={r.description}>
                                     {r.description}
                                 </div>
-                                <div className="text-[10px] text-slate-500 truncate">
+                                <div className={`text-[10px] ${theme.colors.text.secondary} truncate`}>
                                     {(r as any).projectName ? `${(r as any).projectName}` : r.category}
                                     {r.isEscalated && <span className="text-red-600 font-bold ml-1"> (Escalated)</span>}
                                 </div>
@@ -88,7 +88,7 @@ export const RiskListView: React.FC<RiskListViewProps> = ({ risks, onSelectRisk 
                             <div className="w-24 flex-shrink-0 text-center">
                                 <Badge variant={getScoreVariant(r.score)}>{r.score}</Badge>
                             </div>
-                            <div className="w-32 flex-shrink-0 text-right font-mono text-sm text-slate-700">
+                            <div className={`w-32 flex-shrink-0 text-right font-mono text-sm ${theme.colors.text.primary}`}>
                                 {formatCompactCurrency(r.emv || 0)}
                             </div>
                             <div className="w-28 flex-shrink-0 text-center">
@@ -98,7 +98,7 @@ export const RiskListView: React.FC<RiskListViewProps> = ({ risks, onSelectRisk 
                                     'bg-green-50 text-green-700 border-green-200'
                                 }`}>{r.status}</span>
                             </div>
-                            <div className="w-32 hidden md:block pl-4 text-xs text-slate-600 truncate">
+                            <div className={`w-32 hidden md:block pl-4 text-xs ${theme.colors.text.secondary} truncate`}>
                                 {r.ownerId}
                             </div>
                         </div>
@@ -107,7 +107,7 @@ export const RiskListView: React.FC<RiskListViewProps> = ({ risks, onSelectRisk 
             </div>
             
             {risks.length === 0 && (
-                 <div className="flex h-full items-center justify-center text-slate-400 text-sm">
+                 <div className={`flex h-full items-center justify-center ${theme.colors.text.tertiary} text-sm`}>
                     No risks match your criteria.
                  </div>
             )}

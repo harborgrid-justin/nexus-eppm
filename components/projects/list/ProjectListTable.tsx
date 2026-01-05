@@ -9,6 +9,7 @@ import DataTable, { Column } from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
 import { GitBranch } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface ProjectListTableProps {
   projects: Project[];
@@ -18,6 +19,7 @@ interface ProjectListTableProps {
 export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, onSelect }) => {
   const { state } = useData();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const getManagerName = (managerId: string) => state.resources.find(r => r.id === managerId)?.name || 'Unassigned';
 
@@ -31,10 +33,10 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
       render: (p) => (
         <div className="flex flex-col min-w-0 overflow-hidden">
           <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-900 truncate">{p.name}</span>
+              <span className={`text-sm font-semibold ${theme.colors.text.primary} truncate`}>{p.name}</span>
               {p.isReflection && <GitBranch size={14} className="text-purple-500" title="Reflection Project" />}
           </div>
-          <span className="text-xs text-slate-500 font-mono truncate">{p.code}</span>
+          <span className={`text-xs ${theme.colors.text.secondary} font-mono truncate`}>{p.code}</span>
         </div>
       )
     },
@@ -42,10 +44,10 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
       key: 'managerId', header: 'Manager', width: 'w-48', sortable: true,
       render: (p) => (
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 flex-shrink-0">
+          <div className={`w-6 h-6 rounded-full ${theme.colors.background} border ${theme.colors.border} flex items-center justify-center text-[10px] font-bold ${theme.colors.text.secondary} flex-shrink-0`}>
             {formatInitials(getManagerName(p.managerId))}
           </div>
-          <span className="text-sm text-slate-700 truncate">{getManagerName(p.managerId)}</span>
+          <span className={`text-sm ${theme.colors.text.secondary} truncate`}>{getManagerName(p.managerId)}</span>
         </div>
       )
     },
@@ -55,7 +57,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
         const prog = calculateProjectProgress(p);
         return (
           <div className="w-full pr-4">
-            <div className="flex justify-between text-xs mb-1"><span className="font-medium text-slate-700">{prog}%</span></div>
+            <div className="flex justify-between text-xs mb-1"><span className={`font-medium ${theme.colors.text.secondary}`}>{prog}%</span></div>
             <ProgressBar value={prog} colorClass={p.health === 'Critical' ? 'bg-red-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-nexus-600'} />
           </div>
         );
@@ -65,12 +67,12 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
       key: 'budget', header: 'Budget', width: 'w-32', align: 'right', sortable: true,
       render: (p) => (
         <div className="text-right overflow-hidden">
-          <div className="text-sm font-medium text-slate-900 truncate">{formatCompactCurrency(p.budget)}</div>
-          <div className="text-[10px] text-slate-500 truncate">{formatCompactCurrency(p.spent)} spent</div>
+          <div className={`text-sm font-medium ${theme.colors.text.primary} truncate`}>{formatCompactCurrency(p.budget)}</div>
+          <div className={`text-[10px] ${theme.colors.text.secondary} truncate`}>{formatCompactCurrency(p.spent)} spent</div>
         </div>
       )
     }
-  ], [state.resources]);
+  ], [state.resources, theme]);
 
   return <DataTable data={projects} columns={columns} onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} keyField="id" emptyMessage="No projects found." />;
 };

@@ -29,16 +29,16 @@ const ResourceNegotiationHub: React.FC = () => {
                     <h2 className={theme.typography.h2}>Resource Negotiation</h2>
                     <p className={theme.typography.small}>Allocation balancing and request fulfillment.</p>
                 </div>
-                <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                <div className={`flex ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border}`}>
                     <button 
                         onClick={() => setViewMode('manager')}
-                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${viewMode === 'manager' ? 'bg-white shadow text-nexus-700' : 'text-slate-500 hover:text-slate-900'}`}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${viewMode === 'manager' ? `${theme.colors.surface} shadow text-nexus-700` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
                     >
                         Incoming Requests
                     </button>
                     <button 
                         onClick={() => setViewMode('requester')}
-                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${viewMode === 'requester' ? 'bg-white shadow text-nexus-700' : 'text-slate-500 hover:text-slate-900'}`}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${viewMode === 'requester' ? `${theme.colors.surface} shadow text-nexus-700` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
                     >
                         My Demands
                     </button>
@@ -61,16 +61,16 @@ const ResourceNegotiationHub: React.FC = () => {
                                     </Badge>
                                     <span className="text-xs font-mono text-slate-400">{req.id}</span>
                                 </div>
-                                <span className="text-xs font-bold text-slate-500">{req.startDate} <ArrowRight size={12} className="inline mx-1"/> {req.endDate}</span>
+                                <span className={`text-xs font-bold ${theme.colors.text.secondary}`}>{req.startDate} <ArrowRight size={12} className="inline mx-1"/> {req.endDate}</span>
                             </div>
-                            <h4 className="font-bold text-slate-900 text-lg mb-1">{req.role} <span className="text-slate-400 font-normal">x{req.quantity}</span></h4>
+                            <h4 className={`font-bold ${theme.colors.text.primary} text-lg mb-1`}>{req.role} <span className="text-slate-400 font-normal">x{req.quantity}</span></h4>
                             <div className="flex justify-between items-center mt-3">
-                                <div className="text-sm text-slate-600 flex items-center gap-2">
+                                <div className={`text-sm ${theme.colors.text.tertiary} flex items-center gap-2`}>
                                     <Users size={14} className="text-nexus-600"/>
                                     for <strong>{req.projectName}</strong>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-slate-500">
-                                    <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                                <div className={`flex items-center gap-2 text-xs ${theme.colors.text.secondary}`}>
+                                    <div className={`w-6 h-6 rounded-full ${theme.colors.background} flex items-center justify-center font-bold ${theme.colors.text.tertiary}`}>
                                         {req.requesterName.charAt(0)}
                                     </div>
                                     {req.requesterName}
@@ -79,7 +79,7 @@ const ResourceNegotiationHub: React.FC = () => {
                         </Card>
                     ))}
                     {requests.length === 0 && (
-                        <div className="p-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                        <div className={`p-12 text-center ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl`}>
                             No active resource requests.
                         </div>
                     )}
@@ -88,15 +88,15 @@ const ResourceNegotiationHub: React.FC = () => {
                 {/* Impact Analysis Panel */}
                 {selectedReq ? (
                     <div className="w-[450px] flex flex-col gap-6 animate-in slide-in-from-right-4 duration-300">
-                        <Card className="p-6 bg-slate-50 border-slate-200">
-                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Card className={`p-6 ${theme.colors.background} border-${theme.colors.border}`}>
+                            <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
                                 <TrendingUp size={18} className="text-nexus-600"/> Impact Analysis
                             </h3>
                             
                             {impactData && (
                                 <div className="space-y-6">
                                     <div>
-                                        <div className="flex justify-between text-xs font-bold text-slate-500 uppercase mb-2">
+                                        <div className={`flex justify-between text-xs font-bold ${theme.colors.text.secondary} uppercase mb-2`}>
                                             <span>Role Utilization (Current)</span>
                                             <span>{impactData.currentUtilization}%</span>
                                         </div>
@@ -104,7 +104,7 @@ const ResourceNegotiationHub: React.FC = () => {
                                     </div>
                                     
                                     <div>
-                                        <div className="flex justify-between text-xs font-bold text-slate-500 uppercase mb-2">
+                                        <div className={`flex justify-between text-xs font-bold ${theme.colors.text.secondary} uppercase mb-2`}>
                                             <span>Projected Load (+Request)</span>
                                             <span className={impactData.newUtilization > 100 ? 'text-red-600' : 'text-nexus-600'}>{impactData.newUtilization}%</span>
                                         </div>
@@ -116,13 +116,13 @@ const ResourceNegotiationHub: React.FC = () => {
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-                                        <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                                            <p className="text-[10px] text-slate-400 uppercase font-bold">Total Pool</p>
-                                            <p className="text-2xl font-black text-slate-900">{impactData.roleCount}</p>
+                                    <div className={`grid grid-cols-2 gap-4 pt-4 border-t ${theme.colors.border}`}>
+                                        <div className={`text-center p-3 ${theme.colors.surface} rounded-lg border ${theme.colors.border}`}>
+                                            <p className={`text-[10px] ${theme.colors.text.tertiary} uppercase font-bold`}>Total Pool</p>
+                                            <p className={`text-2xl font-black ${theme.colors.text.primary}`}>{impactData.roleCount}</p>
                                         </div>
-                                        <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                                            <p className="text-[10px] text-slate-400 uppercase font-bold">Available</p>
+                                        <div className={`text-center p-3 ${theme.colors.surface} rounded-lg border ${theme.colors.border}`}>
+                                            <p className={`text-[10px] ${theme.colors.text.tertiary} uppercase font-bold`}>Available</p>
                                             <p className="text-2xl font-black text-green-600">{impactData.available}</p>
                                         </div>
                                     </div>
@@ -161,13 +161,13 @@ const ResourceNegotiationHub: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="p-4 rounded-xl border border-dashed border-slate-300 text-center text-slate-500 text-sm">
+                        <div className={`p-4 rounded-xl border border-dashed ${theme.colors.border} text-center ${theme.colors.text.secondary} text-sm`}>
                             <p className="mb-2">Alternative Suggestion:</p>
                             <span className="font-bold text-nexus-600 cursor-pointer hover:underline">Shift start date to Aug 15</span> to reduce peak load.
                         </div>
                     </div>
                 ) : (
-                    <div className="w-[450px] flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                    <div className={`w-[450px] flex items-center justify-center ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl ${theme.colors.background}/50`}>
                         <p>Select a request to view impact analysis.</p>
                     </div>
                 )}

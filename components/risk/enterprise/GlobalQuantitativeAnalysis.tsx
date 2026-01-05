@@ -34,15 +34,15 @@ export const GlobalQuantitativeAnalysis: React.FC = () => {
                         <StatCard title="Required Contingency" value={formatCompactCurrency(result.contingency)} icon={AlertTriangle} subtext="To reach P80" />
                     </div>
 
-                    <div className={`${theme.components.card} p-6 h-[500px]`}>
+                    <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[500px]`}>
                         <h3 className={theme.typography.h3}>Cost Frequency Distribution</h3>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={result.data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="range" tick={{fontSize: 10}} />
-                                <YAxis yAxisId="left" label={{ value: 'Frequency', angle: -90, position: 'insideLeft' }} />
-                                <YAxis yAxisId="right" orientation="right" unit="%" />
-                                <Tooltip />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                                <XAxis dataKey="range" tick={{fontSize: 10, fill: theme.colors.text.secondary}} />
+                                <YAxis yAxisId="left" label={{ value: 'Frequency', angle: -90, position: 'insideLeft', fill: theme.colors.text.tertiary }} tick={{fill: theme.colors.text.secondary}} />
+                                <YAxis yAxisId="right" orientation="right" unit="%" tick={{fill: theme.colors.text.secondary}} />
+                                <Tooltip contentStyle={theme.charts.tooltip} />
                                 <Bar yAxisId="left" dataKey="count" fill="#cbd5e1" barSize={30} />
                                 <Line yAxisId="right" type="monotone" dataKey="cumulative" stroke="#0ea5e9" strokeWidth={3} dot={false} />
                                 <ReferenceLine x={result.data.find((d:any) => d.cumulative >= 80)?.range} stroke="#f59e0b" label="P80" />
@@ -51,7 +51,7 @@ export const GlobalQuantitativeAnalysis: React.FC = () => {
                     </div>
                 </>
             ) : (
-                <div className="h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl text-slate-400 bg-slate-50">
+                <div className={`h-[400px] flex flex-col items-center justify-center border-2 border-dashed ${theme.colors.border} rounded-2xl ${theme.colors.text.tertiary} ${theme.colors.background}`}>
                     <Activity size={48} className="mb-4 opacity-20"/>
                     <p>Run the simulation to generate portfolio risk profile.</p>
                 </div>

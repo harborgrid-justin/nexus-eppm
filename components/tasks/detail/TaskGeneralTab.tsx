@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Task, TaskStatus } from '../../../types';
 import { AlertTriangle, MessageCircle, Truck } from 'lucide-react';
@@ -46,23 +47,23 @@ export const TaskGeneralTab: React.FC<TaskGeneralTabProps> = ({
         </div>
 
         <section>
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">Description</h3>
+            <h3 className={`${theme.typography.label} mb-3`}>Description</h3>
             <textarea
             value={task.description || ''}
             onChange={(e) => onUpdate('description', e.target.value)}
             disabled={isReadOnly}
-            className={`w-full ${theme.colors.background} p-4 rounded-lg border ${theme.colors.border} text-sm min-h-[120px] focus:outline-none focus:ring-1 focus:ring-nexus-500 disabled:opacity-70`}
+            className={`w-full ${theme.colors.background} ${theme.colors.text.primary} p-4 rounded-lg border ${theme.colors.border} text-sm min-h-[120px] focus:outline-none focus:ring-1 focus:ring-nexus-500 disabled:opacity-70`}
             placeholder="Add a detailed description..."
             />
         </section>
 
         <div className={`${theme.colors.surface} p-4 rounded-xl border ${theme.colors.border} shadow-sm`}>
-            <label className="text-xs text-slate-500 font-bold uppercase mb-1 block">Task Status</label>
+            <label className={`${theme.typography.label} mb-1 block`}>Task Status</label>
             <select 
                 value={task.status}
                 disabled={isReadOnly}
                 onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-                className={`w-full p-2 text-sm border rounded-md font-semibold ${(!canComplete || rfiCheck.blocked) && task.status !== TaskStatus.COMPLETED ? 'border-orange-300 focus:ring-orange-500' : 'border-slate-200 focus:ring-nexus-500'} disabled:bg-slate-100`}
+                className={`w-full p-2 text-sm border rounded-md font-semibold ${theme.colors.background} ${theme.colors.text.primary} ${(!canComplete || rfiCheck.blocked) && task.status !== TaskStatus.COMPLETED ? 'border-orange-300 focus:ring-orange-500' : `${theme.colors.border} focus:ring-nexus-500`} disabled:opacity-70`}
             >
                 <option value={TaskStatus.NOT_STARTED}>Not Started</option>
                 <option value={TaskStatus.IN_PROGRESS}>In Progress</option>

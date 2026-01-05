@@ -23,13 +23,13 @@ export const XerParser: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <div className={`h-full flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden`}>
+            <div className={`p-6 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <h2 className={`text-xl font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
                         <FileCode className="text-nexus-600" /> Native Schedule Parser
                     </h2>
-                    <p className="text-sm text-slate-500 mt-1">Directly import .XER (Primavera) or .MPP (MS Project) binary files.</p>
+                    <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>Directly import .XER (Primavera) or .MPP (MS Project) binary files.</p>
                 </div>
                 <div className="flex gap-2">
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded border border-blue-200">v18.8+ Supported</span>
@@ -39,15 +39,15 @@ export const XerParser: React.FC = () => {
 
             <div className="flex-1 p-8 overflow-y-auto">
                 {status === 'idle' && (
-                    <div className="max-w-xl mx-auto text-center border-2 border-dashed border-slate-300 rounded-2xl p-12 bg-slate-50 hover:bg-white hover:border-nexus-400 transition-colors group cursor-pointer relative">
+                    <div className={`max-w-xl mx-auto text-center border-2 border-dashed ${theme.colors.border} rounded-2xl p-12 ${theme.colors.background} hover:${theme.colors.surface} hover:border-nexus-400 transition-colors group cursor-pointer relative`}>
                         <input type="file" accept=".xer,.mpp,.xml" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileUpload} />
-                        <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                        <div className={`w-20 h-20 ${theme.colors.surface} rounded-full shadow-sm flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform`}>
                             <Upload size={40} className="text-nexus-500" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-700 mb-2">
+                        <h3 className={`text-lg font-bold ${theme.colors.text.primary} mb-2`}>
                             {file ? file.name : "Drop Schedule File Here"}
                         </h3>
-                        <p className="text-slate-400 text-sm">
+                        <p className={`text-sm ${theme.colors.text.tertiary}`}>
                             {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "Supports .XER, .MPP, .XML"}
                         </p>
                         {file && (
@@ -73,25 +73,25 @@ export const XerParser: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-4 gap-4 mb-8">
-                            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm text-center">
-                                <div className="text-slate-400 mb-2"><Layers className="mx-auto" size={20}/></div>
-                                <div className="text-2xl font-black text-slate-900">{stats.projects}</div>
-                                <div className="text-xs font-bold text-slate-500 uppercase">Project</div>
+                            <div className={`p-4 ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm text-center`}>
+                                <div className={`${theme.colors.text.tertiary} mb-2`}><Layers className="mx-auto" size={20}/></div>
+                                <div className={`text-2xl font-black ${theme.colors.text.primary}`}>{stats.projects}</div>
+                                <div className={`text-xs font-bold ${theme.colors.text.secondary} uppercase`}>Project</div>
                             </div>
-                            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm text-center">
-                                <div className="text-slate-400 mb-2"><List className="mx-auto" size={20}/></div>
-                                <div className="text-2xl font-black text-slate-900">{stats.wbs}</div>
-                                <div className="text-xs font-bold text-slate-500 uppercase">WBS Nodes</div>
+                            <div className={`p-4 ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm text-center`}>
+                                <div className={`${theme.colors.text.tertiary} mb-2`}><List className="mx-auto" size={20}/></div>
+                                <div className={`text-2xl font-black ${theme.colors.text.primary}`}>{stats.wbs}</div>
+                                <div className={`text-xs font-bold ${theme.colors.text.secondary} uppercase`}>WBS Nodes</div>
                             </div>
-                            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm text-center">
-                                <div className="text-slate-400 mb-2"><Calendar className="mx-auto" size={20}/></div>
-                                <div className="text-2xl font-black text-slate-900">{stats.activities}</div>
-                                <div className="text-xs font-bold text-slate-500 uppercase">Activities</div>
+                            <div className={`p-4 ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm text-center`}>
+                                <div className={`${theme.colors.text.tertiary} mb-2`}><Calendar className="mx-auto" size={20}/></div>
+                                <div className={`text-2xl font-black ${theme.colors.text.primary}`}>{stats.activities}</div>
+                                <div className={`text-xs font-bold ${theme.colors.text.secondary} uppercase`}>Activities</div>
                             </div>
-                            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-sm text-center">
-                                <div className="text-slate-400 mb-2"><Activity className="mx-auto" size={20}/></div>
-                                <div className="text-2xl font-black text-slate-900">{stats.relationships}</div>
-                                <div className="text-xs font-bold text-slate-500 uppercase">Relationships</div>
+                            <div className={`p-4 ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm text-center`}>
+                                <div className={`${theme.colors.text.tertiary} mb-2`}><Activity className="mx-auto" size={20}/></div>
+                                <div className={`text-2xl font-black ${theme.colors.text.primary}`}>{stats.relationships}</div>
+                                <div className={`text-xs font-bold ${theme.colors.text.secondary} uppercase`}>Relationships</div>
                             </div>
                         </div>
 

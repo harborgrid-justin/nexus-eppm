@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import { Project, EPSNode } from '../../../types';
 import { useData } from '../../../context/DataContext';
 import { ChevronRight, ChevronDown, Folder } from 'lucide-react';
-import { calculateProjectProgress } from '../../../utils/calculations';
-import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
-import { StatusBadge } from '../../common/StatusBadge';
-import { ProgressBar } from '../../common/ProgressBar';
+import { formatCompactCurrency } from '../../../utils/formatters';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface EpsTreeViewProps {
   projects: Project[];
@@ -15,6 +13,7 @@ interface EpsTreeViewProps {
 
 export const EpsTreeView: React.FC<EpsTreeViewProps> = ({ projects, onSelect }) => {
   const { state } = useData();
+  const theme = useTheme();
   const [expandedEps, setExpandedEps] = useState<Set<string>>(new Set(state.eps.map(e => e.id)));
 
   const toggleEps = (id: string) => {
@@ -34,29 +33,29 @@ export const EpsTreeView: React.FC<EpsTreeViewProps> = ({ projects, onSelect }) 
     return (
       <React.Fragment key={node.id}>
         <div 
-          className={`flex items-center px-4 py-2.5 bg-slate-50 border-b border-slate-200 hover:bg-slate-100 cursor-pointer select-none transition-colors sticky top-0 z-[5]`}
+          className={`flex items-center px-4 py-2.5 ${theme.colors.background} border-b ${theme.colors.border} hover:${theme.colors.surface} cursor-pointer select-none transition-colors sticky top-0 z-[5]`}
           style={{ paddingLeft: `${level * 24 + 16}px` }}
           onClick={() => toggleEps(node.id)}
         >
-          <span className="mr-3 text-slate-400 flex-shrink-0">
+          <span className={`mr-3 ${theme.colors.text.tertiary} flex-shrink-0`}>
             {hasChildren ? (isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />) : <div className="w-4" />}
           </span>
           <Folder size={16} className="text-nexus-500 mr-2 flex-shrink-0" />
-          <span className="font-bold text-sm text-slate-800 truncate">{node.name}</span>
-          <span className="ml-2 text-[10px] text-slate-400 font-mono flex-shrink-0">({node.code})</span>
-          {nodeProjects.length > 0 && <span className="ml-auto text-[10px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-full text-slate-500 flex-shrink-0">{nodeProjects.length} Projects</span>}
+          <span className={`font-bold text-sm ${theme.colors.text.primary} truncate`}>{node.name}</span>
+          <span className={`ml-2 text-[10px] ${theme.colors.text.tertiary} font-mono flex-shrink-0`}>({node.code})</span>
+          {nodeProjects.length > 0 && <span className={`ml-auto text-[10px] font-bold ${theme.colors.surface} border ${theme.colors.border} px-2 py-0.5 rounded-full ${theme.colors.text.secondary} flex-shrink-0`}>{nodeProjects.length} Projects</span>}
         </div>
         
         {isExpanded && (
           <div className="flex flex-col">
             {nodeProjects.map(project => (
-               <div key={project.id} onClick={() => onSelect(project.id)} className="group flex items-center px-4 py-4 border-b border-slate-100 hover:bg-nexus-50/30 cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-nexus-500" style={{ paddingLeft: `${(level + 1) * 24 + 36}px` }}>
+               <div key={project.id} onClick={() => onSelect(project.id)} className={`group flex items-center px-4 py-4 border-b ${theme.colors.border.replace('border-','border-slate-').replace('200','100')} hover:bg-nexus-50/10 cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-nexus-500`} style={{ paddingLeft: `${(level + 1) * 24 + 36}px` }}>
                   <div className="flex-1 flex min-w-0 items-center gap-6">
                       <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm text-slate-800 group-hover:text-nexus-700 truncate">{project.name}</div>
-                          <div className="text-[10px] text-slate-500 font-mono truncate">{project.code}</div>
+                          <div className={`font-semibold text-sm ${theme.colors.text.primary} group-hover:text-nexus-600 truncate`}>{project.name}</div>
+                          <div className={`text-[10px] ${theme.colors.text.secondary} font-mono truncate`}>{project.code}</div>
                       </div>
-                      <div className="hidden lg:block w-32 text-right text-sm font-mono text-slate-700 flex-shrink-0">{formatCompactCurrency(project.budget)}</div>
+                      <div className={`hidden lg:block w-32 text-right text-sm font-mono ${theme.colors.text.secondary} flex-shrink-0`}>{formatCompactCurrency(project.budget)}</div>
                   </div>
                </div>
             ))}
@@ -67,5 +66,5 @@ export const EpsTreeView: React.FC<EpsTreeViewProps> = ({ projects, onSelect }) 
     );
   };
 
-  return <div className="flex-1 h-full overflow-auto bg-white">{state.eps.filter(e => !e.parentId).map(node => renderEpsNode(node))}</div>;
+  return <div className={`flex-1 h-full overflow-auto ${theme.colors.surface}`}>{state.eps.filter(e => !e.parentId).map(node => renderEpsNode(node))}</div>;
 };

@@ -17,28 +17,28 @@ export const RiskAnalyticsView: React.FC<RiskAnalyticsViewProps> = ({ risks, onS
   const categoryData = React.useMemo(() => {
     const counts: Record<string, number> = {};
     risks.forEach(r => counts[r.category] = (counts[r.category] || 0) + 1);
-    const colors = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
+    const colors = theme.charts.palette;
     return Object.entries(counts).map(([name, value], i) => ({ name, value, color: colors[i % colors.length] }));
-  }, [risks]);
+  }, [risks, theme]);
 
   return (
-    <div className="h-full p-6 overflow-auto">
+    <div className={`h-full p-6 overflow-auto ${theme.colors.background}`}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Layers size={18}/> Risk Category Distribution</h3>
+                <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}><Layers size={18}/> Risk Category Distribution</h3>
                 <CustomPieChart data={categoryData} height={300} />
             </div>
             <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><CheckSquare size={18}/> Top 5 Risks by EMV</h3>
+                <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}><CheckSquare size={18}/> Top 5 Risks by EMV</h3>
                 <div className="space-y-4">
                     {risks.sort((a,b) => (b.emv || 0) - (a.emv || 0)).slice(0, 5).map(r => (
-                        <div key={r.id} className={`flex items-center justify-between p-3 ${theme.colors.background} rounded-lg cursor-pointer hover:bg-slate-100`} onClick={() => onSelectRisk(r.id)}>
+                        <div key={r.id} className={`flex items-center justify-between p-3 ${theme.colors.background} rounded-lg cursor-pointer border border-transparent hover:${theme.colors.border}`} onClick={() => onSelectRisk(r.id)}>
                             <div>
-                                <div className="font-bold text-sm text-slate-900">{r.description}</div>
-                                <div className="text-xs text-slate-500">ID: {r.id}</div>
+                                <div className={`font-bold text-sm ${theme.colors.text.primary}`}>{r.description}</div>
+                                <div className={`text-xs ${theme.colors.text.secondary}`}>ID: {r.id}</div>
                             </div>
                             <div className="text-right">
-                                <div className="font-mono font-bold text-nexus-700">{formatCompactCurrency(r.emv || 0)}</div>
+                                <div className="font-mono font-bold text-nexus-600">{formatCompactCurrency(r.emv || 0)}</div>
                                 <Badge variant={r.score >= 15 ? 'danger' : r.score >= 8 ? 'warning' : 'success'}>Score: {r.score}</Badge>
                             </div>
                         </div>

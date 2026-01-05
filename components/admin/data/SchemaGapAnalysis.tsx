@@ -45,7 +45,7 @@ export const SchemaGapAnalysis: React.FC = () => {
                         placeholder="Search schema entities..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 pr-4 py-2 w-full border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none transition-all"
+                        className={`pl-9 pr-4 py-2 w-full border ${theme.colors.border} rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.text.primary}`}
                     />
                 </div>
             </div>
@@ -63,12 +63,12 @@ export const SchemaGapAnalysis: React.FC = () => {
                             <div key={domain.name} className={`${theme.components.card} flex flex-col overflow-hidden group hover:border-nexus-300 transition-colors`}>
                                 <div className={`p-4 ${theme.colors.background} border-b ${theme.colors.border} flex justify-between items-start`}>
                                     <div className="flex gap-3">
-                                        <div className={`p-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-slate-600 shadow-sm`}>
+                                        <div className={`p-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg ${theme.colors.text.tertiary} shadow-sm`}>
                                             <domain.icon size={20}/>
                                         </div>
                                         <div>
-                                            <h4 className="font-bold text-slate-800 text-sm">{domain.name}</h4>
-                                            <p className="text-[10px] text-slate-500 leading-tight mt-0.5 max-w-[150px]">{domain.description}</p>
+                                            <h4 className={`font-bold ${theme.colors.text.primary} text-sm`}>{domain.name}</h4>
+                                            <p className={`text-[10px] ${theme.colors.text.secondary} leading-tight mt-0.5 max-w-[150px]`}>{domain.description}</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end">
@@ -83,19 +83,19 @@ export const SchemaGapAnalysis: React.FC = () => {
                                     <div className={`h-full ${domainCoverage === 100 ? theme.colors.semantic.success.bg.replace('-50', '-500') : theme.colors.primary}`} style={{ width: `${domainCoverage}%` }}></div>
                                 </div>
 
-                                <div className="divide-y divide-slate-100">
+                                <div className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                     {filteredEntities.map(entity => (
                                         <div key={entity.name} className={`p-3 flex items-center justify-between group/row hover:${theme.colors.background} transition-colors`}>
                                             <div className="min-w-0 flex-1 pr-4">
                                                 <div className="flex items-center gap-2">
-                                                    <p className="font-bold text-xs text-slate-700 truncate" title={entity.name}>{entity.name}</p>
+                                                    <p className={`font-bold text-xs ${theme.colors.text.primary} truncate`} title={entity.name}>{entity.name}</p>
                                                     {entity.status === 'Live' ? (
                                                         <CheckCircle size={12} className={theme.colors.semantic.success.icon} />
                                                     ) : (
                                                         <AlertTriangle size={12} className={`${theme.colors.text.tertiary} group-hover/row:text-amber-500 transition-colors`} />
                                                     )}
                                                 </div>
-                                                <p className="text-[9px] text-slate-400 mt-0.5 font-mono uppercase tracking-wider">
+                                                <p className={`text-[9px] ${theme.colors.text.tertiary} mt-0.5 font-mono uppercase tracking-wider`}>
                                                     {entity.records.toLocaleString()} Records
                                                 </p>
                                             </div>

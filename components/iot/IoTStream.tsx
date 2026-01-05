@@ -9,6 +9,10 @@ export const IoTStream: React.FC = () => {
     const theme = useTheme();
     const { chartData, sensors, alerts } = useIoTStreamLogic();
 
+    // Preserve dark theme for this specific dashboard component regardless of global theme
+    // but use theme variables where appropriate if we wanted consistency. 
+    // Here we force dark mode styles for the "Command Center" feel.
+
     return (
         <div className="h-full bg-slate-950 p-6 text-green-500 font-mono overflow-hidden flex flex-col">
              <div className="flex justify-between items-center border-b border-green-900/50 pb-4 mb-6">
