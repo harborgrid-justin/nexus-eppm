@@ -1,8 +1,8 @@
 
 
+
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Project } from '../types';
-import { AIAnalysisResult } from '../types';
+import { Project, AIAnalysisResult } from '../types/index';
 import { analyzeProjectRisks, chatWithProjectData } from '../services/geminiService';
 import { sanitizeInput } from '../utils/security';
 

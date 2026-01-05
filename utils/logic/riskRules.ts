@@ -1,8 +1,9 @@
 
-import { DataState, Action } from '../../types/index';
+
+// FIX: Correctly import DataState from types/index.
+import { DataState, Action, ProgramRisk, Risk } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
-import { ProgramRisk, Risk } from '../../types/index';
 import { generateId } from '../formatters';
 
 export const applyRiskRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
@@ -15,7 +16,7 @@ export const applyRiskRules = (state: DataState, action: Action, alerts: SystemA
           categoryCounts[r.category] = (categoryCounts[r.category] || 0) + 1;
       });
       
-      const newRiskCat = action.payload.category;
+      const newRiskCat = (action.payload as Risk).category;
       if (categoryCounts[newRiskCat] > 2) {
            if(!alerts.some(a => a.title === 'Systemic Risk Detected' && a.message.includes(newRiskCat)))
               alerts.push(createAlert('Warning', 'Risk', 'Systemic Risk Detected', 

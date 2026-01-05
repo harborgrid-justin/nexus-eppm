@@ -1,100 +1,54 @@
 
-import React, { useState, useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+
+import React, { useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Search, Download, Database, ChevronRight, Table, FileJson, X, Eye, Filter } from 'lucide-react';
+import { Database, ChevronRight, Table, FileJson, X, Eye, Filter, Download } from 'lucide-react';
 import { Button } from '../ui/Button';
-import DataTable from '../common/DataTable';
+import DataTable, { Column } from '../common/DataTable';
 import { Input } from '../ui/Input';
 import { SidePanel } from '../ui/SidePanel';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
-
-type Domain = 'Strategy & Portfolio' | 'Program Mgmt' | 'Project Controls' | 'Financials' | 'Resources & Supply' | 'Field Ops' | 'Configuration' | 'Unifier / BP';
-
-const DOMAIN_MAP: Record<Domain, string[]> = {
-    'Strategy & Portfolio': [
-        'projects', 'programs', 'strategicGoals', 'strategicDrivers', 'portfolioScenarios', 
-        'governanceDecisions', 'esgMetrics', 'portfolioRisks', 'roadmapLanes', 'roadmapItems', 'benefits'
-    ],
-    'Program Mgmt': [
-        'programObjectives', 'programOutcomes', 'programDependencies', 'programChangeRequests', 
-        'programRisks', 'programIssues', 'programStakeholders', 'programCommunicationPlan', 
-        'programAllocations', 'programFundingGates', 'programStageGates', 'programTransitionItems', 
-        'integratedChanges', 'governanceRoles', 'governanceEvents', 'tradeoffScenarios',
-        'programQualityStandards', 'programAssuranceReviews', 'programArchitectureStandards', 'programArchitectureReviews'
-    ],
-    'Project Controls': [
-        'risks', 'issues', 'communicationLogs', 'documents', 'kanbanTasks', 'qualityReports', 'nonConformanceReports'
-    ],
-    'Financials': [
-        'budgetItems', 'expenses', 'changeOrders', 'purchaseOrders', 'invoices', 
-        'contracts', 'solicitations', 'procurementPlans', 'procurementPackages', 
-        'supplierReviews', 'claims', 'makeOrBuyAnalysis', 'fundingSources', 
-        'costBook', 'expenseCategories'
-    ],
-    'Resources & Supply': [
-        'resources', 'resourceRequests', 'users', 'roles', 'skills', 'timesheets', 'vendors'
-    ],
-    'Field Ops': [
-        'dailyLogs', 'safetyIncidents', 'punchList'
-    ],
-    'Configuration': [
-        'eps', 'obs', 'locations', 'calendars', 'activityCodes', 'userDefinedFields', 
-        'standardTemplates', 'workflows', 'dataJobs', 'integrations', 'extensions', 
-        'etlMappings', 'globalChangeRules', 'issueCodes', 'rbs',
-        'governance.alerts', 'governance.auditLog', 'staging.records'
-    ],
-    'Unifier / BP': [
-        'unifier.records', 'unifier.definitions', 'unifier.costSheet.rows'
-    ]
-};
-
-// Helper to access nested state like 'unifier.records'
-const resolvePath = (object: any, path: string) => {
-    return path.split('.').reduce((o, p) => (o ? o[p] : []), object);
-};
+import { useWarehouseExplorerLogic } from '../../hooks/domain/useWarehouseExplorerLogic';
 
 export const WarehouseExplorer: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
+    const {
+        activeDomain,
+        activeEntity,
+        searchTerm,
+        setSearchTerm,
+        selectedRecord,
+        setSelectedRecord,
+        handleDomainChange,
+        setActiveEntity,
+        filteredData,
+        DOMAIN_MAP
+    } = useWarehouseExplorerLogic();
     
-    const [activeDomain, setActiveDomain] = useState<Domain>('Strategy & Portfolio');
-    const [activeEntity, setActiveEntity] = useState<string>('projects');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
+    const currentData = filteredData;
 
-    // Dynamic Data Resolution
-    const rawData = useMemo(() => resolvePath(state, activeEntity), [state, activeEntity]);
-    const currentData = Array.isArray(rawData) ? rawData : [];
-
-    // Dynamic Column Generation
     const columns = useMemo(() => {
         if (!currentData || currentData.length === 0) return [];
         
-        // Take first item to sniff schema
         const sample = currentData[0];
-        // Filter out complex objects/arrays for the grid view to keep it clean
         const keys = Object.keys(sample).filter(k => 
             typeof sample[k] !== 'object' || sample[k] === null || (Array.isArray(sample[k]) && sample[k].length === 0)
         ).slice(0, 6); 
 
-        // Always ensure ID and Name/Title are first if they exist
         const prioritizedKeys = [
             ...keys.filter(k => ['id', 'code'].includes(k.toLowerCase())),
             ...keys.filter(k => ['name', 'title', 'description'].includes(k.toLowerCase())),
             ...keys.filter(k => !['id', 'code', 'name', 'title', 'description'].includes(k.toLowerCase()))
         ].slice(0, 6);
 
-        // Add an "Inspect" column
         const gridCols = prioritizedKeys.map(key => ({
             key,
-            header: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+            header: key.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()),
             sortable: true,
             render: (item: any) => {
                 const val = item[key];
                 
-                // Smart Rendering based on key/value characteristics
                 if (typeof val === 'number') {
                     if (key.toLowerCase().includes('budget') || key.toLowerCase().includes('cost') || key.toLowerCase().includes('amount') || key.toLowerCase().includes('price')) {
                         return <span className="font-mono text-nexus-700">{formatCurrency(val)}</span>;
@@ -103,11 +57,9 @@ export const WarehouseExplorer: React.FC = () => {
                 }
                 
                 if (typeof val === 'string') {
-                    // Date detection
                     if (val.match(/^\d{4}-\d{2}-\d{2}/)) {
                         return <span className="text-slate-500 text-xs">{val.split('T')[0]}</span>;
                     }
-                    // Status detection
                     if (key.toLowerCase() === 'status' || key.toLowerCase() === 'health' || key.toLowerCase() === 'priority') {
                          let variant: any = 'neutral';
                          const v = val.toLowerCase();
@@ -139,98 +91,56 @@ export const WarehouseExplorer: React.FC = () => {
         });
 
         return gridCols;
-    }, [currentData]);
-
-    const filteredData = useMemo(() => {
-        if (!currentData) return [];
-        if (!searchTerm) return currentData;
-        const lowerTerm = searchTerm.toLowerCase();
-        return currentData.filter(item => 
-            Object.values(item).some(val => 
-                String(val).toLowerCase().includes(lowerTerm)
-            )
-        );
-    }, [currentData, searchTerm]);
+    }, [currentData, theme]);
 
     return (
         <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
-            {/* Mobile Navigation Controls */}
-            <div className="md:hidden p-3 bg-slate-50 border-b border-slate-200 grid grid-cols-2 gap-3 shrink-0">
-                <div className="flex flex-col">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Domain</label>
-                    <div className="relative">
-                         <select 
-                            className="w-full p-2 pl-3 pr-6 text-sm border border-slate-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-nexus-500 outline-none text-slate-700 font-medium"
-                            value={activeDomain}
-                            onChange={(e) => {
-                                const newDomain = e.target.value as Domain;
-                                setActiveDomain(newDomain);
-                                setActiveEntity(DOMAIN_MAP[newDomain][0]);
-                            }}
-                         >
-                            {Object.keys(DOMAIN_MAP).map(d => <option key={d} value={d}>{d}</option>)}
-                         </select>
-                         <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 rotate-90 pointer-events-none" size={14} />
-                    </div>
-                </div>
-                <div className="flex flex-col">
-                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Table</label>
-                     <div className="relative">
-                         <select
-                            className="w-full p-2 pl-3 pr-8 text-sm border border-slate-300 rounded-lg appearance-none bg-white focus:ring-2 focus:ring-nexus-500 outline-none text-slate-700 font-medium"
-                            value={activeEntity}
-                            onChange={(e) => setActiveEntity(e.target.value)}
-                         >
-                            {DOMAIN_MAP[activeDomain].map(e => (
-                                <option key={e} value={e}>{e.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</option>
-                            ))}
-                         </select>
-                         <Table className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={14} />
-                     </div>
-                </div>
-            </div>
-
             {/* Desktop Sidebar Navigation */}
             <div className={`hidden md:flex w-64 border-r ${theme.colors.border} bg-slate-50 flex-col`}>
                 <div className="p-4 border-b border-slate-200">
                     <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Data Domains</h3>
                     <div className="space-y-1">
-                        {(Object.keys(DOMAIN_MAP) as Domain[]).map(domain => (
+                        {(Object.keys(DOMAIN_MAP) as (keyof typeof DOMAIN_MAP)[]).map(domain => {
+                            const Icon = DOMAIN_MAP[domain].icon;
+                            return (
+                                <button
+                                    key={domain}
+                                    onClick={() => handleDomainChange(domain)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                                        activeDomain === domain ? 'bg-white text-nexus-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-2"><Icon size={14}/>{domain}</span>
+                                    {activeDomain === domain && <ChevronRight size={14} />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+                {activeDomain && (
+                    <div className="flex-1 overflow-y-auto p-2">
+                        <h4 className="px-2 text-[10px] font-bold text-slate-400 uppercase mb-2 mt-2">Tables</h4>
+                        {DOMAIN_MAP[activeDomain].entities.map(entity => (
                             <button
-                                key={domain}
-                                onClick={() => { setActiveDomain(domain); setActiveEntity(DOMAIN_MAP[domain][0]); }}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-                                    activeDomain === domain ? 'bg-white text-nexus-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'
+                                key={entity}
+                                onClick={() => setActiveEntity(entity)}
+                                className={`w-full text-left px-3 py-1.5 rounded-md text-xs font-medium mb-1 transition-colors flex items-center gap-2 ${
+                                    activeEntity === entity ? 'bg-nexus-50 text-nexus-700 font-bold' : 'text-slate-500 hover:text-slate-800'
                                 }`}
                             >
-                                {domain}
-                                {activeDomain === domain && <ChevronRight size={14} />}
+                                <Table size={12}/>
+                                <span className="truncate" title={entity}>{entity.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase())}</span>
                             </button>
                         ))}
                     </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                    <h4 className="px-2 text-[10px] font-bold text-slate-400 uppercase mb-2 mt-2">Tables</h4>
-                    {DOMAIN_MAP[activeDomain].map(entity => (
-                        <button
-                            key={entity}
-                            onClick={() => setActiveEntity(entity)}
-                            className={`w-full text-left px-3 py-1.5 rounded-md text-xs font-medium mb-1 transition-colors flex items-center gap-2 ${
-                                activeEntity === entity ? 'bg-nexus-50 text-nexus-700 font-bold' : 'text-slate-500 hover:text-slate-800'
-                            }`}
-                        >
-                            <Table size={12}/>
-                            <span className="truncate" title={entity}>{entity.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
-                        </button>
-                    ))}
-                </div>
+                )}
             </div>
 
             {/* Main Grid Area */}
             <div className="flex-1 flex flex-col min-w-0 bg-white h-full overflow-hidden">
                 <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm z-10 gap-3">
                     <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <div className="p-2 bg-nexus-50 text-nexus-600 rounded-lg shrink-0">
+                         <div className="p-2 bg-nexus-50 text-nexus-600 rounded-lg shrink-0">
                             <Database size={18}/>
                         </div>
                         <div className="min-w-0">

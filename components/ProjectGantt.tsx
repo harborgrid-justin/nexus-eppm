@@ -2,6 +2,8 @@
 
 
 
+
+
 import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
 // FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, Task, WBSNode, GlobalCalendar, WorkDay } from '../types/index';
@@ -32,7 +34,7 @@ const ProjectGantt: React.FC = () => {
       getStatusColor, handleMouseDown, taskFilter, setTaskFilter,
       // Scheduling
       isScheduling, runSchedule, scheduleLog, scheduleStats, isLogOpen, setIsLogOpen, dataDate
-  } = useGantt(initialProject);
+  } = useGantt(initialProject as Project);
 
   const [showTaskList, setShowTaskList] = useState(true);
 

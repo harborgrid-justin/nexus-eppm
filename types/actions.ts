@@ -1,17 +1,19 @@
+
 // Action Types
 import { Project } from './project';
-import { Program, Benefit, PortfolioScenario, StrategicDriver, StrategicGoal, GovernanceDecision, ESGMetric, PortfolioRisk, ProgramObjective, ProgramOutcome, ProgramDependency, ProgramChangeRequest, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, ProgramTransitionItem, IntegratedChangeRequest, GovernanceRole, GovernanceEvent, ProgramQualityStandard, ProgramAssuranceReview, ProgramArchitectureStandard, ProgramArchitectureReview, TradeoffScenario, PortfolioCommunicationItem } from './program';
+// FIX: Corrected imports for various types from their respective domain files.
+import { Program, Benefit, PortfolioScenario, StrategicDriver, StrategicGoal, GovernanceDecision, ESGMetric, ProgramObjective, ProgramOutcome, ProgramDependency, ProgramChangeRequest, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem } from './program';
 import { Resource, ResourceRequest, Timesheet, EnterpriseRole, EnterpriseSkill } from './resource';
-import { Risk, Issue, RiskBreakdownStructureNode, IssueCode } from './risk';
-import { BudgetLineItem, Expense, ChangeOrder, PurchaseOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
-import { QualityReport, NonConformanceReport, QualityStandard } from './quality';
+import { Risk, Issue, RiskBreakdownStructureNode, IssueCode, PortfolioRisk } from './risk';
+import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
+import { QualityReport, NonConformanceReport } from './quality';
 import { CommunicationLog, Stakeholder } from './project_subtypes';
-import { Document, ActivityCode, UserDefinedField, Integration, Extension, StandardTemplate, DataJob, WorkflowDefinition, EtlMapping, MaterialReceipt } from './common';
+import { Document, ActivityCode, UserDefinedField, Integration, Extension, StandardTemplate, DataJob, WorkflowDefinition, EtlMapping, QualityStandard } from './common';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
 import { User } from './auth';
 import { GovernanceState, GlobalChangeRule, ServiceStatus, SystemMetric, PipelineStage, KnowledgeArticle } from './business';
-import { Contract, Solicitation, ProcurementPlan, ProcurementPackage, SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis, Vendor } from './procurement';
+import { Contract, Solicitation, ProcurementPlan, ProcurementPackage, SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis, Vendor, PurchaseOrder, MaterialReceipt } from './procurement';
 import { UnifierState } from './unifier';
 import { ExtensionDataState } from './extensions';
 import { DailyLogEntry, SafetyIncident, PunchItem } from './field';
@@ -109,7 +111,8 @@ export interface DataState {
   roadmapLanes: RoadmapLane[];
   roadmapItems: RoadmapItem[];
   kanbanTasks: KanbanTask[];
-  portfolioCommunicationPlan: PortfolioCommunicationItem[];
+  // FIX: Corrected typo from PortfolioCommunicationItem to ProgramCommunicationItem
+  portfolioCommunicationPlan: ProgramCommunicationItem[];
   materialReceipts: MaterialReceipt[];
   activities: ActivityItem[];
   teamEvents: TeamEvent[];

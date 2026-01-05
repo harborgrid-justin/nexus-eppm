@@ -1,4 +1,5 @@
 
+
 import { ActivityCodeScope } from './common';
 
 export interface Risk {
@@ -107,22 +108,4 @@ export interface PortfolioRisk {
   status: string;
   mitigationPlan: string;
   financialImpact?: number; // Optional quantitative impact for portfolio aggregation
-}
-
-export interface ProgramRisk {
-  id: string;
-  programId: string;
-  description: string;
-  category: string;
-  probability: 'High' | 'Medium' | 'Low';
-  impact: 'High' | 'Medium' | 'Low';
-  score: number;
-  ownerId: string;
-  status: 'Open' | 'Closed' | 'Mitigated';
-  mitigationPlan: string;
-  probabilityValue: number;
-  impactValue: number;
-  financialImpact: number;
-  strategy: string;
-  responseActions: any[];
 }

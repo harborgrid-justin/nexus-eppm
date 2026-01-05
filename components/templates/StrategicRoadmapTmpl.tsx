@@ -1,11 +1,14 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
 import { ChartPlaceholder } from '../charts/ChartPlaceholder';
 import { Calendar, Map, Share2, Printer, Filter, ZoomIn, ZoomOut, Maximize2, MoreHorizontal, Layers, ChevronRight, Download, Link, AlertTriangle, Diamond, CalendarDays, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useData } from '../../context/DataContext';
+import { EmptyState } from '../common/EmptyState';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8">
@@ -22,10 +25,12 @@ const TemplateHeader = ({ number, title, subtitle }: { number: string, title: st
 // ... (GanttTimelineTmpl remains unchanged) ...
 export const GanttTimelineTmpl: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    const project = state.projects[0]; // Use first project for demo data
     const [zoomLevel, setZoomLevel] = useState<'Day' | 'Week' | 'Month'>('Week');
     const [filterText, setFilterText] = useState('');
 
-    const tasks = [1, 2, 3, 4, 5, 6, 7];
+    const mockTasks = project?.tasks || [];
 
     return (
         <div className="h-full flex flex-col bg-white overflow-hidden">
@@ -71,12 +76,12 @@ export const GanttTimelineTmpl: React.FC = () => {
                         <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">WBS Hierarchy</span>
                     </div>
                     <div className="flex-1 overflow-y-auto">
-                        {tasks.map(i => (
-                            <div key={i} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${i % 3 === 0 ? 'bg-slate-50' : ''}`} style={{ paddingLeft: `${16 + (i % 3) * 16}px`}}>
-                                <span className={`flex-1 truncate ${i % 3 === 0 ? 'font-bold text-slate-800' : 'text-slate-600 font-medium'}`}>
-                                    {i % 3 === 0 ? `Phase ${i}` : `Task Item ${i}.0`}
+                        {mockTasks.map(t => (
+                            <div key={t.id} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${t.type === 'Summary' ? 'bg-slate-50' : ''}`} style={{ paddingLeft: `${16 + (t.wbsCode.split('.').length - 1) * 16}px`}}>
+                                <span className={`flex-1 truncate ${t.type === 'Summary' ? 'font-bold text-slate-800' : 'text-slate-600 font-medium'}`}>
+                                    {t.name}
                                 </span>
-                                <span className="text-xs text-slate-400 font-mono">12d</span>
+                                <span className="text-xs text-slate-400 font-mono">{t.duration}d</span>
                             </div>
                         ))}
                     </div>
@@ -102,20 +107,21 @@ export const GanttTimelineTmpl: React.FC = () => {
                              ))}
                         </div>
 
-                        {/* Bars */}
-                        {tasks.map((_, i) => (
-                            <div key={i} className="h-10 flex items-center relative px-2 border-b border-slate-100/50">
+                        {mockTasks.map((t, i) => (
+                            <div key={t.id} className="h-10 flex items-center relative px-2 border-b border-slate-100/50">
                                 <div 
                                     className={`h-5 rounded shadow-sm border border-white/20 relative group cursor-pointer transition-all hover:shadow-md hover:-translate-y-px ${
-                                        i % 3 === 0 ? 'bg-slate-800' : i === 2 ? 'bg-red-500' : 'bg-blue-500'
+                                        t.type === 'Summary' ? 'bg-slate-800' : t.critical ? 'bg-red-500' : 'bg-blue-500'
                                     }`}
                                     style={{ 
-                                        width: `${Math.random() * 200 + 50}px`, 
-                                        marginLeft: `${i * 30}px` 
+                                        width: `${t.duration * 10}px`, 
+                                        marginLeft: `${(new Date(t.startDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 3600 * 24) * 2}px` // Simplified positioning
                                     }}
                                 >
                                     <div className="absolute top-0 bottom-0 left-0 bg-black/10 w-[60%] rounded-l"></div>
-                                    <span className="absolute left-full ml-2 text-xs font-bold text-slate-600 opacity-0 group-hover:opacity-100 whitespace-nowrap bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 z-20">Jan 12 - Feb 01</span>
+                                    <span className="absolute left-full ml-2 text-xs font-bold text-slate-600 opacity-0 group-hover:opacity-100 whitespace-nowrap bg-white px-2 py-0.5 rounded shadow-sm border border-slate-200 z-20">
+                                        Dur: {t.duration}d
+                                    </span>
                                 </div>
                             </div>
                         ))}
@@ -191,7 +197,7 @@ export const StrategicRoadmapTmpl: React.FC = () => {
     }, []);
 
     const toggleLane = (laneId: string) => {
-        // FIX: 'lId' is not defined. Use 'laneId' from the function parameter instead.
+        // FIX: Corrected typo from lId to laneId
         setHiddenLanes(prev => prev.includes(laneId) ? prev.filter(l => l !== laneId) : [...prev, laneId]);
     };
     

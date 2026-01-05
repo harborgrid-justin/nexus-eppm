@@ -1,9 +1,9 @@
 
 
+
 import { useState, useCallback } from 'react';
 import { generatePortfolioReport, generateProgramReport as genProgramReportService } from '../services/geminiService';
-import { Project } from '../types';
-import { Program } from '../types';
+import { Project, Program } from '../types/index';
 
 export const useGeminiAnalysis = () => {
   const [isGenerating, setIsGenerating] = useState(false);

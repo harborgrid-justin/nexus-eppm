@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
@@ -9,7 +10,7 @@ import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, Cartesian
 import FundingAllocationModal from './FundingAllocationModal';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
-import { ProjectFunding as ProjectFundingType } from '../../types';
+import { ProjectFunding as ProjectFundingType } from '../../types/index';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
