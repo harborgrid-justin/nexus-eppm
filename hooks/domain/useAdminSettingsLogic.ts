@@ -1,26 +1,40 @@
 
 import { useState, useTransition, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useData } from '../../context/DataContext';
 import { 
   Settings, Users, Shield, Bell, CreditCard, History, 
   Layers, MapPin, Calendar, UserCog, Tag, Edit3, 
   FileWarning, Receipt, Banknote, GitPullRequest, Terminal 
 } from 'lucide-react';
+import { NavGroup } from '../../components/common/ModuleNavigation';
 
 export const useAdminSettingsLogic = () => {
-  const [activeGroup, setActiveGroup] = useState('system');
-  const [activeView, setActiveView] = useState('general');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { dispatch } = useData();
+
+  const activeGroup = searchParams.get('group') || 'system';
+  const activeView = searchParams.get('view') || 'general';
+
   const [isApplying, setIsApplying] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleGlobalApply = () => {
       setIsApplying(true);
+      dispatch({ type: 'GOVERNANCE_SYNC_PARAMETERS', payload: {} });
       setTimeout(() => {
           setIsApplying(false);
-          alert("Global enterprise parameters synchronized across all projects and programs.");
       }, 1500);
   };
+  
+  const handleResetSystem = () => {
+      if (confirm("DANGER: This will wipe all local data and restore the factory demo dataset. This action cannot be undone. Are you sure?")) {
+          dispatch({ type: 'RESET_SYSTEM' });
+          alert("System reset complete.");
+      }
+  };
 
-  const navGroups = useMemo(() => [
+  const navGroups: NavGroup[] = useMemo(() => [
       { id: 'system', label: 'System & Security', items: [
           { id: 'general', label: 'General Settings', icon: Settings },
           { id: 'users', label: 'Users & Roles', icon: Users },
@@ -52,15 +66,14 @@ export const useAdminSettingsLogic = () => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
       startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
+        setSearchParams({ group: groupId, view: newGroup.items[0].id });
       });
     }
   };
 
   const handleItemChange = (viewId: string) => {
     startTransition(() => {
-        setActiveView(viewId);
+        setSearchParams({ group: activeGroup, view: viewId });
     });
   };
 
@@ -72,6 +85,7 @@ export const useAdminSettingsLogic = () => {
       navGroups,
       handleGlobalApply,
       handleGroupChange,
-      handleItemChange
+      handleItemChange,
+      handleResetSystem
   };
 };

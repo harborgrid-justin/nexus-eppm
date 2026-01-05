@@ -5,6 +5,8 @@ import { Card } from '../ui/Card';
 import { ChartPlaceholder } from '../charts/ChartPlaceholder';
 import { Calendar, Map, Share2, Printer, Filter, ZoomIn, ZoomOut, Maximize2, MoreHorizontal, Layers, ChevronRight, Download, Link, AlertTriangle, Diamond, CalendarDays, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useData } from '../../context/DataContext';
+import { EmptyState } from '../common/EmptyState';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8">
@@ -20,18 +22,12 @@ const TemplateHeader = ({ number, title, subtitle }: { number: string, title: st
 
 export const GanttTimelineTmpl: React.FC = () => {
     const theme = useTheme();
+    const { state } = useData();
+    const project = state.projects[0]; // Use first project for demo data
     const [zoomLevel, setZoomLevel] = useState<'Day' | 'Week' | 'Month'>('Week');
     const [filterText, setFilterText] = useState('');
 
-    const mockTasks = [
-        { id: 1, name: 'Phase 1: Mobilization', duration: 12, start: 0, level: 0 },
-        { id: 2, name: 'Site Secure', duration: 5, start: 0, level: 1 },
-        { id: 3, name: 'Equipment Setup', duration: 7, start: 5, level: 1 },
-        { id: 4, name: 'Phase 2: Foundation', duration: 20, start: 12, level: 0 },
-        { id: 5, name: 'Excavation', duration: 10, start: 12, level: 1 },
-        { id: 6, name: 'Rebar Install', duration: 5, start: 22, level: 1 },
-        { id: 7, name: 'Pour Concrete', duration: 5, start: 27, level: 1 },
-    ];
+    const mockTasks = project?.tasks || [];
 
     return (
         <div className="h-full flex flex-col bg-white overflow-hidden">
@@ -76,9 +72,8 @@ export const GanttTimelineTmpl: React.FC = () => {
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         {mockTasks.map(t => (
-                            <div key={t.id} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${t.level === 0 ? 'bg-slate-50' : ''}`} style={{ paddingLeft: `${16 + t.level * 16}px`}}>
-                                {t.level === 0 ? <ChevronRight size={14} className="text-slate-400"/> : <div className="w-[14px]"></div>}
-                                <span className={`flex-1 truncate ${t.level === 0 ? 'font-bold text-slate-800' : 'text-slate-600 font-medium'}`}>
+                            <div key={t.id} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${t.type === 'Summary' ? 'bg-slate-50' : ''}`} style={{ paddingLeft: `${16 + (t.wbsCode.split('.').length - 1) * 16}px`}}>
+                                <span className={`flex-1 truncate ${t.type === 'Summary' ? 'font-bold text-slate-800' : 'text-slate-600 font-medium'}`}>
                                     {t.name}
                                 </span>
                                 <span className="text-xs text-slate-400 font-mono">{t.duration}d</span>
@@ -107,11 +102,11 @@ export const GanttTimelineTmpl: React.FC = () => {
                             <div key={t.id} className="h-10 flex items-center relative px-2 border-b border-slate-100/50">
                                 <div 
                                     className={`h-5 rounded shadow-sm border border-white/20 relative group cursor-pointer transition-all hover:shadow-md hover:-translate-y-px ${
-                                        t.level === 0 ? 'bg-slate-800' : 'bg-blue-500'
+                                        t.type === 'Summary' ? 'bg-slate-800' : t.critical ? 'bg-red-500' : 'bg-blue-500'
                                     }`}
                                     style={{ 
                                         width: `${t.duration * 10}px`, 
-                                        marginLeft: `${t.start * 10}px` 
+                                        marginLeft: `${(new Date(t.startDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 3600 * 24) * 2}px` // Simplified positioning
                                     }}
                                 >
                                     <div className="absolute top-0 bottom-0 left-0 bg-black/10 w-[60%] rounded-l"></div>
@@ -128,7 +123,7 @@ export const GanttTimelineTmpl: React.FC = () => {
     );
 };
 
-// ... (Rest of file unchanged: mockRoadmapData, StrategicRoadmapTmpl, TemplatePlaceholder, etc.)
+
 const mockRoadmapData = [
     {
         id: 'lane1', title: 'Market Expansion', owner: 'Sales & Marketing',
@@ -193,7 +188,6 @@ export const StrategicRoadmapTmpl: React.FC = () => {
     }, []);
 
     const toggleLane = (laneId: string) => {
-        // FIX: 'lId' is not defined. Use 'laneId' from the function parameter instead.
         setHiddenLanes(prev => prev.includes(laneId) ? prev.filter(l => l !== laneId) : [...prev, laneId]);
     };
     
@@ -229,18 +223,21 @@ export const StrategicRoadmapTmpl: React.FC = () => {
 
             <div className="flex-1 overflow-auto scrollbar-thin rounded-xl shadow-lg border border-slate-200">
               <div className="min-w-[1200px] flex flex-col bg-white">
+                {/* Timeline Header */}
                 <div className="flex h-12 border-b border-slate-200 bg-slate-100/50 sticky top-0 z-40">
                     <div className="w-64 border-r border-slate-200 p-3 font-black text-slate-500 text-[10px] uppercase tracking-widest flex items-center bg-slate-50">Work Stream</div>
                     <div className="flex-1 flex text-center items-center relative">
                         {timelineHeaders.map((q, i) => (
                             <div key={q} className="flex-1 border-r border-slate-200 h-full flex items-center justify-center text-sm font-bold text-slate-700">{q}</div>
                         ))}
+                        {/* Today Marker Line (in header) */}
                         <div className="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500 z-30" style={{ left: `${todayPosition}%` }}>
                             <div className="absolute -top-2 -translate-x-1/2 text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full shadow">TODAY</div>
                         </div>
                     </div>
                 </div>
                 
+                {/* Swimlanes */}
                 <div className="flex-1 flex flex-col divide-y divide-slate-200 bg-slate-50/30">
                     {mockRoadmapData.filter(l => !hiddenLanes.includes(l.id)).map(lane => (
                         <div key={lane.id} className="flex-1 flex min-h-[160px]">
@@ -249,11 +246,14 @@ export const StrategicRoadmapTmpl: React.FC = () => {
                                 <p className="text-xs text-slate-500 mt-1 font-medium uppercase tracking-wide">{lane.owner}</p>
                             </div>
                             <div className="flex-1 relative p-4">
+                                {/* Vertical Grid Lines */}
                                 <div className="absolute inset-0 flex pointer-events-none">
                                     {timelineHeaders.map((_, i) => <div key={i} className="flex-1 border-r border-dashed border-slate-200/70"></div>)}
                                 </div>
+                                {/* Today Marker Line (in body) */}
                                 <div className="absolute top-0 bottom-0 border-l-2 border-dashed border-red-500/50 z-0" style={{ left: `${todayPosition}%` }}></div>
 
+                                {/* Roadmap Items */}
                                 {lane.items.map(item => (
                                     <div 
                                         key={item.id} 
@@ -261,6 +261,7 @@ export const StrategicRoadmapTmpl: React.FC = () => {
                                         style={{ left: `${getPosition(item.start)}%`, width: `${getWidth(item.start, item.end)}%`, top: item.type === 'product' ? '24px' : '72px' }}
                                     >
                                         <span className="truncate">{item.name}</span>
+                                        {/* Tooltip */}
                                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-slate-900 text-white text-xs p-3 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                                             <h5 className="font-black text-sm mb-2">{item.name}</h5>
                                             <p className="font-normal normal-case"><strong className="text-slate-400">Dates:</strong> {item.start} to {item.end}</p>
@@ -274,6 +275,7 @@ export const StrategicRoadmapTmpl: React.FC = () => {
                                     </div>
                                 ))}
                                 
+                                {/* Milestones */}
                                 {lane.milestones.map(m => (
                                     <div 
                                         key={m.id}
@@ -296,12 +298,11 @@ export const StrategicRoadmapTmpl: React.FC = () => {
         </div>
     );
 };
-
 const TemplatePlaceholder: React.FC<{ title: string }> = ({ title }) => (
-    <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400">
-        <div className="text-center">
+    <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400 rounded-lg border-2 border-dashed border-slate-200">
+        <div className="text-center p-4">
             <h3 className="font-bold text-slate-600">{title}</h3>
-            <p className="text-xs">Component not implemented.</p>
+            <p className="text-xs mt-1">This is a template placeholder. In a production build, the full component would render here.</p>
         </div>
     </div>
 );

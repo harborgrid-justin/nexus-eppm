@@ -39,7 +39,7 @@ const ProjectGantt: React.FC = () => {
         nodes.forEach(node => {
             list.push({ type: 'wbs', node, level });
             if (expandedNodes.has(node.id)) {
-                project.tasks.filter(t => t.wbsCode.startsWith(node.wbsCode) || t.wbsCode === node.wbsCode)
+                project.tasks.filter(t => t.wbsCode.startsWith(node.wbsCode) && t.wbsCode !== node.wbsCode)
                   .forEach(task => list.push({ type: 'task', task, level: level + 1 }));
                 traverse(node.children, level + 1);
             }

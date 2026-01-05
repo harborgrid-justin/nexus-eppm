@@ -1,6 +1,5 @@
 
-import React, { useMemo } from 'react';
-// FIX: Corrected import path to avoid module resolution conflict.
+import React, { useMemo, useState } from 'react';
 import { Issue } from '../types/index';
 import { Plus, Filter, FileWarning, ArrowUp, ArrowDown, ChevronsUp, Lock } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -9,15 +8,35 @@ import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { usePermissions } from '../hooks/usePermissions';
+import { SidePanel } from './ui/SidePanel';
+import { useData } from '../context/DataContext';
+import { generateId } from '../utils/formatters';
 
 const IssueLog: React.FC = () => {
   const { project, issues } = useProjectWorkspace();
   const theme = useTheme();
   const { canEditProject } = usePermissions();
+  const { dispatch } = useData();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   
   const taskMap = useMemo(() => {
     return new Map(project?.tasks.map(t => [t.id, t.name]));
   }, [project?.tasks]);
+
+  const handleSaveIssue = (newIssue: Partial<Issue>) => {
+    if (!newIssue.description) {
+        alert('Description is required.');
+        return;
+    }
+    const issueToSave: Issue = {
+        id: generateId('ISS'),
+        projectId: project.id,
+        dateIdentified: new Date().toISOString().split('T')[0],
+        ...newIssue
+    } as Issue;
+    dispatch({ type: 'ADD_ISSUE', payload: issueToSave });
+    setIsPanelOpen(false);
+  };
 
   const getPriorityBadge = (priority: Issue['priority']) => {
     switch (priority) {
@@ -38,7 +57,7 @@ const IssueLog: React.FC = () => {
           <p className={theme.typography.small}>Track and resolve project impediments and action items.</p>
         </div>
         {canEditProject() ? (
-            <Button variant="primary" size="md" icon={Plus} className="hidden md:flex">Add Issue</Button>
+            <Button variant="primary" size="md" icon={Plus} className="hidden md:flex" onClick={() => setIsPanelOpen(true)}>Add Issue</Button>
         ) : (
             <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
                <Lock size={14}/> Read Only
@@ -52,7 +71,7 @@ const IssueLog: React.FC = () => {
               <Input isSearch placeholder="Search issues..." className="w-full md:w-64" />
               <Button variant="secondary" size="md" icon={Filter} className="w-full md:w-auto">Filter</Button>
            </div>
-           {canEditProject() && <Button variant="primary" size="md" icon={Plus} className="md:hidden w-full">Add Issue</Button>}
+           {canEditProject() && <Button variant="primary" size="md" icon={Plus} className="md:hidden w-full" onClick={() => setIsPanelOpen(true)}>Add Issue</Button>}
         </div>
         
         <div className="flex-1 overflow-auto">
@@ -89,8 +108,44 @@ const IssueLog: React.FC = () => {
            </div>
         </div>
       </div>
+
+      <IssueForm isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} onSave={handleSaveIssue} />
     </div>
   );
+};
+
+interface IssueFormProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (issue: Partial<Issue>) => void;
+}
+
+const IssueForm: React.FC<IssueFormProps> = ({ isOpen, onClose, onSave }) => {
+    const [formData, setFormData] = useState<Partial<Issue>>({
+        priority: 'Medium',
+        status: 'Open',
+        description: '',
+        assigneeId: ''
+    });
+
+    const handleSave = () => onSave(formData);
+
+    return (
+        <SidePanel isOpen={isOpen} onClose={onClose} title="Log New Issue" footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={handleSave}>Log Issue</Button></>}>
+            <div className="space-y-4">
+                <Input label="Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                <div className="grid grid-cols-2 gap-4">
+                     <Input label="Assignee" value={formData.assigneeId} onChange={e => setFormData({...formData, assigneeId: e.target.value})} />
+                     <div>
+                         <label className="block text-sm font-medium mb-1">Priority</label>
+                         <select value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value as Issue['priority']})} className="w-full p-2 border rounded">
+                             <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+                         </select>
+                     </div>
+                </div>
+            </div>
+        </SidePanel>
+    );
 };
 
 export default IssueLog;

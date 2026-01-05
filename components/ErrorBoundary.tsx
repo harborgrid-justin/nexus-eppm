@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -13,9 +12,9 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // FIX: Added constructor to properly initialize state and handle props.
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    // FIX: Initialize state in the constructor for broader compatibility and to ensure `this` context is correctly established.
     this.state = {
       hasError: false,
       error: undefined
@@ -27,12 +26,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
-    // FIX: Correctly access props via 'this.props' after adding constructor.
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
   handleRetry = () => {
-    // FIX: Correctly access setState via 'this.setState' after adding constructor.
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -57,7 +54,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       return (
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
-          {/* FIX: Correctly access props via 'this.props' after adding constructor. */}
           <h2 className="font-bold flex items-center gap-2"><AlertTriangle size={20} /> Error in {this.props.name || 'Component'}</h2>
           <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
           {errorStack && (
@@ -75,7 +71,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // FIX: Correctly access props via 'this.props' after adding constructor.
     return this.props.children;
   }
 }

@@ -1,56 +1,42 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
+import React from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { ShieldAlert, LayoutDashboard, List, Sigma, Target } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
+import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
+import { useProjectRiskManagerLogic } from '../../hooks/domain/useProjectRiskManagerLogic';
 
 // Sub-components
 import RiskDashboard from './RiskDashboard';
 import { RiskRegisterGrid } from './RiskRegisterGrid';
 import RiskMatrix from './RiskMatrix';
+import QuantitativeAnalysis from './QuantitativeAnalysis';
+import RiskPlanEditor from './RiskPlanEditor';
+import RiskBreakdownStructure from './RiskBreakdownStructure';
 
 const ProjectRiskManager: React.FC = () => {
   const { project } = useProjectWorkspace();
   const theme = useTheme();
   
-  const [activeGroup, setActiveGroup] = useState('monitoring');
-  const [activeView, setActiveView] = useState('dashboard');
-  const [isPending, startTransition] = useTransition();
-
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'monitoring', label: 'Risk Monitoring', items: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'register', label: 'Risk Register', icon: List },
-    ]},
-    { id: 'analysis', label: 'Analysis', items: [
-      { id: 'matrix', label: 'P-I Matrix', icon: Sigma },
-    ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (viewId: string) => {
-    startTransition(() => {
-        setActiveView(viewId);
-    });
-  };
+  const {
+      activeGroup,
+      activeView,
+      isPending,
+      navGroups,
+      handleGroupChange,
+      handleItemChange
+  } = useProjectRiskManagerLogic();
 
   const renderContent = () => {
     switch(activeView) {
       case 'dashboard': return <RiskDashboard />;
       case 'register': return <RiskRegisterGrid />;
       case 'matrix': return <RiskMatrix />;
+      case 'plan': return <RiskPlanEditor />;
+      case 'rbs': return <RiskBreakdownStructure projectId={project.id} />;
+      case 'quantitative': return <QuantitativeAnalysis />;
       default: return <RiskDashboard />;
     }
   };

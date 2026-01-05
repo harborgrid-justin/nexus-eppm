@@ -1,7 +1,6 @@
 
 import React from 'react';
-// FIX: Corrected import path to avoid module resolution conflict.
-import { ChangeOrder } from '../../../types/index';
+import { ChangeOrder } from '../../../types';
 import { CheckCircle, Clock } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -37,8 +36,8 @@ export const ChangeOrderWorkflow: React.FC<ChangeOrderWorkflowProps> = ({ co }) 
                     <div key={idx} className={`flex gap-3 text-sm p-2 hover:${theme.colors.background} rounded`}>
                         <div className="mt-1"><Clock size={14} className="text-slate-400"/></div>
                         <div>
-                            <p className="text-slate-800"><span className="font-bold">{item.userId}</span> {item.action}</p>
-                            <p className="text-xs text-slate-500">{item.date}</p>
+                            <p className={theme.colors.text.primary}><span className="font-bold">{item.userId}</span> {item.action}</p>
+                            <p className={`${theme.typography.small} mt-0.5`}>{item.date}</p>
                             {item.comment && <p className="text-xs text-slate-600 italic mt-1">"{item.comment}"</p>}
                         </div>
                     </div>

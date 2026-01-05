@@ -38,9 +38,11 @@ const AdminSettings: React.FC = () => {
 
   const handleGlobalApply = () => {
       setIsApplying(true);
+      // In a real app this would trigger a complex background job.
+      // We simulate this with a timeout and dispatch an action for the audit log.
+      dispatch({ type: 'GOVERNANCE_SYNC_PARAMETERS', payload: {} });
       setTimeout(() => {
           setIsApplying(false);
-          alert("Global enterprise parameters synchronized across all projects and programs.");
       }, 1500);
   };
 

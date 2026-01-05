@@ -1,13 +1,11 @@
 
 import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { 
-    Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode
+    RiskManagementPlan, Document, ActivityCode, DataState, Action
 } from '../types/index';
-import { User } from '../types/auth';
 import { MOCK_RISK_PLAN } from '../constants/index';
 import { initialState } from './initialState';
 import { rootReducer } from './rootReducer';
-import { Action, DataState } from '../types';
 
 const DataContext = createContext<{
   state: DataState;

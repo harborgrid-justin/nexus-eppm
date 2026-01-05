@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-// FIX: Corrected import path
-import { Risk, RiskBreakdownStructureNode } from '../../types/index';
+import { Risk, RiskBreakdownStructureNode } from '../../types';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';

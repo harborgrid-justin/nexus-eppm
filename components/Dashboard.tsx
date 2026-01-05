@@ -15,6 +15,7 @@ import { Skeleton } from './ui/Skeleton';
 import { formatCompactCurrency } from '../utils/formatters';
 import { ErrorBoundary } from './ErrorBoundary';
 import { useDeterministicLoading } from '../hooks/useDeterministicLoading';
+import { useNavigate } from 'react-router-dom';
 
 // Widget Fallbacks ensuring Zero Layout Shift (Principle 1)
 const StatCardSkeleton = () => (
@@ -53,6 +54,7 @@ const Dashboard: React.FC = () => {
   const { generateReport, report, isGenerating, error, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
   const { hasPermission } = usePermissions();
+  const navigate = useNavigate();
 
   const [isPending, startTransition] = useTransition();
   // Deterministic loading prevents flicker on fast transitions (Principle 4)
@@ -122,16 +124,16 @@ const Dashboard: React.FC = () => {
               <button onClick={() => handleViewChange('strategic')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>Strategic</button>
            </div>
            <button onClick={handleGenerateReport} disabled={isGenerating} className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm hover:${theme.colors.background} ${theme.colors.text.primary}`}><Sparkles size={16} className="text-yellow-500"/> AI Summary</button>
-           {hasPermission('project:create') && <button className={`px-4 py-2 ${theme.colors.primary} rounded-lg text-sm font-bold text-white flex items-center gap-2 shadow-sm ${theme.colors.primaryHover}`}><Plus size={16} /> New Project</button>}
+           {hasPermission('project:create') && <button onClick={() => navigate('/projectList?action=create')} className={`px-4 py-2 ${theme.colors.primary} rounded-lg text-sm font-bold text-white flex items-center gap-2 shadow-sm ${theme.colors.primaryHover}`}><Plus size={16} /> New Project</button>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Suspense fallback={<><StatCardSkeleton/><StatCardSkeleton/><StatCardSkeleton/><StatCardSkeleton/></>}>
-            <StatCard title="Total Portfolio Value" value={`$${(summary.totalBudget / 1000000).toFixed(1)}M`} subtext={`Across ${summary.totalProjects} components`} icon={DollarSign} />
+            <StatCard title="Total Portfolio Value" value={formatCompactCurrency(summary.totalBudget)} subtext={`Across ${summary.totalProjects} components`} icon={DollarSign} />
             <StatCard title="Budget Utilization" value={`${summary.budgetUtilization.toFixed(1)}%`} subtext="Actuals + Commitments" icon={TrendingUp} trend="up" />
-            <StatCard title="Critical Issues" value={summary.healthCounts.critical} subtext="Requires attention" icon={AlertOctagon} trend="down" />
-            <StatCard title="Schedule Health" value="SPI 0.92" subtext="14% behind baseline" icon={TrendingDown} trend="down" />
+            <StatCard title="Critical Issues" value={summary.totalCriticalIssues} subtext="Requires attention" icon={AlertOctagon} trend={summary.totalCriticalIssues > 0 ? "down" : "up"} />
+            <StatCard title="Schedule Health" value={`SPI ${summary.portfolioSpi.toFixed(2)}`} subtext={`${Math.abs(1 - summary.portfolioSpi) * 100 > 1 ? `${(Math.abs(1 - summary.portfolioSpi) * 100).toFixed(0)}% ${summary.portfolioSpi < 1 ? 'behind' : 'ahead'}` : 'On track'}`} icon={summary.portfolioSpi < 1 ? TrendingDown : TrendingUp} trend={summary.portfolioSpi < 1 ? "down" : "up"} />
         </Suspense>
       </div>
 
@@ -151,9 +153,9 @@ const Dashboard: React.FC = () => {
         </Card>
 
         <Card className={`${theme.layout.cardPadding} flex flex-col min-w-0 h-[400px]`}>
-          <h3 className={`${theme.typography.h3} mb-6 flex-shrink-0`}>Portfolio Risk Distribution</h3>
+          <h3 className={`${theme.typography.h3} mb-6 flex-shrink-0`}>Portfolio Health Distribution</h3>
           <div className="flex-1 min-h-0 flex items-center justify-center">
-             <ErrorBoundary name="Risk Chart">
+             <ErrorBoundary name="Health Chart">
                 <Suspense fallback={<Skeleton variant="circle" width={200} height={200} />}>
                     <CustomPieChart data={healthDataForChart} height={300} />
                 </Suspense>

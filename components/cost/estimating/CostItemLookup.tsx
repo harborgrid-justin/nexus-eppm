@@ -6,11 +6,12 @@ import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { useData } from '../../../context/DataContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { CostBookItem } from '../../../types';
 
 interface CostItemLookupProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddItem: (item: any) => void;
+  onAddItem: (item: CostBookItem) => void;
 }
 
 export const CostItemLookup: React.FC<CostItemLookupProps> = ({ isOpen, onClose, onAddItem }) => {

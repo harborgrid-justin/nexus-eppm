@@ -2,9 +2,10 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { RiskHistoryItem } from '../../types';
 
 interface AuditTrailProps {
-  logs: { date: string; user: string; action: string }[];
+  logs: RiskHistoryItem[];
 }
 
 export const AuditTrail: React.FC<AuditTrailProps> = ({ logs }) => {
@@ -20,7 +21,7 @@ export const AuditTrail: React.FC<AuditTrailProps> = ({ logs }) => {
                 <div key={i} className={`p-3 flex gap-3 text-sm hover:${theme.colors.background} transition-colors`}>
                     <Clock size={16} className={`${theme.colors.text.tertiary} shrink-0 mt-0.5`}/>
                     <div>
-                        <p className={theme.colors.text.primary}><span className="font-bold">{log.user}</span> {log.action}</p>
+                        <p className={theme.colors.text.primary}><span className="font-bold">{log.userId}</span> {log.action}</p>
                         <p className={`${theme.typography.small} mt-0.5`}>{log.date}</p>
                     </div>
                 </div>

@@ -52,7 +52,7 @@ export const calculateProjectRisks = (risks: Risk[]) => {
 export const calculateProjectQuality = (qualityReports: QualityReport[], ncrs: NonConformanceReport[]) => {
     const passRate = qualityReports.length > 0 ? (qualityReports.filter(r => r.status === 'Pass').length / qualityReports.length) * 100 : 100;
     const openDefects = ncrs.filter(d => d.status === 'Open').length;
-    return { passRate, openDefects, totalDefects: ncrs.length };
+    return { passRate, openDefects, totalDefects: ncrs.length, totalReports: qualityReports.length, failedReports: qualityReports.filter(r => r.status === 'Fail').length };
 };
 
 // --- Full Data Aggregators ---
@@ -79,7 +79,6 @@ export const calculateProjectData = (project: Project, state: DataState) => {
     const qualityReports = state.qualityReports.filter(q => q.projectId === project.id);
     const nonConformanceReports = state.nonConformanceReports.filter(n => n.projectId === project.id);
     const communicationLogs = state.communicationLogs.filter(c => c.projectId === project.id);
-    // FIX: Add stakeholder data to the project workspace context
     const stakeholders = state.stakeholders.filter(s => s.projectId === project.id);
     const assignedResources = state.resources.filter(r => 
         project.tasks.some(t => t.assignments.some(a => a.resourceId === r.id))
@@ -96,7 +95,6 @@ export const calculateProjectData = (project: Project, state: DataState) => {
         nonConformanceReports,
         communicationLogs,
         assignedResources,
-        // FIX: Add stakeholders to returned data
         stakeholders,
         summary: calculateProjectSummary(project),
         financials: calculateProjectFinancials(project, budgetItems, changeOrders, purchaseOrders),

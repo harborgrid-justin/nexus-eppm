@@ -1,6 +1,6 @@
 
-import { useState, useMemo, useDeferredValue, useTransition } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useDeferredValue, useTransition, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePortfolioState } from '../usePortfolioState';
 import { useData } from '../../context/DataContext';
 import { Project } from '../../types';
@@ -9,6 +9,7 @@ export const useProjectListLogic = () => {
   const { projects } = usePortfolioState();
   const { dispatch } = useData();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -16,6 +17,12 @@ export const useProjectListLogic = () => {
   const [activeGroup, setActiveGroup] = useState('views');
   const [activeView, setActiveView] = useState('list');
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'create') {
+      setActiveView('create');
+    }
+  }, [searchParams]);
 
   const filteredProjects = useMemo(() => 
     projects.filter(p => 
@@ -27,6 +34,8 @@ export const useProjectListLogic = () => {
   const handleCreateProject = (newProject: Project) => {
     dispatch({ type: 'PROJECT_IMPORT', payload: [newProject] });
     startTransition(() => {
+        // Remove action from URL after creation
+        navigate('/projectList', { replace: true });
         setActiveView('list');
     });
   };
