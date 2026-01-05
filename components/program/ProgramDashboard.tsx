@@ -127,9 +127,9 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
             )}
 
             {report && !isGenerating && (
-                <div className="prose prose-sm prose-slate max-w-none">
+                <div className={`prose prose-sm max-w-none ${theme.colors.text.secondary}`}>
                     {report.split('\n').filter(line => line.trim() !== '').map((line, i) => (
-                        <p key={i} className={`my-4 leading-relaxed ${theme.colors.text.secondary}`}>{line}</p>
+                        <p key={i} className="my-4 leading-relaxed">{line}</p>
                     ))}
                 </div>
             )}
@@ -140,7 +140,7 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
              <button 
                  onClick={handleGenerateReport}
                  disabled={isGenerating}
-                 className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 disabled:opacity-50 shadow-sm transition-all"
+                 className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium ${theme.colors.text.secondary} hover:${theme.colors.background} flex items-center gap-2 disabled:opacity-50 shadow-sm transition-all`}
              >
                 <Sparkles size={16} className="text-yellow-500"/>
                 AI Status Report
@@ -197,8 +197,8 @@ const ProgramDashboard: React.FC<ProgramDashboardProps> = ({ programId }) => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={financialChartData} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                    <XAxis dataKey="name" tick={{fontSize: 12}} />
-                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
+                                    <XAxis dataKey="name" tick={{fontSize: 12, fill: theme.colors.text.secondary}} />
+                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12, fill: theme.colors.text.secondary}} />
                                     <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
                                     <Bar dataKey="Budget" fill="#cbd5e1" barSize={20} radius={[4, 4, 0, 0]} />
                                     <Bar dataKey="Actuals" fill={theme.charts.palette[0]} barSize={20} radius={[4, 4, 0, 0]} />

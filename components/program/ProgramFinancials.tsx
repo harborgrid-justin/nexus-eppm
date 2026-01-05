@@ -85,7 +85,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
         </div>
 
         {/* Financial Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Total Program Budget" value={formatCompactCurrency(aggregateMetrics.totalBudget)} icon={DollarSign} />
             <StatCard title="Actual Spend" value={formatCompactCurrency(aggregateMetrics.totalSpent)} subtext={`${((aggregateMetrics.totalSpent / (aggregateMetrics.totalBudget || 1)) * 100).toFixed(1)}% consumed`} icon={TrendingUp} />
             <StatCard title="Remaining Funding" value={formatCompactCurrency(remainingBudget)} icon={Lock} />
@@ -95,17 +95,17 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
         {/* Budget Allocation & Forecast */}
         <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm h-[400px]`}>
             <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-800">Budget Allocation & Cost-to-Complete</h3>
+                <h3 className={`font-bold ${theme.colors.text.primary}`}>Budget Allocation & Cost-to-Complete</h3>
                 <button onClick={handleOpenAllocationPanel} className="text-xs flex items-center gap-1 text-nexus-600 font-medium hover:underline">
                     <Edit2 size={14}/> Adjust Allocations
                 </button>
             </div>
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" tick={{fontSize: 10}} interval={0} />
-                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
-                    <Tooltip formatter={(val: number) => formatCurrency(val)} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                    <XAxis dataKey="name" tick={{fontSize: 10, fill: theme.colors.text.secondary}} interval={0} />
+                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fill: theme.colors.text.secondary}} />
+                    <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
                     <Legend />
                     <Bar dataKey="Allocated" fill="#94a3b8" />
                     <Bar dataKey="Spent" fill="#0ea5e9" />
@@ -116,11 +116,11 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
 
         {/* Funding Gates */}
         <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2"><Lock size={16}/> Funding Gates</h3>
+            <div className={`bg-slate-50 px-6 py-4 border-b ${theme.colors.border}`}>
+                <h3 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2`}><Lock size={16}/> Funding Gates</h3>
             </div>
             {programFinancials.gates.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                <div className={`grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x ${theme.colors.border.replace('border-', 'divide-')}`}>
                     {programFinancials.gates.map(gate => (
                         <div key={gate.id} className="p-6 flex flex-col items-center text-center relative group">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
@@ -128,10 +128,10 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                             }`}>
                                 {gate.status === 'Released' ? <Unlock size={20}/> : <Lock size={20}/>}
                             </div>
-                            <h4 className="font-bold text-slate-900">{gate.name}</h4>
-                            <p className="text-sm text-slate-600 mt-1">{gate.milestoneTrigger}</p>
+                            <h4 className={`font-bold ${theme.colors.text.primary}`}>{gate.name}</h4>
+                            <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>{gate.milestoneTrigger}</p>
                             <p className="text-xl font-bold text-nexus-700 mt-2">{formatCompactCurrency(gate.amount)}</p>
-                            <p className="text-xs text-slate-400 mt-1">Date: {gate.releaseDate}</p>
+                            <p className={`text-xs ${theme.colors.text.tertiary} mt-1`}>Date: {gate.releaseDate}</p>
                             <div className={`mt-3 px-3 py-1 text-xs font-bold rounded-full cursor-pointer ${
                                 gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                             }`} onClick={() => {
@@ -145,7 +145,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                     ))}
                 </div>
             ) : (
-                <div className="p-8 text-center text-slate-400 italic">No funding gates defined for this program.</div>
+                <div className={`p-8 text-center ${theme.colors.text.tertiary} italic`}>No funding gates defined for this program.</div>
             )}
         </div>
 
@@ -163,14 +163,14 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
             }
         >
             <div className="space-y-4">
-                <p className="text-sm text-slate-600 mb-4">Rebalance funding across active projects based on latest forecasts.</p>
+                <p className={`text-sm ${theme.colors.text.secondary} mb-4`}>Rebalance funding across active projects based on latest forecasts.</p>
                 {editAllocations.map(alloc => (
-                    <div key={alloc.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <div key={alloc.id} className={`p-4 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>
                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-bold text-slate-700">
+                            <span className={`text-sm font-bold ${theme.colors.text.primary}`}>
                                 {projectNamesMap.get(alloc.projectId) || alloc.projectId}
                             </span>
-                            <span className="text-xs text-slate-500">Current Forecast: {formatCompactCurrency(alloc.forecast)}</span>
+                            <span className={`text-xs ${theme.colors.text.secondary}`}>Current Forecast: {formatCompactCurrency(alloc.forecast)}</span>
                          </div>
                          
                          <div className="flex items-center gap-3">
@@ -180,7 +180,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                                     type="number" 
                                     value={alloc.allocated} 
                                     onChange={e => handleAllocationChange(alloc.id, parseFloat(e.target.value))}
-                                    className="w-full pl-6 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-nexus-500"
+                                    className={`w-full pl-6 pr-4 py-2 text-sm border ${theme.colors.border} rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none`}
                                  />
                              </div>
                          </div>

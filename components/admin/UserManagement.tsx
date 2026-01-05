@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { User, Role } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
@@ -55,7 +56,7 @@ const UserManagement: React.FC = () => {
                 placeholder="Search directory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-80 pl-4 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none"
+                className={`w-full md:w-80 pl-4 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.border}`}
             />
             <Button icon={UserPlus} onClick={() => handleOpenPanel()} className="w-full md:w-auto">
                 Provision User

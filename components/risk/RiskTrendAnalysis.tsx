@@ -40,8 +40,8 @@ export const RiskTrendAnalysis: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                        <XAxis dataKey="date" tick={{fontSize: 10}} />
-                        <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 10}} />
+                        <XAxis dataKey="date" tick={{fontSize: 10, fill: theme.colors.text.secondary}} />
+                        <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 10, fill: theme.colors.text.secondary}} />
                         <Tooltip 
                             contentStyle={theme.charts.tooltip} 
                             formatter={(val: number) => formatCompactCurrency(val)}
@@ -50,7 +50,7 @@ export const RiskTrendAnalysis: React.FC = () => {
                     </AreaChart>
                 </ResponsiveContainer>
             ) : (
-                <div className="flex h-full flex-col items-center justify-center text-slate-400 text-xs">
+                <div className={`flex h-full flex-col items-center justify-center ${theme.colors.text.tertiary} text-xs`}>
                     <AlertCircle size={24} className="mb-2 opacity-50"/>
                     <p>Insufficient historical data to plot trend.</p>
                 </div>

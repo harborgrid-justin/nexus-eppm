@@ -27,10 +27,10 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
         <div className="h-full flex flex-col">
             <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center bg-slate-50/50`}>
                 <div className="flex items-center gap-4">
-                    <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
+                    <h3 className={`font-semibold ${theme.colors.text.secondary} text-sm flex items-center gap-2`}>
                         <ShoppingCart size={16} /> Sourcing Events (RFx)
                     </h3>
-                    <div className="flex bg-white border border-slate-200 rounded-lg p-0.5">
+                    <div className={`flex ${theme.colors.surface} border ${theme.colors.border} rounded-lg p-0.5`}>
                         {['All', 'Open', 'Closed'].map(f => (
                             <button 
                                 key={f}
@@ -50,22 +50,22 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
             <div className={`flex-1 overflow-auto p-6 ${isPending ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
                 <div className="grid grid-cols-1 gap-4">
                     {filteredSolicitations.map(sol => (
-                        <div key={sol.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={sol.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow`}>
                             <div className="flex justify-between items-start mb-3">
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <Badge variant="info">{sol.type}</Badge>
-                                        <h4 className="font-bold text-slate-800">{sol.title}</h4>
+                                        <h4 className={`font-bold ${theme.colors.text.primary}`}>{sol.title}</h4>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1 ml-1">ID: {sol.id} • Package: {sol.packageId}</p>
+                                    <p className={`text-xs ${theme.colors.text.secondary} mt-1 ml-1`}>ID: {sol.id} • Package: {sol.packageId}</p>
                                 </div>
                                 <Badge variant={sol.status === 'Open' ? 'success' : 'neutral'}>{sol.status}</Badge>
                             </div>
                             
-                            <div className="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-slate-100">
+                            <div className={`grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t ${theme.colors.border.replace('border-', 'border-slate-')}100`}>
                                 <div>
                                     <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Issue Date</span>
-                                    <span className="font-medium text-slate-700">{sol.issueDate}</span>
+                                    <span className={`font-medium ${theme.colors.text.primary}`}>{sol.issueDate}</span>
                                 </div>
                                 <div>
                                     <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Deadline</span>
@@ -73,7 +73,7 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
                                 </div>
                                 <div>
                                     <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Invited Vendors</span>
-                                    <span className="font-medium text-slate-700">{sol.invitedVendorIds.length} Invited</span>
+                                    <span className={`font-medium ${theme.colors.text.primary}`}>{sol.invitedVendorIds.length} Invited</span>
                                 </div>
                             </div>
 
@@ -84,7 +84,7 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
                         </div>
                     ))}
                     {filteredSolicitations.length === 0 && (
-                        <div className="text-center p-12 text-slate-400 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                        <div className={`text-center p-12 ${theme.colors.text.tertiary} ${theme.colors.background} rounded-xl border-2 border-dashed ${theme.colors.border}`}>
                             <FileText size={32} className="mx-auto mb-2 opacity-50"/>
                             <p>No sourcing events found.</p>
                         </div>

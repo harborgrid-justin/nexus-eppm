@@ -31,8 +31,8 @@ const CashFlowForecast: React.FC<CashFlowForecastProps> = ({ project }) => {
         <ResponsiveContainer width="100%" height="100%">
             <BarChart data={metrics.cashFlowForecast}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{ fontSize: 12 }} />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: theme.colors.text.secondary }} />
+            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{ fontSize: 12, fill: theme.colors.text.secondary }} />
             <Tooltip formatter={(val: number) => formatCompactCurrency(val)} contentStyle={theme.charts.tooltip} />
             <Legend />
             <Bar dataKey="committed" stackId="a" fill="#94a3b8" name="Committed" />

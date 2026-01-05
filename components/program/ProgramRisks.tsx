@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -85,21 +86,21 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
             <Button size="sm" icon={Plus} onClick={() => setIsModalOpen(true)}>Add Program Risk</Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
             <StatCard title="Systemic Risks" value={programRisks.length} subtext="Program-level threats" icon={Layers} />
             <StatCard title="Escalated Risks" value={escalatedRisks.length} subtext="High impact from projects" icon={AlertOctagon} trend="down" />
             <StatCard title="Total Exposure" value={totalExposure} subtext="Aggregated risk score" icon={TrendingUp} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50">
-                    <h3 className="font-bold text-slate-800">Program Risk Register (Systemic)</h3>
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
+                    <h3 className={`font-bold ${theme.colors.text.primary}`}>Program Risk Register (Systemic)</h3>
                 </div>
                 {programRisks.length > 0 ? (
                     <div className="flex-1 overflow-auto">
                         <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-white">
+                            <thead className={theme.colors.surface}>
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
@@ -108,10 +109,10 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                                     <th className="px-4 py-3 w-10"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                 {programRisks.map(risk => (
-                                    <tr key={risk.id} className="hover:bg-slate-50 group">
-                                        <td className="px-4 py-3 text-sm font-medium text-slate-900">
+                                    <tr key={risk.id} className={`hover:${theme.colors.background} group`}>
+                                        <td className={`px-4 py-3 text-sm font-medium ${theme.colors.text.primary}`}>
                                             {risk.description}
                                             <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
                                         </td>
@@ -145,26 +146,26 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
             </div>
 
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
-                <div className="p-4 border-b border-slate-200 bg-red-50">
+                <div className="p-4 border-b border-red-200 bg-red-50">
                     <h3 className="font-bold text-red-900">Escalated Project Risks</h3>
                 </div>
                 <div className="flex-1 overflow-auto">
                      {escalatedRisks.length > 0 ? (
                         <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-white">
+                            <thead className={theme.colors.surface}>
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Project</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase w-1/2">Risk Description</th>
                                     <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Score</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                 {escalatedRisks.map(risk => {
                                     const proj = projects.find(p => p.id === risk.projectId);
                                     return (
-                                        <tr key={risk.id} className="hover:bg-slate-50">
+                                        <tr key={risk.id} className={`hover:${theme.colors.background}`}>
                                             <td className="px-4 py-3 text-sm text-slate-600">{proj?.name || risk.projectId}</td>
-                                            <td className="px-4 py-3 text-sm font-medium text-slate-900">{risk.description}</td>
+                                            <td className={`px-4 py-3 text-sm font-medium ${theme.colors.text.primary}`}>{risk.description}</td>
                                             <td className="px-4 py-3 text-center">
                                                 <span className="inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 bg-red-600">
                                                     {risk.score}
@@ -200,25 +201,25 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
         >
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Risk Description</label>
+                    <label className={theme.typography.label + " block mb-1"}>Risk Description</label>
                     <textarea 
-                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-20"
+                        className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm h-20 ${theme.colors.surface} ${theme.colors.text.primary}`}
                         value={newRisk.description}
                         onChange={e => setNewRisk({...newRisk, description: e.target.value})}
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Probability</label>
-                        <select className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={newRisk.probability} onChange={e => setNewRisk({...newRisk, probability: e.target.value as any})}>
+                        <label className={theme.typography.label + " block mb-1"}>Probability</label>
+                        <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={newRisk.probability} onChange={e => setNewRisk({...newRisk, probability: e.target.value as any})}>
                             <option>Low</option>
                             <option>Medium</option>
                             <option>High</option>
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Impact</label>
-                        <select className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={newRisk.impact} onChange={e => setNewRisk({...newRisk, impact: e.target.value as any})}>
+                        <label className={theme.typography.label + " block mb-1"}>Impact</label>
+                        <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={newRisk.impact} onChange={e => setNewRisk({...newRisk, impact: e.target.value as any})}>
                             <option>Low</option>
                             <option>Medium</option>
                             <option>High</option>
@@ -226,11 +227,11 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Mitigation Plan</label>
+                    <label className={theme.typography.label + " block mb-1"}>Mitigation Plan</label>
                     <Input value={newRisk.mitigationPlan} onChange={e => setNewRisk({...newRisk, mitigationPlan: e.target.value})} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Owner ID</label>
+                    <label className={theme.typography.label + " block mb-1"}>Owner ID</label>
                     <Input value={newRisk.ownerId} onChange={e => setNewRisk({...newRisk, ownerId: e.target.value})} placeholder="e.g. R-001" />
                 </div>
             </div>

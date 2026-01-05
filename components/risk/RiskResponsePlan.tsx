@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Risk } from '../../types/index';
-import { Shield, Check, Plus } from 'lucide-react';
+import { Shield, Check, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
@@ -26,6 +26,12 @@ const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
         dispatch({ type: 'UPDATE_RISK', payload: { risk: { ...risk, responseActions: newActions } } });
     };
 
+    const removeAction = (id: string) => {
+        const newActions = actions.filter(a => a.id !== id);
+        setActions(newActions);
+        dispatch({ type: 'UPDATE_RISK', payload: { risk: { ...risk, responseActions: newActions } } });
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -34,7 +40,7 @@ const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
             </div>
             <div className="space-y-2">
                 {actions.map((action, i) => (
-                    <div key={action.id} className={`flex items-center gap-3 p-3 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
+                    <div key={action.id} className={`flex items-center gap-3 p-3 ${theme.colors.background} border ${theme.colors.border} rounded-lg group`}>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${action.status === 'Complete' ? 'bg-green-100 border-green-500 text-green-700' : `${theme.colors.surface} border-slate-300`}`}>
                             {action.status === 'Complete' && <Check size={14}/>}
                         </div>
@@ -42,6 +48,9 @@ const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
                             <p className={`text-sm font-medium ${theme.colors.text.primary}`}>{action.description}</p>
                             <p className={`${theme.typography.small}`}>Owner: {action.ownerId} • Due: {action.dueDate}</p>
                         </div>
+                        <button onClick={() => removeAction(action.id)} className={`text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                            <Trash2 size={16}/>
+                        </button>
                     </div>
                 ))}
                 {actions.length === 0 && <p className={`text-sm ${theme.colors.text.tertiary} italic text-center`}>No mitigation actions defined.</p>}

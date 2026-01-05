@@ -26,17 +26,17 @@ export const JobHistory: React.FC = () => {
 
     return (
         <div className={theme.layout.panelContainer}>
-            <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center bg-slate-50`}>
+            <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center ${theme.colors.background}`}>
                 <h2 className={theme.typography.h2}>Job History & Audit Log</h2>
                 <div className="flex gap-2 text-xs">
-                     <span className="font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">Total Jobs: {totalJobs}</span>
+                     <span className={`font-medium ${theme.colors.text.secondary} ${theme.colors.surface} border ${theme.colors.border} px-2 py-1 rounded`}>Total Jobs: {totalJobs}</span>
                      <span className="font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded">Errors: {errorJobs}</span>
                 </div>
             </div>
             <div className="flex-1 overflow-auto">
                 <div className="min-w-[800px]">
                     <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
+                        <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
                             <tr>
                             <th className="w-10 px-4 py-3"></th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Job ID</th>
@@ -46,17 +46,17 @@ export const JobHistory: React.FC = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Timestamp</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-slate-100">
+                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                             {dataJobs.length > 0 ? dataJobs.map(job => (
                                 <React.Fragment key={job.id}>
-                                    <tr className={`hover:bg-slate-50 transition-colors cursor-pointer ${expandedJobId === job.id ? 'bg-slate-50' : ''}`} onClick={() => toggleExpand(job.id)}>
+                                    <tr className={`hover:${theme.colors.background} transition-colors cursor-pointer ${expandedJobId === job.id ? `${theme.colors.background}` : ''}`} onClick={() => toggleExpand(job.id)}>
                                         <td className="px-4 py-4 text-slate-400">
                                             {expandedJobId === job.id ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
                                         </td>
                                         <td className="px-6 py-4 text-xs font-mono text-slate-500">{job.id}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-slate-700 text-sm">{job.type}</span>
+                                                <span className={`font-bold ${theme.colors.text.primary} text-sm`}>{job.type}</span>
                                                 <span className="text-[10px] text-slate-400 uppercase tracking-wider">{job.format}</span>
                                             </div>
                                         </td>
@@ -72,26 +72,26 @@ export const JobHistory: React.FC = () => {
                                     </tr>
                                     {expandedJobId === job.id && (
                                         <tr>
-                                            <td colSpan={6} className="bg-slate-50/50 p-6 border-b border-slate-200 shadow-inner">
+                                            <td colSpan={6} className={`${theme.colors.background}/50 p-6 border-b border-slate-200 shadow-inner`}>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                     <div className="space-y-4">
                                                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                                                             <FileText size={14}/> Execution Details
                                                         </h4>
-                                                        <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-2 text-sm text-slate-600">
+                                                        <div className={`${theme.colors.surface} p-4 rounded-lg border ${theme.colors.border} space-y-2 text-sm ${theme.colors.text.secondary}`}>
                                                             <div className="grid grid-cols-2 gap-4">
                                                                 <div>
                                                                     <p className="text-xs text-slate-400 uppercase font-bold">File Name</p>
-                                                                    <p className="text-slate-800 font-mono truncate">{job.fileName || 'system_generated.dat'}</p>
+                                                                    <p className={`${theme.colors.text.primary} font-mono truncate`}>{job.fileName || 'system_generated.dat'}</p>
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-xs text-slate-400 uppercase font-bold">Size</p>
-                                                                    <p className="text-slate-800 font-mono">{job.fileSize || '42 KB'}</p>
+                                                                    <p className={`${theme.colors.text.primary} font-mono`}>{job.fileSize || '42 KB'}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="pt-2 border-t border-slate-100 mt-2">
                                                                 <p className="text-xs text-slate-400 uppercase font-bold mb-1">Result Message</p>
-                                                                <p className="text-slate-800">{job.details}</p>
+                                                                <p className={theme.colors.text.primary}>{job.details}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -114,7 +114,7 @@ export const JobHistory: React.FC = () => {
                                     )}
                                 </React.Fragment>
                             )) : (
-                                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-400"><div className="flex flex-col items-center"><AlertCircle size={24} className="mb-2 opacity-50"/><p>No job history available.</p></div></td></tr>
+                                <tr><td colSpan={6} className={`px-6 py-12 text-center ${theme.colors.text.tertiary}`}><div className="flex flex-col items-center"><AlertCircle size={24} className="mb-2 opacity-50"/><p>No job history available.</p></div></td></tr>
                             )}
                         </tbody>
                     </table>

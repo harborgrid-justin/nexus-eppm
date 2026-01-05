@@ -54,23 +54,23 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-nexus-900 text-white rounded-2xl shadow-xl border border-slate-700"><MapIcon size={24}/></div>
                 <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Integrated Strategic Roadmap</h2>
-                    <p className="text-xs text-slate-500 font-medium uppercase tracking-widest mt-0.5">Program ID: {programId}</p>
+                    <h2 className={`text-2xl font-black ${theme.colors.text.primary} tracking-tight`}>Integrated Strategic Roadmap</h2>
+                    <p className={`text-xs ${theme.colors.text.secondary} font-medium uppercase tracking-widest mt-0.5`}>Program ID: {programId}</p>
                 </div>
             </div>
-            <div className="bg-white border p-1.5 rounded-xl shadow-sm flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase px-4">
+            <div className={`flex items-center gap-4 text-[10px] font-bold ${theme.colors.text.secondary} uppercase px-4 ${theme.colors.surface} border ${theme.colors.border} p-1.5 rounded-xl shadow-sm`}>
                 <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-sm shadow-blue-500/50"></div> Healthy</span>
                 <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-500/50"></div> Delay</span>
             </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1 min-h-[400px] relative">
+        <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1 min-h-[400px] relative`}>
             {/* Header Years */}
-            <div className="flex border-b border-slate-200 bg-slate-50">
-                <div className="w-64 border-r border-slate-200 p-4 font-bold text-slate-500 text-xs uppercase tracking-widest">Work Stream</div>
+            <div className={`flex border-b ${theme.colors.border} ${theme.colors.background}`}>
+                <div className={`w-64 border-r ${theme.colors.border} p-4 font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-widest`}>Work Stream</div>
                 <div className="flex-1 flex">
                     {years.map(y => (
-                        <div key={y} className="flex-1 border-r border-slate-200 p-2 text-center font-bold text-slate-400 text-sm">{y}</div>
+                        <div key={y} className={`flex-1 border-r ${theme.colors.border} p-2 text-center font-bold text-slate-400 text-sm`}>{y}</div>
                     ))}
                 </div>
             </div>
@@ -78,14 +78,14 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
             {/* Timeline Body */}
             <div className="overflow-y-auto">
                 {projects.map(proj => (
-                    <div key={proj.id} className="flex border-b border-slate-100 min-h-[60px] group hover:bg-slate-50 transition-colors">
-                        <div className="w-64 border-r border-slate-200 p-4 shrink-0">
-                            <h4 className="font-bold text-sm text-slate-800 truncate">{proj.name}</h4>
-                            <p className="text-[10px] text-slate-500 uppercase">{proj.code}</p>
+                    <div key={proj.id} className={`flex border-b ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} min-h-[60px] group hover:${theme.colors.background} transition-colors`}>
+                        <div className={`w-64 border-r ${theme.colors.border} p-4 shrink-0`}>
+                            <h4 className={`font-bold text-sm ${theme.colors.text.primary} truncate`}>{proj.name}</h4>
+                            <p className={`text-[10px] ${theme.colors.text.secondary} uppercase`}>{proj.code}</p>
                         </div>
                         <div className="flex-1 relative my-auto h-full">
                             <div className="absolute inset-0 flex pointer-events-none">
-                                {years.map((_, i) => <div key={i} className="flex-1 border-r border-dashed border-slate-200/50"></div>)}
+                                {years.map((_, i) => <div key={i} className={`flex-1 border-r border-dashed ${theme.colors.border.replace('border-', 'border-slate-').replace('200','200/50')}`}></div>)}
                             </div>
                             
                             <div 

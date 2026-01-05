@@ -32,12 +32,12 @@ export const ExchangeDashboard: React.FC = () => {
                 <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm flex flex-col h-[400px]`}>
                     <div className="flex justify-between items-center mb-8">
                         <div>
-                            <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2">
+                            <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest flex items-center gap-2`}>
                                 <Activity size={16} className="text-nexus-600"/> Ingestion Velocity
                             </h3>
                             {isPending && <span className="text-[10px] text-nexus-500 animate-pulse font-bold">Querying Log Lake...</span>}
                         </div>
-                        <div className="bg-slate-100 p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight">
+                        <div className={`bg-slate-100 p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight`}>
                             {['24h', '7d', '30d'].map(r => (
                                 <button key={r} onClick={() => changeMetricRange(r)} className={`px-2 py-1 rounded transition-all ${metricRange === r ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-400'}`}>{r}</button>
                             ))}
@@ -48,9 +48,9 @@ export const ExchangeDashboard: React.FC = () => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={deferredData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                    <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold'}} />
-                                    <YAxis tick={{fontSize: 10, fontWeight: 'bold'}} />
-                                    <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                                    <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} />
+                                    <YAxis tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} />
+                                    <Tooltip contentStyle={theme.charts.tooltip} />
                                     <Area type="monotone" dataKey="records" stroke={theme.charts.palette[0]} fill={`${theme.charts.palette[0]}20`} strokeWidth={3} />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -60,8 +60,8 @@ export const ExchangeDashboard: React.FC = () => {
 
                 <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm overflow-y-auto h-[400px] flex flex-col`}>
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">Service Health Registry</h3>
-                        <button onClick={handleAddService} className="text-slate-400 hover:text-nexus-600 transition-colors" title="Register Service">
+                        <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest`}>Service Health Registry</h3>
+                        <button onClick={handleAddService} className={`text-slate-400 hover:text-nexus-600 transition-colors`} title="Register Service">
                             <Plus size={16}/>
                         </button>
                     </div>
@@ -69,24 +69,24 @@ export const ExchangeDashboard: React.FC = () => {
                         {services.length > 0 ? services.map((node, i) => {
                             const Icon = getServiceIcon(node.name);
                             return (
-                                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-xl hover:shadow-sm transition-all group cursor-default">
+                                <div key={i} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl hover:shadow-sm transition-all group cursor-default`}>
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-xl transition-colors bg-white border shadow-sm text-slate-400 group-hover:text-nexus-600`}>
+                                        <div className={`p-2 rounded-xl transition-colors ${theme.colors.surface} border shadow-sm ${theme.colors.text.tertiary} group-hover:text-nexus-600`}>
                                             <Icon size={18} />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-slate-800">{node.name}</p>
+                                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{node.name}</p>
                                             <p className={`text-[10px] font-black uppercase ${getStatusColor(node.status)}`}>{node.status}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`font-mono text-xs font-black text-slate-400 block`}>Latency: {node.latency}</span>
-                                        <span className="text-[10px] text-slate-400">Up: {node.uptime}</span>
+                                        <span className={`font-mono text-xs font-black ${theme.colors.text.tertiary} block`}>Latency: {node.latency}</span>
+                                        <span className={`text-[10px] ${theme.colors.text.secondary}`}>Up: {node.uptime}</span>
                                     </div>
                                 </div>
                             );
                         }) : (
-                            <div className="flex flex-col items-center justify-center h-full text-slate-400 border-2 border-dashed border-slate-200 rounded-xl p-4">
+                            <div className={`flex flex-col items-center justify-center h-full ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl p-4`}>
                                 <Server size={32} className="mb-2 opacity-30"/>
                                 <p className="text-xs font-medium text-center">No external services monitored.</p>
                                 <button onClick={handleAddService} className="mt-4 text-xs font-bold text-nexus-600 bg-nexus-50 px-3 py-1.5 rounded-lg hover:bg-nexus-100 transition-colors">
