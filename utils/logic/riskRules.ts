@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 import { ProgramRisk, Risk } from '../../types/index';

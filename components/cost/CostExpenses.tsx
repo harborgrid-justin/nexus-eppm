@@ -14,7 +14,7 @@ interface CostExpensesProps {
 }
 
 const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const tasks = state.projects.find(p => p.id === projectId)?.tasks || [];
     const taskMap = new Map<string, string>(tasks.map(t => [t.id, t.name]));
     
@@ -62,10 +62,10 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
             remainingUnits: 0,
             atCompletionUnits: 0
         };
-        // Dispatch logic would go here
-        console.log("Saving Expense:", expense);
+        
+        dispatch({ type: 'ADD_EXPENSE', payload: expense });
         setIsPanelOpen(false);
-        setNewExpense({ description: '', categoryId: '', activityId: '', budgetedCost: 0, actualCost: 0 });
+        setNewExpense({ description: '', categoryId: state.expenseCategories[0]?.id || '', activityId: '', budgetedCost: 0, actualCost: 0 });
     };
     
     const handleOpenPanel = () => {

@@ -1,14 +1,19 @@
 
-import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { CheckCircle, Loader2, XCircle, AlertCircle, ChevronDown, ChevronRight, FileText, AlertTriangle, Terminal } from 'lucide-react';
-import { DataJob } from '../../../types';
+import { CheckCircle, Loader2, XCircle, AlertCircle, ChevronDown, ChevronRight, FileText, Terminal } from 'lucide-react';
+import { useJobHistoryLogic } from '../../../hooks/domain/useJobHistoryLogic';
 
 export const JobHistory: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
-    const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
+    const {
+        dataJobs,
+        expandedJobId,
+        toggleExpand,
+        generateLogs,
+        totalJobs,
+        errorJobs
+    } = useJobHistoryLogic();
 
     const getStatusIcon = (status: string) => {
         switch(status) {
@@ -19,49 +24,13 @@ export const JobHistory: React.FC = () => {
         }
     };
 
-    const toggleExpand = (id: string) => {
-        setExpandedJobId(expandedJobId === id ? null : id);
-    };
-
-    // Generate deterministic logs based on job data
-    const generateLogs = (job: DataJob) => {
-        const logs = [];
-        const ts = new Date(job.timestamp);
-        const fmt = (offsetSeconds: number) => new Date(ts.getTime() + offsetSeconds * 1000).toLocaleTimeString();
-
-        logs.push(`[${fmt(0)}] INFO: Job ${job.id} initialized by ${job.submittedBy}`);
-        logs.push(`[${fmt(1)}] INFO: Handshake established. Protocol: ${job.format}`);
-        
-        if (job.type === 'Import') {
-             logs.push(`[${fmt(2)}] INFO: Uploading payload (${job.fileSize || 'Unknown Size'})...`);
-             logs.push(`[${fmt(4)}] INFO: Validating schema integrity...`);
-             if (job.status === 'Failed') {
-                 logs.push(`[${fmt(6)}] ERROR: Schema validation failed. Unexpected token at line 42.`);
-                 logs.push(`[${fmt(7)}] ERROR: Transaction rolled back.`);
-             } else {
-                 logs.push(`[${fmt(5)}] SUCCESS: Validation passed. Schema v2.4.`);
-                 logs.push(`[${fmt(8)}] INFO: Committing records to warehouse...`);
-                 logs.push(`[${fmt(12)}] SUCCESS: ${job.details}`);
-             }
-        } else {
-             logs.push(`[${fmt(2)}] INFO: Querying Data Warehouse...`);
-             logs.push(`[${fmt(5)}] INFO: Serializing to ${job.format}...`);
-             if (job.status === 'Completed') {
-                 logs.push(`[${fmt(8)}] SUCCESS: File generated. Available for download.`);
-             }
-        }
-        return logs;
-    };
-
-    const dataJobs = state.dataJobs || [];
-
     return (
         <div className={theme.layout.panelContainer}>
             <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center bg-slate-50`}>
                 <h2 className={theme.typography.h2}>Job History & Audit Log</h2>
                 <div className="flex gap-2 text-xs">
-                     <span className="font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">Total Jobs: {dataJobs.length}</span>
-                     <span className="font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded">Errors: {dataJobs.filter(j => j.status === 'Failed').length}</span>
+                     <span className="font-medium text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded">Total Jobs: {totalJobs}</span>
+                     <span className="font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-1 rounded">Errors: {errorJobs}</span>
                 </div>
             </div>
             <div className="flex-1 overflow-auto">

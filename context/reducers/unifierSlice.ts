@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { transitionRecord } from '../../utils/logic/businessProcessEngine';
 
 export const unifierReducer = (state: DataState, action: Action): DataState => {

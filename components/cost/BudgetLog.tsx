@@ -11,10 +11,12 @@ import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
 
 
 export const BudgetLog: React.FC = () => {
     const { project } = useProjectWorkspace();
+    const { dispatch } = useData();
     const projectId = project.id;
     const { hasPermission, user } = usePermissions();
     const theme = useTheme();
@@ -54,10 +56,11 @@ export const BudgetLog: React.FC = () => {
             description: newItem.description || '',
             amount: newItem.amount || 0,
             status: newItem.status || 'Pending',
-            source: newItem.source,
+            source: newItem.source || 'Standard',
             submitterId: user?.id || 'User'
         };
-        console.log("Saving budget log:", logItem);
+        
+        dispatch({ type: 'ADD_PROJECT_BUDGET_LOG', payload: { projectId, logItem } });
         setIsPanelOpen(false);
         setNewItem({ description: '', amount: 0, source: 'Management Reserve', status: 'Pending' });
     };

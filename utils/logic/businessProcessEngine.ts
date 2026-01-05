@@ -1,6 +1,6 @@
 
 import { BPRecord, BPDefinition, BPWorkflowStep } from '../../types/unifier';
-import { DataState } from '../../types/actions';
+import { DataState } from '../../types/index';
 
 export const getNextSteps = (record: BPRecord, def: BPDefinition): string[] => {
   const currentStepInfo = def.workflow.find(s => s.name === record.status);

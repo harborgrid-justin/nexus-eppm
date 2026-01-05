@@ -1,26 +1,45 @@
 
-import React, { forwardRef, useRef, useEffect } from 'react';
-import { Task, TaskStatus } from '../../../types';
+import React, { forwardRef } from 'react';
+import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../../types';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
 import { getDaysDiff } from '../../../utils/dateUtils';
 
+interface TimelineHeaders {
+    months: Map<string, { start: number, width: number }>;
+    days: { date: Date; isWorking: boolean }[];
+}
+
+interface RenderItemWBS {
+    type: 'wbs';
+    node: WBSNode;
+    level: number;
+}
+
+interface RenderItemTask {
+    type: 'task';
+    task: Task;
+    level: number;
+}
+
+type RenderItem = RenderItemWBS | RenderItemTask;
+
 interface GanttTimelineProps {
-  timelineHeaders: { months: Map<string, { start: number, width: number }>, days: { date: Date; isWorking: boolean }[] };
-  renderList: any[];
+  timelineHeaders: TimelineHeaders;
+  renderList: RenderItem[];
   taskRowMap: Map<string, number>;
   projectStart: Date;
   projectEnd: Date;
   dayWidth: number;
   rowHeight: number;
   showCriticalPath: boolean;
-  baselineMap: any;
+  baselineMap: Record<string, any> | null;
   selectedTask: Task | null;
   projectTasks: Task[];
-  calendar: any;
+  calendar: ProjectCalendar; // Updated from 'any' to strict type
   ganttContainerRef: React.RefObject<HTMLDivElement>;
   getStatusColor: (s: TaskStatus) => string;
-  handleMouseDown: any;
+  handleMouseDown: (e: React.MouseEvent, task: Task, type: 'move' | 'resize-start' | 'resize-end' | 'progress') => void;
   setSelectedTask: (t: Task) => void;
   virtualItems: { index: number; offsetTop: number }[];
   totalHeight: number;
@@ -33,13 +52,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   getStatusColor, handleMouseDown, setSelectedTask, virtualItems, totalHeight, onScroll
 }, ref) => {
   
-  // Principle 12: Scroll Performance Isolation
-  // Using a local scroll handler that decouples the event from React state updates where possible
-  // Note: The parent component handles the virtualization state update via the onScroll prop,
-  // which should be wrapped in requestAnimationFrame in the parent hook (useVirtualScroll).
-  
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    // Pass event up - optimization logic resides in useVirtualScroll hook
     onScroll(e);
   };
 
@@ -48,7 +61,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
         ref={ref} 
         className="flex-1 overflow-auto bg-slate-50 relative scrollbar-thin will-change-transform"
         onScroll={handleScroll}
-        style={{ contain: 'strict' }} // CSS containment for browser optimization
+        style={{ contain: 'strict' }}
     >
         <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${totalHeight + 100}px` }}>
             {/* Header Sticky */}
@@ -71,7 +84,6 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
 
             {/* Virtualized Body */}
             <div className="relative">
-                {/* Background Grid Lines (Optimization: CSS Grid for static background) */}
                 <div 
                     className="absolute inset-0 pointer-events-none" 
                     style={{ 
@@ -94,7 +106,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                         <div key={item.task.id} style={{ transform: `translateY(${offsetTop}px)`, position: 'absolute', width: '100%', height: `${rowHeight}px`, top: 0, left: 0, willChange: 'transform' }}>
                             <GanttTaskBar
                                 task={item.task}
-                                rowIndex={0} // Relative to transform
+                                rowIndex={0} 
                                 offsetDays={offsetDays}
                                 width={width}
                                 dayWidth={dayWidth}

@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { Baseline, WBSNode, Project } from '../../types/index';
 
@@ -63,6 +63,18 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             })
         };
     
+    // --- BUDGET LOG ---
+    case 'ADD_PROJECT_BUDGET_LOG':
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id === action.payload.projectId) {
+                    return { ...p, budgetLog: [...(p.budgetLog || []), action.payload.logItem] };
+                }
+                return p;
+            })
+        };
+
     // --- REFLECTION PROJECTS ---
     case 'PROJECT_CREATE_REFLECTION': {
         const sourceProject = state.projects.find(p => p.id === action.payload.sourceProjectId);

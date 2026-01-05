@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../types/actions';
+import { DataState, Action } from '../types/index';
 import { applyProgramRules } from './logic/programRules';
 import { applyFinancialRules } from './logic/financialRules';
 import { applyRiskRules } from './logic/riskRules';

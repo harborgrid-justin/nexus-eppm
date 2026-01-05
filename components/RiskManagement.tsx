@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -7,7 +6,7 @@ import { ModuleNavigation } from './common/ModuleNavigation';
 import { ErrorBoundary } from './ErrorBoundary';
 
 import PortfolioRisks from './portfolio/PortfolioRisks';
-import SystemicRiskDashboard from './risk/enterprise/SystemicRiskDashboard';
+import { SystemicRiskDashboard } from './risk/enterprise/SystemicRiskDashboard';
 import { GlobalRiskRegister } from './risk/enterprise/GlobalRiskRegister';
 import { GlobalRiskMatrix } from './risk/enterprise/GlobalRiskMatrix';
 import { GlobalQuantitativeAnalysis } from './risk/enterprise/GlobalQuantitativeAnalysis';

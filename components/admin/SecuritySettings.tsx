@@ -1,4 +1,5 @@
 
+// ... existing imports
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { Shield, Lock, Fingerprint, Globe, ShieldAlert, CheckCircle, Save, Key, Wifi, Clock, AlertTriangle, UserX, RotateCcw } from 'lucide-react';
@@ -22,11 +23,10 @@ const SecuritySettings: React.FC = () => {
 
     const handleSave = () => {
         dispatch({ type: 'GOVERNANCE_UPDATE_SECURITY_POLICY', payload: policies });
-        alert("Security policy updated. Changes will take effect at next login session.");
     };
 
     const runSecurityAudit = () => {
-        alert("Security scan initiated. Scanning for over-privileged users and inactive sessions...");
+        // Dispatch action if needed
     };
 
     // Generate a visual hash based on the current user ID to simulate a linked key

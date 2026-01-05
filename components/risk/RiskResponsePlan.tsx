@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Risk } from '../../types/index';
 import { Shield, Check, Plus } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
+import { useData } from '../../context/DataContext';
 
 interface RiskResponsePlanProps {
   risk: Risk;
@@ -11,10 +12,18 @@ interface RiskResponsePlanProps {
 
 const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
     const theme = useTheme();
+    const { dispatch } = useData();
     const [actions, setActions] = useState(risk.responseActions || []);
 
+    // Sync local state when prop updates
+    useEffect(() => {
+        setActions(risk.responseActions || []);
+    }, [risk.responseActions]);
+
     const addAction = () => {
-        setActions([...actions, { id: Date.now().toString(), description: 'New Action', ownerId: 'Unassigned', dueDate: 'TBD', status: 'Pending' }]);
+        const newActions = [...actions, { id: Date.now().toString(), description: 'New Action', ownerId: 'Unassigned', dueDate: 'TBD', status: 'Pending' as const }];
+        setActions(newActions);
+        dispatch({ type: 'UPDATE_RISK', payload: { risk: { ...risk, responseActions: newActions } } });
     };
 
     return (

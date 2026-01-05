@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 
 export const applyDataRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {

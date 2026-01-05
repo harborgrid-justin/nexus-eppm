@@ -33,7 +33,7 @@ export class SchedulingEngine {
         this.log(`Data Date: ${options.dataDate.toDateString()}`);
         this.log(`Logic Mode: ${options.useRetainedLogic ? 'Retained Logic' : 'Progress Override'}`);
 
-        // Simulate WASM/Worker delay for realism in UI
+        // Simulate calculation time
         await new Promise(resolve => setTimeout(resolve, 600));
 
         const tasks = JSON.parse(JSON.stringify(project.tasks)) as Task[];
@@ -51,34 +51,49 @@ export class SchedulingEngine {
             t.totalFloat = 0;
             t.critical = false;
 
-            if (t.status === TaskStatus.COMPLETED) {
-                // Completed tasks fixed
-            } else if (t.status === TaskStatus.IN_PROGRESS) {
-                // In progress tasks start from Actual Start, calculate remaining
-            }
-
+            // Note: In a real engine, Actual dates would be preserved if Status is Started/Completed
+            
             if (t.dependencies.length === 0 && t.type !== 'Summary') {
-                // Check if it's the start node or truly open
-                if (t.id !== tasks[0]?.id) openEnds++; // Simplified check
+                if (t.id !== tasks[0]?.id) openEnds++; 
             }
         });
 
         this.log(`Validation: Found ${openEnds} activities with open starts.`);
 
-        // 2. Forward Pass (Early Dates)
-        const sortedTasks = this.topologicalSort(tasks); // Simplified topo sort for calculation order
-        
+        // 2. Topological Sort (Kahn's Algorithm)
+        let sortedTasks: Task[];
+        try {
+            sortedTasks = this.topologicalSort(tasks);
+        } catch (e) {
+            this.log(`CRITICAL ERROR: Circular dependency detected in network logic.`);
+            return {
+                tasks: [],
+                log: this.logBuffer.join('\n'),
+                stats: { criticalPathLength: 0, criticalTasksCount: 0, openEnds },
+                success: false
+            };
+        }
+
+        // 3. Forward Pass (Early Dates)
         for (const task of sortedTasks) {
-            if (task.status === TaskStatus.COMPLETED) continue;
+            if (task.status === TaskStatus.COMPLETED) {
+                // If completed, stick to actuals (simplified here to existing dates)
+                // In full engine, we'd use actualStart/actualFinish fields
+                continue;
+            }
 
             let earlyStart = new Date(options.dataDate);
             
+            // If task has no predecessors, it starts at DataDate or Project Start
+            if (task.dependencies.length === 0) {
+                 earlyStart = new Date(options.dataDate); // Or Project Start
+            }
+
             // Check Predecessors
             for (const dep of task.dependencies) {
                 const pred = taskMap.get(dep.targetId);
                 if (!pred) continue;
 
-                // Default to DataDate if predecessor dates missing (shouldn't happen in valid net)
                 const predStart = pred.earlyStart ? new Date(pred.earlyStart) : new Date(options.dataDate);
                 const predFinish = pred.earlyFinish ? new Date(pred.earlyFinish) : new Date(options.dataDate);
                 let constraintDate = new Date(options.dataDate);
@@ -91,10 +106,9 @@ export class SchedulingEngine {
                     case 'SS': // Start to Start
                         constraintDate = addWorkingDays(predStart, dep.lag, { workingDays: [1,2,3,4,5], holidays: [] });
                         break;
-                    case 'FF': // Finish to Finish (Constraint on Finish)
-                         // Logic simplified: usually affects EF, not ES directly without duration back-calc
-                         // For scaffold, treating as FS for critical path basics
+                    case 'FF': // Finish to Finish
                          constraintDate = addWorkingDays(predFinish, dep.lag, { workingDays: [1,2,3,4,5], holidays: [] }); 
+                         // Note: FF constraints affect Finish, which back-calcs Start. Simplified here.
                          break;
                     case 'SF': // Start to Finish
                          constraintDate = addWorkingDays(predStart, dep.lag, { workingDays: [1,2,3,4,5], holidays: [] });
@@ -106,8 +120,8 @@ export class SchedulingEngine {
                 }
             }
             
-            // If task has specific constraints (Start No Earlier Than), apply here
-            if (task.primaryConstraint?.type === 'Start No Earlier Than' && task.primaryConstraint.date) {
+            // Hard Constraints
+            if (options.honorConstraints && task.primaryConstraint?.type === 'Start No Earlier Than' && task.primaryConstraint.date) {
                 const constDate = new Date(task.primaryConstraint.date);
                 if (constDate > earlyStart) {
                      earlyStart = constDate;
@@ -116,11 +130,11 @@ export class SchedulingEngine {
             }
 
             task.earlyStart = earlyStart;
+            // Calculate Early Finish based on duration
             task.earlyFinish = addWorkingDays(earlyStart, Math.max(0, task.duration - 1), { workingDays: [1,2,3,4,5], holidays: [] });
         }
 
-        // 3. Backward Pass (Late Dates & Float)
-        // Find project finish date
+        // 4. Backward Pass (Late Dates & Float)
         let projectFinish = new Date(options.dataDate);
         tasks.forEach(t => {
             if (t.earlyFinish && new Date(t.earlyFinish) > projectFinish) {
@@ -130,30 +144,34 @@ export class SchedulingEngine {
         
         this.log(`Calculated Project Finish: ${projectFinish.toLocaleDateString()}`);
 
-        // Reverse iteration
         const reverseTasks = [...sortedTasks].reverse();
+        
+        // Build Successor Map for Backward Pass
+        const successorMap = new Map<string, Array<{ id: string, type: string, lag: number }>>();
+        tasks.forEach(t => {
+            t.dependencies.forEach(dep => {
+                if (!successorMap.has(dep.targetId)) successorMap.set(dep.targetId, []);
+                successorMap.get(dep.targetId)?.push({ id: t.id, type: dep.type, lag: dep.lag });
+            });
+        });
         
         for (const task of reverseTasks) {
             if (task.status === TaskStatus.COMPLETED) continue;
 
-            // Initialize Late Finish to Project Finish (or successor constraints)
             let lateFinish = new Date(projectFinish);
-
-            // Find successors (This implies we need a successor map, building implicitly here is slow, ideally built in Init)
-            const successors = tasks.filter(t => t.dependencies.some(d => d.targetId === task.id));
+            const successors = successorMap.get(task.id) || [];
             
             if (successors.length > 0) {
                 let minLateStart = new Date(8640000000000000); // Max Date
                 let hasValidSuccessor = false;
 
-                for (const succ of successors) {
-                    const dep = succ.dependencies.find(d => d.targetId === task.id);
-                    if (!dep || !succ.lateStart) continue;
+                for (const succRel of successors) {
+                    const succ = taskMap.get(succRel.id);
+                    if (!succ || !succ.lateStart) continue;
 
                     hasValidSuccessor = true;
                     // Logic for FS Reverse: LS - Lag - 1
-                    // Simplified for demo
-                    const limitDate = addWorkingDays(new Date(succ.lateStart), -(dep.lag + 1), { workingDays: [1,2,3,4,5], holidays: [] });
+                    const limitDate = addWorkingDays(new Date(succ.lateStart), -(succRel.lag + 1), { workingDays: [1,2,3,4,5], holidays: [] });
                     if (limitDate < minLateStart) minLateStart = limitDate;
                 }
                 
@@ -171,12 +189,12 @@ export class SchedulingEngine {
             }
         }
 
-        // 4. Stats Generation
+        // 5. Stats Generation
         const criticalCount = tasks.filter(t => t.critical).length;
         this.log(`Analysis Complete.`);
         this.log(`- Activities Processed: ${tasks.length}`);
         this.log(`- Critical Activities: ${criticalCount}`);
-        this.log(`- Percent Critical: ${((criticalCount/tasks.length)*100).toFixed(1)}%`);
+        this.log(`- Percent Critical: ${tasks.length > 0 ? ((criticalCount/tasks.length)*100).toFixed(1) : 0}%`);
 
         return {
             tasks,
@@ -191,16 +209,51 @@ export class SchedulingEngine {
     }
 
     private topologicalSort(tasks: Task[]): Task[] {
-        // Simplified sort: sort by ID or simple level logic for demo purposes
-        // Real topo sort required for complex cyclic dependencies checks
-        return tasks.sort((a, b) => {
-            // Put dependencies first
-            const aDependsOnB = a.dependencies.some(d => d.targetId === b.id);
-            const bDependsOnA = b.dependencies.some(d => d.targetId === a.id);
-            if (aDependsOnB) return 1;
-            if (bDependsOnA) return -1;
-            return 0;
+        // Kahn's Algorithm
+        const inDegree = new Map<string, number>();
+        const graph = new Map<string, string[]>();
+        
+        tasks.forEach(t => {
+            inDegree.set(t.id, 0);
+            graph.set(t.id, []);
         });
+
+        tasks.forEach(t => {
+            t.dependencies.forEach(dep => {
+                if (graph.has(dep.targetId)) {
+                    graph.get(dep.targetId)?.push(t.id);
+                    inDegree.set(t.id, (inDegree.get(t.id) || 0) + 1);
+                }
+            });
+        });
+
+        const queue: string[] = [];
+        inDegree.forEach((count, id) => {
+            if (count === 0) queue.push(id);
+        });
+
+        const sorted: Task[] = [];
+        const taskMap = new Map(tasks.map(t => [t.id, t]));
+
+        while (queue.length > 0) {
+            const currentId = queue.shift()!;
+            const task = taskMap.get(currentId);
+            if (task) sorted.push(task);
+
+            const neighbors = graph.get(currentId) || [];
+            neighbors.forEach(neighborId => {
+                inDegree.set(neighborId, (inDegree.get(neighborId) || 0) - 1);
+                if (inDegree.get(neighborId) === 0) {
+                    queue.push(neighborId);
+                }
+            });
+        }
+
+        if (sorted.length !== tasks.length) {
+            throw new Error("Cycle detected in schedule network logic.");
+        }
+
+        return sorted;
     }
 }
 

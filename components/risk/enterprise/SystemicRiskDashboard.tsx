@@ -1,55 +1,15 @@
-
-import React, { useMemo } from 'react';
-import { useData } from '../../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShieldAlert, TrendingUp, Activity, Layers, AlertTriangle, PieChart } from 'lucide-react';
 import StatCard from '../../shared/StatCard';
 import { CustomBarChart } from '../../charts/CustomBarChart';
 import { CustomPieChart } from '../../charts/CustomPieChart';
 import { formatCompactCurrency } from '../../../utils/formatters';
+import { useSystemicRiskLogic } from '../../../hooks/domain/useSystemicRiskLogic';
 
-const SystemicRiskDashboard: React.FC = () => {
-  const { state } = useData();
+export const SystemicRiskDashboard: React.FC = () => {
   const theme = useTheme();
-
-  const metrics = useMemo(() => {
-    const allRisks = [
-        ...state.risks.map(r => ({ ...r, context: 'Project' })),
-        ...state.portfolioRisks.map(r => ({ ...r, context: 'Portfolio' })),
-        ...state.programRisks.map(r => ({ ...r, context: 'Program' }))
-    ];
-
-    const totalRisks = allRisks.length;
-    const criticalRisks = allRisks.filter(r => r.score >= 15).length;
-    // Cast to any to access financialImpact which might be missing on PortfolioRisk type but we handle it safely
-    const totalExposure = allRisks.reduce((sum, r) => sum + Number((r as any).financialImpact || 0), 0);
-    const avgScore = totalRisks > 0 ? allRisks.reduce((sum, r) => sum + r.score, 0) / totalRisks : 0;
-
-    // Group by Category
-    const byCategory = allRisks.reduce((acc, r) => {
-        acc[r.category] = (acc[r.category] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-    
-    const palette = theme.charts.palette || [];
-    const len = palette.length > 0 ? palette.length : 1;
-    
-    const categoryData = Object.entries(byCategory)
-        .map(([name, value], i) => {
-             const colorIndex = i % len;
-             return { name, value, color: palette[colorIndex] || '#000000' };
-        })
-        .sort((a, b) => (Number(b.value) - Number(a.value)));
-
-    // Group by Context (Project vs Program vs Portfolio)
-    const byContext = [
-        { name: 'Project Level', value: allRisks.filter(r => r.context === 'Project').length },
-        { name: 'Program Level', value: allRisks.filter(r => r.context === 'Program').length },
-        { name: 'Portfolio Level', value: allRisks.filter(r => r.context === 'Portfolio').length },
-    ];
-
-    return { totalRisks, criticalRisks, totalExposure, avgScore, categoryData, byContext };
-  }, [state.risks, state.portfolioRisks, state.programRisks, theme]);
+  const { metrics, projects } = useSystemicRiskLogic();
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
@@ -103,10 +63,10 @@ const SystemicRiskDashboard: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-100">
-                    {[...state.risks, ...state.portfolioRisks].sort((a,b) => b.score - a.score).slice(0, 5).map((risk: any) => (
+                    {metrics.topRisks.map((risk: any) => (
                         <tr key={risk.id} className="hover:bg-red-50/30">
                             <td className="px-6 py-4 text-xs font-bold text-slate-600">
-                                {risk.projectId ? `Project: ${state.projects.find(p => p.id === risk.projectId)?.code}` : 'Portfolio'}
+                                {risk.projectId ? `Project: ${projects.find(p => p.id === risk.projectId)?.code}` : 'Portfolio'}
                             </td>
                             <td className="px-6 py-4 text-sm font-medium text-slate-900">{risk.description}</td>
                             <td className="px-6 py-4 text-center">
@@ -125,5 +85,3 @@ const SystemicRiskDashboard: React.FC = () => {
     </div>
   );
 };
-
-export default SystemicRiskDashboard;

@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../utils/formatters';
 import { Button } from '../../ui/Button';
+import { ReserveAnalysisData } from '../../../types';
 
-export const GapAnalysis: React.FC<{ data: any; onAdjust: () => void }> = ({ data, onAdjust }) => {
+export const GapAnalysis: React.FC<{ data: ReserveAnalysisData; onAdjust: () => void }> = ({ data, onAdjust }) => {
     const theme = useTheme();
     const isAdequate = data.coverageRatio >= 1.0;
 

@@ -1,6 +1,6 @@
 
-// FIX: Correctly import DataState from types/actions.
-import { DataState, Action } from '../../types/actions';
+// FIX: Correctly import DataState from types/index.
+import { DataState, Action } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 

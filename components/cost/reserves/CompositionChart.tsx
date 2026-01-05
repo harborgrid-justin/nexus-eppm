@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../../utils/formatters';
 import { useTheme } from '../../../context/ThemeContext';
+import { ReserveAnalysisData } from '../../../types';
 
-export const CompositionChart: React.FC<{ data: any }> = ({ data }) => {
+export const CompositionChart: React.FC<{ data: ReserveAnalysisData }> = ({ data }) => {
     const theme = useTheme();
     const chartData = [
         { name: 'Remaining Contingency', value: data.remainingContingency, color: '#10b981' },

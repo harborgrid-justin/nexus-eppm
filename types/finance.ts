@@ -194,3 +194,15 @@ export interface CostBookItem {
     unit: string;
     rate: number;
 }
+
+export interface ReserveAnalysisData {
+    currentRiskExposure: number;
+    baseCost: number;
+    contingencyReserve: number;
+    managementReserve: number;
+    totalReserves: number;
+    drawdowns: { contingency: number; management: number };
+    remainingContingency: number;
+    remainingManagement: number;
+    coverageRatio: number;
+}

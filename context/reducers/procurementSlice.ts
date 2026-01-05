@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 
 export const procurementSlice = (state: DataState, action: Action): DataState => {
   switch (action.type) {
@@ -32,6 +32,15 @@ export const procurementSlice = (state: DataState, action: Action): DataState =>
     // Material Receipts
     case 'ADD_MATERIAL_RECEIPT':
         return { ...state, materialReceipts: [...state.materialReceipts, action.payload] };
+
+    // Procurement Plans
+    case 'ADD_PROCUREMENT_PLAN':
+        return { ...state, procurementPlans: [...state.procurementPlans, action.payload] };
+    case 'UPDATE_PROCUREMENT_PLAN':
+        return { 
+            ...state, 
+            procurementPlans: state.procurementPlans.map(p => p.id === action.payload.id ? action.payload : p) 
+        };
 
     default:
       return state;

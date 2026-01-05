@@ -1,73 +1,21 @@
 
-import React, { useState, useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Table, BarChart2, Download, Filter, RefreshCw, LayoutTemplate } from 'lucide-react';
+import { Table, BarChart2, Download, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { formatCompactCurrency } from '../../utils/formatters';
-
-type PivotField = 'Category' | 'Status' | 'Health' | 'Manager' | 'EPS';
-type AggregateField = 'Budget' | 'Spent' | 'Count';
+import { usePivotAnalyticsLogic } from '../../hooks/domain/usePivotAnalyticsLogic';
 
 const PivotAnalytics: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
-    
-    const [rowField, setRowField] = useState<PivotField>('Category');
-    const [colField, setColField] = useState<PivotField>('Status');
-    const [valField, setValField] = useState<AggregateField>('Budget');
-    const [viewMode, setViewMode] = useState<'Table' | 'Chart'>('Table');
-
-    // Dynamic Pivot Logic
-    const pivotData = useMemo(() => {
-        const rows = new Set<string>();
-        const cols = new Set<string>();
-        const values: Record<string, number> = {};
-
-        state.projects.forEach(p => {
-            // Safe Accessors
-            const rVal = p.category || 'Unassigned'; // Map 'Category'
-            const cVal = p.status || 'Draft'; // Map 'Status' (simplified for demo)
-            
-            // For real dynamic mapping, we'd use a switch/case based on rowField/colField state
-            // Keeping it simple for the scaffold:
-            const getFieldVal = (field: PivotField, item: any) => {
-                switch(field) {
-                    case 'Category': return item.category || 'Unassigned';
-                    case 'Status': return item.status || 'Draft';
-                    case 'Health': return item.health || 'Unknown';
-                    case 'Manager': return item.managerId || 'Unassigned';
-                    case 'EPS': return item.epsId || 'Root';
-                    default: return 'N/A';
-                }
-            };
-            
-            const r = getFieldVal(rowField, p);
-            const c = getFieldVal(colField, p);
-            
-            rows.add(r);
-            cols.add(c);
-            
-            const key = `${r}::${c}`;
-            const val = valField === 'Count' ? 1 : (valField === 'Budget' ? p.budget : p.spent);
-            values[key] = (values[key] || 0) + val;
-        });
-
-        const rowKeys = Array.from(rows).sort();
-        const colKeys = Array.from(cols).sort();
-        
-        // Prepare Chart Data
-        const chartData = rowKeys.map(r => {
-            const item: any = { name: r };
-            colKeys.forEach(c => {
-                item[c] = values[`${r}::${c}`] || 0;
-            });
-            return item;
-        });
-
-        return { rowKeys, colKeys, values, chartData };
-    }, [state.projects, rowField, colField, valField]);
+    const {
+        rowField, setRowField,
+        colField, setColField,
+        valField, setValField,
+        viewMode, setViewMode,
+        pivotData
+    } = usePivotAnalyticsLogic();
 
     return (
         <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>

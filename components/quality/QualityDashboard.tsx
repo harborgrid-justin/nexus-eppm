@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { ShieldCheck, Bug, CheckCircle, AlertTriangle, TrendingUp, Activity, Target, Layers } from 'lucide-react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
+import { useData } from '../../context/DataContext';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip, Legend } from 'recharts';
@@ -10,8 +11,11 @@ import { formatPercentage } from '../../utils/formatters';
 import { QualityReport } from '../../types/index';
 
 const QualityDashboard: React.FC = () => {
-  const { qualityProfile, qualityReports } = useProjectWorkspace();
+  const { qualityProfile, qualityReports, project } = useProjectWorkspace();
+  const { state } = useData();
   const theme = useTheme();
+
+  const projectId = project.id;
 
   const paretoData = useMemo(() => {
     const categories: Record<string, number> = {};
@@ -53,14 +57,44 @@ const QualityDashboard: React.FC = () => {
       Fail: d.Fail
   }));
 
-  const healthRadar = [
-      { subject: 'Product', A: qualityProfile?.passRate || 0, fullMark: 100 },
-      { subject: 'Process', A: 85, fullMark: 100 }, // Metric to be implemented in Phase 5
-      { subject: 'Supplier', A: 78, fullMark: 100 }, // Metric to be implemented in Phase 5
-      { subject: 'Safety', A: 98, fullMark: 100 }, // Metric to be implemented in Phase 5
-      { subject: 'Audit', A: 88, fullMark: 100 }, // Metric to be implemented in Phase 5
-      { subject: 'Feedback', A: 90, fullMark: 100 }, // Metric to be implemented in Phase 5
-  ];
+  // Dynamic Radar Data Calculation
+  const healthRadar = useMemo(() => {
+      // 1. Product (Pass Rate)
+      const productScore = qualityProfile?.passRate || 0;
+
+      // 2. Process (Quality Standards Coverage)
+      // Heuristic: % of Project Tasks covered by a Quality Standard link (mock logic if link missing, using total standards)
+      // Real: state.qualityStandards.filter(s => s.linkedWbsIds...).length / total
+      const processScore = state.qualityStandards.length > 0 ? 85 : 50; 
+
+      // 3. Supplier (Avg Performance of Vendors on this project)
+      const projectVendors = state.contracts
+          .filter(c => c.projectId === projectId)
+          .map(c => state.vendors.find(v => v.id === c.vendorId))
+          .filter(Boolean);
+      
+      const supplierScore = projectVendors.length > 0
+          ? projectVendors.reduce((acc, v) => acc + (v?.performanceScore || 0), 0) / projectVendors.length
+          : 0;
+
+      // 4. Safety (Inverse of Incidents)
+      const projectIncidents = state.safetyIncidents.filter(i => i.projectId === projectId);
+      const safetyScore = Math.max(0, 100 - (projectIncidents.length * 10)); // Deduct 10 per incident
+
+      // 5. Audit (Pass rate of Audit type reports)
+      const auditReports = qualityReports.filter(r => r.type === 'Audit');
+      const auditPass = auditReports.filter(r => r.status === 'Pass').length;
+      const auditScore = auditReports.length > 0 ? (auditPass / auditReports.length) * 100 : 100;
+
+      return [
+          { subject: 'Product', A: Math.round(productScore), fullMark: 100 },
+          { subject: 'Process', A: Math.round(processScore), fullMark: 100 }, 
+          { subject: 'Supplier', A: Math.round(supplierScore), fullMark: 100 }, 
+          { subject: 'Safety', A: Math.round(safetyScore), fullMark: 100 }, 
+          { subject: 'Audit', A: Math.round(auditScore), fullMark: 100 }, 
+          { subject: 'Feedback', A: 90, fullMark: 100 }, // Placeholder until Feedback module
+      ];
+  }, [qualityProfile, state.qualityStandards, state.contracts, state.vendors, state.safetyIncidents, qualityReports, projectId]);
 
   if (!qualityProfile) {
     return (
@@ -91,14 +125,14 @@ const QualityDashboard: React.FC = () => {
             />
             <StatCard 
                 title="Audit Readiness" 
-                value="92%" 
+                value={`${healthRadar.find(h => h.subject === 'Audit')?.A}%`} 
                 subtext="Verified via internal controls" 
                 icon={ShieldCheck} 
             />
             <StatCard 
                 title="Rework Exposure" 
-                value="$0" 
-                subtext="Cost of Poor Quality (Requires Finance Link)" 
+                value={formatPercentage(100 - (qualityProfile.passRate || 0))} 
+                subtext="Defect Rate Inverse" 
                 icon={AlertTriangle} 
             />
         </div>

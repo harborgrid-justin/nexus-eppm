@@ -1,50 +1,21 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { UserPlus, Calendar, CheckCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../context/ThemeContext';
-import { useData } from '../../context/DataContext';
-import { generateId } from '../../utils/formatters';
-import { ResourceRequest as ResourceRequestType } from '../../types/resource';
+import { useResourceRequestLogic } from '../../hooks/domain/useResourceRequestLogic';
 
 export const ResourceRequest: React.FC = () => {
   const theme = useTheme();
-  const { state, dispatch } = useData();
+  const { 
+      formData, projects, roles, skills, successMsg, 
+      updateField, handleSubmit 
+  } = useResourceRequestLogic();
 
-  const [formData, setFormData] = useState<Partial<ResourceRequestType>>({
-      role: '',
-      quantity: 1,
-      startDate: '',
-      endDate: '',
-      notes: ''
-  });
-  const [successMsg, setSuccessMsg] = useState('');
-
-  const handleSubmit = () => {
-      if (!formData.role || !formData.quantity || !formData.startDate) {
-          alert("Please fill in required fields.");
-          return;
-      }
-      
-      const request: ResourceRequestType = {
-          id: generateId('REQ'),
-          projectId: 'P1001', // Mock project context, ideally passed via props
-          projectName: 'Downtown Metro Hub', // Mock
-          requesterName: 'Current User', // Mock
-          role: formData.role || '',
-          quantity: formData.quantity || 1,
-          startDate: formData.startDate || '',
-          endDate: formData.endDate || '',
-          status: 'Pending',
-          notes: formData.notes
-      };
-
-      dispatch({ type: 'RESOURCE_REQUEST_ADD', payload: request });
-      
-      setSuccessMsg(`Request ${request.id} submitted for approval.`);
-      setTimeout(() => setSuccessMsg(''), 3000);
-      setFormData({ role: '', quantity: 1, startDate: '', endDate: '', notes: '' });
+  const handleFormSubmit = () => {
+      const res = handleSubmit();
+      if (res?.error) alert(res.error);
   };
 
   return (
@@ -62,6 +33,18 @@ export const ResourceRequest: React.FC = () => {
                 <CheckCircle size={16}/> {successMsg}
             </div>
         )}
+        
+        <div>
+            <label className={`${theme.typography.label} mb-1 block`}>Project Context</label>
+            <select
+                className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`}
+                value={formData.projectId}
+                onChange={e => updateField('projectId', e.target.value)}
+            >
+                <option value="">Select Project...</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.code} - {p.name}</option>)}
+            </select>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
             <div>
@@ -69,10 +52,10 @@ export const ResourceRequest: React.FC = () => {
                 <select 
                     className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`}
                     value={formData.role}
-                    onChange={e => setFormData({...formData, role: e.target.value})}
+                    onChange={e => updateField('role', e.target.value)}
                 >
                     <option value="">Select Role...</option>
-                    {state.roles.map(r => <option key={r.id} value={r.title}>{r.title}</option>)}
+                    {roles.map(r => <option key={r.id} value={r.title}>{r.title}</option>)}
                 </select>
             </div>
             <div>
@@ -80,7 +63,7 @@ export const ResourceRequest: React.FC = () => {
                 <Input 
                     type="number" 
                     value={formData.quantity}
-                    onChange={e => setFormData({...formData, quantity: parseInt(e.target.value)})}
+                    onChange={e => updateField('quantity', parseInt(e.target.value))}
                 />
             </div>
         </div>
@@ -91,7 +74,7 @@ export const ResourceRequest: React.FC = () => {
                 <Input 
                     type="date" 
                     value={formData.startDate}
-                    onChange={e => setFormData({...formData, startDate: e.target.value})}
+                    onChange={e => updateField('startDate', e.target.value)}
                 />
             </div>
              <div>
@@ -99,7 +82,7 @@ export const ResourceRequest: React.FC = () => {
                 <Input 
                     type="date"
                     value={formData.endDate}
-                    onChange={e => setFormData({...formData, endDate: e.target.value})}
+                    onChange={e => updateField('endDate', e.target.value)}
                 />
             </div>
         </div>
@@ -107,7 +90,7 @@ export const ResourceRequest: React.FC = () => {
         <div>
             <label className={`${theme.typography.label} mb-1 block`}>Skills / Certifications</label>
             <div className={`p-3 border ${theme.colors.border} rounded-lg flex flex-wrap gap-2 ${theme.colors.surface}`}>
-                {state.skills.slice(0, 8).map(skill => (
+                {skills.slice(0, 8).map(skill => (
                     <label key={skill.id} className={`flex items-center gap-2 text-sm ${theme.colors.background} px-2 py-1 rounded border ${theme.colors.border} cursor-pointer`}>
                         <input type="checkbox" className="rounded text-nexus-600 focus:ring-nexus-500"/> {skill.name}
                     </label>
@@ -115,7 +98,7 @@ export const ResourceRequest: React.FC = () => {
             </div>
         </div>
 
-        <Button className="w-full" onClick={handleSubmit}>Submit Request</Button>
+        <Button className="w-full" onClick={handleFormSubmit}>Submit Request</Button>
     </div>
   );
 };

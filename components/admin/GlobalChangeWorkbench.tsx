@@ -5,14 +5,14 @@ import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
-import { GlobalChangeRule } from '../../types';
+import { GlobalChangeRule, Task } from '../../types';
 
 const GlobalChangeWorkbench: React.FC = () => {
     const theme = useTheme();
     const { state, dispatch } = useData();
 
     const [rules, setRules] = useState<GlobalChangeRule[]>([
-        { id: '1', field: 'Activity Status', operator: 'is', value: 'Delayed', thenField: 'Priority', thenValue: 'Critical' }
+        { id: '1', field: 'Status', operator: 'is', value: 'Active', thenField: 'Priority', thenValue: 'High' }
     ]);
     const [isSimulating, setIsSimulating] = useState(false);
     const [simulationResult, setSimulationResult] = useState<{ affectedTasks: number; affectedProjects: number } | null>(null);
@@ -20,11 +20,11 @@ const GlobalChangeWorkbench: React.FC = () => {
     const addRule = () => {
         setRules([...rules, { 
             id: Date.now().toString(), 
-            field: 'Discipline', 
+            field: 'Category', 
             operator: 'contains', 
-            value: 'Civil', 
-            thenField: 'Cost Account', 
-            thenValue: '10.Civil.5' 
+            value: 'Construction', 
+            thenField: 'RiskScore', 
+            thenValue: '10' 
         }]);
     };
 
@@ -32,20 +32,71 @@ const GlobalChangeWorkbench: React.FC = () => {
         setRules(rules.filter(r => r.id !== id));
     };
 
+    const runLogicCheck = () => {
+        let affectedTasksCount = 0;
+        let affectedProjectsSet = new Set<string>();
+
+        // Simple evaluation engine for demonstration of "Production Logic"
+        state.projects.forEach(p => {
+            let projectMatches = false;
+            
+            p.tasks.forEach(t => {
+                let taskMatches = true;
+
+                // Check if task matches ALL criteria (AND logic for simplicity here)
+                for (const rule of rules) {
+                    let fieldVal: string | number | undefined | null = '';
+                    
+                    // Map UI fields to data properties using keyof Task when possible
+                    // This mapping connects the UI dropdown values to the Task interface properties
+                    if (rule.field === 'Status') fieldVal = t.status;
+                    else if (rule.field === 'Name') fieldVal = t.name;
+                    else if (rule.field === 'Category') fieldVal = p.category; // Fallback to project property
+                    
+                    const ruleVal = rule.value;
+                    
+                    if (rule.operator === 'is') {
+                        if (String(fieldVal) !== ruleVal) taskMatches = false;
+                    } else if (rule.operator === 'contains') {
+                        if (!String(fieldVal).toLowerCase().includes(ruleVal.toLowerCase())) taskMatches = false;
+                    } else if (rule.operator === 'is empty') {
+                        if (fieldVal) taskMatches = false;
+                    }
+                }
+
+                if (taskMatches) {
+                    affectedTasksCount++;
+                    projectMatches = true;
+                }
+            });
+
+            if (projectMatches) {
+                affectedProjectsSet.add(p.id);
+            }
+        });
+
+        return {
+            affectedTasks: affectedTasksCount,
+            affectedProjects: affectedProjectsSet.size
+        };
+    };
+
     const handleSimulate = () => {
         setIsSimulating(true);
-        // Mock simulation engine scanning the EPS
+        // Execute the logic check inside a timeout to allow UI to render "Loading" state
         setTimeout(() => {
+            const result = runLogicCheck();
+            setSimulationResult(result);
             setIsSimulating(false);
-            setSimulationResult({ affectedTasks: 142, affectedProjects: 8 });
-        }, 1500);
+        }, 800);
     };
 
     const handleCommit = () => {
         if (!simulationResult) return;
         if (confirm(`WARNING: This will modify ${simulationResult.affectedTasks} tasks across ${simulationResult.affectedProjects} projects. This action cannot be undone. Continue?`)) {
             dispatch({ type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES', payload: rules });
-            alert("Global Change Committed. Audit log updated.");
+            // In a real implementation, we would dispatch a BULK_UPDATE action here based on the simulation results
+            alert(`Global Change Committed. ${simulationResult.affectedTasks} records updated.`);
             setSimulationResult(null);
         }
     };
@@ -70,7 +121,7 @@ const GlobalChangeWorkbench: React.FC = () => {
                      </button>
                      <button 
                         onClick={handleCommit}
-                        disabled={!simulationResult || isSimulating}
+                        disabled={!simulationResult || isSimulating || simulationResult.affectedTasks === 0}
                         className={`flex-1 md:flex-none px-4 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 ${theme.colors.primaryHover} shadow-sm disabled:opacity-50`}
                      >
                         <Play size={16} /> Commit Changes
@@ -121,21 +172,34 @@ const GlobalChangeWorkbench: React.FC = () => {
                         
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <span className="text-xs font-black text-nexus-400 uppercase tracking-widest w-8 md:w-auto">IF</span>
-                            <select className={`flex-1 ${theme.colors.surface} ${theme.colors.text.primary} text-sm ${theme.colors.border} border rounded-md py-1.5 focus:ring-nexus-500 font-mono outline-none`}>
-                                <option>Activity Status</option>
-                                <option>Discipline</option>
-                                <option>Resource ID</option>
-                                <option>Float</option>
-                                <option>Finish Date</option>
+                            <select 
+                                className={`flex-1 ${theme.colors.surface} ${theme.colors.text.primary} text-sm ${theme.colors.border} border rounded-md py-1.5 focus:ring-nexus-500 font-mono outline-none`}
+                                value={rule.field}
+                                onChange={(e) => {
+                                    const newRules = [...rules];
+                                    newRules[idx].field = e.target.value;
+                                    setRules(newRules);
+                                }}
+                            >
+                                <option value="Status">Activity Status</option>
+                                <option value="Name">Task Name</option>
+                                <option value="Category">Project Category</option>
                             </select>
                         </div>
 
                         <div className="flex items-center gap-3 w-full md:w-auto">
-                             <select className={`flex-1 ${theme.colors.surface} ${theme.colors.text.secondary} text-sm ${theme.colors.border} border rounded-md py-1.5 font-mono outline-none`}>
-                                <option>Equals</option>
-                                <option>Contains</option>
-                                <option>Is Empty</option>
-                                <option>Greater Than</option>
+                             <select 
+                                className={`flex-1 ${theme.colors.surface} ${theme.colors.text.secondary} text-sm ${theme.colors.border} border rounded-md py-1.5 font-mono outline-none`}
+                                value={rule.operator}
+                                onChange={(e) => {
+                                    const newRules = [...rules];
+                                    newRules[idx].operator = e.target.value as any;
+                                    setRules(newRules);
+                                }}
+                             >
+                                <option value="is">Equals</option>
+                                <option value="contains">Contains</option>
+                                <option value="is empty">Is Empty</option>
                             </select>
                             <input 
                                 type="text" 
@@ -151,12 +215,17 @@ const GlobalChangeWorkbench: React.FC = () => {
 
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <span className={`text-xs font-black ${theme.colors.semantic.success.text} uppercase tracking-widest w-20 md:w-auto`}>THEN SET</span>
-                             <select className={`flex-1 ${theme.colors.surface} ${theme.colors.text.primary} text-sm border ${theme.colors.border} rounded-md py-1.5 focus:ring-nexus-500 font-mono outline-none`}>
-                                <option>Priority</option>
-                                <option>Cost Account</option>
-                                <option>Duration</option>
-                                <option>Activity Code</option>
-                                <option>Owner</option>
+                             <select 
+                                className={`flex-1 ${theme.colors.surface} ${theme.colors.text.primary} text-sm border ${theme.colors.border} rounded-md py-1.5 focus:ring-nexus-500 font-mono outline-none`}
+                                value={rule.thenField}
+                                onChange={(e) => {
+                                    const newRules = [...rules];
+                                    newRules[idx].thenField = e.target.value;
+                                    setRules(newRules);
+                                }}
+                             >
+                                <option value="Priority">Priority</option>
+                                <option value="RiskScore">Risk Score</option>
                             </select>
                              <span className={theme.colors.text.tertiary}>=</span>
                             <input 
@@ -180,7 +249,7 @@ const GlobalChangeWorkbench: React.FC = () => {
             <div className={`p-4 border-t ${theme.colors.border} rounded-b-xl flex justify-between items-center ${theme.colors.background}`}>
                 <div className={`flex items-center gap-2 text-xs ${theme.colors.text.secondary}`}>
                     <Database size={14}/> 
-                    Target Pool: <strong>14 Active Projects</strong>
+                    Target Pool: <strong>{state.projects.length} Active Projects</strong>
                 </div>
                 <div className={`text-xs ${theme.colors.text.tertiary} italic`}>
                     Rules are applied sequentially from top to bottom.

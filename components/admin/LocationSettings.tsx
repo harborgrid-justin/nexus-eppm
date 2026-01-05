@@ -44,7 +44,7 @@ const LocationSettings: React.FC = () => {
         };
 
         dispatch({
-            type: editingLoc.id ? 'UPDATE_LOCATION' : 'ADD_LOCATION',
+            type: editingLoc.id ? 'ADMIN_UPDATE_LOCATION' : 'ADMIN_ADD_LOCATION',
             payload: locationToSave
         });
         setIsPanelOpen(false);
@@ -52,7 +52,7 @@ const LocationSettings: React.FC = () => {
 
     const handleDelete = (id: string) => {
         if (confirm("Delete this site? Projects linked to this location will lose their georeference.")) {
-            dispatch({ type: 'DELETE_LOCATION', payload: id });
+            dispatch({ type: 'ADMIN_DELETE_LOCATION', payload: id });
         }
     };
 
@@ -163,8 +163,11 @@ const LocationSettings: React.FC = () => {
                                 <input 
                                     type="number" 
                                     className="w-full bg-slate-800 border-slate-700 rounded p-2 text-sm font-mono outline-none focus:ring-1 focus:ring-nexus-500"
-                                    value={editingLoc?.coordinates?.lat}
-                                    onChange={e => setEditingLoc({...editingLoc, coordinates: { ...editingLoc?.coordinates!, lat: parseFloat(e.target.value) }})}
+                                    value={editingLoc?.coordinates?.lat ?? 0}
+                                    onChange={e => {
+                                        const coords = editingLoc?.coordinates || { lat: 0, lng: 0 };
+                                        setEditingLoc({...editingLoc, coordinates: { ...coords, lat: parseFloat(e.target.value) }})
+                                    }}
                                 />
                              </div>
                              <div>
@@ -172,8 +175,11 @@ const LocationSettings: React.FC = () => {
                                 <input 
                                     type="number" 
                                     className="w-full bg-slate-800 border-slate-700 rounded p-2 text-sm font-mono outline-none focus:ring-1 focus:ring-nexus-500"
-                                    value={editingLoc?.coordinates?.lng}
-                                    onChange={e => setEditingLoc({...editingLoc, coordinates: { ...editingLoc?.coordinates!, lng: parseFloat(e.target.value) }})}
+                                    value={editingLoc?.coordinates?.lng ?? 0}
+                                    onChange={e => {
+                                        const coords = editingLoc?.coordinates || { lat: 0, lng: 0 };
+                                        setEditingLoc({...editingLoc, coordinates: { ...coords, lng: parseFloat(e.target.value) }})
+                                    }}
                                 />
                              </div>
                         </div>

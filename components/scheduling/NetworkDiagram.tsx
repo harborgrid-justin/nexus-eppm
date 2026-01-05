@@ -1,6 +1,6 @@
 
-import React, { useMemo, Suspense, useTransition, useRef, useState, useEffect } from 'react';
-import { Project, Task, Dependency } from '../../types/index';
+import React, { useMemo, Suspense, useRef, useEffect } from 'react';
+import { Task, Dependency } from '../../types/index';
 import { Diamond, Loader2, Share2, ZoomIn, ZoomOut, Maximize2, Move } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
@@ -13,7 +13,14 @@ interface NodeTask extends Task {
   dependencies: Dependency[];
 }
 
-const NetworkPaths: React.FC<{ nodes: NodeTask[], positions: Map<string, any>, tasks: Task[] }> = ({ nodes, positions, tasks }) => {
+interface NodePosition {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+const NetworkPaths: React.FC<{ nodes: NodeTask[], positions: Map<string, NodePosition>, tasks: Task[] }> = ({ nodes, positions, tasks }) => {
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
             <defs>
@@ -46,7 +53,6 @@ const NetworkDiagram: React.FC = () => {
   const { project } = useProjectWorkspace();
   const theme = useTheme();
   
-  // Ref for direct DOM manipulation (Principle 11)
   const canvasRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const offset = useRef({ x: 0, y: 0 });
@@ -82,14 +88,13 @@ const NetworkDiagram: React.FC = () => {
   }, [project?.tasks]);
   
   const nodePositions = useMemo(() => {
-    const pos = new Map<string, { x: number, y: number, width: number, height: number }>();
+    const pos = new Map<string, NodePosition>();
     levels.forEach((lTasks, lIdx) => {
       lTasks.forEach((t, tIdx) => pos.set(t.id, { x: lIdx * 280 + 80, y: tIdx * 140 + 80, width: 220, height: 100 }));
     });
     return pos;
   }, [levels]);
 
-  // --- RAF Optimized Panning ---
   const updateTransform = () => {
     if (canvasRef.current) {
         canvasRef.current.style.transform = `translate(${offset.current.x}px, ${offset.current.y}px)`;
@@ -190,7 +195,6 @@ const NetworkDiagram: React.FC = () => {
         </div>
       </div>
       
-      {/* Interaction Hint Overlay */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-3 backdrop-blur-md shadow-2xl border border-white/10 select-none pointer-events-none">
           <div className="flex items-center gap-1.5 text-nexus-400"><Move size={14}/> Click & Drag to Pan</div>
           <div className="w-px h-3 bg-white/20"></div>

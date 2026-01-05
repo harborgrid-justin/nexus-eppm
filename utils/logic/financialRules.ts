@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { SystemAlert } from '../../types/index';
 import { createAlert } from './common';
 import { calculateEVM } from '../integrations/cost';

@@ -1,36 +1,14 @@
 
-import React, { useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Target, DollarSign, GripVertical, AlertTriangle } from 'lucide-react';
 import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 import { formatCompactCurrency } from '../../utils/formatters';
+import { useStrategicAlignmentLogic } from '../../hooks/domain/useStrategicAlignmentLogic';
 
 const StrategicAlignmentBoard: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData();
-
-    // Group projects by category (Strategic Driver)
-    const boardData = useMemo(() => {
-        const drivers = ['Innovation & Growth', 'Operational Efficiency', 'Regulatory & Compliance', 'Keep the Lights On'];
-        const groups: Record<string, typeof state.projects> = {};
-        
-        drivers.forEach(d => groups[d] = []);
-        
-        state.projects.forEach(p => {
-            const category = p.category || 'Keep the Lights On';
-            if (!groups[category]) groups[category] = [];
-            groups[category].push(p);
-        });
-
-        return drivers.map(driver => ({
-            id: driver,
-            title: driver,
-            projects: groups[driver] || [],
-            totalBudget: (groups[driver] || []).reduce((sum, p) => sum + p.budget, 0)
-        }));
-    }, [state.projects]);
+    const { boardData, totalPortfolioBudget } = useStrategicAlignmentLogic();
 
     return (
         <div className={`h-full overflow-hidden flex flex-col ${theme.layout.pagePadding}`}>
@@ -40,7 +18,7 @@ const StrategicAlignmentBoard: React.FC = () => {
                     <p className={theme.typography.small}>Balance investment across strategic pillars.</p>
                 </div>
                 <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg text-sm text-slate-600">
-                    <Target size={16}/> Total Portfolio: <strong>{formatCompactCurrency(state.projects.reduce((s, p) => s + p.budget, 0))}</strong>
+                    <Target size={16}/> Total Portfolio: <strong>{formatCompactCurrency(totalPortfolioBudget)}</strong>
                 </div>
             </div>
 

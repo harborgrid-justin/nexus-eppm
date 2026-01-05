@@ -1,12 +1,26 @@
 
 import React, { useTransition } from 'react';
 import WBSNodeComponent from '../WBSNodeComponent';
-import { Plus, Search } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { WBSNode } from '../../../types';
+
+interface WbsManagerProps {
+    selectedNode: WBSNode | null;
+    openNodes: Set<string>;
+    draggedNodeId: string | null;
+    handleNodeClick: (id: string) => void;
+    toggleNode: (id: string) => void;
+    handleDragStart: (e: React.DragEvent, id: string) => void;
+    handleDragEnd: () => void;
+    handleDrop: (e: React.DragEvent, id: string | null) => void;
+    handleDragOver: (e: React.DragEvent) => void;
+    handleContextMenu: (e: React.MouseEvent, id: string) => void;
+}
 
 interface WbsTreePanelProps {
-    wbsTree: any[];
-    managerProps: any;
+    wbsTree: WBSNode[];
+    managerProps: WbsManagerProps;
     canEdit: boolean;
     onAddNode: (parentId: string | null) => void;
 }
@@ -17,10 +31,9 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
         handleNodeClick, toggleNode, handleDragStart, handleDragEnd, handleDrop, handleDragOver, handleContextMenu 
     } = managerProps;
 
-    // Pattern 19: startTransition for selection to prioritize list responsiveness
     const [isPending, startTransition] = useTransition();
 
-    const renderNode = (node: any, level: number) => {
+    const renderNode = (node: WBSNode, level: number) => {
         const isOpen = openNodes.has(node.id);
         const isSelected = selectedNode?.id === node.id;
 
@@ -41,7 +54,7 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
                     onDragOver={handleDragOver}
                     onContextMenu={(e) => handleContextMenu(e, node.id)}
                 />
-                {isOpen && node.children.map((child: any) => renderNode(child, level + 1))}
+                {isOpen && node.children && node.children.map((child: WBSNode) => renderNode(child, level + 1))}
             </div>
         );
     };
@@ -56,7 +69,7 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
                 </div>
             </div>
             <div className={`flex-1 overflow-y-auto p-2 scrollbar-thin transition-opacity ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-                {wbsTree.map((node: any) => renderNode(node, 0))}
+                {wbsTree.map((node: WBSNode) => renderNode(node, 0))}
             </div>
         </div>
     );

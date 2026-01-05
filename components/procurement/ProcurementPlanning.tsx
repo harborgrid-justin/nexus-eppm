@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FileText, Save, Book, Lock, Calendar, Plus } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -55,15 +56,13 @@ const ProcurementPlanning: React.FC<ProcurementPlanningProps> = ({ projectId }) 
             version: (planData.version || 0) + 1
         };
         
-        // In a real reducer, we'd have a specific action like UPDATE_PROCUREMENT_PLAN
-        // For now, we reuse a generic approach or mock the dispatch if the reducer isn't fully granular
-        // Assuming we added 'UPDATE_PROCUREMENT_PLAN' to the reducer in a real scenario.
-        // I'll simulate an update by just logging for now as the reducer might not have this specific action type yet.
-        // Actually, let's use the generic pattern if available or just update local state to simulate.
-        // Dispatching a mock action for completeness.
-        console.log("Saving Procurement Plan", planToSave);
-        // dispatch({ type: 'UPDATE_PROCUREMENT_PLAN', payload: planToSave }); 
-        alert("Procurement Plan Saved (Simulated)");
+        if (existingPlan) {
+             dispatch({ type: 'UPDATE_PROCUREMENT_PLAN', payload: planToSave });
+        } else {
+             dispatch({ type: 'ADD_PROCUREMENT_PLAN', payload: planToSave });
+        }
+        
+        alert("Procurement Plan Saved.");
     };
 
     return (

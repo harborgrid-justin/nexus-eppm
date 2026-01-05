@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 import { BudgetLogItem } from '../../types/finance';
 
 export const financialReducer = (state: DataState, action: Action): DataState => {

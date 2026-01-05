@@ -1,23 +1,38 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { BarChart2, RefreshCw, TrendingUp, Info, Play, AlertCircle } from 'lucide-react';
+import { BarChart2, TrendingUp, Info, Play, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
 import { Button } from '../ui/Button';
+
+interface HistogramData {
+    range: string;
+    frequency: number;
+    cumulative: number;
+    rawRange: number;
+}
+
+interface SimulationResult {
+    p50: number;
+    p80: number;
+    p90: number;
+    minVal: number;
+    maxVal: number;
+    data: HistogramData[];
+    deterministic: number;
+}
 
 const QuantitativeAnalysis: React.FC = () => {
   const { project, risks } = useProjectWorkspace();
   const theme = useTheme();
   const [iterations, setIterations] = useState(1000);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [results, setResults] = useState<any | null>(null);
+  const [results, setResults] = useState<SimulationResult | null>(null);
 
-  // Helper: PERT Random Generator using Box-Muller transform approximation or simple triangular distribution
   const pertRandom = (min: number, likely: number, max: number) => {
-    // Simple triangular distribution approximation
     const u = Math.random();
     const f = (likely - min) / (max - min);
     if (u <= f) {
@@ -31,12 +46,10 @@ const QuantitativeAnalysis: React.FC = () => {
     if (!project) return;
     setIsSimulating(true);
 
-    // Use setTimeout to allow UI to update to "Running..." state
     setTimeout(() => {
         const simResults = [];
         const baseDuration = getDaysDiff(project.startDate, project.endDate);
         
-        // Identify tasks impacting duration (Simplified Critical Path)
         const criticalTasks = project.tasks.filter(t => t.critical || t.duration > 15);
 
         for (let i = 0; i < iterations; i++) {
@@ -44,7 +57,6 @@ const QuantitativeAnalysis: React.FC = () => {
             
             // 1. Aleatory Uncertainty (Task Variance)
             criticalTasks.forEach(task => {
-                // Assume -10% (Opt) to +25% (Pess) variance for demo if no specific risk data
                 const opt = task.duration * 0.9;
                 const likely = task.duration;
                 const pess = task.duration * 1.25;
@@ -57,8 +69,6 @@ const QuantitativeAnalysis: React.FC = () => {
                 const probThreshold = risk.probability === 'High' ? 0.7 : risk.probability === 'Medium' ? 0.4 : 0.1;
                 
                 if (trigger < probThreshold) {
-                    // Risk occurred: Add impact delay (Mock impact based on score)
-                    // Score 1-25. Assume 1 score point = 1 day delay for simplicity
                     iterationDuration += (risk.score * 0.5); 
                 }
             });
@@ -68,18 +78,16 @@ const QuantitativeAnalysis: React.FC = () => {
 
         simResults.sort((a, b) => a - b);
 
-        // Calculate Percentiles
         const p50 = simResults[Math.floor(simResults.length * 0.50)];
         const p80 = simResults[Math.floor(simResults.length * 0.80)];
         const p90 = simResults[Math.floor(simResults.length * 0.90)];
 
-        // Generate Histogram Buckets
         const minVal = simResults[0];
         const maxVal = simResults[simResults.length - 1];
         const bucketCount = 20;
         const bucketSize = (maxVal - minVal) / bucketCount;
         
-        const histogramData = [];
+        const histogramData: HistogramData[] = [];
         let cumulativeCount = 0;
 
         for (let b = 0; b < bucketCount; b++) {
@@ -149,7 +157,6 @@ const QuantitativeAnalysis: React.FC = () => {
            </div>
        ) : (
            <div className={theme.layout.sectionSpacing}>
-                {/* Confidence Metrics */}
                 <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
                     <StatCard 
                         title="Deterministic Duration" 
@@ -178,7 +185,6 @@ const QuantitativeAnalysis: React.FC = () => {
                     />
                 </div>
 
-                {/* Main Chart */}
                 <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[500px]`}>
                     <div className="flex justify-between items-center mb-4">
                         <h3 className={theme.typography.h3}>Duration Frequency & Cumulative Probability (S-Curve)</h3>
@@ -200,9 +206,8 @@ const QuantitativeAnalysis: React.FC = () => {
                             <Bar yAxisId="left" dataKey="frequency" fill="#cbd5e1" name="Frequency" barSize={30} radius={[4, 4, 0, 0]} />
                             <Line yAxisId="right" type="monotone" dataKey="cumulative" stroke="#0ea5e9" strokeWidth={3} name="Cumulative Probability" dot={false} />
                             
-                            {/* Reference Lines for P-Values */}
-                            <ReferenceLine x={results.data.find((d:any) => d.cumulative >= 50)?.range} stroke="#22c55e" strokeDasharray="3 3" label={{ value: 'P50', fill: '#22c55e', fontSize: 12 }} yAxisId="left" />
-                            <ReferenceLine x={results.data.find((d:any) => d.cumulative >= 80)?.range} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'P80', fill: '#f59e0b', fontSize: 12 }} yAxisId="left" />
+                            <ReferenceLine x={results.data.find(d => d.cumulative >= 50)?.range} stroke="#22c55e" strokeDasharray="3 3" label={{ value: 'P50', fill: '#22c55e', fontSize: 12 }} yAxisId="left" />
+                            <ReferenceLine x={results.data.find(d => d.cumulative >= 80)?.range} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'P80', fill: '#f59e0b', fontSize: 12 }} yAxisId="left" />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </div>

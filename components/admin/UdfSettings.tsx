@@ -34,7 +34,7 @@ export const UdfSettings: React.FC = () => {
         };
 
         dispatch({
-            type: editingUdf.id ? 'UPDATE_UDF' : 'ADD_UDF',
+            type: editingUdf.id ? 'ADMIN_UPDATE_UDF' : 'ADMIN_ADD_UDF',
             payload: udfToSave
         });
         setIsPanelOpen(false);
@@ -42,7 +42,7 @@ export const UdfSettings: React.FC = () => {
 
     const handleDelete = (id: string) => {
         if (confirm("Remove this custom field? Data associated with this field will be permanently deleted from all items.")) {
-            dispatch({ type: 'DELETE_UDF', payload: id });
+            dispatch({ type: 'ADMIN_DELETE_UDF', payload: id });
         }
     };
 

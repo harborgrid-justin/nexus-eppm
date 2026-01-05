@@ -1,5 +1,5 @@
 
-import { DataState, Action, StagingRecord } from '../../types/actions';
+import { DataState, Action, StagingRecord } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { Project, Task, Resource, TaskStatus } from '../../types';
 
@@ -8,7 +8,7 @@ export const stagingReducer = (state: DataState, action: Action): DataState => {
     case 'STAGING_INIT': {
         const { type, data } = action.payload;
         // Transform raw data into StagingRecord shape
-        const records: StagingRecord[] = data.map((row, idx) => {
+        const records: StagingRecord[] = data.map((row: any, idx: number) => {
             const errors: string[] = [];
             
             // Basic Validation based on type

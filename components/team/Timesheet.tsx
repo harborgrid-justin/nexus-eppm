@@ -1,129 +1,19 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useData } from '../../context/DataContext';
-import { Timesheet as TimesheetType, TimesheetRow } from '../../types/resource';
-import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import React from 'react';
+import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, Lock, Plus } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
-import { generateId } from '../../utils/formatters';
+import { useTimesheetLogic } from '../../hooks/domain/useTimesheetLogic';
+import { Button } from '../ui/Button';
 
 const Timesheet: React.FC = () => {
-  const { state, dispatch } = useData();
   const theme = useTheme();
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date | null>(null);
-  
-  // Use local user ID (Mock - in real app this comes from AuthContext)
-  const currentUserId = 'R-002'; // 'Mike Ross' from MOCK_RESOURCES
+  const { 
+      currentWeekStart, weekDates, rows, status, isEditable, grandTotal,
+      handleHourChange, shiftWeek, saveSheet, addRow, user
+  } = useTimesheetLogic();
 
-  function getMonday(d: Date) {
-    d = new Date(d);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-    return new Date(d.setDate(diff));
-  }
-
-  useEffect(() => {
-    setCurrentWeekStart(getMonday(new Date()));
-  }, []);
-
-  const weekDates = useMemo(() => {
-    if (!currentWeekStart) return [];
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(currentWeekStart);
-        d.setDate(d.getDate() + i);
-        dates.push(d);
-    }
-    return dates;
-  }, [currentWeekStart]);
-
-  // Find existing timesheet or create structure
-  const activeTimesheet = useMemo(() => {
-      if (!currentWeekStart) return null;
-      const weekStr = currentWeekStart.toISOString().split('T')[0];
-      return state.timesheets.find(t => t.resourceId === currentUserId && t.periodStart === weekStr);
-  }, [state.timesheets, currentWeekStart, currentUserId]);
-
-  const [rows, setRows] = useState<TimesheetRow[]>([]);
-  const [status, setStatus] = useState<'Draft' | 'Submitted' | 'Approved' | 'Rejected'>('Draft');
-  const isEditable = status === 'Draft' || status === 'Rejected';
-
-  useEffect(() => {
-      if (activeTimesheet) {
-          setRows(activeTimesheet.rows);
-          setStatus(activeTimesheet.status);
-      } else if (currentWeekStart) {
-          // Initialize empty rows based on assignments from Project Tasks
-          const tasks: TimesheetRow[] = [];
-          state.projects.forEach(p => {
-              p.tasks.forEach(t => {
-                  if (t.assignments && t.assignments.some(a => a.resourceId === currentUserId)) {
-                      tasks.push({
-                          taskId: t.id,
-                          projectId: p.id,
-                          taskName: t.name,
-                          projectName: p.name,
-                          hours: [0, 0, 0, 0, 0, 0, 0] // 7 days
-                      });
-                  }
-              });
-          });
-          setRows(tasks);
-          setStatus('Draft');
-      }
-  }, [activeTimesheet, currentWeekStart, state.projects]);
-
-  const handleHourChange = (rowIndex: number, dayIndex: number, val: string) => {
-      if (!isEditable) return;
-      
-      let numVal = parseFloat(val);
-      if (isNaN(numVal) || numVal < 0) numVal = 0;
-      if (numVal > 24) numVal = 24; // Cap daily hours
-
-      const newRows = [...rows];
-      // Create deep copy of hours array to avoid mutation issues
-      newRows[rowIndex] = { ...newRows[rowIndex], hours: [...newRows[rowIndex].hours] };
-      newRows[rowIndex].hours[dayIndex] = numVal;
-      setRows(newRows);
-  };
-
-  const calculateDailyTotal = (dayIndex: number) => {
-      return rows.reduce((sum, row) => sum + (row.hours[dayIndex] || 0), 0);
-  };
-
-  const calculateRowTotal = (row: TimesheetRow) => {
-      return row.hours.reduce((sum, h) => sum + (h || 0), 0);
-  };
-
-  const grandTotal = rows.reduce((sum, row) => sum + calculateRowTotal(row), 0);
-
-  const saveSheet = (newStatus: TimesheetType['status']) => {
-      if (!currentWeekStart) return;
-      
-      const sheet: TimesheetType = {
-          id: activeTimesheet?.id || generateId('TS'),
-          resourceId: currentUserId,
-          periodStart: currentWeekStart.toISOString().split('T')[0],
-          status: newStatus,
-          totalHours: grandTotal,
-          rows: rows
-      };
-      
-      dispatch({ 
-          type: 'SUBMIT_TIMESHEET', 
-          payload: sheet
-      });
-      setStatus(newStatus);
-  };
-
-  const shiftWeek = (direction: 'prev' | 'next') => {
-      if (!currentWeekStart) return;
-      const newDate = new Date(currentWeekStart);
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-      setCurrentWeekStart(newDate);
-  };
-
-  if (!currentWeekStart) return <div className="p-6">Loading timesheet...</div>;
+  if (!currentWeekStart || !user) return <div className="p-6 text-slate-400">Loading timesheet...</div>;
 
   return (
     <div className={`h-full flex flex-col ${theme.components.card} overflow-hidden`}>
@@ -212,27 +102,22 @@ const Timesheet: React.FC = () => {
                                 </td>
                             ))}
                             <td className={`px-4 py-3 text-center font-bold text-sm ${theme.colors.text.primary} bg-slate-50/50`}>
-                                {calculateRowTotal(row).toFixed(1)}
+                                {row.hours.reduce((a,b) => a+b, 0).toFixed(1)}
                             </td>
                         </tr>
                     ))}
-                    {/* Totals Row */}
-                    <tr className={`${theme.colors.background} font-bold ${theme.colors.text.primary} sticky bottom-0 z-20 shadow-[0_-2px_5px_rgba(0,0,0,0.05)]`}>
-                        <td className={`px-4 py-3 border-r ${theme.colors.border} text-right text-xs uppercase sticky left-0 z-30 ${theme.colors.background}`}>Daily Total</td>
-                        {weekDates.map((_, i) => (
-                            <td key={i} className="px-2 py-3 text-center text-sm border-r border-slate-200">
-                                {calculateDailyTotal(i).toFixed(1)}
+                    {isEditable && (
+                        <tr>
+                            <td colSpan={9} className="p-2">
+                                <Button variant="ghost" size="sm" icon={Plus} onClick={addRow} className="w-full border border-dashed border-slate-300 text-slate-500">Add Line</Button>
                             </td>
-                        ))}
-                        <td className={`px-4 py-3 text-center text-sm ${theme.colors.surface} border ${theme.colors.border}`}>
-                            {grandTotal.toFixed(1)}
-                        </td>
-                    </tr>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>
         
-        {rows.length === 0 && (
+        {rows.length === 0 && !isEditable && (
             <div className={`flex flex-col items-center justify-center h-64 ${theme.colors.text.tertiary}`}>
                 <AlertCircle size={32} className="mb-2 opacity-50"/>
                 <p>No tasks assigned for this period.</p>

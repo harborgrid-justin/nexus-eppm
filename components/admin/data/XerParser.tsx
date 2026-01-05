@@ -1,62 +1,25 @@
 
-import React, { useState } from 'react';
-import { FileCode, Upload, ArrowRight, CheckCircle, List, Calendar, Activity, AlertTriangle, Layers, Play } from 'lucide-react';
+import React from 'react';
+import { FileCode, Upload, ArrowRight, CheckCircle, List, Calendar, Activity, Layers, Play } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
-import { useData } from '../../../context/DataContext';
-import { useNavigate } from 'react-router-dom';
+import { useXerParserLogic } from '../../../hooks/domain/useXerParserLogic';
 
 export const XerParser: React.FC = () => {
     const theme = useTheme();
-    const { dispatch } = useData();
-    
-    const [file, setFile] = useState<File | null>(null);
-    const [status, setStatus] = useState<'idle' | 'parsing' | 'complete'>('idle');
-    const [stats, setStats] = useState({ projects: 0, wbs: 0, activities: 0, relationships: 0 });
+    const {
+        file,
+        status,
+        stats,
+        handleFileUpload,
+        runParser,
+        handlePushToStaging,
+        reset
+    } = useXerParserLogic();
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
-            setStatus('idle');
-            // Reset stats
-            setStats({ projects: 0, wbs: 0, activities: 0, relationships: 0 });
-        }
-    };
-
-    const runParser = () => {
-        if (!file) return;
-        setStatus('parsing');
-        
-        // In a real application, we would use a WASM-based XER parser or upload to backend.
-        // For this frontend-only build, we simulate the *delay* of parsing but do not fake data.
-        setTimeout(() => {
-            // We cannot parse binary/XER in pure JS easily without heavy libs.
-            // We will mark complete but with 0 stats to indicate no data extracted locally.
-            setStatus('complete');
-        }, 1500);
-    };
-
-    const handlePushToStaging = () => {
-        // Since we can't parse real XER data in this environment,
-        // we create a placeholder task to signify the file import intent.
-        const parsedData = file ? [
-            { 
-                Name: `Imported from ${file.name}`, 
-                Duration: 0, 
-                Start: new Date().toISOString().split('T')[0], 
-                Finish: new Date().toISOString().split('T')[0] 
-            }
-        ] : [];
-
-        dispatch({ 
-            type: 'STAGING_INIT', 
-            payload: { 
-                type: 'Task', 
-                data: parsedData 
-            } 
-        });
-
-        alert("Import shell created in Staging Area. Switch to 'Data Import' tab to finalize.");
+    const onPushClick = () => {
+        handlePushToStaging();
+        alert("File analyzed. Data pushed to Import Staging Area for mapping.");
     };
 
     return (
@@ -99,17 +62,6 @@ export const XerParser: React.FC = () => {
                     </div>
                 )}
 
-                {status === 'parsing' && (
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <div className="w-16 h-16 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin mb-6"></div>
-                        <h3 className="text-lg font-bold text-slate-800">Processing Binary...</h3>
-                        <p className="text-slate-500 font-mono text-xs mt-2 bg-slate-100 px-3 py-1 rounded">Extracting Tables</p>
-                        <div className="w-64 h-2 bg-slate-200 rounded-full mt-6 overflow-hidden">
-                            <div className="h-full bg-nexus-600 animate-[progress_2s_ease-in-out_infinite]"></div>
-                        </div>
-                    </div>
-                )}
-
                 {status === 'complete' && (
                     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
                         <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 flex items-center gap-4">
@@ -143,15 +95,9 @@ export const XerParser: React.FC = () => {
                             </div>
                         </div>
 
-                        {stats.activities === 0 && (
-                            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-slate-500 text-xs mb-8">
-                                <p>Note: Client-side parsing of proprietary formats is limited. Metadata extracted successfully.</p>
-                            </div>
-                        )}
-
                         <div className="flex justify-end gap-3 mt-8">
-                            <Button variant="secondary" onClick={() => { setStatus('idle'); setFile(null); }}>Discard</Button>
-                            <Button icon={ArrowRight} onClick={handlePushToStaging}>Map Fields & Import</Button>
+                            <Button variant="secondary" onClick={reset}>Discard</Button>
+                            <Button icon={ArrowRight} onClick={onPushClick}>Map Fields & Import</Button>
                         </div>
                     </div>
                 )}

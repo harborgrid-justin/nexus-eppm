@@ -115,7 +115,7 @@ export const ActivityCodeSettings: React.FC = () => {
                        ].map(tab => (
                          <button 
                             key={tab.id}
-                            onClick={() => { setActiveScope(tab.id as any); setSelectedCodeId(null); }}
+                            onClick={() => { setActiveScope(tab.id as ActivityCodeScope); setSelectedCodeId(null); }}
                             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold rounded-md transition-all ${activeScope === tab.id ? `${theme.colors.surface} shadow ${theme.colors.primary.replace('bg-', 'text-')}` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
                          >
                             <tab.icon size={14} /> {tab.id}
@@ -224,7 +224,6 @@ export const ActivityCodeSettings: React.FC = () => {
                 )}
             </div>
 
-            {/* Definition SidePanel */}
             <SidePanel
                 isOpen={isDefinitionPanelOpen}
                 onClose={() => setIsDefinitionPanelOpen(false)}
@@ -251,7 +250,7 @@ export const ActivityCodeSettings: React.FC = () => {
                         <select 
                             className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} font-medium ${theme.colors.text.primary} outline-none focus:ring-2 focus:ring-nexus-500`}
                             value={editingDefinition?.scope}
-                            onChange={e => setEditingDefinition({...editingDefinition!, scope: e.target.value as any})}
+                            onChange={e => setEditingDefinition({...editingDefinition!, scope: e.target.value as ActivityCodeScope})}
                         >
                             <option value="Global">Global (All Projects)</option>
                             <option value="Project">Project Specific (Private)</option>
@@ -266,7 +265,6 @@ export const ActivityCodeSettings: React.FC = () => {
                 </div>
             </SidePanel>
 
-            {/* Value SidePanel */}
             <SidePanel
                 isOpen={isValuePanelOpen}
                 onClose={() => setIsValuePanelOpen(false)}

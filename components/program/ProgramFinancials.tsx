@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
 import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon, Edit2, Save } from 'lucide-react';
@@ -27,20 +27,42 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const projectNamesMap = new Map(projects.map(p => [p.id, p.name]));
 
   // Live aggregation: Link chart data directly to Project current state
-  const chartData = programFinancials.allocations.map(a => {
-      const liveProject = projects.find(p => p.id === a.projectId);
-      return {
-          name: liveProject ? liveProject.code : a.projectId,
-          Allocated: a.allocated,
-          // Use live project spend if available, else fallback to allocation record
-          Spent: liveProject ? liveProject.spent : a.spent,
-          // Simple Forecast calculation: Spend + (Budget - Spend) * 1.1 (10% contingency)
-          Forecast: liveProject ? liveProject.budget * 1.05 : a.forecast
-      };
-  });
+  // Fallback: If no allocations exist, create a virtual list from projects for visualization
+  const chartData = useMemo(() => {
+      if (programFinancials.allocations.length > 0) {
+          return programFinancials.allocations.map(a => {
+              const liveProject = projects.find(p => p.id === a.projectId);
+              return {
+                  name: liveProject ? liveProject.code : a.projectId,
+                  Allocated: a.allocated,
+                  Spent: liveProject ? liveProject.spent : a.spent,
+                  Forecast: liveProject ? liveProject.budget * 1.05 : a.forecast
+              };
+          });
+      } else {
+          return projects.map(p => ({
+              name: p.code,
+              Allocated: p.budget,
+              Spent: p.spent,
+              Forecast: p.budget * 1.05
+          }));
+      }
+  }, [programFinancials.allocations, projects]);
 
   const handleOpenAllocationPanel = () => {
-      setEditAllocations(JSON.parse(JSON.stringify(programFinancials.allocations)));
+      // If no allocations exist, initialize them from projects
+      const allocationsToEdit = programFinancials.allocations.length > 0 
+          ? JSON.parse(JSON.stringify(programFinancials.allocations))
+          : projects.map(p => ({
+              id: `ALLOC-${p.id}`,
+              programId,
+              projectId: p.id,
+              allocated: p.budget,
+              spent: p.spent,
+              forecast: p.budget * 1.05
+          }));
+
+      setEditAllocations(allocationsToEdit);
       setIsAllocationPanelOpen(true);
   };
 
@@ -65,7 +87,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
         {/* Financial Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Total Program Budget" value={formatCompactCurrency(aggregateMetrics.totalBudget)} icon={DollarSign} />
-            <StatCard title="Actual Spend" value={formatCompactCurrency(aggregateMetrics.totalSpent)} subtext={`${((aggregateMetrics.totalSpent / aggregateMetrics.totalBudget) * 100).toFixed(1)}% consumed`} icon={TrendingUp} />
+            <StatCard title="Actual Spend" value={formatCompactCurrency(aggregateMetrics.totalSpent)} subtext={`${((aggregateMetrics.totalSpent / (aggregateMetrics.totalBudget || 1)) * 100).toFixed(1)}% consumed`} icon={TrendingUp} />
             <StatCard title="Remaining Funding" value={formatCompactCurrency(remainingBudget)} icon={Lock} />
             <StatCard title="Forecast at Completion" value={formatCompactCurrency(aggregateMetrics.totalBudget * 1.05)} subtext="Estimated variance +5%" icon={PieIcon} trend="down" />
         </div>
@@ -97,30 +119,34 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
             <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
                 <h3 className="font-bold text-slate-800 flex items-center gap-2"><Lock size={16}/> Funding Gates</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-                {programFinancials.gates.map(gate => (
-                    <div key={gate.id} className="p-6 flex flex-col items-center text-center relative group">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
-                            gate.status === 'Released' ? 'bg-green-100 text-green-600' : 'bg-slate-200 text-slate-500'
-                        }`}>
-                            {gate.status === 'Released' ? <Unlock size={20}/> : <Lock size={20}/>}
+            {programFinancials.gates.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                    {programFinancials.gates.map(gate => (
+                        <div key={gate.id} className="p-6 flex flex-col items-center text-center relative group">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                                gate.status === 'Released' ? 'bg-green-100 text-green-600' : 'bg-slate-200 text-slate-500'
+                            }`}>
+                                {gate.status === 'Released' ? <Unlock size={20}/> : <Lock size={20}/>}
+                            </div>
+                            <h4 className="font-bold text-slate-900">{gate.name}</h4>
+                            <p className="text-sm text-slate-600 mt-1">{gate.milestoneTrigger}</p>
+                            <p className="text-xl font-bold text-nexus-700 mt-2">{formatCompactCurrency(gate.amount)}</p>
+                            <p className="text-xs text-slate-400 mt-1">Date: {gate.releaseDate}</p>
+                            <div className={`mt-3 px-3 py-1 text-xs font-bold rounded-full cursor-pointer ${
+                                gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                            }`} onClick={() => {
+                                if(gate.status !== 'Released' && confirm("Release this funding gate?")) {
+                                    dispatch({type: 'PROGRAM_UPDATE_GATE', payload: {...gate, status: 'Released'}});
+                                }
+                            }}>
+                                {gate.status}
+                            </div>
                         </div>
-                        <h4 className="font-bold text-slate-900">{gate.name}</h4>
-                        <p className="text-sm text-slate-600 mt-1">{gate.milestoneTrigger}</p>
-                        <p className="text-xl font-bold text-nexus-700 mt-2">{formatCompactCurrency(gate.amount)}</p>
-                        <p className="text-xs text-slate-400 mt-1">Date: {gate.releaseDate}</p>
-                        <div className={`mt-3 px-3 py-1 text-xs font-bold rounded-full cursor-pointer ${
-                            gate.status === 'Released' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                        }`} onClick={() => {
-                             if(gate.status !== 'Released' && confirm("Release this funding gate?")) {
-                                 dispatch({type: 'PROGRAM_UPDATE_GATE', payload: {...gate, status: 'Released'}});
-                             }
-                        }}>
-                            {gate.status}
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="p-8 text-center text-slate-400 italic">No funding gates defined for this program.</div>
+            )}
         </div>
 
         {/* Edit Allocation Panel */}

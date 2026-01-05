@@ -1,36 +1,31 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from '../../../context/DataContext';
+import { NEXUS_SCHEMAS } from '../../../constants/index';
+import { EtlMapping } from '../../../types';
 import { 
-    GitMerge, ArrowRight, Save, RefreshCw, Layers, 
-    Code, Shield, Clock, AlertTriangle, FileCode, Check, Plus,
-    Database, Mail, Lock, Activity, Shuffle, 
-    Variable, History, Link, X, PlayCircle, Settings
+    GitMerge, ArrowRight, Save, Clock, Shield, Plus,
+    Database, Shuffle, Variable, X, PlayCircle, Layers
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
-import { NEXUS_SCHEMAS } from '../../../constants/index';
-import { EtlMapping } from '../../../types';
-
-// Mock source data simulating an incoming payload from an external ERP
-const MOCK_SOURCE_DATA: Record<string, any> = {
-    EXTERNAL_ID: "PRJ-9920",
-    PROJ_NAME: "  Global Expansion Initiative  ", // Intentionally padded to show trim
-    BUDGET_AMT: "1250000.00",
-    START_DT: "2024-10-01T00:00:00Z",
-    COST_CENTER: "CC-NY-01",
-    STATUS_CODE: "A"
-};
 
 export const IntegrationDesigner: React.FC = () => {
     const theme = useTheme();
     const { state, dispatch } = useData();
     const [activeTab, setActiveTab] = useState<'mapping' | 'transform' | 'orchestration' | 'governance'>('mapping');
     const [targetEntity, setTargetEntity] = useState('Project');
-    
-    // Mapping State populated from global store
     const [mappings, setMappings] = useState<EtlMapping[]>([]);
+    
+    const [testPayload, setTestPayload] = useState(JSON.stringify({
+        EXTERNAL_ID: "PRJ-9920",
+        PROJ_NAME: "  Global Expansion Initiative  ", 
+        BUDGET_AMT: "1250000.00",
+        START_DT: "2024-10-01T00:00:00Z",
+        COST_CENTER: "CC-NY-01",
+        STATUS_CODE: "A"
+    }, null, 2));
 
     useEffect(() => {
         if(state.etlMappings && state.etlMappings.length > 0) {
@@ -38,7 +33,7 @@ export const IntegrationDesigner: React.FC = () => {
         }
     }, [state.etlMappings]);
 
-    const availableTargets = NEXUS_SCHEMAS[targetEntity] || [];
+    const availableTargets = useMemo(() => NEXUS_SCHEMAS[targetEntity] || [], [targetEntity]);
 
     const handleAddMapping = () => {
         setMappings([...mappings, { 
@@ -68,49 +63,58 @@ export const IntegrationDesigner: React.FC = () => {
 
     const handleSaveConfig = () => {
         dispatch({ type: 'SYSTEM_SAVE_ETL_MAPPINGS', payload: mappings });
-        alert("ETL Configuration Saved to System Core.");
     };
 
     // --- Dynamic Preview Generation ---
     const previewOutput = useMemo(() => {
-        const result: Record<string, any> = {};
+        let sourceData: Record<string, unknown> = {};
+        try {
+            sourceData = JSON.parse(testPayload);
+        } catch (e) {
+            return { error: "Invalid JSON in Source Payload" };
+        }
+
+        const result: Record<string, unknown> = {};
         
         mappings.forEach(m => {
             if (!m.target) return;
             
-            let val = MOCK_SOURCE_DATA[m.source] || null;
+            let val: unknown = sourceData[m.source] !== undefined ? sourceData[m.source] : null;
 
-            // Apply simulated transformations
             if (val !== null) {
                 if (m.transform === 'Trim Whitespace' && typeof val === 'string') {
                     val = val.trim();
-                } else if (m.transform === 'Currency(USD)' || m.transform === 'Number') {
-                    val = parseFloat(val);
-                } else if (m.transform === 'Date(ISO8601)') {
-                    val = new Date(val).toISOString().split('T')[0];
-                } else if (m.transform === 'Uppercase') {
-                    val = String(val).toUpperCase();
+                } else if ((m.transform === 'Currency(USD)' || m.transform === 'Number') && (typeof val === 'string' || typeof val === 'number')) {
+                    val = parseFloat(String(val));
+                } else if (m.transform === 'Date(ISO8601)' && typeof val === 'string') {
+                    try { val = new Date(val).toISOString().split('T')[0]; } catch {}
+                } else if (m.transform === 'Uppercase' && typeof val === 'string') {
+                    val = val.toUpperCase();
                 }
             }
 
-            // Nested object simulation (e.g., metrics.budget)
             if (m.target.includes('.')) {
                 const parts = m.target.split('.');
-                if (!result[parts[0]]) result[parts[0]] = {};
-                result[parts[0]][parts[1]] = val;
+                const root = parts[0];
+                const key = parts[1];
+                
+                if (typeof result[root] !== 'object' || result[root] === null) {
+                    result[root] = {};
+                }
+                (result[root] as Record<string, unknown>)[key] = val;
             } else {
                 result[m.target] = val;
             }
         });
 
         return {
-            source_id: MOCK_SOURCE_DATA.EXTERNAL_ID,
+            source_id: sourceData.EXTERNAL_ID,
             timestamp: new Date().toISOString(),
             status: "Transformed",
             entity: targetEntity,
             data: result
         };
-    }, [mappings, targetEntity]);
+    }, [mappings, targetEntity, testPayload]);
 
     return (
         <div className="h-full flex flex-col bg-slate-50/50">
@@ -255,15 +259,17 @@ export const IntegrationDesigner: React.FC = () => {
                         {/* Live Preview Panel */}
                         <div className="w-96 bg-slate-900 rounded-xl border border-slate-800 flex flex-col shadow-xl">
                             <div className="p-4 border-b border-slate-800 flex justify-between items-center">
-                                <h4 className="text-white font-bold flex items-center gap-2"><Activity size={16} className="text-green-500"/> Live Preview</h4>
+                                <h4 className="text-white font-bold flex items-center gap-2"><Clock size={16} className="text-green-500"/> Live Preview</h4>
                                 <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded border border-slate-700 font-mono">JSON Output</span>
                             </div>
                             <div className="flex-1 p-4 overflow-auto font-mono text-xs">
                                 <div className="mb-4">
                                     <p className="text-slate-500 mb-2 uppercase font-bold text-[10px] tracking-widest">Input (Source)</p>
-                                    <pre className="text-blue-400 opacity-70">
-                                        {JSON.stringify(MOCK_SOURCE_DATA, null, 2)}
-                                    </pre>
+                                    <textarea 
+                                        className="w-full h-32 bg-slate-950 border border-slate-700 rounded p-2 text-blue-400 outline-none resize-none"
+                                        value={testPayload}
+                                        onChange={(e) => setTestPayload(e.target.value)}
+                                    />
                                 </div>
                                 <div className="border-t border-slate-800 pt-4">
                                     <p className="text-slate-500 mb-2 uppercase font-bold text-[10px] tracking-widest">Output (Mapped)</p>
@@ -279,7 +285,7 @@ export const IntegrationDesigner: React.FC = () => {
                 {activeTab === 'transform' && (
                     <div className="h-full flex items-center justify-center text-slate-400">
                          <div className="text-center">
-                             <Code size={48} className="mx-auto mb-4 opacity-20"/>
+                             <Variable size={48} className="mx-auto mb-4 opacity-20"/>
                              <p>Advanced Scripting Mode Available in Enterprise Plan</p>
                          </div>
                     </div>

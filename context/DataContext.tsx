@@ -1,10 +1,9 @@
 
 import React, { createContext, useContext, useReducer, ReactNode, useCallback, useEffect } from 'react';
 import { 
-    Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode
+    Project, Risk, ActivityCode, Document, RiskManagementPlan, WBSNode, DataState, Action
 } from '../types/index';
 import { User } from '../types/auth';
-import { DataState, Action } from '../types/actions';
 import { MOCK_RISK_PLAN } from '../constants/index';
 import { initialState } from './initialState';
 import { rootReducer } from './rootReducer';

@@ -1,9 +1,11 @@
+
 import React from 'react';
 import StatCard from '../../shared/StatCard';
 import { ShieldCheck, TrendingDown, DollarSign, AlertTriangle } from 'lucide-react';
 import { formatCompactCurrency } from '../../../utils/formatters';
+import { ReserveAnalysisData } from '../../../types';
 
-export const ReserveKPIs: React.FC<{ data: any }> = ({ data }) => {
+export const ReserveKPIs: React.FC<{ data: ReserveAnalysisData }> = ({ data }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <StatCard title="Total Reserves" value={formatCompactCurrency(data.totalReserves)} icon={ShieldCheck} />

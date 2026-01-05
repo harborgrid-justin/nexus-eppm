@@ -1,67 +1,23 @@
 
 import React from 'react';
-import { UploadCloud, CheckCircle, AlertTriangle, ArrowRight, Database, Play, Lock, Trash2 } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertTriangle, Play, Lock, Trash2 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
-import { useData } from '../../../context/DataContext';
 import { Button } from '../../ui/Button';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { formatBytes } from '../../../utils/dataExchangeUtils';
+import { useImportLogic } from '../../../hooks/domain/useImportLogic';
 
 export const ImportPanel: React.FC = () => {
     const theme = useTheme();
-    const { state, dispatch } = useData();
-    const { hasPermission } = usePermissions();
-    const canExchange = hasPermission('system:configure');
-    
-    // Derived from Global State now
-    const { records, summary, activeImportId } = state.staging;
-    const step = !activeImportId ? 'upload' : (records.length > 0 ? 'staging' : 'complete'); 
-
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-    const handleFiles = (files: FileList | null) => { 
-        if (canExchange && files && files[0]) {
-            // Mock parsing delay
-            setTimeout(() => {
-                const mockParsed = [
-                    { ID: 'P-101', Name: 'Alpha Project', Budget: '50000', Status: 'Active' },
-                    { ID: 'P-102', Name: 'Beta Project', Budget: 'Invalid', Status: 'Planning' }, 
-                    { ID: 'P-103', Name: '', Budget: '120000', Status: 'Active' }, 
-                    { ID: 'P-104', Name: 'Gamma Expansion', Budget: '750000', Status: 'Active' },
-                ];
-                dispatch({ type: 'STAGING_INIT', payload: { type: 'Project', data: mockParsed } });
-            }, 800);
-        }
-    };
-
-    const handleCommit = () => {
-        // Dispatch commit action for selected records
-        const idsToCommit = records.filter(r => r.status === 'Valid').map(r => r.id);
-        dispatch({ type: 'STAGING_COMMIT_SELECTED', payload: idsToCommit });
-        
-        // Log job
-        dispatch({ 
-            type: 'SYSTEM_QUEUE_DATA_JOB', 
-            payload: { 
-                id: `IMP-${Date.now()}`, 
-                type: 'Import', 
-                format: 'JSON', 
-                status: 'Completed', 
-                submittedBy: 'Admin', 
-                timestamp: new Date().toLocaleString(), 
-                details: `Imported ${idsToCommit.length} records.`, 
-                progress: 100 
-            } as any 
-        });
-    };
-
-    const handleClear = () => {
-        dispatch({ type: 'STAGING_CLEAR' });
-    };
-
-    const triggerFileUpload = () => {
-        fileInputRef.current?.click();
-    };
+    const {
+        step,
+        records,
+        summary,
+        fileInputRef,
+        canExchange,
+        handleFiles,
+        handleCommit,
+        handleClear,
+        triggerFileUpload
+    } = useImportLogic();
 
     if (!canExchange) {
         return (

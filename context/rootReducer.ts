@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../types/actions';
+import { DataState, Action } from '../types/index';
 import { projectReducer } from './reducers/projectSlice';
 import { programReducer } from './reducers/programSlice';
 import { adminReducer } from './reducers/adminSlice';
@@ -31,7 +31,7 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
       nextState = programReducer(state, action);
   } else if (action.type.startsWith('ADMIN_') || action.type.startsWith('RESOURCE_')) {
       nextState = adminReducer(state, action);
-  } else if (action.type.startsWith('SYSTEM_') || action.type.startsWith('GOVERNANCE_') || action.type.includes('PORTFOLIO_SCENARIO') || action.type === 'SUBMIT_TIMESHEET' || action.type === 'UPDATE_USER' || action.type === 'ADD_USER' || action.type === 'DELETE_USER' || action.type === 'MARK_ALERT_READ') {
+  } else if (action.type.startsWith('SYSTEM_') || action.type.startsWith('GOVERNANCE_') || action.type.includes('PORTFOLIO_SCENARIO') || action.type === 'SUBMIT_TIMESHEET' || action.type === 'UPDATE_USER' || action.type === 'MARK_ALERT_READ') {
       nextState = systemReducer(state, action);
   } else if (action.type.startsWith('UNIFIER_')) {
       nextState = unifierReducer(state, action);

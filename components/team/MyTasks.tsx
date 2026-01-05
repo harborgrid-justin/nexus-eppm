@@ -1,45 +1,16 @@
 
 import React, { useMemo } from 'react';
-import { useData } from '../../context/DataContext';
-import { useAuth } from '../../context/AuthContext';
 import DataTable, { Column } from '../common/DataTable';
-import { Task, TaskStatus, Project } from '../../types/index';
 import { StatusBadge } from '../common/StatusBadge';
 import { ProgressBar } from '../common/ProgressBar';
-import { Calendar, Briefcase } from 'lucide-react';
+import { Calendar, Briefcase, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-
-interface EnrichedTask extends Task {
-  projectName: string;
-  projectCode: string;
-  projectId: string;
-}
+import { useMyTasksLogic, EnrichedTask } from '../../hooks/domain/useMyTasksLogic';
+import { Button } from '../ui/Button';
 
 const MyTasks: React.FC = () => {
-  const { state } = useData();
-  const { user } = useAuth();
   const theme = useTheme();
-
-  // Filter tasks across ALL projects where the user is assigned
-  const myTasks = useMemo(() => {
-    const targetResourceId = 'R-001'; 
-
-    const tasks: EnrichedTask[] = [];
-    state.projects.forEach(project => {
-        project.tasks.forEach(task => {
-            const assignment = task.assignments.find(a => a.resourceId === targetResourceId);
-            if (assignment || task.status === TaskStatus.IN_PROGRESS) { 
-                tasks.push({
-                    ...task,
-                    projectName: project.name,
-                    projectCode: project.code,
-                    projectId: project.id
-                });
-            }
-        });
-    });
-    return tasks;
-  }, [state.projects]);
+  const { myTasks, isEmpty, user } = useMyTasksLogic();
 
   const columns = useMemo<Column<EnrichedTask>[]>(() => [
     {
@@ -100,6 +71,14 @@ const MyTasks: React.FC = () => {
     }
   ], [theme]);
 
+  if (!user) {
+      return (
+          <div className="h-full flex items-center justify-center text-slate-400">
+              <p>Please log in to view your assignments.</p>
+          </div>
+      );
+  }
+
   return (
     <div className={`h-full flex flex-col ${theme.components.card} overflow-hidden`}>
       <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center`}>
@@ -111,8 +90,15 @@ const MyTasks: React.FC = () => {
             data={myTasks}
             columns={columns}
             keyField="id"
-            emptyMessage="No tasks assigned to you."
+            emptyMessage="No tasks currently assigned."
         />
+        {isEmpty && (
+             <div className="p-8 flex flex-col items-center justify-center text-center">
+                 <AlertCircle size={32} className="text-slate-300 mb-2" />
+                 <p className="text-slate-500 text-sm mb-4">You have no active tasks.</p>
+                 <Button size="sm" variant="outline">Browse Project Tasks</Button>
+             </div>
+        )}
       </div>
     </div>
   );

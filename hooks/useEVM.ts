@@ -1,12 +1,19 @@
 
 import { useMemo } from 'react';
-// FIX: Correctly import Project and BudgetLineItem types.
 import { Project } from '../types/project';
 import { BudgetLineItem, EVMMetrics } from '../types/finance';
 import { calculateProjectProgress } from '../utils/calculations';
 import { getDaysDiff } from '../utils/dateUtils';
 
 export { EVMMetrics };
+
+export interface EVMCurvePoint {
+  date: string;
+  pv: number;
+  bac: number;
+  ev?: number;
+  ac?: number;
+}
 
 export const useEVM = (project: Project | undefined, budgetItems: BudgetLineItem[] = []) => {
   const metrics = useMemo<EVMMetrics | null>(() => {

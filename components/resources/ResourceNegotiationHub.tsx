@@ -1,61 +1,25 @@
 
-import React, { useState, useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Users, ArrowRight, CheckCircle, XCircle, AlertCircle, TrendingUp, UserCheck, Clock } from 'lucide-react';
+import { Users, ArrowRight, XCircle, AlertCircle, TrendingUp, UserCheck, Clock } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../common/ProgressBar';
-import { formatCompactCurrency } from '../../utils/formatters';
-import { ResourceRequest } from '../../types';
+import { useResourceNegotiationLogic } from '../../hooks/domain/useResourceNegotiationLogic';
 
 const ResourceNegotiationHub: React.FC = () => {
     const theme = useTheme();
-    const { state, dispatch } = useData();
-    const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<'manager' | 'requester'>('manager');
-
-    // Use live requests from state instead of mocks
-    const requests = state.resourceRequests;
-    
-    const selectedReq = requests.find(r => r.id === selectedReqId);
-
-    // Dynamic Impact Calculation
-    const impactData = useMemo(() => {
-        if (!selectedReq) return null;
-        
-        // Calculate Utilization impact
-        const totalRoleCapacity = state.resources
-            .filter(r => r.role === selectedReq.role && r.status === 'Active')
-            .reduce((sum, r) => sum + (r.capacity || 160), 0);
-            
-        const currentRoleLoad = state.resources
-            .filter(r => r.role === selectedReq.role && r.status === 'Active')
-            .reduce((sum, r) => sum + (r.allocated || 0), 0);
-            
-        // Assume request adds (Quantity * 160) hours of demand if month duration is roughly 1
-        // Simplified heuristic: Quantity * 40 hours/week * 4 weeks
-        const requestLoad = selectedReq.quantity * 160;
-
-        const currentUtilization = totalRoleCapacity > 0 ? (currentRoleLoad / totalRoleCapacity) * 100 : 0;
-        const newUtilization = totalRoleCapacity > 0 ? ((currentRoleLoad + requestLoad) / totalRoleCapacity) * 100 : 0;
-
-        return {
-            currentUtilization: Math.round(currentUtilization),
-            newUtilization: Math.round(newUtilization),
-            roleCount: state.resources.filter(r => r.role === selectedReq.role).length,
-            available: state.resources.filter(r => r.role === selectedReq.role && r.status === 'Active').length
-        };
-    }, [selectedReq, state.resources]);
-
-    const handleUpdateStatus = (status: ResourceRequest['status']) => {
-        if (!selectedReq) return;
-        dispatch({
-            type: 'RESOURCE_REQUEST_UPDATE',
-            payload: { ...selectedReq, status }
-        });
-    };
+    const { 
+        requests,
+        selectedReqId,
+        setSelectedReqId,
+        viewMode,
+        setViewMode,
+        selectedReq,
+        impactData,
+        handleUpdateStatus
+    } = useResourceNegotiationLogic();
 
     return (
         <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>

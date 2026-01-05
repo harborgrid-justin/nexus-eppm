@@ -1,38 +1,23 @@
 
-import React, { useTransition, useDeferredValue, Suspense } from 'react';
-import { Activity, CheckCircle, Server, Database, HardDrive, Cloud, Zap, Loader2, Plus } from 'lucide-react';
+import React, { Suspense } from 'react';
+import { Activity, CheckCircle, Server, Zap, Loader2, Plus } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import StatCard from '../../shared/StatCard';
 import { useTheme } from '../../../context/ThemeContext';
-import { useData } from '../../../context/DataContext';
+import { useExchangeDashboardLogic } from '../../../hooks/domain/useExchangeDashboardLogic';
 
 export const ExchangeDashboard: React.FC = () => {
     const theme = useTheme();
-    const { state, dispatch } = useData(); // Dispatch needed for future add action
-    const [isPending, startTransition] = useTransition();
-    const [metricRange, setMetricRange] = React.useState('24h');
-    
-    // Retrieve centralized metrics
-    const throughputData = state.systemMonitoring.throughput || [];
-    const deferredData = useDeferredValue(throughputData);
-    const services = state.systemMonitoring.services || [];
-
-    const getServiceIcon = (name: string) => {
-        if (name.includes('Database') || name.includes('DB')) return Database;
-        if (name.includes('Cloud') || name.includes('Bridge')) return Cloud;
-        if (name.includes('Storage') || name.includes('ETL')) return HardDrive;
-        return Server;
-    };
-
-    const getStatusColor = (status: string) => {
-        if (status === 'Operational') return 'text-green-500';
-        if (status === 'Degraded') return 'text-orange-500';
-        return 'text-red-500';
-    };
-
-    const handleAddService = () => {
-        alert("Provisioning Wizard not implemented in this demo.");
-    };
+    const {
+        isPending,
+        metricRange,
+        changeMetricRange,
+        deferredData,
+        services,
+        getServiceIcon,
+        getStatusColor,
+        handleAddService
+    } = useExchangeDashboardLogic();
 
     return (
         <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">
@@ -54,7 +39,7 @@ export const ExchangeDashboard: React.FC = () => {
                         </div>
                         <div className="bg-slate-100 p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight">
                             {['24h', '7d', '30d'].map(r => (
-                                <button key={r} onClick={() => startTransition(() => setMetricRange(r))} className={`px-2 py-1 rounded transition-all ${metricRange === r ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-400'}`}>{r}</button>
+                                <button key={r} onClick={() => changeMetricRange(r)} className={`px-2 py-1 rounded transition-all ${metricRange === r ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-400'}`}>{r}</button>
                             ))}
                         </div>
                     </div>

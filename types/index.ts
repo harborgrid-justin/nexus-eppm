@@ -1,4 +1,3 @@
-
 export * from './auth';
 export * from './common';
 export * from './project';
@@ -18,3 +17,142 @@ export * from './field';
 export * from './strategy';
 export * from './collaboration';
 export * from './extensions';
+export * from './actions';
+
+// --- Consolidated Types to Replace Missing types/actions.ts ---
+
+import { Project, Baseline, WBSNode } from './project';
+import { Program, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramObjective, ProgramIssue, ProgramStageGate, ProgramTransitionItem, IntegratedChangeRequest, GovernanceRole, GovernanceEvent, ProgramQualityStandard, ProgramAssuranceReview, ProgramArchitectureStandard, ProgramArchitectureReview, TradeoffScenario, StrategicGoal, StrategicDriver, PortfolioScenario, GovernanceDecision, ESGMetric, ProgramDependency, ProgramOutcome, ProgramChangeRequest } from './program';
+import { Resource, ResourceRequest, EnterpriseRole, EnterpriseSkill, Timesheet } from './resource';
+import { Risk, Issue, RiskManagementPlan, RiskBreakdownStructureNode, IssueCode, ProgramRisk, PortfolioRisk } from './risk';
+import { BudgetLineItem, Expense, ChangeOrder, Invoice, CostReport, CostMeeting, CostAlert, CostBookItem, ExpenseCategory, FundingSource, CostEstimate, ProjectFunding, BudgetLogItem } from './finance';
+import { ProcurementPlan, Vendor, ProcurementPackage, Solicitation, Contract, SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis, MaterialReceipt, PurchaseOrder } from './procurement';
+import { QualityReport, NonConformanceReport } from './quality';
+import { Document, ActivityCode, UserDefinedField, StandardTemplate, DataJob, Integration, Extension, EtlMapping, QualityStandard } from './common';
+import { User } from './auth';
+import { EPSNode, OBSNode, Location } from './structure';
+import { GlobalCalendar } from './calendar';
+import { CommunicationLog, Stakeholder } from './project_subtypes';
+import { GovernanceState, SystemMetric, ServiceStatus, PipelineStage, KnowledgeArticle } from './business';
+import { UnifierState } from './unifier';
+import { RoadmapLane, RoadmapItem, PortfolioCommunicationItem } from './strategy';
+import { KanbanTask, ActivityItem, TeamEvent } from './collaboration';
+import { ExtensionDataState } from './extensions';
+import { DailyLogEntry, SafetyIncident, PunchItem } from './field';
+
+export interface StagingRecord {
+    id: string;
+    data: any;
+    status: 'Valid' | 'Error';
+    errors?: string[];
+    selected: boolean;
+}
+
+export interface DataState {
+  projects: Project[];
+  programs: Program[];
+  resources: Resource[];
+  resourceRequests: ResourceRequest[];
+  risks: Risk[];
+  issues: Issue[];
+  budgetItems: BudgetLineItem[];
+  expenses: Expense[];
+  changeOrders: ChangeOrder[];
+  purchaseOrders: PurchaseOrder[];
+  qualityReports: QualityReport[];
+  nonConformanceReports: NonConformanceReport[];
+  communicationLogs: CommunicationLog[];
+  stakeholders: Stakeholder[];
+  documents: Document[];
+  activityCodes: ActivityCode[];
+  userDefinedFields: UserDefinedField[];
+  fundingSources: FundingSource[];
+  calendars: GlobalCalendar[];
+  users: User[];
+  roles: EnterpriseRole[];
+  eps: EPSNode[];
+  obs: OBSNode[];
+  locations: Location[];
+  workflows: any[];
+  dataJobs: DataJob[];
+  integrations: Integration[];
+  extensions: Extension[];
+  expenseCategories: ExpenseCategory[];
+  issueCodes: IssueCode[];
+  costBook: CostBookItem[];
+  standardTemplates: StandardTemplate[];
+  governance: GovernanceState;
+  strategicGoals: StrategicGoal[];
+  strategicDrivers: StrategicDriver[];
+  portfolioScenarios: PortfolioScenario[];
+  governanceDecisions: GovernanceDecision[];
+  esgMetrics: ESGMetric[];
+  portfolioRisks: PortfolioRisk[];
+  programObjectives: ProgramObjective[];
+  programOutcomes: ProgramOutcome[];
+  programDependencies: ProgramDependency[];
+  programChangeRequests: ProgramChangeRequest[];
+  programRisks: ProgramRisk[];
+  programIssues: ProgramIssue[];
+  programStakeholders: ProgramStakeholder[];
+  programCommunicationPlan: ProgramCommunicationItem[];
+  programAllocations: ProgramBudgetAllocation[];
+  programFundingGates: ProgramFundingGate[];
+  programStageGates: ProgramStageGate[];
+  programTransitionItems: ProgramTransitionItem[];
+  integratedChanges: IntegratedChangeRequest[];
+  governanceRoles: GovernanceRole[];
+  governanceEvents: GovernanceEvent[];
+  programQualityStandards: ProgramQualityStandard[];
+  programAssuranceReviews: ProgramAssuranceReview[];
+  programArchitectureStandards: ProgramArchitectureStandard[];
+  programArchitectureReviews: ProgramArchitectureReview[];
+  tradeoffScenarios: TradeoffScenario[];
+  contracts: Contract[];
+  solicitations: Solicitation[];
+  procurementPlans: ProcurementPlan[];
+  procurementPackages: ProcurementPackage[];
+  supplierReviews: SupplierPerformanceReview[];
+  claims: ProcurementClaim[];
+  makeOrBuyAnalysis: MakeOrBuyAnalysis[];
+  globalChangeRules: any[];
+  invoices: Invoice[];
+  timesheets: Timesheet[];
+  skills: EnterpriseSkill[];
+  benefits: any[];
+  rbs: RiskBreakdownStructureNode[];
+  vendors: Vendor[];
+  qualityStandards: QualityStandard[];
+  unifier: UnifierState;
+  dailyLogs: DailyLogEntry[];
+  safetyIncidents: SafetyIncident[];
+  punchList: PunchItem[];
+  roadmapLanes: RoadmapLane[];
+  roadmapItems: RoadmapItem[];
+  kanbanTasks: KanbanTask[];
+  portfolioCommunicationPlan: PortfolioCommunicationItem[];
+  materialReceipts: MaterialReceipt[];
+  activities: ActivityItem[];
+  teamEvents: TeamEvent[];
+  pipelineStages: PipelineStage[];
+  knowledgeBase: KnowledgeArticle[];
+  etlMappings: EtlMapping[];
+  costReports: CostReport[];
+  costMeetings: CostMeeting[];
+  costAlerts: CostAlert[];
+  systemMonitoring: {
+      metrics: SystemMetric[];
+      services: ServiceStatus[];
+      throughput: any[];
+  };
+  staging: {
+      activeImportId: string | null;
+      entityType: string;
+      records: StagingRecord[];
+      isProcessing: boolean;
+      summary: { total: number; valid: number; error: number };
+  };
+  extensionData: ExtensionDataState;
+}
+
+// Action type is exported from ./actions to avoid duplication and conflicts

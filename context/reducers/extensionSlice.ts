@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/actions';
+import { DataState, Action } from '../../types/index';
 
 export const extensionReducer = (state: DataState, action: Action): DataState => {
   switch (action.type) {

@@ -1,34 +1,13 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Radio, Activity, Truck, AlertTriangle, Cpu, MapPin, Zap, Info } from 'lucide-react';
+import React from 'react';
+import { Radio, Activity, MapPin, AlertTriangle, Cpu, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, LineChart, Line, YAxis } from 'recharts';
-import { useData } from '../../context/DataContext';
+import { useIoTStreamLogic } from '../../hooks/domain/useIoTStreamLogic';
 
 export const IoTStream: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData();
-    const [dataPoints, setDataPoints] = useState<number[]>(new Array(20).fill(0));
-
-    // Filter for Equipment Resources as "Sensors"
-    const sensors = useMemo(() => {
-        return state.resources.filter(r => r.type === 'Equipment').slice(0, 10);
-    }, [state.resources]);
-
-    // Filter for IoT related alerts
-    const alerts = useMemo(() => {
-        return state.governance.alerts.filter(a => a.category === 'Supply Chain' || a.category === 'Risk').slice(0, 3);
-    }, [state.governance.alerts]);
-
-    // Simulate real-time stream
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setDataPoints(prev => [...prev.slice(1), Math.floor(Math.random() * 100)]);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const chartData = dataPoints.map((val, i) => ({ i, val }));
+    const { chartData, sensors, alerts } = useIoTStreamLogic();
 
     return (
         <div className="h-full bg-slate-950 p-6 text-green-500 font-mono overflow-hidden flex flex-col">

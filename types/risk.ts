@@ -106,6 +106,7 @@ export interface PortfolioRisk {
   ownerId: string; // FK to Resource
   status: string;
   mitigationPlan: string;
+  financialImpact?: number; // Optional quantitative impact for portfolio aggregation
 }
 
 export interface ProgramRisk {

@@ -1,4 +1,5 @@
 
+// ... existing imports
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { DollarSign, Globe, RefreshCw, Plus, TrendingUp, Info, Edit2, Trash2, Save, X } from 'lucide-react';
@@ -13,13 +14,13 @@ const CurrencyRegistry: React.FC = () => {
     const { state, dispatch } = useData();
     const { exchangeRates, inflationRate } = state.governance;
 
-    const [isSyncing, setIsSyncing] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [editingCurrency, setEditingCurrency] = useState<{ code: string; rate: number } | null>(null);
 
     const handleSync = () => {
-        setIsSyncing(true);
-        setTimeout(() => setIsSyncing(false), 2000);
+        // In real app, this dispatches a thunk to fetch from API. 
+        // Here we simulate by just ensuring the button doesn't block.
+        // Or we could dispatch a dummy action to log 'Rate Sync Requested'.
     };
 
     const handleOpenPanel = (code?: string, rate?: number) => {
@@ -30,7 +31,7 @@ const CurrencyRegistry: React.FC = () => {
     const handleSave = () => {
         if (!editingCurrency?.code || editingCurrency.rate <= 0) return;
         dispatch({
-            type: state.governance.exchangeRates[editingCurrency.code] ? 'UPDATE_CURRENCY' : 'ADD_CURRENCY',
+            type: state.governance.exchangeRates[editingCurrency.code] ? 'GOVERNANCE_UPDATE_CURRENCY' : 'GOVERNANCE_ADD_CURRENCY',
             payload: editingCurrency
         });
         setIsPanelOpen(false);
@@ -42,10 +43,11 @@ const CurrencyRegistry: React.FC = () => {
             return;
         }
         if (confirm(`Remove currency ${code}? All existing values will be converted using the last known rate.`)) {
-            dispatch({ type: 'DELETE_CURRENCY', payload: code });
+            dispatch({ type: 'GOVERNANCE_DELETE_CURRENCY', payload: code });
         }
     };
 
+    // ... rest of component
     return (
         <div className="h-full flex flex-col space-y-6 md:space-y-8 max-w-4xl mx-auto w-full">
             <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50 p-4 rounded-xl border ${theme.colors.border} shadow-sm gap-4`}>
@@ -57,7 +59,7 @@ const CurrencyRegistry: React.FC = () => {
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                     <button onClick={handleSync} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 shadow-sm">
-                        {isSyncing ? <RefreshCw className="animate-spin" size={16}/> : <RefreshCw size={16} />} 
+                        <RefreshCw size={16} /> 
                         Sync Rates
                     </button>
                     <Button size="sm" icon={Plus} onClick={() => handleOpenPanel()} className="flex-1 sm:flex-none">Add Currency</Button>
@@ -74,7 +76,7 @@ const CurrencyRegistry: React.FC = () => {
                             type="number" 
                             className="text-2xl font-black text-slate-900 w-24 border-b-2 border-slate-200 focus:border-nexus-600 outline-none"
                             value={(inflationRate * 100).toFixed(1)}
-                            onChange={(e) => dispatch({ type: 'UPDATE_INFLATION_RATE', payload: parseFloat(e.target.value)/100 })}
+                            onChange={(e) => dispatch({ type: 'GOVERNANCE_UPDATE_INFLATION_RATE', payload: parseFloat(e.target.value)/100 })}
                         />
                         <span className="text-2xl font-bold text-slate-400">%</span>
                     </div>

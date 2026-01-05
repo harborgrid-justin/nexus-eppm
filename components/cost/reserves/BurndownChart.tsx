@@ -3,28 +3,20 @@ import React from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useTheme } from '../../../context/ThemeContext';
 import { formatCurrency } from '../../../utils/formatters';
+import { ReserveAnalysisData } from '../../../types';
 
 interface BurndownChartProps {
-    data: {
-        drawdowns: { contingency: number; management: number };
-        totalReserves: number;
-        // In real app, we'd pass a timeseries history here.
-        // For now, we will simulate a trend based on the current aggregate usage
-        // because history isn't fully in the data model yet.
-    };
+    data: ReserveAnalysisData;
 }
 
 export const BurndownChart: React.FC<BurndownChartProps> = ({ data }) => {
     const theme = useTheme();
 
-    // Simulate trend based on current total usage. 
-    // In production, this should come from a history log.
     const totalUsed = data.drawdowns.contingency + data.drawdowns.management;
     const remaining = data.totalReserves - totalUsed;
     const chartData = [
         { month: 'Start', reserve: data.totalReserves },
         { month: 'Current', reserve: remaining },
-        // Simple linear projection
         { month: 'Forecast', reserve: Math.max(0, remaining - (totalUsed * 0.2)) } 
     ];
 

@@ -1,21 +1,20 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
-import { useData } from '../../context/DataContext';
-import { AlertTriangle, LayoutDashboard, List, Sigma, BarChart2, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, List, Sigma, BarChart2, ShieldAlert } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { PageHeader } from '../common/PageHeader';
 import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
 
-// Reusing existing views but adapting data source in them or passing data props
+// Internal Views
 import RiskDashboard from './RiskDashboard';
 import { RiskRegisterGrid } from './RiskRegisterGrid';
 import RiskMatrix from './RiskMatrix';
 import QuantitativeAnalysis from './QuantitativeAnalysis';
-import PortfolioRisks from '../portfolio/PortfolioRisks'; // Reuse portfolio risk view for enterprise
 
-// Enterprise-Specific Views
-import SystemicRiskDashboard from './enterprise/SystemicRiskDashboard';
+// Enterprise Views (Sibling Directory)
+import PortfolioRisks from '../portfolio/PortfolioRisks';
+import { SystemicRiskDashboard } from './enterprise/SystemicRiskDashboard';
 import { GlobalRiskRegister } from './enterprise/GlobalRiskRegister';
 import { GlobalRiskMatrix } from './enterprise/GlobalRiskMatrix';
 import { GlobalQuantitativeAnalysis } from './enterprise/GlobalQuantitativeAnalysis';
@@ -71,7 +70,7 @@ const RiskManagement: React.FC = () => {
       <PageHeader 
         title="Enterprise Risk Management" 
         subtitle="Identify, analyze, and mitigate systemic threats across the organization."
-        icon={AlertTriangle}
+        icon={ShieldAlert}
       />
 
       <div className={theme.layout.panelContainer}>

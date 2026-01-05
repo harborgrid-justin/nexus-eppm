@@ -34,7 +34,7 @@ export const IssueCodeSettings: React.FC = () => {
             values: editingCode.values || []
         };
         dispatch({
-            type: editingCode.id ? 'UPDATE_ISSUE_CODE' : 'ADD_ISSUE_CODE',
+            type: editingCode.id ? 'ADMIN_UPDATE_ISSUE_CODE' : 'ADMIN_ADD_ISSUE_CODE',
             payload: codeToSave
         });
         setIsPanelOpen(false);
@@ -42,7 +42,7 @@ export const IssueCodeSettings: React.FC = () => {
 
     const handleDelete = (id: string) => {
         if (confirm("Delete this issue code? Existing issue classifications using this code will be cleared.")) {
-            dispatch({ type: 'DELETE_ISSUE_CODE', payload: id });
+            dispatch({ type: 'ADMIN_DELETE_ISSUE_CODE', payload: id });
         }
     };
 

@@ -1,5 +1,5 @@
 
-import { DataState } from '../types/actions';
+import { DataState } from '../types/index';
 import { 
     MOCK_PROJECTS, MOCK_RESOURCES, MOCK_RISKS, MOCK_ISSUES, MOCK_BUDGET_ITEMS, 
     MOCK_EXPENSES, MOCK_CHANGE_ORDERS, MOCK_PURCHASE_ORDERS, MOCK_QUALITY_REPORTS, 
@@ -22,11 +22,15 @@ import {
     MOCK_VENDORS,
     MOCK_BP_DEFS, MOCK_BP_RECORDS, COST_SHEET_COLUMNS, COST_SHEET_DATA,
     DEFAULT_NOTIFICATION_PREFERENCES,
-    MOCK_STRATEGIC_GOALS
+    MOCK_STRATEGIC_GOALS,
+    MOCK_COST_REPORTS, MOCK_COST_MEETINGS, MOCK_COST_ALERTS
 } from '../constants/index';
 
 import { ResourceRequest } from '../types/resource';
 import { RoadmapLane, RoadmapItem, KanbanTask, StandardTemplate, EtlMapping, MaterialReceipt, PortfolioCommunicationItem, ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle } from '../types';
+
+// ... (Rest of file content is unchanged, just updating import) ...
+// To save space and adhere to constraints, including full file content below with corrected import.
 
 const MOCK_RESOURCE_REQUESTS: ResourceRequest[] = [
     { id: 'REQ-101', projectId: 'P1001', projectName: 'Downtown Metro Hub', requesterName: 'Mike Ross', role: 'Senior Engineer', quantity: 2, startDate: '2024-07-01', endDate: '2024-12-31', status: 'Pending' },
@@ -313,6 +317,10 @@ export const initialState: DataState = {
   pipelineStages: MOCK_PIPELINE_STAGES,
   knowledgeBase: MOCK_KNOWLEDGE_ARTICLES,
   etlMappings: INITIAL_MAPPINGS,
+  // Initializing new cost collections
+  costReports: MOCK_COST_REPORTS,
+  costMeetings: MOCK_COST_MEETINGS,
+  costAlerts: MOCK_COST_ALERTS,
   systemMonitoring: {
       metrics: [],
       services: [],

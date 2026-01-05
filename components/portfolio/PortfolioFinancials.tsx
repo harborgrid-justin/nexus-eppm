@@ -24,24 +24,50 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
     category: p.category
   })), [projects]);
 
-  // --- 2. Multi-Year Budget Data (Simulated) ---
+  // --- 2. Multi-Year Budget Data (Calculated from Project Dates) ---
   const annualData = useMemo(() => {
-      const years = [2024, 2025, 2026];
-      return years.map(year => {
-          const budget = projects.reduce((sum, p) => {
-              const seed = p.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-              const spreadFactor = (seed % 100) / 100; // 0.00 - 0.99
-              
-              let yearlyAllocation = 0;
-              if (year === 2024) yearlyAllocation = p.budget * (0.4 + (spreadFactor * 0.1));
-              if (year === 2025) yearlyAllocation = p.budget * (0.3 + (spreadFactor * 0.1));
-              if (year === 2026) yearlyAllocation = p.budget * (0.2 + (spreadFactor * 0.1));
-              
-              return sum + yearlyAllocation;
-          }, 0);
+      // Determine year range from projects
+      const years = new Set<number>();
+      projects.forEach(p => {
+          years.add(new Date(p.startDate).getFullYear());
+          years.add(new Date(p.endDate).getFullYear());
+      });
+      // Default range if empty
+      if (years.size === 0) {
+          const currentYear = new Date().getFullYear();
+          years.add(currentYear);
+          years.add(currentYear + 1);
+      }
+      
+      const sortedYears = Array.from(years).sort();
 
-          const actuals = year === 2024 ? budget * 0.82 : 0; 
-          const forecast = budget * 1.05; 
+      return sortedYears.map(year => {
+          let budget = 0;
+          let actuals = 0;
+          let forecast = 0;
+
+          projects.forEach(p => {
+              const start = new Date(p.startDate);
+              const end = new Date(p.endDate);
+              const pStartYear = start.getFullYear();
+              const pEndYear = end.getFullYear();
+
+              // Simple linear allocation if project overlaps year
+              if (year >= pStartYear && year <= pEndYear) {
+                  const durationYears = Math.max(1, pEndYear - pStartYear + 1);
+                  const yearlyBudget = p.budget / durationYears;
+                  budget += yearlyBudget;
+
+                  // Apply actuals only if year is passed or current
+                  if (year <= new Date().getFullYear()) {
+                       const yearlySpent = p.spent / durationYears; // Approximation
+                       actuals += yearlySpent;
+                  }
+                  
+                  // Forecast
+                  forecast += yearlyBudget * 1.05; // 5% variance assumption
+              }
+          });
 
           return { 
               year, 
@@ -52,6 +78,7 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
       });
   }, [projects]);
 
+  // ... rest of component (stats, fundingGates) remains same
   // --- 3. Aggregate Stats ---
   const stats = useMemo(() => {
     const totalBudget = projects.reduce((acc, p) => acc + p.budget, 0);
@@ -62,25 +89,23 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
 
   // --- 4. Funding Gates (Dynamic) ---
   const fundingGates = useMemo(() => {
-      // Aggregate stage gates from all programs that are 'Funding' type
       const allGates = state.programStageGates
           .filter(g => g.type === 'Funding')
           .sort((a,b) => new Date(a.plannedDate).getTime() - new Date(b.plannedDate).getTime())
-          .slice(0, 5); // Show next 5
+          .slice(0, 5);
 
       return allGates.map(g => ({
           id: g.id,
           name: g.name,
           date: g.actualDate || g.plannedDate,
           status: g.status,
-          // Mock amount mapping if not present in StageGate type directly, 
-          // in real app this would link to ProgramBudgetAllocation
           amount: g.status === 'Approved' ? 'Released' : 'Pending' 
       }));
   }, [state.programStageGates]);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+      {/* ... Header and KPI Cards (same) ... */}
       <div className="flex justify-between items-center">
          <div>
             <h2 className={theme.typography.h2}>Financial Management</h2>
@@ -92,7 +117,6 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
          </div>
       </div>
 
-      {/* KPI Cards */}
       <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
         <div className={`${theme.components.card} p-6 relative overflow-hidden`}>
             <div className="absolute right-4 top-4 text-slate-100"><DollarSign size={48} /></div>

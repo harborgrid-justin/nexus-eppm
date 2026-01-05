@@ -1,76 +1,27 @@
 
-import React, { useState } from 'react';
-import { useData } from '../../../context/DataContext';
+// ... existing imports
+import React from 'react';
 import { Network, Plus, Settings, RefreshCw, Save, Key, Globe, Database, Server, Link, Activity } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { SidePanel } from '../../ui/SidePanel';
 import { Input } from '../../ui/Input';
-import { Integration } from '../../../types';
-import { generateId } from '../../../utils/formatters';
+import { useConnectorConfigLogic } from '../../../hooks/domain/useConnectorConfigLogic';
 
 export const ConnectorConfig: React.FC = () => {
-    const { state, dispatch } = useData();
     const theme = useTheme();
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [editingConn, setEditingConn] = useState<Partial<Integration> | null>(null);
-    const [isTesting, setIsTesting] = useState(false);
-
-    const handleOpen = (conn: Integration | null) => {
-        setEditingConn(conn || { name: '', type: 'ERP', protocol: 'REST API', endpoint: '', health: 'Unknown' });
-        setIsPanelOpen(true);
-    };
-
-    const handleSave = () => {
-        if (!editingConn?.name) return;
-        const connToSave = {
-            ...editingConn,
-            id: editingConn.id || generateId('INT'),
-            status: editingConn.status || 'Active',
-            lastSync: editingConn.lastSync || 'Never',
-            // Default icon map logic for new items
-            logo: editingConn.logo || 'Server'
-        } as Integration;
-
-        if (editingConn.id) {
-            dispatch({ type: 'SYSTEM_UPDATE_INTEGRATION', payload: connToSave });
-        } else {
-            dispatch({ type: 'SYSTEM_ADD_INTEGRATION', payload: connToSave });
-        }
-        setIsPanelOpen(false);
-    };
-
-    const handleTestConnection = () => {
-        setIsTesting(true);
-        setTimeout(() => {
-            setIsTesting(false);
-            if (editingConn && editingConn.name) {
-                 // Update the specific connector status if it exists, or just alert for new
-                 alert("Connection Successful! Latency: 45ms");
-                 // If we are editing an existing connection, update its status in real-time
-                 if(editingConn.id) {
-                     dispatch({ 
-                         type: 'SYSTEM_UPDATE_INTEGRATION', 
-                         payload: { ...editingConn, health: 'Good', lastSync: 'Just now' } as Integration 
-                     });
-                 }
-            }
-        }, 1500);
-    };
-
-    const handleSync = (conn: Integration) => {
-        // Trigger a sync for a specific connector from the grid
-        dispatch({ 
-             type: 'SYSTEM_UPDATE_INTEGRATION', 
-             payload: { ...conn, lastSync: 'Syncing...', health: 'Unknown' } 
-        });
-        setTimeout(() => {
-             dispatch({ 
-                 type: 'SYSTEM_UPDATE_INTEGRATION', 
-                 payload: { ...conn, lastSync: 'Just now', health: 'Good' } 
-             });
-        }, 2000);
-    };
+    const {
+        integrations,
+        isPanelOpen,
+        setIsPanelOpen,
+        editingConn,
+        setEditingConn,
+        isTesting,
+        handleOpen,
+        handleSave,
+        handleTestConnection,
+        handleSync
+    } = useConnectorConfigLogic();
 
     const getIcon = (type: string) => {
         switch(type) {
@@ -97,7 +48,7 @@ export const ConnectorConfig: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto pb-4 px-1">
-                {state.integrations.map(conn => {
+                {integrations.map(conn => {
                     const Icon = getIcon(conn.type);
                     return (
                         <div key={conn.id} className={`${theme.components.card} p-6 group hover:border-nexus-300 transition-all flex flex-col`}>
