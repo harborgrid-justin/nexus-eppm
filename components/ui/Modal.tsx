@@ -51,19 +51,19 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-[2px] animate-in fade-in duration-300">
       <div 
         ref={modalRef}
-        className={`${theme.colors.surface} ${theme.layout.borderRadius} shadow-2xl flex flex-col w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300`}
+        className={`${theme.colors.surface} ${theme.layout.borderRadius} shadow-2xl flex flex-col w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 border ${theme.colors.border}`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
         <div className={`flex items-center justify-between px-8 py-5 border-b ${theme.colors.border.replace('border-', 'border-b-')} ${theme.colors.surface}`}>
-          <div className={`${theme.typography.h3} text-slate-900`}>{title}</div>
+          <div className={`${theme.typography.h3} ${theme.colors.text.primary}`}>{title}</div>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 transition-all rounded-full hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-nexus-500"
+            className={`p-2 ${theme.colors.text.tertiary} transition-all rounded-full hover:${theme.colors.text.primary} hover:${theme.colors.background} focus:outline-none focus:ring-2 focus:ring-nexus-500`}
           >
             <X size={22} />
           </button>

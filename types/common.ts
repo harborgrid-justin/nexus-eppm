@@ -7,6 +7,13 @@ export type ActivityCodeScope = 'Global' | 'EPS' | 'Project';
 
 export type UDFSubjectArea = 'Projects' | 'Tasks' | 'Resources' | 'Risks';
 
+export interface DocumentHistory {
+    version: string;
+    date: string;
+    user: string;
+    notes: string;
+}
+
 export interface Document {
   id: string;
   projectId?: string;
@@ -17,6 +24,7 @@ export interface Document {
   uploadedBy: string;
   status: string;
   url: string;
+  history?: DocumentHistory[];
 }
 
 export interface Integration {

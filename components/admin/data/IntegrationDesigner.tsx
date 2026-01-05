@@ -18,14 +18,30 @@ export const IntegrationDesigner: React.FC = () => {
     const [targetEntity, setTargetEntity] = useState('Project');
     const [mappings, setMappings] = useState<EtlMapping[]>([]);
     
-    const [testPayload, setTestPayload] = useState(JSON.stringify({
-        EXTERNAL_ID: "PRJ-9920",
-        PROJ_NAME: "  Global Expansion Initiative  ", 
-        BUDGET_AMT: "1250000.00",
-        START_DT: "2024-10-01T00:00:00Z",
-        COST_CENTER: "CC-NY-01",
-        STATUS_CODE: "A"
-    }, null, 2));
+    const [testPayload, setTestPayload] = useState('');
+
+    // Hydrate test payload with real data sample if available
+    useEffect(() => {
+        if (state.projects.length > 0) {
+            const sample = state.projects[0];
+            setTestPayload(JSON.stringify({
+                EXTERNAL_ID: sample.code || "EXT-001",
+                PROJ_NAME: sample.name || "Sample Project",
+                BUDGET_AMT: sample.budget ? String(sample.budget) : "0",
+                START_DT: sample.startDate || new Date().toISOString(),
+                COST_CENTER: "CC-DEFAULT",
+                STATUS_CODE: sample.status === 'Active' ? "A" : "I"
+            }, null, 2));
+        } else {
+            // Fallback if no projects exist
+            setTestPayload(JSON.stringify({
+                EXTERNAL_ID: "PRJ-9920",
+                PROJ_NAME: "Global Expansion Initiative", 
+                BUDGET_AMT: "1250000.00",
+                START_DT: "2024-10-01T00:00:00Z"
+            }, null, 2));
+        }
+    }, [state.projects]);
 
     useEffect(() => {
         if(state.etlMappings && state.etlMappings.length > 0) {

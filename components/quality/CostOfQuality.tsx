@@ -1,11 +1,12 @@
 
 import React, { useMemo } from 'react';
-import { Coins, TrendingDown, ArrowUpRight, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Coins, TrendingDown, ArrowUpRight, CheckCircle, AlertTriangle, BarChart2 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ComposedChart } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { Project } from '../../types';
 import StatCard from '../shared/StatCard';
+import { EmptyState } from '../common/EmptyState';
 
 interface CostOfQualityProps {
     project: Project;
@@ -26,20 +27,11 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
     const totalCoQ = goodQualityCost + poorQualityCost;
     const budgetPercent = project.budget > 0 ? (totalCoQ / project.budget) * 100 : 0;
 
-    // Use real data if available, otherwise mock a trend based on current snapshot
+    // Use real data if available
     const trendData = useMemo(() => {
         if (project.coqHistory && project.coqHistory.length > 0) return project.coqHistory;
-        
-        // Generate trend based on current snapshot distribution
-        // Prevention high = declining failure trend mock
-        const isMature = goodQualityCost > poorQualityCost;
-        
-        return [
-            { period: 'Q1', preventionCosts: coq.preventionCosts * 0.8, appraisalCosts: coq.appraisalCosts * 0.8, internalFailureCosts: isMature ? coq.internalFailureCosts * 1.5 : coq.internalFailureCosts * 0.8, externalFailureCosts: coq.externalFailureCosts },
-            { period: 'Q2', preventionCosts: coq.preventionCosts * 0.9, appraisalCosts: coq.appraisalCosts * 0.9, internalFailureCosts: isMature ? coq.internalFailureCosts * 1.2 : coq.internalFailureCosts * 0.9, externalFailureCosts: coq.externalFailureCosts },
-            { period: 'Q3', preventionCosts: coq.preventionCosts, appraisalCosts: coq.appraisalCosts, internalFailureCosts: coq.internalFailureCosts, externalFailureCosts: coq.externalFailureCosts },
-        ];
-    }, [project.coqHistory, coq, goodQualityCost, poorQualityCost]);
+        return [];
+    }, [project.coqHistory]);
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -83,25 +75,33 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
             <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
                 
                 {/* 1. PAF Composition Chart */}
-                <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[400px]`}>
+                <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[400px] flex flex-col`}>
                     <h3 className={`${theme.typography.h3} mb-4 flex items-center gap-2`}>
                         <ArrowUpRight size={18} className="text-nexus-600"/> PAF Composition Trend
                     </h3>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="period" />
-                            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
-                            <Tooltip formatter={(val: number) => formatCurrency(val)} />
-                            <Legend />
-                            {/* Cost of Good Quality */}
-                            <Bar dataKey="preventionCosts" name="Prevention" stackId="a" fill="#22c55e" />
-                            <Bar dataKey="appraisalCosts" name="Appraisal" stackId="a" fill="#3b82f6" />
-                            {/* Cost of Poor Quality */}
-                            <Bar dataKey="internalFailureCosts" name="Internal Failure" stackId="a" fill="#f59e0b" />
-                            <Bar dataKey="externalFailureCosts" name="External Failure" stackId="a" fill="#ef4444" />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <div className="flex-1 min-h-0">
+                        {trendData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="period" />
+                                    <YAxis tickFormatter={(val) => formatCompactCurrency(val)} />
+                                    <Tooltip formatter={(val: number) => formatCurrency(val)} />
+                                    <Legend />
+                                    <Bar dataKey="preventionCosts" name="Prevention" stackId="a" fill="#22c55e" />
+                                    <Bar dataKey="appraisalCosts" name="Appraisal" stackId="a" fill="#3b82f6" />
+                                    <Bar dataKey="internalFailureCosts" name="Internal Failure" stackId="a" fill="#f59e0b" />
+                                    <Bar dataKey="externalFailureCosts" name="External Failure" stackId="a" fill="#ef4444" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState 
+                                title="No Trend Data" 
+                                description="Historical Cost of Quality data is not yet available."
+                                icon={BarChart2}
+                            />
+                        )}
+                    </div>
                 </div>
 
                 {/* 2. CoQ Model Explanation / Breakdown */}

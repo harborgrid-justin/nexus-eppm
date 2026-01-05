@@ -29,9 +29,6 @@ import {
 import { ResourceRequest } from '../types/resource';
 import { RoadmapLane, RoadmapItem, KanbanTask, StandardTemplate, EtlMapping, MaterialReceipt, PortfolioCommunicationItem, ActivityItem, TeamEvent, PipelineStage, KnowledgeArticle } from '../types';
 
-// ... (Rest of file content is unchanged, just updating import) ...
-// To save space and adhere to constraints, including full file content below with corrected import.
-
 const MOCK_RESOURCE_REQUESTS: ResourceRequest[] = [
     { id: 'REQ-101', projectId: 'P1001', projectName: 'Downtown Metro Hub', requesterName: 'Mike Ross', role: 'Senior Engineer', quantity: 2, startDate: '2024-07-01', endDate: '2024-12-31', status: 'Pending' },
     { id: 'REQ-102', projectId: 'P1002', projectName: 'Global ERP Migration', requesterName: 'Jessica Pearson', role: 'Solution Architect', quantity: 1, startDate: '2024-08-01', endDate: '2024-10-30', status: 'Pending' },
@@ -208,6 +205,12 @@ export const initialState: DataState = {
       riskTolerance: 'Moderate',
       strategicWeights: {},
       vendorBlacklist: [],
+      scoringCriteria: [
+        { id: 'strategic', name: 'Strategic Contribution', weight: 0.4, description: 'Alignment with core business objectives.' },
+        { id: 'financial', name: 'Financial Value (ROI)', weight: 0.3, description: 'Expected return on investment.' },
+        { id: 'risk', name: 'Risk Level (Inverse)', weight: 0.2, description: 'Lower risk scores higher.' },
+        { id: 'feasibility', name: 'Resource Feasibility', weight: 0.1, description: 'Availability of skills and resources.' },
+      ],
       scheduling: {
           retainedLogic: true,
           calculateCriticalPathUsing: 'Longest Path',
@@ -317,7 +320,6 @@ export const initialState: DataState = {
   pipelineStages: MOCK_PIPELINE_STAGES,
   knowledgeBase: MOCK_KNOWLEDGE_ARTICLES,
   etlMappings: INITIAL_MAPPINGS,
-  // Initializing new cost collections
   costReports: MOCK_COST_REPORTS,
   costMeetings: MOCK_COST_MEETINGS,
   costAlerts: MOCK_COST_ALERTS,
@@ -333,7 +335,6 @@ export const initialState: DataState = {
       isProcessing: false,
       summary: { total: 0, valid: 0, error: 0 }
   },
-  // Extension Mock Data
   extensionData: {
       financial: {
           allocation: [

@@ -68,7 +68,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
                                 onClick={() => { setActiveTab(item.id); if(window.innerWidth < 768) onClose(); }}
                                 className={`w-full flex items-center gap-3 px-6 py-2.5 text-sm font-medium border-l-[3px] transition-all ${
                                     activeTab === item.id 
-                                    ? `border-nexus-500 text-white bg-white/5` 
+                                    ? `border-nexus-500 text-white bg-white/10` 
                                     : `border-transparent text-slate-400 hover:text-white hover:bg-white/5`
                                 }`}
                             >

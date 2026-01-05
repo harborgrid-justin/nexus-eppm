@@ -59,7 +59,7 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
     <div className={`flex-shrink-0 h-16 ${theme.colors.surface} border-b ${theme.colors.border} flex items-center justify-between px-6 z-20 shadow-sm`}>
       <div className="flex items-center gap-3">
         {/* Scheduling Controls */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className={`flex items-center gap-1 ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border}`}>
              <Button 
                 size="sm" 
                 variant="primary" 
@@ -70,27 +70,27 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
              >
                 Schedule (F9)
              </Button>
-             <button onClick={onViewLog} className="p-2 text-slate-500 hover:text-slate-800 hover:bg-white rounded-md transition-all" title="View Schedule Log">
+             <button onClick={onViewLog} className={`p-2 ${theme.colors.text.secondary} hover:${theme.colors.text.primary} hover:${theme.colors.surface} rounded-md transition-all`} title="View Schedule Log">
                  <FileText size={16}/>
              </button>
         </div>
 
         <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Data Date</span>
-            <div className="flex items-center gap-1 text-xs font-mono font-bold text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+            <span className={`text-[9px] font-bold ${theme.colors.text.tertiary} uppercase tracking-widest pl-1`}>Data Date</span>
+            <div className={`flex items-center gap-1 text-xs font-mono font-bold ${theme.colors.text.primary} ${theme.colors.background} px-2 py-1 rounded border ${theme.colors.border}`}>
                 <Clock size={12}/> {dataDate.toLocaleDateString()}
             </div>
         </div>
 
-        <div className="h-8 w-px bg-slate-200 mx-2" />
+        <div className={`h-8 w-px ${theme.colors.border} mx-2`} />
         
-        <div className={`flex items-center gap-1 bg-slate-100 p-1 rounded-lg border ${theme.colors.border} shadow-inner`}>
+        <div className={`flex items-center gap-1 ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border} shadow-inner`}>
           {(['day', 'week', 'month'] as const).map(mode => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
               className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all duration-200 whitespace-nowrap ${
-                viewMode === mode ? `${theme.colors.surface} text-nexus-700 shadow-sm font-black` : 'text-slate-500 hover:text-slate-800'
+                viewMode === mode ? `${theme.colors.surface} text-nexus-700 shadow-sm font-black` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`
               }`}
             >
               {mode}
@@ -101,24 +101,24 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
 
       <div className="flex items-center gap-3">
         <div className="relative group">
-            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nexus-500 transition-colors" />
+            <Filter size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme.colors.text.tertiary} group-focus-within:text-nexus-500 transition-colors`} />
             <select 
                 value={taskFilter}
                 onChange={e => setTaskFilter(e.target.value)}
-                className={`pl-9 pr-8 py-1.5 text-xs font-bold text-slate-600 ${theme.colors.surface} border ${theme.colors.border} rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-nexus-500 hover:border-slate-300 transition-all cursor-pointer w-40`}
+                className={`pl-9 pr-8 py-1.5 text-xs font-bold ${theme.colors.text.secondary} ${theme.colors.surface} border ${theme.colors.border} rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-nexus-500 hover:border-slate-300 transition-all cursor-pointer w-40`}
             >
                 <option value="all">All Activities</option>
                 <option value="critical">Critical Path</option>
                 <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
                 <option value={TaskStatus.DELAYED}>Delayed</option>
             </select>
-            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <ChevronDown size={12} className={`absolute right-3 top-1/2 -translate-y-1/2 ${theme.colors.text.tertiary} pointer-events-none`} />
         </div>
 
         <button 
             onClick={onTraceLogic}
             disabled={!isTaskSelected}
-            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-600 ${theme.colors.surface} border ${theme.colors.border} hover:border-slate-300 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm active:scale-95`}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${theme.colors.text.secondary} ${theme.colors.surface} border ${theme.colors.border} hover:border-slate-300 hover:${theme.colors.background} disabled:opacity-40 disabled:cursor-not-allowed shadow-sm active:scale-95`}
          >
            <Share2 size={14} className="text-nexus-500" /> Trace Logic
         </button>
@@ -128,7 +128,7 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm active:scale-95 ${
                showCriticalPath 
                ? 'bg-red-50 border-red-200 text-red-700 ring-1 ring-red-500/20' 
-               : `${theme.colors.surface} ${theme.colors.border} text-slate-600 hover:bg-slate-50 hover:border-slate-300`
+               : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.secondary} hover:${theme.colors.background} hover:border-slate-300`
            }`}
         >
            <AlertTriangle size={14} className={showCriticalPath ? 'text-red-500' : 'text-slate-400'} />
@@ -143,13 +143,13 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
                 <select 
                   value={activeBaselineId || ''}
                   onChange={(e) => setActiveBaselineId(e.target.value || null)}
-                  className="text-xs bg-transparent border-none focus:ring-0 focus:outline-none text-slate-700 font-bold pr-1 cursor-pointer w-24"
+                  className={`text-xs bg-transparent border-none focus:ring-0 focus:outline-none ${theme.colors.text.primary} font-bold pr-1 cursor-pointer w-24`}
                 >
                   <option value="">No Baseline</option>
                   {project.baselines?.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
-                <button onClick={handleSetBaseline} title="Capture baseline" className="p-1 hover:bg-white rounded-md transition-colors">
-                    <Save size={12} className="text-slate-400 hover:text-nexus-600" />
+                <button onClick={handleSetBaseline} title="Capture baseline" className={`p-1 hover:${theme.colors.background} rounded-md transition-colors`}>
+                    <Save size={12} className={`text-slate-400 hover:text-nexus-600`} />
                 </button>
             </div>
         </div>
@@ -159,7 +159,7 @@ const GanttToolbar: React.FC<GanttToolbarProps> = ({
             className={`p-2 rounded-lg transition-all border shadow-sm active:scale-95 ${
                 showResources 
                 ? 'bg-nexus-50 border-nexus-200 text-nexus-600' 
-                : `${theme.colors.surface} ${theme.colors.border} text-slate-400 hover:bg-slate-50`
+                : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.tertiary} hover:${theme.colors.background}`
             }`}
             title="Toggle Resources"
          >

@@ -36,25 +36,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     }, [onNavigate]);
 
     return (
-        <header className={`${theme.layout.headerHeight} ${theme.colors.surface} ${theme.colors.border} border-b flex justify-between items-center px-4 md:px-6 flex-shrink-0 z-20 shadow-sm`}>
+        <header className={`${theme.layout.headerHeight} ${theme.colors.surface} ${theme.colors.border} border-b flex justify-between items-center px-4 md:px-6 flex-shrink-0 z-20 shadow-sm transition-colors duration-300`}>
            <div className="flex items-center gap-4">
-              <button onClick={onSidebarOpen} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md"><Menu size={20} /></button>
+              <button onClick={onSidebarOpen} className={`md:hidden p-2 -ml-2 ${theme.colors.text.secondary} hover:${theme.colors.background} rounded-md`}><Menu size={20} /></button>
               <GlobalBreadcrumbs activeTab={activeTab} projectId={activeTab === 'projectWorkspace' ? projectId || undefined : undefined} onNavigate={onNavigate} />
            </div>
 
            <div className="flex items-center gap-3 md:gap-5">
               <div 
-                  className="hidden md:flex items-center bg-slate-100 rounded-lg px-3 py-1.5 border border-transparent hover:border-slate-300 transition-colors w-64 cursor-pointer" 
+                  className={`hidden md:flex items-center ${theme.colors.background} rounded-lg px-3 py-1.5 border border-transparent hover:${theme.colors.border} transition-colors w-64 cursor-pointer`}
                   onClick={() => onNavigate('search')}
               >
-                  <Search size={14} className="text-slate-400 mr-2"/>
-                  <span className="text-xs text-slate-500">Search (Cmd+K)</span>
+                  <Search size={14} className={`${theme.colors.text.tertiary} mr-2`}/>
+                  <span className={`text-xs ${theme.colors.text.secondary}`}>Search (Cmd+K)</span>
               </div>
 
-              <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
+              <div className={`h-6 w-px ${theme.colors.border} hidden md:block`}></div>
 
               <div className="flex items-center gap-2">
-                <button onClick={onPulseOpen} className={`p-2 rounded-lg transition-all ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : 'text-slate-400 hover:text-nexus-600 hover:bg-slate-50'}`} title="Activity Stream">
+                <button onClick={onPulseOpen} className={`p-2 rounded-lg transition-all ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : `${theme.colors.text.secondary} hover:text-nexus-600 hover:${theme.colors.background}`}`} title="Activity Stream">
                     <History size={18} />
                 </button>
                 <NotificationCenter />
@@ -63,7 +63,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               {enableAi && (
                 <button 
                     onClick={() => onNavigate('ai')} 
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700 shadow-inner' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 shadow-sm'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700 shadow-inner' : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.secondary} hover:${theme.colors.background} shadow-sm`}`}
                 >
                     <Sparkles size={14} className={activeTab === 'ai' ? 'text-nexus-600' : 'text-yellow-500'} />
                     <span className="hidden sm:inline">AI Advisor</span>

@@ -17,18 +17,20 @@ export const useResourceNegotiationLogic = () => {
     const impactData = useMemo(() => {
         if (!selectedReq) return null;
         
+        // Use Global Settings for Monthly Hours
+        const standardHours = (state.governance.resourceDefaults.defaultWorkHoursPerDay || 8) * 20; // Avg 20 days/month
+        
         // Calculate Utilization impact
         const totalRoleCapacity = state.resources
             .filter(r => r.role === selectedReq.role && r.status === 'Active')
-            .reduce((sum, r) => sum + (r.capacity || 160), 0);
+            .reduce((sum, r) => sum + (r.capacity || standardHours), 0);
             
         const currentRoleLoad = state.resources
             .filter(r => r.role === selectedReq.role && r.status === 'Active')
             .reduce((sum, r) => sum + (r.allocated || 0), 0);
             
-        // Assume request adds (Quantity * 160) hours of demand if month duration is roughly 1
-        // Simplified heuristic: Quantity * 40 hours/week * 4 weeks
-        const requestLoad = selectedReq.quantity * 160;
+        // Calculate request load (monthly basis assumption for simplicity in this view)
+        const requestLoad = selectedReq.quantity * standardHours;
 
         const currentUtilization = totalRoleCapacity > 0 ? (currentRoleLoad / totalRoleCapacity) * 100 : 0;
         const newUtilization = totalRoleCapacity > 0 ? ((currentRoleLoad + requestLoad) / totalRoleCapacity) * 100 : 0;
@@ -39,7 +41,7 @@ export const useResourceNegotiationLogic = () => {
             roleCount: state.resources.filter(r => r.role === selectedReq.role).length,
             available: state.resources.filter(r => r.role === selectedReq.role && r.status === 'Active').length
         };
-    }, [selectedReq, state.resources]);
+    }, [selectedReq, state.resources, state.governance.resourceDefaults]);
 
     const handleUpdateStatus = useCallback((status: ResourceRequest['status']) => {
         if (!selectedReq) return;

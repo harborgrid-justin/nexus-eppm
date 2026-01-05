@@ -92,6 +92,13 @@ export interface BillingState {
     history: BillingRecord[];
 }
 
+export interface ScoringCriterion {
+    id: string;
+    name: string;
+    weight: number; // 0.0 to 1.0
+    description: string;
+}
+
 export interface GovernanceState {
   alerts: SystemAlert[];
   auditLog: any[];
@@ -99,6 +106,7 @@ export interface GovernanceState {
   inflationRate: number;
   riskTolerance: 'Aggressive' | 'Moderate' | 'Conservative';
   strategicWeights: Record<string, number>;
+  scoringCriteria: ScoringCriterion[];
   vendorBlacklist: string[];
   scheduling: SchedulingLogic;
   resourceDefaults: ResourceGlobals;

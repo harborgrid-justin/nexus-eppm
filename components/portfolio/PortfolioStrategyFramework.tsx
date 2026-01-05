@@ -1,47 +1,44 @@
+
 import React, { useState } from 'react';
 import { 
-  Users, Shield, Scale, BookOpen, BarChart2, Briefcase, FileText, ArrowRight, Layers, Plus, MoreHorizontal, Move, Edit2, Trash2
+  Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2
 } from 'lucide-react';
 import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { Project } from '../../types';
+import { Project, ScoringCriterion } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
-
-// --- Scoring Model Logic ---
-const SCORING_MODEL = [
-  { id: 'strategic', name: 'Strategic Contribution', weight: 0.4, description: 'Alignment with core business objectives.' },
-  { id: 'financial', name: 'Financial Value (ROI)', weight: 0.3, description: 'Expected return on investment.' },
-  { id: 'risk', name: 'Risk Level (Inverse)', weight: 0.2, description: 'Lower risk scores higher.' },
-  { id: 'feasibility', name: 'Resource Feasibility', weight: 0.1, description: 'Availability of skills and resources.' },
-];
-
-const calculateProjectScores = (project: Project): Record<string, number> => {
-    return {
-        strategic: project.strategicImportance || 5,
-        financial: project.financialValue || 5,
-        risk: project.riskScore ? Math.max(1, 10 - Math.ceil(project.riskScore / 5)) : 5, // Normalize 0-25 risk to 1-10 inverse
-        feasibility: project.resourceFeasibility || 5
-    };
-};
-
-const calculateWeightedScore = (scores: Record<string, number>): number => {
-  const totalScore = SCORING_MODEL.reduce((acc, criterion) => {
-    const score = scores[criterion.id] || 0;
-    return acc + (score / 10) * criterion.weight;
-  }, 0);
-  return Math.round(totalScore * 100);
-};
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
   const { state, dispatch } = useData();
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
+  const { scoringCriteria } = state.governance;
+
+  const calculateProjectScores = (project: Project): Record<string, number> => {
+      // Dynamic scoring logic based on project attributes mapping to criteria IDs
+      // Fallback to default attributes if ID matches known keys
+      return scoringCriteria.reduce((acc, criterion) => {
+          if (criterion.id === 'strategic') acc[criterion.id] = project.strategicImportance || 5;
+          else if (criterion.id === 'financial') acc[criterion.id] = project.financialValue || 5;
+          else if (criterion.id === 'risk') acc[criterion.id] = project.riskScore ? Math.max(1, 10 - Math.ceil(project.riskScore / 5)) : 5;
+          else if (criterion.id === 'feasibility') acc[criterion.id] = project.resourceFeasibility || 5;
+          else acc[criterion.id] = 5; // Default for custom criteria without mapping
+          return acc;
+      }, {} as Record<string, number>);
+  };
+
+  const calculateWeightedScore = (scores: Record<string, number>): number => {
+    const totalScore = scoringCriteria.reduce((acc, criterion) => {
+      const score = scores[criterion.id] || 0;
+      return acc + (score / 10) * criterion.weight;
+    }, 0);
+    return Math.round(totalScore * 100);
+  };
 
   const getProjectById = (id: string) => state.projects.find(p => p.id === id);
 
@@ -138,10 +135,10 @@ const PortfolioStrategyFramework: React.FC = () => {
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                    {SCORING_MODEL.map(c => (
+                    {scoringCriteria.map(c => (
                         <tr key={c.id}>
                         <td className={`py-2 ${theme.colors.text.primary}`}>{c.name}</td>
-                        <td className={`py-2 text-center font-mono ${theme.colors.text.secondary}`}>{c.weight * 100}%</td>
+                        <td className={`py-2 text-center font-mono ${theme.colors.text.secondary}`}>{(c.weight * 100).toFixed(0)}%</td>
                         </tr>
                     ))}
                     </tbody>
@@ -156,7 +153,7 @@ const PortfolioStrategyFramework: React.FC = () => {
                 <thead>
                   <tr className={`border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <th className={`p-2 text-left font-bold ${theme.colors.text.secondary}`}>Project</th>
-                    {SCORING_MODEL.map(c => <th key={c.id} className={`p-2 text-center font-bold ${theme.colors.text.secondary}`}>{c.name.split(' ')[0]}</th>)}
+                    {scoringCriteria.map(c => <th key={c.id} className={`p-2 text-center font-bold ${theme.colors.text.secondary}`}>{c.name.split(' ')[0]}</th>)}
                     <th className="p-2 text-center font-black text-nexus-800 bg-nexus-50">Weighted Score</th>
                   </tr>
                 </thead>
@@ -169,13 +166,13 @@ const PortfolioStrategyFramework: React.FC = () => {
                             {project.name}
                             <div className="text-[10px] text-slate-400">{project.code}</div>
                         </td>
-                        {SCORING_MODEL.map(c => <td key={c.id} className={`p-2 text-center ${theme.colors.text.secondary}`}>{scores[c.id]}</td>)}
+                        {scoringCriteria.map(c => <td key={c.id} className={`p-2 text-center ${theme.colors.text.secondary}`}>{scores[c.id]}</td>)}
                         <td className="p-2 text-center font-bold text-lg text-nexus-700 bg-nexus-50/50">{calculateWeightedScore(scores)}</td>
                       </tr>
                     )
                   })}
                   {state.projects.length === 0 && (
-                      <tr><td colSpan={6} className="p-4 text-center text-slate-400">No active projects to evaluate.</td></tr>
+                      <tr><td colSpan={scoringCriteria.length + 2} className="p-4 text-center text-slate-400">No active projects to evaluate.</td></tr>
                   )}
                 </tbody>
               </table>

@@ -66,7 +66,7 @@ function DataTable<T>({
                     ))}
                  </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                   {[...Array(rowsPerPage)].map((_, i) => (
                       <tr key={i} className={theme.components.table.row}>
                           {columns.map((_, cIdx) => (
@@ -86,8 +86,8 @@ function DataTable<T>({
   return (
     <div className={`${theme.components.card} flex flex-col h-full w-full min-w-0 overflow-hidden`}>
       <div className="overflow-x-auto flex-1 scrollbar-thin">
-        <table className="min-w-full divide-y divide-slate-100 table-fixed">
-          <thead className={`${theme.colors.background}/80 backdrop-blur-sm sticky top-0 z-10`}>
+        <table className={`min-w-full divide-y ${theme.colors.border.replace('border-', 'divide-')} table-fixed`}>
+          <thead className={`${theme.colors.background}/95 backdrop-blur-sm sticky top-0 z-10`}>
             <tr>
               {columns.map((col) => (
                 <th
@@ -105,7 +105,7 @@ function DataTable<T>({
                   <div className={`flex items-center gap-2 overflow-hidden ${col.align === 'right' ? 'justify-end' : col.align === 'center' ? 'justify-center' : 'justify-start'}`}>
                     <span className="truncate">{col.header}</span>
                     {col.sortable && (
-                      <span className="text-slate-400 group-hover:text-nexus-500 flex-shrink-0 transition-colors">
+                      <span className={`text-slate-400 group-hover:text-nexus-500 flex-shrink-0 transition-colors`}>
                         {sortConfig.key === col.key ? (
                           sortConfig.direction === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />
                         ) : (
@@ -118,7 +118,7 @@ function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className={`${theme.colors.surface} divide-y divide-slate-50`}>
+          <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
             {sortedData.length > 0 ? (
               sortedData.map((item) => (
                 <tr
@@ -146,7 +146,7 @@ function DataTable<T>({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-20 text-center text-slate-400">
+                <td colSpan={columns.length} className={`px-6 py-20 text-center ${theme.colors.text.tertiary}`}>
                   <div className="flex flex-col items-center gap-3">
                     <div className={`p-4 ${theme.colors.background} rounded-full`}>
                       <AlertCircle size={32} className="opacity-20" />

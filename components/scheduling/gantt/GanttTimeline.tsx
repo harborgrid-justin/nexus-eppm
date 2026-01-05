@@ -4,6 +4,7 @@ import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../../types';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
 import { getDaysDiff } from '../../../utils/dateUtils';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface TimelineHeaders {
     months: Map<string, { start: number, width: number }>;
@@ -36,7 +37,7 @@ interface GanttTimelineProps {
   baselineMap: Record<string, any> | null;
   selectedTask: Task | null;
   projectTasks: Task[];
-  calendar: ProjectCalendar; // Updated from 'any' to strict type
+  calendar: ProjectCalendar; 
   ganttContainerRef: React.RefObject<HTMLDivElement>;
   getStatusColor: (s: TaskStatus) => string;
   handleMouseDown: (e: React.MouseEvent, task: Task, type: 'move' | 'resize-start' | 'resize-end' | 'progress') => void;
@@ -51,6 +52,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   showCriticalPath, baselineMap, selectedTask, projectTasks, calendar, ganttContainerRef,
   getStatusColor, handleMouseDown, setSelectedTask, virtualItems, totalHeight, onScroll
 }, ref) => {
+  const theme = useTheme();
   
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     onScroll(e);
@@ -59,22 +61,22 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   return (
     <div 
         ref={ref} 
-        className="flex-1 overflow-auto bg-slate-50 relative scrollbar-thin will-change-transform"
+        className={`flex-1 overflow-auto ${theme.colors.background} relative scrollbar-thin will-change-transform`}
         onScroll={handleScroll}
         style={{ contain: 'strict' }}
     >
         <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${totalHeight + 100}px` }}>
             {/* Header Sticky */}
-            <div className="sticky top-0 z-20 bg-white border-b border-slate-200 h-[50px] flex shadow-sm will-change-transform">
+            <div className={`sticky top-0 z-20 ${theme.colors.surface} border-b ${theme.colors.border} h-[50px] flex shadow-sm will-change-transform`}>
                 {Array.from(timelineHeaders.months.entries()).map(([key, data]) => (
-                    <div key={key} className="absolute top-0 border-r border-slate-200 text-xs font-bold text-slate-500 px-2 py-1 truncate bg-white" 
+                    <div key={key} className={`absolute top-0 border-r ${theme.colors.border} text-xs font-bold ${theme.colors.text.secondary} px-2 py-1 truncate ${theme.colors.surface}`}
                         style={{ left: `${data.start}px`, width: `${data.width}px` }}>
                         {key}
                     </div>
                 ))}
                 <div className="flex pt-6">
                     {timelineHeaders.days.map((day) => (
-                        <div key={day.date.toISOString()} className={`flex-shrink-0 flex items-center justify-center text-[10px] text-slate-400 border-r border-slate-100 ${day.isWorking ? 'bg-white' : 'bg-slate-50'}`} 
+                        <div key={day.date.toISOString()} className={`flex-shrink-0 flex items-center justify-center text-[10px] ${theme.colors.text.tertiary} border-r ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} ${day.isWorking ? theme.colors.surface : theme.colors.background}`} 
                             style={{ width: `${dayWidth}px` }}>
                             {day.date.getDate()}
                         </div>
@@ -88,7 +90,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                     className="absolute inset-0 pointer-events-none" 
                     style={{ 
                         height: `${totalHeight}px`,
-                        backgroundImage: `linear-gradient(to right, #f1f5f9 1px, transparent 1px)`,
+                        backgroundImage: `linear-gradient(to right, ${theme.mode === 'dark' ? '#334155' : '#f1f5f9'} 1px, transparent 1px)`,
                         backgroundSize: `${dayWidth}px 100%`,
                         zIndex: 0
                     }} 

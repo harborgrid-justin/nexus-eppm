@@ -2,6 +2,7 @@
 import React from 'react';
 import { User } from '../../types/auth';
 import { LogOut } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SidebarFooterProps {
     user: User | null;
@@ -10,8 +11,12 @@ interface SidebarFooterProps {
 }
 
 export const SidebarFooter: React.FC<SidebarFooterProps> = ({ user, onProfileOpen, onLogout }) => {
+    const theme = useTheme();
+    const borderColor = theme.mode === 'dark' ? 'border-slate-800' : 'border-slate-700';
+    const bgColor = theme.mode === 'dark' ? 'bg-slate-950' : 'bg-slate-900';
+
     return (
-        <div className="p-4 border-t border-slate-800 bg-slate-950 flex-shrink-0">
+        <div className={`p-4 border-t ${borderColor} ${bgColor} flex-shrink-0`}>
            <div className="flex items-center gap-3">
                <div 
                   className="relative cursor-pointer group flex-shrink-0" 

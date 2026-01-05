@@ -15,7 +15,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick })
       onClick={onClick}
       className={`
         ${theme.components.card}
-        ${onClick ? 'cursor-pointer hover:shadow-md hover:border-slate-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]' : ''} 
+        ${onClick ? `cursor-pointer hover:shadow-md hover:${theme.colors.border.replace('border-','border-slate-')}300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]` : ''} 
         ${className}
       `}
     >

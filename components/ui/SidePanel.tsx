@@ -47,7 +47,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
     >
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity duration-300" 
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] transition-opacity duration-300" 
         onClick={onClose}
       />
 
@@ -59,10 +59,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         >
             {/* Header */}
             <div className={`flex items-center justify-between px-8 py-5 border-b ${theme.colors.border.replace('border-', 'border-b-')} ${theme.colors.surface} flex-shrink-0`}>
-                <div className={`${theme.typography.h3} text-slate-900`}>{title}</div>
+                <div className={`${theme.typography.h3} ${theme.colors.text.primary}`}>{title}</div>
                 <button 
                     onClick={onClose}
-                    className="p-2 text-slate-400 transition-all rounded-full hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-nexus-500"
+                    className={`p-2 ${theme.colors.text.tertiary} transition-all rounded-full hover:${theme.colors.text.primary} hover:${theme.colors.background} focus:outline-none focus:ring-2 focus:ring-nexus-500`}
                     aria-label="Close panel"
                 >
                     <X size={22} />
@@ -70,7 +70,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto bg-slate-50/50 scrollbar-thin">
+            <div className={`flex-1 overflow-y-auto ${theme.colors.background} scrollbar-thin`}>
                 <div className="p-8">
                     {children}
                 </div>
