@@ -3,9 +3,9 @@ import { useState, useTransition, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { 
-  Settings, Users, Shield, Bell, CreditCard, History, 
-  Layers, MapPin, Calendar, UserCog, Tag, Edit3, 
-  FileWarning, Receipt, Banknote, GitPullRequest, Terminal 
+  Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, 
+  Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
+  Terminal, Layers, MapPin, History 
 } from 'lucide-react';
 import { NavGroup } from '../../components/common/ModuleNavigation';
 
@@ -21,7 +21,17 @@ export const useAdminSettingsLogic = () => {
 
   const handleGlobalApply = () => {
       setIsApplying(true);
-      dispatch({ type: 'GOVERNANCE_SYNC_PARAMETERS', payload: {} });
+      // In a real app, this might trigger a complex background job.
+      // We simulate this with a timeout and dispatch an action for the audit log.
+      dispatch({ type: 'SYSTEM_QUEUE_DATA_JOB', payload: {
+          id: `JOB-${Date.now()}`,
+          type: 'System',
+          format: 'Global Sync',
+          status: 'In Progress',
+          submittedBy: 'Admin',
+          timestamp: new Date().toLocaleString(),
+          details: 'Applying global configuration changes...'
+      }});
       setTimeout(() => {
           setIsApplying(false);
       }, 1500);
@@ -30,7 +40,8 @@ export const useAdminSettingsLogic = () => {
   const handleResetSystem = () => {
       if (confirm("DANGER: This will wipe all local data and restore the factory demo dataset. This action cannot be undone. Are you sure?")) {
           dispatch({ type: 'RESET_SYSTEM' });
-          alert("System reset complete.");
+          alert("System reset complete. The application will now reload.");
+          window.location.reload();
       }
   };
 

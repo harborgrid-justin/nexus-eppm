@@ -1,5 +1,5 @@
 
-import { Project, Task } from '../../types';
+import { Project, Task } from '../../types/index';
 
 export interface ComparisonResult {
     addedTasks: Task[];
@@ -28,7 +28,7 @@ export const compareProjects = (baseProject: Project, targetProject: Project): C
     let durationVariance = 0;
 
     // Detect Added & Modified
-    targetProject.tasks.forEach(targetTask => {
+    targetProject.tasks.forEach((targetTask: Task) => {
         const baseTask = baseMap.get(targetTask.id);
         if (!baseTask) {
             addedTasks.push(targetTask);
@@ -55,7 +55,7 @@ export const compareProjects = (baseProject: Project, targetProject: Project): C
     });
 
     // Detect Deleted
-    baseProject.tasks.forEach(baseTask => {
+    baseProject.tasks.forEach((baseTask: Task) => {
         if (!targetMap.has(baseTask.id)) {
             deletedTasks.push(baseTask);
         }

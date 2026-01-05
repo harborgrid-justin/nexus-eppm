@@ -1,4 +1,3 @@
-
 export * from './mocks/projects';
 export * from './mocks/resources';
 export * from './mocks/finance';
@@ -14,4 +13,5 @@ export * from './mocks/governance';
 export * from './mocks/business';
 export * from './mocks/unifier';
 export * from './dictionaries';
+export * from './industry_seeds';
 export * from './mocks/strategy';

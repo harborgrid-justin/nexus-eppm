@@ -1,5 +1,9 @@
 
+
+
+
 import { GoogleGenAI, Type, Chat } from "@google/genai";
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, AIAnalysisResult, Program } from '../types/index';
 
 const getAiClient = () => {

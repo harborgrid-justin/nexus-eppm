@@ -1,7 +1,12 @@
+
+
+
+
 import React, { useState } from 'react';
-import { QualityReport, InspectionChecklist } from '../../../types';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useTheme } from '../../../context/ThemeContext';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
+import { QualityReport, InspectionChecklist } from '../../types/index';
+import { usePermissions } from '../../hooks/usePermissions';
+import { useTheme } from '../../context/ThemeContext';
 import { ControlLogHeader } from './control/ControlLogHeader';
 import { ControlLogTable } from './control/ControlLogTable';
 import { ControlLogDetail } from './control/ControlLogDetail';

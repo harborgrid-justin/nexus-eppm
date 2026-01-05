@@ -1,5 +1,9 @@
 
+
+
+
 import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, Task, WBSNode, GlobalCalendar, WorkDay } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';

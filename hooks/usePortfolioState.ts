@@ -1,6 +1,10 @@
 
+
+
+
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, TaskStatus, Issue } from '../types/index';
 import { calculateProjectProgress } from '../utils/calculations';
 import { useTheme } from '../context/ThemeContext';

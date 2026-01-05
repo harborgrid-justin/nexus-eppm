@@ -1,2 +1,3 @@
-// Re-export all types from the types directory index
-export * from './types/index';
+// This file makes the root "types" a valid module to avoid resolution errors.
+// All type definitions are in the /types directory.
+export {};

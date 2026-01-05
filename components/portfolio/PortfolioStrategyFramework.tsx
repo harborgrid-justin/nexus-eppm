@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2
@@ -11,23 +10,24 @@ import { Project, ScoringCriterion } from '../../types';
 import { StatusBadge } from '../common/StatusBadge';
 import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
+import { usePortfolioData } from '../../hooks/usePortfolioData';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
-  const { state, dispatch } = useData();
+  const { dispatch, state: { governance } } = useData(); // Keep useData for dispatch and governance
+  const { projects, strategicGoals } = usePortfolioData(); // Use dedicated hook for portfolio data
+  
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
-  const { scoringCriteria } = state.governance;
+  const { scoringCriteria } = governance;
 
   const calculateProjectScores = (project: Project): Record<string, number> => {
-      // Dynamic scoring logic based on project attributes mapping to criteria IDs
-      // Fallback to default attributes if ID matches known keys
       return scoringCriteria.reduce((acc, criterion) => {
           if (criterion.id === 'strategic') acc[criterion.id] = project.strategicImportance || 5;
           else if (criterion.id === 'financial') acc[criterion.id] = project.financialValue || 5;
           else if (criterion.id === 'risk') acc[criterion.id] = project.riskScore ? Math.max(1, 10 - Math.ceil(project.riskScore / 5)) : 5;
           else if (criterion.id === 'feasibility') acc[criterion.id] = project.resourceFeasibility || 5;
-          else acc[criterion.id] = 5; // Default for custom criteria without mapping
+          else acc[criterion.id] = 5;
           return acc;
       }, {} as Record<string, number>);
   };
@@ -40,7 +40,7 @@ const PortfolioStrategyFramework: React.FC = () => {
     return Math.round(totalScore * 100);
   };
 
-  const getProjectById = (id: string) => state.projects.find(p => p.id === id);
+  const getProjectById = (id: string) => projects.find(p => p.id === id);
 
   const handleMoveCategory = (projectId: string, newCategory: string) => {
       dispatch({
@@ -62,7 +62,6 @@ const PortfolioStrategyFramework: React.FC = () => {
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
       
-      {/* 1. GOVERNANCE */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Shield className="text-nexus-600" size={20} />
@@ -103,7 +102,6 @@ const PortfolioStrategyFramework: React.FC = () => {
         </Card>
       </section>
 
-      {/* 2. STRATEGY & ALIGNMENT */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="text-nexus-600" size={20} />
@@ -114,7 +112,7 @@ const PortfolioStrategyFramework: React.FC = () => {
             <div>
               <h3 className={`${theme.typography.h3} mb-4`}>Strategic Objectives</h3>
               <ul className="space-y-2 text-sm">
-                {state.strategicGoals.length > 0 ? state.strategicGoals.map(goal => (
+                {strategicGoals.length > 0 ? strategicGoals.map(goal => (
                     <li key={goal.id} className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border}`}>
                         <span className="font-bold block mb-1">{goal.name}</span>
                         <span className="text-slate-500">{goal.description}</span>
@@ -158,7 +156,7 @@ const PortfolioStrategyFramework: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {state.projects.map((project) => {
+                  {projects.map((project) => {
                     const scores = calculateProjectScores(project);
                     return (
                       <tr key={project.id}>
@@ -171,7 +169,7 @@ const PortfolioStrategyFramework: React.FC = () => {
                       </tr>
                     )
                   })}
-                  {state.projects.length === 0 && (
+                  {projects.length === 0 && (
                       <tr><td colSpan={scoringCriteria.length + 2} className="p-4 text-center text-slate-400">No active projects to evaluate.</td></tr>
                   )}
                 </tbody>
@@ -181,7 +179,6 @@ const PortfolioStrategyFramework: React.FC = () => {
         </Card>
       </section>
 
-      {/* 3. COMPONENT STRUCTURE */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Layers className="text-nexus-600" size={20} />
@@ -189,7 +186,7 @@ const PortfolioStrategyFramework: React.FC = () => {
         </div>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
           {PORTFOLIO_CATEGORIES.map((category) => {
-            const projectsInCategory = state.projects.filter(p => p.category === category);
+            const projectsInCategory = projects.filter(p => p.category === category);
             return (
               <div key={category} className="flex flex-col gap-3">
                 <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} flex justify-between items-center`}>
@@ -224,7 +221,6 @@ const PortfolioStrategyFramework: React.FC = () => {
         </div>
       </section>
 
-      {/* Edit Panel for Category Assignment */}
       <SidePanel
         isOpen={isEditPanelOpen}
         onClose={() => setIsEditPanelOpen(false)}
@@ -245,7 +241,7 @@ const PortfolioStrategyFramework: React.FC = () => {
                         {PORTFOLIO_CATEGORIES.map(cat => (
                             <button
                                 key={cat}
-                                onClick={() => handleMoveCategory(currentProject.id, cat)}
+                                onClick={() => currentProject && handleMoveCategory(currentProject.id, cat)}
                                 className={`w-full text-left p-3 rounded-lg border transition-all ${
                                     currentProject.category === cat 
                                     ? `${theme.colors.semantic.info.bg} border-nexus-500 ${theme.colors.semantic.info.text} ring-1 ring-nexus-500` 

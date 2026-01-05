@@ -1,7 +1,11 @@
 
+
+
+
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { calculateProjectData } from '../utils/projectSelectors';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { ProjectWorkspaceData } from '../context/ProjectWorkspaceContext';
 
 export const useProjectState = (projectId: string | null): ProjectWorkspaceData | null => {

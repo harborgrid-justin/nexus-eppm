@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Settings, RefreshCw } from 'lucide-react';
+import { Settings, RefreshCw, Database } from 'lucide-react';
 import EpsObsSettings from './admin/EpsObsSettings';
 import CalendarEditor from './admin/CalendarEditor';
 import GlobalChangeWorkbench from './admin/GlobalChangeWorkbench';
@@ -83,7 +82,7 @@ const AdminSettings: React.FC = () => {
                   className={`flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95`}
                   title="Restore Factory Defaults"
                 >
-                  <RefreshCw size={16} />
+                  <Database size={16} />
                   Reset Database
                 </button>
                 <button 

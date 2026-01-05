@@ -1,4 +1,4 @@
-
+import { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Permission, Role } from '../types/auth';
 import { ROLE_DEFINITIONS } from '../constants/auth';
@@ -6,10 +6,13 @@ import { ROLE_DEFINITIONS } from '../constants/auth';
 export const usePermissions = () => {
   const { user } = useAuth();
 
+  const permissions = useMemo(() => {
+    if (!user) return new Set<Permission>();
+    return new Set(ROLE_DEFINITIONS[user.role] || []);
+  }, [user]);
+
   const hasPermission = (permission: Permission): boolean => {
-    if (!user) return false;
-    const permissions = ROLE_DEFINITIONS[user.role] || [];
-    return permissions.includes(permission);
+    return permissions.has(permission);
   };
 
   const hasRole = (role: Role | Role[]): boolean => {

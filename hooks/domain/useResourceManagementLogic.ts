@@ -1,15 +1,21 @@
-
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FileText, Users, BarChart2, Sliders, ScrollText, Box } from 'lucide-react';
 import { NavGroup } from '../../components/common/ModuleNavigation';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 
 export const useResourceManagementLogic = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const { assignedResources } = useProjectWorkspace();
 
   const activeGroup = searchParams.get('resGroup') || 'planning';
   const activeView = searchParams.get('view') || 'plan';
+  
+  const overAllocatedResources = useMemo(() => {
+    return (assignedResources || []).filter(r => r.allocated > r.capacity);
+  }, [assignedResources]);
+
 
   const navStructure: NavGroup[] = useMemo(() => [
     { id: 'planning', label: 'Planning & Setup', items: [
@@ -53,6 +59,7 @@ export const useResourceManagementLogic = () => {
       isPending,
       navStructure,
       handleGroupChange,
-      handleViewChange
+      handleViewChange,
+      overAllocatedResources
   };
 };

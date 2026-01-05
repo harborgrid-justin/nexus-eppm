@@ -1,5 +1,9 @@
 
-import { Project, TaskStatus } from '../types/project';
+
+
+
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
+import { Project, TaskStatus } from '../types/index';
 import { getDaysDiff } from './dateUtils';
 
 export const calculateProjectProgress = (project: Project): number => {

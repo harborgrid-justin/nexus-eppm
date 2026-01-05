@@ -1,4 +1,6 @@
 
+
+
 import React from 'react';
 import { useIndustry } from '../context/IndustryContext';
 import { Industry } from '../types/index';

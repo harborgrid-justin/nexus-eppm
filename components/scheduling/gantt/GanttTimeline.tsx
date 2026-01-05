@@ -1,6 +1,5 @@
-
 import React, { forwardRef } from 'react';
-import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../../types';
+import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../types/index';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
 import { getDaysDiff } from '../../../utils/dateUtils';

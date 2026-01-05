@@ -1,4 +1,6 @@
 
+
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Industry } from '../types/index';
 

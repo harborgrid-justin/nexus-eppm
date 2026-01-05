@@ -1,4 +1,5 @@
 
+
 import React, { useMemo, useState, useEffect, useTransition, useDeferredValue, Suspense } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
@@ -8,7 +9,7 @@ import { formatCompactCurrency, formatCurrency, formatPercentage } from '../../u
 import { getDaysDiff } from '../../utils/dateUtils';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Area, Bar } from 'recharts';
 import { calculateRiskExposure } from '../../utils/integrationUtils';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { Card } from '../ui/Card';
 
 const CostDashboard: React.FC = () => {
@@ -72,25 +73,25 @@ const CostDashboard: React.FC = () => {
             </div>
             <div className="flex gap-8 border-l border-slate-200 pl-8">
                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" checked={includeRisk} onChange={e => setIncludeRisk(e.target.checked)} className="w-4 h-4 rounded text-nexus-600 focus:ring-nexus-500 border-slate-300" />
+                    <input type="checkbox" checked={includeRisk} onChange={e => startTransition(() => setIncludeRisk(e.target.checked))} className="w-4 h-4 rounded text-nexus-600 focus:ring-nexus-500 border-slate-300" />
                     <span className="text-sm font-bold text-slate-700 group-hover:text-nexus-600 transition-colors">Projected Risk EMV</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" checked={includePendingChanges} onChange={e => setIncludePendingChanges(e.target.checked)} className="w-4 h-4 rounded text-nexus-600 focus:ring-nexus-500 border-slate-300" />
+                    <input type="checkbox" checked={includePendingChanges} onChange={e => startTransition(() => setIncludePendingChanges(e.target.checked))} className="w-4 h-4 rounded text-nexus-600 focus:ring-nexus-500 border-slate-300" />
                     <span className="text-sm font-bold text-slate-700 group-hover:text-nexus-600 transition-colors">Pending Changes</span>
                 </label>
             </div>
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-4 gap-6 transition-opacity ${includeRisk !== deferredIncludeRisk ? 'opacity-50' : 'opacity-100'}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-4 gap-6 transition-opacity ${isPending ? 'opacity-50' : 'opacity-100'}`}>
             <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Approved Baseline" icon={DollarSign} />
             <StatCard title="Committed Cost" value={formatCompactCurrency(committedCosts)} subtext="Issued PO Ledger" icon={ShoppingCart} />
             <StatCard title="Cost of Quality" value={formatCompactCurrency(costOfQuality)} subtext="Rework & Defects" icon={Coins} trend="down"/>
             <StatCard title="EAC (Forecast)" value={formatCompactCurrency(eac)} subtext={`Target: ${formatCompactCurrency(project.budget)}`} icon={Layers} trend={project.budget >= eac ? 'up' : 'down'} />
         </div>
 
-        <Card className={`p-8 h-[450px] relative transition-opacity ${includeRisk !== deferredIncludeRisk ? 'opacity-50' : 'opacity-100'}`}>
-            {(includeRisk !== deferredIncludeRisk || includePendingChanges !== deferredIncludePending) && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/20 backdrop-blur-[1px]"><Loader2 className="animate-spin text-nexus-600 mb-2" size={32}/><p className="text-[10px] font-black uppercase text-nexus-700 tracking-widest">Simulating EAC Curve...</p></div>}
+        <Card className={`p-8 h-[450px] relative transition-opacity ${isPending ? 'opacity-50' : 'opacity-100'}`}>
+            {isPending && <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/20 backdrop-blur-[1px]"><Loader2 className="animate-spin text-nexus-600 mb-2" size={32}/><p className="text-[10px] font-black uppercase text-nexus-700 tracking-widest">Simulating EAC Curve...</p></div>}
             <h3 className="text-lg font-black text-slate-800 mb-8 flex items-center gap-2 border-b border-slate-50 pb-4"><TrendingUp className="text-nexus-600" size={20}/> Risk-Adjusted S-Curve (PMB)</h3>
             <div className="flex-1 h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">

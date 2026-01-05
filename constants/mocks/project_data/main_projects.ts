@@ -1,4 +1,3 @@
-
 // FIX: Direct import to avoid circular dependency
 import { Project, TaskStatus } from '../../../types/project';
 

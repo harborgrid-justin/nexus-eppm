@@ -1,4 +1,6 @@
 
+
+
 import React, { useMemo, useState, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { Briefcase, GanttChartSquare, DollarSign, AlertTriangle, ShieldCheck, Loader2, AlertOctagon, Zap, Anchor, BookOpen, FileText, CheckCircle, Clock, Activity as ActivityIcon, GitBranch, GitMerge, FileDiff } from 'lucide-react';
@@ -124,7 +126,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><BookOpen size={18} className="text-nexus-600"/> High-Level Charter</h3>
-             <button onClick={() => handleTabChange('charter')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
+             <button onClick={() => setActiveTab('charter')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">Full Document</button>
            </div>
            <div className="p-6">
                <dl className="space-y-4">
@@ -140,7 +142,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><FileText size={18} className="text-nexus-600"/> Change Summary</h3>
-             <button onClick={() => handleTabChange('logs')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">View Log</button>
+             <button onClick={() => setActiveTab('logs')} className="text-[10px] font-bold text-nexus-600 uppercase tracking-widest hover:underline">View Log</button>
            </div>
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -170,13 +172,10 @@ const ProjectIntegrationManagement: React.FC = () => {
     <div className={`h-full overflow-y-auto p-6 md:p-8 bg-slate-100/50 scrollbar-thin`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-3">
-             <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
-                <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
-                {project.name}
-             </h1>
-             {project.isReflection && <span className="bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Reflection Mode</span>}
-          </div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tighter">
+            <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
+            {project.name}
+          </h1>
           <p className="text-slate-500 font-medium text-sm mt-1">{project.code} • {project.category}</p>
         </div>
         <div className="flex gap-2">

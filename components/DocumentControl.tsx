@@ -1,4 +1,5 @@
 
+
 import React, { useRef } from 'react';
 import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -6,7 +7,8 @@ import { PageHeader } from './common/PageHeader';
 import { useDocumentControlLogic } from '../hooks/domain/useDocumentControlLogic';
 import { useData } from '../context/DataContext';
 import { generateId, formatFileSize } from '../utils/formatters';
-import { Document } from '../types';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
+import { Document } from '../types/index';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 
 const DocumentControl: React.FC = () => {

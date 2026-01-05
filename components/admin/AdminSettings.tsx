@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { 
-  Settings, Users, Server, Shield, Bell, CreditCard, UserCog, Tag, 
+  Settings, Users, Shield, Bell, CreditCard, UserCog, Tag, 
   Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
   Terminal, Layers, MapPin, History, RefreshCw, Database
 } from 'lucide-react';
@@ -27,75 +26,22 @@ import EnterpriseResourceSettings from '../resources/EnterpriseResourceSettings'
 import WorkflowDesigner from './WorkflowDesigner';
 import AuditLog from './AuditLog';
 import GeneralSettings from './GeneralSettings';
+import { useAdminSettingsLogic } from '../../hooks/domain/useAdminSettingsLogic';
 
 const AdminSettings: React.FC = () => {
-  const [activeGroup, setActiveGroup] = useState('system');
-  const [activeView, setActiveView] = useState('general');
-  const [isApplying, setIsApplying] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const theme = useTheme();
-  const { dispatch } = useData();
 
-  const handleGlobalApply = () => {
-      setIsApplying(true);
-      // In a real app this would trigger a complex background job.
-      // We simulate this with a timeout and dispatch an action for the audit log.
-      dispatch({ type: 'GOVERNANCE_SYNC_PARAMETERS', payload: {} });
-      setTimeout(() => {
-          setIsApplying(false);
-      }, 1500);
-  };
-
-  const handleResetSystem = () => {
-      if (confirm("DANGER: This will wipe all local data and restore the factory demo dataset. This action cannot be undone. Are you sure?")) {
-          dispatch({ type: 'RESET_SYSTEM' });
-          alert("System reset complete.");
-      }
-  };
-
-  const navGroups: NavGroup[] = useMemo(() => [
-      { id: 'system', label: 'System & Security', items: [
-          { id: 'general', label: 'General Settings', icon: Settings },
-          { id: 'users', label: 'Users & Roles', icon: Users },
-          { id: 'security', label: 'Security Policy', icon: Shield },
-          { id: 'notifications', label: 'Notifications', icon: Bell },
-          { id: 'billing', label: 'Billing & Licensing', icon: CreditCard },
-          { id: 'audit', label: 'Audit Log', icon: History },
-      ]},
-      { id: 'enterprise', label: 'Enterprise Data', items: [
-          { id: 'epsobs', label: 'EPS & OBS Structure', icon: Layers },
-          { id: 'locations', label: 'Global Locations', icon: MapPin },
-          { id: 'calendars', label: 'Enterprise Calendars', icon: Calendar },
-          { id: 'resources', label: 'Resource Taxonomy', icon: UserCog },
-      ]},
-      { id: 'dictionaries', label: 'Dictionaries', items: [
-          { id: 'activityCodes', label: 'Activity Codes', icon: Tag },
-          { id: 'udfs', label: 'User Defined Fields', icon: Edit3 },
-          { id: 'issueCodes', label: 'Issue Codes', icon: FileWarning },
-          { id: 'expenseCategories', label: 'Expense Categories', icon: Receipt },
-          { id: 'fundingSources', label: 'Funding Sources', icon: Banknote },
-      ]},
-      { id: 'automation', label: 'Automation', items: [
-          { id: 'workflows', label: 'Workflows', icon: GitPullRequest },
-          { id: 'globalChange', label: 'Global Change', icon: Terminal },
-      ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (viewId: string) => {
-    startTransition(() => {
-        setActiveView(viewId);
-    });
-  };
+  const {
+      activeGroup,
+      activeView,
+      isApplying,
+      isPending,
+      navGroups,
+      handleGlobalApply,
+      handleGroupChange,
+      handleItemChange,
+      handleResetSystem
+  } = useAdminSettingsLogic();
 
   const renderContent = () => {
     switch(activeView) {

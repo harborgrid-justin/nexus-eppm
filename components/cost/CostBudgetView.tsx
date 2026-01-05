@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BudgetTable } from './budget/BudgetTable';
 import { BudgetDetailPanel } from './budget/BudgetDetailPanel';
@@ -10,7 +9,7 @@ import { Plus } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { useData } from '../../context/DataContext';
-import { BudgetLineItem } from '../../types';
+import { BudgetLineItem } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 
 const CostBudgetView: React.FC = () => {

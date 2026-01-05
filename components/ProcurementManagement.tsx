@@ -1,4 +1,7 @@
 
+
+
+
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -14,6 +17,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { formatCurrency } from '../utils/formatters';
 import { PageHeader } from './common/PageHeader';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { MakeOrBuyAnalysisView } from './procurement/MakeOrBuyAnalysisView';
 import { SourceSelectionView } from './procurement/SourceSelectionView';
 

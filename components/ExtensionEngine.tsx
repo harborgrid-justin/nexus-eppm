@@ -1,5 +1,9 @@
 
+
+
+
 import React, { lazy, Suspense, useMemo } from 'react';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Extension } from '../types/index';
 import { 
   LayoutDashboard, Map as MapIcon, Database, Box, FileText, Settings, 

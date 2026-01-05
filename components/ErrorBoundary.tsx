@@ -12,9 +12,9 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // FIX: Added a constructor to properly initialize state and props for the class component.
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    // FIX: Initialize state in the constructor for broader compatibility and to ensure `this` context is correctly established.
     this.state = {
       hasError: false,
       error: undefined

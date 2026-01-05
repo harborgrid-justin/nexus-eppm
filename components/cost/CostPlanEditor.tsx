@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight, Copy, Info, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';

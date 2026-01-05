@@ -1,5 +1,5 @@
 
-import React, { useState, useTransition, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud, FileCode, Grid, Server } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ExchangeDashboard } from './data/ExchangeDashboard';
@@ -13,52 +13,21 @@ import { ExcelSync } from './data/ExcelSync';
 import { XerParser } from './data/XerParser';
 import { ErpConnector } from './data/ErpConnector';
 import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
+import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
+import { useDataExchangeLogic } from '../../hooks/domain/useDataExchangeLogic';
 
 const DataExchange: React.FC = () => {
     const theme = useTheme();
-    const [activeGroup, setActiveGroup] = useState('operations');
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [isPending, startTransition] = useTransition();
-
-    const navGroups: NavGroup[] = useMemo(() => [
-        { id: 'operations', label: 'Operations', items: [
-            { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-            { id: 'history', label: 'Job Logs', icon: History },
-        ]},
-        { id: 'import_tools', label: 'Ingestion Tools', items: [
-            { id: 'excel', label: 'Excel Sync', icon: Grid },
-            { id: 'xer', label: 'Schedule Parser', icon: FileCode },
-            { id: 'import', label: 'Data Import', icon: UploadCloud },
-        ]},
-        { id: 'configuration', label: 'Configuration', items: [
-            { id: 'erp', label: 'ERP Gateways', icon: Server },
-            { id: 'schema', label: 'Schema Map', icon: Map },
-            { id: 'designer', label: 'Integration Designer', icon: GitMerge },
-            { id: 'connectors', label: 'Connectors', icon: Network },
-        ]},
-        { id: 'exports', label: 'Outbound', items: [
-            { id: 'export', label: 'Export', icon: Download },
-        ]}
-    ], []);
-
-    const handleGroupChange = (groupId: string) => {
-        const newGroup = navGroups.find(g => g.id === groupId);
-        if (newGroup?.items.length) {
-            startTransition(() => {
-                setActiveGroup(groupId);
-                setActiveTab(newGroup.items[0].id);
-            });
-        }
-    };
-
-    const handleItemChange = (itemId: string) => {
-        startTransition(() => {
-            setActiveTab(itemId);
-        });
-    };
-
+    const {
+        activeGroup,
+        activeTab,
+        isPending,
+        navGroups,
+        handleGroupChange,
+        handleItemChange
+    } = useDataExchangeLogic();
+    
     const renderContent = () => {
         switch(activeTab) {
             case 'dashboard': return <ExchangeDashboard />;

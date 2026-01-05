@@ -1,6 +1,6 @@
 
 // FIX: Correctly import all necessary procurement-related types.
-import { ProcurementPlan, Vendor, ProcurementPackage, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, VendorBid, BidLineItem } from '../../types';
+import { ProcurementPlan, Vendor, ProcurementPackage, Solicitation, Contract, PurchaseOrder, SupplierPerformanceReview, ProcurementClaim, VendorBid, BidLineItem } from '../../types/index';
 
 export const MOCK_PROCUREMENT_PLANS: ProcurementPlan[] = [
   { id: 'PP-01', projectId: 'P1001', objectives: 'Ensure timely material delivery', scope: 'All raw materials', approach: 'Competitive Bid', procurementMethods: ['RFP'], status: 'Active', version: 1 }

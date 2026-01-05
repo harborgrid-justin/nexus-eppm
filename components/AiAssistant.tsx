@@ -1,5 +1,9 @@
 
+
+
+
 import React from 'react';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, AIAnalysisResult } from '../types/index';
 import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2 } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAiAssistant';

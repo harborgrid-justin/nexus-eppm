@@ -1,4 +1,7 @@
 
+
+
+
 import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { 
@@ -14,6 +17,7 @@ import { Badge } from './ui/Badge';
 import { StakeholderDashboard } from './stakeholder/StakeholderDashboard';
 import { EngagementMatrix } from './stakeholder/EngagementMatrix';
 import { FinancialAuthority } from './stakeholder/FinancialAuthority';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { EnrichedStakeholder } from '../types/index';
 
 const StakeholderManagement: React.FC = () => {

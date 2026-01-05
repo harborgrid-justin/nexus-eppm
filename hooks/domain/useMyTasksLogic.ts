@@ -2,7 +2,8 @@
 import { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Task, TaskStatus, Project } from '../../types';
+// FIX: Corrected import path
+import { Task, TaskStatus, Project } from '../../types/index';
 
 export interface EnrichedTask extends Task {
   projectName: string;

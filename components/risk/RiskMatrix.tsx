@@ -1,109 +1,75 @@
-
-import React, { useMemo } from 'react';
-import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { useData } from '../../context/DataContext';
-import { ArrowRight, ArrowUp } from 'lucide-react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Risk } from '../../types/index';
+import { useRiskMatrixLogic } from '../../hooks/domain/useRiskMatrixLogic';
 
 const RiskMatrix: React.FC = () => {
-  const { risks } = useProjectWorkspace();
-  const { dispatch } = useData();
   const theme = useTheme();
-
-  const scale = [1, 2, 3, 4, 5];
-
-  // Optimize: Pre-calculate the distribution of risks into the matrix cells (Rule 8)
-  const matrixData = useMemo(() => {
-      if (!risks) return {};
-      const map: Record<string, Risk[]> = {};
-      risks.forEach(r => {
-          const key = `${r.probabilityValue}-${r.impactValue}`;
-          if (!map[key]) map[key] = [];
-          map[key].push(r);
-      });
-      return map;
-  }, [risks]);
-
-  const getCellColor = (prob: number, imp: number) => {
-    const score = prob * imp;
-    if (score >= 15) return 'bg-red-500/80 hover:bg-red-500 text-white';
-    if (score >= 8) return 'bg-yellow-400/80 hover:bg-yellow-400 text-yellow-900';
-    return 'bg-green-400/80 hover:bg-green-400 text-green-900';
-  };
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, riskId: string) => {
-    e.dataTransfer.setData("riskId", riskId);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, prob: number, imp: number) => {
-    e.preventDefault();
-    const riskId = e.dataTransfer.getData("riskId");
-    if (!risks) return;
-    const risk = risks.find(r => r.id === riskId);
-    if (risk) {
-      const updatedRisk = {
-        ...risk,
-        probabilityValue: prob,
-        impactValue: imp,
-        score: prob * imp
-      };
-      dispatch({ type: 'UPDATE_RISK', payload: { risk: updatedRisk } });
-    }
-  };
-
-  if (!risks) return <div className={theme.layout.pagePadding}>Loading risks...</div>;
+  const { 
+    matrixData, 
+    hoveredCell, 
+    setHoveredCell, 
+    handleRiskClick 
+  } = useRiskMatrixLogic();
 
   return (
-    <div className={`h-full overflow-auto ${theme.layout.pagePadding} ${theme.colors.background}`}>
-        <h3 className={`${theme.typography.h3} mb-4`}>Probability-Impact Matrix</h3>
-        <div className="overflow-x-auto pb-4">
-            <div className="flex items-center justify-center min-w-[700px]">
-                {/* Y Axis Label */}
-                <div className="flex items-center justify-center -rotate-90 -ml-8 mr-2">
-                <span className={theme.typography.label}>Probability</span>
-                <ArrowUp size={14} className={`ml-1 ${theme.colors.text.secondary}`} />
+    <div className={`h-full flex flex-col items-center justify-center p-8 ${theme.colors.background} overflow-auto`}>
+        <div className={`${theme.colors.surface} p-8 rounded-2xl shadow-sm border ${theme.colors.border} max-w-4xl w-full`}>
+            <div className="flex justify-between items-end mb-6">
+                <div>
+                    <h2 className={theme.typography.h2}>Project Risk Matrix</h2>
+                    <p className={theme.typography.small}>Probability vs. Impact Heatmap</p>
                 </div>
-                
-                <div className={`grid grid-cols-5 grid-rows-5 gap-1 border-l border-b ${theme.colors.border}`}>
-                    {scale.slice().reverse().map(prob => 
-                        scale.map(imp => {
-                            const cellRisks = matrixData[`${prob}-${imp}`] || [];
-                            return (
-                                <div 
-                                    key={`${prob}-${imp}`} 
-                                    className={`w-32 h-32 border border-transparent hover:border-white/50 relative p-2 flex flex-wrap gap-1 content-start ${getCellColor(prob, imp)} transition-colors rounded-sm`}
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, prob, imp)}
-                                >
-                                    {cellRisks.map(risk => (
-                                        <div 
-                                            key={risk.id} 
-                                            className={`w-8 h-8 rounded-full ${theme.colors.surface} ${theme.colors.text.primary} text-[10px] flex items-center justify-center font-bold cursor-grab active:cursor-grabbing shadow-md border ${theme.colors.border}`}
-                                            title={risk.description}
-                                            draggable
-                                            onDragStart={(e) => handleDragStart(e, risk.id)}
-                                        >
-                                            {risk.id.split('-')[1] || risk.id.substring(0,2)}
-                                        </div>
-                                    ))}
-                                    {cellRisks.length > 5 && <span className="text-xs font-bold pl-1 opacity-70">+{cellRisks.length - 5}</span>}
-                                    <span className="absolute top-1 right-1 text-[9px] font-black opacity-30">{prob * imp}</span>
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
+                {hoveredCell && (
+                    <div className={`text-sm font-bold ${theme.colors.text.secondary} ${theme.colors.background} px-3 py-1 rounded animate-in fade-in`}>
+                        {matrixData[hoveredCell]?.length || 0} Risks in this zone
+                    </div>
+                )}
             </div>
             
-            {/* X Axis Label */}
-            <div className="flex items-center justify-center mt-2 ml-16 min-w-[700px]">
-                <span className={theme.typography.label}>Impact</span>
-                <ArrowRight size={14} className={`ml-1 ${theme.colors.text.secondary}`} />
+            <div className="flex gap-4">
+                <div className="flex flex-col justify-center items-center w-8">
+                    <span className={`font-bold ${theme.colors.text.tertiary} uppercase tracking-widest text-xs -rotate-90 whitespace-nowrap`}>Probability</span>
+                </div>
+                
+                <div className="flex-1">
+                    <div className="grid grid-cols-5 grid-rows-5 gap-1.5 aspect-square max-h-[500px]">
+                        {[5,4,3,2,1].map(prob => 
+                            [1,2,3,4,5].map(imp => {
+                                const key = `${prob}-${imp}`;
+                                const cellRisks = matrixData[key] || [];
+                                const score = prob * imp;
+                                let bgClass = 'bg-green-500/20 hover:bg-green-500/30';
+                                if (score >= 15) bgClass = 'bg-red-500/20 hover:bg-red-500/30'; else if (score >= 8) bgClass = 'bg-yellow-500/20 hover:bg-yellow-500/30';
+
+                                return (
+                                    <div 
+                                        key={key} 
+                                        className={`${bgClass} border border-transparent p-2 relative group transition-all overflow-hidden cursor-pointer rounded-sm`} 
+                                        title={`Score: ${score}`}
+                                        onMouseEnter={() => setHoveredCell(key)}
+                                        onMouseLeave={() => setHoveredCell(null)}
+                                    >
+                                        <div className="absolute inset-0 flex flex-wrap content-start p-1 gap-1">
+                                            {cellRisks.map(r => (
+                                                <div 
+                                                    key={r.id} 
+                                                    onClick={() => handleRiskClick(r.id)} 
+                                                    className={`w-6 h-6 rounded-full ${theme.colors.surface} ${theme.colors.text.primary} border ${theme.colors.border} text-[9px] flex items-center justify-center font-bold cursor-pointer hover:scale-110 transition-transform shadow-sm`} 
+                                                    title={`${r.id}: ${r.description}`}
+                                                >
+                                                    {cellRisks.length > 5 ? '' : r.id.split('-')[1] || r.id.substring(0,2)}
+                                                </div>
+                                            ))}
+                                            {cellRisks.length > 5 && <span className={`text-xs ${theme.colors.text.secondary} font-bold pl-1`}>+{cellRisks.length}</span>}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                    <div className={`text-center font-bold ${theme.colors.text.tertiary} uppercase tracking-widest text-xs mt-4`}>Impact</div>
+                </div>
             </div>
         </div>
     </div>

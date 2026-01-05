@@ -1,6 +1,6 @@
 
 // FIX: Correctly import all necessary risk-related types.
-import { Issue, IssueCode, RiskManagementPlan, RiskBreakdownStructureNode, PortfolioRisk, Risk } from '../../types';
+import { Issue, IssueCode, RiskManagementPlan, RiskBreakdownStructureNode, PortfolioRisk, Risk } from '../../types/index';
 
 export const MOCK_ISSUE_CODES: IssueCode[] = [
   { id: 'IC-01', name: 'Priority', scope: 'Global', values: [{ id: 'P-High', value: 'High', description: 'Urgent' }] }

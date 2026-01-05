@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -10,14 +9,15 @@ import { NavGroup } from '../../components/common/ModuleNavigation';
 
 export const useProgramManagerLogic = (forcedProgramId?: string) => {
   const { state } = useData();
-  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(forcedProgramId || null);
+  const [internalProgramId, setInternalProgramId] = useState<string | null>(null);
+  
+  // If forcedProgramId is provided, it's a controlled component. Use that ID.
+  // Otherwise, use the internal state for the standalone program manager view.
+  const selectedProgramId = forcedProgramId !== undefined ? forcedProgramId : internalProgramId;
+
   const [activeGroup, setActiveGroup] = useState<string>('Overview');
   const [activeView, setActiveView] = useState<string>('dashboard');
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (forcedProgramId) setSelectedProgramId(forcedProgramId);
-  }, [forcedProgramId]);
 
   const selectedProgram = state.programs.find(p => p.id === selectedProgramId);
 
@@ -61,7 +61,10 @@ export const useProgramManagerLogic = (forcedProgramId?: string) => {
   };
 
   const handleSelectProgram = (id: string | null) => {
-      setSelectedProgramId(id);
+      // This handler is for the uncontrolled state (when browsing the main program list)
+      if (forcedProgramId === undefined) {
+        setInternalProgramId(id);
+      }
   };
 
   return {

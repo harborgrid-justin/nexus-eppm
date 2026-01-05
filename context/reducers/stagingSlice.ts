@@ -1,7 +1,7 @@
 
 import { DataState, Action, StagingRecord } from '../../types/index';
 import { generateId } from '../../utils/formatters';
-import { Project, Task, Resource, TaskStatus } from '../../types';
+import { Project, Task, Resource, TaskStatus } from '../../types/index';
 
 export const stagingReducer = (state: DataState, action: Action): DataState => {
   switch (action.type) {

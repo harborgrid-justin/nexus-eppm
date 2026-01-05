@@ -1,58 +1,29 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
-import { LayoutDashboard, List, Sigma, BarChart2, ShieldAlert } from 'lucide-react';
+import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
+import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
 
-// Internal Views
-import RiskDashboard from './RiskDashboard';
-import { RiskRegisterGrid } from './RiskRegisterGrid';
-import RiskMatrix from './RiskMatrix';
-import QuantitativeAnalysis from './QuantitativeAnalysis';
-
-// Enterprise Views (Sibling Directory)
 import PortfolioRisks from '../portfolio/PortfolioRisks';
 import { SystemicRiskDashboard } from './enterprise/SystemicRiskDashboard';
 import { GlobalRiskRegister } from './enterprise/GlobalRiskRegister';
 import { GlobalRiskMatrix } from './enterprise/GlobalRiskMatrix';
 import { GlobalQuantitativeAnalysis } from './enterprise/GlobalQuantitativeAnalysis';
+import { useRiskManagementLogic } from '../../hooks/domain/useRiskManagementLogic';
 
 const RiskManagement: React.FC = () => {
   const theme = useTheme();
   
-  const [activeGroup, setActiveGroup] = useState('enterprise');
-  const [activeView, setActiveView] = useState('dashboard');
-  const [isPending, startTransition] = useTransition();
-
-  const navGroups: NavGroup[] = useMemo(() => [
-    { id: 'enterprise', label: 'Enterprise & Portfolio', items: [
-      { id: 'dashboard', label: 'Systemic Dashboard', icon: LayoutDashboard },
-      { id: 'portfolio', label: 'Portfolio Risks', icon: ShieldAlert },
-    ]},
-    { id: 'analysis', label: 'Analysis & Aggregation', items: [
-      { id: 'register', label: 'Global Risk Register', icon: List },
-      { id: 'matrix', label: 'Global Heatmap', icon: Sigma },
-      { id: 'quantitative', label: 'Quantitative Model', icon: BarChart2 },
-    ]}
-  ], []);
-
-  const handleGroupChange = (groupId: string) => {
-    const newGroup = navGroups.find(g => g.id === groupId);
-    if (newGroup?.items.length) {
-      startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveView(newGroup.items[0].id);
-      });
-    }
-  };
-
-  const handleItemChange = (viewId: string) => {
-    startTransition(() => {
-        setActiveView(viewId);
-    });
-  };
+  const {
+      activeGroup,
+      activeView,
+      isPending,
+      navGroups,
+      handleGroupChange,
+      handleItemChange
+  } = useRiskManagementLogic();
 
   const renderContent = () => {
     switch(activeView) {
@@ -70,7 +41,7 @@ const RiskManagement: React.FC = () => {
       <PageHeader 
         title="Enterprise Risk Management" 
         subtitle="Identify, analyze, and mitigate systemic threats across the organization."
-        icon={ShieldAlert}
+        icon={AlertTriangle}
       />
 
       <div className={theme.layout.panelContainer}>

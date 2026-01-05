@@ -1,5 +1,4 @@
-
-import { Project, Task, Dependency, TaskStatus, ProjectCalendar } from '../types';
+import { Project, Task, Dependency, TaskStatus, ProjectCalendar } from '../types/index';
 import { addWorkingDays, getWorkingDaysDiff, maxDate, minDate, toISODateString } from '../utils/dateUtils';
 
 export interface ScheduleOptions {

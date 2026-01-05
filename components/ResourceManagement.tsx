@@ -1,4 +1,5 @@
 
+
 import React, { useMemo } from 'react';
 import { Users } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -13,6 +14,7 @@ import PhysicalResources from './resources/PhysicalResources';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
+// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Resource } from '../types/index';
 import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
 
@@ -20,11 +22,7 @@ const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
   const projectId = project.id;
   const projectResources = assignedResources as Resource[];
-  const overAllocatedResources = useMemo(() => {
-      // Mock logic as full enterprise allocation is not available in project context
-      return projectResources.filter(r => r.allocated > r.capacity);
-  }, [projectResources]);
-
+ 
   const theme = useTheme();
   
   const {
@@ -33,7 +31,8 @@ const ResourceManagement: React.FC = () => {
       isPending,
       navStructure,
       handleGroupChange,
-      handleViewChange
+      handleViewChange,
+      overAllocatedResources
   } = useResourceManagementLogic();
 
   const renderContent = () => {

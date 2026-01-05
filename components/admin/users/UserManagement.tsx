@@ -1,19 +1,19 @@
 
 import React, { useState, useMemo, useDeferredValue } from 'react';
-import { User, Role } from '../../types/auth';
-import { useAuth } from '../../context/AuthContext';
+import { User, Role } from '../../../types/auth';
+import { useAuth } from '../../../context/AuthContext';
 import { UserPlus, Search } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { Button } from '../ui/Button';
-import { useData } from '../../context/DataContext';
+import { Button } from '../../ui/Button';
+import { useData } from '../../../context/DataContext';
 import { UserTable } from './users/UserTable';
 import { UserPanel } from './users/UserPanel';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyState } from '../../common/EmptyState';
+import { useTheme } from '../../../context/ThemeContext';
 
 const UserManagement: React.FC = () => {
-  const theme = useTheme();
   const { updateUserRole } = useAuth();
   const { state, dispatch } = useData();
+  const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
   

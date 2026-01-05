@@ -72,8 +72,7 @@ export const GanttTimelineTmpl: React.FC = () => {
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         {tasks.map(i => (
-                            <div key={i} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${i % 3 === 0 ? 'bg-slate-50' : ''}`}>
-                                <ChevronRight size={14} className="text-slate-400"/>
+                            <div key={i} className={`flex items-center h-10 border-b border-slate-100 hover:bg-nexus-50/30 text-sm px-4 gap-2 cursor-pointer group ${i % 3 === 0 ? 'bg-slate-50' : ''}`} style={{ paddingLeft: `${16 + (i % 3) * 16}px`}}>
                                 <span className={`flex-1 truncate ${i % 3 === 0 ? 'font-bold text-slate-800' : 'text-slate-600 font-medium'}`}>
                                     {i % 3 === 0 ? `Phase ${i}` : `Task Item ${i}.0`}
                                 </span>
