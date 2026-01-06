@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { DollarSign } from 'lucide-react';

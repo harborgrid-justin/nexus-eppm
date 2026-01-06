@@ -1,7 +1,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { ShoppingCart, Plus, Filter, FileText, CheckCircle } from 'lucide-react';
-import { useProcurementData } from '../../hooks';
+import { useProcurementData } from '../../hooks/index';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 

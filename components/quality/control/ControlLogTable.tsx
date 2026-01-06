@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { QualityReport } from '../../../types';
 import { Badge } from '../../ui/Badge';
-import { useTheme } from '../../../context/ThemeContext';
-import { Search, Filter, ChevronRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface ControlLogTableProps {
     reports: QualityReport[];
@@ -13,7 +13,6 @@ interface ControlLogTableProps {
 }
 
 export const ControlLogTable: React.FC<ControlLogTableProps> = ({ reports, filterStatus, onFilterChange, onSelectReport, selectedReportId }) => {
-    const theme = useTheme();
     
     return (
         <div className="flex flex-col h-full">

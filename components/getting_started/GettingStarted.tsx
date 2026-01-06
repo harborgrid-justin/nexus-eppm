@@ -6,7 +6,7 @@ import { PageHeader } from '../common/PageHeader';
 import { 
     Rocket, Layers, PieChart, Briefcase, CheckCircle, 
     Circle, ArrowRight, ShieldCheck, Database,
-    Lock
+    Lock, AlertTriangle
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -18,7 +18,7 @@ import { IndustrySeeder } from './IndustrySeeder';
 import { TeamOnboarding } from './TeamOnboarding';
 
 export const GettingStarted: React.FC = () => {
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const theme = useTheme();
     const navigate = useNavigate();
     const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -53,6 +53,13 @@ export const GettingStarted: React.FC = () => {
     const securityLabel = state.governance.security.mfa ? 'MFA Enabled' : 'Standard Auth';
     const securityColor = state.governance.security.mfa ? 'text-green-600' : 'text-yellow-600';
     const SecurityIcon = state.governance.security.mfa ? ShieldCheck : Lock;
+
+    const handleResetSystem = () => {
+        if (confirm("DANGER: This will wipe all data for the current session. Reloading the page will restore the demo data. Are you sure?")) {
+            dispatch({ type: 'RESET_SYSTEM' });
+            alert("System data has been reset for the current session.");
+        }
+    };
 
     return (
         <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col`}>
@@ -164,6 +171,26 @@ export const GettingStarted: React.FC = () => {
                                     <div className={`font-bold ${securityColor} flex items-center gap-1`}><SecurityIcon size={14}/> {securityLabel}</div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div className="lg:col-span-3 mt-8">
+                            <Card className="p-6 border-red-500/50 bg-red-50/50">
+                                <h3 className="font-bold text-red-800 flex items-center gap-2">
+                                    <AlertTriangle size={18} /> Danger Zone
+                                </h3>
+                                <p className="text-sm text-red-700 mt-2">
+                                    These actions are destructive and cannot be undone. Proceed with caution.
+                                </p>
+                                <div className="mt-4 pt-4 border-t border-red-200/50">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="font-bold text-slate-800">Reset Enterprise Data</p>
+                                            <p className="text-xs text-slate-500">Remove all projects, programs, and other data to start fresh.</p>
+                                        </div>
+                                        <Button variant="danger" onClick={handleResetSystem}>Zero Out Data</Button>
+                                    </div>
+                                </div>
+                            </Card>
                         </div>
                     </div>
                 )}

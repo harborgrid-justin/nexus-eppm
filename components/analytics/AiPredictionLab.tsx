@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { BrainCircuit, Activity } from 'lucide-react';
+import { BrainCircuit, Activity, RefreshCw, Settings, Play } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ProgressBar } from '../common/ProgressBar';
+import { Card } from '../ui/Card';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8">
@@ -21,40 +22,76 @@ export const AiPredictionLab: React.FC = () => {
     const theme = useTheme();
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} bg-slate-900 text-white`}>
-            <TemplateHeader number="61" title="AI Prediction Lab" subtitle="Experimental model training & testing" />
+            <div className="flex justify-between items-start mb-8">
+                <TemplateHeader number="61" title="AI Prediction Lab" subtitle="Experimental model training & testing" />
+                <div className="flex gap-2">
+                    <Button variant="secondary" icon={Settings}>Config</Button>
+                    <Button icon={Play} className="bg-purple-600 hover:bg-purple-500 text-white border-0">Run Model</Button>
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-slate-800 rounded-2xl border border-slate-700 p-6">
+                <div className="lg:col-span-2 bg-slate-800 rounded-2xl border border-slate-700 p-6 flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="font-bold text-lg flex items-center gap-2"><BrainCircuit className="text-purple-400"/> Model Performance</h3>
                         <div className="flex gap-2">
-                            <Button size="sm" className="bg-purple-600 hover:bg-purple-500 text-white border-none">Retrain</Button>
-                            <Button size="sm" variant="ghost-white">Parameters</Button>
+                            <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-1 rounded border border-slate-700">v2.1.0-beta</span>
                         </div>
                     </div>
-                    <div className="h-[400px] w-full bg-slate-900/50 rounded-xl border border-slate-700 p-4 flex items-center justify-center relative overflow-hidden">
+                    <div className="flex-1 bg-slate-900/50 rounded-xl border border-slate-700 p-4 flex items-center justify-center relative overflow-hidden min-h-[400px]">
                         <div className="absolute inset-0 flex items-center justify-center opacity-30">
                             <Activity size={200} className="text-purple-500 animate-pulse"/>
                         </div>
-                        <p className="z-10 font-mono text-purple-300">Training Epoch 42/100... Loss: 0.042</p>
+                        <div className="z-10 text-center">
+                             <div className="text-6xl font-black text-white mb-2">94.2%</div>
+                             <div className="text-sm text-purple-300 font-mono">CONFIDENCE INTERVAL</div>
+                             <div className="mt-8 grid grid-cols-3 gap-8 text-left">
+                                 <div>
+                                     <div className="text-xs text-slate-500 uppercase font-bold">Loss</div>
+                                     <div className="text-xl font-mono text-white">0.042</div>
+                                 </div>
+                                 <div>
+                                     <div className="text-xs text-slate-500 uppercase font-bold">Epoch</div>
+                                     <div className="text-xl font-mono text-white">420</div>
+                                 </div>
+                                 <div>
+                                     <div className="text-xs text-slate-500 uppercase font-bold">Batch</div>
+                                     <div className="text-xl font-mono text-white">64</div>
+                                 </div>
+                             </div>
+                        </div>
                     </div>
                 </div>
+
                 <div className="space-y-6">
                     <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-                        <h4 className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-4">Input Variables</h4>
+                        <h4 className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-4">Input Variables (Features)</h4>
                         <div className="space-y-3">
-                            {['Historical Cost', 'Schedule Variance', 'Risk Factors', 'Team Velocity'].map(v => (
-                                <div key={v} className="flex justify-between items-center bg-slate-700/50 p-3 rounded-lg border border-slate-600">
-                                    <span className="text-sm font-medium">{v}</span>
-                                    <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
+                            {[
+                                { label: 'Historical Cost Variance', weight: 85 },
+                                { label: 'Schedule Slippage Rate', weight: 62 },
+                                { label: 'Risk Register Volume', weight: 45 },
+                                { label: 'Team Velocity Trend', weight: 78 }
+                            ].map(v => (
+                                <div key={v.label} className="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm font-medium text-slate-200">{v.label}</span>
+                                        <span className="text-xs font-mono text-purple-300">{v.weight}%</span>
+                                    </div>
+                                    <div className="w-full bg-slate-600 h-1.5 rounded-full overflow-hidden">
+                                        <div className="bg-purple-500 h-full" style={{ width: `${v.weight}%` }}></div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
+
                     <div className="bg-gradient-to-br from-purple-900 to-slate-900 rounded-2xl border border-purple-500/30 p-6">
-                        <h4 className="font-bold text-white mb-2">Prediction Confidence</h4>
-                        <div className="text-5xl font-black text-purple-400 mb-2">94.2%</div>
-                        <ProgressBar value={94.2} colorClass="bg-purple-500" className="bg-slate-700"/>
-                        <p className="text-xs text-purple-200 mt-2 opacity-70">Based on validation set (n=402)</p>
+                        <h4 className="font-bold text-white mb-2 flex items-center gap-2"><RefreshCw size={16} className="animate-spin"/> Training Status</h4>
+                        <p className="text-sm text-purple-200 leading-relaxed opacity-80 mb-4">
+                            Model is currently retraining on last night's data warehouse snapshot. Estimated completion in 12 minutes.
+                        </p>
+                        <Button size="sm" className="w-full bg-white/10 hover:bg-white/20 text-white border-0">View Logs</Button>
                     </div>
                 </div>
             </div>

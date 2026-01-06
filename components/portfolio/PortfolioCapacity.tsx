@@ -1,172 +1,22 @@
-
-import React, { useMemo, useState, useTransition } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { 
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Legend, Area 
+  CartesianGrid, Tooltip, Area 
 } from 'recharts';
-import { Users, AlertTriangle, ArrowRight, LayoutGrid, BarChart2, Filter } from 'lucide-react';
+import { Users, AlertTriangle, LayoutGrid, BarChart2, Filter } from 'lucide-react';
 import { ProgressBar } from '../common/ProgressBar';
 import { formatCompactCurrency } from '../../utils/formatters';
+import { usePortfolioCapacityLogic } from '../../hooks/domain/usePortfolioCapacityLogic';
 
 const PortfolioCapacity: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
-    const [viewHorizon, setViewHorizon] = useState(6); // Months
-    const [viewMode, setViewMode] = useState<'chart' | 'heatmap'>('chart');
-    const [roleFilter, setRoleFilter] = useState('All');
-    
-    // Pattern 1: startTransition for heavy recalculation triggers
-    const [isPending, startTransition] = useTransition();
-
-    // --- 1. Date & Bucket Generation ---
-    const monthBuckets = useMemo(() => {
-        const buckets = [];
-        const start = new Date();
-        start.setDate(1); // Start of current month
-
-        for (let i = 0; i < viewHorizon; i++) {
-            const d = new Date(start);
-            d.setMonth(d.getMonth() + i);
-            buckets.push({
-                date: d,
-                label: d.toLocaleString('default', { month: 'short', year: '2-digit' }),
-                key: d.toISOString().slice(0, 7) // YYYY-MM
-            });
-        }
-        return buckets;
-    }, [viewHorizon]);
-
-    // --- 2. Core Calculation Engine ---
-    const { chartData, resourceMatrix, roleAggregates, conflicts } = useMemo(() => {
-        // Data Structures
-        const resData: Record<string, Record<string, number>> = {}; // resId -> monthKey -> hours
-        const roleData: Record<string, { capacity: number; demand: number }> = {};
-        const chartAgg: Record<string, { capacity: number; demand: number }> = {};
-        
-        // Initialize aggregation structures
-        monthBuckets.forEach(m => {
-            chartAgg[m.key] = { capacity: 0, demand: 0 };
-        });
-
-        // Initialize Resource Capacities
-        state.resources.forEach(r => {
-            if (r.status !== 'Active') return;
-            
-            resData[r.id] = {};
-            // Initialize Role Data if new
-            if (!roleData[r.role]) roleData[r.role] = { capacity: 0, demand: 0 };
-
-            monthBuckets.forEach(m => {
-                // Monthly Capacity = Resource Capacity (e.g. 160h)
-                const monthlyCap = r.capacity || 160; 
-                
-                // Add to aggregates
-                chartAgg[m.key].capacity += monthlyCap;
-                roleData[r.role].capacity += monthlyCap;
-                
-                // Init individual demand to 0
-                resData[r.id][m.key] = 0;
-            });
-        });
-
-        // Process Task Demand
-        state.projects.forEach(p => {
-            // Skip projects that are closed/archived if necessary
-            // if (p.status === 'Closed') return;
-
-            p.tasks.forEach(t => {
-                if (!t.startDate || !t.endDate || !t.assignments) return;
-
-                const start = new Date(t.startDate);
-                const end = new Date(t.endDate);
-                
-                // Optimization: Skip tasks outside horizon
-                const horizonEnd = new Date(monthBuckets[viewHorizon - 1].date);
-                horizonEnd.setMonth(horizonEnd.getMonth() + 1);
-                if (end < monthBuckets[0].date || start >= horizonEnd) return;
-
-                t.assignments.forEach(assign => {
-                    if (!resData[assign.resourceId]) return; // Resource not active or filtered out
-                    
-                    const dailyLoad = 8 * (assign.units / 100);
-                    
-                    // Iterate task duration day-by-day
-                    let curr = new Date(start);
-                    while (curr <= end) {
-                        // Check if curr is within horizon
-                        if (curr >= monthBuckets[0].date && curr < horizonEnd) {
-                            const mKey = curr.toISOString().slice(0, 7);
-                            
-                            if (resData[assign.resourceId][mKey] !== undefined) {
-                                resData[assign.resourceId][mKey] += dailyLoad;
-                                
-                                // Update Aggregates
-                                chartAgg[mKey].demand += dailyLoad;
-                                
-                                const res = state.resources.find(r => r.id === assign.resourceId);
-                                if (res) {
-                                    roleData[res.role].demand += dailyLoad;
-                                }
-                            }
-                        }
-                        curr.setDate(curr.getDate() + 1);
-                    }
-                });
-            });
-        });
-
-        // Format Chart Data
-        const finalChartData = monthBuckets.map(m => ({
-            name: m.label,
-            Capacity: Math.round(chartAgg[m.key].capacity),
-            Demand: Math.round(chartAgg[m.key].demand),
-            Utilization: chartAgg[m.key].capacity > 0 
-                ? Math.round((chartAgg[m.key].demand / chartAgg[m.key].capacity) * 100) 
-                : 0
-        }));
-
-        // Format Role Data
-        const finalRoleData = Object.entries(roleData).map(([role, data]) => ({
-            role,
-            capacity: data.capacity,
-            demand: Math.round(data.demand),
-            utilization: data.capacity > 0 ? (data.demand / data.capacity) * 100 : 0
-        })).sort((a,b) => b.utilization - a.utilization);
-
-        // Detect Conflicts (Individual Resources > 100% in a month)
-        const finalConflicts: any[] = [];
-        state.resources.forEach(r => {
-            if (r.status !== 'Active') return;
-            const mKey = monthBuckets.find(m => {
-                const demand = resData[r.id][m.key];
-                const capacity = r.capacity || 160;
-                return demand > capacity;
-            });
-            
-            if (mKey) {
-                const demand = resData[r.id][mKey.key];
-                const capacity = r.capacity || 160;
-                finalConflicts.push({
-                    resource: r.name,
-                    role: r.role,
-                    month: mKey.label,
-                    utilization: Math.round((demand / capacity) * 100),
-                    excessHours: Math.round(demand - capacity)
-                });
-            }
-        });
-
-        return { 
-            chartData: finalChartData, 
-            resourceMatrix: resData, 
-            roleAggregates: finalRoleData, 
-            conflicts: finalConflicts 
-        };
-
-    }, [state.projects, state.resources, viewHorizon, monthBuckets]);
-
+    const { 
+        isPending, viewHorizon, viewMode, roleFilter,
+        monthBuckets, chartData, resourceMatrix, roleAggregates, conflicts,
+        displayResources, roles,
+        changeHorizon, changeViewMode, changeRoleFilter
+    } = usePortfolioCapacityLogic();
 
     // --- Helper for Heatmap Colors ---
     const getCellColor = (demand: number, capacity: number) => {
@@ -177,13 +27,6 @@ const PortfolioCapacity: React.FC = () => {
         if (util <= 115) return 'bg-yellow-100 text-yellow-800';
         return 'bg-red-100 text-red-700 font-bold';
     };
-
-    const roles = Array.from(new Set(state.resources.map(r => r.role)));
-    
-    // Filtered resources for heatmap
-    const displayResources = state.resources.filter(r => 
-        r.status === 'Active' && (roleFilter === 'All' || r.role === roleFilter)
-    );
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
@@ -207,7 +50,7 @@ const PortfolioCapacity: React.FC = () => {
                         {[3, 6, 12].map(m => (
                              <button 
                                 key={m}
-                                onClick={() => startTransition(() => setViewHorizon(m))} 
+                                onClick={() => changeHorizon(m)} 
                                 className={`px-3 py-1.5 rounded transition-colors ${viewHorizon === m ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
                             >
                                 {m} Mo
@@ -218,13 +61,13 @@ const PortfolioCapacity: React.FC = () => {
                     {/* View Mode */}
                     <div className="bg-white border border-slate-200 rounded-lg p-1 flex text-xs font-medium">
                         <button 
-                            onClick={() => setViewMode('chart')} 
+                            onClick={() => changeViewMode('chart')} 
                             className={`flex items-center gap-1 px-3 py-1.5 rounded transition-colors ${viewMode === 'chart' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
                         >
                             <BarChart2 size={14}/> Chart
                         </button>
                         <button 
-                            onClick={() => setViewMode('heatmap')} 
+                            onClick={() => changeViewMode('heatmap')} 
                             className={`flex items-center gap-1 px-3 py-1.5 rounded transition-colors ${viewMode === 'heatmap' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
                         >
                             <LayoutGrid size={14}/> Heatmap
@@ -277,7 +120,7 @@ const PortfolioCapacity: React.FC = () => {
                                     <Filter size={14} className="text-slate-400"/>
                                     <select 
                                         value={roleFilter} 
-                                        onChange={(e) => setRoleFilter(e.target.value)}
+                                        onChange={(e) => changeRoleFilter(e.target.value)}
                                         className="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-nexus-500"
                                     >
                                         <option value="All">All Roles</option>
@@ -367,7 +210,7 @@ const PortfolioCapacity: React.FC = () => {
                             {conflicts.length > 0 ? (
                                 <table className="min-w-full divide-y divide-slate-100">
                                     <tbody className="bg-white">
-                                        {conflicts.map((c, idx) => (
+                                        {conflicts.map((c: any, idx: number) => (
                                             <tr key={idx} className="group">
                                                 <td className="px-4 py-2">
                                                     <div className="text-xs font-bold text-slate-800">{c.resource}</div>

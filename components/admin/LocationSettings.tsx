@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useData } from '../../context/DataContext';
 import { MapPin, Plus, Search, Globe, MoreHorizontal, Edit2, Trash2, Save, X, Navigation } from 'lucide-react';
@@ -6,7 +5,7 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { SidePanel } from '../ui/SidePanel';
-import { Location } from '../../types';
+import { Location } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
 

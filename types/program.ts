@@ -1,4 +1,5 @@
 
+
 export interface Program {
   id: string;
   name: string;
@@ -61,6 +62,25 @@ export interface ProgramIssue {
   ownerId: string;
   resolutionPath: string;
   impactedProjectIds: string[];
+}
+
+export interface ProgramRisk {
+  id: string;
+  programId: string;
+  description: string;
+  category: string;
+  probability: 'High' | 'Medium' | 'Low';
+  impact: 'High' | 'Medium' | 'Low';
+  score: number;
+  ownerId: string;
+  status: 'Open' | 'Mitigated' | 'Closed';
+  mitigationPlan: string;
+  probabilityValue?: number;
+  impactValue?: number;
+  financialImpact?: number;
+  strategy?: string;
+  responseActions?: any[];
+  isEscalated?: boolean;
 }
 
 export interface ProgramBudgetAllocation {

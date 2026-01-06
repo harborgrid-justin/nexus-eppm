@@ -4,6 +4,7 @@ import { useData } from '../../context/DataContext';
 import RBSNode from './RBSNode';
 import { detectCircularDependency } from '../../utils/treeUtils';
 import { useTheme } from '../../context/ThemeContext';
+import { RiskBreakdownStructureNode } from '../../types/index';
 
 interface RiskBreakdownStructureProps {
   projectId: string;

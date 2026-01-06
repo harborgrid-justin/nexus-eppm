@@ -1,5 +1,5 @@
+
 import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { 
     RiskManagementPlan, Document, ActivityCode, DataState, Action
 } from '../types/index';
@@ -15,6 +15,7 @@ const DataContext = createContext<{
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // The root reducer now handles all state logic, including loading demo data.
   const [state, dispatch] = useReducer(rootReducer, initialState);
 
   const getRiskPlan = useCallback((projectId: string): RiskManagementPlan | undefined => {

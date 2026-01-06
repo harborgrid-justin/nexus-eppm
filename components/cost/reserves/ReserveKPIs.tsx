@@ -3,7 +3,7 @@ import React from 'react';
 import StatCard from '../../shared/StatCard';
 import { ShieldCheck, TrendingDown, DollarSign, AlertTriangle } from 'lucide-react';
 import { formatCompactCurrency } from '../../../utils/formatters';
-import { ReserveAnalysisData } from '../../../types';
+import { ReserveAnalysisData } from '../../../types/index';
 
 export const ReserveKPIs: React.FC<{ data: ReserveAnalysisData }> = ({ data }) => {
     return (

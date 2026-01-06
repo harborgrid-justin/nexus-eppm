@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Risk } from '../../../types';
+import { Risk } from '../../../types/index';
 import { useTheme } from '../../../context/ThemeContext';
 import { AlertTriangle, DollarSign } from 'lucide-react';
 

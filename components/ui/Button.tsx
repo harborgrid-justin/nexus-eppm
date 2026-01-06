@@ -20,20 +20,28 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props 
 }) => {
-  const theme = useTheme();
+  const { density } = useTheme();
   
+  const baseClasses = "inline-flex items-center justify-center font-bold tracking-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] rounded-lg";
+
   const variants = {
-    primary: `${theme.colors.primary} text-white ${theme.colors.primaryHover} focus:ring-nexus-500 shadow-sm hover:shadow-md`,
+    primary: "bg-primary text-text-inverted hover:bg-primary-dark focus:ring-nexus-500 shadow-sm hover:shadow-md",
     secondary: "bg-slate-900 text-white hover:bg-black focus:ring-slate-500 shadow-sm",
-    outline: `bg-white ${theme.colors.text.primary} ${theme.colors.border} hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm focus:ring-slate-300`,
-    ghost: `${theme.colors.text.secondary} hover:bg-slate-100 hover:${theme.colors.text.primary} focus:ring-slate-200 border border-transparent`,
+    outline: "bg-white text-text-primary border-border border hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm focus:ring-slate-300",
+    ghost: "text-text-secondary hover:bg-slate-100 hover:text-text-primary focus:ring-slate-200 border border-transparent",
     'ghost-white': "text-slate-400 hover:text-white hover:bg-slate-800 focus:ring-slate-700",
-    danger: `${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.text} border ${theme.colors.semantic.danger.border} hover:bg-red-100 focus:ring-red-500 shadow-sm`,
+    danger: "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 focus:ring-red-500 shadow-sm",
+  };
+
+  const sizes = {
+    sm: "px-3 py-1.5 text-xs",
+    md: density === 'compact' ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base"
   };
 
   return (
     <button 
-      className={`${theme.components.button.base} ${variants[variant]} ${theme.components.button.sizes[size]} ${className}`}
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >

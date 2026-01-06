@@ -1,9 +1,5 @@
 
-
-
-
 import React from 'react';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Resource } from '../../types/index';
 import { Plus, Filter, Lock, Calendar, UserCog, Briefcase, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { useData } from '../../context/DataContext';

@@ -1,4 +1,3 @@
-
 export interface GlobalCalendar {
   id: string;
   name: string;
@@ -37,7 +36,6 @@ export interface CalendarException {
   intervals?: { start: string; end: string }[];
 }
 
-// FIX: Added missing ProjectCalendar interface
 export interface ProjectCalendar {
   id: string;
   name: string;

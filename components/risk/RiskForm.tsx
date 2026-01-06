@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Risk, RiskBreakdownStructureNode } from '../../types';
+import { Risk, RiskBreakdownStructureNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';

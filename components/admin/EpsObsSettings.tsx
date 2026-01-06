@@ -2,12 +2,10 @@
 import React, { useState } from 'react';
 import { Layers, Folder, User, Plus, Edit2, Trash2, ChevronRight, ChevronDown, Building } from 'lucide-react';
 import { useData } from '../../context/DataContext';
-import { useTheme } from '../../context/ThemeContext';
-import { EPSNode, OBSNode } from '../../types';
+import { EPSNode, OBSNode } from '../../types/index';
 
 const EpsObsSettings: React.FC = () => {
     const { state } = useData();
-    const theme = useTheme();
     const [view, setView] = useState<'EPS' | 'OBS'>('EPS');
     const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['EPS-ROOT', 'OBS-ROOT']));
 
@@ -27,7 +25,7 @@ const EpsObsSettings: React.FC = () => {
         return (
             <div key={node.id} className="select-none">
                 <div 
-                    className={`flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer`}
+                    className="flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer"
                     style={{ paddingLeft: `${level * 24 + 12}px` }} 
                     onClick={() => toggleNode(node.id)}
                 >
@@ -58,7 +56,7 @@ const EpsObsSettings: React.FC = () => {
         return (
             <div key={node.id} className="select-none">
                 <div 
-                    className={`flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer`}
+                    className="flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer"
                     style={{ paddingLeft: `${level * 24 + 12}px` }}
                     onClick={() => toggleNode(node.id)}
                 >

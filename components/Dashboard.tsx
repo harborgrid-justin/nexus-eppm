@@ -50,7 +50,7 @@ const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart: rawHealthData, budgetDataForChart: rawBudgetData, projects } = usePortfolioState();
-  const theme = useTheme();
+  const { tokens } = useTheme();
   const { generateReport, report, isGenerating, error, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
   const { hasPermission } = usePermissions();
@@ -63,15 +63,15 @@ const Dashboard: React.FC = () => {
   const [viewType, setViewType] = useState<'financial' | 'strategic'>('financial');
 
   const deferredBudgetData = useDeferredValue(rawBudgetData);
-  const deferredHealthData = useDeferredValue(rawHealthData);
+  const deferredHealthData = useDeferredValue(rawBudgetData);
 
-  const healthDataForChart = useMemo(() => deferredHealthData.map((d: { name: string; value: number }) => {
+  const healthDataForChart = useMemo(() => rawHealthData.map((d: { name: string; value: number }) => {
       let color;
-      if (d.name === 'Good') color = theme.charts.palette[1];
-      else if (d.name === 'Warning') color = theme.charts.palette[2];
-      else color = theme.charts.palette[3];
+      if (d.name === 'Good') color = tokens.colors.success;
+      else if (d.name === 'Warning') color = tokens.colors.warning;
+      else color = tokens.colors.error;
       return { ...d, color };
-  }), [deferredHealthData, theme]);
+  }), [rawHealthData, tokens]);
 
   const handleGenerateReport = () => {
     setIsReportOpen(true);
@@ -91,11 +91,11 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className={`h-full overflow-y-auto scrollbar-thin p-6`}>
+    <div className="h-full overflow-y-auto scrollbar-thin p-[var(--spacing-gutter)]">
       <SidePanel 
         isOpen={isReportOpen} 
         onClose={() => { setIsReportOpen(false); reset(); }} 
-        width="md:w-[600px]" 
+        width="max-w-xl" 
         title={aiPanelTitle} 
         footer={<Button onClick={() => setIsReportOpen(false)}>Close</Button>}
       >
@@ -106,7 +106,7 @@ const Dashboard: React.FC = () => {
                </div>
            ) : (
                report && (
-                   <div className={`prose prose-sm max-w-none ${theme.colors.text.secondary}`}>
+                   <div className="prose prose-sm max-w-none text-text-secondary">
                        {report.split('\n').map((l, i) => <p key={i}>{l}</p>)}
                    </div>
                )
@@ -115,16 +115,16 @@ const Dashboard: React.FC = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-           <h3 className={`text-lg font-bold ${theme.colors.text.primary}`}>Executive Overview</h3>
-           <p className={`text-sm ${theme.colors.text.secondary}`}>Key performance indicators across the enterprise.</p>
+           <h3 className="text-lg font-bold text-text-primary">Executive Overview</h3>
+           <p className="text-sm text-text-secondary">Key performance indicators across the enterprise.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-           <div className={`${theme.colors.background} p-1 rounded-lg flex border ${theme.colors.border}`}>
-              <button onClick={() => handleViewChange('financial')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'financial' ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>Financial</button>
-              <button onClick={() => handleViewChange('strategic')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>Strategic</button>
+           <div className="bg-background p-1 rounded-lg flex border border-border">
+              <button onClick={() => handleViewChange('financial')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'financial' ? 'bg-surface shadow-sm text-nexus-700' : 'text-text-secondary'}`}>Financial</button>
+              <button onClick={() => handleViewChange('strategic')} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? 'bg-surface shadow-sm text-nexus-700' : 'text-text-secondary'}`}>Strategic</button>
            </div>
-           <button onClick={handleGenerateReport} disabled={isGenerating} className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm hover:${theme.colors.background} ${theme.colors.text.primary}`}><Sparkles size={16} className="text-yellow-500"/> AI Summary</button>
-           {hasPermission('project:create') && <button onClick={() => navigate('/projectList?action=create')} className={`px-4 py-2 ${theme.colors.primary} rounded-lg text-sm font-bold text-white flex items-center gap-2 shadow-sm ${theme.colors.primaryHover}`}><Plus size={16} /> New Project</button>}
+           <button onClick={handleGenerateReport} disabled={isGenerating} className="px-4 py-2 bg-surface border border-border rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm hover:bg-background text-text-primary"><Sparkles size={16} className="text-yellow-500"/> AI Summary</button>
+           {hasPermission('project:create') && <button onClick={() => navigate('/projectList?action=create')} className="px-4 py-2 bg-primary rounded-lg text-sm font-bold text-white flex items-center gap-2 shadow-sm hover:bg-primary-dark"><Plus size={16} /> New Project</button>}
         </div>
       </div>
 
@@ -132,28 +132,28 @@ const Dashboard: React.FC = () => {
         <Suspense fallback={<><StatCardSkeleton/><StatCardSkeleton/><StatCardSkeleton/><StatCardSkeleton/></>}>
             <StatCard title="Total Portfolio Value" value={formatCompactCurrency(summary.totalBudget)} subtext={`Across ${summary.totalProjects} components`} icon={DollarSign} />
             <StatCard title="Budget Utilization" value={`${summary.budgetUtilization.toFixed(1)}%`} subtext="Actuals + Commitments" icon={TrendingUp} trend="up" />
-            <StatCard title="Critical Issues" value={summary.totalCriticalIssues} subtext="Requires attention" icon={AlertOctagon} trend={summary.totalCriticalIssues > 0 ? "down" : "up"} />
+            <StatCard title="Critical Issues" value={summary.totalCriticalIssues} subtext="Requires attention" icon={AlertOctagon} trend={summary.totalCriticalIssues > 0 ? 'down' : "up"} />
             <StatCard title="Schedule Health" value={`SPI ${summary.portfolioSpi.toFixed(2)}`} subtext={`${Math.abs(1 - summary.portfolioSpi) * 100 > 1 ? `${(Math.abs(1 - summary.portfolioSpi) * 100).toFixed(0)}% ${summary.portfolioSpi < 1 ? 'behind' : 'ahead'}` : 'On track'}`} icon={summary.portfolioSpi < 1 ? TrendingDown : TrendingUp} trend={summary.portfolioSpi < 1 ? "down" : "up"} />
         </Suspense>
       </div>
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-opacity duration-300 ${displayLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-        <Card className={`${theme.layout.cardPadding} flex flex-col min-w-0 h-[400px]`}>
+        <Card className="p-[var(--spacing-cardPadding)] flex flex-col min-w-0 h-[400px]">
           <div className="flex justify-between items-center mb-6">
-             <h3 className={theme.typography.h3}>{viewType === 'financial' ? 'Spend by Project' : 'Strategic ROI'}</h3>
+             <h3 className="text-base font-bold text-text-primary">{viewType === 'financial' ? 'Spend by Project' : 'Strategic ROI'}</h3>
              <Button variant="ghost" size="sm" icon={Filter} />
           </div>
           <div className="flex-1 min-h-0">
             <ErrorBoundary name="Budget Chart">
                 <Suspense fallback={<ChartSkeleton height={300} />}>
-                <CustomBarChart data={deferredBudgetData} xAxisKey="name" dataKey="Spent" height={300} barColor={theme.charts.palette[0]} formatTooltip={(val) => formatCompactCurrency(val)} />
+                <CustomBarChart data={deferredBudgetData} xAxisKey="name" dataKey="Spent" height={300} barColor={tokens.colors.info} formatTooltip={(val) => formatCompactCurrency(val)} />
                 </Suspense>
             </ErrorBoundary>
           </div>
         </Card>
 
-        <Card className={`${theme.layout.cardPadding} flex flex-col min-w-0 h-[400px]`}>
-          <h3 className={`${theme.typography.h3} mb-6 flex-shrink-0`}>Portfolio Health Distribution</h3>
+        <Card className="p-[var(--spacing-cardPadding)] flex flex-col min-w-0 h-[400px]">
+          <h3 className="text-base font-bold text-text-primary mb-6 flex-shrink-0">Portfolio Health Distribution</h3>
           <div className="flex-1 min-h-0 flex items-center justify-center">
              <ErrorBoundary name="Health Chart">
                 <Suspense fallback={<Skeleton variant="circle" width={200} height={200} />}>

@@ -1,14 +1,9 @@
 
-
-
-
-
-
 import { GoogleGenAI, Type, Chat } from "@google/genai";
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
-import { Project, AIAnalysisResult, Program } from '../types';
+import { Project, AIAnalysisResult, Program } from '../types/index';
 
 const getAiClient = () => {
+  // Create a new GoogleGenAI instance on each call to ensure the latest API key from process.env is used.
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 

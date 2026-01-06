@@ -1,11 +1,5 @@
 
-
-
-
-
-
 import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, Task, WBSNode, GlobalCalendar, WorkDay } from '../types/index';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
@@ -45,7 +39,10 @@ const ProjectGantt: React.FC = () => {
         nodes.forEach(node => {
             list.push({ type: 'wbs', node, level });
             if (expandedNodes.has(node.id)) {
-                project.tasks.filter(t => t.wbsCode.startsWith(node.wbsCode) && t.wbsCode !== node.wbsCode)
+                project.tasks.filter(t => {
+                    const parentCode = t.wbsCode.substring(0, t.wbsCode.lastIndexOf('.'));
+                    return parentCode === node.wbsCode;
+                })
                   .forEach(task => list.push({ type: 'task', task, level: level + 1 }));
                 traverse(node.children, level + 1);
             }
@@ -72,6 +69,11 @@ const ProjectGantt: React.FC = () => {
   // Calendar Resolution
   const projectCalendar = useMemo(() => {
       const globalCal = state.calendars.find(c => c.id === project.calendarId) || state.calendars[0];
+      
+      if (!globalCal || !globalCal.workWeek) {
+          return { id: 'default', name: 'Standard', workingDays: [1,2,3,4,5], holidays: [] };
+      }
+
       // Convert GlobalCalendar to the structure required by utilities (simple array of working days)
       const workingDays: number[] = [];
       const dayMap: Record<string, number> = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
@@ -87,7 +89,7 @@ const ProjectGantt: React.FC = () => {
           id: globalCal.id,
           name: globalCal.name,
           workingDays,
-          holidays: globalCal.holidays.map(h => h.date)
+          holidays: globalCal.holidays ? globalCal.holidays.map(h => h.date) : []
       };
   }, [project.calendarId, state.calendars]);
 

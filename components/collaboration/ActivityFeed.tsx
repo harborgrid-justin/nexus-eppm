@@ -1,10 +1,9 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, Share2, MoreHorizontal, CheckCircle, FileText, AlertTriangle, User } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Share2, MoreHorizontal, CheckCircle, FileText, AlertTriangle, User, Send } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { formatDistanceToNow } from 'date-fns';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ActivityItem } from '../../types';
@@ -67,26 +66,26 @@ export const ActivityFeed: React.FC = () => {
             {/* Input Area */}
             <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.surface}`}>
                 <div className="flex gap-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 overflow-hidden">
-                         <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"} alt="Me" />
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex-shrink-0 overflow-hidden border border-slate-200">
+                         <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"} alt="Me" className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1">
                         <textarea 
-                            className={`w-full p-3 border ${theme.colors.border} rounded-xl resize-none focus:ring-2 focus:ring-nexus-500 outline-none text-sm min-h-[80px]`}
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl resize-none focus:ring-2 focus:ring-nexus-500 outline-none text-sm min-h-[80px] bg-slate-50 focus:bg-white transition-colors`}
                             placeholder="Share an update, ask a question, or log a decision..."
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                         />
                         <div className="flex justify-end mt-2">
-                            <Button size="sm" onClick={handlePost} disabled={!input.trim()}>Post Update</Button>
+                            <Button size="sm" onClick={handlePost} disabled={!input.trim()} icon={Send}>Post Update</Button>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Feed */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {activities.map((item) => (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+                {activities.length > 0 ? activities.map((item) => (
                     <Card key={item.id} className="p-5 flex gap-4">
                         <div className="flex-shrink-0">
                             {item.userAvatar ? (
@@ -129,11 +128,18 @@ export const ActivityFeed: React.FC = () => {
                             {getTypeIcon(item.type)}
                         </div>
                     </Card>
-                ))}
+                )) : (
+                    <div className="p-12 text-center text-slate-400 flex flex-col items-center">
+                        <MessageSquare size={48} className="mb-4 opacity-20"/>
+                        <p>No activity yet. Be the first to post!</p>
+                    </div>
+                )}
                 
-                <div className="text-center py-6 text-slate-400 text-xs uppercase tracking-widest font-bold">
-                    End of Stream
-                </div>
+                {activities.length > 0 && (
+                    <div className="text-center py-6 text-slate-400 text-xs uppercase tracking-widest font-bold">
+                        End of Stream
+                    </div>
+                )}
             </div>
         </div>
     );

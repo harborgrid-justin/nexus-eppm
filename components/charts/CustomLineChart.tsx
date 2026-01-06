@@ -1,5 +1,5 @@
+
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 
 interface CustomLineChartProps {
   data: any[];
@@ -14,11 +14,9 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({
   dataKeys, 
   height = 300 
 }) => {
-  const theme = useTheme();
-
   if (!data || data.length < 2) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-400" style={{ height }}>
+      <div className="flex items-center justify-center h-full text-text-secondary" style={{ height }}>
         <p className="text-xs">Not enough data to display chart</p>
       </div>
     );
@@ -37,9 +35,9 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({
 
   return (
     <div className="w-full flex flex-col" style={{ height }}>
-      <div className={`flex-1 relative border-l border-b ${theme.colors.border.replace('border-', 'border-l-').replace('border-', 'border-b-')} ml-6 mb-6`}>
+      <div className="flex-1 relative border-l border-b border-border ml-6 mb-6">
         {/* Y-Axis Labels */}
-        <div className="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-[10px] text-slate-400">
+        <div className="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-[10px] text-text-tertiary">
             <span>{Math.round(maxValue)}</span>
             <span>{Math.round(maxValue / 2)}</span>
             <span>0</span>
@@ -47,9 +45,9 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({
 
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             {/* Grid Lines */}
-            <line x1="0" y1="0" x2="100" y2="0" stroke={theme.charts.grid} strokeWidth="0.5" />
-            <line x1="0" y1="50" x2="100" y2="50" stroke={theme.charts.grid} strokeWidth="0.5" />
-            <line x1="0" y1="100" x2="100" y2="100" stroke={theme.charts.grid} strokeWidth="0.5" />
+            <line x1="0" y1="0" x2="100" y2="0" stroke="var(--color-border)" strokeWidth="0.5" />
+            <line x1="0" y1="50" x2="100" y2="50" stroke="var(--color-border)" strokeWidth="0.5" />
+            <line x1="0" y1="100" x2="100" y2="100" stroke="var(--color-border)" strokeWidth="0.5" />
 
             {dataKeys.map((dk, i) => (
                 <polyline
@@ -66,7 +64,7 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({
         {/* X-Axis Labels */}
         <div className="absolute top-full left-0 right-0 flex justify-between mt-2">
             {data.map((d, i) => (
-                <span key={i} className="text-[10px] text-slate-400 -translate-x-1/2" style={{ left: `${(i / (data.length - 1)) * 100}%` }}>
+                <span key={i} className="text-[10px] text-text-tertiary -translate-x-1/2" style={{ left: `${(i / (data.length - 1)) * 100}%` }}>
                     {d[xAxisKey]}
                 </span>
             ))}
@@ -76,7 +74,7 @@ export const CustomLineChart: React.FC<CustomLineChartProps> = ({
       {/* Legend */}
       <div className="flex justify-center gap-4 mt-2">
           {dataKeys.map(dk => (
-              <div key={dk.key} className="flex items-center gap-1 text-xs text-slate-600">
+              <div key={dk.key} className="flex items-center gap-1 text-xs text-text-secondary">
                   <div className="w-3 h-1" style={{ backgroundColor: dk.color }}></div>
                   {dk.key}
               </div>

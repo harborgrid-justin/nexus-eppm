@@ -4,9 +4,10 @@ import { Modal } from '../ui/Modal';
 import { Project } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
-import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ProjectWizardProps {
   onClose: () => void;
@@ -21,7 +22,9 @@ const STEPS = [
 ];
 
 const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
-  const { state } = useData();
+  const { state, dispatch } = useData();
+  const theme = useTheme();
+  const [mode, setMode] = useState<'select' | 'wizard'>('select');
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
@@ -45,7 +48,18 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   });
 
   const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
-  const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+  const handleBack = () => {
+    if (currentStep === 1) {
+      setMode('select');
+    } else {
+      setCurrentStep(prev => Math.max(prev - 1, 1));
+    }
+  };
+  
+  const handleSeed = (type: 'construction' | 'software') => {
+      dispatch({ type: 'LOAD_DEMO_PROJECT', payload: type });
+      onClose();
+  };
 
   const handleSubmit = () => {
     const newProject: Project = {
@@ -179,59 +193,96 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
       </div>
   );
 
+  const renderSelection = () => (
+    <div className="animate-in fade-in duration-300 py-6">
+        <h3 className="text-center font-bold text-slate-800 text-lg mb-2">How would you like to start?</h3>
+        <p className="text-center text-sm text-slate-500 mb-8">Create a project from scratch or load a pre-built industry template.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div onClick={() => setMode('wizard')} className="p-8 border-2 border-dashed border-slate-300 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:bg-nexus-50 transition-all group">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 border border-slate-200 group-hover:border-nexus-200 transition-all">
+                    <Plus size={32} className="text-slate-400 group-hover:text-nexus-600 transition-colors"/>
+                </div>
+                <h4 className="font-bold text-slate-800">Start from Scratch</h4>
+                <p className="text-xs text-slate-500 mt-1">Build a new project with the wizard.</p>
+            </div>
+            <div onClick={() => handleSeed('construction')} className="p-8 bg-white border border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-4 border border-amber-200"><HardHat size={32} className="text-amber-600"/></div>
+                <h4 className="font-bold text-slate-800">Construction Demo</h4>
+                <p className="text-xs text-slate-500 mt-1">A large-scale infrastructure project.</p>
+            </div>
+            <div onClick={() => handleSeed('software')} className="p-8 bg-white border border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 border border-blue-200"><Code size={32} className="text-blue-600"/></div>
+                <h4 className="font-bold text-slate-800">Software Development</h4>
+                <p className="text-xs text-slate-500 mt-1">An agile ERP migration project.</p>
+            </div>
+        </div>
+    </div>
+  );
+
   return (
     <Modal
-        isOpen={true} // This component is lazy-loaded, so it's always open when rendered
+        isOpen={true}
         onClose={onClose}
-        title={<span className="flex items-center gap-2"><Briefcase className="text-nexus-600"/> New Project Wizard</span>}
+        title={mode === 'wizard' ? <span className="flex items-center gap-2"><Briefcase className="text-nexus-600"/> New Project Wizard</span> : 'Create New Project'}
+        size={mode === 'wizard' ? 'lg' : '2xl'}
         footer={
-            <div className="flex justify-between w-full">
-                <Button variant="ghost" onClick={handleBack} disabled={currentStep === 1}>
-                    <ArrowLeft className="mr-2 h-4 w-4"/> Back
-                </Button>
-                <div className="flex gap-2">
-                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
-                    {currentStep < STEPS.length ? (
-                        <Button onClick={handleNext}>
-                            Next <ArrowRight className="ml-2 h-4 w-4"/>
-                        </Button>
-                    ) : (
-                        <Button onClick={handleSubmit} icon={CheckCircle}>
-                            Create Project
-                        </Button>
-                    )}
+            mode === 'wizard' ? (
+                <div className="flex justify-between w-full">
+                    <Button variant="ghost" onClick={handleBack}>
+                        <ArrowLeft className="mr-2 h-4 w-4"/> Back
+                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                        {currentStep < STEPS.length ? (
+                            <Button onClick={handleNext}>
+                                Next <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Button>
+                        ) : (
+                            <Button onClick={handleSubmit} icon={CheckCircle}>
+                                Create Project
+                            </Button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="flex justify-end w-full">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                </div>
+            )
         }
     >
-        {/* Stepper */}
-        <div className="flex justify-between mb-8 relative">
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -z-10"></div>
-            {STEPS.map((step) => {
-                const isActive = step.id === currentStep;
-                const isComplete = step.id < currentStep;
-                return (
-                    <div key={step.id} className="flex flex-col items-center gap-2 bg-white px-2">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
-                            isActive ? 'border-nexus-600 bg-nexus-50 text-nexus-600' :
-                            isComplete ? 'border-green-500 bg-green-50 text-green-600' :
-                            'border-slate-300 text-slate-400'
-                        }`}>
-                            {isComplete ? <CheckCircle size={16}/> : step.id}
-                        </div>
-                        <span className={`text-xs font-medium ${isActive ? 'text-nexus-700' : 'text-slate-500'}`}>{step.label}</span>
-                    </div>
-                );
-            })}
-        </div>
+        {mode === 'select' ? renderSelection() : (
+            <div className="flex flex-col h-[400px]">
+                {/* Stepper */}
+                <div className="flex justify-between mb-8 relative">
+                    <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-200 -z-10"></div>
+                    {STEPS.map((step) => {
+                        const isActive = step.id === currentStep;
+                        const isComplete = step.id < currentStep;
+                        return (
+                            <div key={step.id} className="flex flex-col items-center gap-2 bg-white px-2">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
+                                    isActive ? 'border-nexus-600 bg-nexus-50 text-nexus-600' :
+                                    isComplete ? 'border-green-500 bg-green-50 text-green-600' :
+                                    'border-slate-300 text-slate-400'
+                                }`}>
+                                    {isComplete ? <CheckCircle size={16}/> : step.id}
+                                </div>
+                                <span className={`text-xs font-medium ${isActive ? 'text-nexus-700' : 'text-slate-500'}`}>{step.label}</span>
+                            </div>
+                        );
+                    })}
+                </div>
 
-        {/* Content */}
-        <div className="min-h-[300px]">
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-            {currentStep === 4 && renderStep4()}
-        </div>
+                {/* Content */}
+                <div className="flex-1 flex flex-col justify-center">
+                    {currentStep === 1 && renderStep1()}
+                    {currentStep === 2 && renderStep2()}
+                    {currentStep === 3 && renderStep3()}
+                    {currentStep === 4 && renderStep4()}
+                </div>
+            </div>
+        )}
     </Modal>
   );
 };

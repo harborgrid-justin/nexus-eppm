@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { Settings, RefreshCw, Database } from 'lucide-react';
 import EpsObsSettings from './admin/EpsObsSettings';
 import CalendarEditor from './admin/CalendarEditor';
 import GlobalChangeWorkbench from './admin/GlobalChangeWorkbench';
 import UserManagement from './admin/UserManagement';
-import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -17,15 +17,15 @@ import { UdfSettings } from './admin/UdfSettings';
 import { IssueCodeSettings } from './admin/IssueCodeSettings';
 import { ExpenseCategorySettings } from './admin/ExpenseCategorySettings';
 import { FundingSourceSettings } from './admin/FundingSourceSettings';
-import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
+import EnterpriseResourceSettings from '../resources/EnterpriseResourceSettings';
 import WorkflowDesigner from './admin/WorkflowDesigner';
 import AuditLog from './admin/AuditLog';
 import GeneralSettings from './admin/GeneralSettings';
 import { useAdminSettingsLogic } from '../hooks/domain/useAdminSettingsLogic';
+import { useTheme } from '../context/ThemeContext';
 
 const AdminSettings: React.FC = () => {
   const theme = useTheme();
-
   const {
       activeGroup,
       activeView,
@@ -79,7 +79,7 @@ const AdminSettings: React.FC = () => {
             <div className="flex gap-2">
                 <button 
                   onClick={handleResetSystem}
-                  className={`flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95`}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95"
                   title="Restore Factory Defaults"
                 >
                   <Database size={16} />

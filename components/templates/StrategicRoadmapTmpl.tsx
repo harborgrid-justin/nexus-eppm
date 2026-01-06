@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
@@ -32,10 +29,16 @@ export const GanttTimelineTmpl: React.FC = () => {
 
     const mockTasks = project?.tasks || [];
 
+    if (!project) return (
+        <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
+             <EmptyState title="No Projects Available" description="Create a project to view the Gantt timeline template." icon={Calendar} />
+        </div>
+    );
+
     return (
         <div className="h-full flex flex-col bg-white overflow-hidden">
              <div className="px-6 pt-6">
-                <TemplateHeader number="16" title="Gantt Timeline" subtitle="Interactive schedule waterfall" />
+                <TemplateHeader number="16" title="Gantt Timeline" subtitle={`Interactive schedule for ${project.name}`} />
              </div>
 
             {/* Toolbar */}
@@ -114,8 +117,8 @@ export const GanttTimelineTmpl: React.FC = () => {
                                         t.type === 'Summary' ? 'bg-slate-800' : t.critical ? 'bg-red-500' : 'bg-blue-500'
                                     }`}
                                     style={{ 
-                                        width: `${t.duration * 10}px`, 
-                                        marginLeft: `${(new Date(t.startDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 3600 * 24) * 2}px` // Simplified positioning
+                                        width: `${Math.max(20, t.duration * 10)}px`, 
+                                        marginLeft: `${(new Date(t.startDate).getTime() - new Date(project.startDate).getTime()) / (1000 * 3600 * 24) * 2}px` 
                                     }}
                                 >
                                     <div className="absolute top-0 bottom-0 left-0 bg-black/10 w-[60%] rounded-l"></div>
@@ -197,7 +200,6 @@ export const StrategicRoadmapTmpl: React.FC = () => {
     }, []);
 
     const toggleLane = (laneId: string) => {
-        // FIX: Corrected typo from lId to laneId
         setHiddenLanes(prev => prev.includes(laneId) ? prev.filter(l => l !== laneId) : [...prev, laneId]);
     };
     
@@ -232,7 +234,7 @@ export const StrategicRoadmapTmpl: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-auto scrollbar-thin rounded-xl shadow-lg border border-slate-200">
-              <div className="min-w-[1200px] flex flex-col bg-white">
+              <div className="min-w-[1200px] flex flex-col bg-white h-full">
                 {/* Timeline Header */}
                 <div className="flex h-12 border-b border-slate-200 bg-slate-100/50 sticky top-0 z-40">
                     <div className="w-64 border-r border-slate-200 p-3 font-black text-slate-500 text-[10px] uppercase tracking-widest flex items-center bg-slate-50">Work Stream</div>
@@ -308,7 +310,6 @@ export const StrategicRoadmapTmpl: React.FC = () => {
         </div>
     );
 };
-// FIX: Define TemplatePlaceholder to resolve compilation error
 const TemplatePlaceholder: React.FC<{ title: string }> = ({ title }) => (
     <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400">
         <div className="text-center">

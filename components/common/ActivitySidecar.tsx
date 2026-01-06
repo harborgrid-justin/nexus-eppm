@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { History, User, Zap, MessageSquare, Clock, X, Terminal, CheckCircle } from 'lucide-react';
 
@@ -10,11 +9,9 @@ interface ActivitySidecarProps {
 }
 
 export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClose }) => {
-  const theme = useTheme();
   const { state } = useData();
   const auditLogs = state.governance.auditLog || [];
 
-  // Hydration safety
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
@@ -38,8 +35,8 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-y-0 right-0 w-80 ${theme.colors.surface} border-l ${theme.colors.border} shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300`}>
-      <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
+    <div className="fixed inset-y-0 right-0 w-80 bg-surface border-l border-border shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="p-4 border-b border-border flex justify-between items-center bg-background">
         <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
           <History size={14} className="text-nexus-600" /> Live Project Pulse
         </h3>
@@ -59,7 +56,6 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
                 <p className="text-slate-500 leading-relaxed">
                     <span className="font-semibold text-slate-600">{log.action}</span> - {log.details}
                 </p>
-                {/* Visual Flair for specific types */}
                 {log.action.includes('Approved') && (
                     <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold border border-green-100">
                         <CheckCircle size={8} /> DECISION
@@ -81,7 +77,7 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
         )}
       </div>
 
-      <div className={`p-4 border-t ${theme.colors.border} ${theme.colors.background}`}>
+      <div className="p-4 border-t border-border bg-background">
          <button className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-nexus-600 transition-colors">View Full Audit Ledger</button>
       </div>
     </div>

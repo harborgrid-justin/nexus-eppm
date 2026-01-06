@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { CostEstimate, CostEstimateItem } from '../../../types';
+import { CostEstimate, CostEstimateItem } from '../../../types/index';
 import { PieChart, Calculator } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../../utils/formatters';

@@ -2,11 +2,9 @@
 import React from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../../utils/formatters';
-import { useTheme } from '../../../context/ThemeContext';
-import { ReserveAnalysisData } from '../../../types';
+import { ReserveAnalysisData } from '../../../types/index';
 
 export const CompositionChart: React.FC<{ data: ReserveAnalysisData }> = ({ data }) => {
-    const theme = useTheme();
     const chartData = [
         { name: 'Remaining Contingency', value: data.remainingContingency, color: '#10b981' },
         { name: 'Used Contingency', value: data.drawdowns.contingency, color: '#f59e0b' },
@@ -15,8 +13,8 @@ export const CompositionChart: React.FC<{ data: ReserveAnalysisData }> = ({ data
     ];
 
     return (
-        <div className={`${theme.components.card} ${theme.layout.cardPadding} h-80`}>
-            <h3 className="font-bold text-slate-800 mb-4">Reserve Composition & Usage</h3>
+        <div className="bg-surface border border-border rounded-lg p-[var(--spacing-cardPadding)] h-80">
+            <h3 className="font-bold text-text-primary mb-4">Reserve Composition & Usage</h3>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie data={chartData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">

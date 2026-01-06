@@ -1,7 +1,10 @@
 
-import React, { useMemo } from 'react';
-import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud, FileCode, Grid, Server } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
+import React from 'react';
+import { PageHeader } from '../common/PageHeader';
+import { ModuleNavigation } from '../common/ModuleNavigation';
+import { ErrorBoundary } from '../ErrorBoundary';
+import { useDataExchangeLogic } from '../../hooks/domain/useDataExchangeLogic';
+import { Database, Loader2 } from 'lucide-react';
 import { ExchangeDashboard } from './data/ExchangeDashboard';
 import { IntegrationDesigner } from './data/IntegrationDesigner';
 import { ConnectorConfig } from './data/ConnectorConfig';
@@ -12,13 +15,8 @@ import { ImportPanel } from './data/ImportPanel';
 import { ExcelSync } from './data/ExcelSync';
 import { XerParser } from './data/XerParser';
 import { ErpConnector } from './data/ErpConnector';
-import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation } from '../common/ModuleNavigation';
-import { ErrorBoundary } from '../ErrorBoundary';
-import { useDataExchangeLogic } from '../../hooks/domain/useDataExchangeLogic';
 
 const DataExchange: React.FC = () => {
-    const theme = useTheme();
     const {
         activeGroup,
         activeTab,
@@ -45,15 +43,15 @@ const DataExchange: React.FC = () => {
     };
 
     return (
-        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+        <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
             <PageHeader 
                 title="Data Exchange Hub" 
                 subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."
                 icon={Database}
             />
 
-            <div className={theme.layout.panelContainer}>
-                <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
+            <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+                <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50">
                     <ModuleNavigation 
                         groups={navGroups}
                         activeGroup={activeGroup}
@@ -65,6 +63,7 @@ const DataExchange: React.FC = () => {
                 </div>
                 
                 <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+                    {isPending && <div className="absolute inset-0 flex items-center justify-center z-20"><Loader2 className="animate-spin text-nexus-500" /></div>}
                     <ErrorBoundary name="Data Exchange">
                         {renderContent()}
                     </ErrorBoundary>

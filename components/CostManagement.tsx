@@ -23,7 +23,6 @@ import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
 const CostManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
   const projectId = project.id;
-  const theme = useTheme();
 
   const {
       activeGroup,
@@ -52,18 +51,18 @@ const CostManagement: React.FC = () => {
     }
   };
 
-  if (!project) return <div className={theme.layout.pagePadding}>Loading cost module...</div>;
+  if (!project) return <div className="p-[var(--spacing-gutter)]">Loading cost module...</div>;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
       <PageHeader 
         title="Cost Management" 
         subtitle="Plan, estimate, and control project costs with precision."
         icon={DollarSign}
       />
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden bg-slate-50/50 ${theme.layout.headerBorder}`}>
+      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50">
             <ModuleNavigation 
                 groups={navGroups}
                 activeGroup={activeGroup}

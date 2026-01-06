@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 
 interface ProgressBarProps {
   value: number;
@@ -21,19 +20,15 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   className = '',
   colorClass
 }) => {
-  const theme = useTheme();
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
   
-  let barColor = theme.colors.primary; // Default to primary brand color
+  let barColor = colorClass || 'bg-primary'; 
   
-  if (colorClass) {
-    barColor = colorClass;
-  } else if (thresholds) {
-    // Use semantic colors from theme
-    if (percentage > 100) barColor = theme.colors.semantic.danger.bg.replace('bg-', 'bg-').replace('-50', '-600'); 
+  if (!colorClass && thresholds) {
+    if (percentage > 100) barColor = 'bg-error'; 
     else if (percentage > 90) barColor = 'bg-red-500'; 
-    else if (percentage > 75) barColor = 'bg-amber-500';
-    else barColor = 'bg-emerald-500';
+    else if (percentage > 75) barColor = 'bg-warning';
+    else barColor = 'bg-success';
   }
 
   const heightClass = size === 'sm' ? 'h-1.5' : size === 'lg' ? 'h-4' : 'h-2.5';
@@ -41,12 +36,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {showLabel && (
-        <div className={`flex justify-between ${theme.typography.label} mb-1.5 px-0.5`}>
+        <div className="flex justify-between text-xs font-bold text-text-secondary mb-1.5 px-0.5">
           <span>Progress</span>
-          <span className={theme.colors.text.primary}>{percentage.toFixed(0)}%</span>
+          <span className="text-text-primary">{percentage.toFixed(0)}%</span>
         </div>
       )}
-      <div className={`w-full ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border} shadow-inner ${heightClass}`}>
+      <div className={`w-full bg-background rounded-full overflow-hidden border border-border shadow-inner ${heightClass}`}>
         <div 
           className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${barColor}`}
           style={{ width: `${percentage}%` }}

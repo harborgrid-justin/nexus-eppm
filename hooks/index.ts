@@ -1,3 +1,4 @@
+
 export * from './usePortfolioState';
 export * from './useWbsManager';
 export * from './useGantt';
@@ -33,3 +34,5 @@ export * from './domain/useExchangeDashboardLogic';
 export * from './domain/useQualityManagementLogic';
 export * from './domain/useRiskMatrixLogic';
 export * from './domain/useWarehouseExplorerLogic';
+export * from './domain/useStakeholderManagementLogic';
+export * from './domain/useQuantitativeAnalysisLogic';

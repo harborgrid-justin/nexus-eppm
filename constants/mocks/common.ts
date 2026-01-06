@@ -1,5 +1,6 @@
 
-import { Document, Extension, QualityStandard, EnterpriseRole, EnterpriseSkill, StandardTemplate } from '../../types/index';
+// FIX: Added KanbanTask to the import list to define mock data.
+import { Document, Extension, QualityStandard, EnterpriseRole, EnterpriseSkill, StandardTemplate, KanbanTask } from '../../types/index';
 
 export const EXTENSIONS_REGISTRY: Extension[] = [
   { id: 'dod_suite', name: 'DoD Acquisition Suite', category: 'Compliance', description: 'DoD 5000.02 Lifecycle, EVMS-748, and Defense-grade Risk.', icon: 'Shield', status: 'Available', version: '1.0', viewType: 'dashboard' },
@@ -65,4 +66,14 @@ export const MOCK_DOCUMENTS: Document[] = [
 
 export const MOCK_TEMPLATES: StandardTemplate[] = [
     { id: 'TPL-01', category: 'Risk', name: 'Standard Risk Plan', description: 'Default risk management plan template.', content: {} },
+];
+
+// FIX: Added MOCK_KANBAN_TASKS to resolve export error in software demo.
+export const MOCK_KANBAN_TASKS: KanbanTask[] = [
+  { id: 'KT-1', title: 'Setup CI/CD pipeline for API', status: 'done', priority: 'High' },
+  { id: 'KT-2', title: 'Design database schema for user profiles', status: 'progress', priority: 'High' },
+  { id: 'KT-3', title: 'Develop login endpoint', status: 'progress', priority: 'Medium' },
+  { id: 'KT-4', title: 'Create UI mockups for dashboard', status: 'todo', priority: 'Medium' },
+  { id: 'KT-5', title: 'Investigate performance bottleneck in data query', status: 'todo', priority: 'Low' },
+  { id: 'KT-6', title: 'Write integration tests for payment gateway', status: 'review', priority: 'High' },
 ];

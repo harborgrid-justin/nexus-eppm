@@ -21,7 +21,6 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   width = 'max-w-3xl' 
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
-  const theme = useTheme();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,14 +54,14 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       <div className={`absolute inset-y-0 right-0 flex max-w-full pl-10 pointer-events-none`}>
         <div 
             ref={panelRef}
-            className={`pointer-events-auto w-screen ${width} transform transition-transform duration-300 ease-out ${theme.colors.surface} shadow-2xl flex flex-col h-full border-l ${theme.colors.border} ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            className={`pointer-events-auto w-screen ${width} transform transition-transform duration-300 ease-out bg-surface shadow-2xl flex flex-col h-full border-l border-border ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
         >
             {/* Header */}
-            <div className={`flex items-center justify-between px-8 py-5 border-b ${theme.colors.border.replace('border-', 'border-b-')} ${theme.colors.surface} flex-shrink-0`}>
-                <div className={`${theme.typography.h3} ${theme.colors.text.primary}`}>{title}</div>
+            <div className="flex items-center justify-between px-8 py-5 border-b border-b-border bg-surface flex-shrink-0">
+                <div className="text-base font-bold text-text-primary">{title}</div>
                 <button 
                     onClick={onClose}
-                    className={`p-2 ${theme.colors.text.tertiary} transition-all rounded-full hover:${theme.colors.text.primary} hover:${theme.colors.background} focus:outline-none focus:ring-2 focus:ring-nexus-500`}
+                    className="p-2 text-text-tertiary transition-all rounded-full hover:text-text-primary hover:bg-background focus:outline-none focus:ring-2 focus:ring-nexus-500"
                     aria-label="Close panel"
                 >
                     <X size={22} />
@@ -70,7 +69,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </div>
 
             {/* Content Area */}
-            <div className={`flex-1 overflow-y-auto ${theme.colors.background} scrollbar-thin`}>
+            <div className="flex-1 overflow-y-auto bg-background scrollbar-thin">
                 <div className="p-8">
                     {children}
                 </div>
@@ -78,7 +77,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
 
             {/* Footer */}
             {footer && (
-                <div className={`flex items-center justify-end gap-3 px-8 py-5 ${theme.colors.surface} border-t ${theme.colors.border.replace('border-', 'border-t-')} flex-shrink-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]`}>
+                <div className="flex items-center justify-end gap-3 px-8 py-5 bg-surface border-t border-t-border flex-shrink-0 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                     {footer}
                 </div>
             )}

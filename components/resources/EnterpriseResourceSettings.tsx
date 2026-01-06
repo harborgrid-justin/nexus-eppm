@@ -1,14 +1,10 @@
 
-
-
-
 import React, { useState } from 'react';
 import { Users, Sliders, Landmark, Save } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { Button } from '../ui/Button';
 import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { EnterpriseRole } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { RoleSettings } from './settings/RoleSettings';

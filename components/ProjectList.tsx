@@ -1,7 +1,6 @@
 
 import React, { useMemo } from 'react';
 import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2 } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { FilterBar } from './common/FilterBar';
 import { usePermissions } from '../hooks/usePermissions';
@@ -14,7 +13,6 @@ import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 import { useProjectListLogic } from '../hooks/domain/useProjectListLogic';
 
 const ProjectList: React.FC = () => {
-  const theme = useTheme();
   const { canEditProject } = usePermissions();
   
   const {
@@ -43,20 +41,20 @@ const ProjectList: React.FC = () => {
   }
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col`}>
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] h-full flex flex-col w-full max-w-[var(--spacing-container)] mx-auto">
       <PageHeader 
         title="Enterprise Projects" 
         subtitle="Manage active project portfolio, track execution, and monitor delivery health."
         icon={Briefcase}
         actions={canEditProject() && (
-            <button onClick={() => setActiveView('create')} className={`px-4 py-2 ${theme.colors.primary} ${theme.colors.primaryHover} rounded-lg text-sm font-semibold text-white flex items-center gap-2 shadow-sm active:scale-95 transition-all`}>
+            <button onClick={() => setActiveView('create')} className="px-4 py-2 bg-primary hover:bg-primary-dark rounded-lg text-sm font-semibold text-text-inverted flex items-center gap-2 shadow-sm active:scale-95 transition-all">
                 <Plus size={16} /> <span className="hidden sm:inline">New Project</span>
             </button>
         )}
       />
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center`}>
+      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50 flex flex-col md:flex-row justify-between md:items-center">
             <div className="flex-1">
                 <ModuleNavigation 
                     groups={navGroups}

@@ -1,5 +1,5 @@
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { createHashRouter, RouterProvider } from 'react-router-dom';
 import { DataProvider } from './context/DataContext';
 import { IndustryProvider } from './context/IndustryContext';

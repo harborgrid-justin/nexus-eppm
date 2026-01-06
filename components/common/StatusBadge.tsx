@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { StatusVariant } from '../../types/ui';
 
 export type { StatusVariant };
@@ -18,16 +17,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   customColorClass
 }) => {
-  const theme = useTheme();
+  const baseClasses = "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-bold border uppercase tracking-wider";
   const s = status?.toLowerCase();
   
-  // Default to neutral
-  let colors = theme.colors.semantic.neutral;
+  let colors = 'bg-slate-100 text-slate-700 border-slate-200';
 
   if (customColorClass) {
-      // Escape hatch if needed
       return (
-        <span className={`${theme.components.badge.base} ${customColorClass} ${className}`}>
+        <span className={`${baseClasses} ${customColorClass} ${className}`}>
             {status}
         </span>
       );
@@ -35,32 +32,32 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   // Map status text to semantic theme tokens
   if (variant === 'health') {
-      if (['good', 'healthy', 'on track'].includes(s)) colors = theme.colors.semantic.success;
-      else if (['warning', 'at risk'].includes(s)) colors = theme.colors.semantic.warning;
-      else if (['critical', 'poor', 'off track'].includes(s)) colors = theme.colors.semantic.danger;
+      if (['good', 'healthy', 'on track'].includes(s)) colors = 'bg-green-50 text-green-700 border-green-200';
+      else if (['warning', 'at risk'].includes(s)) colors = 'bg-amber-50 text-amber-700 border-amber-200';
+      else if (['critical', 'poor', 'off track'].includes(s)) colors = 'bg-red-50 text-red-700 border-red-200';
   } else if (variant === 'priority') {
-      if (['high', 'critical', 'urgent'].includes(s)) colors = theme.colors.semantic.danger;
-      else if (['medium'].includes(s)) colors = theme.colors.semantic.warning;
-      else if (['low'].includes(s)) colors = theme.colors.semantic.info;
+      if (['high', 'critical', 'urgent'].includes(s)) colors = 'bg-red-50 text-red-700 border-red-200';
+      else if (['medium'].includes(s)) colors = 'bg-amber-50 text-amber-700 border-amber-200';
+      else if (['low'].includes(s)) colors = 'bg-blue-50 text-blue-700 border-blue-200';
   } else if (variant === 'success') {
-      colors = theme.colors.semantic.success;
+      colors = 'bg-green-50 text-green-700 border-green-200';
   } else if (variant === 'warning') {
-      colors = theme.colors.semantic.warning;
+      colors = 'bg-amber-50 text-amber-700 border-amber-200';
   } else if (variant === 'danger') {
-      colors = theme.colors.semantic.danger;
+      colors = 'bg-red-50 text-red-700 border-red-200';
   } else if (variant === 'info') {
-      colors = theme.colors.semantic.info;
+      colors = 'bg-blue-50 text-blue-700 border-blue-200';
   } else {
       // General Status
-      if (['approved', 'active', 'completed', 'paid', 'met', 'resolved', 'success'].includes(s)) colors = theme.colors.semantic.success;
-      else if (['pending', 'in progress', 'open', 'conditional', 'draft', 'review'].includes(s)) colors = theme.colors.semantic.warning;
-      else if (['rejected', 'critical', 'blocked', 'failed', 'not met', 'blacklisted', 'error'].includes(s)) colors = theme.colors.semantic.danger;
-      else if (['closed', 'archived', 'inactive'].includes(s)) colors = theme.colors.semantic.neutral;
-      else if (['issued', 'sent'].includes(s)) colors = theme.colors.semantic.info;
+      if (['approved', 'active', 'completed', 'paid', 'met', 'resolved', 'success'].includes(s)) colors = 'bg-green-50 text-green-700 border-green-200';
+      else if (['pending', 'in progress', 'open', 'conditional', 'draft', 'review'].includes(s)) colors = 'bg-amber-50 text-amber-700 border-amber-200';
+      else if (['rejected', 'critical', 'blocked', 'failed', 'not met', 'blacklisted', 'error'].includes(s)) colors = 'bg-red-50 text-red-700 border-red-200';
+      else if (['closed', 'archived', 'inactive'].includes(s)) colors = 'bg-slate-100 text-slate-700 border-slate-200';
+      else if (['issued', 'sent'].includes(s)) colors = 'bg-blue-50 text-blue-700 border-blue-200';
   }
 
   return (
-    <span className={`${theme.components.badge.base} ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
+    <span className={`${baseClasses} ${colors} ${className}`}>
       {status}
     </span>
   );

@@ -1,6 +1,6 @@
 
 import React, { useState, useDeferredValue, useMemo } from 'react';
-import { useProcurementData } from '../../hooks';
+import { useProcurementData } from '../../hooks/index';
 import { useData } from '../../context/DataContext';
 import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search, Briefcase } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';

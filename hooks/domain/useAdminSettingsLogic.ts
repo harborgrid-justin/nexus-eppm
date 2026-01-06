@@ -38,10 +38,9 @@ export const useAdminSettingsLogic = () => {
   };
   
   const handleResetSystem = () => {
-      if (confirm("DANGER: This will wipe all local data and restore the factory demo dataset. This action cannot be undone. Are you sure?")) {
+      if (confirm("DANGER: This will wipe all data for the current session. Reloading the page will restore the demo data. Are you sure?")) {
           dispatch({ type: 'RESET_SYSTEM' });
-          alert("System reset complete. The application will now reload.");
-          window.location.reload();
+          alert("System data has been reset for the current session.");
       }
   };
 

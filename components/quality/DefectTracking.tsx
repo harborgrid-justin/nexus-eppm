@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useState } from 'react';
 import { Bug, Plus, Lock, AlertOctagon } from 'lucide-react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
@@ -10,7 +7,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { DefectList } from './defects/DefectList';
 import { DefectDetailView } from './defects/DefectDetailView';
 import { DefectFormPanel } from './defects/DefectFormPanel';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { NonConformanceReport } from '../../types/index';
 
 const DefectTracking: React.FC = () => {

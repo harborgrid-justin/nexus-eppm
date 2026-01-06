@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { NonConformanceReport } from '../../../types';
 import { Search, AlertOctagon } from 'lucide-react';
 import { Badge } from '../../ui/Badge';
-import { useTheme } from '../../../context/ThemeContext';
 
 interface DefectListProps {
     defects: NonConformanceReport[];
@@ -13,9 +13,8 @@ interface DefectListProps {
 }
 
 export const DefectList: React.FC<DefectListProps> = ({ defects, selectedDefectId, onSelectDefect, searchTerm, onSearch }) => {
-    const theme = useTheme();
     return (
-        <div className={`w-1/3 min-w-[300px] border-r ${theme.colors.border} bg-white flex flex-col`}>
+        <div className="w-1/3 min-w-[300px] border-r border-border bg-white flex flex-col">
              <div className="p-4 border-b border-slate-200">
                  <div className="relative">
                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>

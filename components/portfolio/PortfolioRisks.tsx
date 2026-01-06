@@ -1,49 +1,33 @@
-
-import React, { useMemo } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { ShieldAlert, Plus, ArrowUpRight } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import { usePortfolioRisksLogic } from '../../hooks/domain/usePortfolioRisksLogic';
+import { EmptyState } from '../common/EmptyState';
 
 const PortfolioRisks: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
-
-    const allRisks = useMemo(() => {
-        // 1. Portfolio Risks (Native)
-        const portfolioLevel = state.portfolioRisks.map(r => ({
-            ...r,
-            sourceType: 'Portfolio',
-            sourceId: 'Global'
-        }));
-
-        // 2. Escalated Project Risks
-        const escalated = state.risks
-            .filter(r => r.isEscalated)
-            .map(r => {
-                const project = state.projects.find(p => p.id === r.projectId);
-                return {
-                    id: r.id,
-                    description: r.description,
-                    category: r.category,
-                    score: r.score,
-                    status: r.status,
-                    ownerId: r.ownerId,
-                    mitigationPlan: r.mitigationPlan || 'Review required',
-                    sourceType: 'Project',
-                    sourceId: project ? project.code : r.projectId
-                };
-            });
-
-        return [...portfolioLevel, ...escalated].sort((a,b) => b.score - a.score);
-    }, [state.portfolioRisks, state.risks, state.projects]);
+    const { allRisks, isEmpty } = usePortfolioRisksLogic();
 
     const getScoreVariant = (score: number): 'danger' | 'warning' | 'success' => {
         if (score >= 15) return 'danger';
         if (score >= 8) return 'warning';
         return 'success';
     };
+
+    if (isEmpty) {
+        return (
+            <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
+                 <EmptyState 
+                    title="No Active Portfolio Risks" 
+                    description="No systemic or escalated risks currently tracked." 
+                    icon={ShieldAlert}
+                    action={<Button variant="primary" icon={Plus}>Add Risk</Button>}
+                 />
+            </div>
+        );
+    }
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -96,11 +80,6 @@ const PortfolioRisks: React.FC = () => {
                                     <td className="px-6 py-4 text-sm text-slate-600">{risk.ownerId}</td>
                                 </tr>
                             ))}
-                            {allRisks.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} className="p-8 text-center text-slate-400 italic">No active risks found.</td>
-                                </tr>
-                            )}
                         </tbody>
                     </table>
                 </div>

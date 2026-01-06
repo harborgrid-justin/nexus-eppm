@@ -1,9 +1,5 @@
 
-
-
-
 import React, { useState } from 'react';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { QualityReport, InspectionChecklist } from '../../types/index';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';

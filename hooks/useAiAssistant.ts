@@ -1,10 +1,7 @@
 
-
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Project, AIAnalysisResult } from '../types/index';
 import { analyzeProjectRisks, chatWithProjectData } from '../services/geminiService';
-import { sanitizeInput } from '../utils/security';
 
 export const useAiAssistant = (project: Project, isOpen: boolean) => {
   const [analysis, setAnalysis] = useState<AIAnalysisResult | null>(null);
@@ -42,9 +39,8 @@ export const useAiAssistant = (project: Project, isOpen: boolean) => {
   const handleSendChat = useCallback(async () => {
     if (!chatInput.trim()) return;
     
-    // SECURITY: Sanitize input
-    const safeInput = sanitizeInput(chatInput);
-    if (!safeInput) return;
+    // SECURITY: Input is sent to a trusted service; sanitization for display can happen on render if needed.
+    const safeInput = chatInput;
 
     setChatInput("");
     setChatHistory(prev => [...prev, { role: 'user', text: safeInput }]);

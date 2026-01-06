@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -7,12 +8,12 @@ interface CustomPieChartProps {
 }
 
 export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 300 }) => {
-  const theme = useTheme();
+  const { tokens } = useTheme();
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   if (!data || data.length === 0 || total === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-slate-400" style={{ height }}>
+      <div className="flex items-center justify-center h-full text-text-secondary" style={{ height }}>
         <p className="text-xs">No data to display</p>
       </div>
     );
@@ -20,7 +21,6 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 3
   
   let cumulativeAngle = 0;
 
-  // SVG Config
   const size = 100;
   const radius = 50;
   const center = 50;
@@ -31,23 +31,21 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 3
     cumulativeAngle += fraction;
     const endAngle = cumulativeAngle;
 
-    // Convert angles to coordinates (0 is at 3 o'clock, go clockwise)
-    // We rotate -90deg in SVG transform to start at 12 o'clock
     const startX = center + radius * Math.cos(2 * Math.PI * startAngle);
     const startY = center + radius * Math.sin(2 * Math.PI * startAngle);
     const endX = center + radius * Math.cos(2 * Math.PI * endAngle);
     const endY = center + radius * Math.sin(2 * Math.PI * endAngle);
 
-    // SVG Path Command
     const largeArcFlag = fraction > 0.5 ? 1 : 0;
     const pathData = [
-      `M ${center} ${center}`, // Move to center
-      `L ${startX} ${startY}`, // Line to start
-      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`, // Arc to end
-      `Z` // Close path
+      `M ${center} ${center}`,
+      `L ${startX} ${startY}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
+      `Z`
     ].join(' ');
 
-    const sliceColor = slice.color || theme.charts.palette[index % theme.charts.palette.length];
+    const palette = [tokens.colors.info, tokens.colors.success, tokens.colors.warning, tokens.colors.error, tokens.colors.accent, tokens.colors.primaryLight];
+    const sliceColor = slice.color || palette[index % palette.length];
 
     return {
       ...slice,
@@ -71,18 +69,16 @@ export const CustomPieChart: React.FC<CustomPieChartProps> = ({ data, height = 3
               <title>{`${slice.name}: ${slice.value} (${(slice.fraction * 100).toFixed(1)}%)`}</title>
             </path>
           ))}
-          {/* Inner Circle for Donut Effect */}
-          <circle cx="50" cy="50" r="35" fill="white" />
+          <circle cx="50" cy="50" r="35" fill="var(--color-surface)" />
         </svg>
       </div>
       
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-4 mt-4">
         {slices.map((item, i) => (
           <div key={i} className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-            <span className="text-xs text-slate-600 font-medium">
-              {item.name} <span className="text-slate-400">({item.value})</span>
+            <span className="text-xs text-text-secondary font-medium">
+              {item.name} <span className="text-text-tertiary">({item.value})</span>
             </span>
           </div>
         ))}

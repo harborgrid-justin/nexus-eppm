@@ -1,18 +1,10 @@
-
-
-
-
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
-import { Project, TaskStatus, Issue } from '../types/index';
-import { calculateProjectProgress } from '../utils/calculations';
-import { useTheme } from '../context/ThemeContext';
+import { TaskStatus } from '../types/index';
 import { calculateEVM } from '../utils/integrations/cost';
 
 export const usePortfolioState = () => {
   const { state } = useData();
-  const theme = useTheme();
   const { projects, issues, budgetItems } = state;
 
   const summary = useMemo(() => {
@@ -41,7 +33,6 @@ export const usePortfolioState = () => {
 
     // Calculate total critical issues
     const totalCriticalIssues = issues.filter(i => i.priority === 'Critical' || i.priority === 'High').length;
-
 
     return {
       totalProjects,

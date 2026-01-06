@@ -1,13 +1,14 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Card } from '../ui/Card';
-import { Search, Filter, Plus, MoreVertical, ChevronRight, Folder, MoreHorizontal, LayoutGrid, List as ListIcon, MapPin, Download } from 'lucide-react';
+import { Search, Filter, Plus, MoreVertical, ChevronRight, Folder, MoreHorizontal, LayoutGrid, List as ListIcon, MapPin, Download, ChevronDown } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { useData } from '../../context/DataContext';
-import { generateId } from '../../utils/formatters';
-import { KanbanTask } from '../../types';
+import { generateId, formatCompactCurrency, formatCurrency } from '../../utils/formatters';
+import { KanbanTask, EPSNode } from '../../types/index';
+import { StatusBadge } from '../common/StatusBadge';
 
 const TemplateHeader = ({ number, title, subtitle }: { number: string, title: string, subtitle?: string }) => (
     <div className="flex items-start gap-4 mb-8 border-b border-slate-200 pb-6">
@@ -47,18 +48,16 @@ const MockToolbar = ({ onSearch }: { onSearch: (val: string) => void }) => {
 
 export const StandardGridTmpl: React.FC = () => {
     const theme = useTheme();
-    const [rows, setRows] = useState([...Array(10)].map((_, i) => ({ id: i, name: `Enterprise Initiative ${i+1}` })));
+    const { state } = useData();
     const [search, setSearch] = useState('');
 
-    const handleDelete = (id: number) => {
-        setRows(rows.filter(r => r.id !== id));
-    };
+    const filteredRows = state.projects.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.code.toLowerCase().includes(search.toLowerCase()));
 
-    const filteredRows = rows.filter(r => r.name.toLowerCase().includes(search.toLowerCase()));
+    const getManagerName = (id: string) => state.resources.find(r => r.id === id)?.name || id;
 
     return (
         <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
-            <TemplateHeader number="06" title="Data Grid" subtitle="High density tabular data view" />
+            <TemplateHeader number="06" title="Data Grid" subtitle="High density tabular data view (Projects)" />
             
             <Card className="flex-1 flex flex-col overflow-hidden border border-slate-200 shadow-sm rounded-xl">
                 <div className="p-4 border-b border-slate-200 bg-white"><MockToolbar onSearch={setSearch} /></div>
@@ -69,7 +68,7 @@ export const StandardGridTmpl: React.FC = () => {
                                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">ID</th>
                                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Owner</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Manager</th>
                                 <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-200">Budget</th>
                                 <th className="px-6 py-3 w-10 border-b border-slate-200"></th>
                             </tr>
@@ -77,35 +76,30 @@ export const StandardGridTmpl: React.FC = () => {
                         <tbody className="bg-white divide-y divide-slate-100">
                             {filteredRows.map((row) => (
                                 <tr key={row.id} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-slate-500 font-medium">PROJ-{100+row.id}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-slate-500 font-medium">{row.code}</td>
                                     <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-800">{row.name}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide border ${row.id % 3 === 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>
-                                            {row.id % 3 === 0 ? 'Active' : 'Planning'}
-                                        </span>
+                                        <StatusBadge status={row.health} variant="health" />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">MR</div>
-                                        Mike Ross
+                                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600 border border-slate-200">
+                                            {getManagerName(row.managerId).charAt(0)}
+                                        </div>
+                                        {getManagerName(row.managerId)}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-mono text-slate-700 font-medium">$1,250,000</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-mono text-slate-700 font-medium">{formatCompactCurrency(row.budget)}</td>
                                     <td className="px-6 py-4 text-right">
-                                        <button onClick={() => handleDelete(row.id)} className="text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal size={16}/></button>
+                                        <button className="text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal size={16}/></button>
                                     </td>
                                 </tr>
                             ))}
+                            {filteredRows.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-slate-400">No projects found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
-                </div>
-                <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center text-xs text-slate-500 font-medium">
-                    <span>Showing {filteredRows.length} records</span>
-                    <div className="flex gap-2">
-                        <button className="px-3 py-1 border rounded hover:bg-white disabled:opacity-50" disabled>Previous</button>
-                        <button className="px-3 py-1 border rounded hover:bg-white bg-white text-nexus-600 font-bold border-nexus-200">1</button>
-                        <button className="px-3 py-1 border rounded hover:bg-white">2</button>
-                        <button className="px-3 py-1 border rounded hover:bg-white">3</button>
-                        <button className="px-3 py-1 border rounded hover:bg-white">Next</button>
-                    </div>
                 </div>
             </Card>
         </div>
@@ -114,8 +108,33 @@ export const StandardGridTmpl: React.FC = () => {
 
 export const TreeHierarchyTmpl: React.FC = () => {
     const theme = useTheme();
-    const [selectedNode, setSelectedNode] = useState<number | null>(1);
+    const { state } = useData();
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(state.eps[0]?.id || null);
     
+    // Recursive Tree Renderer
+    const renderTree = (nodes: EPSNode[], parentId: string | null = null, level = 0) => {
+        return nodes
+            .filter(n => n.parentId === parentId)
+            .map(node => (
+                <div key={node.id} className="select-none">
+                    <div 
+                        onClick={() => setSelectedNodeId(node.id)}
+                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-sm transition-colors ${selectedNodeId === node.id ? 'bg-nexus-50 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
+                        style={{ paddingLeft: `${level * 16 + 8}px` }}
+                    >
+                        <ChevronRight size={14} className="text-slate-400" />
+                        <Folder size={16} className={selectedNodeId === node.id ? 'text-nexus-600' : 'text-blue-400'} />
+                        <span className="truncate">{node.name}</span>
+                    </div>
+                    {renderTree(nodes, node.id, level + 1)}
+                </div>
+            ));
+    };
+
+    const selectedNode = state.eps.find(n => n.id === selectedNodeId);
+    const nodeProjects = state.projects.filter(p => p.epsId === selectedNodeId);
+    const totalBudget = nodeProjects.reduce((sum, p) => sum + p.budget, 0);
+
     return (
         <div className={`h-full flex flex-col ${theme.colors.background}`}>
              <div className={theme.layout.pagePadding}>
@@ -128,35 +147,7 @@ export const TreeHierarchyTmpl: React.FC = () => {
                         <h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">Enterprise Structure</h3>
                     </div>
                     <div className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-                        <div className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer text-sm font-bold text-slate-800">
-                            <ChevronRight size={14} className="text-slate-400 rotate-90" />
-                            <Folder size={16} className="text-nexus-500" />
-                            <span>Global Portfolio</span>
-                        </div>
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className="pl-6">
-                                <div 
-                                    onClick={() => setSelectedNode(i)}
-                                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-sm transition-colors ${selectedNode===i ? 'bg-nexus-50 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
-                                >
-                                    <ChevronRight size={14} className="text-slate-400" />
-                                    <Folder size={16} className={selectedNode===i ? 'text-nexus-600' : 'text-blue-400'} />
-                                    <span>Division Node {i}</span>
-                                </div>
-                                {i === 1 && (
-                                    <div className="pl-6 mt-0.5 space-y-0.5">
-                                        <div className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-600 font-medium">
-                                            <div className="w-4 h-px bg-slate-300"></div>
-                                            <span>Project Alpha</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 p-2 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-600 font-medium">
-                                            <div className="w-4 h-px bg-slate-300"></div>
-                                            <span>Project Beta</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                        {renderTree(state.eps)}
                     </div>
                 </div>
 
@@ -164,8 +155,8 @@ export const TreeHierarchyTmpl: React.FC = () => {
                     <Card className={`flex-1 ${theme.layout.cardPadding} shadow-sm border border-slate-200`}>
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h2 className={theme.typography.h2}>Division Node {selectedNode}</h2>
-                                <p className="text-slate-500 mt-1 font-medium">North American Infrastructure Group</p>
+                                <h2 className={theme.typography.h2}>{selectedNode?.name || 'Select a Node'}</h2>
+                                <p className="text-slate-500 mt-1 font-medium">{selectedNode?.code || '---'}</p>
                             </div>
                             <Button icon={Download} variant="outline">Export Data</Button>
                         </div>
@@ -173,23 +164,38 @@ export const TreeHierarchyTmpl: React.FC = () => {
                         <div className={`grid grid-cols-3 ${theme.layout.gridGap} mb-8`}>
                             <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
                                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Projects</p>
-                                <p className="text-3xl font-black text-slate-900">{12 + (selectedNode || 0)}</p>
+                                <p className="text-3xl font-black text-slate-900">{nodeProjects.length}</p>
                             </div>
                             <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
                                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Total Budget</p>
-                                <p className="text-3xl font-black text-slate-900">${45 + (selectedNode || 0)}M</p>
+                                <p className="text-3xl font-black text-slate-900">{formatCompactCurrency(totalBudget)}</p>
                             </div>
                             <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Headcount</p>
-                                <p className="text-3xl font-black text-slate-900">142</p>
+                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Node ID</p>
+                                <p className="text-sm font-black text-slate-900 truncate">{selectedNodeId}</p>
                             </div>
                         </div>
                         
-                        <div className="flex-1 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center bg-slate-50/50 min-h-[300px]">
-                            <div className="text-center text-slate-400">
-                                <LayoutGrid size={48} className="mx-auto mb-4 opacity-20"/>
-                                <p className="font-medium">Aggregation Visualization Area</p>
-                            </div>
+                        <div className="flex-1 overflow-auto">
+                             <table className="min-w-full text-sm">
+                                 <thead className="bg-slate-50 border-b border-slate-100">
+                                     <tr>
+                                         <th className="px-4 py-2 text-left font-bold text-slate-500">Project</th>
+                                         <th className="px-4 py-2 text-right font-bold text-slate-500">Budget</th>
+                                         <th className="px-4 py-2 text-right font-bold text-slate-500">Spent</th>
+                                     </tr>
+                                 </thead>
+                                 <tbody>
+                                     {nodeProjects.map(p => (
+                                         <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                                             <td className="px-4 py-2 font-medium">{p.name}</td>
+                                             <td className="px-4 py-2 text-right font-mono">{formatCompactCurrency(p.budget)}</td>
+                                             <td className="px-4 py-2 text-right font-mono">{formatCompactCurrency(p.spent)}</td>
+                                         </tr>
+                                     ))}
+                                 </tbody>
+                             </table>
+                             {nodeProjects.length === 0 && <div className="text-center p-8 text-slate-400 italic">No projects in this node.</div>}
                         </div>
                     </Card>
                 </div>
@@ -275,7 +281,8 @@ export const KanbanBoardTmpl: React.FC = () => {
                                 >
                                     <div className="text-sm font-bold text-slate-800 mb-3 leading-snug">{card.title}</div>
                                     <div className="flex justify-between items-center pt-3 border-t border-slate-50">
-                                        <span className="text-[10px] font-mono font-bold text-slate-400">TSK-{card.id}</span>
+                                        <span className="text-[10px] font-mono font-bold text-slate-400">{card.id}</span>
+                                        <StatusBadge status={card.priority} variant="priority" />
                                     </div>
                                 </div>
                             ))}
@@ -294,7 +301,13 @@ export const KanbanBoardTmpl: React.FC = () => {
 
 export const MasterDetailTmpl: React.FC = () => {
     const theme = useTheme();
-    const [selectedItem, setSelectedItem] = useState(1);
+    const { state } = useData();
+    const materials = state.resources.filter(r => r.type === 'Material');
+    const [selectedItem, setSelectedItem] = useState<string | null>(materials[0]?.id || null);
+
+    const activeMaterial = materials.find(m => m.id === selectedItem);
+
+    if (materials.length === 0) return <div className="p-12 text-center text-slate-400">No materials defined in resources.</div>;
 
     return (
         <div className="h-full flex overflow-hidden bg-slate-50">
@@ -307,62 +320,60 @@ export const MasterDetailTmpl: React.FC = () => {
                     </div>
                 </div>
                 <div className="flex-1 overflow-y-auto">
-                    {[1,2,3,4,5,6].map(i => (
-                        <div key={i} onClick={() => setSelectedItem(i)} className={`p-5 border-b border-slate-50 cursor-pointer transition-all group ${selectedItem === i ? 'bg-nexus-50 border-l-4 border-l-nexus-600' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}>
+                    {materials.map(mat => (
+                        <div key={mat.id} onClick={() => setSelectedItem(mat.id)} className={`p-5 border-b border-slate-50 cursor-pointer transition-all group ${selectedItem === mat.id ? 'bg-nexus-50 border-l-4 border-l-nexus-600' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}>
                             <div className="flex justify-between items-start">
-                                <div className={`font-bold text-sm ${selectedItem===i ? 'text-nexus-800' : 'text-slate-800'}`}>Steel Beam W12x40</div>
-                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold border border-slate-200 uppercase">Mat</span>
+                                <div className={`font-bold text-sm ${selectedItem===mat.id ? 'text-nexus-800' : 'text-slate-800'}`}>{mat.name}</div>
+                                <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-bold border border-slate-200 uppercase">{mat.unitOfMeasure}</span>
                             </div>
                             <div className="flex justify-between mt-2">
-                                <div className="text-xs text-slate-500 truncate font-medium">Warehouse A • Zone 4</div>
-                                <span className={`text-xs font-mono font-bold ${selectedItem===i ? 'text-nexus-600' : 'text-slate-400'}`}>QTY: {420 + i}</span>
+                                <div className="text-xs text-slate-500 truncate font-medium">{mat.location || 'Unassigned'}</div>
+                                <span className={`text-xs font-mono font-bold ${selectedItem===mat.id ? 'text-nexus-600' : 'text-slate-400'}`}>QTY: {mat.availableQuantity}</span>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
+            
             <div className={`flex-1 ${theme.layout.pagePadding} overflow-y-auto`}>
-                <div className="max-w-3xl mx-auto">
-                    <TemplateHeader number="09" title="Item Detail View" />
-                    <Card className={`${theme.layout.cardPadding} shadow-md border-slate-200`}>
-                        <div className="flex justify-between items-start mb-8 border-b border-slate-100 pb-6">
-                            <div>
-                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Steel Beam W12x40 (Item {selectedItem})</h2>
-                                <p className="text-slate-500 font-mono text-xs mt-1 font-bold">SKU: MAT-STL-{selectedItem}42 • REVISION B</p>
+                {activeMaterial ? (
+                    <div className="max-w-3xl mx-auto">
+                        <TemplateHeader number="09" title="Item Detail View" />
+                        <Card className={`${theme.layout.cardPadding} shadow-md border-slate-200`}>
+                            <div className="flex justify-between items-start mb-8 border-b border-slate-100 pb-6">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{activeMaterial.name}</h2>
+                                    <p className="text-slate-500 font-mono text-xs mt-1 font-bold">SKU: {activeMaterial.id} • {activeMaterial.status}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="sm">History</Button>
+                                    <Button size="sm">Edit Item</Button>
+                                </div>
                             </div>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="sm">History</Button>
-                                <Button size="sm">Edit Item</Button>
+                            
+                            <div className={`grid grid-cols-2 ${theme.layout.gridGap} mb-8`}>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unit Price</label>
+                                    <p className="text-xl font-mono font-bold text-slate-900">{formatCurrency(activeMaterial.hourlyRate)}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</label>
+                                    <p className="text-lg font-bold text-slate-800">{activeMaterial.role}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</label>
+                                    <p className="text-lg font-medium text-slate-700">{activeMaterial.location}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reorder Point</label>
+                                    <p className="text-lg font-bold text-orange-600">{activeMaterial.minQuantity} {activeMaterial.unitOfMeasure}</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div className={`grid grid-cols-2 ${theme.layout.gridGap} mb-8`}>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unit Price</label>
-                                <p className="text-xl font-mono font-bold text-slate-900">$245.00</p>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Supplier</label>
-                                <p className="text-lg font-bold text-slate-800">Acme Steelworks</p>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lead Time</label>
-                                <p className="text-lg font-medium text-slate-700">14 Days</p>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reorder Point</label>
-                                <p className="text-lg font-bold text-orange-600">500 Units</p>
-                            </div>
-                        </div>
-
-                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-8">
-                            <h4 className="text-sm font-bold text-slate-800 mb-2 uppercase tracking-wide">Technical Specifications</h4>
-                            <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                                Standard wide-flange carbon steel structural beam. ASTM A992 compliant. Yield strength 50 ksi. Used for primary structural framing in Sector 4.
-                            </p>
-                        </div>
-                    </Card>
-                </div>
+                        </Card>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-slate-400">Select an item to view details.</div>
+                )}
             </div>
         </div>
     );
@@ -370,29 +381,46 @@ export const MasterDetailTmpl: React.FC = () => {
 
 export const SplitPaneTmpl: React.FC = () => {
     const theme = useTheme();
-    const [selectedAsset, setSelectedAsset] = useState<number | null>(null);
+    const { state } = useData();
+    const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
+
+    // Filter Equipment
+    const assets = state.resources.filter(r => r.type === 'Equipment');
 
     return (
         <div className="h-full flex flex-col">
             <div className="h-1/2 bg-blue-50 relative border-b border-slate-300 overflow-hidden group">
                 <div className="absolute inset-0 bg-[radial-gradient(#94a3b8_1px,transparent_1px)] [background-size:24px_24px] opacity-40"></div>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <MapPin size={64} className={`text-slate-400 opacity-50 ${selectedAsset ? 'text-nexus-600 opacity-100 scale-110' : ''} transition-all`}/>
-                </div>
+                
+                {assets.length === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">No assets available.</div>
+                ) : (
+                     /* Mock Positioning for Visualization - Scatter them */
+                     assets.map((asset, i) => (
+                        <div 
+                            key={asset.id}
+                            className="absolute flex flex-col items-center cursor-pointer group/pin"
+                            style={{ 
+                                left: `${20 + (i * 15) % 70}%`, 
+                                top: `${30 + (i * 20) % 50}%` 
+                            }}
+                            onClick={() => setSelectedAsset(asset.id)}
+                        >
+                             <MapPin size={32} className={`transition-all ${selectedAsset === asset.id ? 'text-nexus-600 scale-125' : 'text-slate-400 opacity-70 group-hover/pin:opacity-100 group-hover/pin:text-nexus-400'}`}/>
+                             {selectedAsset === asset.id && <span className="bg-white text-xs font-bold px-2 py-1 rounded shadow mt-1">{asset.name}</span>}
+                        </div>
+                     ))
+                )}
+                
                 <div className="absolute top-4 left-4 z-10">
                     <TemplateHeader number="10" title="Geospatial Assets" />
                 </div>
-                {selectedAsset && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-lg border border-slate-200 text-sm font-bold animate-in slide-in-from-bottom-2">
-                        Selected: EQ-{1000+selectedAsset}
-                    </div>
-                )}
             </div>
             
             <div className="h-1/2 bg-white flex flex-col">
                 <div className="p-4 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
                     <span className="font-black text-xs uppercase text-slate-500 tracking-widest flex items-center gap-2">
-                        <LayoutGrid size={14}/> Selected Assets (12)
+                        <LayoutGrid size={14}/> Selected Assets ({assets.length})
                     </span>
                 </div>
                 <div className="flex-1 overflow-auto p-0">
@@ -400,20 +428,21 @@ export const SplitPaneTmpl: React.FC = () => {
                         <thead className="bg-slate-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Asset ID</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Coordinates</th>
-                                <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Telemetry</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Location</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {[1,2,3,4,5].map(i => (
-                                <tr key={i} onClick={() => setSelectedAsset(i)} className={`hover:bg-slate-50 transition-colors cursor-pointer ${selectedAsset === i ? 'bg-nexus-50' : ''}`}>
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-900 font-mono">EQ-{1000+i}</td>
-                                    <td className="px-6 py-4"><span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200 font-bold uppercase tracking-wide">Online</span></td>
-                                    <td className="px-6 py-4 text-xs font-mono text-slate-500">34.0522° N, 118.2437° W</td>
-                                    <td className="px-6 py-4 text-right text-xs font-mono font-bold text-slate-700">Running (42h)</td>
+                            {assets.map(asset => (
+                                <tr key={asset.id} onClick={() => setSelectedAsset(asset.id)} className={`hover:bg-slate-50 transition-colors cursor-pointer ${selectedAsset === asset.id ? 'bg-nexus-50' : ''}`}>
+                                    <td className="px-6 py-4 text-xs font-bold text-slate-500 font-mono">{asset.id}</td>
+                                    <td className="px-6 py-4 text-sm font-bold text-slate-900">{asset.name}</td>
+                                    <td className="px-6 py-4"><Badge variant={asset.status === 'Active' ? 'success' : 'neutral'}>{asset.status}</Badge></td>
+                                    <td className="px-6 py-4 text-xs font-mono text-slate-500">{asset.location}</td>
                                 </tr>
                             ))}
+                            {assets.length === 0 && <tr><td colSpan={4} className="p-8 text-center">No assets found.</td></tr>}
                         </tbody>
                     </table>
                 </div>

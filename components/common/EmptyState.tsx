@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { Search } from 'lucide-react';
 
 interface EmptyStateProps {
@@ -16,10 +15,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   icon: Icon = Search, 
   action 
 }) => {
-  const theme = useTheme();
-
   return (
-    <div className={`flex flex-col items-center justify-center text-center p-12 h-full ${theme.colors.surface} rounded-xl border border-dashed ${theme.colors.border}`}>
+    <div className="flex flex-col items-center justify-center text-center p-12 h-full bg-surface rounded-xl border border-dashed border-border">
       <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
         <Icon size={32} className="text-slate-400" />
       </div>

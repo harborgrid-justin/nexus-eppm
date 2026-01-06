@@ -1,5 +1,4 @@
 
-
 import React, { useMemo } from 'react';
 import { Users } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -14,7 +13,6 @@ import PhysicalResources from './resources/PhysicalResources';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Resource } from '../types/index';
 import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
 
@@ -23,8 +21,6 @@ const ResourceManagement: React.FC = () => {
   const projectId = project.id;
   const projectResources = assignedResources as Resource[];
  
-  const theme = useTheme();
-  
   const {
       activeGroup,
       activeView,
@@ -48,18 +44,18 @@ const ResourceManagement: React.FC = () => {
     }
   };
 
-  if (!project) return <div className={theme.layout.pagePadding}>Loading resources...</div>;
+  if (!project) return <div className="p-[var(--spacing-gutter)]">Loading resources...</div>;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
       <PageHeader 
         title="Resource Management" 
         subtitle="Plan, staff, and manage your project and enterprise resources."
         icon={Users}
       />
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 ${theme.layout.headerBorder} bg-slate-50/50 z-10`}>
+      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="flex-shrink-0 border-b border-border bg-slate-50/50 z-10">
           <ModuleNavigation 
               groups={navStructure}
               activeGroup={activeGroup}

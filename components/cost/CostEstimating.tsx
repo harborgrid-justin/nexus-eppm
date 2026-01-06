@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useWbsManager } from '../../hooks';
+import { useWbsManager } from '../../hooks/index';
 import { CostEstimate, CostEstimateItem } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { EstimateWorksheet } from './estimating/EstimateWorksheet';

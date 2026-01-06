@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { GlobalCalendar, WorkDay } from '../../types';
+import { GlobalCalendar, WorkDay } from '../../types/index';
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, Check, X, Save, Edit2 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { SidePanel } from '../ui/SidePanel';

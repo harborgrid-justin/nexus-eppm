@@ -24,8 +24,7 @@ export const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
 }) => {
   const groupRef = useRef<HTMLDivElement>(null);
   const itemRef = useRef<HTMLDivElement>(null);
-  const theme = useTheme();
-
+  
   const currentGroup = groups.find(g => g.id === activeGroup);
 
   useEffect(() => {
@@ -38,9 +37,9 @@ export const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
   }, [activeItem, currentGroup]);
 
   return (
-    <div className={`flex flex-col ${theme.colors.surface} border-b ${theme.colors.border} shadow-sm z-20 sticky top-0 ${className}`}>
+    <div className={`flex flex-col bg-surface border-b border-border shadow-sm z-20 sticky top-0 ${className}`}>
       {/* Level 1: Groups (Strategy/Execution/etc) */}
-      <div className={`w-full overflow-x-auto scrollbar-hide border-b ${theme.colors.border} ${theme.colors.surface}`}>
+      <div className="w-full overflow-x-auto scrollbar-hide border-b border-border bg-surface">
         <div ref={groupRef} className="flex px-6 py-3.5 space-x-3 min-w-max items-center">
           {groups.map(group => {
             const isActive = activeGroup === group.id;
@@ -52,8 +51,8 @@ export const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
                   px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out whitespace-nowrap
                   focus:outline-none focus:ring-2 focus:ring-nexus-500
                   ${isActive 
-                    ? `${theme.colors.primary} ${theme.colors.text.inverted} shadow-lg shadow-slate-900/20` 
-                    : `${theme.colors.surface} ${theme.colors.text.secondary} border ${theme.colors.border} hover:border-slate-300 hover:${theme.colors.text.primary}`
+                    ? `bg-primary text-text-inverted shadow-lg shadow-slate-900/20` 
+                    : `bg-surface text-text-secondary border border-border hover:border-slate-300 hover:text-text-primary`
                   }
                 `}
               >
@@ -66,7 +65,7 @@ export const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
 
       {/* Level 2: Items (Specific views) */}
       {currentGroup && currentGroup.items.length > 0 && (
-        <div className={`w-full overflow-x-auto scrollbar-hide ${theme.colors.background}/50 backdrop-blur-sm transition-all duration-300`}>
+        <div className="w-full overflow-x-auto scrollbar-hide bg-background/50 backdrop-blur-sm transition-all duration-300">
           <div ref={itemRef} className="flex px-6 py-2.5 space-x-1 min-w-max items-center">
             {currentGroup.items.map(item => {
               const isActive = activeItem === item.id;
@@ -80,8 +79,8 @@ export const ModuleNavigation: React.FC<ModuleNavigationProps> = ({
                     flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap
                     focus:outline-none select-none
                     ${isActive 
-                      ? `${theme.colors.surface} text-nexus-600 shadow-sm ring-1 ring-slate-200` 
-                      : `${theme.colors.text.secondary} hover:${theme.colors.text.primary} hover:bg-white/40 active:scale-95`
+                      ? 'bg-surface text-nexus-600 shadow-sm ring-1 ring-slate-200' 
+                      : 'text-text-secondary hover:text-text-primary hover:bg-white/40 active:scale-95'
                     }
                   `}
                 >

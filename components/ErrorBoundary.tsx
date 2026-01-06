@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -11,30 +12,35 @@ interface ErrorBoundaryState {
   error?: Error | string | unknown;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // FIX: Added a constructor to properly initialize state and props for the class component.
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    // FIX: In a class component constructor, `state` must be assigned to `this.state`.
     this.state = {
       hasError: false,
-      error: undefined
+      error: undefined,
     };
+    this.handleRetry = this.handleRetry.bind(this);
   }
 
-  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+  public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+    // FIX: Component properties (`props`) are accessed via `this.props` in class components.
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
-  handleRetry = () => {
+  public handleRetry() {
+    // FIX: The `setState` method is accessed via `this.setState` in class components to update state.
     this.setState({ hasError: false, error: undefined });
-  };
+  }
 
-  render() {
+  public render() {
+    // FIX: State is accessed via `this.state` in class components.
     if (this.state.hasError) {
+      // FIX: Destructuring `error` from `this.state`.
       const { error } = this.state;
       let errorMessage = 'An unexpected error occurred.';
       let errorStack = null;
@@ -54,10 +60,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
       return (
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
+          {/* FIX: Component properties (`props`) are accessed via `this.props`. */}
           <h2 className="font-bold flex items-center gap-2"><AlertTriangle size={20} /> Error in {this.props.name || 'Component'}</h2>
           <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
           {errorStack && (
-             <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 overflow-auto max-h-32 text-red-800 font-mono">
+             <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 max-h-32 text-red-800 font-mono overflow-auto">
                 {errorStack}
              </pre>
           )}
@@ -71,6 +78,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
+    // FIX: The `children` prop is accessed via `this.props`.
     return this.props.children;
   }
 }

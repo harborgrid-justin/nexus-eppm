@@ -1,4 +1,3 @@
-
 import { DataState, Action } from '../types/index';
 import { projectReducer } from './reducers/projectSlice';
 import { programReducer } from './reducers/programSlice';
@@ -16,13 +15,24 @@ import { extensionReducer } from './reducers/extensionSlice';
 import { stagingReducer } from './reducers/stagingSlice';
 import { applyBusinessLogic } from '../utils/businessLogic';
 import { initialState } from './initialState';
+import { constructionDemoData } from '../constants/demos/constructionDemo';
+import { softwareDemoData } from '../constants/demos/softwareDemo';
 
 export const rootReducer = (state: DataState, action: Action): DataState => {
-  // Global Reset Interceptor
+  // Global Interceptors
   if (action.type === 'RESET_SYSTEM') {
       return initialState;
   }
 
+  if (action.type === 'LOAD_DEMO_PROJECT') {
+    if (action.payload === 'construction') {
+      return { ...initialState, ...constructionDemoData, projects: constructionDemoData.projects || [] };
+    }
+    if (action.payload === 'software') {
+      return { ...initialState, ...softwareDemoData, projects: softwareDemoData.projects || [] };
+    }
+  }
+  
   let nextState = { ...state };
 
   if (action.type.startsWith('PROJECT_') || action.type.startsWith('TASK_') || action.type.startsWith('BASELINE_') || action.type.startsWith('WBS_') || action.type.startsWith('COST_ESTIMATE_')) {

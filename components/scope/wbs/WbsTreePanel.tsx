@@ -1,7 +1,7 @@
 
 import React, { useTransition } from 'react';
 import WBSNodeComponent from '../WBSNodeComponent';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { WBSNode } from '../../../types';
 
@@ -60,11 +60,11 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
     };
 
     return (
-        <div className="w-1/3 min-w-[350px] border-r border-slate-200 bg-slate-50 flex flex-col">
-            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm">
+        <div className="w-1/3 min-w-[350px] border-r border-border bg-slate-50 flex flex-col">
+            <div className="p-4 border-b border-border flex justify-between items-center bg-white shadow-sm">
                 <h3 className="font-black text-slate-700 text-xs uppercase tracking-widest">WBS Hierarchy</h3>
                 <div className="flex gap-2">
-                    {isPending && <span className="text-nexus-500 animate-pulse text-[10px] font-bold self-center">UPDATING...</span>}
+                    {isPending && <Loader2 className="animate-spin text-nexus-500 self-center" size={14}/>}
                     {canEdit && <Button size="sm" variant="ghost" icon={Plus} onClick={() => onAddNode(null)}>Root</Button>}
                 </div>
             </div>

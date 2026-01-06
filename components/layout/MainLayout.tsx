@@ -3,7 +3,6 @@ import React, { useState, useTransition, Suspense } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../Sidebar';
 import { ActivitySidecar } from '../common/ActivitySidecar';
-import { useData } from '../../context/DataContext';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
@@ -13,7 +12,6 @@ const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPulseOpen, setIsPulseOpen] = useState(false);
   
-  // Pattern 1: startTransition for critical interactions
   const [isPending, startTransition] = useTransition();
   
   const navigate = useNavigate();
@@ -44,7 +42,7 @@ const MainLayout: React.FC = () => {
         onClose={() => setIsSidebarOpen(false)}
       />
       
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-background">
         <AppHeader 
           activeTab={activeTab} 
           projectId={projectIdFromUrl}

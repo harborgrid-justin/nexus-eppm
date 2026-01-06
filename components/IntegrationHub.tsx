@@ -3,7 +3,6 @@ import React from 'react';
 import { useData } from '../context/DataContext';
 import { Network, RefreshCw, CheckCircle2, XCircle, Settings, Power } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
-import { useTheme } from '../context/ThemeContext';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
@@ -11,10 +10,9 @@ import { PageHeader } from './common/PageHeader';
 
 const IntegrationHub: React.FC = () => {
   const { state, dispatch } = useData();
-  const theme = useTheme();
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)]">
        <PageHeader 
           title="Integration Hub" 
           subtitle="Manage connections to external enterprise systems." 
@@ -23,7 +21,7 @@ const IntegrationHub: React.FC = () => {
        />
 
       <ErrorBoundary>
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-gutter)]">
             {state.integrations.map((integration) => (
               <Card key={integration.id} className="p-6 relative group flex flex-col h-full">
                   <div className="flex justify-between items-start mb-4">
@@ -38,11 +36,11 @@ const IntegrationHub: React.FC = () => {
                     </Badge>
                   </div>
                   
-                  <h3 className={theme.typography.h3}>{integration.name}</h3>
-                  <p className={`${theme.typography.body} text-slate-500 mb-6`}>{integration.type} Platform</p>
+                  <h3 className="text-base font-bold text-text-primary">{integration.name}</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed mb-6">{integration.type} Platform</p>
                   
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
-                    <span className="text-xs text-slate-400">Last synced: {integration.lastSync}</span>
+                    <span className="text-xs text-text-secondary">Last synced: {integration.lastSync}</span>
                     <div className="flex gap-2">
                         <Button variant="ghost" size="sm" className="p-2" aria-label="Configure Integration"><Settings size={16} /></Button>
                         <Button 
@@ -62,7 +60,7 @@ const IntegrationHub: React.FC = () => {
             {[...Array(2)].map((_, i) => (
               <div 
                 key={`placeholder-${i}`} 
-                className={`border-2 border-dashed ${theme.colors.border} rounded-xl p-6 flex flex-col items-center justify-center text-center text-slate-400 hover:border-nexus-300 hover:bg-nexus-50/50 transition-all cursor-pointer min-h-[200px]`}
+                className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center justify-center text-center text-slate-400 hover:border-nexus-300 hover:bg-nexus-50/50 transition-all cursor-pointer min-h-[200px]"
                 tabIndex={0}
                 role="button"
                 onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && alert('Feature coming soon')}

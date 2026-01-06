@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 
 interface SkeletonProps {
   className?: string;
@@ -15,9 +14,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   height, 
   variant = 'rect' 
 }) => {
-  const theme = useTheme();
-  
-  const baseClasses = `animate-pulse bg-slate-200/80 ${theme.mode === 'dark' ? 'bg-slate-800' : ''}`;
+  const baseClasses = `animate-pulse bg-slate-200 dark:bg-slate-800`;
   const roundedClasses = variant === 'circle' ? 'rounded-full' : variant === 'text' ? 'rounded' : 'rounded-xl';
   
   const style = {

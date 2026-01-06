@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Risk } from '../../../types';
+import { Risk } from '../../../types/index';
 import { useTheme } from '../../../context/ThemeContext';
 import { Shield, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../ui/Button';
@@ -38,8 +38,8 @@ export const RiskResponseTab: React.FC<RiskResponseTabProps> = ({ risk, setRisk,
       
       <div className="space-y-3">
         {risk.responseActions?.map((action, idx) => (
-          <div key={action.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex gap-4 items-start">
-             <div className="p-2 bg-white rounded-full border border-slate-200 text-slate-400">
+          <div key={action.id} className={`flex items-center gap-3 p-3 border rounded-lg transition-all ${'bg-white border-slate-200'}`}>
+             <div className="p-2 bg-slate-100 rounded-full border border-slate-200 text-slate-400">
                <Shield size={16}/>
              </div>
              <div className="flex-1 space-y-2">

@@ -4,14 +4,13 @@ import { BookOpen, Calendar, User, Tag, Share2, Printer, ThumbsUp, Eye } from 'l
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { Badge } from '../ui/Badge';
-import { KnowledgeArticle } from '../../types';
 
 export const KnowledgeBaseArticle: React.FC = () => {
     const theme = useTheme();
     const { state } = useData();
     const article = state.knowledgeBase[0]; // Display first for demo
 
-    if (!article) return <div className="p-8 text-center text-slate-400">No articles available.</div>;
+    if (!article) return <div className="p-8 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl m-6">No articles available in Knowledge Base.</div>;
 
     const authorName = state.users.find(u => u.id === article.authorId)?.name || article.authorId;
 
@@ -30,12 +29,14 @@ export const KnowledgeBaseArticle: React.FC = () => {
                         </div>
                     </div>
                     
-                    <div className="p-8 md:p-12 prose prose-slate max-w-none" dangerouslySetInnerHTML={{ __html: article.content }} />
+                    <div className="p-8 md:p-12 prose prose-slate max-w-none">
+                        <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                    </div>
                     
-                    <div className="p-8 border-t border-slate-100 flex justify-between items-center">
+                    <div className="p-8 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <div className="flex gap-4">
-                            <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-nexus-600"><ThumbsUp size={16}/> Helpful (42)</button>
-                            <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-nexus-600"><Share2 size={16}/> Share</button>
+                            <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-nexus-600 transition-colors"><ThumbsUp size={16}/> Helpful (42)</button>
+                            <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-nexus-600 transition-colors"><Share2 size={16}/> Share</button>
                         </div>
                         <div className="text-xs text-slate-400">
                             Last edited: {article.lastUpdated}
@@ -75,7 +76,7 @@ export const KnowledgeBaseArticle: React.FC = () => {
                              <h4 className="font-bold text-slate-800 mb-2 text-xs uppercase tracking-wider">Tags</h4>
                              <div className="flex flex-wrap gap-2">
                                  {article.tags.map(tag => (
-                                     <span key={tag} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium hover:bg-slate-200 cursor-pointer transition-colors">{tag}</span>
+                                     <span key={tag} className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium hover:bg-slate-200 cursor-pointer transition-colors border border-slate-200">{tag}</span>
                                  ))}
                              </div>
                         </div>
@@ -84,9 +85,9 @@ export const KnowledgeBaseArticle: React.FC = () => {
                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h4 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider">Related Articles</h4>
                         <ul className="space-y-3">
-                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer">Budget Transfer Policy</li>
-                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer">WBS Coding Standards</li>
-                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer">Vendor Onboarding Guide</li>
+                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer flex items-center gap-2"><BookOpen size={14}/> Budget Transfer Policy</li>
+                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer flex items-center gap-2"><BookOpen size={14}/> WBS Coding Standards</li>
+                            <li className="text-sm text-nexus-600 hover:underline cursor-pointer flex items-center gap-2"><BookOpen size={14}/> Vendor Onboarding Guide</li>
                         </ul>
                     </div>
                 </div>

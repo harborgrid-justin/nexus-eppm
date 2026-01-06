@@ -1,6 +1,4 @@
 
-
-// FIX: Correctly import DataState from types/index.
 import { DataState, Action } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';

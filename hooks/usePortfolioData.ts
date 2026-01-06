@@ -1,5 +1,3 @@
-
-
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 
@@ -27,7 +25,6 @@ export const usePortfolioData = () => {
       setScenarios, 
       governanceDecisions: state.governanceDecisions, // From Global State
       esgMetrics: state.esgMetrics, // From Global State
-      // FIX: Export strategicGoals
       strategicGoals: state.strategicGoals,
       aggregatedFinancials
   };

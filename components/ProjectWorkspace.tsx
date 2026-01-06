@@ -1,14 +1,10 @@
 
-
-
-
 import React, { Suspense, lazy } from 'react';
 import { Network, GanttChartSquare, Loader2, GitBranch } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { ModuleNavigation } from './common/ModuleNavigation';
-import { useTheme } from '../context/ThemeContext';
-import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
+import { useTheme } from './context/ThemeContext';
+import { ProjectWorkspaceProvider } from './context/ProjectWorkspaceContext';
 import SuspenseFallback from './layout/SuspenseFallback';
 import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLogic';
 

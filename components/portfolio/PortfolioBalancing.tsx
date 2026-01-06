@@ -1,43 +1,53 @@
-
-import React, { useMemo, useState, useDeferredValue } from 'react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, PieChart } from 'lucide-react';
 import { StrategicDrivers } from './balancing/StrategicDrivers';
 import { ValueRiskChart } from './balancing/ValueRiskChart';
 import { EfficientFrontierChart } from './balancing/EfficientFrontierChart';
+import { usePortfolioBalancingLogic } from '../../hooks/domain/usePortfolioBalancingLogic';
+import { Button } from '../ui/Button';
+import { EmptyState } from '../common/EmptyState';
 
 const PortfolioBalancing: React.FC = () => {
-    const { state } = useData();
     const theme = useTheme();
-    
-    const [weights, setWeights] = useState({ financial: 0.5, strategic: 0.3, risk: 0.2 });
-    const deferredWeights = useDeferredValue(weights);
-    const [budgetConstraint, setBudgetConstraint] = useState(50000000);
+    const { 
+        portfolioData, 
+        weights, 
+        setWeights, 
+        budgetConstraint, 
+        setBudgetConstraint,
+        isEmpty
+    } = usePortfolioBalancingLogic();
 
-    const portfolioData = useMemo(() => {
-        return [...state.projects, ...state.programs].map(item => {
-            const riskFactor = 1 - (item.riskScore / 25); 
-            const rawValue = (item.financialValue * deferredWeights.financial) + (item.strategicImportance * deferredWeights.strategic);
-            return {
-                id: item.id, name: item.name, risk: item.riskScore,
-                value: Math.round(rawValue * riskFactor * 100), 
-                budget: item.budget, category: item.category,
-            };
-        }).sort((a, b) => b.value - a.value); 
-    }, [state.projects, state.programs, deferredWeights]);
+    if (isEmpty) {
+        return (
+            <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
+                <EmptyState 
+                    title="No Data to Balance" 
+                    description="Add projects to the portfolio to enable optimization modeling." 
+                    icon={PieChart} 
+                />
+            </div>
+        );
+    }
 
     return (
         <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in`}>
-            <div className={`bg-white p-5 rounded-xl border flex flex-col xl:flex-row justify-between items-center gap-6`}>
+            <div className={`${theme.colors.surface} p-5 rounded-xl border ${theme.colors.border} flex flex-col xl:flex-row justify-between items-center gap-6 shadow-sm`}>
                 <div>
                     <h2 className={theme.typography.h2}>Portfolio Optimization</h2>
                     <p className={theme.typography.small}>Efficient Frontier & Strategic Balancing</p>
                 </div>
-                <StrategicDrivers weights={weights} onWeightChange={setWeights} />
-                <button className="w-full xl:w-auto px-4 py-2.5 bg-nexus-600 text-white rounded-lg flex items-center gap-2">
-                    <RefreshCw size={16} /> Recalculate Model
-                </button>
+                <div className="flex-1 w-full xl:w-auto">
+                    <StrategicDrivers weights={weights} onWeightChange={setWeights} />
+                </div>
+                <Button 
+                    className="w-full xl:w-auto" 
+                    icon={RefreshCw} 
+                    onClick={() => {/* Trigger re-simulation if logic requires explicit run */}}
+                >
+                    Recalculate Model
+                </Button>
             </div>
 
             <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto`}>

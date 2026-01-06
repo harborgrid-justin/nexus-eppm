@@ -1,4 +1,6 @@
 
+export type EngagementLevel = 'Unaware' | 'Resistant' | 'Neutral' | 'Supportive' | 'Leading';
+
 export interface TeamCharter {
   values: string[];
   communicationGuidelines: string;
@@ -20,8 +22,8 @@ export interface Stakeholder {
 
 export interface StakeholderEngagement {
   stakeholderId: string; // FK to Stakeholder
-  currentLevel: string;
-  desiredLevel: string;
+  currentLevel: EngagementLevel;
+  desiredLevel: EngagementLevel;
 }
 
 export interface Assumption {
@@ -68,8 +70,8 @@ export interface EnrichedStakeholder {
   power: number; // 1-10
   support: number; // -5 to +5 (Sentiment)
   engagement: {
-    current: 'Unaware' | 'Resistant' | 'Neutral' | 'Supportive' | 'Leading';
-    desired: 'Unaware' | 'Resistant' | 'Neutral' | 'Supportive' | 'Leading';
+    current: EngagementLevel;
+    desired: EngagementLevel;
   };
   financialAuthority: {
     limit: number;

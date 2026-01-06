@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { CostEstimate, CostEstimateItem } from '../../../types';
+import { CostEstimate, CostEstimateItem } from '../../../types/index';
 import { Plus, Trash2, Book } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import { useTheme } from '../../../context/ThemeContext';

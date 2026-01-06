@@ -1,52 +1,19 @@
 
-
-
-
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { 
-  Users, BarChart2, DollarSign, TrendingUp, Filter, Plus, 
-  MessageSquare, Shield, AlertTriangle, Target, LayoutDashboard, 
-  CheckCircle, ArrowRight, UserCheck
+  Users, BarChart2, DollarSign, TrendingUp, LayoutDashboard
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Cell } from 'recharts';
-import StatCard from './shared/StatCard';
-import { formatCurrency } from '../utils/formatters';
-import { Badge } from './ui/Badge';
 import { StakeholderDashboard } from './stakeholder/StakeholderDashboard';
 import { EngagementMatrix } from './stakeholder/EngagementMatrix';
 import { FinancialAuthority } from './stakeholder/FinancialAuthority';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { EnrichedStakeholder } from '../types/index';
+import { useStakeholderManagementLogic } from '../hooks/domain/useStakeholderManagementLogic';
 
 const StakeholderManagement: React.FC = () => {
-  const { project, stakeholders: rawStakeholders } = useProjectWorkspace();
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'register' | 'analysis' | 'engagement' | 'financial'>('dashboard');
-
-  // Enrich mock data since base model might be simple
-  const stakeholders: EnrichedStakeholder[] = useMemo(() => {
-    return (rawStakeholders || []).map((s, i) => ({
-      id: s.id,
-      name: s.name,
-      role: s.role,
-      organization: i % 2 === 0 ? 'Internal' : 'Client Corp',
-      category: i === 0 ? 'Internal' : 'External',
-      interest: s.interest === 'High' ? 9 : s.interest === 'Medium' ? 5 : 2,
-      power: s.influence === 'High' ? 9 : s.influence === 'Medium' ? 5 : 2,
-      support: s.engagementStrategy === 'Manage Closely' ? 2 : 4,
-      engagement: {
-        current: (project?.stakeholderEngagement?.find(e => e.stakeholderId === s.id)?.currentLevel as any) || 'Neutral',
-        desired: (project?.stakeholderEngagement?.find(e => e.stakeholderId === s.id)?.desiredLevel as any) || 'Supportive',
-      },
-      financialAuthority: {
-        limit: s.influence === 'High' ? 500000 : 10000,
-        ccbMember: s.influence === 'High',
-        costInfluence: s.influence as 'High' | 'Medium' | 'Low'
-      }
-    }));
-  }, [rawStakeholders, project]);
+  const { activeTab, setActiveTab, stakeholders } = useStakeholderManagementLogic();
 
   return (
     <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>

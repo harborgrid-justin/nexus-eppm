@@ -1,10 +1,4 @@
-
-
-
-
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project, TaskStatus } from '../types/index';
-import { getDaysDiff } from './dateUtils';
 
 export const calculateProjectProgress = (project: Project): number => {
     if (!project || !project.tasks || project.tasks.length === 0) return 0;
@@ -20,5 +14,3 @@ export const calculateProjectProgress = (project: Project): number => {
     const completedWeightedDuration = project.tasks.reduce((acc, t) => acc + (t.duration * (t.work || 1) * (t.progress / 100)), 0);
     return Math.round((completedWeightedDuration / totalWeightedDuration) * 100);
 };
-
-export { getDaysDiff } from './dateUtils';

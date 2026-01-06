@@ -1,9 +1,5 @@
 
-
-
-
 import React, { useMemo, useState, useEffect, useDeferredValue } from 'react';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Loader2, Filter } from 'lucide-react';

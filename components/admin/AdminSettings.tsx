@@ -1,17 +1,11 @@
-import React, { useState, useMemo, useTransition } from 'react';
-import { 
-  Settings, Users, Shield, Bell, CreditCard, UserCog, Tag, 
-  Receipt, FileWarning, Banknote, Edit3, Calendar, GitPullRequest, 
-  Terminal, Layers, MapPin, History, RefreshCw, Database
-} from 'lucide-react';
-import { useData } from '../../context/DataContext';
+import React from 'react';
+import { Settings, RefreshCw, Database } from 'lucide-react';
 import EpsObsSettings from './EpsObsSettings';
 import CalendarEditor from './CalendarEditor';
 import GlobalChangeWorkbench from './GlobalChangeWorkbench';
 import UserManagement from './UserManagement';
-import { useTheme } from '../../context/ThemeContext';
 import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
+import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
 import BillingSettings from './BillingSettings';
 import NotificationSettings from './NotificationSettings';
@@ -27,10 +21,10 @@ import WorkflowDesigner from './WorkflowDesigner';
 import AuditLog from './AuditLog';
 import GeneralSettings from './GeneralSettings';
 import { useAdminSettingsLogic } from '../../hooks/domain/useAdminSettingsLogic';
+import { useTheme } from '../../context/ThemeContext';
 
 const AdminSettings: React.FC = () => {
   const theme = useTheme();
-
   const {
       activeGroup,
       activeView,
@@ -84,7 +78,7 @@ const AdminSettings: React.FC = () => {
             <div className="flex gap-2">
                 <button 
                   onClick={handleResetSystem}
-                  className={`flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95`}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-bold shadow-sm transition-all active:scale-95"
                   title="Restore Factory Defaults"
                 >
                   <Database size={16} />
