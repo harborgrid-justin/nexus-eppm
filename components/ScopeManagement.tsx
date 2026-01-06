@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sliders } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -15,8 +14,8 @@ import WBSManager from './scope/WBSManager';
 import RequirementsTraceability from './scope/RequirementsTraceability';
 
 const ScopeManagement: React.FC = () => {
-  const { project } = useProjectWorkspace();
-  const projectId = project.id;
+  const workspace = useProjectWorkspace();
+  const project = workspace?.project;
   const theme = useTheme();
 
   const {
@@ -28,6 +27,19 @@ const ScopeManagement: React.FC = () => {
       handleViewChange
   } = useScopeManagementLogic();
 
+  // FIX: Professional grey fill placeholder instead of static text to maintain UI consistency during init.
+  if (!project) return (
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+        <PageHeader title="Scope Management" subtitle="Deliverable Hub" icon={Sliders} />
+        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
+            <Sliders size={48} className="mb-4 opacity-10" />
+            <p className="font-bold uppercase tracking-widest text-xs">Initializing Scope Context...</p>
+        </div>
+    </div>
+  );
+
+  const projectId = project.id;
+
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard': return <ScopeDashboard />;
@@ -37,8 +49,6 @@ const ScopeManagement: React.FC = () => {
       default: return <ScopeDashboard />;
     }
   };
-
-  if (!project) return <div className={theme.layout.pagePadding}>Loading scope data...</div>;
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>

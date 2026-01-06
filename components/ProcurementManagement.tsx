@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -14,21 +10,28 @@ import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
 import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListCheck } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useData } from '../context/DataContext';
-import { formatCurrency } from '../utils/formatters';
 import { PageHeader } from './common/PageHeader';
-// FIX: Corrected import path to use the barrel file to resolve module ambiguity.
-import { MakeOrBuyAnalysisView } from './procurement/MakeOrBuyAnalysisView';
-import { SourceSelectionView } from './procurement/SourceSelectionView';
+import { EmptyGrid } from './common/EmptyGrid';
 
 const ProcurementManagement: React.FC = () => {
   const theme = useTheme();
   const { project } = useProjectWorkspace();
-  const projectId = project.id;
 
   const [activeGroup, setActiveGroup] = useState('overview');
   const [activeView, setActiveView] = useState('dashboard');
   const [isPending, startTransition] = useTransition();
+
+  if (!project) return (
+    <div className="p-8 h-full flex flex-col items-center justify-center">
+        <EmptyGrid 
+            title="Procurement Context Restricted"
+            description="Bridge this workspace to a procurement entity to manage supply chain logistics."
+            icon={ShoppingCart}
+        />
+    </div>
+  );
+
+  const projectId = project.id;
   
   const navStructure = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
@@ -75,8 +78,24 @@ const ProcurementManagement: React.FC = () => {
         case 'dashboard': return <ProcurementDashboard />;
         case 'vendors': return <VendorRegistry projectId={projectId} />;
         case 'contracts': return <ContractLifecycle projectId={projectId} />;
-        case 'makebuy': return <MakeOrBuyAnalysisView projectId={projectId} />;
-        case 'criteria': return <SourceSelectionView />;
+        case 'makebuy': return (
+            <EmptyGrid 
+                title="Make-or-Buy Analysis Undefined" 
+                description="Conduct strategic analysis to determine whether deliverables should be manufactured internally or outsourced."
+                icon={Scale}
+                actionLabel="Start Analysis"
+                onAdd={() => {}}
+            />
+        );
+        case 'criteria': return (
+            <EmptyGrid 
+                title="Source Selection Criteria" 
+                description="Define weighted technical and financial criteria for evaluating vendor solicitations."
+                icon={ListCheck}
+                actionLabel="Define Criteria"
+                onAdd={() => {}}
+            />
+        );
         case 'planning': return <ProcurementPlanning projectId={projectId} />;
         case 'sourcing': return <ProcurementSourcing projectId={projectId} />;
         case 'execution': return <ProcurementExecution />;
@@ -95,15 +114,15 @@ const ProcurementManagement: React.FC = () => {
 
        <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
           <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
-            <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border}`}>
+            <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border} overflow-x-auto scrollbar-hide flex whitespace-nowrap`}>
                 {navStructure.map(group => (
                     <button
                         key={group.id}
                         onClick={() => handleGroupChange(group.id)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
                             activeGroup === group.id
                             ? `${theme.colors.primary} text-white shadow-sm`
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                         }`}
                     >
                         {group.label}
@@ -115,7 +134,7 @@ const ProcurementManagement: React.FC = () => {
                 <button
                     key={item.id}
                     onClick={() => handleViewChange(item.id)}
-                    className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap ${
+                    className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
                     activeView === item.id
                         ? 'border-nexus-600 text-nexus-600'
                         : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
@@ -128,7 +147,7 @@ const ProcurementManagement: React.FC = () => {
             </nav>
           </div>
           <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-             <ErrorBoundary>
+             <ErrorBoundary name="Procurement Module">
                 {renderContent()}
              </ErrorBoundary>
           </div>

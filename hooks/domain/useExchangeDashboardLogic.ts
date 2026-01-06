@@ -1,8 +1,7 @@
-
-import { useState, useTransition, useDeferredValue } from 'react';
+import { useState, useTransition, useDeferredValue, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Server, Database, HardDrive, Cloud } from 'lucide-react';
-import { ServiceStatus } from '../../types';
+import { ServiceStatus } from '../../types/business';
 import { generateId } from '../../utils/formatters';
 
 export const useExchangeDashboardLogic = () => {
@@ -10,15 +9,16 @@ export const useExchangeDashboardLogic = () => {
     const [isPending, startTransition] = useTransition();
     const [metricRange, setMetricRange] = useState('24h');
     
-    // Retrieve centralized metrics
-    const throughputData = state.systemMonitoring.throughput || [];
+    // Pattern: Defensive memoization of state slices
+    const throughputData = useMemo(() => state.systemMonitoring.throughput || [], [state.systemMonitoring.throughput]);
     const deferredData = useDeferredValue(throughputData);
-    const services = state.systemMonitoring.services || [];
+    const services = useMemo(() => state.systemMonitoring.services || [], [state.systemMonitoring.services]);
 
     const getServiceIcon = (name: string) => {
-        if (name.includes('Database') || name.includes('DB')) return Database;
-        if (name.includes('Cloud') || name.includes('Bridge')) return Cloud;
-        if (name.includes('Storage') || name.includes('ETL')) return HardDrive;
+        const n = name.toLowerCase();
+        if (n.includes('database') || n.includes('db')) return Database;
+        if (n.includes('cloud') || n.includes('bridge')) return Cloud;
+        if (n.includes('storage') || n.includes('etl')) return HardDrive;
         return Server;
     };
 
@@ -31,7 +31,7 @@ export const useExchangeDashboardLogic = () => {
     const handleAddService = () => {
         const newService: ServiceStatus = {
             id: generateId('SVC'),
-            name: `New Service Node ${services.length + 1}`,
+            name: `Service Node ${services.length + 1}`,
             status: 'Operational',
             uptime: '100%',
             latency: '15ms'

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Menu, Search, Sparkles, History } from 'lucide-react';
 import { GlobalBreadcrumbs } from '../common/GlobalBreadcrumbs';
@@ -30,6 +29,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             }
         };
         window.addEventListener('keydown', handleKeyDown);
+        // CRITICAL: Memory leak prevention
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [onNavigate]);
 

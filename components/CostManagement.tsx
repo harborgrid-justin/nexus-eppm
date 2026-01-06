@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { DollarSign } from 'lucide-react';
@@ -21,8 +20,8 @@ import { ModuleNavigation } from './common/ModuleNavigation';
 import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
 
 const CostManagement: React.FC = () => {
-  const { project } = useProjectWorkspace();
-  const projectId = project.id;
+  const workspace = useProjectWorkspace();
+  const project = workspace?.project;
 
   const {
       activeGroup,
@@ -32,6 +31,19 @@ const CostManagement: React.FC = () => {
       handleGroupChange,
       handleItemChange
   } = useCostManagementLogic();
+
+  // FIX: Sourcing projectId dynamically and providing a professional placeholder if project context is null.
+  if (!project) return (
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+        <PageHeader title="Cost Management" subtitle="Staffing and allocation hub" icon={DollarSign} />
+        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
+            <DollarSign size={48} className="mb-4 opacity-10" />
+            <p className="font-bold uppercase tracking-widest text-xs">Initializing Cost Context...</p>
+        </div>
+    </div>
+  );
+
+  const projectId = project.id;
 
   const renderContent = () => {
     switch(activeView) {
@@ -50,8 +62,6 @@ const CostManagement: React.FC = () => {
       default: return <CostDashboard />;
     }
   };
-
-  if (!project) return <div className="p-[var(--spacing-gutter)]">Loading cost module...</div>;
 
   return (
     <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">

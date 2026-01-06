@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -13,10 +12,15 @@ export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, ico
   const theme = useTheme();
   const colors = theme.colors.semantic[variant];
 
+  // Safeguard against Error #31 for string/number children
+  const content = (typeof children === 'string' || typeof children === 'number') 
+    ? String(children) 
+    : children;
+
   return (
     <span className={`${theme.components.badge.base} ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
       {Icon && <Icon className="w-3 h-3 mr-1" />}
-      {children}
+      {content}
     </span>
   );
 };

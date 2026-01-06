@@ -1,26 +1,36 @@
-
 import { useState, useMemo, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
-import { ResourceRequest } from '../../types';
+import { useAuth } from '../../context/AuthContext';
+import { ResourceRequest } from '../../types/resource';
+import { generateId } from '../../utils/formatters';
 
 export const useResourceNegotiationLogic = () => {
     const { state, dispatch } = useData();
+    const { user } = useAuth();
     const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<'manager' | 'requester'>('manager');
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    // Use live requests from state instead of mocks
-    const requests = useMemo(() => state.resourceRequests, [state.resourceRequests]);
+    // Derived State from Global Store
+    const requests = useMemo(() => state.resourceRequests || [], [state.resourceRequests]);
     
-    const selectedReq = useMemo(() => requests.find(r => r.id === selectedReqId), [requests, selectedReqId]);
+    const filteredRequests = useMemo(() => {
+        if (viewMode === 'requester') {
+            return requests.filter(r => r.requesterName === user?.name);
+        }
+        return requests;
+    }, [requests, viewMode, user?.name]);
 
-    // Dynamic Impact Calculation
+    const selectedReq = useMemo(() => 
+        requests.find(r => r.id === selectedReqId), 
+    [requests, selectedReqId]);
+
+    // Predictive Impact Engine
     const impactData = useMemo(() => {
         if (!selectedReq) return null;
         
-        // Use Global Settings for Monthly Hours
-        const standardHours = (state.governance.resourceDefaults.defaultWorkHoursPerDay || 8) * 20; // Avg 20 days/month
+        const standardHours = (state.governance.resourceDefaults.defaultWorkHoursPerDay || 8) * 20;
         
-        // Calculate Utilization impact
         const totalRoleCapacity = state.resources
             .filter(r => r.role === selectedReq.role && r.status === 'Active')
             .reduce((sum, r) => sum + (r.capacity || standardHours), 0);
@@ -29,7 +39,6 @@ export const useResourceNegotiationLogic = () => {
             .filter(r => r.role === selectedReq.role && r.status === 'Active')
             .reduce((sum, r) => sum + (r.allocated || 0), 0);
             
-        // Calculate request load (monthly basis assumption for simplicity in this view)
         const requestLoad = selectedReq.quantity * standardHours;
 
         const currentUtilization = totalRoleCapacity > 0 ? (currentRoleLoad / totalRoleCapacity) * 100 : 0;
@@ -51,14 +60,38 @@ export const useResourceNegotiationLogic = () => {
         });
     }, [selectedReq, dispatch]);
 
+    const handleCreateRequest = useCallback((data: Partial<ResourceRequest>) => {
+        if (!data.projectId || !data.role) return;
+        
+        const targetProject = state.projects.find(p => p.id === data.projectId);
+        
+        const newRequest: ResourceRequest = {
+            id: generateId('REQ'),
+            projectId: data.projectId,
+            projectName: targetProject?.name || 'External Site',
+            requesterName: user?.name || 'Justin Saadein',
+            role: data.role,
+            quantity: Number(data.quantity) || 1,
+            startDate: data.startDate || new Date().toISOString().split('T')[0],
+            endDate: data.endDate || new Date(Date.now() + 2592000000).toISOString().split('T')[0], // +30 days
+            status: 'Pending',
+            notes: data.notes
+        };
+        dispatch({ type: 'RESOURCE_REQUEST_ADD', payload: newRequest });
+        setIsCreateModalOpen(false);
+    }, [dispatch, user, state.projects]);
+
     return {
-        requests,
+        requests: filteredRequests,
         selectedReqId,
         setSelectedReqId,
         viewMode,
         setViewMode,
         selectedReq,
         impactData,
-        handleUpdateStatus
+        isCreateModalOpen,
+        setIsCreateModalOpen,
+        handleUpdateStatus,
+        handleCreateRequest
     };
 };

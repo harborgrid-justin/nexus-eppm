@@ -1,0 +1,32 @@
+:root {
+  --nexus-grid-bg: #f1f5f9;
+  --nexus-empty-fill: #f8fafc;
+}
+
+.nexus-empty-pattern {
+  background-color: var(--nexus-empty-fill);
+  background-image: radial-gradient(#e2e8f0 0.8px, transparent 0.8px);
+  background-size: 24px 24px;
+}
+
+.nexus-table-row:hover {
+  background-color: rgba(59, 130, 246, 0.02);
+}
+
+.nexus-focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+@keyframes nexus-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-nexus-in {
+  animation: nexus-fade-in 0.3s ease-out forwards;
+}
+
+.nexus-input-base {
+  @apply bg-white border-slate-200 rounded-lg text-sm transition-all focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none;
+}

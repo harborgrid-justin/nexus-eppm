@@ -1,19 +1,17 @@
-
-
-
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { AlertTriangle, ShieldCheck, TrendingDown, List } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { CustomBarChart } from '../charts/CustomBarChart';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const RiskDashboard: React.FC = () => {
   const { risks } = useProjectWorkspace();
   const theme = useTheme();
 
   const { categoryData, avgRiskScore, openRisksCount, mitigatedCount } = useMemo(() => {
-    if (!risks) return { categoryData: [], avgRiskScore: "N/A", openRisksCount: 0, mitigatedCount: 0 };
+    if (!risks || risks.length === 0) return { categoryData: [], avgRiskScore: "0.0", openRisksCount: 0, mitigatedCount: 0 };
 
     const riskCategories = Array.from(new Set(risks.map(r => r.category)));
     const data = riskCategories.map(cat => ({
@@ -21,7 +19,7 @@ const RiskDashboard: React.FC = () => {
         count: risks.filter(r => r.category === cat).length
     }));
 
-    const avg = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "N/A";
+    const avg = risks.length > 0 ? (risks.reduce((acc, r) => acc + r.score, 0) / risks.length).toFixed(1) : "0.0";
     const open = risks.filter(r => r.status === 'Open').length;
     const mitigated = risks.filter(r => r.status !== 'Open').length;
 
@@ -32,6 +30,20 @@ const RiskDashboard: React.FC = () => {
       if (!risks) return [];
       return [...risks].sort((a,b) => b.score - a.score).slice(0, 5);
   }, [risks]);
+
+  if (!risks || risks.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-8 bg-slate-50">
+              <EmptyGrid 
+                title="Risk Register Isolated"
+                description="Identify and register project threats to enable qualitative and quantitative analysis."
+                icon={AlertTriangle}
+                actionLabel="Identify Risk"
+                onAdd={() => {}}
+              />
+          </div>
+      );
+  }
 
   const getScoreColorClass = (score: number) => {
     if (score >= 15) return theme.colors.semantic.danger.bg; 
@@ -45,12 +57,8 @@ const RiskDashboard: React.FC = () => {
     return theme.colors.semantic.success.text;
   }
 
-  if (!risks) {
-    return <div className={theme.layout.pagePadding}>Loading risk data...</div>;
-  }
-
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-nexus-in`}>
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Total Risks" value={risks.length} icon={List} />
             <StatCard title="Open Risks" value={openRisksCount} icon={AlertTriangle} trend="down" />

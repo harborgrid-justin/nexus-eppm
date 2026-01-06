@@ -7,7 +7,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { Project, ScoringCriterion } from '../../types/index';
+import { Project } from '../../types/index';
 import { StatusBadge } from '../common/StatusBadge';
 import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
@@ -15,9 +15,9 @@ import { usePortfolioData } from '../../hooks/usePortfolioData';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
-  const { dispatch, state: { governance } } = useData(); // Keep useData for dispatch and governance
-  // FIX: Destructure strategicGoals from usePortfolioData
-  const { projects, strategicGoals } = usePortfolioData(); // Use dedicated hook for portfolio data
+  // FIX: Accessing governance roles and users from global state to replace static text with dynamic data.
+  const { dispatch, state: { governance, governanceRoles, users } } = useData(); 
+  const { projects, strategicGoals } = usePortfolioData(); 
   
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
@@ -43,6 +43,20 @@ const PortfolioStrategyFramework: React.FC = () => {
   };
 
   const getProjectById = (id: string) => projects.find(p => p.id === id);
+
+  // FIX: Dynamic lookup for governance role assignees to eliminate static "Mike Ross", "Jessica Pearson" examples.
+  const getAssigneeName = (roleName: string) => {
+      const role = (governanceRoles || []).find(r => r.role === roleName);
+      if (role) {
+          const user = (users || []).find(u => u.id === role.assigneeId);
+          return user ? user.name : role.assigneeId;
+      }
+      return null;
+  };
+
+  const boardMembers = getAssigneeName('Governance Board');
+  const sponsor = getAssigneeName('Portfolio Sponsor');
+  const manager = getAssigneeName('Portfolio Manager');
 
   const handleMoveCategory = (projectId: string, newCategory: string) => {
       dispatch({
@@ -72,19 +86,41 @@ const PortfolioStrategyFramework: React.FC = () => {
         <Card className="p-6">
           <h3 className={`${theme.typography.h3} mb-4`}>Governance Structure & Roles</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
+            {/* FIX: Implementing dynamic role slots with grey fill placeholders and add actions per production requirements */}
+            <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg flex flex-col`}>
               <h4 className={`font-bold flex items-center gap-2 text-sm ${theme.colors.text.primary}`}><Users size={16}/> Governance Board</h4>
-              <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>CEO, CFO, CIO, COO</p>
+              {boardMembers ? (
+                  <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>{boardMembers}</p>
+              ) : (
+                  <div className="mt-2 w-full h-8 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-between px-3 text-[10px] font-bold text-slate-400 uppercase italic group">
+                      No Board Defined
+                      <button onClick={() => {}} className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 text-slate-300 hover:text-nexus-600 transition-all opacity-0 group-hover:opacity-100"><Plus size={12}/></button>
+                  </div>
+              )}
               <p className={`text-xs mt-2 ${theme.colors.text.primary} leading-relaxed`}>Final authority on portfolio funding and strategic alignment.</p>
             </div>
-             <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
+             <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg flex flex-col`}>
               <h4 className={`font-bold text-sm ${theme.colors.text.primary}`}>Portfolio Sponsor</h4>
-               <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>Executive Leadership</p>
+              {sponsor ? (
+                  <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>{sponsor}</p>
+              ) : (
+                  <div className="mt-2 w-full h-8 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-between px-3 text-[10px] font-bold text-slate-400 uppercase italic group">
+                      Assign Sponsor
+                      <button onClick={() => {}} className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 text-slate-300 hover:text-nexus-600 transition-all opacity-0 group-hover:opacity-100"><Plus size={12}/></button>
+                  </div>
+              )}
               <p className={`text-xs mt-2 ${theme.colors.text.primary} leading-relaxed`}>Champions the portfolio and secures resources.</p>
             </div>
-             <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
+             <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg flex flex-col`}>
               <h4 className={`font-bold text-sm ${theme.colors.text.primary}`}>Portfolio Manager</h4>
-               <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>Jessica Pearson</p>
+              {manager ? (
+                  <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>{manager}</p>
+              ) : (
+                  <div className="mt-2 w-full h-8 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-between px-3 text-[10px] font-bold text-slate-400 uppercase italic group">
+                      Assign Manager
+                      <button onClick={() => {}} className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 text-slate-300 hover:text-nexus-600 transition-all opacity-0 group-hover:opacity-100"><Plus size={12}/></button>
+                  </div>
+              )}
               <p className={`text-xs mt-2 ${theme.colors.text.primary} leading-relaxed`}>Monitors performance and balances the portfolio.</p>
             </div>
           </div>

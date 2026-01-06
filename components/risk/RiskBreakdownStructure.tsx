@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import RBSNode from './RBSNode';
 import { detectCircularDependency } from '../../utils/treeUtils';
@@ -16,13 +15,21 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const theme = useTheme();
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    };
+  }, []);
   
   const handleDrop = (newParentId: string | null) => {
     if (!draggedNodeId) return;
 
     if (detectCircularDependency(rbs, draggedNodeId, newParentId)) {
         setError(`Cannot move node. Circular dependency detected.`);
-        setTimeout(() => setError(null), 3000);
+        if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = setTimeout(() => setError(null), 3000);
         setDraggedNodeId(null);
         return;
     }
@@ -38,7 +45,7 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
   return (
     <div className="h-full flex flex-col relative">
         {error && (
-            <div className="absolute top-2 right-2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded z-50 shadow-md">
+            <div className="absolute top-2 right-2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded z-50 shadow-md animate-in fade-in slide-in-from-top-2">
                 {error}
             </div>
         )}
@@ -48,7 +55,7 @@ const RiskBreakdownStructure: React.FC<RiskBreakdownStructureProps> = ({ project
         <div 
           className="flex-1 overflow-auto p-4"
           onDragOver={e => e.preventDefault()}
-          onDrop={() => handleDrop(null)} // Drop on root
+          onDrop={() => handleDrop(null)} 
         >
             {rbs.map(node => 
               <RBSNode 

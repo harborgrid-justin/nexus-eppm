@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { useDocumentControlLogic } from '../hooks/domain/useDocumentControlLogic';
@@ -7,9 +6,11 @@ import { useData } from '../context/DataContext';
 import { generateId, formatFileSize } from '../utils/formatters';
 import { Document } from '../types/index';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useAuth } from '../context/AuthContext';
 
 const DocumentControl: React.FC = () => {
-  const { dispatch } = useData();
+  const { state, dispatch } = useData();
+  const { user } = useAuth();
   const { project } = useProjectWorkspace(); // Get active project context
   
   const {
@@ -43,7 +44,8 @@ const DocumentControl: React.FC = () => {
               type: docType,
               size: formatFileSize(file.size),
               version: '1.0',
-              uploadedBy: 'Current User', // In real app, use auth context
+              // FIX: source uploader from auth context
+              uploadedBy: user?.name || 'System User', 
               status: 'Draft',
               url: '#'
           };
@@ -55,6 +57,25 @@ const DocumentControl: React.FC = () => {
   const triggerUpload = () => {
       fileInputRef.current?.click();
   };
+
+  // FIX: Dynamic storage calculation from global state replacing static 65% mock
+  const storageMetrics = useMemo(() => {
+    const totalLimitGB = state.governance.billing.storageLimitGB || 10;
+    const totalBytes = state.documents.reduce((acc, d) => {
+        const match = d.size.match(/(\d+(\.\d+)?)\s*(MB|KB|GB|B)/);
+        if (!match) return acc;
+        const num = parseFloat(match[1]);
+        const unit = match[3];
+        let bytes = num;
+        if (unit === 'KB') bytes *= 1024;
+        else if (unit === 'MB') bytes *= 1024 * 1024;
+        else if (unit === 'GB') bytes *= 1024 * 1024 * 1024;
+        return acc + bytes;
+    }, 0);
+    const usedGB = totalBytes / (1024 * 1024 * 1024);
+    const percent = Math.min(100, Math.round((usedGB / totalLimitGB) * 100));
+    return { percent, usedGB, limit: totalLimitGB };
+  }, [state.documents, state.governance.billing.storageLimitGB]);
 
   return (
     <div className="p-[var(--spacing-gutter)] flex flex-col h-full">
@@ -106,12 +127,12 @@ const DocumentControl: React.FC = () => {
                     <Filter size={14} /> Filter
                  </button>
              </div>
-             <div className="flex items-center gap-2 text-sm text-slate-500 w-full md:w-auto justify-end">
+             <div className="flex items-center gap-2 text-sm text-slate-500 w-full md:w-auto justify-end" title={`${storageMetrics.usedGB.toFixed(2)} GB of ${storageMetrics.limit} GB`}>
                 <span>Storage Used: </span>
                 <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
-                   <div className="h-full bg-nexus-500 w-[65%]"></div>
+                   <div className="h-full bg-nexus-500 transition-all duration-500" style={{ width: `${storageMetrics.percent}%` }}></div>
                 </div>
-                <span className="font-medium text-slate-700">65%</span>
+                <span className="font-medium text-slate-700">{storageMetrics.percent}%</span>
              </div>
           </div>
 

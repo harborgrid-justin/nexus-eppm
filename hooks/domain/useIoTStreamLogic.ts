@@ -1,21 +1,39 @@
-
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
+import { Resource } from '../../types';
+
+interface StreamPoint {
+    i: number;
+    val: number;
+}
 
 export const useIoTStreamLogic = () => {
     const { state } = useData();
+    const [chartData, setChartData] = useState<StreamPoint[]>([]);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Map global monitoring throughput data to chart format
-    // This allows the chart to reflect the global state which might be updated by system events or other logic
-    const chartData = useMemo(() => {
+    // Initial Data Load
+    useEffect(() => {
         const throughput = state.systemMonitoring?.throughput || [];
-        return throughput.map((d: any, i: number) => ({
-            i,
-            val: d.records || 0
-        }));
-    }, [state.systemMonitoring]);
+        setChartData(throughput.map((d, i) => ({ i, val: d.records || 0 })));
 
-    // Use actual equipment resources as sensors to reflect real asset state
+        // Live Simulation to mimic real hardware telemetry
+        intervalRef.current = setInterval(() => {
+            setChartData(prev => {
+                const nextI = prev.length > 0 ? prev[prev.length - 1].i + 1 : 0;
+                const nextVal = Math.floor(Math.random() * 40) + 30;
+                const nextData = [...prev.slice(-29), { i: nextI, val: nextVal }];
+                return nextData;
+            });
+        }, 2000);
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [state.systemMonitoring?.throughput]);
+
     const sensors = useMemo(() => {
         return state.resources
             .filter(r => r.type === 'Equipment')
@@ -23,12 +41,11 @@ export const useIoTStreamLogic = () => {
             .map(r => ({
                 id: r.id,
                 name: r.name,
-                location: r.location,
-                maintenanceStatus: r.maintenanceStatus
+                location: r.location || 'Site Unset',
+                maintenanceStatus: r.maintenanceStatus || 'Unknown'
             }));
     }, [state.resources]);
 
-    // Filter for Supply Chain or Risk alerts from the global alert stream
     const alerts = useMemo(() => {
         return state.governance.alerts
             .filter(a => a.category === 'Supply Chain' || a.category === 'Risk')

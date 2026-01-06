@@ -1,152 +1,19 @@
-
-
-// Action Types
+import { DataState, StagingRecord } from './state';
 import { Project } from './project';
-import { 
-    Program, Benefit, PortfolioScenario, StrategicDriver, StrategicGoal, 
-    GovernanceDecision, ESGMetric, ProgramObjective, ProgramOutcome, 
-    ProgramDependency, ProgramChangeRequest, ProgramRisk, ProgramIssue, 
-    ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, 
-    ProgramFundingGate, ProgramStageGate, ProgramTransitionItem, 
-    IntegratedChangeRequest, GovernanceRole, GovernanceEvent, 
-    ProgramQualityStandard, ProgramAssuranceReview, ProgramArchitectureStandard, 
-    ProgramArchitectureReview, TradeoffScenario 
-} from './program';
-import { Resource, ResourceRequest, Timesheet, EnterpriseRole, EnterpriseSkill } from './resource';
-import { Risk, Issue, RiskBreakdownStructureNode, IssueCode, PortfolioRisk } from './risk';
-import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
+import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal } from './program';
+import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
+import { Risk, Issue, IssueCode } from './risk';
+import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
 import { QualityReport, NonConformanceReport } from './quality';
-import { CommunicationLog, Stakeholder } from './project_subtypes';
-import { Document, ActivityCode, UserDefinedField, Integration, Extension, StandardTemplate, DataJob, WorkflowDefinition, EtlMapping, QualityStandard, GlobalChangeRule } from './common';
+import { Document, ActivityCode, UserDefinedField, Integration, Extension, DataJob, WorkflowDefinition, QualityStandard, GlobalChangeRule } from './common';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
-import { User } from './auth';
-import { GovernanceState, ServiceStatus, SystemMetric, PipelineStage, KnowledgeArticle } from './business';
-import { Contract, Solicitation, ProcurementPlan, ProcurementPackage, SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis, Vendor, PurchaseOrder, MaterialReceipt } from './procurement';
-import { UnifierState } from './unifier';
-import { ExtensionDataState } from './extensions';
+import { ServiceStatus, PipelineStage } from './business';
+import { Contract, Solicitation, ProcurementPlan, MaterialReceipt } from './procurement';
 import { DailyLogEntry, SafetyIncident, PunchItem } from './field';
-import { RoadmapLane, RoadmapItem } from './strategy';
 import { KanbanTask, TeamEvent, ActivityItem } from './collaboration';
 
-
-export interface StagingRecord {
-  id: string;
-  data: any;
-  status: 'Valid' | 'Error';
-  errors: string[];
-  selected: boolean;
-}
-
-export interface DataState {
-  projects: Project[];
-  programs: Program[];
-  resources: Resource[];
-  resourceRequests: ResourceRequest[];
-  risks: Risk[];
-  issues: Issue[];
-  budgetItems: BudgetLineItem[];
-  expenses: Expense[];
-  changeOrders: ChangeOrder[];
-  purchaseOrders: PurchaseOrder[];
-  qualityReports: QualityReport[];
-  nonConformanceReports: NonConformanceReport[];
-  communicationLogs: CommunicationLog[];
-  stakeholders: Stakeholder[];
-  documents: Document[];
-  activityCodes: ActivityCode[];
-  userDefinedFields: UserDefinedField[];
-  fundingSources: FundingSource[];
-  calendars: GlobalCalendar[];
-  users: User[];
-  roles: EnterpriseRole[];
-  eps: EPSNode[];
-  obs: OBSNode[];
-  locations: Location[];
-  workflows: WorkflowDefinition[];
-  dataJobs: DataJob[];
-  integrations: Integration[];
-  extensions: Extension[];
-  expenseCategories: ExpenseCategory[];
-  issueCodes: IssueCode[];
-  costBook: CostBookItem[];
-  standardTemplates: StandardTemplate[];
-  governance: GovernanceState;
-  strategicGoals: StrategicGoal[];
-  strategicDrivers: StrategicDriver[];
-  portfolioScenarios: PortfolioScenario[];
-  governanceDecisions: GovernanceDecision[];
-  esgMetrics: ESGMetric[];
-  portfolioRisks: PortfolioRisk[];
-  programObjectives: ProgramObjective[];
-  programOutcomes: ProgramOutcome[];
-  programDependencies: ProgramDependency[];
-  programChangeRequests: ProgramChangeRequest[];
-  programRisks: ProgramRisk[];
-  programIssues: ProgramIssue[];
-  programStakeholders: ProgramStakeholder[];
-  programCommunicationPlan: ProgramCommunicationItem[];
-  programAllocations: ProgramBudgetAllocation[];
-  programFundingGates: ProgramFundingGate[];
-  programStageGates: ProgramStageGate[];
-  programTransitionItems: ProgramTransitionItem[];
-  integratedChanges: IntegratedChangeRequest[];
-  governanceRoles: GovernanceRole[];
-  governanceEvents: GovernanceEvent[];
-  programQualityStandards: ProgramQualityStandard[];
-  programAssuranceReviews: ProgramAssuranceReview[];
-  programArchitectureStandards: ProgramArchitectureStandard[];
-  programArchitectureReviews: ProgramArchitectureReview[];
-  tradeoffScenarios: TradeoffScenario[];
-  contracts: Contract[];
-  solicitations: Solicitation[];
-  procurementPlans: ProcurementPlan[];
-  procurementPackages: ProcurementPackage[];
-  supplierReviews: SupplierPerformanceReview[];
-  claims: ProcurementClaim[];
-  makeOrBuyAnalysis: MakeOrBuyAnalysis[];
-  globalChangeRules: GlobalChangeRule[];
-  invoices: Invoice[];
-  timesheets: Timesheet[];
-  skills: EnterpriseSkill[];
-  benefits: Benefit[];
-  rbs: RiskBreakdownStructureNode[];
-  vendors: Vendor[];
-  qualityStandards: QualityStandard[];
-  unifier: UnifierState;
-  dailyLogs: DailyLogEntry[];
-  safetyIncidents: SafetyIncident[];
-  punchList: PunchItem[];
-  roadmapLanes: RoadmapLane[];
-  roadmapItems: RoadmapItem[];
-  kanbanTasks: KanbanTask[];
-  portfolioCommunicationPlan: ProgramCommunicationItem[];
-  materialReceipts: MaterialReceipt[];
-  activities: ActivityItem[];
-  teamEvents: TeamEvent[];
-  pipelineStages: PipelineStage[];
-  knowledgeBase: KnowledgeArticle[];
-  etlMappings: EtlMapping[];
-  costReports: CostReport[];
-  costMeetings: any[]; // Define CostMeeting type if needed
-  costAlerts: any[]; // Define CostAlert type if needed
-  systemMonitoring: {
-    metrics: SystemMetric[];
-    services: ServiceStatus[];
-    throughput: { time: string; records: number }[];
-  };
-  staging: {
-    activeImportId: string | null;
-    entityType: string;
-    records: StagingRecord[];
-    isProcessing: boolean;
-    summary: { total: number; valid: number; error: number };
-  };
-  extensionData: ExtensionDataState;
-}
-
 export type Action =
-    // Project
     | { type: 'PROJECT_IMPORT'; payload: any[] }
     | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: any } }
     | { type: 'TASK_UPDATE'; payload: { projectId: string; task: any } }
@@ -164,9 +31,6 @@ export type Action =
     | { type: 'WBS_REPARENT'; payload: { projectId: string; nodeId: string; newParentId: string | null } }
     | { type: 'WBS_UPDATE_SHAPE'; payload: { projectId: string; nodeId: string; shape: any } }
     | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' }
-
-
-    // Program
     | { type: 'ADD_PROGRAM'; payload: any }
     | { type: 'UPDATE_PROGRAM'; payload: any }
     | { type: 'PROGRAM_ADD_STAKEHOLDER'; payload: any }
@@ -185,8 +49,6 @@ export type Action =
     | { type: 'PROGRAM_ADD_ISSUE'; payload: any }
     | { type: 'PROGRAM_UPDATE_ISSUE'; payload: any }
     | { type: 'PROGRAM_DELETE_ISSUE'; payload: string }
-
-    // Admin & System
     | { type: 'ADMIN_ADD_LOCATION'; payload: any }
     | { type: 'ADMIN_UPDATE_LOCATION'; payload: any }
     | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
@@ -227,8 +89,6 @@ export type Action =
     | { type: 'ADMIN_DELETE_WORKFLOW'; payload: string }
     | { type: 'ADMIN_ADD_ROLE'; payload: any }
     | { type: 'ADMIN_UPDATE_ROLE'; payload: any }
-    
-    // System Ops
     | { type: 'SYSTEM_QUEUE_DATA_JOB'; payload: any }
     | { type: 'SYSTEM_UPDATE_DATA_JOB'; payload: any }
     | { type: 'SYSTEM_TOGGLE_INTEGRATION'; payload: string }
@@ -251,11 +111,7 @@ export type Action =
     | { type: 'GOVERNANCE_SYNC_PARAMETERS', payload: any }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any } 
     | { type: 'RESET_SYSTEM' }
-
-    // Unifier
     | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any; action: string; user: any } }
-
-    // Procurement
     | { type: 'ADD_VENDOR'; payload: any }
     | { type: 'UPDATE_VENDOR'; payload: any }
     | { type: 'DELETE_VENDOR'; payload: string }
@@ -268,20 +124,14 @@ export type Action =
     | { type: 'ADD_MATERIAL_RECEIPT'; payload: any }
     | { type: 'ADD_PROCUREMENT_PLAN'; payload: any }
     | { type: 'UPDATE_PROCUREMENT_PLAN'; payload: any }
-
-    // Quality
     | { type: 'ADD_QUALITY_REPORT'; payload: any }
     | { type: 'UPDATE_QUALITY_REPORT'; payload: any }
     | { type: 'ADD_NCR'; payload: any }
     | { type: 'UPDATE_NCR'; payload: any }
     | { type: 'ADD_QUALITY_STANDARD'; payload: any }
-
-    // Documents
     | { type: 'UPLOAD_DOCUMENT'; payload: any }
     | { type: 'DELETE_DOCUMENT'; payload: string }
     | { type: 'VERSION_DOCUMENT'; payload: { documentId: string; version: string } }
-
-    // Risk
     | { type: 'ADD_RISK'; payload: any }
     | { type: 'UPDATE_RISK'; payload: { risk: any } }
     | { type: 'DELETE_RISK'; payload: string }
@@ -290,8 +140,6 @@ export type Action =
     | { type: 'DELETE_ISSUE'; payload: string }
     | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: any } }
     | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
-
-    // Financial
     | { type: 'ADD_BUDGET_ITEM'; payload: any }
     | { type: 'UPDATE_BUDGET_ITEM'; payload: any }
     | { type: 'DELETE_BUDGET_ITEM'; payload: string }
@@ -304,16 +152,12 @@ export type Action =
     | { type: 'UPDATE_CHANGE_ORDER'; payload: any }
     | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
     | { type: 'TRANSFER_BUDGET'; payload: any }
-
-    // Field
     | { type: 'FIELD_ADD_LOG'; payload: any }
     | { type: 'FIELD_UPDATE_LOG'; payload: any }
     | { type: 'FIELD_ADD_INCIDENT'; payload: any }
     | { type: 'FIELD_UPDATE_INCIDENT'; payload: any }
     | { type: 'FIELD_ADD_PUNCH_ITEM'; payload: any }
     | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: any }
-
-    // Strategy
     | { type: 'ROADMAP_UPDATE_ITEM'; payload: any }
     | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string; status: string } }
     | { type: 'KANBAN_ADD_TASK'; payload: any }
@@ -327,14 +171,10 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: any }
     | { type: 'UPDATE_USER'; payload: any }
     | { type: 'SUBMIT_TIMESHEET'; payload: any }
-
-    // Extension
     | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: any }
     | { type: 'EXTENSION_UPDATE_CONSTRUCTION'; payload: any }
     | { type: 'EXTENSION_UPDATE_GOVERNMENT'; payload: any }
     | { type: 'UPDATE_PIPELINE_STAGE'; payload: any }
-
-    // Staging
     | { type: 'STAGING_INIT'; payload: { type: string; data: any[] } }
     | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string; data: any } }
     | { type: 'STAGING_COMMIT_SELECTED'; payload: string[] }

@@ -1,243 +1,34 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { 
-  ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Area 
-} from 'recharts';
-import { Users, AlertTriangle, LayoutGrid, BarChart2, Filter } from 'lucide-react';
-import { ProgressBar } from '../common/ProgressBar';
-import { formatCompactCurrency } from '../../utils/formatters';
+import { LayoutGrid, BarChart2 } from 'lucide-react';
 import { usePortfolioCapacityLogic } from '../../hooks/domain/usePortfolioCapacityLogic';
+import { CapacityHeatmap } from './capacity/CapacityHeatmap';
 
 const PortfolioCapacity: React.FC = () => {
     const theme = useTheme();
     const { 
-        isPending, viewHorizon, viewMode, roleFilter,
-        monthBuckets, chartData, resourceMatrix, roleAggregates, conflicts,
-        displayResources, roles,
-        changeHorizon, changeViewMode, changeRoleFilter
+        isPending, viewMode, monthBuckets, resourceMatrix, 
+        displayResources, changeViewMode 
     } = usePortfolioCapacityLogic();
 
-    // --- Helper for Heatmap Colors ---
-    const getCellColor = (demand: number, capacity: number) => {
-        const util = capacity > 0 ? (demand / capacity) * 100 : 0;
-        if (util === 0) return 'bg-slate-50 text-slate-300';
-        if (util < 80) return 'bg-green-50 text-green-700';
-        if (util <= 100) return 'bg-blue-50 text-blue-700';
-        if (util <= 115) return 'bg-yellow-100 text-yellow-800';
-        return 'bg-red-100 text-red-700 font-bold';
-    };
-
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
-             {/* Progress indicator for calculation */}
-             {isPending && (
-                <div className="absolute top-0 left-0 w-full h-1 bg-nexus-100 z-50">
-                    <div className="h-full bg-nexus-500 animate-progress origin-left"></div>
+        <div className={`h-full flex flex-col ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+            <div className="flex justify-between items-center">
+                <h2 className={theme.typography.h2}>Portfolio Capacity Matrix</h2>
+                <div className="bg-white border border-slate-200 rounded-lg p-1 flex text-xs font-medium shadow-sm">
+                    <button onClick={() => changeViewMode('chart')} className={`flex items-center gap-1 px-4 py-1.5 rounded transition-colors ${viewMode === 'chart' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600'}`}><BarChart2 size={14}/> Chart</button>
+                    <button onClick={() => changeViewMode('heatmap')} className={`flex items-center gap-1 px-4 py-1.5 rounded transition-colors ${viewMode === 'heatmap' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600'}`}><LayoutGrid size={14}/> Heatmap</button>
+                </div>
+            </div>
+
+            {viewMode === 'heatmap' ? (
+                <CapacityHeatmap resources={displayResources} monthBuckets={monthBuckets} matrix={resourceMatrix} />
+            ) : (
+                <div className="flex-1 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center text-slate-400">
+                    Portfolio Capacity Chart Visualization (Aggregated Demand)
                 </div>
             )}
-            
-            {/* Header Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 className={theme.typography.h2}>Resource Capacity Planning</h2>
-                    <p className={theme.typography.small}>Balance portfolio demand against enterprise resource constraints.</p>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 items-center">
-                     {/* View Horizon */}
-                     <div className="bg-white border border-slate-200 rounded-lg p-1 flex text-xs font-medium">
-                        {[3, 6, 12].map(m => (
-                             <button 
-                                key={m}
-                                onClick={() => changeHorizon(m)} 
-                                className={`px-3 py-1.5 rounded transition-colors ${viewHorizon === m ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
-                            >
-                                {m} Mo
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* View Mode */}
-                    <div className="bg-white border border-slate-200 rounded-lg p-1 flex text-xs font-medium">
-                        <button 
-                            onClick={() => changeViewMode('chart')} 
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded transition-colors ${viewMode === 'chart' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
-                        >
-                            <BarChart2 size={14}/> Chart
-                        </button>
-                        <button 
-                            onClick={() => changeViewMode('heatmap')} 
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded transition-colors ${viewMode === 'heatmap' ? 'bg-nexus-100 text-nexus-700 font-bold' : 'text-slate-600 hover:bg-slate-50'}`}
-                        >
-                            <LayoutGrid size={14}/> Heatmap
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap} h-[500px] transition-opacity duration-300 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
-                {/* Main Visualization Area (2/3) */}
-                <div className={`lg:col-span-2 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm flex flex-col overflow-hidden`}>
-                    
-                    {viewMode === 'chart' ? (
-                        <div className="flex-1 p-6 flex flex-col">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                    <Users size={18} className="text-nexus-600"/> Portfolio Demand vs. Capacity
-                                </h3>
-                                <div className="flex gap-4 text-xs text-slate-500">
-                                    <span className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-100 border border-blue-300"></div> Capacity</span>
-                                    <span className="flex items-center gap-1"><div className="w-3 h-3 bg-slate-500"></div> Demand</span>
-                                    <span className="flex items-center gap-1"><div className="w-3 h-1 bg-yellow-500"></div> Utilization %</span>
-                                </div>
-                            </div>
-                            <div className="flex-1 min-h-0">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="name" />
-                                        <YAxis yAxisId="left" label={{ value: 'Hours', angle: -90, position: 'insideLeft' }} />
-                                        <YAxis yAxisId="right" orientation="right" unit="%" domain={[0, 150]} />
-                                        <Tooltip 
-                                            labelStyle={{fontWeight:'bold'}}
-                                            contentStyle={{borderRadius:'8px', border:'1px solid #e2e8f0'}}
-                                        />
-                                        <Area yAxisId="left" type="monotone" dataKey="Capacity" fill="#e0f2fe" stroke="#38bdf8" fillOpacity={0.6} />
-                                        <Bar yAxisId="left" dataKey="Demand" fill="#64748b" barSize={32} radius={[4,4,0,0]} />
-                                        <Line yAxisId="right" type="monotone" dataKey="Utilization" stroke="#eab308" strokeWidth={3} dot={{r:4}} />
-                                    </ComposedChart>
-                                </ResponsiveContainer>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex-1 flex flex-col">
-                            <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                                <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                    <LayoutGrid size={18} className="text-nexus-600"/> Resource Utilization Heatmap
-                                </h3>
-                                <div className="flex items-center gap-2">
-                                    <Filter size={14} className="text-slate-400"/>
-                                    <select 
-                                        value={roleFilter} 
-                                        onChange={(e) => changeRoleFilter(e.target.value)}
-                                        className="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-nexus-500"
-                                    >
-                                        <option value="All">All Roles</option>
-                                        {roles.map(r => <option key={r} value={r}>{r}</option>)}
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="flex-1 overflow-auto">
-                                <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-                                    <thead className="bg-slate-50 sticky top-0 z-10">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 sticky left-0 z-20 w-48 shadow-[1px_0_0_0_#e2e8f0]">Resource</th>
-                                            {monthBuckets.map(m => (
-                                                <th key={m.key} className="px-2 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 min-w-[60px]">{m.label}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-slate-100">
-                                        {displayResources.map(r => (
-                                            <tr key={r.id}>
-                                                <td className="px-4 py-3 text-sm font-medium text-slate-700 bg-white border-r border-slate-100 sticky left-0 z-10 shadow-[1px_0_0_0_#f1f5f9]">
-                                                    <div className="truncate w-40" title={r.name}>{r.name}</div>
-                                                    <div className="text-xs text-slate-400 truncate w-40">{r.role}</div>
-                                                </td>
-                                                {monthBuckets.map(m => {
-                                                    const demand = resourceMatrix[r.id]?.[m.key] || 0;
-                                                    const capacity = r.capacity || 160;
-                                                    const util = Math.round((demand / capacity) * 100);
-                                                    return (
-                                                        <td key={m.key} className="p-1">
-                                                            <div 
-                                                                className={`w-full h-full min-h-[32px] rounded flex items-center justify-center text-xs ${getCellColor(demand, capacity)}`}
-                                                                title={`${Math.round(demand)}h / ${capacity}h (${util}%)`}
-                                                            >
-                                                                {util > 0 ? `${util}%` : '-'}
-                                                            </div>
-                                                        </td>
-                                                    );
-                                                })}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Sidebar: Role Breakdown & Conflicts (1/3) */}
-                <div className="flex flex-col gap-6 h-full overflow-hidden">
-                    {/* Role Utilization */}
-                    <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm flex-1 flex flex-col overflow-hidden`}>
-                        <h3 className="font-bold text-slate-800 mb-4 text-sm flex-shrink-0">Role Utilization (Avg)</h3>
-                        <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                            {roleAggregates.map(role => (
-                                <div key={role.role} className="space-y-1">
-                                    <div className="flex justify-between text-xs">
-                                        <span className="font-medium text-slate-700">{role.role}</span>
-                                        <span className={`font-bold ${role.utilization > 100 ? 'text-red-600' : role.utilization > 85 ? 'text-yellow-600' : 'text-green-600'}`}>
-                                            {Math.round(role.utilization)}%
-                                        </span>
-                                    </div>
-                                    <ProgressBar 
-                                        value={role.utilization} 
-                                        max={120} // Visual cap
-                                        thresholds
-                                        size="sm"
-                                    />
-                                    <div className="flex justify-between text-[10px] text-slate-400">
-                                        <span>Dem: {formatCompactCurrency(role.demand).replace('$','')}h</span>
-                                        <span>Cap: {formatCompactCurrency(role.capacity).replace('$','')}h</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Conflicts Alert */}
-                    <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex-shrink-0 max-h-[40%]`}>
-                        <div className="bg-red-50 px-4 py-3 border-b border-red-100 flex justify-between items-center">
-                            <h3 className="font-bold text-red-900 text-xs flex items-center gap-2">
-                                <AlertTriangle size={14}/> Over-Allocation Alerts
-                            </h3>
-                            <span className="bg-white text-red-700 text-[10px] px-2 py-0.5 rounded-full border border-red-200 font-bold">{conflicts.length}</span>
-                        </div>
-                        <div className="overflow-y-auto max-h-[150px]">
-                            {conflicts.length > 0 ? (
-                                <table className="min-w-full divide-y divide-slate-100">
-                                    <tbody className="bg-white">
-                                        {conflicts.map((c: any, idx: number) => (
-                                            <tr key={idx} className="group">
-                                                <td className="px-4 py-2">
-                                                    <div className="text-xs font-bold text-slate-800">{c.resource}</div>
-                                                    <div className="text-[10px] text-slate-500">{c.role}</div>
-                                                </td>
-                                                <td className="px-4 py-2 text-right">
-                                                    <div className="text-xs font-bold text-red-600">{c.utilization}%</div>
-                                                    <div className="text-[10px] text-red-400">{c.month}</div>
-                                                </td>
-                                                <td className="px-4 py-2 text-right">
-                                                    <button className="text-[10px] font-bold text-nexus-600 hover:text-nexus-800 opacity-0 group-hover:opacity-100 transition-opacity">Resolve</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            ) : (
-                                <div className="p-4 text-center text-xs text-slate-400 italic">
-                                    No critical conflicts detected in this horizon.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
-
 export default PortfolioCapacity;

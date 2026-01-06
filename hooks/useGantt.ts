@@ -1,8 +1,7 @@
-
-import React, { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react';
-import { Project, Task, TaskStatus, WorkDay, ProjectCalendar } from '../types/index';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { Project, Task, TaskStatus } from '../types/index';
 import { useData } from '../context/DataContext';
-import { Scheduler, ScheduleResult } from '../services/SchedulingEngine';
+import { Scheduler } from '../services/SchedulingEngine';
 import { useGanttTimeline, DAY_WIDTH as BASE_DAY_WIDTH } from './gantt/useGanttTimeline';
 import { useGanttDrag } from './gantt/useGanttDrag';
 
@@ -10,10 +9,6 @@ export const DAY_WIDTH = BASE_DAY_WIDTH;
 
 export const useGantt = (initialProject: Project | undefined) => {
   const { state, dispatch } = useData();
-  
-  // Guard: if initialProject is undefined, use a dummy or handle it. 
-  // However, state hooks must run. 
-  // We'll initialize state with undefined/null friendly values.
   
   const [project, setProject] = useState<Project | undefined>(initialProject);
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
@@ -26,12 +21,11 @@ export const useGantt = (initialProject: Project | undefined) => {
   // Scheduling State
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduleLog, setScheduleLog] = useState<string>('');
-  const [scheduleStats, setScheduleStats] = useState<ScheduleResult['stats'] | null>(null);
+  const [scheduleStats, setScheduleStats] = useState<any>(null);
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [dataDate, setDataDate] = useState(new Date(initialProject?.dataDate || Date.now()));
   const [taskFilter, setTaskFilter] = useState('all');
   
-  // Update local project if initialProject changes (e.g. loaded async)
   useEffect(() => {
     if (initialProject) {
         setProject(initialProject);
@@ -39,7 +33,7 @@ export const useGantt = (initialProject: Project | undefined) => {
             setActiveBaselineId(initialProject.baselines[0].id);
         }
     }
-  }, [initialProject]);
+  }, [initialProject, activeBaselineId]);
 
   const dayWidth = useMemo(() => {
     switch(viewMode) {
@@ -49,8 +43,13 @@ export const useGantt = (initialProject: Project | undefined) => {
     }
   }, [viewMode]);
 
-  // Safe timeline hooks
-  const safeProject = project || { tasks: [], startDate: new Date().toISOString(), endDate: new Date().toISOString() } as unknown as Project;
+  const safeProject = useMemo(() => project || { 
+      id: 'UNSET',
+      name: 'Uninitialized',
+      tasks: [], 
+      startDate: new Date().toISOString(), 
+      endDate: new Date().toISOString() 
+  } as unknown as Project, [project]);
 
   const {
       timelineHeaders,
@@ -61,6 +60,7 @@ export const useGantt = (initialProject: Project | undefined) => {
   const { ganttContainerRef, handleMouseDown } = useGanttDrag(dispatch, safeProject, dayWidth);
 
   const [expandedNodes, setExpandedNodes] = useState(new Set<string>(project?.wbs?.map(w => w.id) || []));
+  
   const toggleNode = (id: string) => {
     setExpandedNodes(prev => {
       const next = new Set(prev);
@@ -82,20 +82,21 @@ export const useGantt = (initialProject: Project | undefined) => {
   const runSchedule = useCallback(async () => {
     if(!project) return;
     setIsScheduling(true);
-    const result = await Scheduler.schedule(project, { dataDate, useRetainedLogic: true, honorConstraints: true });
-    setScheduleLog(result.log);
-    setScheduleStats(result.stats);
-    // Update tasks in state
-    if (result.success) {
-      dispatch({ type: 'PROJECT_UPDATE', payload: { projectId: project.id, updatedData: { tasks: result.tasks } }});
-      // Update local project state too
-      setProject(p => p ? ({...p, tasks: result.tasks}) : undefined);
+    try {
+        const result = await Scheduler.schedule(project, { dataDate, useRetainedLogic: true, honorConstraints: true });
+        setScheduleLog(result.log);
+        setScheduleStats(result.stats);
+        if (result.success) {
+          dispatch({ type: 'PROJECT_UPDATE', payload: { projectId: project.id, updatedData: { tasks: result.tasks } }});
+          setProject(p => p ? ({...p, tasks: result.tasks}) : undefined);
+        }
+    } finally {
+        setIsScheduling(false);
     }
-    setIsScheduling(false);
   }, [project, dataDate, dispatch]);
   
   return {
-    project: safeProject, // Return safe object to prevent downstream crashes
+    project: safeProject,
     viewMode,
     setViewMode,
     selectedTask,

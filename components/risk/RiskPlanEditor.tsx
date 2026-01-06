@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { FileText, Save, Book, Lock, ShieldCheck, Activity, Settings, ListTree, Grid } from 'lucide-react';
+import { ShieldCheck, Activity, Settings, ListTree, Grid, Save, Book } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { Button } from '../ui/Button';
@@ -12,6 +11,7 @@ import { PlanTaxonomy } from './planning/PlanTaxonomy';
 import { PlanThresholds } from './planning/PlanThresholds';
 import { PlanTemplatePanel } from './planning/PlanTemplatePanel';
 import { Badge } from '../ui/Badge';
+import { NarrativeField } from '../common/NarrativeField';
 
 const RiskPlanEditor: React.FC = () => {
     const { project, riskPlan } = useProjectWorkspace();
@@ -32,19 +32,8 @@ const RiskPlanEditor: React.FC = () => {
         }
     };
 
-    if (!formData || !project) return <div className="p-8 text-slate-400">Initializing Plan Context...</div>;
+    if (!formData || !project) return <div className="p-8 text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Initializing Plan Context...</div>;
     
-    const renderContent = () => {
-        const props = { formData, setFormData, isReadOnly: !canEditProject() };
-        switch(activeTab) {
-            case 'overview': return <PlanOverview {...props} project={project} />;
-            case 'methodology': return <PlanMethodology {...props} />;
-            case 'taxonomy': return <PlanTaxonomy {...props} />;
-            case 'thresholds': return <PlanThresholds {...props} />;
-            default: return null;
-        }
-    }
-
     return (
         <div className={`h-full flex flex-col ${theme.colors.background}/30 scrollbar-thin`}>
             <div className={`px-8 py-5 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center shrink-0`}>
@@ -60,16 +49,62 @@ const RiskPlanEditor: React.FC = () => {
                     {canEditProject() && <Button icon={Save} onClick={handleSave}>Commit Plan</Button>}
                 </div>
             </div>
+
             <div className={`${theme.colors.surface} border-b ${theme.colors.border} px-8 flex gap-1`}>
-                {[ { id: 'overview', label: 'Overview', icon: Activity }, { id: 'methodology', label: 'Methodology', icon: Settings }, { id: 'taxonomy', label: 'RBS', icon: ListTree }, { id: 'thresholds', label: 'Thresholds', icon: Grid } ].map(tab => (
-                    <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`px-6 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === tab.id ? `border-nexus-600 text-nexus-700` : `border-transparent text-slate-500 hover:text-slate-800`}`}>
+                {[ 
+                    { id: 'overview', label: 'Overview', icon: Activity }, 
+                    { id: 'methodology', label: 'Methodology', icon: Settings }, 
+                    { id: 'taxonomy', label: 'RBS', icon: ListTree }, 
+                    { id: 'thresholds', label: 'Thresholds', icon: Grid } 
+                ].map(tab => (
+                    <button 
+                        key={tab.id} 
+                        onClick={() => setActiveTab(tab.id as any)} 
+                        className={`px-6 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === tab.id ? `border-nexus-600 text-nexus-700` : `border-transparent text-slate-500 hover:text-slate-800`}`}
+                    >
                         <tab.icon size={14}/> {tab.label}
                     </button>
                 ))}
             </div>
+
             <div className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-5xl mx-auto bg-white border border-slate-200 shadow-sm rounded-xl p-10 min-h-[600px]">
-                    {renderContent()}
+                <div className="max-w-5xl mx-auto bg-white border border-slate-200 shadow-sm rounded-xl p-10 min-h-[600px] space-y-10">
+                    {activeTab === 'overview' && (
+                        <div className="space-y-10 animate-nexus-in">
+                            <NarrativeField 
+                                label="Risk Management Objectives"
+                                value={formData.objectives}
+                                placeholderLabel="Objectives not established for this project."
+                                onAdd={() => {}}
+                            />
+                            <NarrativeField 
+                                label="Execution Scope"
+                                value={formData.scope}
+                                placeholderLabel="Plan scope boundaries undefined."
+                                onAdd={() => {}}
+                            />
+                        </div>
+                    )}
+                    
+                    {activeTab === 'methodology' && (
+                        <div className="animate-nexus-in">
+                            <NarrativeField 
+                                label="Risk Approach & Methodology"
+                                value={formData.approach}
+                                placeholderLabel="No approach defined. Using standard corporate policy by default."
+                                onAdd={() => {}}
+                                className="mb-8"
+                            />
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
+                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Frequency</h4><p className="text-sm font-bold">Weekly Review</p></div>
+                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Analysis</h4><p className="text-sm font-bold">Qualitative & Monte Carlo</p></div>
+                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Escalation</h4><p className="text-sm font-bold">Score >= 15</p></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'taxonomy' && <PlanTaxonomy formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />}
+                    {activeTab === 'thresholds' && <PlanThresholds formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />}
                 </div>
             </div>
             <PlanTemplatePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} onApply={() => {}} />

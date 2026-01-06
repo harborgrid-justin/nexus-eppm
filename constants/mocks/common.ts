@@ -1,5 +1,4 @@
 
-// FIX: Added KanbanTask to the import list to define mock data.
 import { Document, Extension, QualityStandard, EnterpriseRole, EnterpriseSkill, StandardTemplate, KanbanTask } from '../../types/index';
 
 export const EXTENSIONS_REGISTRY: Extension[] = [
@@ -68,7 +67,6 @@ export const MOCK_TEMPLATES: StandardTemplate[] = [
     { id: 'TPL-01', category: 'Risk', name: 'Standard Risk Plan', description: 'Default risk management plan template.', content: {} },
 ];
 
-// FIX: Added MOCK_KANBAN_TASKS to resolve export error in software demo.
 export const MOCK_KANBAN_TASKS: KanbanTask[] = [
   { id: 'KT-1', title: 'Setup CI/CD pipeline for API', status: 'done', priority: 'High' },
   { id: 'KT-2', title: 'Design database schema for user profiles', status: 'progress', priority: 'High' },

@@ -1,16 +1,17 @@
-
 import React, { Suspense, lazy } from 'react';
-import { Network, GanttChartSquare, Loader2, GitBranch } from 'lucide-react';
+import { Network, GanttChartSquare, Loader2, GitBranch, Briefcase } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation } from './common/ModuleNavigation';
-import { useTheme } from './context/ThemeContext';
-import { ProjectWorkspaceProvider } from './context/ProjectWorkspaceContext';
+import { useTheme } from '../context/ThemeContext';
+import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
 import SuspenseFallback from './layout/SuspenseFallback';
 import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLogic';
+import { EmptyGrid } from './common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
-const ProjectRiskManager = lazy(() => import('./risk/ProjectRiskManager')); // Updated import
+const ProjectRiskManager = lazy(() => import('./risk/ProjectRiskManager'));
 const IssueLog = lazy(() => import('./IssueLog'));
 const ScopeManagement = lazy(() => import('./ScopeManagement'));
 const StakeholderManagement = lazy(() => import('./StakeholderManagement'));
@@ -27,6 +28,7 @@ const FieldManagement = lazy(() => import('./FieldManagement'));
 
 const ProjectWorkspace: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   
   const {
       projectData,
@@ -42,11 +44,14 @@ const ProjectWorkspace: React.FC = () => {
 
   if (!projectData) {
       return (
-        <div className="flex items-center justify-center h-full">
-            <div className="flex flex-col items-center gap-4 text-slate-400">
-                <Loader2 className="animate-spin" size={32} />
-                <p>Loading project workspace...</p>
-            </div>
+        <div className="h-full w-full flex items-center justify-center p-12 bg-slate-50">
+            <EmptyGrid 
+                title="Project Context Undefined"
+                description="Select an active initiative from the portfolio registry to initialize the command center."
+                icon={Briefcase}
+                onAdd={() => navigate('/projectList')}
+                actionLabel="Browse Projects"
+            />
         </div>
       );
   }
@@ -59,7 +64,7 @@ const ProjectWorkspace: React.FC = () => {
       case 'scope': return <ScopeManagement />;
       case 'schedule': return scheduleView === 'gantt' ? <ProjectGantt /> : <NetworkDiagram />;
       case 'cost': return <CostManagement />;
-      case 'risk': return <ProjectRiskManager />; // Updated component
+      case 'risk': return <ProjectRiskManager />;
       case 'issues': return <IssueLog />;
       case 'stakeholder': return <StakeholderManagement />;
       case 'procurement': return <ProcurementManagement />;

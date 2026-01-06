@@ -16,6 +16,7 @@ export * from './project_subtypes';
 export * from './quality';
 export * from './resource';
 export * from './risk';
+export * from './state';
 export * from './strategy';
 export * from './structure';
 export * from './ui';

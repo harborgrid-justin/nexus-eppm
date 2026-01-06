@@ -1,5 +1,4 @@
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Users } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -10,7 +9,6 @@ import ResourcePlanEditor from './resources/ResourcePlanEditor';
 import TeamCharter from './resources/TeamCharter';
 import ResourceHistogram from './resources/ResourceHistogram';
 import PhysicalResources from './resources/PhysicalResources';
-import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { Resource } from '../types/index';
@@ -18,9 +16,7 @@ import { useResourceManagementLogic } from '../hooks/domain/useResourceManagemen
 
 const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
-  const projectId = project.id;
-  const projectResources = assignedResources as Resource[];
- 
+  
   const {
       activeGroup,
       activeView,
@@ -32,6 +28,10 @@ const ResourceManagement: React.FC = () => {
   } = useResourceManagementLogic();
 
   const renderContent = () => {
+    // FIX: Using proper project context variables
+    const projectId = project?.id || '';
+    const projectResources = (assignedResources || []) as Resource[];
+
     switch(activeView) {
       case 'plan': return <ResourcePlanEditor projectId={projectId} />;
       case 'pool': return <ResourcePool resources={projectResources} />;
@@ -44,7 +44,16 @@ const ResourceManagement: React.FC = () => {
     }
   };
 
-  if (!project) return <div className="p-[var(--spacing-gutter)]">Loading resources...</div>;
+  // FIX: Replaced simple loading text with professional grey fill placeholder to avoid layout shift
+  if (!project) return (
+    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+        <PageHeader title="Resource Management" subtitle="Staffing and allocation hub" icon={Users} />
+        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
+            <Users size={48} className="mb-4 opacity-10" />
+            <p className="font-bold uppercase tracking-widest text-xs">Initializing Resource Context...</p>
+        </div>
+    </div>
+  );
 
   return (
     <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">

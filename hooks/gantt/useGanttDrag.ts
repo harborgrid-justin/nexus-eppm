@@ -1,5 +1,4 @@
-
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { Project, Task } from '../../types';
 import { Action } from '../../types/actions';
 import { getDaysDiff } from '../../utils/dateUtils';
@@ -35,22 +34,17 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
         const deltaX = e.clientX - dragState.current.startX;
         dragState.current.currentDeltaX = deltaX;
 
-        // Principle 11: Frame-Budget-Aware Animation
-        // Use RAF to coalesce mouse events and update DOM only once per frame
         if (rafId.current) cancelAnimationFrame(rafId.current);
 
         rafId.current = requestAnimationFrame(() => {
             const { targetElement, type, currentDeltaX } = dragState.current;
             if (!targetElement) return;
 
-            // Direct DOM manipulation for 60fps perf, bypass React Render Cycle
             if (type === 'move') {
                 targetElement.style.transform = `translateX(${currentDeltaX}px)`;
-                // Optional: Add snapping visual guide here if needed
             } else if (type === 'resize-end') {
-                const currentWidth = targetElement.offsetWidth; // This forces reflow, cache if possible
-                // Visual resize logic (simplified: usually needs a ghost element or direct width manip)
-                 targetElement.style.width = `${Math.max(dayWidth, currentWidth + currentDeltaX)}px`;
+                const currentWidth = targetElement.offsetWidth;
+                targetElement.style.width = `${Math.max(dayWidth, currentWidth + currentDeltaX)}px`;
             }
         });
     }, [dayWidth]);
@@ -58,21 +52,18 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
     const handleMouseUp = useCallback((e: MouseEvent) => {
         if (!dragState.current.task) return;
 
-        // Cleanup
         if (rafId.current) cancelAnimationFrame(rafId.current);
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
         document.body.style.cursor = 'default';
 
-        // Calculate Final Changes
         const deltaX = e.clientX - dragState.current.startX;
         const deltaDays = Math.round(deltaX / dayWidth);
         const { task, type, originalStart, originalEnd, targetElement } = dragState.current;
 
-        // Reset DOM Styles before React Update
         if (targetElement) {
             targetElement.style.transform = '';
-            targetElement.style.width = ''; // Reset to let React control width again
+            targetElement.style.width = '';
         }
 
         if (deltaDays !== 0) {
@@ -91,7 +82,6 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
             } else if (type === 'resize-end') {
                 const newEnd = new Date(originalEnd);
                 newEnd.setDate(newEnd.getDate() + deltaDays);
-                 // Ensure duration >= 1 day
                  if (newEnd > new Date(task.startDate)) {
                     updates = {
                         endDate: newEnd.toISOString().split('T')[0],
@@ -100,7 +90,6 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
                  }
             }
 
-            // Commit to State (Principle 8: Optimistic/Deterministic)
             if (Object.keys(updates).length > 0) {
                 dispatch({ 
                     type: 'TASK_UPDATE', 
@@ -109,19 +98,24 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
             }
         }
 
-        // Reset Refs
         dragState.current = {
             task: null, type: 'move', startX: 0, originalStart: new Date(), originalEnd: new Date(), originalProgress: 0, currentDeltaX: 0, targetElement: null
         };
     }, [dispatch, project.id, dayWidth, handleMouseMove]);
 
+    // CRITICAL FIX: Purge window listeners on unmount to prevent memory leaks
+    useEffect(() => {
+        return () => {
+            if (rafId.current) cancelAnimationFrame(rafId.current);
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [handleMouseMove, handleMouseUp]);
+
     const handleMouseDown = useCallback((e: React.MouseEvent, task: Task, type: 'move' | 'resize-start' | 'resize-end' | 'progress') => {
-        // Prevent default browser drag behavior
         e.preventDefault();
         e.stopPropagation();
         
-        // Find the draggable element (Task Bar)
-        // We assume the event target or its parent is the bar
         const target = (e.currentTarget as HTMLElement);
         
         dragState.current = {

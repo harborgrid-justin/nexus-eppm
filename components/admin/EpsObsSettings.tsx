@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { Layers, Folder, User, Plus, Edit2, Trash2, ChevronRight, ChevronDown, Building } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { EPSNode, OBSNode } from '../../types/index';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const EpsObsSettings: React.FC = () => {
     const { state } = useData();
@@ -23,7 +23,7 @@ const EpsObsSettings: React.FC = () => {
         const isExpanded = expandedNodes.has(node.id);
 
         return (
-            <div key={node.id} className="select-none">
+            <div key={node.id} className="select-none animate-nexus-in">
                 <div 
                     className="flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer"
                     style={{ paddingLeft: `${level * 24 + 12}px` }} 
@@ -54,7 +54,7 @@ const EpsObsSettings: React.FC = () => {
         const manager = state.resources.find(r => r.id === node.managerId);
 
         return (
-            <div key={node.id} className="select-none">
+            <div key={node.id} className="select-none animate-nexus-in">
                 <div 
                     className="flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer"
                     style={{ paddingLeft: `${level * 24 + 12}px` }}
@@ -83,6 +83,8 @@ const EpsObsSettings: React.FC = () => {
         );
     };
 
+    const hasData = view === 'EPS' ? state.eps.length > 0 : state.obs.length > 0;
+
     return (
         <div className="h-full flex flex-col space-y-6">
             <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
@@ -106,13 +108,23 @@ const EpsObsSettings: React.FC = () => {
                     <span className="font-mono text-[10px] text-slate-400">{view === 'EPS' ? state.eps.length : state.obs.length} Nodes</span>
                 </div>
                 <div className="flex-1 overflow-auto p-2 scrollbar-thin">
-                    <div className="min-w-[400px]">
-                        {view === 'EPS' ? (
-                            state.eps.filter(e => !e.parentId).map(node => renderEPSNode(node))
-                        ) : (
-                            state.obs.filter(e => !e.parentId).map(node => renderOBSNode(node))
-                        )}
-                    </div>
+                    {!hasData ? (
+                        <EmptyGrid 
+                            title={`${view} Structure Undefined`}
+                            description={`Initialize the global hierarchical structure for your ${view === 'EPS' ? 'project database' : 'security and organization'} nodes.`}
+                            icon={Layers}
+                            actionLabel={`Define Root ${view}`}
+                            onAdd={() => {}}
+                        />
+                    ) : (
+                        <div className="min-w-[400px]">
+                            {view === 'EPS' ? (
+                                state.eps.filter(e => !e.parentId).map(node => renderEPSNode(node))
+                            ) : (
+                                state.obs.filter(e => !e.parentId).map(node => renderOBSNode(node))
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
             

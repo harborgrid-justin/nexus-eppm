@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { StatusVariant } from '../../types/ui';
 
 export type { StatusVariant };
 
 interface StatusBadgeProps {
-  status: string;
+  status: any;
   variant?: StatusVariant;
   className?: string;
   customColorClass?: string;
@@ -18,14 +17,17 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   customColorClass
 }) => {
   const baseClasses = "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-bold border uppercase tracking-wider";
-  const s = status?.toLowerCase();
+  
+  // Safe primitive conversion to prevent Error #31
+  const displayStatus = (status === null || status === undefined) ? '-' : String(status);
+  const s = displayStatus.toLowerCase();
   
   let colors = 'bg-slate-100 text-slate-700 border-slate-200';
 
   if (customColorClass) {
       return (
         <span className={`${baseClasses} ${customColorClass} ${className}`}>
-            {status}
+            {displayStatus}
         </span>
       );
   }
@@ -58,7 +60,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   return (
     <span className={`${baseClasses} ${colors} ${className}`}>
-      {status}
+      {displayStatus}
     </span>
   );
 };

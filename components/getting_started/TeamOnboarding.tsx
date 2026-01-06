@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { UserPlus, Mail, Trash2, Send, Plus, Users } from 'lucide-react';
@@ -13,6 +12,13 @@ export const TeamOnboarding: React.FC = () => {
     const theme = useTheme();
     const [invites, setInvites] = useState([{ email: '', name: '', role: 'Team Member' }]);
     const [sent, setSent] = useState(false);
+    const sentTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (sentTimerRef.current) clearTimeout(sentTimerRef.current);
+        };
+    }, []);
 
     const addRow = () => {
         setInvites([...invites, { email: '', name: '', role: 'Team Member' }]);
@@ -41,13 +47,14 @@ export const TeamOnboarding: React.FC = () => {
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${invite.name}`,
                 department: 'Unassigned',
                 lastLogin: '',
-                status: 'Active' // Auto-active for demo
+                status: 'Active' 
             };
             dispatch({ type: 'ADMIN_ADD_USER', payload: newUser });
         });
 
         setSent(true);
-        setTimeout(() => {
+        if (sentTimerRef.current) clearTimeout(sentTimerRef.current);
+        sentTimerRef.current = setTimeout(() => {
             setSent(false);
             setInvites([{ email: '', name: '', role: 'Team Member' }]);
         }, 3000);

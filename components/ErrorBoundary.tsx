@@ -1,5 +1,5 @@
 
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -12,35 +12,40 @@ interface ErrorBoundaryState {
   error?: Error | string | unknown;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+/**
+ * Standard Error Boundary component to catch and display runtime errors gracefully.
+ */
+// Fix: Use Component directly from react and ensure proper generic types for props and state to resolve inheritance visibility issues.
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // Initialize state using standard property initializer
+  state: ErrorBoundaryState = {
+    hasError: false,
+    error: undefined,
+  };
+
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    // FIX: In a class component constructor, `state` must be assigned to `this.state`.
-    this.state = {
-      hasError: false,
-      error: undefined,
-    };
     this.handleRetry = this.handleRetry.bind(this);
   }
 
+  // Static method for identifying errors during render phase
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
-    // FIX: Component properties (`props`) are accessed via `this.props` in class components.
+  // Fix: Ensuring this.props is correctly inherited and accessible in lifecycle methods.
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Correctly logging the component name from props
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
+  // Fix: Ensuring this.setState is correctly inherited and accessible in class methods.
   public handleRetry() {
-    // FIX: The `setState` method is accessed via `this.setState` in class components to update state.
     this.setState({ hasError: false, error: undefined });
   }
 
   public render() {
-    // FIX: State is accessed via `this.state` in class components.
     if (this.state.hasError) {
-      // FIX: Destructuring `error` from `this.state`.
       const { error } = this.state;
       let errorMessage = 'An unexpected error occurred.';
       let errorStack = null;
@@ -60,11 +65,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
       return (
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
-          {/* FIX: Component properties (`props`) are accessed via `this.props`. */}
-          <h2 className="font-bold flex items-center gap-2"><AlertTriangle size={20} /> Error in {this.props.name || 'Component'}</h2>
+          <h2 className="font-bold flex items-center gap-2">
+            <AlertTriangle size={20} /> 
+            {/* Fix: Correctly accessing inherited this.props for rendering the component name. */}
+            Error in {this.props.name || 'Component'}
+          </h2>
           <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
           {errorStack && (
-             <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 max-h-32 text-red-800 font-mono overflow-auto">
+             <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 font-mono overflow-auto">
                 {errorStack}
              </pre>
           )}
@@ -78,7 +86,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
-    // FIX: The `children` prop is accessed via `this.props`.
+    // Fix: Correctly accessing inherited this.props to render children when no error occurs.
     return this.props.children;
   }
 }

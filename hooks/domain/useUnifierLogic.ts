@@ -1,11 +1,10 @@
-
 import { useState, useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { BPRecord } from '../../types/unifier';
+import { BPRecord, BPDefinition } from '../../types/unifier';
 import { Table, Layers, TrendingUp, Banknote, Edit3, Settings } from 'lucide-react';
-import { NavGroup } from '../../components/common/ModuleNavigation';
+import { NavGroup } from '../../types/ui';
 
 export const useUnifierLogic = () => {
   const { state, dispatch } = useData();
@@ -21,11 +20,15 @@ export const useUnifierLogic = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<BPRecord | undefined>(undefined);
 
-  const projectId = 'P1001'; 
+  const projectId = useMemo(() => state.projects[0]?.id || 'UNSET', [state.projects]); 
+
+  const definitions: BPDefinition[] = useMemo(() => 
+    state.unifier?.definitions || [], 
+  [state.unifier.definitions]);
 
   const activeDefinition = useMemo(() => 
-    state.unifier.definitions.find(d => d.id === selectedBP), 
-  [state.unifier.definitions, selectedBP]);
+    definitions.find(d => d.id === selectedBP), 
+  [definitions, selectedBP]);
 
   const records = useMemo(() => 
     state.unifier.records.filter(r => r.bpDefId === selectedBP && r.projectId === projectId), 
@@ -80,14 +83,6 @@ export const useUnifierLogic = () => {
      setIsFormOpen(false);
   };
 
-  const setSelectedBPWrapper = (id: string) => {
-    setSelectedBP(id);
-  };
-
-  const setIsFormOpenWrapper = (isOpen: boolean) => {
-    setIsFormOpen(isOpen);
-  };
-
   return {
       activeGroup,
       activeTab,
@@ -96,6 +91,7 @@ export const useUnifierLogic = () => {
       editingRecord,
       isPending,
       projectId,
+      definitions, 
       activeDefinition,
       records,
       navGroups,
@@ -104,7 +100,7 @@ export const useUnifierLogic = () => {
       handleCreate,
       handleEdit,
       handleSaveRecord,
-      setSelectedBP: setSelectedBPWrapper,
-      setIsFormOpen: setIsFormOpenWrapper
+      setSelectedBP,
+      setIsFormOpen
   };
 };
