@@ -1,4 +1,6 @@
-import React, { ErrorInfo, ReactNode } from 'react';
+
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -14,14 +16,15 @@ interface ErrorBoundaryState {
 /**
  * Standard Error Boundary component to catch and display runtime errors gracefully.
  */
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined,
-  };
-
+// FIX: Extending Component explicitly from the 'react' package to ensure inheritance of state, props, and setState.
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    // FIX: Initializing the state property which is now correctly inherited.
+    this.state = {
+      hasError: false,
+      error: undefined,
+    };
   }
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
@@ -29,15 +32,19 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // FIX: Accessing props from the inherited Component class.
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
   handleRetry = () => {
+    // FIX: Using the inherited setState method from Component.
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
+    // FIX: Accessing state from the inherited Component class.
     if (this.state.hasError) {
+      // FIX: Accessing state from the inherited Component class.
       const { error } = this.state;
       let errorMessage = 'An unexpected error occurred.';
       let errorStack: string | undefined = undefined;
@@ -59,11 +66,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
           <h2 className="font-bold flex items-center gap-2">
             <AlertTriangle size={20} /> 
+            {/* FIX: Accessing name from the inherited props. */}
             Error in {this.props.name || 'Component'}
           </h2>
           <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
           {errorStack && (
-             <pre className="text-xs bg-white p-3 mt-3 rounded border border-red-100 font-mono overflow-auto">
+             <pre className="text-xs bg-white p-4 mt-3 rounded border border-red-100 font-mono overflow-auto max-h-64">
                 {errorStack}
              </pre>
           )}
@@ -77,6 +85,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
+    // FIX: Accessing children from the inherited props.
     return this.props.children;
   }
 }

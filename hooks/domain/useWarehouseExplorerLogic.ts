@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -15,7 +14,7 @@ const DOMAIN_MAP: Record<Domain, { icon: React.ElementType, entities: string[] }
     'Financials': { icon: DollarSign, entities: [ 'budgetItems', 'expenses', 'changeOrders', 'purchaseOrders', 'invoices', 'contracts', 'solicitations', 'procurementPlans', 'procurementPackages', 'supplierReviews', 'claims', 'makeOrBuyAnalysis', 'fundingSources', 'costBook', 'expenseCategories' ] },
     'Resources & Supply': { icon: Users, entities: [ 'resources', 'resourceRequests', 'users', 'roles', 'skills', 'timesheets', 'vendors' ] },
     'Field Ops': { icon: HardHat, entities: [ 'dailyLogs', 'safetyIncidents', 'punchList' ] },
-    'Configuration': { icon: Settings, entities: [ 'eps', 'obs', 'locations', 'calendars', 'activityCodes', 'userDefinedFields', 'standardTemplates', 'workflows', 'dataJobs', 'integrations', 'extensions', 'etlMappings', 'globalChangeRules', 'issueCodes', 'rbs', 'governance.alerts', 'governance.auditLog', 'staging.records' ] },
+    'Configuration': { icon: Settings, entities: [ 'eps', 'obs', 'locations', 'calendars', 'activityCodes', 'userDefinedFields', 'standardTemplates', 'workflows', 'dataJobs', 'integrations', 'extensions', 'etlMappings', 'globalChangeRules', 'issueCodes', 'rbs', 'governance.alerts', 'governance.auditLog', 'staging.records', 'systemMonitoring.metrics' ] },
     'Unifier / BP': { icon: LayoutTemplate, entities: [ 'unifier.records', 'unifier.definitions', 'unifier.costSheet.rows' ] }
 };
 

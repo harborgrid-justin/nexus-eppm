@@ -1,11 +1,14 @@
+
 import React from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Layers, ArrowRight, Activity, TrendingUp, DollarSign } from 'lucide-react';
+import { Layers, ArrowRight, Activity, TrendingUp, DollarSign, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { ProgressBar } from '../common/ProgressBar';
 import { StatusBadge } from '../common/StatusBadge';
 import { Card } from '../ui/Card';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { Button } from '../ui/Button';
 
 interface PortfolioProgramsProps {
   onSelectProgram: (programId: string) => void;
@@ -15,6 +18,20 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
   const { programs, projects } = usePortfolioData();
   const theme = useTheme();
 
+  if (programs.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-12">
+              <EmptyGrid 
+                title="Program Portfolio Null"
+                description="No cross-functional programs identified. Establish a program to aggregate strategic project delivery."
+                icon={Layers}
+                actionLabel="Establish Program"
+                onAdd={() => {}} // CRUD action path
+              />
+          </div>
+      );
+  }
+
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
       <div className="flex justify-between items-center mb-2">
@@ -22,6 +39,7 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
           <h2 className={theme.typography.h2}>Program Portfolio Summary</h2>
           <p className={theme.typography.small}>Aggregated oversight of cross-project delivery groups.</p>
         </div>
+        <Button size="sm" icon={Plus}>Establish Program</Button>
       </div>
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>

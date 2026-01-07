@@ -1,15 +1,15 @@
-
-
 import React, { useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Database, ChevronRight, Table, FileJson, X, Eye, Filter, Download } from 'lucide-react';
+// Added Shield to the lucide-react import list.
+import { Database, ChevronRight, Table, FileJson, Eye, Download, Plus, Shield } from 'lucide-react';
 import { Button } from '../ui/Button';
-import DataTable, { Column } from '../common/DataTable';
+import DataTable from '../common/DataTable';
 import { Input } from '../ui/Input';
 import { SidePanel } from '../ui/SidePanel';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 import { useWarehouseExplorerLogic } from '../../hooks/domain/useWarehouseExplorerLogic';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const WarehouseExplorer: React.FC = () => {
     const theme = useTheme();
@@ -37,9 +37,9 @@ export const WarehouseExplorer: React.FC = () => {
         ).slice(0, 6); 
 
         const prioritizedKeys = [
-            ...keys.filter(k => ['id', 'code'].includes(k.toLowerCase())),
-            ...keys.filter(k => ['name', 'title', 'description'].includes(k.toLowerCase())),
-            ...keys.filter(k => !['id', 'code', 'name', 'title', 'description'].includes(k.toLowerCase()))
+            ...keys.filter(k => ['id', 'code', 'number'].includes(k.toLowerCase())),
+            ...keys.filter(k => ['name', 'title', 'description', 'label'].includes(k.toLowerCase())),
+            ...keys.filter(k => !['id', 'code', 'name', 'title', 'description', 'number', 'label'].includes(k.toLowerCase()))
         ].slice(0, 6);
 
         const gridCols = prioritizedKeys.map(key => ({
@@ -51,27 +51,27 @@ export const WarehouseExplorer: React.FC = () => {
                 
                 if (typeof val === 'number') {
                     if (key.toLowerCase().includes('budget') || key.toLowerCase().includes('cost') || key.toLowerCase().includes('amount') || key.toLowerCase().includes('price')) {
-                        return <span className="font-mono text-nexus-700">{formatCurrency(val)}</span>;
+                        return <span className="font-mono text-nexus-700 font-bold">{formatCurrency(val)}</span>;
                     }
                     return <span className="font-mono">{val}</span>;
                 }
                 
                 if (typeof val === 'string') {
                     if (val.match(/^\d{4}-\d{2}-\d{2}/)) {
-                        return <span className="text-slate-500 text-xs">{val.split('T')[0]}</span>;
+                        return <span className="text-slate-500 text-xs font-mono">{val.split('T')[0]}</span>;
                     }
                     if (key.toLowerCase() === 'status' || key.toLowerCase() === 'health' || key.toLowerCase() === 'priority') {
                          let variant: any = 'neutral';
                          const v = val.toLowerCase();
-                         if (['active', 'approved', 'open', 'good', 'completed'].includes(v)) variant = 'success';
-                         else if (['warning', 'pending', 'draft', 'medium'].includes(v)) variant = 'warning';
-                         else if (['critical', 'rejected', 'error', 'failed', 'high'].includes(v)) variant = 'danger';
+                         if (['active', 'approved', 'open', 'good', 'completed', 'success', 'on track'].includes(v)) variant = 'success';
+                         else if (['warning', 'pending', 'draft', 'medium', 'at risk'].includes(v)) variant = 'warning';
+                         else if (['critical', 'rejected', 'error', 'failed', 'high', 'off track'].includes(v)) variant = 'danger';
                          
                          return <Badge variant={variant}>{val}</Badge>;
                     }
                 }
                 
-                return <span className="truncate block max-w-xs" title={String(val)}>{String(val ?? '-')}</span>;
+                return <span className="truncate block max-w-xs text-sm" title={String(val)}>{String(val ?? '-')}</span>;
             }
         }));
 
@@ -82,10 +82,10 @@ export const WarehouseExplorer: React.FC = () => {
             render: (item: any) => (
                 <button 
                     onClick={(e) => { e.stopPropagation(); setSelectedRecord(item); }}
-                    className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-nexus-600"
-                    title="View Raw Data"
+                    className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-nexus-600 transition-colors"
+                    title="Inspect Record"
                 >
-                    <Eye size={14}/>
+                    <Eye size={16}/>
                 </button>
             )
         });
@@ -93,12 +93,16 @@ export const WarehouseExplorer: React.FC = () => {
         return gridCols;
     }, [currentData, theme]);
 
+    const entityLabel = useMemo(() => {
+        return activeEntity.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()) || 'Entities';
+    }, [activeEntity]);
+
     return (
-        <div className="flex flex-col md:flex-row h-full w-full overflow-hidden">
+        <div className="flex flex-col md:flex-row h-full w-full overflow-hidden bg-white">
             {/* Desktop Sidebar Navigation */}
-            <div className={`hidden md:flex w-64 border-r ${theme.colors.border} bg-slate-50 flex-col`}>
-                <div className="p-4 border-b border-slate-200">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Data Domains</h3>
+            <div className={`hidden md:flex w-72 border-r ${theme.colors.border} bg-slate-50 flex-col shrink-0`}>
+                <div className="p-4 border-b border-slate-200 bg-white">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Enterprise Domains</h3>
                     <div className="space-y-1">
                         {(Object.keys(DOMAIN_MAP) as (keyof typeof DOMAIN_MAP)[]).map(domain => {
                             const Icon = DOMAIN_MAP[domain].icon;
@@ -106,11 +110,11 @@ export const WarehouseExplorer: React.FC = () => {
                                 <button
                                     key={domain}
                                     onClick={() => handleDomainChange(domain)}
-                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
-                                        activeDomain === domain ? 'bg-white text-nexus-700 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                        activeDomain === domain ? 'bg-nexus-600 text-white shadow-lg shadow-nexus-500/20' : 'text-slate-500 hover:bg-slate-200'
                                     }`}
                                 >
-                                    <span className="flex items-center gap-2"><Icon size={14}/>{domain}</span>
+                                    <span className="flex items-center gap-2"><Icon size={16}/>{domain}</span>
                                     {activeDomain === domain && <ChevronRight size={14} />}
                                 </button>
                             );
@@ -118,57 +122,63 @@ export const WarehouseExplorer: React.FC = () => {
                     </div>
                 </div>
                 {activeDomain && (
-                    <div className="flex-1 overflow-y-auto p-2">
-                        <h4 className="px-2 text-[10px] font-bold text-slate-400 uppercase mb-2 mt-2">Tables</h4>
-                        {DOMAIN_MAP[activeDomain].entities.map(entity => (
-                            <button
-                                key={entity}
-                                onClick={() => setActiveEntity(entity)}
-                                className={`w-full text-left px-3 py-1.5 rounded-md text-xs font-medium mb-1 transition-colors flex items-center gap-2 ${
-                                    activeEntity === entity ? 'bg-nexus-50 text-nexus-700 font-bold' : 'text-slate-500 hover:text-slate-800'
-                                }`}
-                            >
-                                <Table size={12}/>
-                                <span className="truncate" title={entity}>{entity.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase())}</span>
-                            </button>
-                        ))}
+                    <div className="flex-1 overflow-y-auto p-3 scrollbar-thin">
+                        <h4 className="px-2 text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 mt-2">Data Tables</h4>
+                        <div className="space-y-0.5">
+                            {DOMAIN_MAP[activeDomain].entities.map(entity => (
+                                <button
+                                    key={entity}
+                                    onClick={() => setActiveEntity(entity)}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-3 ${
+                                        activeEntity === entity ? 'bg-white text-nexus-700 shadow-sm border border-slate-200 ring-4 ring-nexus-500/5' : 'text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent'
+                                    }`}
+                                >
+                                    <Table size={14} className={activeEntity === entity ? 'text-nexus-600' : 'opacity-40'}/>
+                                    <span className="truncate" title={entity}>{entity.split('.').pop()?.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase())}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
 
             {/* Main Grid Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-white h-full overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white shadow-sm z-10 gap-3">
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                         <div className="p-2 bg-nexus-50 text-nexus-600 rounded-lg shrink-0">
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white z-10 gap-3`}>
+                    <div className="flex items-center gap-3 w-full sm:w-auto min-w-0">
+                         <div className="p-2 bg-nexus-50 text-nexus-600 rounded-lg shrink-0 border border-nexus-100">
                             <Database size={18}/>
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-bold text-slate-800 text-sm capitalize truncate">{activeEntity.split('.').pop()?.replace(/([A-Z])/g, ' $1')}</h3>
-                            <p className="text-xs text-slate-500 font-mono hidden sm:block">path: state.{activeEntity}</p>
+                            <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight truncate">{entityLabel}</h3>
+                            <p className="text-[10px] text-slate-400 font-mono hidden sm:block truncate">sys_path: state.{activeEntity}</p>
                         </div>
-                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold ml-2 shrink-0">{currentData?.length || 0}</span>
+                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-black border border-slate-200 ml-2 shrink-0">{currentData?.length || 0} RECORDS</span>
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
-                        <Input isSearch placeholder="Search records..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full sm:w-64" />
+                        <Input isSearch placeholder="Filter warehouse..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full sm:w-64" />
                         <Button variant="outline" size="sm" icon={Download} className="shrink-0">Export</Button>
                     </div>
                 </div>
                 
-                <div className="flex-1 overflow-hidden p-0 md:p-4 bg-slate-50/30">
+                <div className="flex-1 overflow-hidden p-0 md:p-4 bg-slate-50/50">
                     {currentData && currentData.length > 0 ? (
                         <DataTable 
-                            data={filteredData}
+                            data={currentData}
                             columns={columns}
                             keyField="id" 
                             rowsPerPage={15}
                             onRowClick={(item) => setSelectedRecord(item)}
                         />
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                            <Database size={48} className="mb-4 opacity-20"/>
-                            <p className="text-sm font-medium">No records found in this table.</p>
-                            <p className="text-xs mt-1 opacity-70">Initialize data or check configuration.</p>
+                        <div className="h-full">
+                            <EmptyGrid 
+                                title={`${entityLabel} Registry Null`}
+                                description={`No master records identified for the ${activeDomain} domain in the current data partition.`}
+                                icon={Database}
+                                actionLabel={`Register New ${entityLabel.replace(/s$/, '')}`}
+                                onAdd={() => {}} // CRUD action path
+                            />
                         </div>
                     )}
                 </div>
@@ -178,18 +188,28 @@ export const WarehouseExplorer: React.FC = () => {
             <SidePanel
                 isOpen={!!selectedRecord}
                 onClose={() => setSelectedRecord(null)}
-                title={<div className="flex items-center gap-2"><FileJson size={18} className="text-nexus-500"/> Record Inspector</div>}
+                title={<div className="flex items-center gap-2 font-black text-sm uppercase tracking-widest"><FileJson size={18} className="text-nexus-500"/> Data Inspector</div>}
                 width="md:w-[600px]"
-                footer={<Button onClick={() => setSelectedRecord(null)}>Close</Button>}
+                footer={<Button onClick={() => setSelectedRecord(null)}>Close Inspector</Button>}
             >
-                <div className="space-y-4">
-                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg font-mono text-xs overflow-auto max-h-[70vh]">
-                        <pre className="text-slate-700 whitespace-pre-wrap">
+                <div className="space-y-6 animate-nexus-in">
+                    <div className="p-5 bg-slate-900 rounded-2xl border border-slate-800 font-mono text-[11px] overflow-auto max-h-[70vh] shadow-2xl relative">
+                        <div className="absolute top-3 right-4 flex gap-2">
+                             <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                             <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                        </div>
+                        <pre className="text-green-400 whitespace-pre-wrap leading-relaxed">
                             {JSON.stringify(selectedRecord, null, 2)}
                         </pre>
                     </div>
-                    <div className="text-xs text-slate-400 italic">
-                        Raw JSON representation from application state.
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                        <p className="text-[10px] text-blue-700 font-black uppercase tracking-widest flex items-center gap-2">
+                            <Shield size={12}/> Security Assertion
+                        </p>
+                        <p className="text-xs text-blue-800 mt-1 leading-relaxed">
+                            Raw entity representation from the immutable platform state. All modifications are logged in the global audit trail.
+                        </p>
                     </div>
                 </div>
             </SidePanel>

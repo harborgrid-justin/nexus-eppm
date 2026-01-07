@@ -1,15 +1,18 @@
+
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { RefreshCw, PieChart } from 'lucide-react';
+import { RefreshCw, PieChart, Briefcase } from 'lucide-react';
 import { StrategicDrivers } from './balancing/StrategicDrivers';
 import { ValueRiskChart } from './balancing/ValueRiskChart';
 import { EfficientFrontierChart } from './balancing/EfficientFrontierChart';
 import { usePortfolioBalancingLogic } from '../../hooks/domain/usePortfolioBalancingLogic';
 import { Button } from '../ui/Button';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 const PortfolioBalancing: React.FC = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const { 
         portfolioData, 
         weights, 
@@ -22,10 +25,12 @@ const PortfolioBalancing: React.FC = () => {
     if (isEmpty) {
         return (
             <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
-                <EmptyState 
-                    title="No Data to Balance" 
-                    description="Add projects to the portfolio to enable optimization modeling." 
-                    icon={PieChart} 
+                <EmptyGrid 
+                    title="Optimization Model Inactive" 
+                    description="The investment balancing model requires active projects to calculate the efficient frontier." 
+                    icon={PieChart}
+                    actionLabel="Create Initiative"
+                    onAdd={() => navigate('/projectList?action=create')}
                 />
             </div>
         );

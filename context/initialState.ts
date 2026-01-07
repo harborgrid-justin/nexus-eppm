@@ -1,3 +1,4 @@
+
 import { DataState } from '../types/index';
 
 // This is the "Day Zero" state of the application.
@@ -155,7 +156,11 @@ export const initialState: DataState = {
   costMeetings: [],
   costAlerts: [],
   systemMonitoring: {
-      metrics: [],
+      metrics: [
+          { id: 'm-db-size', name: 'Database Size', value: 0.0, unit: 'MB', threshold: 500, trend: [] },
+          { id: 'm-schema', name: 'Schema Version', value: 1.3, unit: 'v', threshold: 2.0, trend: [] },
+          { id: 'm-backup', name: 'Last Backup', value: 0, unit: 'mins ago', threshold: 60, trend: [] }
+      ],
       services: [],
       throughput: []
   },

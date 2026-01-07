@@ -7,10 +7,27 @@ import { CustomBarChart } from '../../charts/CustomBarChart';
 import { CustomPieChart } from '../../charts/CustomPieChart';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import { useSystemicRiskLogic } from '../../../hooks/domain/useSystemicRiskLogic';
+import { EmptyGrid } from '../../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 export const SystemicRiskDashboard: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { metrics, projects } = useSystemicRiskLogic();
+
+  if (metrics.totalRisks === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-12">
+              <EmptyGrid 
+                title="Systemic Risk Registry Null"
+                description="No organizational or escalated project risks have been identified. Initialize risk monitoring to secure the portfolio."
+                icon={ShieldAlert}
+                actionLabel="Identify Corporate Risk"
+                onAdd={() => navigate('/enterpriseRisks?view=register')}
+              />
+          </div>
+      );
+  }
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
@@ -31,7 +48,7 @@ export const SystemicRiskDashboard: React.FC = () => {
                         data={metrics.byContext}
                         xAxisKey="name"
                         dataKey="value"
-                        barColor={theme.colors.primary.split(' ')[0].replace('bg-', '')} 
+                        barColor={theme.charts.palette[0]} 
                         height={300}
                     />
                 </div>

@@ -1,13 +1,16 @@
+
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { TrendingUp, ListOrdered, AlertCircle, Briefcase } from 'lucide-react';
 import { usePortfolioPrioritizationLogic } from '../../hooks/domain/usePortfolioPrioritizationLogic';
 import { Button } from '../ui/Button';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 const PortfolioPrioritization: React.FC = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const { 
         prioritizedItems, 
         totalPortfolioValue, 
@@ -19,11 +22,12 @@ const PortfolioPrioritization: React.FC = () => {
     if (isEmpty) {
         return (
             <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
-                <EmptyState 
-                    title="No Portfolio Components"
-                    description="Add projects or programs to begin prioritization analysis."
+                <EmptyGrid 
+                    title="Prioritization Engine Null"
+                    description="Populate the portfolio with projects or programs to enable strategic prioritization analysis."
                     icon={ListOrdered}
-                    action={<Button variant="primary" icon={Briefcase}>Create Project</Button>}
+                    actionLabel="Create First Initiative"
+                    onAdd={() => navigate('/projectList?action=create')}
                 />
             </div>
         );
