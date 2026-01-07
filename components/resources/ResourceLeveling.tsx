@@ -1,9 +1,12 @@
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useMemo } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Sliders, Check, AlertTriangle, RefreshCw, BarChart2 } from 'lucide-react';
+import { Sliders, Check, AlertTriangle, RefreshCw, BarChart2, Plus } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
+import { EmptyGrid } from '../common/EmptyGrid';
+// Added missing import for Card component
+import { Card } from '../ui/Card';
 
 interface ResourceLevelingProps {
     overAllocatedResources: Resource[] | undefined;
@@ -14,6 +17,16 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
     const [simulatedData, setSimulatedData] = useState<any[] | null>(null);
     const [isLeveling, startTransition] = useTransition();
 
+    // Derived 6-week horizon labels from current date
+    const weekLabels = useMemo(() => {
+        const today = new Date();
+        return Array.from({ length: 6 }).map((_, i) => {
+            const d = new Date(today);
+            d.setDate(today.getDate() + (i * 7));
+            return `W${i+1} (${d.getMonth() + 1}/${d.getDate()})`;
+        });
+    }, []);
+
     const runLevelingSimulation = () => {
         startTransition(() => {
             if (!overAllocatedResources || overAllocatedResources.length === 0) {
@@ -21,16 +34,10 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                 return;
             }
 
-            // 1. Calculate Real Demand for these resources over next 6 weeks
-            const weeks = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'];
             const today = new Date();
             const horizonStart = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // This Monday
 
-            // Map: Week Index -> Total Demand Hours
             const demandMap = new Array(6).fill(0);
-            
-            // Total Capacity of selected resources (Weekly)
-            // Assuming Capacity is Monthly in DB (e.g. 160), convert to Weekly (~40)
             const totalWeeklyCapacity = overAllocatedResources.reduce((sum, r) => sum + ((r.capacity || 160) / 4), 0);
 
             state.projects.forEach(p => {
@@ -40,13 +47,9 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                     const taskStart = new Date(t.startDate);
                     const taskEnd = new Date(t.endDate);
                     
-                    // Filter assignments for our target resources
                     t.assignments.filter(a => overAllocatedResources.some(r => r.id === a.resourceId)).forEach(assign => {
-                        // Calculate weekly load
-                        // Simplified: Uniform distribution over duration
-                        const weeklyLoad = (assign.units / 100) * 40; // 40h work week assumption
+                        const weeklyLoad = (assign.units / 100) * 40; 
                         
-                        // Check overlap with our 6 week horizon
                         for (let i = 0; i < 6; i++) {
                             const wStart = new Date(horizonStart);
                             wStart.setDate(wStart.getDate() + (i * 7));
@@ -61,15 +64,12 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                 });
             });
 
-            // 2. Generate Data with "After" logic (Leveling = Capping at Capacity + Variance)
-            const data = weeks.map((week, i) => {
+            const data = weekLabels.map((label, i) => {
                 const demand = Math.round(demandMap[i]);
-                // Leveling Logic: If Demand > Capacity, push excess to future (simplified visual)
-                // Real leveling engine would shift specific task dates
                 const leveled = Math.min(demand, totalWeeklyCapacity); 
                 
                 return {
-                    period: week,
+                    period: label,
                     Capacity: Math.round(totalWeeklyCapacity),
                     Before: demand,
                     After: leveled
@@ -83,77 +83,94 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
     return (
         <div className="h-full flex flex-col">
             <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50">
-                <h3 className="font-semibold text-slate-700 text-sm">Over-allocation Resolution</h3>
+                <div>
+                    <h3 className="font-semibold text-slate-700 text-sm">Over-allocation Resolution</h3>
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Resource-Loaded Schedule Optimization</p>
+                </div>
                 <button 
                     onClick={runLevelingSimulation}
                     disabled={isLeveling || !overAllocatedResources?.length}
-                    className="px-3 py-2 bg-nexus-600 rounded-lg text-sm font-medium text-white hover:bg-nexus-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                    className="px-4 py-2 bg-nexus-600 rounded-xl text-xs font-black uppercase tracking-widest text-white hover:bg-nexus-700 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-nexus-500/20 transition-all active:scale-95"
                 >
-                    {isLeveling ? <RefreshCw className="animate-spin" size={16}/> : <Sliders size={16}/>}
-                    {isLeveling ? 'Optimizing Plan...' : 'Run CPM Leveling'}
+                    {isLeveling ? <RefreshCw className="animate-spin" size={14}/> : <Sliders size={14}/>}
+                    {isLeveling ? 'Leveling...' : 'Level Resources'}
                 </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {/* Visualizer */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
                 {simulatedData ? (
-                    <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm h-64 animate-in fade-in slide-in-from-top-4">
-                        <h4 className="font-bold text-slate-700 mb-2 text-sm">Leveling Impact Simulation (6-Week Horizon)</h4>
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-80 animate-nexus-in">
+                        <div className="flex justify-between items-center mb-6">
+                            <h4 className="font-bold text-slate-800 text-sm">Forecasted Peak Utilization (6-Week Horizon)</h4>
+                            <div className="flex gap-4 text-[10px] font-black uppercase tracking-tighter">
+                                <span className="flex items-center gap-1.5"><div className="w-2 h-2 bg-red-500 rounded-full"></div> Before</span>
+                                <span className="flex items-center gap-1.5"><div className="w-2 h-2 bg-green-500 rounded-full"></div> After</span>
+                            </div>
+                        </div>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={simulatedData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="period" tick={{fontSize: 10}} />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="Before" fill="#ef4444" name="Current Demand" />
-                                <Bar dataKey="After" fill="#22c55e" name="Leveled Load" />
-                                <ReferenceLine y={simulatedData[0]?.Capacity} label="Capacity Limit" stroke="orange" strokeDasharray="3 3" />
+                                <XAxis dataKey="period" tick={{fontSize: 9, fontWeight: 'bold'}} />
+                                <YAxis tick={{fontSize: 9, fontWeight: 'bold'}} />
+                                <Tooltip contentStyle={{ borderRadius: '12px' }} />
+                                <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingTop: '10px' }} />
+                                <Bar dataKey="Before" fill="#ef4444" name="Unleveled Demand" radius={[4,4,0,0]} />
+                                <Bar dataKey="After" fill="#22c55e" name="Leveled Execution" radius={[4,4,0,0]} />
+                                <ReferenceLine y={simulatedData[0]?.Capacity} stroke="orange" strokeDasharray="3 3" label={{ value: 'Capacity', position: 'right', fontSize: 10, fill: 'orange' }} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 ) : (
-                    <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl h-64 flex flex-col items-center justify-center text-slate-400">
-                        <BarChart2 size={32} className="mb-2 opacity-50"/>
-                        <p className="text-sm">Run simulation to visualize capacity impact.</p>
+                    <div className="h-80">
+                        <EmptyGrid 
+                            title="Simulation Ready"
+                            description="Run the leveling solver to visualize how task shifting can resolve current resource over-allocations."
+                            icon={BarChart2}
+                            actionLabel="Initialize Simulation"
+                            onAdd={runLevelingSimulation}
+                        />
                     </div>
                 )}
 
-                {overAllocatedResources && overAllocatedResources.length > 0 ? overAllocatedResources.map(res => (
-                    <div key={res.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                        <div className="flex justify-between items-center mb-3">
-                            <div>
-                                <h4 className="font-bold text-slate-800">{res.name}</h4>
-                                <p className="text-xs text-slate-500">{res.role}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {overAllocatedResources && overAllocatedResources.length > 0 ? overAllocatedResources.map(res => (
+                        <div key={res.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-nexus-300 transition-all">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 className="font-bold text-slate-800 text-sm group-hover:text-nexus-700 transition-colors">{res.name}</h4>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{res.role}</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="flex items-center gap-1.5 text-red-600 font-black text-sm">
+                                        <AlertTriangle size={14}/>
+                                        <span>{((res.allocated / (res.capacity || 1)) * 100).toFixed(0)}% Util</span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">Variance: +{Math.round(res.allocated - res.capacity)}h</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
-                                <AlertTriangle size={16}/>
-                                <span>{((res.allocated / (res.capacity || 1)) * 100).toFixed(0)}% Allocated</span>
-                            </div>
+                            
+                            {simulatedData ? (
+                                <div className="p-2.5 bg-green-50 text-green-800 text-[11px] rounded-lg border border-green-200 flex items-center gap-2 animate-nexus-in">
+                                    <Check size={14} className="shrink-0"/> 
+                                    <span>Resolution: Solver proposes delaying non-critical WBS 1.2.4 by 3 days.</span>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <button className="flex-1 text-[10px] font-black uppercase py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-all">Shift Task</button>
+                                    <button className="flex-1 text-[10px] font-black uppercase py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-all">Substitute</button>
+                                </div>
+                            )}
                         </div>
-                        <div className="text-xs space-y-1 text-slate-600">
-                            <p><strong>Capacity:</strong> {res.capacity} hrs/mo</p>
-                            <p><strong>Allocated:</strong> {res.allocated} hrs/mo</p>
+                    )) : (
+                        <div className="col-span-full">
+                            <Card className="p-12 flex flex-col items-center justify-center text-center bg-green-50 border-green-200">
+                                <Check size={48} className="text-green-500 mb-4" />
+                                <h3 className="text-xl font-black text-green-900 tracking-tight">Resource Pool Optimized</h3>
+                                <p className="text-sm text-green-700 mt-2 max-w-sm">No over-allocation conflicts identified across the current project portfolio. The plan is within capacity thresholds.</p>
+                            </Card>
                         </div>
-                        
-                        {simulatedData ? (
-                             <div className="mt-3 p-2 bg-green-50 text-green-800 text-xs rounded border border-green-200 flex items-center gap-2 animate-in fade-in">
-                                <Check size={14}/> Resolution: Shift non-critical tasks to reduce peak load.
-                             </div>
-                        ) : (
-                            <div className="mt-3 flex gap-2">
-                                <button className="text-xs px-3 py-1 bg-white border border-slate-300 rounded-md hover:bg-slate-50 text-slate-700">Delay Task</button>
-                                <button className="text-xs px-3 py-1 bg-white border border-slate-300 rounded-md hover:bg-slate-50 text-slate-700">Reassign</button>
-                            </div>
-                        )}
-                    </div>
-                )) : (
-                    <div className="flex flex-col items-center justify-center h-48 text-slate-400">
-                        <Check size={48} className="text-green-500 mb-4" />
-                        <h3 className="font-bold text-slate-600">Resource Pool Optimized</h3>
-                        <p className="text-sm">No over-allocation conflicts detected for this project.</p>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

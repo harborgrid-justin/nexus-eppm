@@ -17,12 +17,12 @@ import { UdfSettings } from './admin/UdfSettings';
 import { IssueCodeSettings } from './admin/IssueCodeSettings';
 import { ExpenseCategorySettings } from './admin/ExpenseCategorySettings';
 import { FundingSourceSettings } from './admin/FundingSourceSettings';
-import EnterpriseResourceSettings from '../resources/EnterpriseResourceSettings';
+import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
 import WorkflowDesigner from './admin/WorkflowDesigner';
 import AuditLog from './admin/AuditLog';
 import GeneralSettings from './admin/GeneralSettings';
-import { useAdminSettingsLogic } from '../../hooks/domain/useAdminSettingsLogic';
-import { useTheme } from '../../context/ThemeContext';
+import { useAdminSettingsLogic } from '../hooks/domain/useAdminSettingsLogic';
+import { useTheme } from '../context/ThemeContext';
 
 const AdminSettings: React.FC = () => {
   const theme = useTheme();
@@ -65,7 +65,7 @@ const AdminSettings: React.FC = () => {
       case 'workflows': return <WorkflowDesigner />;
       case 'globalChange': return <GlobalChangeWorkbench />;
       
-      default: return <div>Select a setting to configure.</div>;
+      default: return <div className="p-8 text-center text-slate-400 italic">Select a setting from the navigation menu above to configure.</div>;
     }
   };
 
