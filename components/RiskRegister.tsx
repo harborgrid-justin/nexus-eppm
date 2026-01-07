@@ -27,7 +27,7 @@ const RiskRegister: React.FC = () => {
   } = useRiskRegisterLogic();
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)]">
+    <div className="p-[var(--spacing-gutter)] space-y-4 h-full flex flex-col">
       {selectedRiskId && (
         <RiskDetailModal 
             riskId={selectedRiskId} 
@@ -50,7 +50,7 @@ const RiskRegister: React.FC = () => {
          <div className="bg-surface border border-border rounded-lg p-4 flex items-center justify-between"><div className="space-y-1"><p className="text-xs text-text-secondary uppercase font-bold">Escalated</p><p className="text-xl font-bold text-orange-500">{metrics.escalatedCount}</p></div><ArrowUpRight className="text-orange-400"/></div>
       </div>
 
-      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="flex flex-col flex-1 bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border flex flex-col gap-4 bg-slate-50/50">
            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex bg-surface border border-slate-200 rounded-lg p-1">

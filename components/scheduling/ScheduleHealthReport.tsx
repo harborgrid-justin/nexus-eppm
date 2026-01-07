@@ -36,6 +36,27 @@ const ScheduleHealthReport: React.FC = () => {
     ];
   }, [project]);
 
+  const recommendations = useMemo(() => {
+      if (!metrics) return ["No data to analyze."];
+      const recs = [];
+      const logicMetric = metrics.find(m => m.id === 1);
+      const floatMetric = metrics.find(m => m.id === 6);
+      const lagMetric = metrics.find(m => m.id === 2);
+      
+      if (logicMetric && logicMetric.count > 0) {
+          recs.push(`Fix ${logicMetric.count} tasks with missing predecessors/successors to ensure network integrity.`);
+      }
+      if (floatMetric && floatMetric.count > 5) {
+          recs.push(`High float on ${floatMetric.count} tasks indicates loose path logic. Review lags and constraints.`);
+      }
+      if (lagMetric && lagMetric.count > 2) {
+          recs.push(`Reduce long lags on ${lagMetric.count} dependencies to improve schedule transparency.`);
+      }
+      
+      if (recs.length === 0) return ["Schedule logic appears sound. Continue monitoring critical path."];
+      return recs;
+  }, [metrics]);
+
   if (!project || !metrics) return <div>No tasks to analyze.</div>;
 
   const overallScore = metrics.reduce((sum, m) => sum + (m.count === 0 ? 1 : 0), 0) / metrics.length * 100;
@@ -68,11 +89,11 @@ const ScheduleHealthReport: React.FC = () => {
                 </div>
                 <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.semantic.warning.bg}/50`}>
                     <p className={`${theme.typography.label} ${theme.colors.semantic.warning.text}`}>Dangling Activities</p>
-                    <p className="text-lg font-bold">5</p>
+                    <p className="text-lg font-bold">{metrics[0].count}</p>
                 </div>
                 <div className={`p-4 rounded-xl border ${theme.colors.border} bg-purple-50`}>
                     <p className={`${theme.typography.label} text-purple-600`}>Constraint Impact</p>
-                    <p className="text-lg font-bold">Moderate</p>
+                    <p className="text-lg font-bold">{metrics[4].count > 0 ? 'High' : 'Low'}</p>
                 </div>
                 <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.semantic.success.bg}/50`}>
                     <p className={`${theme.typography.label} ${theme.colors.semantic.success.text}`}>Status updates</p>
@@ -120,11 +141,9 @@ const ScheduleHealthReport: React.FC = () => {
             <div className={`mt-8 grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
                  <div className="p-6 bg-indigo-900 text-white rounded-xl shadow-lg">
                     <h3 className="font-bold flex items-center gap-2 mb-4"><Info size={18}/> Master Scheduler Recommendation</h3>
-                    <p className="text-indigo-100 text-sm leading-relaxed">
-                        The schedule contains multiple high-float activities that are not properly linked to successors. 
-                        This creates an optimistic bias in the P80 confidence level. 
-                        Recommend closing out logic loops in WBS 1.3 (Mechanical) to stabilize the Critical Path.
-                    </p>
+                    <ul className="text-indigo-100 text-sm leading-relaxed list-disc list-inside space-y-2">
+                        {recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
+                    </ul>
                  </div>
                  <div className={`${theme.components.card} p-6`}>
                     <h3 className={`${theme.typography.h3} mb-4 flex items-center gap-2`}><BarChart size={18}/> Logic Type Distribution</h3>

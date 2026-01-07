@@ -20,7 +20,7 @@ const DATA_BURN = [
 export const DesignProjectManagement = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Project Management" icon={ClipboardList} count="PM-01 to PM-70" />
+        <SectionHeading title="CPM & Scheduling" icon={ClipboardList} count="PM-01 to PM-70" />
         
         {/* --- TASKS & LIST VIEWS --- */}
         <div className="space-y-6">

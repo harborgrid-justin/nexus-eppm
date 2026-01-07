@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalIcon, Filter, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalIcon, Filter, Plus, CalendarDays } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { Button } from '../ui/Button';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const TeamCalendar: React.FC = () => {
     const theme = useTheme();
@@ -42,6 +42,11 @@ export const TeamCalendar: React.FC = () => {
         dispatch({ type: 'ADD_TEAM_EVENT', payload: newEvent });
     };
 
+    const monthEvents = events.filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === currentMonth.getMonth() && d.getFullYear() === currentMonth.getFullYear();
+    });
+
     return (
         <div className={`h-full flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden`}>
             {/* Header */}
@@ -72,57 +77,73 @@ export const TeamCalendar: React.FC = () => {
             </div>
 
             {/* Grid */}
-            <div className="flex-1 overflow-auto">
-                <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-100 text-center">
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                        <div key={d} className="py-2 text-xs font-bold text-slate-500 uppercase tracking-widest">{d}</div>
-                    ))}
-                </div>
-                <div className="grid grid-cols-7 auto-rows-fr h-full min-h-[500px]">
-                    {[...Array(42)].map((_, i) => {
-                        const dayNum = i - startDay + 1;
-                        const isCurrentMonth = dayNum > 0 && dayNum <= daysInMonth;
-                        
-                        let dayEvents = [];
-                        if (isCurrentMonth) {
-                            dayEvents = events.filter(e => {
-                                const d = new Date(e.date);
-                                return d.getDate() === dayNum && 
-                                       d.getMonth() === currentMonth.getMonth() && 
-                                       d.getFullYear() === currentMonth.getFullYear() &&
-                                       (filter === 'All' || e.type === filter);
-                            });
-                        }
+            <div className="flex-1 overflow-auto relative">
+                {monthEvents.length === 0 && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center p-12 pointer-events-none">
+                         <div className="pointer-events-auto w-full max-w-md">
+                            <EmptyGrid 
+                                title="No Events Scheduled"
+                                description={`The agenda for ${currentMonth.toLocaleString('default', { month: 'long' })} is currently clear.`}
+                                icon={CalendarDays}
+                                actionLabel="Schedule Team Event"
+                                onAdd={handleAddEvent}
+                            />
+                         </div>
+                    </div>
+                )}
+                
+                <div className={`h-full flex flex-col ${monthEvents.length === 0 ? 'opacity-20 blur-[1px]' : ''}`}>
+                    <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-100 text-center">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                            <div key={d} className="py-2 text-xs font-bold text-slate-500 uppercase tracking-widest">{d}</div>
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-7 auto-rows-fr h-full min-h-[500px]">
+                        {[...Array(42)].map((_, i) => {
+                            const dayNum = i - startDay + 1;
+                            const isCurrentMonth = dayNum > 0 && dayNum <= daysInMonth;
+                            
+                            let dayEvents = [];
+                            if (isCurrentMonth) {
+                                dayEvents = events.filter(e => {
+                                    const d = new Date(e.date);
+                                    return d.getDate() === dayNum && 
+                                        d.getMonth() === currentMonth.getMonth() && 
+                                        d.getFullYear() === currentMonth.getFullYear() &&
+                                        (filter === 'All' || e.type === filter);
+                                });
+                            }
 
-                        const isToday = isCurrentMonth && 
-                                        dayNum === new Date().getDate() && 
-                                        currentMonth.getMonth() === new Date().getMonth() &&
-                                        currentMonth.getFullYear() === new Date().getFullYear();
+                            const isToday = isCurrentMonth && 
+                                            dayNum === new Date().getDate() && 
+                                            currentMonth.getMonth() === new Date().getMonth() &&
+                                            currentMonth.getFullYear() === new Date().getFullYear();
 
-                        return (
-                            <div 
-                                key={i} 
-                                className={`
-                                    border-b border-r border-slate-100 p-2 flex flex-col gap-1 relative min-h-[100px] transition-colors
-                                    ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white hover:bg-slate-50'}
-                                `}
-                            >
-                                <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1 ${isToday ? 'bg-nexus-600 text-white shadow-md' : ''}`}>
-                                    {isCurrentMonth ? dayNum : ''}
-                                </span>
-                                
-                                {isCurrentMonth && dayEvents.map(ev => (
-                                    <div 
-                                        key={ev.id} 
-                                        className={`text-[10px] px-2 py-1 rounded border font-medium truncate cursor-pointer hover:opacity-80 shadow-sm ${getEventColor(ev.type)}`}
-                                        title={ev.title}
-                                    >
-                                        {ev.title}
-                                    </div>
-                                ))}
-                            </div>
-                        );
-                    })}
+                            return (
+                                <div 
+                                    key={i} 
+                                    className={`
+                                        border-b border-r border-slate-100 p-2 flex flex-col gap-1 relative min-h-[100px] transition-colors
+                                        ${!isCurrentMonth ? 'bg-slate-50/50 text-slate-300' : 'bg-white hover:bg-slate-50'}
+                                    `}
+                                >
+                                    <span className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full mb-1 ${isToday ? 'bg-nexus-600 text-white shadow-md' : ''}`}>
+                                        {isCurrentMonth ? dayNum : ''}
+                                    </span>
+                                    
+                                    {isCurrentMonth && dayEvents.map(ev => (
+                                        <div 
+                                            key={ev.id} 
+                                            className={`text-[10px] px-2 py-1 rounded border font-bold truncate cursor-pointer hover:opacity-80 shadow-sm ${getEventColor(ev.type)}`}
+                                            title={ev.title}
+                                        >
+                                            {ev.title}
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>

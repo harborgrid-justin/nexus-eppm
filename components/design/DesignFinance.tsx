@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   DollarSign, CreditCard, TrendingUp, Activity, ArrowUpRight, ArrowDownLeft, 
@@ -9,7 +8,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignFinance = () => {
   return (
     <div className="space-y-10 animate-fade-in pb-20">
-        <SectionHeading title="Finance & Banking" icon={DollarSign} count="FIN-01 to FIN-20" />
+        <SectionHeading title="Fiscal Patterns" icon={DollarSign} count="FIN-01 to FIN-20" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             

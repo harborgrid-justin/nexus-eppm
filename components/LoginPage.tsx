@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Form, useActionData, useNavigation } from 'react-router-dom';
 import { Lock, Mail, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
@@ -22,7 +21,7 @@ const LoginPage: React.FC = () => {
              <p className={`${theme.colors.text.secondary} text-sm mt-1`}>Enterprise Portfolio Management</p>
           </div>
 
-          <Form method="post" className="p-8 space-y-6">
+          <Form method="post" className="p-8 space-y-6 bg-white">
             {actionData?.error && (
               <div className={`p-3 ${theme.colors.semantic.danger.bg} border ${theme.colors.semantic.danger.border} ${theme.colors.semantic.danger.text} text-sm rounded-lg flex items-center gap-2`}>
                 <Lock size={14} /> {actionData.error}
@@ -40,7 +39,7 @@ const LoginPage: React.FC = () => {
                   name="email"
                   required
                   defaultValue="justin@nexus.com"
-                  className={`w-full pl-10 pr-4 py-2.5 ${theme.colors.background} border ${theme.colors.border} rounded-lg focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none transition-all`}
+                  className={`w-full pl-10 pr-4 py-2.5 ${theme.colors.background} border ${theme.colors.border} rounded-lg focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none transition-all ${theme.colors.text.primary}`}
                   placeholder="name@company.com"
                 />
               </div>
@@ -57,7 +56,7 @@ const LoginPage: React.FC = () => {
                   name="password"
                   required
                   defaultValue="password"
-                  className={`w-full pl-10 pr-4 py-2.5 ${theme.colors.background} border ${theme.colors.border} rounded-lg focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none transition-all`}
+                  className={`w-full pl-10 pr-4 py-2.5 ${theme.colors.background} border ${theme.colors.border} rounded-lg focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none transition-all ${theme.colors.text.primary}`}
                   placeholder="••••••••"
                 />
               </div>
@@ -79,6 +78,10 @@ const LoginPage: React.FC = () => {
               )}
             </button>
           </Form>
+          
+          <div className={`p-4 ${theme.colors.background} border-t ${theme.colors.border} text-center text-xs ${theme.colors.text.tertiary}`}>
+              Protected by Enterprise SSO and MFA.
+          </div>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
-
 import React from 'react';
-import { ChevronLeft, ChevronRight, Save, Send, AlertCircle, Lock, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Save, Send, Lock, Plus, Clock } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
 import { useTimesheetLogic } from '../../hooks/domain/useTimesheetLogic';
 import { Button } from '../ui/Button';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const Timesheet: React.FC = () => {
   const theme = useTheme();
@@ -13,7 +13,7 @@ const Timesheet: React.FC = () => {
       handleHourChange, shiftWeek, saveSheet, addRow, user
   } = useTimesheetLogic();
 
-  if (!currentWeekStart || !user) return <div className="p-6 text-slate-400">Loading timesheet...</div>;
+  if (!currentWeekStart || !user) return <div className={`p-6 ${theme.colors.text.secondary}`}>Loading timesheet...</div>;
 
   return (
     <div className={`h-full flex flex-col ${theme.components.card} overflow-hidden`}>
@@ -54,7 +54,7 @@ const Timesheet: React.FC = () => {
                         </button>
                     </>
                 ) : (
-                    <div className="flex items-center gap-2 text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+                    <div className={`flex items-center gap-2 ${theme.colors.text.tertiary} ${theme.colors.background} px-3 py-2 rounded-lg border ${theme.colors.border}`}>
                         <Lock size={14}/> Period Locked
                     </div>
                 )}
@@ -63,66 +63,71 @@ const Timesheet: React.FC = () => {
 
         {/* Grid */}
         <div className="flex-1 overflow-auto">
-            <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-                <thead className={`${theme.colors.background} sticky top-0 z-10`}>
-                    <tr>
-                        <th className={`${theme.components.table.header} w-64 border-r sticky left-0 z-20 ${theme.colors.background} shadow-sm`}>Task / Project</th>
-                        {weekDates.map((date, i) => (
-                            <th key={i} className={`${theme.components.table.header} w-24 text-center border-r`}>
-                                <div className={date.getDay() === 0 || date.getDay() === 6 ? 'text-slate-400' : ''}>
-                                    {date.toLocaleDateString('en-US', {weekday: 'short'})}
-                                </div>
-                                <div className={`text-[10px] font-normal ${date.toDateString() === new Date().toDateString() ? 'bg-nexus-600 text-white px-1.5 rounded-full' : ''}`}>
-                                    {date.getDate()}
-                                </div>
-                            </th>
-                        ))}
-                        <th className={`${theme.components.table.header} w-24 text-center`}>Total</th>
-                    </tr>
-                </thead>
-                <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-','divide-')}`}>
-                    {rows.map((row, rIdx) => (
-                        <tr key={rIdx} className={`hover:${theme.colors.background} group`}>
-                            <td className={`px-4 py-3 border-r ${theme.colors.border} sticky left-0 z-10 bg-white group-hover:bg-slate-50`}>
-                                <div className={`font-medium text-sm ${theme.colors.text.primary} truncate max-w-[200px]`} title={row.taskName}>{row.taskName}</div>
-                                <div className={`text-xs ${theme.colors.text.secondary} truncate max-w-[200px]`}>{row.projectName}</div>
-                            </td>
-                            {row.hours.map((hrs, dIdx) => (
-                                <td key={dIdx} className="p-2 text-center border-r border-slate-50">
-                                    <input 
-                                        type="number" 
-                                        min="0"
-                                        max="24"
-                                        step="0.5"
-                                        value={hrs === 0 ? '' : hrs}
-                                        onChange={(e) => handleHourChange(rIdx, dIdx, e.target.value)}
-                                        disabled={!isEditable}
-                                        className={`w-full text-center border ${theme.colors.border} rounded py-1 text-sm focus:ring-2 focus:ring-nexus-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-500 transition-colors ${hrs > 8 ? 'text-orange-600 font-bold bg-orange-50/50' : ''}`}
-                                    />
-                                </td>
-                            ))}
-                            <td className={`px-4 py-3 text-center font-bold text-sm ${theme.colors.text.primary} bg-slate-50/50`}>
-                                {row.hours.reduce((a,b) => a+b, 0).toFixed(1)}
-                            </td>
-                        </tr>
-                    ))}
-                    {isEditable && (
+            {rows.length === 0 && !isEditable ? (
+                <div className="h-full flex items-center justify-center p-8">
+                     <EmptyGrid 
+                        title="Timesheet Empty" 
+                        description="No hours recorded for this period."
+                        icon={Clock}
+                        actionLabel="View Current Period"
+                        onAdd={() => shiftWeek('next')}
+                     />
+                </div>
+            ) : (
+                <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+                    <thead className={`${theme.colors.background} sticky top-0 z-10`}>
                         <tr>
-                            <td colSpan={9} className="p-2">
-                                <Button variant="ghost" size="sm" icon={Plus} onClick={addRow} className="w-full border border-dashed border-slate-300 text-slate-500">Add Line</Button>
-                            </td>
+                            <th className={`${theme.components.table.header} w-64 border-r ${theme.colors.border} sticky left-0 z-20 ${theme.colors.background} shadow-sm`}>Task / Project</th>
+                            {weekDates.map((date, i) => (
+                                <th key={i} className={`${theme.components.table.header} w-24 text-center border-r ${theme.colors.border}`}>
+                                    <div className={date.getDay() === 0 || date.getDay() === 6 ? theme.colors.text.tertiary : theme.colors.text.primary}>
+                                        {date.toLocaleDateString('en-US', {weekday: 'short'})}
+                                    </div>
+                                    <div className={`text-[10px] font-normal ${date.toDateString() === new Date().toDateString() ? 'bg-nexus-600 text-white px-1.5 rounded-full' : ''}`}>
+                                        {date.getDate()}
+                                    </div>
+                                </th>
+                            ))}
+                            <th className={`${theme.components.table.header} w-24 text-center`}>Total</th>
                         </tr>
-                    )}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-','divide-')}`}>
+                        {rows.map((row, rIdx) => (
+                            <tr key={rIdx} className={`hover:${theme.colors.background} group`}>
+                                <td className={`px-4 py-3 border-r ${theme.colors.border} sticky left-0 z-10 bg-white group-hover:bg-slate-50`}>
+                                    <div className={`font-medium text-sm ${theme.colors.text.primary} truncate max-w-[200px]`} title={row.taskName}>{row.taskName}</div>
+                                    <div className={`text-xs ${theme.colors.text.secondary} truncate max-w-[200px]`}>{row.projectName}</div>
+                                </td>
+                                {row.hours.map((hrs, dIdx) => (
+                                    <td key={dIdx} className={`p-2 text-center border-r ${theme.colors.border}`}>
+                                        <input 
+                                            type="number" 
+                                            min="0"
+                                            max="24"
+                                            step="0.5"
+                                            value={hrs === 0 ? '' : hrs}
+                                            onChange={(e) => handleHourChange(rIdx, dIdx, e.target.value)}
+                                            disabled={!isEditable}
+                                            className={`w-full text-center border ${theme.colors.border} rounded py-1 text-sm focus:ring-2 focus:ring-nexus-500 focus:outline-none disabled:bg-slate-50 disabled:text-slate-500 transition-colors ${hrs > 8 ? 'text-orange-600 font-bold bg-orange-50/50' : theme.colors.surface}`}
+                                        />
+                                    </td>
+                                ))}
+                                <td className={`px-4 py-3 text-center font-bold text-sm ${theme.colors.text.primary} ${theme.colors.background}/50`}>
+                                    {row.hours.reduce((a,b) => a+b, 0).toFixed(1)}
+                                </td>
+                            </tr>
+                        ))}
+                        {isEditable && (
+                            <tr>
+                                <td colSpan={9} className="p-2">
+                                    <Button variant="ghost" size="sm" icon={Plus} onClick={addRow} className={`w-full border-2 border-dashed ${theme.colors.border} ${theme.colors.text.secondary}`}>Add Line</Button>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            )}
         </div>
-        
-        {rows.length === 0 && !isEditable && (
-            <div className={`flex flex-col items-center justify-center h-64 ${theme.colors.text.tertiary}`}>
-                <AlertCircle size={32} className="mb-2 opacity-50"/>
-                <p>No tasks assigned for this period.</p>
-            </div>
-        )}
     </div>
   );
 };

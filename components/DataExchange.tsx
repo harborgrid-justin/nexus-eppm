@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud, FileCode, Grid, Server } from 'lucide-react';
+import { Database, LayoutDashboard, GitMerge, Network, History, Map, Download, UploadCloud, FileCode, Grid, Server, Loader2 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { ExchangeDashboard } from './admin/data/ExchangeDashboard';
 import { IntegrationDesigner } from './admin/data/IntegrationDesigner';
@@ -45,7 +45,7 @@ const DataExchange: React.FC = () => {
     };
 
     return (
-        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4 flex flex-col h-full`}>
             <PageHeader 
                 title="Data Exchange Hub" 
                 subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."

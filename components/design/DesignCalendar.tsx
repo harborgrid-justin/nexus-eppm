@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -6,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignCalendar = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Calendar & Scheduling" icon={Calendar} count="CAL-01 to CAL-55" />
+        <SectionHeading title="Planning Calendar" icon={Calendar} count="CAL-01 to CAL-55" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <DemoContainer>
                 <ComponentLabel id="CAL-01" name="Month Cell (Std)" />

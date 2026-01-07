@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Target, DollarSign, GripVertical, AlertTriangle } from 'lucide-react';
+import { Target, DollarSign, GripVertical, AlertTriangle, Plus } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { useStrategicAlignmentLogic } from '../../hooks/domain/useStrategicAlignmentLogic';
+import { FieldPlaceholder } from '../common/FieldPlaceholder';
 
 const StrategicAlignmentBoard: React.FC = () => {
     const theme = useTheme();
@@ -18,7 +18,7 @@ const StrategicAlignmentBoard: React.FC = () => {
                     <p className={theme.typography.small}>Balance investment across strategic pillars.</p>
                 </div>
                 <div className={`flex items-center gap-2 ${theme.colors.background} p-2 rounded-lg text-sm ${theme.colors.text.secondary} border ${theme.colors.border}`}>
-                    <Target size={16}/> Total Portfolio: <strong>{formatCompactCurrency(totalPortfolioBudget)}</strong>
+                    <Target size={16} className="text-nexus-600"/> Total Portfolio: <strong>{formatCompactCurrency(totalPortfolioBudget)}</strong>
                 </div>
             </div>
 
@@ -44,45 +44,50 @@ const StrategicAlignmentBoard: React.FC = () => {
 
                             {/* Cards Container */}
                             <div className="flex-1 p-3 space-y-3 overflow-y-auto scrollbar-thin">
-                                {column.projects.map(proj => (
-                                    <Card 
-                                        key={proj.id} 
-                                        className={`p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-nexus-300 group relative border ${theme.colors.border} ${theme.colors.surface}`}
-                                        draggable
-                                    >
-                                        <div className="absolute top-3 right-3 text-slate-300 opacity-0 group-hover:opacity-100">
-                                            <GripVertical size={14}/>
-                                        </div>
-                                        <div className="mb-2">
-                                            <span className="text-[10px] font-mono text-slate-400">{proj.code}</span>
-                                            <h4 className={`font-bold text-sm ${theme.colors.text.primary} leading-tight`}>{proj.name}</h4>
-                                        </div>
-                                        <div className={`flex justify-between items-center pt-2 border-t ${theme.colors.border.replace('border-','border-slate-')}50`}>
-                                            <div className={`flex items-center gap-1 text-xs font-mono ${theme.colors.text.secondary}`}>
-                                                <DollarSign size={10}/> {formatCompactCurrency(proj.budget)}
+                                {column.projects.length > 0 ? (
+                                    column.projects.map(proj => (
+                                        <Card 
+                                            key={proj.id} 
+                                            className={`p-3 cursor-grab active:cursor-grabbing hover:shadow-md hover:border-nexus-300 group relative border ${theme.colors.border} ${theme.colors.surface}`}
+                                            draggable
+                                        >
+                                            <div className="absolute top-3 right-3 text-slate-300 opacity-0 group-hover:opacity-100">
+                                                <GripVertical size={14}/>
                                             </div>
-                                            {proj.strategicImportance < 5 && (
-                                                <div className="text-[10px] text-orange-500 flex items-center gap-1" title="Low Strategic Score">
-                                                    <AlertTriangle size={10}/> Review
+                                            <div className="mb-2">
+                                                <span className="text-[10px] font-mono text-slate-400">{proj.code}</span>
+                                                <h4 className={`font-bold text-sm ${theme.colors.text.primary} leading-tight`}>{proj.name}</h4>
+                                            </div>
+                                            <div className={`flex justify-between items-center pt-2 border-t ${theme.colors.border.replace('border-','border-slate-')}50`}>
+                                                <div className={`flex items-center gap-1 text-xs font-mono ${theme.colors.text.secondary}`}>
+                                                    <DollarSign size={10}/> {formatCompactCurrency(proj.budget)}
                                                 </div>
-                                            )}
-                                        </div>
-                                        {/* Strategic Score Bar */}
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase">Strat. Score</span>
-                                            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                                <div 
-                                                    className={`h-full ${proj.strategicImportance >= 8 ? 'bg-green-500' : proj.strategicImportance >= 5 ? 'bg-yellow-500' : 'bg-red-500'}`} 
-                                                    style={{ width: `${proj.strategicImportance * 10}%` }}
-                                                ></div>
+                                                {proj.strategicImportance < 5 && (
+                                                    <div className="text-[10px] text-orange-500 flex items-center gap-1" title="Low Strategic Score">
+                                                        <AlertTriangle size={10}/> Review
+                                                    </div>
+                                                )}
                                             </div>
-                                            <span className="text-[9px] font-mono font-bold text-slate-600">{proj.strategicImportance}</span>
-                                        </div>
-                                    </Card>
-                                ))}
-                                {column.projects.length === 0 && (
-                                    <div className={`h-24 border-2 border-dashed ${theme.colors.border} rounded-lg flex items-center justify-center text-xs ${theme.colors.text.tertiary} italic`}>
-                                        Drop projects here
+                                            {/* Strategic Score Bar */}
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase">Strat. Score</span>
+                                                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className={`h-full ${proj.strategicImportance >= 8 ? 'bg-green-500' : proj.strategicImportance >= 5 ? 'bg-yellow-500' : 'bg-red-500'}`} 
+                                                        style={{ width: `${proj.strategicImportance * 10}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="text-[9px] font-mono font-bold text-slate-600">{proj.strategicImportance}</span>
+                                            </div>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <div className="h-full">
+                                        <FieldPlaceholder 
+                                            label="No Initiatives Aligned" 
+                                            onAdd={() => {}} 
+                                            className="h-full min-h-[120px]"
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -93,3 +98,5 @@ const StrategicAlignmentBoard: React.FC = () => {
         </div>
     );
 };
+
+export default StrategicAlignmentBoard;

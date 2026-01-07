@@ -1,5 +1,4 @@
 import React from 'react';
-// FIX: Imported AlertTriangle to resolve missing component error.
 import {
   History, Clock, CheckCircle, XCircle, User, FileText, GitCommit,
   ArrowRight, Milestone, ChevronRight, MessageSquare, DollarSign, Scale,
@@ -17,7 +16,7 @@ import { ProgressBar } from '../common/ProgressBar';
 export const DesignTimeline = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Timelines & History" icon={History} count="TL-01 to TL-89" />
+        <SectionHeading title="History & Feeds" icon={History} count="TL-01 to TL-89" />
 
         {/* --- VERTICAL FEEDS & AUDIT LOGS --- */}
         <div className="space-y-6">

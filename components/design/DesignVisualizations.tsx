@@ -6,7 +6,7 @@ import { BarVisuals } from './visuals/BarVisuals';
 
 export const DesignVisualizations = () => (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Micro Charts & Sparklines" icon={Activity} count="VZ-01 to VZ-12" />
+        <SectionHeading title="Chart Foundations" icon={BarChart3} count="VZ-01 to VZ-12" />
         <MicroVisuals />
         <SectionHeading title="Bar & Column Variants" icon={BarChart3} count="VZ-13 to VZ-24" />
         <BarVisuals />

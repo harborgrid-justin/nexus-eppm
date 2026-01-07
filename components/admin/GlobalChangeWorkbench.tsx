@@ -11,9 +11,12 @@ const GlobalChangeWorkbench: React.FC = () => {
     const theme = useTheme();
     const { state, dispatch } = useData();
 
-    const [rules, setRules] = useState<GlobalChangeRule[]>([
-        { id: '1', field: 'Status', operator: 'is', value: 'Active', thenField: 'Priority', thenValue: 'High' }
-    ]);
+    // Init from Global State
+    const [rules, setRules] = useState<GlobalChangeRule[]>(
+        state.globalChangeRules.length > 0 
+        ? state.globalChangeRules 
+        : []
+    );
     const [isSimulating, setIsSimulating] = useState(false);
     const [simulationResult, setSimulationResult] = useState<{ affectedTasks: number; affectedProjects: number } | null>(null);
 
@@ -36,22 +39,18 @@ const GlobalChangeWorkbench: React.FC = () => {
         let affectedTasksCount = 0;
         let affectedProjectsSet = new Set<string>();
 
-        // Simple evaluation engine for demonstration of "Production Logic"
         state.projects.forEach(p => {
             let projectMatches = false;
             
             p.tasks.forEach(t => {
                 let taskMatches = true;
 
-                // Check if task matches ALL criteria (AND logic for simplicity here)
                 for (const rule of rules) {
                     let fieldVal: string | number | undefined | null = '';
                     
-                    // Map UI fields to data properties using keyof Task when possible
-                    // This mapping connects the UI dropdown values to the Task interface properties
                     if (rule.field === 'Status') fieldVal = t.status;
                     else if (rule.field === 'Name') fieldVal = t.name;
-                    else if (rule.field === 'Category') fieldVal = p.category; // Fallback to project property
+                    else if (rule.field === 'Category') fieldVal = p.category;
                     
                     const ruleVal = rule.value;
                     
@@ -83,7 +82,6 @@ const GlobalChangeWorkbench: React.FC = () => {
 
     const handleSimulate = () => {
         setIsSimulating(true);
-        // Execute the logic check inside a timeout to allow UI to render "Loading" state
         setTimeout(() => {
             const result = runLogicCheck();
             setSimulationResult(result);
@@ -95,7 +93,6 @@ const GlobalChangeWorkbench: React.FC = () => {
         if (!simulationResult) return;
         if (confirm(`WARNING: This will modify ${simulationResult.affectedTasks} tasks across ${simulationResult.affectedProjects} projects. This action cannot be undone. Continue?`)) {
             dispatch({ type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES', payload: rules });
-            // In a real implementation, we would dispatch a BULK_UPDATE action here based on the simulation results
             alert(`Global Change Committed. ${simulationResult.affectedTasks} records updated.`);
             setSimulationResult(null);
         }
@@ -161,6 +158,9 @@ const GlobalChangeWorkbench: React.FC = () => {
             )}
 
             <div className={`flex-1 ${theme.colors.background} rounded-2xl p-4 md:p-8 overflow-y-auto space-y-4 shadow-inner border ${theme.colors.border}`}>
+                {rules.length === 0 && (
+                    <div className="text-center p-12 text-slate-400 italic">No global change rules defined. Add a rule to begin.</div>
+                )}
                 {rules.map((rule, idx) => (
                     <div key={rule.id} className={`flex flex-col md:flex-row flex-wrap items-center gap-4 ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} relative group animate-in slide-in-from-left-4 duration-300 shadow-sm`}>
                         <button 

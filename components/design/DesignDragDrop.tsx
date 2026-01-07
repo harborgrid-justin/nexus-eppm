@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Move, GripVertical } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -8,7 +7,7 @@ export const DesignDragDrop = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="Drag & Drop Interactions" icon={Move} count="DD-01 to DD-30" />
+        <SectionHeading title="Gestures & Drag" icon={Move} count="DD-01 to DD-30" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="DD-01" name="Draggable List Item" />
@@ -28,6 +27,7 @@ export const DesignDragDrop = () => {
                         dropZoneStatus === 'hover' ? 'bg-blue-50 border-blue-400 text-blue-600 scale-[1.02]' :
                         'bg-slate-50 border-slate-200 text-slate-400'
                     }`}
+                    // Removed duplicate onDragOver attribute to fix JSX compilation error
                     onDragOver={(e) => { e.preventDefault(); setDropZoneStatus('hover'); }}
                     onDragLeave={() => setDropZoneStatus('idle')}
                     onDrop={(e) => { e.preventDefault(); setDropZoneStatus('idle'); }}

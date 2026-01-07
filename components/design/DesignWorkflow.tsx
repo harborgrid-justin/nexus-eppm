@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GitBranch, Play, User, ChevronRight } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -6,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignWorkflow = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Workflow Engine" icon={GitBranch} count="WF-01 to WF-50" />
+        <SectionHeading title="Automation Engine" icon={GitBranch} count="WF-01 to WF-50" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="WF-01" name="Flow Start Event" />

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { Project, Risk, BudgetLineItem, ChangeOrder, Stakeholder, RiskManagementPlan, PurchaseOrder, QualityReport, NonConformanceReport, CommunicationLog, Resource, EVMMetrics, Issue } from '../types/index';
+import { Project, Risk, BudgetLineItem, ChangeOrder, Stakeholder, RiskManagementPlan, PurchaseOrder, QualityReport, NonConformanceReport, CommunicationLog, Resource, EVMMetrics, Issue, Expense } from '../types/index';
 
 // Define a comprehensive type for all data related to a project workspace
 export interface ProjectWorkspaceData {
@@ -8,6 +8,7 @@ export interface ProjectWorkspaceData {
     risks: Risk[];
     issues: Issue[];
     budgetItems: BudgetLineItem[];
+    expenses: Expense[];
     changeOrders: ChangeOrder[];
     purchaseOrders: PurchaseOrder[];
     qualityReports: QualityReport[];

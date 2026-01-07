@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   FileText, Folder, Image, UploadCloud, Search, MoreVertical, 
@@ -20,7 +19,7 @@ export const DesignDocuments = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="Document Management" icon={Folder} count="DOC-01 to DOC-40" />
+        <SectionHeading title="DMS Interface" icon={Folder} count="DOC-01 to DOC-40" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* --- ICONS & THUMBNAILS --- */}
@@ -356,7 +355,7 @@ export const DesignDocuments = () => {
                 <div className="relative h-16 bg-white border border-slate-200 rounded flex items-center justify-center overflow-hidden">
                     <span className="absolute text-slate-100 text-3xl font-black -rotate-12 select-none pointer-events-none tracking-widest">DRAFT</span>
                     <div className="relative z-10 text-[9px] text-slate-600 text-center px-4 leading-relaxed opacity-60">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        Lorem ipsum document content...
                     </div>
                 </div>
             </DemoContainer>

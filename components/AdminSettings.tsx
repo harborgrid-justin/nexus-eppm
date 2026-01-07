@@ -21,8 +21,8 @@ import EnterpriseResourceSettings from '../resources/EnterpriseResourceSettings'
 import WorkflowDesigner from './admin/WorkflowDesigner';
 import AuditLog from './admin/AuditLog';
 import GeneralSettings from './admin/GeneralSettings';
-import { useAdminSettingsLogic } from '../hooks/domain/useAdminSettingsLogic';
-import { useTheme } from '../context/ThemeContext';
+import { useAdminSettingsLogic } from '../../hooks/domain/useAdminSettingsLogic';
+import { useTheme } from '../../context/ThemeContext';
 
 const AdminSettings: React.FC = () => {
   const theme = useTheme();
@@ -70,7 +70,7 @@ const AdminSettings: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4 flex flex-col h-full`}>
       <PageHeader 
         title="Enterprise Administration" 
         subtitle="Configure global system logic and enterprise data definitions."

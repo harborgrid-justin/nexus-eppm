@@ -7,7 +7,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignControls = () => {
     return (
         <div className="space-y-12 animate-fade-in">
-            <SectionHeading title="Buttons & Badges" icon={Sparkles} count="CTL-01 to CTL-20" />
+            <SectionHeading title="Buttons & Triggers" icon={Sparkles} count="CTL-01 to CTL-20" />
             
             <DemoContainer className="space-y-4">
                 <ComponentLabel id="CTL-01" name="Buttons" />

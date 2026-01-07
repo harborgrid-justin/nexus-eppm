@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Users } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -46,7 +47,7 @@ const ResourceManagement: React.FC = () => {
 
   // FIX: Replaced simple loading text with professional grey fill placeholder to avoid layout shift
   if (!project) return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
         <PageHeader title="Resource Management" subtitle="Staffing and allocation hub" icon={Users} />
         <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
             <Users size={48} className="mb-4 opacity-10" />
@@ -56,7 +57,7 @@ const ResourceManagement: React.FC = () => {
   );
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
       <PageHeader 
         title="Resource Management" 
         subtitle="Plan, staff, and manage your project and enterprise resources."

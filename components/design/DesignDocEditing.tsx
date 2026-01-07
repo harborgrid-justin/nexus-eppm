@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PenTool, Bold, Italic, Underline } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -6,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignDocEditing = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Document Editor" icon={PenTool} count="DE-01 to DE-50" />
+        <SectionHeading title="Rich Text Editor" icon={PenTool} count="DE-01 to DE-50" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="DE-01" name="Format Group" />

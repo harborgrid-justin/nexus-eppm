@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Info, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -13,7 +12,7 @@ export const DesignFeedback = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="Feedback & States" icon={AlertTriangle} count="FB-01 to FB-46" />
+        <SectionHeading title="State & Feedback" icon={AlertTriangle} count="FB-01 to FB-46" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="FB-01" name="Alert Info" />

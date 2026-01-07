@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Scale } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -6,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignLegal = () => {
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="Legal Patterns" icon={Scale} count="LG-01 to LG-50" />
+        <SectionHeading title="Regulatory Layouts" icon={Scale} count="LG-01 to LG-50" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="LG-01" name="Pleading Caption" />

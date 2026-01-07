@@ -34,7 +34,7 @@ export const DesignColors = () => {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-300">
-        <SectionHeading title="System Color Palette" icon={Palette} count="12 Base Swatches" />
+        <SectionHeading title="Color Variables" icon={Palette} count="12 Base Swatches" />
 
         <div className="space-y-8">
             <h4 className="text-lg font-black text-slate-900 border-b-2 border-slate-100 pb-2 flex items-center gap-2">

@@ -37,7 +37,7 @@ const FieldManagement: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4`}>
       <PageHeader 
         title="Field Management" 
         subtitle="Site operations, safety compliance, and daily reporting."

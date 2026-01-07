@@ -40,8 +40,12 @@ const RiskMatrix: React.FC = () => {
                                 const key = `${prob}-${imp}`;
                                 const cellRisks = matrixData[key] || [];
                                 const score = prob * imp;
+                                
+                                // Use semantic tokens for heatmap (using solid variant for high visibility, or bg variant for softer look)
+                                // We use a semi-transparent base for cells, and full for high risk
                                 let bgClass = 'bg-green-500/20 hover:bg-green-500/30';
-                                if (score >= 15) bgClass = 'bg-red-500/20 hover:bg-red-500/30'; else if (score >= 8) bgClass = 'bg-yellow-500/20 hover:bg-yellow-500/30';
+                                if (score >= 15) bgClass = 'bg-red-500/20 hover:bg-red-500/30'; 
+                                else if (score >= 8) bgClass = 'bg-yellow-500/20 hover:bg-yellow-500/30';
 
                                 return (
                                     <div 

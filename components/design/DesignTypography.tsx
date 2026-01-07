@@ -5,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignTypography = () => {
   return (
     <div className="space-y-12 animate-in fade-in duration-300 pb-20">
-        <SectionHeading title="Typography System" icon={Type} count="TYP-01 to TYP-12" />
+        <SectionHeading title="Typography" icon={Type} count="TYP-01 to TYP-12" />
         
         <div className="grid grid-cols-1 gap-8">
             <DemoContainer>

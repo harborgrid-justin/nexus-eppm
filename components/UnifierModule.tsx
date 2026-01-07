@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { CostSheet } from './unifier/CostSheet';
@@ -22,7 +23,7 @@ const UnifierModule: React.FC = () => {
   } = useUnifierLogic();
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4 flex flex-col h-full`}>
         <PageHeader title="Unifier Controls" subtitle="Cost control and business automation" icon={LayoutTemplate} />
 
         <div className={theme.layout.panelContainer}>

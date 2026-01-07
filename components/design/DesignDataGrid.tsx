@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, Settings, List, X } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -7,7 +6,7 @@ export const DesignDataGrid = () => {
   const [density, setDensity] = useState<'compact' | 'normal' | 'comfortable'>('normal');
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Data Grids & Tables" icon={Table} count="DG-01 to DG-50" />
+        <SectionHeading title="Grids & Tables" icon={Table} count="DG-01 to DG-50" />
         <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DemoContainer>

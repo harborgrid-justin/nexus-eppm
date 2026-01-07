@@ -6,7 +6,7 @@ import { Target, Shield, Users, Briefcase, Info } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { formatDate, formatCurrency } from '../../utils/formatters';
-import { FieldPlaceholder } from '../common/FieldPlaceholder';
+import { NarrativeField } from '../common/NarrativeField';
 
 const ProjectCharter: React.FC = () => {
   const { project, stakeholders } = useProjectWorkspace();
@@ -22,130 +22,121 @@ const ProjectCharter: React.FC = () => {
   [state.resources, project.managerId]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in`}>
         <div className="flex justify-between items-start">
             <div>
-                <h2 className={theme.typography.h2}>Project Charter</h2>
-                <p className={theme.typography.small}>Authorizing document for {project.name}</p>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Project Charter</h2>
+                <p className={theme.typography.small}>Authorizing document for corporate investment.</p>
             </div>
             <Badge variant={project.status === 'Active' ? 'success' : 'neutral'}>
                 {project.status || 'Draft'}
             </Badge>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-                <Card className="p-6">
-                    <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
-                        <Target size={18} className="text-nexus-600"/> Business Case & Justification
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+                <Card className="p-8">
+                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
+                        <Target size={14} className="text-nexus-600"/> Authorization Strategy
                     </h3>
-                    {project.businessCase ? (
-                        <p className={`text-sm ${theme.colors.text.secondary} leading-relaxed mb-4 whitespace-pre-wrap`}>
-                            {project.businessCase}
-                        </p>
-                    ) : (
-                        <FieldPlaceholder label="No business case narrative defined." onAdd={() => {}} className="mb-4" />
-                    )}
-                    
-                    <div className={`${theme.colors.background} p-4 rounded-lg border ${theme.colors.border}`}>
-                        <h4 className={`text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-widest mb-2`}>Mission Description</h4>
-                        {project.description ? (
-                            <p className={`text-sm ${theme.colors.text.primary} leading-relaxed`}>{project.description}</p>
-                        ) : (
-                            <FieldPlaceholder label="Specify project mission and scope boundaries..." onAdd={() => {}} />
-                        )}
+                    <div className="space-y-8">
+                        <NarrativeField 
+                            label="Strategic Business Case"
+                            value={project.businessCase}
+                            placeholderLabel="Strategic rationale not yet formalized."
+                            onAdd={() => {}}
+                        />
+                        <NarrativeField 
+                            label="Primary Mission & Success Criteria"
+                            value={project.description}
+                            placeholderLabel="Mission statement pending executive alignment."
+                            onAdd={() => {}}
+                        />
                     </div>
                 </Card>
 
-                <Card className="p-6">
-                    <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
-                        <Shield size={18} className="text-blue-600"/> Execution Parameters
+                <Card className="p-8">
+                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
+                        <Shield size={14} className="text-blue-600"/> Boundary Conditions
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <h4 className={`text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-widest mb-3`}>Financial Constraints</h4>
+                            <h4 className={`text-xs font-bold text-slate-800 mb-4`}>Authorized Budgetary Ceilings</h4>
                             <ul className={`text-sm ${theme.colors.text.secondary} space-y-3`}>
                                 <li className="flex justify-between border-b border-slate-50 pb-2">
-                                    <span>Authorized Budget:</span> 
-                                    <span className="font-bold text-slate-900 font-mono">{formatCurrency(project.budget)}</span>
+                                    <span className="font-medium">Approved Funding:</span> 
+                                    <span className="font-black text-slate-900 font-mono">{formatCurrency(project.budget)}</span>
                                 </li>
                                 <li className="flex justify-between border-b border-slate-50 pb-2">
-                                    <span>Ceiling Delta:</span> 
-                                    <span className="font-bold text-slate-700 font-mono">10% Authorization</span>
+                                    <span className="font-medium">Escalation Threshold:</span> 
+                                    <span className="font-bold text-red-600 font-mono">+10.0%</span>
                                 </li>
                                 <li className="flex justify-between pb-1">
-                                    <span>Planned Duration:</span> 
+                                    <span className="font-medium">Lifecycle Dates:</span> 
                                     <span className="font-bold text-slate-800">{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
                                 </li>
                             </ul>
                         </div>
-                        <div>
-                            <h4 className={`text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-widest mb-3`}>High-Level Assumptions</h4>
-                            {project.assumptions && project.assumptions.length > 0 ? (
-                                <ul className={`text-sm ${theme.colors.text.secondary} space-y-2`}>
-                                    {project.assumptions.map((a, i) => (
-                                        <li key={i} className="flex gap-2">
-                                            <span className="text-nexus-500 font-bold">•</span>
-                                            {a.description}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <FieldPlaceholder label="No critical assumptions identified." onAdd={() => {}} />
-                            )}
+                        <div className="space-y-6">
+                            <NarrativeField 
+                                label="Critical Assumptions"
+                                value={project.assumptions?.[0]?.description}
+                                placeholderLabel="No external assumptions recorded."
+                                onAdd={() => {}}
+                            />
                         </div>
                     </div>
                 </Card>
             </div>
 
-            <div className="space-y-6">
-                <Card className="p-6">
-                    <h3 className={`font-bold ${theme.colors.text.primary} mb-6 flex items-center gap-2`}>
-                        <Users size={18} className="text-purple-600"/> Governance Authority
+            <div className="space-y-8">
+                <Card className="p-8">
+                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
+                        <Users size={14} className="text-purple-600"/> Decision Authorities
                     </h3>
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl ${theme.colors.background} flex items-center justify-center font-black text-lg ${theme.colors.text.tertiary} border ${theme.colors.border}`}>
+                            <div className={`w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-lg text-slate-400 border border-slate-200 shadow-inner`}>
                                 {sponsor ? sponsor.name.charAt(0) : '?'}
                             </div>
                             <div>
-                                <p className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-tighter`}>Project Sponsor</p>
-                                <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{sponsor?.name || 'Selection Pending'}</p>
-                                <p className="text-[10px] text-green-600 font-bold">Authority Level: III</p>
+                                <p className={`text-[10px] font-black text-slate-400 uppercase tracking-tighter`}>Portfolio Sponsor</p>
+                                <p className={`text-sm font-bold text-slate-900`}>{sponsor?.name || 'Unassigned'}</p>
+                                <p className="text-[9px] text-green-600 font-black uppercase">Approved Sign-off</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl ${theme.colors.background} flex items-center justify-center font-black text-lg ${theme.colors.text.tertiary} border ${theme.colors.border}`}>
+                            <div className={`w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-lg text-slate-400 border border-slate-200 shadow-inner`}>
                                 {pm ? pm.name.charAt(0) : '?'}
                             </div>
                             <div>
-                                <p className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-tighter`}>Project Manager</p>
-                                <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{pm?.name || 'Unassigned'}</p>
-                                <p className="text-[10px] text-blue-600 font-bold">ID: {pm?.id || '---'}</p>
+                                <p className={`text-[10px] font-black text-slate-400 uppercase tracking-tighter`}>Project Manager</p>
+                                <p className={`text-sm font-bold text-slate-900`}>{pm?.name || 'Unassigned'}</p>
+                                <p className="text-[10px] text-blue-600 font-bold">Authority Level: III</p>
                             </div>
                         </div>
                     </div>
                 </Card>
 
-                <div className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl relative overflow-hidden">
-                    <h3 className={`font-bold mb-4 flex items-center gap-2 text-nexus-400 relative z-10`}>
-                        <Info size={18} /> Official Record
+                <div className="p-8 bg-slate-900 text-white rounded-3xl shadow-2xl relative overflow-hidden">
+                    <h3 className={`font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-2 text-nexus-400 relative z-10`}>
+                        <Info size={18} /> Metadata Token
                     </h3>
-                    <div className="space-y-3 text-xs relative z-10">
-                        <div className="flex justify-between border-b border-white/10 pb-2">
-                            <span className="text-slate-400">Ledger Code</span>
-                            <span className="font-mono font-bold text-white">{project.code || 'PENDING'}</span>
+                    <div className="space-y-4 text-xs relative z-10">
+                        <div className="flex justify-between border-b border-white/10 pb-3">
+                            <span className="text-slate-500 font-bold uppercase">Ledger Ref</span>
+                            <span className="font-mono font-black text-white">{project.code || 'PENDING'}</span>
                         </div>
-                        <div className="flex justify-between border-b border-white/10 pb-2">
-                            <span className="text-slate-400">Creation Date</span>
-                            <span className="font-bold text-white">{project.startDate ? formatDate(project.startDate) : '---'}</span>
+                        <div className="flex justify-between border-b border-white/10 pb-3">
+                            <span className="text-slate-500 font-bold uppercase">EPS Branch</span>
+                            <span className="font-bold text-white uppercase">{project.epsId}</span>
                         </div>
                         <div className="flex justify-between pt-1">
-                            <span className="text-slate-400">Original Baseline</span>
-                            <span className="text-lg font-mono font-black text-green-400">{formatCurrency(project.originalBudget)}</span>
+                            <span className="text-slate-500 font-bold uppercase">Original Basis</span>
+                            <span className="text-xl font-mono font-black text-green-400">{formatCurrency(project.originalBudget)}</span>
                         </div>
                     </div>
-                    <Briefcase size={150} className="absolute -right-10 -bottom-10 opacity-5 text-white pointer-events-none" />
+                    <Briefcase size={200} className="absolute -right-16 -bottom-16 opacity-5 text-white pointer-events-none" />
                 </div>
             </div>
         </div>

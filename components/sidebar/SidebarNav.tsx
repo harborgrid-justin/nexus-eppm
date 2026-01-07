@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Globe, PieChart, ShieldAlert, LayoutTemplate, Briefcase, 
-  Users, Settings, Database, Grid, Box, CheckSquare, FileText, HardDrive, Rocket, Calendar, CornerDownRight, Palette
+  Users, Settings, Database, CheckSquare, FileText, HardDrive, Rocket, Calendar, CornerDownRight, Palette
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -37,7 +37,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
             label: 'Project Execution',
             items: [
                 { id: 'projectList', label: 'Projects', icon: Briefcase },
-                // Visually nested
                 { id: 'schedule', label: 'Master Schedule', icon: Calendar, isSubItem: true },
                 { id: 'resources', label: 'Resources', icon: Users },
                 { id: 'myWork', label: 'My Work', icon: CheckSquare },
@@ -60,20 +59,20 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
         <div className="space-y-8 px-0">
             {navStructure.map(group => (
                 <div key={group.id}>
-                    <h3 className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{group.label}</h3>
+                    <h3 className={`${theme.typography.label} px-6 text-[10px] ${theme.colors.text.tertiary} mb-3`}>{group.label}</h3>
                     <div className="space-y-1">
                         {group.items.map((item: any) => (
                             <button
                                 key={item.id}
                                 onClick={() => { setActiveTab(item.id); if(window.innerWidth < 768) onClose(); }}
-                                className={`w-full flex items-center gap-3 px-6 py-2.5 text-sm font-medium border-l-[3px] transition-all ${
+                                className={`w-full flex items-center gap-3 px-6 py-2.5 text-sm font-bold border-l-[3px] transition-all ${
                                     activeTab === item.id 
                                     ? `border-nexus-500 text-white bg-white/10` 
-                                    : `border-transparent text-slate-400 hover:text-white hover:bg-white/5`
+                                    : `border-transparent ${theme.colors.text.tertiary} hover:text-white hover:bg-white/5`
                                 } ${item.isSubItem ? 'pl-10' : ''}`}
                             >
-                                {item.isSubItem && <CornerDownRight size={14} className="text-slate-600 -ml-2" />}
-                                <item.icon size={item.isSubItem ? 16 : 18} className={activeTab === item.id ? 'text-nexus-400' : 'text-slate-500'} />
+                                {item.isSubItem && <CornerDownRight size={14} className="opacity-20 -ml-2" />}
+                                <item.icon size={item.isSubItem ? 16 : 18} className={activeTab === item.id ? 'text-nexus-400' : 'opacity-40'} />
                                 {item.label}
                             </button>
                         ))}

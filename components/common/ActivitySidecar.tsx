@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { History, User, Zap, MessageSquare, Clock, X, Terminal, CheckCircle } from 'lucide-react';
+import { EmptyGrid } from './EmptyGrid';
 
 interface ActivitySidecarProps {
   isOpen: boolean;
@@ -43,36 +43,41 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
         <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full text-slate-400"><X size={16} /></button>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         {auditLogs.length > 0 ? (
-            auditLogs.slice(0, 50).map((log, idx) => (
-            <div key={`${log.date}-${idx}`} className="relative pl-6 border-l border-slate-100 group">
-                <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-slate-200 border-2 border-white group-hover:bg-nexus-500 transition-colors"></div>
-                <div className="text-xs">
-                <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-slate-900 truncate max-w-[120px]">{log.user}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">{getTimeString(log.date)}</span>
-                </div>
-                <p className="text-slate-500 leading-relaxed">
-                    <span className="font-semibold text-slate-600">{log.action}</span> - {log.details}
-                </p>
-                {log.action.includes('Approved') && (
-                    <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold border border-green-100">
-                        <CheckCircle size={8} /> DECISION
+            <div className="p-4 space-y-6">
+                {auditLogs.slice(0, 50).map((log, idx) => (
+                    <div key={`${log.date}-${idx}`} className="relative pl-6 border-l border-slate-100 group">
+                        <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-slate-200 border-2 border-white group-hover:bg-nexus-500 transition-colors"></div>
+                        <div className="text-xs">
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold text-slate-900 truncate max-w-[120px]">{log.user}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{getTimeString(log.date)}</span>
+                        </div>
+                        <p className="text-slate-500 leading-relaxed">
+                            <span className="font-semibold text-slate-600">{log.action}</span> - {log.details}
+                        </p>
+                        {log.action.includes('Approved') && (
+                            <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold border border-green-100">
+                                <CheckCircle size={8} /> DECISION
+                            </div>
+                        )}
+                        {log.action.includes('Alert') && (
+                            <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-50 text-red-700 text-[9px] font-bold border border-red-100">
+                                <Zap size={8} /> CRITICAL
+                            </div>
+                        )}
+                        </div>
                     </div>
-                )}
-                {log.action.includes('Alert') && (
-                    <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-50 text-red-700 text-[9px] font-bold border border-red-100">
-                        <Zap size={8} /> CRITICAL
-                    </div>
-                )}
-                </div>
+                ))}
             </div>
-            ))
         ) : (
-            <div className="text-center py-10 text-slate-400">
-                <Terminal size={32} className="mx-auto mb-2 opacity-20"/>
-                <p className="text-xs italic">No activity recorded yet.</p>
+            <div className="p-6 h-full flex flex-col justify-center">
+                <EmptyGrid 
+                    title="No Live Activity"
+                    description="The project pulse is currently silent. Actions taken in the workspace will appear here in real-time."
+                    icon={Terminal}
+                />
             </div>
         )}
       </div>

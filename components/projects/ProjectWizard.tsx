@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Project } from '../../types/index';
@@ -85,18 +84,18 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
     <div className="space-y-4">
        <div className="grid grid-cols-2 gap-4">
           <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Project Name</label>
+              <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Project Name</label>
               <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Headquarters Expansion" />
           </div>
           <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Project Code</label>
+              <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Project Code</label>
               <Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="e.g. P-2024-001" />
           </div>
        </div>
        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Business Case</label>
+          <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Business Case</label>
           <textarea 
-            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+            className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.text.primary}`}
             placeholder="Why are we undertaking this project?"
             value={formData.businessCase}
             onChange={e => setFormData({...formData, businessCase: e.target.value})}
@@ -108,9 +107,9 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const renderStep2 = () => (
     <div className="space-y-4">
         <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Enterprise Project Structure (EPS)</label>
+            <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Enterprise Project Structure (EPS)</label>
             <select 
-                className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+                className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`}
                 value={formData.epsId}
                 onChange={e => setFormData({...formData, epsId: e.target.value})}
             >
@@ -119,12 +118,12 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
         </div>
         <div className="grid grid-cols-2 gap-4">
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Planned Start</label>
-                <input type="date" className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} />
+                <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Planned Start</label>
+                <input type="date" className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} />
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Planned Finish</label>
-                <input type="date" className="w-full p-2 border border-slate-300 rounded-lg text-sm" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
+                <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Planned Finish</label>
+                <input type="date" className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
             </div>
         </div>
     </div>
@@ -132,21 +131,21 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
 
   const renderStep3 = () => (
       <div className="space-y-6">
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Total Budget Authority</label>
+          <div className={`${theme.colors.background} p-4 rounded-lg border ${theme.colors.border}`}>
+              <label className={`block text-sm font-bold ${theme.colors.text.primary} mb-2`}>Total Budget Authority</label>
               <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                   <input 
                     type="number" 
-                    className="w-full pl-8 pr-4 py-3 text-xl font-bold text-slate-900 border border-slate-300 rounded-lg"
+                    className={`w-full pl-8 pr-4 py-3 text-xl font-bold ${theme.colors.text.primary} border ${theme.colors.border} rounded-lg ${theme.colors.surface}`}
                     value={formData.budget}
                     onChange={e => setFormData({...formData, budget: parseFloat(e.target.value), originalBudget: parseFloat(e.target.value)})}
                   />
               </div>
           </div>
           <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Funding Source</label>
-              <select className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white">
+              <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Funding Source</label>
+              <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`}>
                   <option>Internal CapEx</option>
                   <option>Grant / External</option>
                   <option>OpEx</option>
@@ -158,9 +157,9 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const renderStep4 = () => (
       <div className="space-y-4">
           <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Project Manager</label>
+              <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Project Manager</label>
               <select 
-                  className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+                  className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`}
                   value={formData.managerId}
                   onChange={e => setFormData({...formData, managerId: e.target.value})}
               >
@@ -169,7 +168,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
               </select>
           </div>
           <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Initial Charter Values</label>
+              <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Initial Charter Values</label>
               <div className="flex gap-2">
                   {['Transparency', 'Safety', 'Innovation', 'Speed'].map(val => (
                       <button 
@@ -182,7 +181,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
                         className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
                             formData.teamCharter?.values.includes(val) 
                             ? 'bg-nexus-100 border-nexus-200 text-nexus-700' 
-                            : 'bg-white border-slate-200 text-slate-500'
+                            : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.tertiary}`
                         }`}
                       >
                           {val}
@@ -195,25 +194,25 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
 
   const renderSelection = () => (
     <div className="animate-in fade-in duration-300 py-6">
-        <h3 className="text-center font-bold text-slate-800 text-lg mb-2">How would you like to start?</h3>
-        <p className="text-center text-sm text-slate-500 mb-8">Create a project from scratch or load a pre-built industry template.</p>
+        <h3 className={`text-center font-bold ${theme.colors.text.primary} text-lg mb-2`}>How would you like to start?</h3>
+        <p className={`text-center text-sm ${theme.colors.text.secondary} mb-8`}>Create a project from scratch or load a pre-built industry template.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div onClick={() => setMode('wizard')} className="p-8 border-2 border-dashed border-slate-300 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:bg-nexus-50 transition-all group">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 border border-slate-200 group-hover:border-nexus-200 transition-all">
-                    <Plus size={32} className="text-slate-400 group-hover:text-nexus-600 transition-colors"/>
+            <div onClick={() => setMode('wizard')} className={`p-8 border-2 border-dashed ${theme.colors.border} rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:bg-nexus-50 transition-all group ${theme.colors.surface}`}>
+                <div className={`w-16 h-16 ${theme.colors.background} rounded-full flex items-center justify-center mb-4 border ${theme.colors.border} group-hover:border-nexus-200 transition-all`}>
+                    <Plus size={32} className={`text-slate-400 group-hover:text-nexus-600 transition-colors`}/>
                 </div>
-                <h4 className="font-bold text-slate-800">Start from Scratch</h4>
-                <p className="text-xs text-slate-500 mt-1">Build a new project with the wizard.</p>
+                <h4 className={`font-bold ${theme.colors.text.primary}`}>Start from Scratch</h4>
+                <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>Build a new project with the wizard.</p>
             </div>
-            <div onClick={() => handleSeed('construction')} className="p-8 bg-white border border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group">
+            <div onClick={() => handleSeed('construction')} className={`p-8 ${theme.colors.surface} border ${theme.colors.border} rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group`}>
                 <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-4 border border-amber-200"><HardHat size={32} className="text-amber-600"/></div>
-                <h4 className="font-bold text-slate-800">Construction Demo</h4>
-                <p className="text-xs text-slate-500 mt-1">A large-scale infrastructure project.</p>
+                <h4 className={`font-bold ${theme.colors.text.primary}`}>Construction Demo</h4>
+                <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>A large-scale infrastructure project.</p>
             </div>
-            <div onClick={() => handleSeed('software')} className="p-8 bg-white border border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group">
+            <div onClick={() => handleSeed('software')} className={`p-8 ${theme.colors.surface} border ${theme.colors.border} rounded-2xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:shadow-lg transition-all group`}>
                 <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 border border-blue-200"><Code size={32} className="text-blue-600"/></div>
-                <h4 className="font-bold text-slate-800">Software Development</h4>
-                <p className="text-xs text-slate-500 mt-1">An agile ERP migration project.</p>
+                <h4 className={`font-bold ${theme.colors.text.primary}`}>Software Development</h4>
+                <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>An agile ERP migration project.</p>
             </div>
         </div>
     </div>
@@ -260,7 +259,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
                         const isActive = step.id === currentStep;
                         const isComplete = step.id < currentStep;
                         return (
-                            <div key={step.id} className="flex flex-col items-center gap-2 bg-white px-2">
+                            <div key={step.id} className={`flex flex-col items-center gap-2 ${theme.colors.surface} px-2`}>
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
                                     isActive ? 'border-nexus-600 bg-nexus-50 text-nexus-600' :
                                     isComplete ? 'border-green-500 bg-green-50 text-green-600' :

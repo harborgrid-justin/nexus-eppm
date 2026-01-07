@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail, Lock, Search, ChevronDown, Eye, EyeOff, FileText } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -8,7 +7,7 @@ export const DesignInputs = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="Forms & Inputs" icon={FileText} count="INP-01 to INP-25" />
+        <SectionHeading title="Data Input Controls" icon={FileText} count="INP-01 to INP-25" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="INP-01" name="Standard Text" />

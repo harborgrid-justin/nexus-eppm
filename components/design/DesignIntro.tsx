@@ -19,8 +19,8 @@ export const DesignIntro = ({ onNavigate }: { onNavigate: (page: string) => void
                     <Sparkles className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                    <h1 className="text-5xl font-black tracking-tight">Nexus Design <span className="text-nexus-400">v1.3</span></h1>
-                    <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mt-1">Enterprise Standard Guidelines</p>
+                    <h1 className="text-5xl font-black tracking-tight">Framework <span className="text-nexus-400">Overview</span></h1>
+                    <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mt-1">Enterprise Standard Guidelines v1.3</p>
                 </div>
             </div>
             <p className="text-slate-300 text-xl leading-relaxed max-w-2xl font-medium">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { DollarSign } from 'lucide-react';
@@ -34,7 +35,7 @@ const CostManagement: React.FC = () => {
 
   // FIX: Sourcing projectId dynamically and providing a professional placeholder if project context is null.
   if (!project) return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
         <PageHeader title="Cost Management" subtitle="Staffing and allocation hub" icon={DollarSign} />
         <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
             <DollarSign size={48} className="mb-4 opacity-10" />
@@ -64,7 +65,7 @@ const CostManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
       <PageHeader 
         title="Cost Management" 
         subtitle="Plan, estimate, and control project costs with precision."

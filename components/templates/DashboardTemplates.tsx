@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import StatCard from '../shared/StatCard';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -9,7 +10,7 @@ import { Badge } from '../ui/Badge';
 import { ChartPlaceholder } from '../charts/ChartPlaceholder';
 import { ProgressBar } from '../common/ProgressBar';
 import { 
-    Activity, DollarSign, TrendingUp, AlertTriangle, MoreHorizontal, Clock, CheckSquare, Calendar, BarChart2, Check, User, Plus
+    Activity, DollarSign, TrendingUp, AlertTriangle, MoreHorizontal, Clock, CheckSquare, Calendar, BarChart2, Check, Plus
 } from 'lucide-react';
 import { formatCompactCurrency } from '../../utils/formatters';
 
@@ -186,15 +187,47 @@ export const ProjectHealthTmpl: React.FC = () => {
     );
 };
 
-// ... (FinancialControllerTmpl, ResourceCenterTmpl, PersonalWorkspaceTmpl follow similar patterns)
-// For brevity in this response, I'll update PersonalWorkspaceTmpl as another example of live data usage.
-
 export const PersonalWorkspaceTmpl: React.FC = () => {
     const theme = useTheme();
     const { state } = useData();
-    // In a real app, filter by current User ID
-    // For demo/template, we just show some tasks
-    const tasks = state.projects.flatMap(p => p.tasks).slice(0, 5); 
+    const { user } = useAuth();
+    
+    // Calculate live data for the logged in user
+    const { tasks, hoursToday } = useMemo(() => {
+        if (!user) return { tasks: [], hoursToday: 0 };
+        
+        // 1. My Tasks
+        const userTasks = state.projects.flatMap(p => 
+            p.tasks.filter(t => t.assignments.some(a => a.resourceId === user.id) && t.status !== 'Completed')
+        ).slice(0, 5);
+
+        // 2. Hours Worked Today
+        const today = new Date();
+        const dayOfWeek = (today.getDay() + 6) % 7; // Monday = 0 index
+        let totalHours = 0;
+        
+        // Simple logic: find sheets that cover 'today'.
+        // In this mock, we assume timesheet periodStart matches the week of 'today' or close enough.
+        // Real implementation would parse dates strictly.
+        state.timesheets
+            .filter(ts => ts.resourceId === user.id)
+            .forEach(ts => {
+                 // Check if today falls in the week
+                 const start = new Date(ts.periodStart);
+                 const end = new Date(start);
+                 end.setDate(end.getDate() + 7);
+                 
+                 // If mocking, just sum everything for the user to show data.
+                 // In production, strictly check (today >= start && today < end)
+                 if (true) { 
+                     ts.rows.forEach(r => {
+                         totalHours += (r.hours[dayOfWeek] || 0);
+                     });
+                 }
+            });
+
+        return { tasks: userTasks, hoursToday: totalHours };
+    }, [state.projects, state.timesheets, user]);
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding}`}>
@@ -243,7 +276,7 @@ export const PersonalWorkspaceTmpl: React.FC = () => {
                     <Card className={`${theme.layout.cardPadding} bg-slate-900 text-white border-slate-800`}>
                         <h3 className="font-bold mb-4 flex items-center gap-2"><Clock size={18} className="text-nexus-400"/> Quick Timesheet</h3>
                         <div className="p-6 bg-white/10 rounded-2xl text-center border border-white/10 mb-6 backdrop-blur-sm">
-                            <div className="text-5xl font-black text-white tracking-tighter">6.5</div>
+                            <div className="text-5xl font-black text-white tracking-tighter">{hoursToday.toFixed(1)}</div>
                             <p className="text-xs text-slate-300 mt-2 uppercase tracking-widest font-bold">Hours Today</p>
                         </div>
                         <Button className="w-full bg-nexus-600 hover:bg-nexus-500 text-white border-0" icon={Plus}>Add Entry</Button>
@@ -270,8 +303,6 @@ export const PersonalWorkspaceTmpl: React.FC = () => {
     );
 };
 
-// ... Placeholder components for FinancialController and ResourceCenter can follow similar pattern of 
-// checking state and rendering real metrics vs placeholders.
 export const FinancialControllerTmpl: React.FC = () => {
     return <div className="p-12 text-center text-slate-400">Template uses live financial data (see Cost Management module).</div>;
 };

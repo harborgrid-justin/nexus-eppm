@@ -1,12 +1,11 @@
-
 import React, { useMemo } from 'react';
 import DataTable, { Column } from '../common/DataTable';
 import { StatusBadge } from '../common/StatusBadge';
 import { ProgressBar } from '../common/ProgressBar';
-import { Calendar, Briefcase, AlertCircle } from 'lucide-react';
+import { Calendar, Briefcase, CheckSquare } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useMyTasksLogic, EnrichedTask } from '../../hooks/domain/useMyTasksLogic';
-import { Button } from '../ui/Button';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const MyTasks: React.FC = () => {
   const theme = useTheme();
@@ -73,7 +72,7 @@ const MyTasks: React.FC = () => {
 
   if (!user) {
       return (
-          <div className="h-full flex items-center justify-center text-slate-400">
+          <div className={`h-full flex items-center justify-center ${theme.colors.text.secondary}`}>
               <p>Please log in to view your assignments.</p>
           </div>
       );
@@ -86,18 +85,23 @@ const MyTasks: React.FC = () => {
         <span className={`text-xs ${theme.colors.text.secondary} ${theme.colors.background} px-2 py-1 rounded-full`}>{myTasks.length} Active Tasks</span>
       </div>
       <div className="flex-1 overflow-auto">
-        <DataTable 
-            data={myTasks}
-            columns={columns}
-            keyField="id"
-            emptyMessage="No tasks currently assigned."
-        />
-        {isEmpty && (
-             <div className="p-8 flex flex-col items-center justify-center text-center">
-                 <AlertCircle size={32} className="text-slate-300 mb-2" />
-                 <p className="text-slate-500 text-sm mb-4">You have no active tasks.</p>
-                 <Button size="sm" variant="outline">Browse Project Tasks</Button>
+        {isEmpty ? (
+             <div className="h-full flex flex-col items-center justify-center p-8">
+                 <EmptyGrid 
+                    title="No Active Assignments" 
+                    description="You have no tasks currently assigned to you across the portfolio."
+                    icon={CheckSquare}
+                    actionLabel="Refresh Assignments"
+                    onAdd={() => window.location.reload()}
+                 />
              </div>
+        ) : (
+            <DataTable 
+                data={myTasks}
+                columns={columns}
+                keyField="id"
+                emptyMessage="No tasks found."
+            />
         )}
       </div>
     </div>

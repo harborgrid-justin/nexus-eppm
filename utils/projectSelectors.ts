@@ -84,11 +84,15 @@ export const calculateProjectData = (project: Project, state: DataState) => {
         project.tasks.some(t => t.assignments.some(a => a.resourceId === r.id))
     );
 
+    const taskIds = new Set(project.tasks.map(t => t.id));
+    const expenses = state.expenses.filter(e => taskIds.has(e.activityId));
+
     return {
         project,
         risks,
         issues,
         budgetItems,
+        expenses,
         changeOrders,
         purchaseOrders,
         qualityReports,

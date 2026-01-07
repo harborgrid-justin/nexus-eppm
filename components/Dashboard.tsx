@@ -1,5 +1,5 @@
-import React, { useState, useTransition, Suspense } from 'react';
-import { Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useTransition } from 'react';
+import { Sparkles, Loader2, Plus, Briefcase } from 'lucide-react';
 import { usePortfolioState } from '../hooks/usePortfolioState';
 import { useGeminiAnalysis } from '../hooks/useGeminiAnalysis';
 import { SidePanel } from './ui/SidePanel';
@@ -7,6 +7,8 @@ import { Button } from './ui/Button';
 import { DashboardHeader } from './dashboard/DashboardHeader';
 import { DashboardKPIs } from './dashboard/DashboardKPIs';
 import { DashboardVisuals } from './dashboard/DashboardVisuals';
+import { EmptyGrid } from './common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
@@ -14,8 +16,31 @@ const Dashboard: React.FC = () => {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [viewType, setViewType] = useState<'financial' | 'strategic'>('financial');
   const [isPending, startTransition] = useTransition();
+  const navigate = useNavigate();
 
   const handleGenerateReport = () => { setIsReportOpen(true); generateReport(projects); };
+
+  if (summary.totalProjects === 0) {
+      return (
+          <div className="h-full flex flex-col p-6 md:p-8">
+              <DashboardHeader 
+                onGenerateReport={handleGenerateReport} 
+                isGenerating={isGenerating} 
+                viewType={viewType} 
+                onViewChange={(t) => startTransition(() => setViewType(t))} 
+              />
+              <div className="flex-1 flex items-center justify-center">
+                  <EmptyGrid 
+                    title="Portfolio Not Initialized"
+                    description="Your executive dashboard is waiting for data. Launch your first project to activate real-time analytics."
+                    icon={Briefcase}
+                    actionLabel="Launch First Project"
+                    onAdd={() => navigate('/projectList?action=create')}
+                  />
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="h-full overflow-y-auto scrollbar-thin p-6 md:p-8">

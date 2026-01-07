@@ -1,7 +1,7 @@
-
 import React from 'react';
-import { Home, LayoutGrid, Briefcase, Database, ChevronRight, Layers, PieChart, Globe } from 'lucide-react';
+import { Home, LayoutGrid, Briefcase, ChevronRight, PieChart, Globe } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface BreadcrumbProps {
   activeTab: string;
@@ -11,6 +11,7 @@ interface BreadcrumbProps {
 
 export const GlobalBreadcrumbs: React.FC<BreadcrumbProps> = ({ activeTab, projectId, onNavigate }) => {
   const { state } = useData();
+  const theme = useTheme();
   
   const currentProject = state.projects.find(p => p.id === projectId);
   
@@ -25,38 +26,33 @@ export const GlobalBreadcrumbs: React.FC<BreadcrumbProps> = ({ activeTab, projec
       }
   };
 
-  const getModuleIcon = () => {
-      switch(activeTab) {
-          case 'portfolio': return Globe;
-          case 'programs': return PieChart;
-          case 'projectWorkspace': return Briefcase;
-          default: return LayoutGrid;
-      }
-  };
-
-  const ModuleIcon = getModuleIcon();
-
   return (
-    <nav className="flex items-center space-x-1 text-[11px] font-semibold text-slate-500 select-none">
-      <div className="flex items-center gap-1 px-2 py-1 rounded hover:bg-background cursor-pointer transition-colors" onClick={() => onNavigate('portfolio')}>
-          <Home size={14} className="text-slate-400"/>
+    <nav className={`flex items-center space-x-1 text-[11px] font-semibold ${theme.colors.text.secondary} select-none`}>
+      <div 
+        className={`flex items-center gap-1 px-2 py-1 rounded hover:${theme.colors.background} cursor-pointer transition-colors`} 
+        onClick={() => onNavigate('portfolio')}
+      >
+          <Home size={14} className={theme.colors.text.tertiary}/>
       </div>
       
-      <ChevronRight size={12} className="text-slate-300" />
+      <ChevronRight size={12} className={theme.colors.text.tertiary} />
       
-      <span className="px-2 py-1 uppercase tracking-wider text-[10px] font-bold text-slate-400">{getModuleGroup()}</span>
+      <span className={`px-2 py-1 uppercase tracking-wider text-[10px] font-black ${theme.colors.text.tertiary}`}>{getModuleGroup()}</span>
 
-      <ChevronRight size={12} className="text-slate-300" />
+      <ChevronRight size={12} className={theme.colors.text.tertiary} />
 
       {activeTab === 'projectWorkspace' && currentProject ? (
-        <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200 shadow-sm cursor-pointer hover:bg-blue-100 transition-colors">
+        <div 
+            className={`flex items-center gap-2 ${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.text} px-3 py-1 rounded-full border ${theme.colors.semantic.info.border} shadow-sm cursor-pointer hover:brightness-95 transition-all`}
+            onClick={() => onNavigate('projectWorkspace', currentProject.id)}
+        >
             <Briefcase size={12} />
-            <span>{currentProject.code}</span>
-            <span className="font-normal text-blue-600 hidden sm:inline">| {currentProject.name}</span>
+            <span className="font-bold">{currentProject.code}</span>
+            <span className="font-medium opacity-70 hidden sm:inline">| {currentProject.name}</span>
         </div>
       ) : (
-        <div className="flex items-center gap-2 px-2 py-1 text-slate-700">
-            <span className="capitalize">{activeTab.replace(/([A-Z])/g, ' $1').trim()}</span>
+        <div className={`flex items-center gap-2 px-2 py-1 ${theme.colors.text.primary}`}>
+            <span className="capitalize font-bold">{activeTab.replace(/([A-Z])/g, ' $1').trim()}</span>
         </div>
       )}
     </nav>

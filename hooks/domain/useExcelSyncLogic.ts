@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 
@@ -16,15 +17,20 @@ export const useExcelSyncLogic = () => {
     const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
     const loadTemplate = useCallback(() => {
-        setData([
-            ['ID', 'Task Name', 'Duration', 'Start Date', 'Finish Date', 'Resource', 'Cost'],
-            ['T-100', 'Site Prep', '10', '2024-01-01', '2024-01-10', 'Excavator', '5000'],
-            ['T-101', 'Foundation', '25', '2024-01-11', '2024-02-05', 'Concrete Crew', '12000'],
-            ['T-102', 'Framing', '15', '2024-02-06', '2024-02-21', 'Steel Team', '8500'],
-            ['', '', '', '', '', '', ''],
-            ['', '', '', '', '', '', ''],
-        ]);
-    }, []);
+        const importTemplate = state.standardTemplates.find(t => t.category === 'Schedule' || t.name.includes('Import'));
+        
+        if (importTemplate && importTemplate.content && Array.isArray(importTemplate.content.grid)) {
+             setData(importTemplate.content.grid);
+        } else {
+             // Fallback default
+             setData([
+                ['ID', 'Task Name', 'Duration', 'Start Date', 'Finish Date', 'Resource', 'Cost'],
+                ['T-NEW-1', 'Site Preparation', '10', '2024-06-01', '2024-06-10', 'Excavator', '5000'],
+                ['T-NEW-2', 'Foundation Pour', '20', '2024-06-11', '2024-06-30', 'Concrete', '12000'],
+                ['', '', '', '', '', '', ''],
+             ]);
+        }
+    }, [state.standardTemplates]);
 
     const handleLoadProject = useCallback(() => {
         if (!selectedProjectId) return;

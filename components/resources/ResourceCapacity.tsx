@@ -4,6 +4,7 @@ import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Loader2, Filter } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ResourceCapacityProps {
   projectResources: Resource[] | undefined;
@@ -11,6 +12,7 @@ interface ResourceCapacityProps {
 
 const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources }) => {
   const { state } = useData();
+  const theme = useTheme();
   const [currentYear, setCurrentYear] = useState<number | null>(null);
   
   // Pattern 18: useDeferredValue for the intensive heatmap computation
@@ -55,17 +57,17 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
   }, [deferredResources, state.projects, currentYear]);
 
   const getCellColor = (percentage: number) => {
-    if (percentage === 0) return 'bg-white text-slate-300';
-    if (percentage < 80) return 'bg-green-100 text-green-800 hover:bg-green-200';
-    if (percentage <= 100) return 'bg-nexus-100 text-nexus-800 hover:bg-nexus-200';
-    return 'bg-red-100 text-red-800 hover:bg-red-200';
+    if (percentage === 0) return `${theme.colors.surface} ${theme.colors.text.tertiary}`;
+    if (percentage < 80) return `${theme.colors.semantic.success.bg} ${theme.colors.semantic.success.text}`;
+    if (percentage <= 100) return `${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.text}`;
+    return `${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.text} font-bold`;
   };
   
   // Skeleton Loading State (Principle 1: Zero Layout Shift)
   if (!deferredResources || !currentYear) {
       return (
           <div className="h-full flex flex-col">
-              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+              <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}/50`}>
                   <Skeleton width={200} height={20} />
                   <Skeleton width={150} height={20} />
               </div>
@@ -89,30 +91,30 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
 
   return (
     <div className={`h-full flex flex-col transition-opacity duration-300 ${isStale ? 'opacity-60' : 'opacity-100'}`}>
-      <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50/50">
-        <h3 className="font-bold text-slate-700 text-sm">Resource Allocation Index ({currentYear})</h3>
+      <div className={`p-4 border-b ${theme.colors.border} flex-shrink-0 flex items-center justify-between ${theme.colors.background}/50`}>
+        <h3 className={`font-bold ${theme.colors.text.primary} text-sm`}>Resource Allocation Index ({currentYear})</h3>
         <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-tighter">
           {isStale && <span className="text-nexus-600 animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Recalculating Matrix...</span>}
           <div className="flex gap-2">
-            <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 bg-green-100 border rounded"></div> Under</span>
-            <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 bg-nexus-100 border rounded"></div> Optimal</span>
-            <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 bg-red-100 border rounded"></div> Over</span>
+            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.success.bg} border rounded`}></div> Under</span>
+            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.info.bg} border rounded`}></div> Optimal</span>
+            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.danger.bg} border rounded`}></div> Over</span>
           </div>
         </div>
       </div>
       <div className="overflow-auto flex-1 scrollbar-thin">
         <div className="min-w-[800px]">
             <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-            <thead className="bg-slate-50 sticky top-0 z-10 shadow-sm">
+            <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
                 <tr>
-                <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 border-b border-slate-200 sticky left-0 z-20 w-64 shadow-[1px_0_0_0_#e2e8f0]">Entity Identity</th>
-                {months.map(m => <th key={m} className="px-4 py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 border-b border-slate-200">{m}</th>)}
+                <th className={`px-6 py-3 text-left text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-widest ${theme.colors.background} border-b ${theme.colors.border} sticky left-0 z-20 w-64 shadow-[1px_0_0_0_#e2e8f0]`}>Entity Identity</th>
+                {months.map(m => <th key={m} className={`px-4 py-3 text-center text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest ${theme.colors.background} border-b ${theme.colors.border}`}>{m}</th>)}
                 </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-slate-100">
+            <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                 {deferredResources.map(res => (
                 <tr key={res.id}>
-                    <td className="px-6 py-4 whitespace-nowrap bg-white border-r border-slate-100 sticky left-0 z-10 font-bold text-sm text-slate-800 shadow-[1px_0_0_0_#f1f5f9]">
+                    <td className={`px-6 py-4 whitespace-nowrap ${theme.colors.surface} border-r ${theme.colors.border} sticky left-0 z-10 font-bold text-sm ${theme.colors.text.primary} shadow-[1px_0_0_0_#f1f5f9]`}>
                         {res.name}
                     </td>
                     {months.map((_, idx) => {

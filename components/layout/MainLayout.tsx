@@ -32,7 +32,7 @@ const MainLayout: React.FC = () => {
   const activeTab = location.pathname.split('/')[1] || 'portfolio';
 
   return (
-    <div className="flex h-screen w-full font-sans overflow-hidden relative">
+    <div className="flex h-screen w-full font-sans overflow-hidden relative bg-background">
       <ActivitySidecar isOpen={isPulseOpen} onClose={() => setIsPulseOpen(false)} />
 
       <Sidebar 
@@ -42,7 +42,7 @@ const MainLayout: React.FC = () => {
         onClose={() => setIsSidebarOpen(false)}
       />
       
-      <div className="flex-1 flex flex-col min-w-0 bg-background">
+      <div className="flex-1 flex flex-col min-w-0 bg-background relative z-0">
         <AppHeader 
           activeTab={activeTab} 
           projectId={projectIdFromUrl}
@@ -54,12 +54,12 @@ const MainLayout: React.FC = () => {
           onAiToggle={() => navigate('/ai')}
           onNavigate={handleQuickNav}
         />
-        <main className="flex-1 overflow-hidden relative">
+        <main className="flex-1 overflow-hidden relative z-0">
            <ErrorBoundary name="Main Content">
              <div className="h-full w-full relative flex flex-col">
                  {/* Visual indicator for background transitions */}
                  {isPending && (
-                    <div className="absolute top-0 left-0 right-0 h-1 z-[100] overflow-hidden bg-nexus-100">
+                    <div className="absolute top-0 left-0 right-0 h-1 z-[60] overflow-hidden bg-nexus-100">
                         <div className="h-full bg-nexus-600 animate-progress origin-left"></div>
                     </div>
                  )}

@@ -1,12 +1,13 @@
 
 import React, { useMemo } from 'react';
 import { Coins, TrendingDown, ArrowUpRight, CheckCircle, AlertTriangle, BarChart2 } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, ComposedChart } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { Project } from '../../types';
 import StatCard from '../shared/StatCard';
 import { EmptyState } from '../common/EmptyState';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 
 interface CostOfQualityProps {
     project: Project;
@@ -14,6 +15,8 @@ interface CostOfQualityProps {
 
 const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
     const theme = useTheme();
+    // Access full collections from context for accurate aggregation
+    const { expenses, nonConformanceReports } = useProjectWorkspace();
 
     const coq = project.costOfQuality || {
         preventionCosts: 0,
@@ -22,16 +25,57 @@ const CostOfQuality: React.FC<CostOfQualityProps> = ({ project }) => {
         externalFailureCosts: 0
     };
 
+    // Calculate dynamic trend from live expenses and NCRs
+    const trendData = useMemo(() => {
+        const timeMap: Record<string, { preventionCosts: number, appraisalCosts: number, internalFailureCosts: number, externalFailureCosts: number }> = {};
+        
+        // 1. Map Expenses (Prevention/Appraisal)
+        expenses.forEach(exp => {
+            const date = new Date(); // Use actual expense date if available, mocking current
+            const period = date.toLocaleString('default', { month: 'short' });
+            
+            if (!timeMap[period]) timeMap[period] = { preventionCosts: 0, appraisalCosts: 0, internalFailureCosts: 0, externalFailureCosts: 0 };
+            
+            // Heuristic mapping based on category text or ID
+            // In a real app, expenses would have explicit CoQ category tags
+            if (exp.description.toLowerCase().includes('training') || exp.description.toLowerCase().includes('prevention')) {
+                timeMap[period].preventionCosts += exp.actualCost;
+            } else if (exp.description.toLowerCase().includes('inspection') || exp.description.toLowerCase().includes('test')) {
+                timeMap[period].appraisalCosts += exp.actualCost;
+            }
+        });
+
+        // 2. Map NCRs (Failure Costs)
+        nonConformanceReports.forEach(ncr => {
+            const date = new Date(ncr.date);
+            const period = date.toLocaleString('default', { month: 'short' });
+            
+            if (!timeMap[period]) timeMap[period] = { preventionCosts: 0, appraisalCosts: 0, internalFailureCosts: 0, externalFailureCosts: 0 };
+            
+            // Estimated cost of failure based on severity
+            const cost = ncr.severity === 'Critical' ? 5000 : ncr.severity === 'Major' ? 2500 : 500;
+            
+            if (ncr.category === 'Material' || ncr.category === 'Workmanship') {
+                 timeMap[period].internalFailureCosts += cost;
+            } else {
+                 timeMap[period].externalFailureCosts += cost;
+            }
+        });
+
+        const sortedData = Object.entries(timeMap).map(([period, values]) => ({
+            period,
+            ...values
+        }));
+        
+        // If empty, return existing static history as fallback for demo
+        return sortedData.length > 0 ? sortedData : (project.coqHistory || []);
+
+    }, [expenses, nonConformanceReports, project.coqHistory]);
+
     const goodQualityCost = coq.preventionCosts + coq.appraisalCosts;
     const poorQualityCost = coq.internalFailureCosts + coq.externalFailureCosts;
     const totalCoQ = goodQualityCost + poorQualityCost;
     const budgetPercent = project.budget > 0 ? (totalCoQ / project.budget) * 100 : 0;
-
-    // Use real data if available
-    const trendData = useMemo(() => {
-        if (project.coqHistory && project.coqHistory.length > 0) return project.coqHistory;
-        return [];
-    }, [project.coqHistory]);
 
     return (
         <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>

@@ -12,7 +12,7 @@ export const DesignLayouts = () => {
 
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Layouts & Grids" icon={LayoutTemplate} count="LO-01 to LO-70" />
+        <SectionHeading title="Structural Layouts" icon={LayoutTemplate} count="LO-01 to LO-70" />
         
         {/* --- APP SHELLS --- */}
         <div className="space-y-6">

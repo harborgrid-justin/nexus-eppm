@@ -32,9 +32,9 @@ export const GlobalRiskMatrix: React.FC = () => {
 
     const getCellColor = (prob: number, imp: number) => {
         const score = prob * imp;
-        if (score >= 15) return 'bg-red-500 text-white';
-        if (score >= 8) return 'bg-yellow-400 text-yellow-900';
-        return 'bg-green-400 text-green-900';
+        if (score >= 15) return theme.colors.semantic.danger.solid; // 'bg-red-600 text-white'
+        if (score >= 8) return theme.colors.semantic.warning.solid; // 'bg-amber-500 text-white'
+        return theme.colors.semantic.success.solid; // 'bg-green-600 text-white'
     };
 
     return (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Database, UploadCloud, FileText, X } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
@@ -6,7 +5,7 @@ import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 export const DesignDataManagement = () => {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
-        <SectionHeading title="Data Management" icon={Database} count="DMT-01 to DMT-55" />
+        <SectionHeading title="ETL & Ingestion" icon={Database} count="DMT-01 to DMT-55" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DemoContainer>
                 <ComponentLabel id="DMT-01" name="Upload Zone (Hero)" />
