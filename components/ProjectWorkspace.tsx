@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import { Network, GanttChartSquare, Loader2, GitBranch, Briefcase } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -9,6 +10,7 @@ import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLog
 import { EmptyGrid } from './common/EmptyGrid';
 import { useNavigate } from 'react-router-dom';
 
+const ProjectIntegrationManagement = lazy(() => import('./integration/ProjectIntegrationManagement'));
 const ProjectGantt = lazy(() => import('./ProjectGantt'));
 const CostManagement = lazy(() => import('./CostManagement'));
 const ProjectRiskManager = lazy(() => import('./risk/ProjectRiskManager'));
@@ -19,7 +21,6 @@ const ProcurementManagement = lazy(() => import('./ProcurementManagement'));
 const QualityManagement = lazy(() => import('./QualityManagement'));
 const CommunicationsManagement = lazy(() => import('./CommunicationsManagement'));
 const ResourceManagement = lazy(() => import('./ResourceManagement'));
-const ProjectIntegrationManagement = lazy(() => import('./ProjectIntegrationManagement'));
 const NetworkDiagram = lazy(() => import('./scheduling/NetworkDiagram'));
 const DocumentControl = lazy(() => import('./DocumentControl'));
 const BaselineManager = lazy(() => import('./scheduling/BaselineManager'));

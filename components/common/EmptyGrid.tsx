@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Plus, Database, LucideIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -29,11 +30,15 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
       <div className={`w-16 h-16 ${theme.colors.surface} rounded-full flex items-center justify-center shadow-sm mb-4 border ${theme.colors.border} ${theme.colors.text.tertiary}`}>
         <Icon size={32} />
       </div>
-      <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-1 text-center`}>{String(title)}</h3>
-      <p className={`${theme.typography.body} ${theme.colors.text.secondary} max-w-sm text-center mb-6`}>{String(description)}</p>
+      <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-1 text-center`}>
+        {title}
+      </h3>
+      <p className={`${theme.typography.body} ${theme.colors.text.secondary} max-w-sm text-center mb-6`}>
+        {description}
+      </p>
       {onAdd && (
         <Button onClick={onAdd} icon={Plus} size="md">
-          {String(actionLabel)}
+          {actionLabel}
         </Button>
       )}
     </div>
