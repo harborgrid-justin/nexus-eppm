@@ -11,13 +11,13 @@ import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
 import { ProgramRisk } from '../../types';
 import { generateId } from '../../utils/formatters';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramRisksProps {
   programId: string;
 }
 
-const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
+export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
   const { programRisks, projects } = useProgramData(programId);
   const { state, dispatch } = useData();
   const theme = useTheme();
@@ -93,7 +93,7 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[350px]`}>
                 <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className={`font-bold ${theme.colors.text.primary}`}>Program Risk Register (Systemic)</h3>
                 </div>
@@ -135,17 +135,18 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     </div>
                 ) : (
                     <div className="flex-1 flex flex-col justify-center">
-                        <EmptyState 
-                            title="No Systemic Risks" 
-                            description="Track cross-cutting threats here."
+                        <EmptyGrid 
+                            title="No Systemic Risks Identified" 
+                            description="The program register is currently clear of overarching threats. Use project-level escalations to populate this view."
                             icon={ShieldAlert}
-                            action={<Button size="sm" variant="ghost" onClick={() => setIsModalOpen(true)}>Log First Risk</Button>}
+                            actionLabel="Identify Program Threat"
+                            onAdd={() => setIsModalOpen(true)}
                         />
                     </div>
                 )}
             </div>
 
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[350px]`}>
                 <div className="p-4 border-b border-red-200 bg-red-50">
                     <h3 className="font-bold text-red-900">Escalated Project Risks</h3>
                 </div>
@@ -180,7 +181,8 @@ const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                          <div className="flex-1 h-full flex flex-col justify-center">
                              <div className="text-center p-8 text-slate-400 italic">
                                 <AlertOctagon size={32} className="mx-auto mb-2 opacity-30"/>
-                                <p>No escalated project risks.</p>
+                                <p className="font-bold uppercase tracking-widest text-[10px]">No Escalated Threats</p>
+                                <p className="text-xs mt-1">All project-level risks are currently below the escalation threshold.</p>
                              </div>
                          </div>
                     )}

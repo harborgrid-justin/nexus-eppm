@@ -1,14 +1,17 @@
+
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield } from 'lucide-react';
+// Fix: Added Briefcase and AlertTriangle to the import list to resolve "Cannot find name" errors
+import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield, Briefcase, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { StrategicGoal, ProgramObjective } from '../../types';
 import { generateId } from '../../utils/formatters';
 import { StrategicGoalForm } from './StrategicGoalForm';
 import { ProgramObjectiveForm } from './ProgramObjectiveForm';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
 import { Button } from '../ui/Button';
+import { FieldPlaceholder } from '../common/FieldPlaceholder';
 
 interface ProgramStrategyProps {
   programId: string;
@@ -79,7 +82,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 relative`}>
         <div className="flex items-center gap-2 mb-4">
             <Target className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Strategic Alignment Matrix</h2>
@@ -111,11 +114,12 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         ))}
                     </div>
                 ) : (
-                    <EmptyState 
-                        title="No Strategic Goals" 
-                        description="Define high-level organizational goals to align your program."
+                    <EmptyGrid 
+                        title="No Strategic Goals Defined" 
+                        description="Define organizational goals to align your program and project portfolio with the corporate strategy."
                         icon={Target}
-                        action={<Button size="sm" onClick={handleAddGoal} icon={Plus}>Define Goal</Button>}
+                        actionLabel="Define Corporate Goal"
+                        onAdd={handleAddGoal}
                     />
                 )}
             </div>
@@ -155,11 +159,10 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         })}
                     </div>
                 ) : (
-                    <EmptyState 
-                        title="No Program Objectives" 
-                        description="Break down strategic goals into actionable program objectives."
+                    <FieldPlaceholder 
+                        label="No actionable program objectives identified." 
+                        onAdd={handleAddObj} 
                         icon={Shield}
-                        action={<Button size="sm" variant="secondary" onClick={handleAddObj} icon={Plus}>Add Objective</Button>}
                     />
                 )}
             </div>
@@ -168,24 +171,31 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             <div>
                 <h3 className={`${theme.typography.label} text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
                 {projects.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
                         {projects.map(proj => {
-                            // Find which objective this project supports
                             const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
-                            
                             return (
                                 <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
                                     <div className="flex items-center gap-2 mb-2">
                                         <Folder size={16} className="text-slate-400"/>
-                                        <h4 className="font-bold text-sm text-slate-900">{proj.name}</h4>
+                                        <h4 className="font-bold text-sm text-slate-900 truncate">{proj.name}</h4>
                                     </div>
+                                    {/* Fix: Applied professional empty pattern and CRUD alignment path for unlinked projects as per instructions */}
                                     {linkedObj ? (
-                                        <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
-                                            <CheckSquare size={12}/> Aligned: {linkedObj.description.substring(0, 20)}...
+                                        <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto truncate">
+                                            <CheckSquare size={12} className="shrink-0"/> Aligned to Objective
                                         </div>
                                     ) : (
-                                        <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1 mt-auto">
-                                            ⚠ No direct strategic link
+                                        <div className="flex flex-col gap-2 mt-auto">
+                                            <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1">
+                                                <AlertTriangle size={12} className="shrink-0"/> No strategic link
+                                            </div>
+                                            <button 
+                                                onClick={handleAddObj}
+                                                className="text-[10px] font-black uppercase text-nexus-600 hover:text-nexus-700 flex items-center gap-1 transition-colors"
+                                            >
+                                                <Plus size={10}/> Link to Objective
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -193,9 +203,11 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         })}
                     </div>
                 ) : (
-                    <div className="p-8 text-center text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                         No projects linked to this program yet.
-                    </div>
+                    <FieldPlaceholder 
+                        label="No active project components identified for this program." 
+                        onAdd={() => {}} 
+                        icon={Briefcase}
+                    />
                 )}
             </div>
         </div>

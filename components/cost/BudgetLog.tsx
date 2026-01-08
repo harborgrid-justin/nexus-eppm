@@ -12,7 +12,7 @@ import { generateId } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const BudgetLog: React.FC = () => {
     const { project } = useProjectWorkspace();
@@ -65,7 +65,19 @@ export const BudgetLog: React.FC = () => {
         setNewItem({ description: '', amount: 0, source: 'Management Reserve', status: 'Pending' });
     };
 
-    if (!project || !budgetSummary) return <div>Loading budget...</div>;
+    if (!project || !budgetSummary) {
+        return (
+            <div className="h-full flex items-center justify-center p-12">
+                 <EmptyGrid 
+                    title="Budget Context Missing" 
+                    description="Could not resolve the financial context for the current workspace. Ensure the project is properly initialized."
+                    icon={Landmark}
+                 />
+            </div>
+        );
+    }
+
+    const hasTransactions = project.budgetLog && project.budgetLog.length > 0;
 
     return (
         <div className={`h-full flex flex-col ${theme.colors.background}/30`}>
@@ -105,43 +117,55 @@ export const BudgetLog: React.FC = () => {
             </div>
 
             <div className={`flex-1 overflow-auto ${theme.colors.surface}`}>
-                <table className="min-w-full divide-y divide-slate-100">
-                    <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
-                        <tr>
-                            <th className={theme.components.table.header}>Post Date</th>
-                            <th className={theme.components.table.header}>Narrative</th>
-                            <th className={theme.components.table.header}>Source Pool</th>
-                            <th className={`${theme.components.table.header} text-center`}>Status</th>
-                            <th className={`${theme.components.table.header} text-right`}>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} ${theme.colors.surface}`}>
-                        {project.budgetLog?.map(item => (
-                            <tr 
-                                key={item.id} 
-                                className={theme.components.table.row}
-                                tabIndex={0}
-                            >
-                                <td className={`${theme.components.table.cell} text-xs font-mono font-bold ${theme.colors.text.tertiary}`}>{item.date}</td>
-                                <td className={theme.components.table.cell}>
-                                    <div className={`text-sm font-bold ${theme.colors.text.primary}`}>{item.description}</div>
-                                    <div className={`text-[10px] ${theme.colors.text.tertiary} font-mono mt-0.5 uppercase tracking-tighter`}>Auth: {item.submitterId}</div>
-                                </td>
-                                <td className={theme.components.table.cell}>
-                                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${theme.colors.text.secondary} ${theme.colors.background} px-2 py-0.5 rounded border ${theme.colors.border}`}>
-                                        <Landmark size={10} className={theme.colors.text.tertiary}/> {item.source || 'Standard'}
-                                    </span>
-                                </td>
-                                <td className={`${theme.components.table.cell} text-center`}>
-                                    {getStatusBadge(item.status)}
-                                </td>
-                                <td className={`${theme.components.table.cell} text-right font-black font-mono ${item.amount < 0 ? theme.colors.semantic.danger.text : theme.colors.text.primary}`}>
-                                    {item.amount > 0 ? '+' : ''}{formatCurrency(item.amount)}
-                                </td>
+                {!hasTransactions ? (
+                    <div className="h-full flex items-center justify-center">
+                        <EmptyGrid 
+                            title="Transaction Log Clear"
+                            description="No budgetary adjustments or baseline snapshots have been recorded for this fiscal period."
+                            onAdd={canWriteBudget ? () => setIsPanelOpen(true) : undefined}
+                            actionLabel="Record Adjustment"
+                            icon={History}
+                        />
+                    </div>
+                ) : (
+                    <table className="min-w-full divide-y divide-slate-100">
+                        <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
+                            <tr>
+                                <th className={theme.components.table.header}>Post Date</th>
+                                <th className={theme.components.table.header}>Narrative</th>
+                                <th className={theme.components.table.header}>Source Pool</th>
+                                <th className={`${theme.components.table.header} text-center`}>Status</th>
+                                <th className={`${theme.components.table.header} text-right`}>Amount</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} ${theme.colors.surface}`}>
+                            {project.budgetLog?.map(item => (
+                                <tr 
+                                    key={item.id} 
+                                    className={theme.components.table.row}
+                                    tabIndex={0}
+                                >
+                                    <td className={`${theme.components.table.cell} text-xs font-mono font-bold ${theme.colors.text.tertiary}`}>{item.date}</td>
+                                    <td className={theme.components.table.cell}>
+                                        <div className={`text-sm font-bold ${theme.colors.text.primary}`}>{item.description}</div>
+                                        <div className={`text-[10px] ${theme.colors.text.tertiary} font-mono mt-0.5 uppercase tracking-tighter`}>Auth: {item.submitterId}</div>
+                                    </td>
+                                    <td className={theme.components.table.cell}>
+                                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${theme.colors.text.secondary} ${theme.colors.background} px-2 py-0.5 rounded border ${theme.colors.border}`}>
+                                            <Landmark size={10} className={theme.colors.text.tertiary}/> {item.source || 'Standard'}
+                                        </span>
+                                    </td>
+                                    <td className={`${theme.components.table.cell} text-center`}>
+                                        {getStatusBadge(item.status)}
+                                    </td>
+                                    <td className={`${theme.components.table.cell} text-right font-black font-mono ${item.amount < 0 ? theme.colors.semantic.danger.text : theme.colors.text.primary}`}>
+                                        {item.amount > 0 ? '+' : ''}{formatCurrency(item.amount)}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
 
             <SidePanel

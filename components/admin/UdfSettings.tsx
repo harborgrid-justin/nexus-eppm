@@ -9,6 +9,7 @@ import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const UdfSettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -102,8 +103,14 @@ export const UdfSettings: React.FC = () => {
                     </div>
                 ))}
                 {filteredUdfs.length === 0 && (
-                    <div className={`col-span-full py-12 text-center border-2 border-dashed ${theme.colors.border} rounded-2xl ${theme.colors.background} ${theme.colors.text.tertiary} text-sm italic`}>
-                        No user-defined fields registered for the {subjectArea} area.
+                    <div className="col-span-full py-4">
+                        <EmptyGrid 
+                            title={`No ${subjectArea} UDFs Defined`}
+                            description={`There are no user-defined fields registered for ${subjectArea}. Custom fields allow you to track proprietary project data outside the core P6 schema.`}
+                            icon={Edit3}
+                            actionLabel="Initialize Field"
+                            onAdd={() => handleOpenPanel()}
+                        />
                     </div>
                 )}
             </div>
