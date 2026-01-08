@@ -10,6 +10,7 @@ import SuspenseFallback from './SuspenseFallback';
 
 const MainLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isPulseOpen, setIsPulseOpen] = useState(false);
   
   const [isPending, startTransition] = useTransition();
@@ -30,9 +31,10 @@ const MainLayout: React.FC = () => {
   };
 
   const activeTab = location.pathname.split('/')[1] || 'portfolio';
+  const isScheduleMode = activeTab === 'schedule';
 
   return (
-    <div className="flex h-screen w-full font-sans overflow-hidden relative bg-background">
+    <div className="flex h-screen w-full font-sans overflow-hidden relative bg-background text-text-primary">
       <ActivitySidecar isOpen={isPulseOpen} onClose={() => setIsPulseOpen(false)} />
 
       <Sidebar 
@@ -40,9 +42,11 @@ const MainLayout: React.FC = () => {
         setActiveTab={(tab) => startTransition(() => navigate(`/${tab}`))} 
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       
-      <div className="flex-1 flex flex-col min-w-0 bg-background relative z-0">
+      <div className={`flex-1 flex flex-col min-w-0 bg-background relative z-0 transition-all duration-300`}>
         <AppHeader 
           activeTab={activeTab} 
           projectId={projectIdFromUrl}
@@ -53,11 +57,12 @@ const MainLayout: React.FC = () => {
           onPulseOpen={() => setIsPulseOpen(true)}
           onAiToggle={() => navigate('/ai')}
           onNavigate={handleQuickNav}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
         <main className="flex-1 overflow-hidden relative z-0">
            <ErrorBoundary name="Main Content">
              <div className="h-full w-full relative flex flex-col">
-                 {/* Visual indicator for background transitions */}
                  {isPending && (
                     <div className="absolute top-0 left-0 right-0 h-1 z-[60] overflow-hidden bg-nexus-100">
                         <div className="h-full bg-nexus-600 animate-progress origin-left"></div>

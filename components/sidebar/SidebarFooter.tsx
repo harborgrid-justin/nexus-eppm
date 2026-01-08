@@ -1,15 +1,31 @@
 
 import React from 'react';
 import { User } from '../../types/auth';
-import { LogOut } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 
 interface SidebarFooterProps {
     user: User | null;
     onProfileOpen: () => void;
     onLogout: () => void;
+    isCollapsed?: boolean;
 }
 
-export const SidebarFooter: React.FC<SidebarFooterProps> = ({ user, onProfileOpen, onLogout }) => {
+export const SidebarFooter: React.FC<SidebarFooterProps> = ({ user, onProfileOpen, onLogout, isCollapsed }) => {
+    if (isCollapsed) {
+        return (
+            <div className="py-4 border-t border-primary-light/10 flex flex-col items-center gap-4">
+                 <button onClick={onProfileOpen} className="relative group">
+                    <img src={user?.avatar} alt={user?.name} className="w-8 h-8 rounded-full border border-slate-600 hover:border-nexus-500" />
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] shadow-xl">Profile</div>
+                 </button>
+                 <button onClick={onLogout} className="text-slate-500 hover:text-red-400 p-1 group relative" title="Log Out">
+                   <LogOut size={18} />
+                   <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] shadow-xl">Logout</div>
+               </button>
+            </div>
+        );
+    }
+
     return (
         <div className="p-4 border-t border-primary-light/10 bg-primary-dark/20">
            <div className="flex items-center gap-3">

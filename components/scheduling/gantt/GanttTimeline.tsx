@@ -1,5 +1,6 @@
+
 import React, { forwardRef } from 'react';
-import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../types/index';
+import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../../types/index';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
 import { getDaysDiff } from '../../../utils/dateUtils';
@@ -44,12 +45,14 @@ interface GanttTimelineProps {
   virtualItems: { index: number; offsetTop: number }[];
   totalHeight: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+  onTimelineContextMenu?: (e: React.MouseEvent, task: Task | null) => void;
 }
 
 export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   timelineHeaders, renderList, taskRowMap, projectStart, dayWidth, rowHeight,
   showCriticalPath, baselineMap, selectedTask, projectTasks, calendar, ganttContainerRef,
-  getStatusColor, handleMouseDown, setSelectedTask, virtualItems, totalHeight, onScroll
+  getStatusColor, handleMouseDown, setSelectedTask, virtualItems, totalHeight, onScroll,
+  onTimelineContextMenu
 }, ref) => {
   const theme = useTheme();
   
@@ -62,20 +65,21 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
         ref={ref} 
         className={`flex-1 overflow-auto ${theme.colors.background} relative scrollbar-thin will-change-transform`}
         onScroll={handleScroll}
+        onContextMenu={(e) => onTimelineContextMenu?.(e, null)}
         style={{ contain: 'strict' }}
     >
         <div style={{ width: `${timelineHeaders.days.length * dayWidth}px`, height: `${totalHeight + 100}px` }}>
             {/* Header Sticky */}
             <div className={`sticky top-0 z-20 ${theme.colors.surface} border-b ${theme.colors.border} h-[50px] flex shadow-sm will-change-transform`}>
                 {Array.from(timelineHeaders.months.entries()).map(([key, data]) => (
-                    <div key={key} className={`absolute top-0 border-r ${theme.colors.border} text-xs font-bold ${theme.colors.text.secondary} px-2 py-1 truncate ${theme.colors.surface}`}
+                    <div key={key} className={`absolute top-0 border-r ${theme.colors.border} text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary} px-3 py-2 truncate ${theme.colors.surface}`}
                         style={{ left: `${data.start}px`, width: `${data.width}px` }}>
                         {key}
                     </div>
                 ))}
                 <div className="flex pt-6">
                     {timelineHeaders.days.map((day) => (
-                        <div key={day.date.toISOString()} className={`flex-shrink-0 flex items-center justify-center text-[10px] ${theme.colors.text.tertiary} border-r ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} ${day.isWorking ? theme.colors.surface : theme.colors.background}`} 
+                        <div key={day.date.toISOString()} className={`flex-shrink-0 flex items-center justify-center text-[9px] font-bold ${theme.colors.text.tertiary} border-r ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} ${day.isWorking ? theme.colors.surface : theme.colors.background}/50`} 
                             style={{ width: `${dayWidth}px` }}>
                             {day.date.getDate()}
                         </div>
@@ -104,7 +108,11 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                     const baselineData = baselineMap ? baselineMap[item.task.id] : null;
 
                     return (
-                        <div key={item.task.id} style={{ transform: `translateY(${offsetTop}px)`, position: 'absolute', width: '100%', height: `${rowHeight}px`, top: 0, left: 0, willChange: 'transform' }}>
+                        <div 
+                            key={item.task.id} 
+                            style={{ transform: `translateY(${offsetTop}px)`, position: 'absolute', width: '100%', height: `${rowHeight}px`, top: 0, left: 0, borderBottom: `1px solid ${theme.mode === 'dark' ? '#334155' : '#f8fafc'}` }}
+                            onContextMenu={(e) => { e.stopPropagation(); onTimelineContextMenu?.(e, item.task); }}
+                        >
                             <GanttTaskBar
                                 task={item.task}
                                 rowIndex={0} 

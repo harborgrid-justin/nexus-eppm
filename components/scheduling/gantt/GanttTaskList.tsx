@@ -14,11 +14,12 @@ interface GanttTaskListProps {
   totalHeight: number;
   rowHeight: number;
   onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+  onRowContextMenu?: (e: React.MouseEvent, task: Task) => void;
 }
 
 export const GanttTaskList = forwardRef<HTMLDivElement, GanttTaskListProps>(({ 
   renderList, showTaskList, expandedNodes, selectedTask, toggleNode, setSelectedTask,
-  virtualItems, totalHeight, rowHeight, onScroll
+  virtualItems, totalHeight, rowHeight, onScroll, onRowContextMenu
 }, ref) => {
   const theme = useTheme();
 
@@ -31,12 +32,11 @@ export const GanttTaskList = forwardRef<HTMLDivElement, GanttTaskListProps>(({
         `} 
         role="treegrid"
     >
-        <div className={`sticky top-0 z-30 ${theme.colors.background}/95 backdrop-blur-sm border-b ${theme.colors.border} h-[50px] flex items-center px-4 font-bold text-[10px] ${theme.colors.text.secondary} uppercase tracking-widest flex-shrink-0`}>
+        <div className={`sticky top-0 z-30 ${theme.colors.background}/95 backdrop-blur-sm border-b ${theme.colors.border} h-[50px] flex items-center px-4 font-bold text-[10px] ${theme.colors.text.secondary} uppercase tracking-widest flex-shrink-0 shadow-sm`}>
             <div className="flex-1 truncate">Task / Element Name</div>
             <div className="w-12 text-center flex-shrink-0">Dur.</div>
         </div>
         
-        {/* Virtualized Scroll Container */}
         <div 
             ref={ref}
             className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin"
@@ -68,6 +68,7 @@ export const GanttTaskList = forwardRef<HTMLDivElement, GanttTaskListProps>(({
                             <div 
                                 key={item.task.id}
                                 onClick={() => setSelectedTask(item.task)}
+                                onContextMenu={(e) => onRowContextMenu?.(e, item.task)}
                                 className={`
                                   h-[44px] w-full flex items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-b-').replace('200','100')} text-xs text-left cursor-pointer transition-all flex-shrink-0 min-w-0 border-l-4 absolute top-0 left-0
                                   ${isSelected ? 'bg-nexus-50/50 border-l-nexus-600 font-semibold text-nexus-900' : `hover:${theme.colors.background} border-l-transparent ${theme.colors.text.secondary}`}
