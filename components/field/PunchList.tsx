@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { CheckSquare, Filter, Plus, MapPin, Camera, User, CheckCircle, Circle, Search, MoreHorizontal } from 'lucide-react';
+import { CheckSquare, Filter, Plus, MapPin, Camera, User, CheckCircle, Circle, Search, MoreHorizontal, Copy } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -31,6 +31,18 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
         dispatch({ type: 'FIELD_UPDATE_PUNCH_ITEM', payload: { ...item, status: nextStatus } });
     };
 
+    // Optimization: Clipboard API for copying IDs
+    const copyToClipboard = async (text: string) => {
+        if (navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(text);
+                // In a real app, trigger a toast notification here
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        }
+    };
+
     const handleAddItem = () => {
         const newItem: PunchItem = {
             id: generateId('PL'),
@@ -47,8 +59,19 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
 
     const columns: Column<PunchItem>[] = [
         {
-            key: 'id', header: 'ID', width: 'w-24',
-            render: (i) => <span className="font-mono text-xs text-slate-500">{i.id}</span>
+            key: 'id', header: 'ID', width: 'w-28',
+            render: (i) => (
+                <div className="flex items-center gap-1 group/id">
+                    <span className="font-mono text-xs text-slate-500">{i.id}</span>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); copyToClipboard(i.id); }}
+                        className="opacity-0 group-hover/id:opacity-100 text-slate-400 hover:text-nexus-600 transition-opacity"
+                        title="Copy ID"
+                    >
+                        <Copy size={10}/>
+                    </button>
+                </div>
+            )
         },
         {
             key: 'description', header: 'Description',

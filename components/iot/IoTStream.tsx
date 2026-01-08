@@ -1,13 +1,76 @@
 
-import React from 'react';
-import { Radio, Activity, MapPin, AlertTriangle, Cpu, Info, Wifi, Server } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useData } from '../../context/DataContext';
+import { Radio, Activity, MapPin, AlertTriangle, Cpu, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, LineChart, Line, YAxis, Tooltip } from 'recharts';
-import { useIoTStreamLogic } from '../../hooks/domain/useIoTStreamLogic';
+import { ResponsiveContainer, LineChart, Line, YAxis } from 'recharts';
+import { Resource } from '../../types';
+
+interface StreamPoint {
+    i: number;
+    val: number;
+}
 
 export const IoTStream: React.FC = () => {
+    const { state } = useData();
     const theme = useTheme();
-    const { chartData, sensors, alerts } = useIoTStreamLogic();
+    const [chartData, setChartData] = useState<StreamPoint[]>([]);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Initial Data Load
+    useEffect(() => {
+        const throughput = state.systemMonitoring?.throughput || [];
+        setChartData(throughput.map((d, i) => ({ i, val: d.records || 0 })));
+    }, [state.systemMonitoring?.throughput]);
+
+    // Live Simulation with Page Visibility Optimization
+    useEffect(() => {
+        const startStream = () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            intervalRef.current = setInterval(() => {
+                setChartData(prev => {
+                    const nextI = prev.length > 0 ? prev[prev.length - 1].i + 1 : 0;
+                    const nextVal = Math.floor(Math.random() * 40) + 30;
+                    const nextData = [...prev.slice(-29), { i: nextI, val: nextVal }];
+                    return nextData;
+                });
+            }, 2000);
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                if (intervalRef.current) clearInterval(intervalRef.current);
+            } else {
+                startStream();
+            }
+        };
+
+        startStream();
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, []);
+
+    const sensors = useMemo(() => {
+        return state.resources
+            .filter(r => r.type === 'Equipment')
+            .slice(0, 10)
+            .map(r => ({
+                id: r.id,
+                name: r.name,
+                location: r.location || 'Site Unset',
+                maintenanceStatus: r.maintenanceStatus || 'Unknown'
+            }));
+    }, [state.resources]);
+
+    const alerts = useMemo(() => {
+        return state.governance.alerts
+            .filter(a => a.category === 'Supply Chain' || a.category === 'Risk')
+            .slice(0, 3);
+    }, [state.governance.alerts]);
 
     return (
         <div className="h-full bg-slate-950 p-6 text-green-500 font-mono overflow-hidden flex flex-col">

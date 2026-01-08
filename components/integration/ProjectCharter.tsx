@@ -1,7 +1,9 @@
+
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { Target, Shield, Users, Briefcase, Info } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -10,8 +12,9 @@ import { NarrativeField } from '../common/NarrativeField';
 
 const ProjectCharter: React.FC = () => {
   const { project, stakeholders } = useProjectWorkspace();
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
+  const { canEditProject } = usePermissions();
 
   const sponsor = useMemo(() => 
     stakeholders.find(s => s.role === 'Sponsor' || s.interest === 'High'),
@@ -20,6 +23,25 @@ const ProjectCharter: React.FC = () => {
   const pm = useMemo(() => 
     state.resources.find(r => r.id === project.managerId),
   [state.resources, project.managerId]);
+
+  const handleUpdate = (field: string, value: string) => {
+      dispatch({
+          type: 'PROJECT_UPDATE',
+          payload: {
+              projectId: project.id,
+              updatedData: { [field]: value }
+          }
+      });
+  };
+
+  const handleAssumptionUpdate = (desc: string) => {
+      // Create or update first assumption for simplicity in this view
+      const newAssumptions = project.assumptions && project.assumptions.length > 0 
+          ? [{ ...project.assumptions[0], description: desc }]
+          : [{ id: `ASM-${Date.now()}`, description: desc, ownerId: 'Unassigned', status: 'Active' }];
+      
+      handleUpdate('assumptions', newAssumptions as any);
+  };
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in`}>
@@ -43,14 +65,16 @@ const ProjectCharter: React.FC = () => {
                         <NarrativeField 
                             label="Strategic Business Case"
                             value={project.businessCase}
-                            placeholderLabel="Strategic rationale not yet formalized."
-                            onAdd={() => {}}
+                            placeholderLabel="Why are we undertaking this project? Define strategic rationale."
+                            onSave={(val) => handleUpdate('businessCase', val)}
+                            isReadOnly={!canEditProject()}
                         />
                         <NarrativeField 
                             label="Primary Mission & Success Criteria"
                             value={project.description}
-                            placeholderLabel="Mission statement pending executive alignment."
-                            onAdd={() => {}}
+                            placeholderLabel="Define the mission statement and acceptance criteria."
+                            onSave={(val) => handleUpdate('description', val)}
+                            isReadOnly={!canEditProject()}
                         />
                     </div>
                 </Card>
@@ -81,8 +105,9 @@ const ProjectCharter: React.FC = () => {
                             <NarrativeField 
                                 label="Critical Assumptions"
                                 value={project.assumptions?.[0]?.description}
-                                placeholderLabel="No external assumptions recorded."
-                                onAdd={() => {}}
+                                placeholderLabel="List external dependencies or resource assumptions."
+                                onSave={handleAssumptionUpdate}
+                                isReadOnly={!canEditProject()}
                             />
                         </div>
                     </div>

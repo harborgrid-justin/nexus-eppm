@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BudgetTable } from './budget/BudgetTable';
 import { BudgetDetailPanel } from './budget/BudgetDetailPanel';

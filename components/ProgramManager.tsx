@@ -62,7 +62,7 @@ const ProgramManager: React.FC<ProgramManagerProps> = ({ forcedProgramId }) => {
                 className="bg-transparent border-0 shadow-none"
             />
         </div>
-        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'} flex flex-col`}>
             {isPending && <div className="absolute inset-0 z-10 bg-white/50 flex items-center justify-center"><Loader2 className="animate-spin text-nexus-500" /></div>}
             <ErrorBoundary name={`Program: ${activeView}`}>
                 <ModuleComponent programId={selectedProgram.id} />

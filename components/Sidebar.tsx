@@ -27,6 +27,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
 
+  // Optimization: View Transitions API
+  // This creates a snapshot of the DOM before and after the state change,
+  // allowing the browser to interpolate the layout change smoothly.
+  const handleNavClick = (tab: string) => {
+    if ((document as any).startViewTransition) {
+        (document as any).startViewTransition(() => {
+            setActiveTab(tab);
+        });
+    } else {
+        setActiveTab(tab);
+    }
+  };
+
   return (
     <>
       <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
@@ -46,11 +59,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
 
         <div className="flex-1 overflow-y-auto py-2 space-y-4 scrollbar-hide">
-            <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} onClose={onClose} isCollapsed={isCollapsed} />
+            <SidebarNav activeTab={activeTab} setActiveTab={handleNavClick} onClose={onClose} isCollapsed={isCollapsed} />
         </div>
 
         <div className="flex-shrink-0 bg-slate-950/30">
-             {!isCollapsed && <SidebarPinned setActiveTab={setActiveTab} onClose={onClose} />}
+             {!isCollapsed && <SidebarPinned setActiveTab={handleNavClick} onClose={onClose} />}
              <SidebarFooter user={user} onProfileOpen={() => setIsProfileOpen(true)} onLogout={logout} isCollapsed={isCollapsed} />
         </div>
       </div>

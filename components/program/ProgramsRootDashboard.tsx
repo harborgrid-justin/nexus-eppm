@@ -1,23 +1,27 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { 
   Layers, DollarSign, Activity, TrendingUp, ArrowRight,
-  ShieldAlert, User
+  ShieldAlert, User, Plus, Target, PieChart, MoreHorizontal
 } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { StatusBadge } from '../common/StatusBadge';
 import { ProgressBar } from '../common/ProgressBar';
+import { Button } from '../ui/Button';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 interface ProgramsRootDashboardProps {
   onSelectProgram: (id: string) => void;
 }
 
 const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectProgram }) => {
-  const { state } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const metrics = useMemo(() => {
     const totalBudget = state.programs.reduce((acc, p) => acc + p.budget, 0);
@@ -34,8 +38,77 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
     return { totalBudget, totalSpent, activeCount, criticalCount };
   }, [state.programs, state.projects]);
 
+  const handleCreateProgram = () => {
+    // In a real scenario, this would open a modal or navigate to a create wizard
+    const id = `PRG-${Date.now()}`;
+    dispatch({ 
+        type: 'ADD_PROGRAM', 
+        payload: {
+            id,
+            name: 'New Strategic Initiative',
+            managerId: 'Unassigned',
+            description: 'Define program scope and strategic alignment...',
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: '',
+            budget: 0,
+            benefits: '',
+            status: 'Planned',
+            health: 'Good',
+            strategicImportance: 5,
+            financialValue: 0,
+            riskScore: 0,
+            calculatedPriorityScore: 0,
+            category: 'Strategic',
+            businessCase: ''
+        }
+    });
+    onSelectProgram(id);
+  };
+
   return (
     <div className={`h-full overflow-y-auto p-6 space-y-8 animate-in fade-in duration-300`}>
+        {/* Command Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <button 
+                onClick={handleCreateProgram}
+                className={`p-4 rounded-xl border border-dashed border-nexus-300 bg-nexus-50/50 hover:bg-nexus-50 transition-all flex items-center gap-4 group text-left`}
+              >
+                  <div className="w-10 h-10 rounded-full bg-white border border-nexus-200 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <Layers className="text-nexus-600" size={18}/>
+                  </div>
+                  <div>
+                      <h4 className="font-bold text-slate-800 text-sm">Initialize Program</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Group related projects & outcomes</p>
+                  </div>
+              </button>
+
+              <button 
+                onClick={() => navigate('/portfolio?tab=framework')}
+                className={`p-4 rounded-xl border border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-50 transition-all flex items-center gap-4 group text-left`}
+              >
+                  <div className="w-10 h-10 rounded-full bg-white border border-purple-200 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <Target className="text-purple-600" size={18}/>
+                  </div>
+                  <div>
+                      <h4 className="font-bold text-slate-800 text-sm">Strategic Alignment</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Review organizational goals</p>
+                  </div>
+              </button>
+
+              <button 
+                onClick={() => navigate('/portfolio?tab=financials')}
+                className={`p-4 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/50 hover:bg-emerald-50 transition-all flex items-center gap-4 group text-left`}
+              >
+                  <div className="w-10 h-10 rounded-full bg-white border border-emerald-200 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <DollarSign className="text-emerald-600" size={18}/>
+                  </div>
+                  <div>
+                      <h4 className="font-bold text-slate-800 text-sm">Funding Review</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Manage capital allocation</p>
+                  </div>
+              </button>
+        </div>
+
         {/* Aggregate Stats */}
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard 
@@ -48,7 +121,7 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
                 title="Portfolio Burn" 
                 value={formatCompactCurrency(metrics.totalSpent)} 
                 icon={TrendingUp} 
-                subtext={`${((metrics.totalSpent/metrics.totalBudget)*100).toFixed(1)}% Consumed`}
+                subtext={`${metrics.totalBudget > 0 ? ((metrics.totalSpent/metrics.totalBudget)*100).toFixed(1) : 0}% Consumed`}
             />
             <StatCard 
                 title="Active Programs" 
@@ -79,11 +152,17 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
                         <div 
                             key={program.id} 
                             onClick={() => onSelectProgram(program.id)}
-                            className={`${theme.components.card} p-5 hover:shadow-md transition-all cursor-pointer group flex flex-col h-full`}
+                            className={`${theme.components.card} p-5 hover:shadow-md transition-all cursor-pointer group flex flex-col h-full border border-slate-200 hover:border-nexus-300 relative`}
                         >
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <button className="p-1 hover:bg-slate-100 rounded-full text-slate-400">
+                                    <MoreHorizontal size={16} />
+                                </button>
+                            </div>
+
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-nexus-50 flex items-center justify-center text-nexus-600 group-hover:bg-nexus-100 transition-colors">
+                                    <div className="w-10 h-10 rounded-lg bg-nexus-50 flex items-center justify-center text-nexus-600 group-hover:bg-nexus-100 transition-colors border border-nexus-100">
                                         <Layers size={20} />
                                     </div>
                                     <div>
@@ -126,9 +205,14 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
             </div>
             
             {state.programs.length === 0 && (
-                <div className="col-span-full text-center py-20 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400">
-                    <Layers size={48} className="mx-auto mb-4 opacity-50"/>
-                    <p>No active programs found.</p>
+                <div className="col-span-full">
+                    <EmptyGrid 
+                        title="Program Portfolio Null"
+                        description="No cross-functional programs identified. Establish a program to aggregate strategic project delivery."
+                        icon={Layers}
+                        actionLabel="Establish Program"
+                        onAdd={handleCreateProgram}
+                    />
                 </div>
             )}
         </div>

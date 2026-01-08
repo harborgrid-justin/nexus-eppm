@@ -14,6 +14,7 @@ import { useData } from '../context/DataContext';
 import { useGanttData } from '../hooks/gantt/useGanttData';
 import { useGanttCalendar } from '../hooks/gantt/useGanttCalendar';
 import { EmptyGrid } from './common/EmptyGrid';
+import { useContainerSize } from '../hooks/useContainerSize';
 
 const ROW_HEIGHT = 44;
 
@@ -35,17 +36,15 @@ const ProjectGantt: React.FC = () => {
   const { flatRenderList, taskRowMap } = useGanttData(project, expandedNodes);
   const projectCalendar = useGanttCalendar(project, state.calendars);
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(600);
-  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Optimization: Resize Observer API
+  const { ref: containerRef, height: containerHeight } = useContainerSize();
+
   const listRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (containerRef.current) setContainerHeight(containerRef.current.clientHeight);
-  }, []);
-
   const { virtualItems, totalHeight, onScroll } = useVirtualScroll(scrollTop, {
-    totalItems: flatRenderList.length, itemHeight: ROW_HEIGHT, containerHeight
+    totalItems: flatRenderList.length, itemHeight: ROW_HEIGHT, containerHeight: containerHeight || 600
   });
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -73,16 +72,19 @@ const ProjectGantt: React.FC = () => {
             title="Schedule Logic Missing"
             description="The master schedule currently has no activities. Import an XER file or manually add tasks to calculate the critical path."
             icon={Calendar}
-            onAdd={() => {}} // CRUD action handled by toolbar or context menu normally
+            onAdd={() => {}} 
             actionLabel="Add First Task"
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
             <button className="md:hidden absolute bottom-20 left-4 z-30 p-3 bg-primary text-white rounded-full shadow-lg" onClick={() => setShowTaskList(!showTaskList)}>{showTaskList ? <X size={20} /> : <List size={20} />}</button>
+            
+            {/* Main Gantt Container attached to ResizeObserver */}
             <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
               <GanttTaskList ref={listRef} renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes} selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask} virtualItems={virtualItems} totalHeight={totalHeight} rowHeight={ROW_HEIGHT} onScroll={handleScroll} />
               <GanttTimeline ref={timelineRef} timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap} projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT} showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask} projectTasks={project.tasks} calendar={projectCalendar} ganttContainerRef={containerRef} getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask} virtualItems={virtualItems} totalHeight={totalHeight} onScroll={handleScroll} />
             </div>
+            
             {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}
           </div>
       )}

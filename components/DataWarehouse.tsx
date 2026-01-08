@@ -46,7 +46,7 @@ const DataWarehouse: React.FC = () => {
           <StatCard title="Schema Version" value={schemaVersion} icon={Shield} subtext="Enterprise Stable" />
       </div>
 
-      <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl flex-1 flex flex-col overflow-hidden shadow-sm`}>
+      <div className={theme.layout.panelContainer}>
          <WarehouseExplorer />
       </div>
     </div>

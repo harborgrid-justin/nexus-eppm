@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sliders } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -14,10 +15,9 @@ import WBSManager from './scope/WBSManager';
 import RequirementsTraceability from './scope/RequirementsTraceability';
 
 const ScopeManagement: React.FC = () => {
-  const workspace = useProjectWorkspace();
-  const project = workspace?.project;
+  const { project } = useProjectWorkspace();
   const theme = useTheme();
-
+  
   const {
       activeGroup,
       activeView,
@@ -27,13 +27,12 @@ const ScopeManagement: React.FC = () => {
       handleViewChange
   } = useScopeManagementLogic();
 
-  // FIX: Professional grey fill placeholder instead of static text to maintain UI consistency during init.
+  // Handle case where project is undefined (e.g. direct navigation or loading)
   if (!project) return (
-    <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
-        <PageHeader title="Scope Management" subtitle="Deliverable Hub" icon={Sliders} />
-        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
-            <Sliders size={48} className="mb-4 opacity-10" />
-            <p className="font-bold uppercase tracking-widest text-xs">Initializing Scope Context...</p>
+    <div className="p-8 flex items-center justify-center h-full text-slate-400">
+        <div className="flex flex-col items-center gap-2">
+            <Sliders size={32} className="opacity-20"/>
+            <span className="font-bold text-xs uppercase tracking-widest">Initializing Scope Context...</span>
         </div>
     </div>
   );
@@ -70,7 +69,7 @@ const ScopeManagement: React.FC = () => {
           />
         </div>
         <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          <ErrorBoundary>
+          <ErrorBoundary name="Scope Module">
             {renderContent()}
           </ErrorBoundary>
         </div>

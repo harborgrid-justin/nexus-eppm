@@ -15,8 +15,19 @@ interface LogContext {
 class LoggerService {
   private static instance: LoggerService;
   private globalContext: LogContext = {};
+  private queue: any[] = [];
 
-  private constructor() {}
+  private constructor() {
+      // Optimization: Flush queue on unload using Beacon API
+      if (typeof window !== 'undefined') {
+          window.addEventListener('unload', () => {
+              if (this.queue.length > 0) {
+                  const blob = new Blob([JSON.stringify(this.queue)], { type: 'application/json' });
+                  navigator.sendBeacon('/api/log-flush', blob);
+              }
+          });
+      }
+  }
 
   static getInstance(): LoggerService {
     if (!LoggerService.instance) {
@@ -25,46 +36,48 @@ class LoggerService {
     return LoggerService.instance;
   }
 
-  /**
-   * Sets global context attributes that apply to all subsequent logs 
-   * (e.g., User ID, Current Route, Tenant ID).
-   */
   public setGlobalContext(context: LogContext) {
     this.globalContext = { ...this.globalContext, ...context };
   }
 
   private log(level: LogLevel, message: string, context?: LogContext) {
-    const timestamp = new Date().toISOString();
-    
-    // Merge global context with call-specific context
-    const mergedContext = { 
-      ...this.globalContext, 
-      ...context 
-    };
-    
-    const payload = {
-      timestamp,
-      level,
-      message,
-      environment: ConfigService.env,
-      version: ConfigService.appVersion,
-      ...mergedContext
+    // Optimization: Defer non-critical logs using requestIdleCallback
+    const task = () => {
+        const timestamp = new Date().toISOString();
+        const mergedContext = { ...this.globalContext, ...context };
+        
+        const payload = {
+          timestamp,
+          level,
+          message,
+          environment: ConfigService.env,
+          version: ConfigService.appVersion,
+          ...mergedContext
+        };
+
+        // Enqueue for batch sending (Beacon)
+        this.queue.push(payload);
+        if (this.queue.length > 50) this.queue.shift(); // Keep buffer small for demo
+
+        if (ConfigService.isProduction && level === 'debug') return;
+
+        const style = {
+          info: 'color: #0ea5e9',
+          warn: 'color: #eab308',
+          error: 'color: #ef4444; font-weight: bold',
+          debug: 'color: #94a3b8'
+        };
+
+        console.groupCollapsed(`%c[${level.toUpperCase()}] ${message}`, style[level]);
+        console.log('Payload:', payload);
+        console.groupEnd();
     };
 
-    // In production, this would dispatch to Datadog/Sentry/Splunk
-    // Example: DatadogLogs.logger.info(message, payload);
-    if (ConfigService.isProduction && level === 'debug') return;
-
-    const style = {
-      info: 'color: #0ea5e9', // Blue
-      warn: 'color: #eab308', // Yellow
-      error: 'color: #ef4444; font-weight: bold', // Red
-      debug: 'color: #94a3b8' // Slate
-    };
-
-    console.groupCollapsed(`%c[${level.toUpperCase()}] ${message}`, style[level]);
-    console.log('Payload:', payload);
-    console.groupEnd();
+    if ('requestIdleCallback' in window && level !== 'error') {
+        window.requestIdleCallback(task);
+    } else {
+        task();
+    }
   }
 
   public info(message: string, context?: LogContext) { this.log('info', message, context); }

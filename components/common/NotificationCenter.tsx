@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bell, CheckCircle, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,13 +9,31 @@ export const NotificationCenter: React.FC = () => {
     const theme = useTheme();
     const notifications = state.governance.alerts;
     const unreadCount = notifications.filter(n => !n.isRead).length;
+    
+    // Track previous count to detect NEW notifications for vibration
+    const prevCountRef = useRef(unreadCount);
 
-    // Rule 38/35: Hydration safety for time-ago calculations
     const [isMounted, setIsMounted] = useState(false);
-
+  
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    // Optimization: Vibration API
+    // Provides tactile feedback on mobile devices when a new high-priority alert arrives
+    useEffect(() => {
+        if (unreadCount > prevCountRef.current) {
+            const latest = notifications[0];
+            if (latest && (latest.severity === 'Critical' || latest.severity === 'Blocker')) {
+                // Pulse pattern: Vibrate 200ms, pause 100ms, vibrate 200ms
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            } else {
+                // Short pulse for normal info
+                if (navigator.vibrate) navigator.vibrate(100);
+            }
+        }
+        prevCountRef.current = unreadCount;
+    }, [unreadCount, notifications]);
 
     const getIcon = (severity: string) => {
         switch(severity) {
@@ -45,7 +63,7 @@ export const NotificationCenter: React.FC = () => {
                 )}
             </button>
             
-            <div className={`absolute right-0 mt-3 w-96 ${theme.components.card} overflow-hidden z-50 hidden group-hover:block animate-in slide-in-from-top-2 origin-top-right`}>
+            <div className={`absolute right-0 mt-3 w-96 ${theme.components.card} overflow-hidden z-50 hidden group-hover:block animate-in slide-in-from-top-2 origin-top-right shadow-2xl`}>
                 <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center`}>
                     <h3 className="font-bold text-slate-900 text-sm">Notifications</h3>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{unreadCount} UNREAD</span>

@@ -11,11 +11,12 @@ import {
     Calendar, ZoomIn, ZoomOut, ChevronRight, 
     ArrowLeft, Filter, Play, Download, Search, Loader2, Plus,
     MoreVertical, UserPlus, ShieldAlert, AlertCircle, Trash2, Edit3,
-    CheckCircle2
+    CheckCircle2, GanttChartSquare
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Task, TaskStatus } from '../../types';
 import { generateId } from '../../utils/formatters';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const ROW_HEIGHT = 44;
 
@@ -205,15 +206,14 @@ export const ProjectSchedulePage: React.FC = () => {
 
     if (!activeProject && !state.projects.length) {
          return (
-            <div className={`h-full flex items-center justify-center ${theme.colors.background} text-slate-400`}>
-                <div className="text-center p-8 bg-white border border-slate-200 rounded-xl shadow-sm max-w-md">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Calendar size={32} className="text-slate-300"/>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-700 mb-2">No Projects Available</h3>
-                    <p className="text-sm text-slate-500 mb-6">Create a project to start visualizing the master schedule and critical path.</p>
-                    <Button onClick={() => navigate('/projectList?action=create')} icon={Plus}>Create Project</Button>
-                </div>
+            <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
+                <EmptyGrid 
+                    title="Schedule View Empty"
+                    description="No projects available to schedule. Create a project to enable the CPM engine."
+                    actionLabel="Create Project"
+                    onAdd={() => navigate('/projectList?action=create')}
+                    icon={GanttChartSquare}
+                />
             </div>
          );
     }

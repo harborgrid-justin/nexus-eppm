@@ -1,29 +1,49 @@
 
-import { useSyncExternalStore } from 'react';
-import { Logger } from '../services/Logger';
-
-// External store subscription logic
-const subscribe = (callback: () => void) => {
-  window.addEventListener('online', callback);
-  window.addEventListener('offline', callback);
-  return () => {
-    window.removeEventListener('online', callback);
-    window.removeEventListener('offline', callback);
-  };
-};
-
-const getSnapshot = () => navigator.onLine;
-
-const getServerSnapshot = () => true; // Default for SSR consistency
+import { useState, useEffect } from 'react';
 
 export const useNetworkStatus = () => {
-  const isOnline = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isBrowser = typeof window !== 'undefined';
+  
+  const getNetworkInfo = () => {
+    if (!isBrowser) return { isOnline: true, effectiveType: '4g', saveData: false };
+    
+    const nav = navigator as any;
+    const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+    
+    return {
+      isOnline: navigator.onLine,
+      effectiveType: connection?.effectiveType || '4g',
+      saveData: connection?.saveData || false
+    };
+  };
 
-  if (!isOnline) {
-      // Side effect for logging (kept separate from store logic)
-      // Note: In strict mode, this might log double, but it's safe.
-      // We throttle this in a real app, simplified here.
-  }
+  const [status, setStatus] = useState(getNetworkInfo());
 
-  return isOnline;
+  useEffect(() => {
+    if (!isBrowser) return;
+
+    const nav = navigator as any;
+    const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+
+    const updateStatus = () => {
+      setStatus(getNetworkInfo());
+    };
+
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    
+    if (connection) {
+      connection.addEventListener('change', updateStatus);
+    }
+
+    return () => {
+      window.removeEventListener('online', updateStatus);
+      window.removeEventListener('offline', updateStatus);
+      if (connection) {
+        connection.removeEventListener('change', updateStatus);
+      }
+    };
+  }, []);
+
+  return status;
 };

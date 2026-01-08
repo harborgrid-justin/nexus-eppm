@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Project, AIAnalysisResult } from '../types/index';
-import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2, RefreshCw } from 'lucide-react';
+import { Sparkles, Send, X, AlertTriangle, Lightbulb, FileText, Loader2, RefreshCw, Mic } from 'lucide-react';
 import { useAiAssistant } from '../hooks/useAiAssistant';
 import { useTheme } from '../context/ThemeContext';
 
@@ -22,6 +23,31 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
     handleSendChat
   } = useAiAssistant(project, isOpen);
   const theme = useTheme();
+
+  const [isListening, setIsListening] = useState(false);
+
+  // Optimization: Web Speech API
+  const startListening = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech recognition not supported in this browser.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.start();
+    setIsListening(true);
+
+    recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setChatInput(transcript);
+        setIsListening(false);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+  };
 
   if (!isOpen) return null;
 
@@ -145,19 +171,28 @@ const AiAssistant: React.FC<AiAssistantProps> = ({ project, isOpen, onClose }) =
           <input
             id="ai-chat-input"
             type="text"
-            className={`w-full pl-4 pr-12 py-3.5 ${theme.colors.background} border ${theme.colors.border} rounded-2xl outline-none focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 text-sm font-medium transition-all`}
+            className={`w-full pl-4 pr-24 py-3.5 ${theme.colors.background} border ${theme.colors.border} rounded-2xl outline-none focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 text-sm font-medium transition-all`}
             placeholder="Ask about schedule drift, budget logic..."
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
           />
-          <button 
-            onClick={handleSendChat}
-            className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 ${theme.colors.primary} text-white rounded-xl hover:brightness-110 transition-all shadow-md active:scale-90`}
-            aria-label="Send message"
-          >
-            <Send size={16} />
-          </button>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+              <button
+                onClick={startListening}
+                className={`p-2 rounded-xl transition-all ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'text-slate-400 hover:text-nexus-600 hover:bg-slate-100'}`}
+                title="Voice Input"
+              >
+                  <Mic size={16} />
+              </button>
+              <button 
+                onClick={handleSendChat}
+                className={`p-2 ${theme.colors.primary} text-white rounded-xl hover:brightness-110 transition-all shadow-md active:scale-90`}
+                aria-label="Send message"
+              >
+                <Send size={16} />
+              </button>
+          </div>
         </div>
         <p className="text-[9px] text-center mt-3 text-slate-400 font-bold uppercase tracking-widest opacity-60">AI can generate incorrect data. Review all findings.</p>
       </div>

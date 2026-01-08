@@ -1,86 +1,38 @@
-import React, { useState } from 'react';
-import { useProgramData } from '../../hooks/useProgramData';
+
+import React from 'react';
+import { useProgramStakeholdersLogic } from '../../hooks/domain/useProgramStakeholdersLogic';
 import { Users, MessageSquare, Volume2, Shield, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { useData } from '../../context/DataContext';
-import { ProgramStakeholder, ProgramCommunicationItem } from '../../types';
-import { generateId } from '../../utils/formatters';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramStakeholdersProps {
   programId: string;
 }
 
 const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) => {
-  const { programStakeholders, communicationPlan } = useProgramData(programId);
   const theme = useTheme();
-  const { dispatch } = useData();
-
-  // State for Stakeholder Panel
-  const [isStakeholderPanelOpen, setIsStakeholderPanelOpen] = useState(false);
-  const [editingStakeholder, setEditingStakeholder] = useState<Partial<ProgramStakeholder> | null>(null);
-
-  // State for Communication Panel
-  const [isCommPanelOpen, setIsCommPanelOpen] = useState(false);
-  const [editingCommItem, setEditingCommItem] = useState<Partial<ProgramCommunicationItem> | null>(null);
-
-  // --- Stakeholder CRUD Handlers ---
-  const handleOpenStakeholderPanel = (stakeholder?: ProgramStakeholder) => {
-    setEditingStakeholder(stakeholder || {});
-    setIsStakeholderPanelOpen(true);
-  };
-
-  const handleSaveStakeholder = () => {
-    if (!editingStakeholder?.name) return;
-    const stakeholderToSave: ProgramStakeholder = {
-      id: editingStakeholder.id || generateId('PS'),
-      programId,
-      ...editingStakeholder,
-    } as ProgramStakeholder;
-
-    dispatch({
-      type: editingStakeholder.id ? 'PROGRAM_UPDATE_STAKEHOLDER' : 'PROGRAM_ADD_STAKEHOLDER',
-      payload: stakeholderToSave
-    });
-    setIsStakeholderPanelOpen(false);
-  };
-
-  const handleDeleteStakeholder = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this stakeholder?')) {
-      dispatch({ type: 'PROGRAM_DELETE_STAKEHOLDER', payload: id });
-    }
-  };
-
-  // --- Communication Item CRUD Handlers ---
-  const handleOpenCommPanel = (item?: ProgramCommunicationItem) => {
-    setEditingCommItem(item || {});
-    setIsCommPanelOpen(true);
-  };
-
-  const handleSaveCommItem = () => {
-    if (!editingCommItem?.audience || !editingCommItem?.content) return;
-    const itemToSave: ProgramCommunicationItem = {
-      id: editingCommItem.id || generateId('PCI'),
-      programId,
-      ...editingCommItem,
-    } as ProgramCommunicationItem;
-    
-    dispatch({
-        type: editingCommItem.id ? 'PROGRAM_UPDATE_COMM_ITEM' : 'PROGRAM_ADD_COMM_ITEM',
-        payload: itemToSave
-    });
-    setIsCommPanelOpen(false);
-  };
-
-  const handleDeleteCommItem = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this communication item?')) {
-        dispatch({ type: 'PROGRAM_DELETE_COMM_ITEM', payload: id });
-    }
-  };
+  const {
+      programStakeholders,
+      communicationPlan,
+      isStakeholderPanelOpen,
+      editingStakeholder,
+      isCommPanelOpen,
+      editingCommItem,
+      setIsStakeholderPanelOpen,
+      setIsCommPanelOpen,
+      setEditingStakeholder,
+      setEditingCommItem,
+      handleOpenStakeholderPanel,
+      handleSaveStakeholder,
+      handleDeleteStakeholder,
+      handleOpenCommPanel,
+      handleSaveCommItem,
+      handleDeleteCommItem
+  } = useProgramStakeholdersLogic(programId);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -125,7 +77,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                                     </td>
                                     <td className="px-6 py-4">
                                         <Badge variant={
-                                            s.engagementLevel === 'Supportive' ? 'success' :
+                                            s.engagementLevel === 'Supportive' || s.engagementLevel === 'Leading' ? 'success' :
                                             s.engagementLevel === 'Resistant' ? 'danger' : 'neutral'
                                         }>{s.engagementLevel}</Badge>
                                     </td>
@@ -142,11 +94,12 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                 </div>
             ) : (
                 <div className="flex-1 flex flex-col justify-center">
-                    <EmptyState 
+                    <EmptyGrid 
                         title="Stakeholder Register Empty" 
                         description="Identify and register key program stakeholders to manage engagement."
                         icon={Users}
-                        action={<Button size="sm" variant="ghost" onClick={() => handleOpenStakeholderPanel()}>Add First Stakeholder</Button>}
+                        actionLabel="Add First Stakeholder"
+                        onAdd={() => handleOpenStakeholderPanel()}
                     />
                 </div>
             )}
@@ -194,11 +147,12 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                 </div>
             ) : (
                 <div className="flex-1 flex flex-col justify-center">
-                    <EmptyState 
+                    <EmptyGrid 
                         title="No Communication Plan" 
-                        description="Define the cadence and channels for information distribution."
+                        description="Define the cadence and channels for information distribution to stakeholders."
                         icon={MessageSquare}
-                        action={<Button size="sm" variant="ghost" onClick={() => handleOpenCommPanel()}>Plan Communication</Button>}
+                        actionLabel="Plan Communication"
+                        onAdd={() => handleOpenCommPanel()}
                     />
                 </div>
             )}
@@ -212,13 +166,26 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                 title={editingStakeholder?.id ? "Edit Stakeholder" : "Add Stakeholder"}
                 footer={<>
                     <Button variant="secondary" onClick={() => setIsStakeholderPanelOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSaveStakeholder}>Save</Button>
+                    <Button onClick={() => handleSaveStakeholder(editingStakeholder!)}>Save</Button>
                 </>}
             >
                 <div className="space-y-4">
-                    <Input label="Name" value={editingStakeholder?.name || ''} onChange={(e) => setEditingStakeholder({...editingStakeholder, name: e.target.value})} />
-                    <Input label="Role" value={editingStakeholder?.role || ''} onChange={(e) => setEditingStakeholder({...editingStakeholder, role: e.target.value})} />
-                    {/* Add more inputs for other fields as needed */}
+                    <Input label="Name" value={editingStakeholder?.name || ''} onChange={(e) => setEditingStakeholder({...editingStakeholder!, name: e.target.value})} placeholder="Stakeholder Name"/>
+                    <Input label="Role" value={editingStakeholder?.role || ''} onChange={(e) => setEditingStakeholder({...editingStakeholder!, role: e.target.value})} placeholder="Job Title / Role"/>
+                    <div className="grid grid-cols-2 gap-4">
+                         <div>
+                            <label className="block text-sm font-bold mb-1 text-slate-700">Category</label>
+                            <select className="w-full p-2 border rounded-lg text-sm" value={editingStakeholder?.category} onChange={e => setEditingStakeholder({...editingStakeholder!, category: e.target.value as any})}>
+                                <option>Strategic</option><option>Operational</option><option>External</option>
+                            </select>
+                         </div>
+                         <div>
+                            <label className="block text-sm font-bold mb-1 text-slate-700">Engagement Level</label>
+                            <select className="w-full p-2 border rounded-lg text-sm" value={editingStakeholder?.engagementLevel} onChange={e => setEditingStakeholder({...editingStakeholder!, engagementLevel: e.target.value as any})}>
+                                <option>Leading</option><option>Supportive</option><option>Neutral</option><option>Resistant</option>
+                            </select>
+                         </div>
+                    </div>
                 </div>
             </SidePanel>
         )}
@@ -231,13 +198,17 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                 title={editingCommItem?.id ? "Edit Communication Item" : "Add Communication Item"}
                 footer={<>
                     <Button variant="secondary" onClick={() => setIsCommPanelOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSaveCommItem}>Save</Button>
+                    <Button onClick={() => handleSaveCommItem(editingCommItem!)}>Save</Button>
                 </>}
             >
                 <div className="space-y-4">
-                    <Input label="Audience" value={editingCommItem?.audience || ''} onChange={(e) => setEditingCommItem({...editingCommItem, audience: e.target.value})} />
-                    <Input label="Content" value={editingCommItem?.content || ''} onChange={(e) => setEditingCommItem({...editingCommItem, content: e.target.value})} />
-                    {/* Add more inputs for other fields as needed */}
+                    <Input label="Audience" value={editingCommItem?.audience || ''} onChange={(e) => setEditingCommItem({...editingCommItem!, audience: e.target.value})} placeholder="e.g. Steering Committee"/>
+                    <Input label="Content" value={editingCommItem?.content || ''} onChange={(e) => setEditingCommItem({...editingCommItem!, content: e.target.value})} placeholder="e.g. Monthly Status Report"/>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Frequency" value={editingCommItem?.frequency || ''} onChange={(e) => setEditingCommItem({...editingCommItem!, frequency: e.target.value})} />
+                        <Input label="Channel" value={editingCommItem?.channel || ''} onChange={(e) => setEditingCommItem({...editingCommItem!, channel: e.target.value})} />
+                    </div>
+                    <Input label="Owner ID" value={editingCommItem?.owner || ''} onChange={(e) => setEditingCommItem({...editingCommItem!, owner: e.target.value})} />
                 </div>
             </SidePanel>
         )}
