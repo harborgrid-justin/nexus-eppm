@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Risk } from '../../types/index';
-import { Shield, Check, Plus, Trash2 } from 'lucide-react';
+import { Shield, Check, Plus, Trash2, ShieldCheck } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
+import { FieldPlaceholder } from '../common/FieldPlaceholder';
 
 interface RiskResponsePlanProps {
   risk: Risk;
@@ -36,7 +37,7 @@ const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h4 className={`${theme.typography.h3} flex items-center gap-2`}><Shield size={16}/> Mitigation Actions</h4>
-                <Button size="sm" icon={Plus} onClick={addAction}>Add Step</Button>
+                {actions.length > 0 && <Button size="sm" icon={Plus} onClick={addAction}>Add Step</Button>}
             </div>
             <div className="space-y-2">
                 {actions.map((action, i) => (
@@ -53,7 +54,13 @@ const RiskResponsePlan: React.FC<RiskResponsePlanProps> = ({ risk }) => {
                         </button>
                     </div>
                 ))}
-                {actions.length === 0 && <p className={`text-sm ${theme.colors.text.tertiary} italic text-center`}>No mitigation actions defined.</p>}
+                {actions.length === 0 && (
+                    <FieldPlaceholder 
+                        label="No mitigation actions defined." 
+                        onAdd={addAction}
+                        icon={ShieldCheck}
+                    />
+                )}
             </div>
         </div>
     );

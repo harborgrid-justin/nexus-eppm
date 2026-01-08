@@ -2,7 +2,8 @@
 import React from 'react';
 import { QualityReport } from '../../../types';
 import { Badge } from '../../ui/Badge';
-import { Search } from 'lucide-react';
+import { Search, ClipboardList } from 'lucide-react';
+import { EmptyGrid } from '../../common/EmptyGrid';
 
 interface ControlLogTableProps {
     reports: QualityReport[];
@@ -16,7 +17,7 @@ export const ControlLogTable: React.FC<ControlLogTableProps> = ({ reports, filte
     
     return (
         <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-slate-200 flex gap-2">
+            <div className="p-4 border-b border-slate-200 flex gap-2 shrink-0">
                 <div className="relative flex-1">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                     <input className="w-full pl-9 pr-3 py-1.5 text-sm border border-slate-300 rounded-md" placeholder="Search logs..." />
@@ -28,7 +29,7 @@ export const ControlLogTable: React.FC<ControlLogTableProps> = ({ reports, filte
                 </select>
             </div>
             <div className="flex-1 overflow-y-auto">
-                {reports.map(r => (
+                {reports.length > 0 ? reports.map(r => (
                     <div 
                         key={r.id} 
                         onClick={() => onSelectReport(r.id)}
@@ -41,7 +42,15 @@ export const ControlLogTable: React.FC<ControlLogTableProps> = ({ reports, filte
                         <p className="text-xs text-slate-500 mb-2">{r.date} • {r.inspector}</p>
                         <p className="text-sm text-slate-600 line-clamp-1">{r.summary}</p>
                     </div>
-                ))}
+                )) : (
+                    <div className="h-full flex items-center justify-center p-8">
+                         <EmptyGrid 
+                            title="Inspection Log Empty"
+                            description="No quality control inspections match the current criteria."
+                            icon={ClipboardList}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -3,12 +3,15 @@ import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
-import { Banknote, PieChart, AlertCircle, Plus } from 'lucide-react';
+import { Banknote, PieChart, AlertCircle, Plus, Wallet } from 'lucide-react';
 import { ProgressBar } from '../common/ProgressBar';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 export const FundingManager: React.FC = () => {
     const { state } = useData();
     const theme = useTheme();
+    const navigate = useNavigate();
 
     const { totalAppropriated, totalConsumed, sourceDistribution, alerts } = useMemo(() => {
         let totalApp = 0;
@@ -20,7 +23,6 @@ export const FundingManager: React.FC = () => {
             totalApp += fund.totalAuthorized;
             
             // Calculate consumption (Allocated to projects)
-            // In absence of explicit `fundAllocations` table in mock, we sum ProjectFunding entries
             const allocated = state.projects.reduce((pSum, proj) => {
                 const funding = proj.funding?.filter(f => f.fundingSourceId === fund.id) || [];
                 return pSum + funding.reduce((fSum, f) => fSum + f.amount, 0);
@@ -57,18 +59,18 @@ export const FundingManager: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col space-y-6 p-6 overflow-y-auto">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className={theme.typography.h2}>Funding Manager</h2>
                     <p className={theme.typography.small}>Manage fund appropriation, consumption, and transfers.</p>
                 </div>
-                <div className="p-3 bg-green-50 border border-green-200 rounded-xl flex gap-4">
+                <div className="p-3 bg-green-50 border border-green-200 rounded-xl flex gap-4 w-full sm:w-auto justify-between sm:justify-start">
                     <div>
                         <p className="text-[10px] font-bold text-green-800 uppercase">Total Appropriated</p>
                         <p className="text-xl font-black text-green-900">{formatCompactCurrency(totalAppropriated)}</p>
                     </div>
                     <div className="w-px bg-green-200 h-10"></div>
-                    <div>
+                    <div className="text-right sm:text-left">
                         <p className="text-[10px] font-bold text-green-800 uppercase">Consumed</p>
                         <p className="text-xl font-black text-green-900">{formatCompactCurrency(totalConsumed)}</p>
                     </div>
@@ -78,51 +80,54 @@ export const FundingManager: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Funding Sources List */}
                 <div className="space-y-4">
-                    {state.fundingSources.map(fund => {
-                        // Re-calculate local consumption for display
-                        const allocated = state.projects.reduce((pSum, proj) => {
-                             const funding = proj.funding?.filter(f => f.fundingSourceId === fund.id) || [];
-                             return pSum + funding.reduce((fSum, f) => fSum + f.amount, 0);
-                        }, 0);
-                        const percent = fund.totalAuthorized > 0 ? (allocated / fund.totalAuthorized) * 100 : 0;
-                        
-                        return (
-                            <div key={fund.id} className={`${theme.components.card} p-5 flex flex-col gap-3`}>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-100 rounded-lg text-slate-600"><Banknote size={20}/></div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-800">{fund.name}</h4>
-                                            <p className="text-xs text-slate-500">{fund.type} • {fund.description}</p>
+                    {state.fundingSources.length === 0 ? (
+                         <div className="h-64">
+                             <EmptyGrid 
+                                title="No Funding Sources"
+                                description="Define corporate or external funding sources (Grants, Bonds, CapEx) to enable project allocation."
+                                icon={Wallet}
+                                actionLabel="Manage Sources"
+                                onAdd={() => navigate('/admin?view=fundingSources')}
+                             />
+                         </div>
+                    ) : (
+                        state.fundingSources.map(fund => {
+                            // Re-calculate local consumption for display
+                            const allocated = state.projects.reduce((pSum, proj) => {
+                                 const funding = proj.funding?.filter(f => f.fundingSourceId === fund.id) || [];
+                                 return pSum + funding.reduce((fSum, f) => fSum + f.amount, 0);
+                            }, 0);
+                            const percent = fund.totalAuthorized > 0 ? (allocated / fund.totalAuthorized) * 100 : 0;
+                            
+                            return (
+                                <div key={fund.id} className={`${theme.components.card} p-5 flex flex-col gap-3 group hover:border-nexus-300 transition-all`}>
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 bg-slate-100 rounded-lg ${theme.colors.text.secondary}`}><Banknote size={20}/></div>
+                                            <div>
+                                                <h4 className={`font-bold ${theme.colors.text.primary}`}>{fund.name}</h4>
+                                                <p className={`text-xs ${theme.colors.text.secondary}`}>{fund.type} • {fund.description}</p>
+                                            </div>
                                         </div>
+                                        <span className={`font-mono font-bold text-lg ${theme.colors.text.primary}`}>{formatCurrency(fund.totalAuthorized)}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-lg text-slate-900">{formatCurrency(fund.totalAuthorized)}</span>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-xs mb-1">
-                                        <span className="text-slate-500">Allocated: {formatCurrency(allocated)}</span>
-                                        <span className="font-bold text-slate-700">{percent.toFixed(1)}%</span>
+                                    <div>
+                                        <div className="flex justify-between text-xs mb-1">
+                                            <span className={theme.colors.text.secondary}>Allocated: {formatCurrency(allocated)}</span>
+                                            <span className={`font-bold ${theme.colors.text.primary}`}>{percent.toFixed(1)}%</span>
+                                        </div>
+                                        <ProgressBar value={percent} size="sm" colorClass={percent > 90 ? 'bg-red-500' : 'bg-nexus-600'} />
                                     </div>
-                                    <ProgressBar value={percent} size="sm" colorClass={percent > 90 ? 'bg-red-500' : 'bg-nexus-600'} />
                                 </div>
-                            </div>
-                        );
-                    })}
-                    {state.fundingSources.length === 0 && (
-                        <div className="p-12 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
-                            <Banknote size={48} className="mx-auto mb-4 opacity-20"/>
-                            <p>No funding sources defined.</p>
-                            <button className="mt-4 text-sm font-bold text-nexus-600 flex items-center justify-center gap-2 mx-auto hover:underline">
-                                <Plus size={14}/> Add Source in Admin
-                            </button>
-                        </div>
+                            );
+                        })
                     )}
                 </div>
 
                 {/* Alerts & Analysis */}
                 <div className="space-y-6">
                     {alerts.length > 0 ? (
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex gap-4">
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex gap-4 animate-in fade-in">
                             <AlertCircle className="text-amber-600 shrink-0" size={24}/>
                             <div>
                                 <h4 className="font-bold text-amber-900 text-sm">Funding Alerts</h4>
@@ -133,7 +138,7 @@ export const FundingManager: React.FC = () => {
                                 </ul>
                             </div>
                         </div>
-                    ) : (
+                    ) : state.fundingSources.length > 0 ? (
                         <div className="bg-green-50 border border-green-200 rounded-xl p-5 flex gap-4 items-center">
                             <AlertCircle className="text-green-600 shrink-0" size={24}/>
                             <div>
@@ -141,29 +146,30 @@ export const FundingManager: React.FC = () => {
                                 <p className="text-xs text-green-800 mt-1">No utilization breaches or expiration warnings.</p>
                             </div>
                         </div>
-                    )}
+                    ) : null}
 
-                    <div className={`${theme.components.card} p-6`}>
-                        <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><PieChart size={18}/> Fund Type Distribution</h4>
-                        <div className="space-y-3">
-                            {sourceDistribution.map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-sm">
-                                    <span className="flex items-center gap-2">
-                                        <div className={`w-3 h-3 rounded-full ${item.color}`}></div> 
-                                        {item.type}
-                                    </span>
-                                    <span className="font-mono">{item.percentage.toFixed(1)}%</span>
-                                </div>
-                            ))}
-                            {sourceDistribution.length === 0 && <p className="text-slate-400 text-xs italic">No data available.</p>}
-                            
-                            <div className="w-full h-4 rounded-full flex overflow-hidden mt-2 bg-slate-100">
+                    {sourceDistribution.length > 0 && (
+                        <div className={`${theme.components.card} p-6`}>
+                            <h4 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}><PieChart size={18}/> Fund Type Distribution</h4>
+                            <div className="space-y-3">
                                 {sourceDistribution.map((item, idx) => (
-                                    <div key={idx} className={`${item.color} h-full`} style={{ width: `${item.percentage}%` }}></div>
+                                    <div key={idx} className="flex items-center justify-between text-sm">
+                                        <span className={`flex items-center gap-2 ${theme.colors.text.secondary}`}>
+                                            <div className={`w-3 h-3 rounded-full ${item.color}`}></div> 
+                                            {item.type}
+                                        </span>
+                                        <span className={`font-mono font-bold ${theme.colors.text.primary}`}>{item.percentage.toFixed(1)}%</span>
+                                    </div>
                                 ))}
+                                
+                                <div className="w-full h-4 rounded-full flex overflow-hidden mt-2 bg-slate-100">
+                                    {sourceDistribution.map((item, idx) => (
+                                        <div key={idx} className={`${item.color} h-full`} style={{ width: `${item.percentage}%` }}></div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>

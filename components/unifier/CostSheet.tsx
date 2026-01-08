@@ -4,7 +4,9 @@ import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { evaluateFormula } from '../../utils/logic/businessProcessEngine';
 import { formatCurrency } from '../../utils/formatters';
-import { RefreshCw, Calculator, FileSpreadsheet } from 'lucide-react';
+import { RefreshCw, Calculator, FileSpreadsheet, Plus } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface CostSheetProps {
   projectId: string;
@@ -39,64 +41,99 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
       return t;
   }, [computedRows, columns]);
 
+  const handleRecalculate = () => {
+      // In a real app, this might dispatch an action to re-run server-side logic
+      console.log("Recalculating sheet...");
+  };
+
   return (
     <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-        <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center bg-slate-50`}>
+        <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50`}>
             <div className="flex items-center gap-2">
-                <FileSpreadsheet className="text-green-600" size={20} />
-                <h3 className="font-bold text-slate-800">Master Cost Sheet</h3>
+                <div className={`p-2 bg-green-50 text-green-600 rounded-lg border border-green-200`}>
+                    <FileSpreadsheet size={20} />
+                </div>
+                <div>
+                    <h3 className={`font-bold ${theme.colors.text.primary}`}>Master Cost Sheet</h3>
+                    <p className={`text-xs ${theme.colors.text.secondary}`}>Consolidated CBS & Variance</p>
+                </div>
             </div>
-            <div className="flex gap-2">
-                <button className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-300 rounded hover:bg-slate-50 flex items-center gap-2">
-                    <Calculator size={14}/> Recalculate
-                </button>
-                <button className="px-3 py-1.5 text-xs font-bold bg-nexus-600 text-white rounded hover:bg-nexus-700 flex items-center gap-2">
-                    <RefreshCw size={14}/> Refresh
-                </button>
+            <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    icon={Calculator} 
+                    onClick={handleRecalculate}
+                    className="flex-1 sm:flex-none"
+                >
+                    Recalculate
+                </Button>
+                <Button 
+                    variant="primary" 
+                    size="sm" 
+                    icon={RefreshCw}
+                    className="flex-1 sm:flex-none"
+                >
+                    Refresh
+                </Button>
             </div>
         </div>
         
-        <div className="flex-1 overflow-auto">
-            <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-                <thead className="bg-slate-100 sticky top-0 z-10">
-                    <tr>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 sticky left-0 bg-slate-100 z-20 min-w-[150px]">WBS / Cost Code</th>
-                        <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 min-w-[200px]">Description</th>
-                        {columns.map(col => (
-                            <th key={col.id} className={`px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 min-w-[140px] ${col.type === 'Formula' ? 'bg-blue-50/50' : ''}`}>
-                                {col.name}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                    {computedRows.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-2 text-sm font-mono text-slate-600 border-r border-slate-100 sticky left-0 bg-white font-bold">
-                                {row.wbsCode} <span className="text-slate-300">|</span> {row.costCode}
-                            </td>
-                            <td className="px-4 py-2 text-sm text-slate-800 border-r border-slate-100">
-                                {row.description}
-                            </td>
+        <div className="flex-1 overflow-auto bg-white relative">
+            {computedRows.length === 0 ? (
+                 <div className="h-full flex flex-col justify-center p-8">
+                    <EmptyGrid 
+                        title="Cost Sheet Empty"
+                        description="No cost codes or budget lines found for this project. Initialize the Cost Breakdown Structure (CBS) to begin."
+                        icon={FileSpreadsheet}
+                        actionLabel="Initialize CBS"
+                        onAdd={() => {}} 
+                    />
+                 </div>
+            ) : (
+                <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+                    <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
+                        <tr>
+                            <th className={`px-4 py-3 text-left text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} sticky left-0 ${theme.colors.background} z-20 min-w-[150px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>WBS / Cost Code</th>
+                            <th className={`px-4 py-3 text-left text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} min-w-[200px]`}>Description</th>
                             {columns.map(col => (
-                                <td key={col.id} className={`px-4 py-2 text-sm text-right font-mono border-r border-slate-100 ${col.type === 'Formula' ? 'font-bold text-slate-900 bg-blue-50/10' : 'text-slate-600'}`}>
-                                    {formatCurrency(row[col.id])}
+                                <th key={col.id} className={`px-4 py-3 text-right text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} min-w-[140px] ${col.type === 'Formula' ? 'bg-blue-50/30' : ''}`}>
+                                    {col.name}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className={`divide-y divide-slate-100 bg-white`}>
+                        {computedRows.map((row, idx) => (
+                            <tr key={idx} className={`hover:${theme.colors.background} transition-colors group`}>
+                                <td className={`px-4 py-3 text-sm font-mono ${theme.colors.text.secondary} border-r ${theme.colors.border} sticky left-0 bg-white group-hover:${theme.colors.background} z-10 font-bold shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>
+                                    {row.wbsCode} <span className="text-slate-300">|</span> {row.costCode}
+                                </td>
+                                <td className={`px-4 py-3 text-sm ${theme.colors.text.primary} border-r ${theme.colors.border}`}>
+                                    {row.description}
+                                </td>
+                                {columns.map(col => (
+                                    <td key={col.id} className={`px-4 py-3 text-sm text-right font-mono border-r ${theme.colors.border} ${col.type === 'Formula' ? 'font-bold text-slate-900 bg-blue-50/10' : 'text-slate-600'}`}>
+                                        {formatCurrency(row[col.id])}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                        {/* Totals Row */}
+                        <tr className={`${theme.colors.background} font-black border-t-2 ${theme.colors.border} sticky bottom-0 z-20 shadow-[0_-2px_5px_-2px_rgba(0,0,0,0.05)]`}>
+                            <td className={`px-4 py-3 text-xs uppercase ${theme.colors.text.secondary} sticky left-0 ${theme.colors.background} z-30 border-r ${theme.colors.border} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>
+                                Grand Total
+                            </td>
+                            <td className={`px-4 py-3 border-r ${theme.colors.border}`}></td>
+                            {columns.map(col => (
+                                <td key={col.id} className={`px-4 py-3 text-right text-sm border-r ${theme.colors.border}`}>
+                                    {formatCurrency(totals[col.id])}
                                 </td>
                             ))}
                         </tr>
-                    ))}
-                    {/* Totals Row */}
-                    <tr className="bg-slate-50 font-black border-t-2 border-slate-300">
-                        <td className="px-4 py-3 text-xs uppercase text-slate-500 sticky left-0 bg-slate-50 z-20 border-r border-slate-200">Total</td>
-                        <td className="px-4 py-3 border-r border-slate-200"></td>
-                        {columns.map(col => (
-                            <td key={col.id} className="px-4 py-3 text-right text-sm border-r border-slate-200">
-                                {formatCurrency(totals[col.id])}
-                            </td>
-                        ))}
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            )}
         </div>
     </div>
   );

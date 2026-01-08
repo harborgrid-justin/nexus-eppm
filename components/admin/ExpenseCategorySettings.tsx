@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const ExpenseCategorySettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -60,25 +61,50 @@ export const ExpenseCategorySettings: React.FC = () => {
                 <button onClick={() => setActiveScope('Project')} className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-1.5 text-xs font-bold rounded-md ${activeScope === 'Project' ? `${theme.colors.surface} shadow` : `${theme.colors.text.secondary}`}`}><Briefcase size={14}/> Project</button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-10">
-                {filteredCategories.map(cat => (
-                    <div key={cat.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-4 shadow-sm group hover:border-nexus-300 transition-all flex items-center justify-between`}>
-                        <div className="flex items-center gap-3">
-                            <div className={`p-2 ${theme.colors.background} rounded-lg ${theme.colors.text.tertiary} group-hover:bg-nexus-50 group-hover:text-nexus-600`}>
-                                <Receipt size={16}/>
+            <div className="flex-1 overflow-auto">
+                {filteredCategories.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-10">
+                        {filteredCategories.map(cat => (
+                            <div key={cat.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-4 shadow-sm group hover:border-nexus-300 transition-all flex items-center justify-between`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 ${theme.colors.background} rounded-lg ${theme.colors.text.tertiary} group-hover:bg-nexus-50 group-hover:text-nexus-600`}>
+                                        <Receipt size={16}/>
+                                    </div>
+                                    <span className={`font-bold ${theme.colors.text.primary}`}>{cat.name}</span>
+                                </div>
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleOpenPanel(cat)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={14}/></button>
+                                    <button onClick={() => handleDelete(cat.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={14}/></button>
+                                </div>
                             </div>
-                            <span className={`font-bold ${theme.colors.text.primary}`}>{cat.name}</span>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleOpenPanel(cat)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={14}/></button>
-                            <button onClick={() => handleDelete(cat.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={14}/></button>
-                        </div>
+                        ))}
                     </div>
-                ))}
-                {filteredCategories.length === 0 && (
-                    <div className={`col-span-full py-12 text-center border-2 border-dashed ${theme.colors.border} rounded-xl ${theme.colors.text.tertiary}`}>No categories defined for this scope.</div>
+                ) : (
+                    <div className="h-full flex items-center justify-center">
+                        <EmptyGrid 
+                            title={`No ${activeScope} Categories`}
+                            description={`Define cost categories for ${activeScope === 'Global' ? 'organization-wide' : 'project-specific'} expense reporting.`}
+                            onAdd={() => handleOpenPanel()}
+                            actionLabel="Add Category"
+                            icon={Receipt}
+                        />
+                    </div>
                 )}
             </div>
+            
+            <SidePanel
+                isOpen={isPanelOpen}
+                onClose={() => setIsPanelOpen(false)}
+                title={editingCategory?.id ? "Edit Category" : "New Category"}
+                footer={<>
+                    <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSave} icon={Save}>Save Category</Button>
+                </>}
+            >
+                <div className="space-y-4">
+                    <Input label="Category Name" value={editingCategory?.name} onChange={e => setEditingCategory({...editingCategory, name: e.target.value})} />
+                </div>
+            </SidePanel>
         </div>
     );
 };

@@ -1,9 +1,10 @@
 
 import React, { useState, useTransition } from 'react';
-import { ShoppingCart, Plus, Filter, FileText, CheckCircle } from 'lucide-react';
+import { ShoppingCart, Plus, Filter, FileText, CheckCircle, Search } from 'lucide-react';
 import { useProcurementData } from '../../hooks/index';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProcurementSourcingProps {
     projectId: string;
@@ -48,48 +49,54 @@ const ProcurementSourcing: React.FC<ProcurementSourcingProps> = ({ projectId }) 
             </div>
 
             <div className={`flex-1 overflow-auto p-6 ${isPending ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
-                <div className="grid grid-cols-1 gap-4">
-                    {filteredSolicitations.map(sol => (
-                        <div key={sol.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow`}>
-                            <div className="flex justify-between items-start mb-3">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <Badge variant="info">{sol.type}</Badge>
-                                        <h4 className={`font-bold ${theme.colors.text.primary}`}>{sol.title}</h4>
+                {filteredSolicitations.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-4">
+                        {filteredSolicitations.map(sol => (
+                            <div key={sol.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow`}>
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="info">{sol.type}</Badge>
+                                            <h4 className={`font-bold ${theme.colors.text.primary}`}>{sol.title}</h4>
+                                        </div>
+                                        <p className={`text-xs ${theme.colors.text.secondary} mt-1 ml-1`}>ID: {sol.id} • Package: {sol.packageId}</p>
                                     </div>
-                                    <p className={`text-xs ${theme.colors.text.secondary} mt-1 ml-1`}>ID: {sol.id} • Package: {sol.packageId}</p>
+                                    <Badge variant={sol.status === 'Open' ? 'success' : 'neutral'}>{sol.status}</Badge>
                                 </div>
-                                <Badge variant={sol.status === 'Open' ? 'success' : 'neutral'}>{sol.status}</Badge>
-                            </div>
-                            
-                            <div className={`grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t ${theme.colors.border.replace('border-', 'border-slate-')}100`}>
-                                <div>
-                                    <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Issue Date</span>
-                                    <span className={`font-medium ${theme.colors.text.primary}`}>{sol.issueDate}</span>
+                                
+                                <div className={`grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t ${theme.colors.border.replace('border-', 'border-slate-')}100`}>
+                                    <div>
+                                        <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Issue Date</span>
+                                        <span className={`font-medium ${theme.colors.text.primary}`}>{sol.issueDate}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Deadline</span>
+                                        <span className="font-medium text-red-600">{sol.deadline}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Invited Vendors</span>
+                                        <span className={`font-medium ${theme.colors.text.primary}`}>{sol.invitedVendorIds.length} Invited</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Deadline</span>
-                                    <span className="font-medium text-red-600">{sol.deadline}</span>
-                                </div>
-                                <div>
-                                    <span className="text-slate-400 text-xs uppercase font-bold block mb-1">Invited Vendors</span>
-                                    <span className={`font-medium ${theme.colors.text.primary}`}>{sol.invitedVendorIds.length} Invited</span>
-                                </div>
-                            </div>
 
-                            <div className="mt-4 flex gap-2">
-                                <button className="flex-1 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded border border-slate-200 hover:bg-slate-100">View Responses</button>
-                                <button className="flex-1 py-1.5 text-xs font-bold text-nexus-600 bg-nexus-50 rounded border border-nexus-200 hover:bg-nexus-100">Compare Bids</button>
+                                <div className="mt-4 flex gap-2">
+                                    <button className="flex-1 py-1.5 text-xs font-bold text-slate-600 bg-slate-50 rounded border border-slate-200 hover:bg-slate-100">View Responses</button>
+                                    <button className="flex-1 py-1.5 text-xs font-bold text-nexus-600 bg-nexus-50 rounded border border-nexus-200 hover:bg-nexus-100">Compare Bids</button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                    {filteredSolicitations.length === 0 && (
-                        <div className={`text-center p-12 ${theme.colors.text.tertiary} ${theme.colors.background} rounded-xl border-2 border-dashed ${theme.colors.border}`}>
-                            <FileText size={32} className="mx-auto mb-2 opacity-50"/>
-                            <p>No sourcing events found.</p>
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="h-full flex items-center justify-center">
+                         <EmptyGrid 
+                            title="No Sourcing Events"
+                            description={filter !== 'All' ? `No ${filter.toLowerCase()} solicitations found.` : "No active RFPs or RFQs. Initiate a sourcing event to solicit vendor bids."}
+                            icon={FileText}
+                            actionLabel="Create RFx"
+                            onAdd={() => {}}
+                         />
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -2,12 +2,13 @@
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Star, TrendingUp, DollarSign, Clock } from 'lucide-react';
+import { Star, TrendingUp, DollarSign, Clock, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramBenefitsProps {
   programId: string;
@@ -34,12 +35,8 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
       let cumulativePlanned = 0;
       let cumulativeRealized = 0;
       
-      // Distribute value over 4 quarters
-      // In a real app, this would be aggregated from benefit line item dates
       for(let i=0; i<4; i++) {
-          // Weighted towards back-end
           const incrementPlanned = plannedValue * (i === 0 ? 0.1 : i === 1 ? 0.2 : i === 2 ? 0.3 : 0.4);
-          // Lagging realization
           const incrementRealized = realizedValue * (i === 0 ? 0.05 : i === 1 ? 0.15 : i === 2 ? 0.3 : 0.5);
           
           cumulativePlanned += incrementPlanned;
@@ -53,6 +50,11 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
       }
       return data;
   }, [plannedValue, realizedValue]);
+
+  const handleAddBenefit = () => {
+      // Future: Open modal
+      console.log('Add Benefit');
+  };
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
@@ -86,41 +88,48 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
                 </div>
             </div>
 
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
                     <h3 className="font-bold text-slate-800">Benefits Register</h3>
                 </div>
-                <div className="overflow-auto max-h-72">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Benefit</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Source</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Target</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-100">
-                            {programBenefits.map(b => (
-                                <tr key={b.id}>
-                                    <td className="px-6 py-3 text-sm font-medium text-slate-900">{b.description}</td>
-                                    <td className="px-6 py-3 text-xs text-slate-500">{b.componentId}</td>
-                                    <td className="px-6 py-3 text-sm text-right font-mono">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
-                                    <td className="px-6 py-3 text-right">
-                                        <Badge variant={
-                                            b.status === 'Realized' ? 'success' : 
-                                            b.status === 'In Progress' ? 'info' : 'neutral'
-                                        }>{b.status}</Badge>
-                                    </td>
-                                </tr>
-                            ))}
-                            {programBenefits.length === 0 && (
+                <div className="flex-1 overflow-auto max-h-72">
+                    {programBenefits.length > 0 ? (
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-white">
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-400 italic">No benefits defined for this program.</td>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Benefit</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Source</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Target</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Status</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-100">
+                                {programBenefits.map(b => (
+                                    <tr key={b.id}>
+                                        <td className="px-6 py-3 text-sm font-medium text-slate-900">{b.description}</td>
+                                        <td className="px-6 py-3 text-xs text-slate-500">{b.componentId}</td>
+                                        <td className="px-6 py-3 text-sm text-right font-mono">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
+                                        <td className="px-6 py-3 text-right">
+                                            <Badge variant={
+                                                b.status === 'Realized' ? 'success' : 
+                                                b.status === 'In Progress' ? 'info' : 'neutral'
+                                            }>{b.status}</Badge>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div className="h-full">
+                            <EmptyGrid 
+                                title="No Benefits Defined" 
+                                description="Define financial or non-financial benefits to track program value."
+                                icon={Star}
+                                actionLabel="Add Benefit"
+                                onAdd={handleAddBenefit}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

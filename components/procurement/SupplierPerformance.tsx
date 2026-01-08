@@ -4,6 +4,7 @@ import { Award, Star } from 'lucide-react';
 import { useProcurementData } from '../../hooks';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface SupplierPerformanceProps {
     projectId: string;
@@ -22,7 +23,7 @@ const SupplierPerformance: React.FC<SupplierPerformanceProps> = ({ projectId }) 
             </div>
 
             <div className="flex-1 overflow-auto p-6 space-y-4">
-                {supplierReviews.map(review => {
+                {supplierReviews.length > 0 ? supplierReviews.map(review => {
                     const vendor = vendors.find(v => v.id === review.vendorId);
                     return (
                         <div key={review.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
@@ -49,11 +50,15 @@ const SupplierPerformance: React.FC<SupplierPerformanceProps> = ({ projectId }) 
                             </div>
                         </div>
                     );
-                })}
-                {supplierReviews.length === 0 && (
-                    <div className="text-center p-12 text-slate-400">
-                        <Award size={32} className="mx-auto mb-2 opacity-50"/>
-                        <p>No performance reviews recorded.</p>
+                }) : (
+                    <div className="h-full flex flex-col justify-center">
+                        <EmptyGrid 
+                            title="No Performance Reviews"
+                            description="Evaluate vendor performance to track compliance and delivery quality."
+                            icon={Award}
+                            actionLabel="Log Evaluation"
+                            onAdd={() => {}}
+                        />
                     </div>
                 )}
             </div>

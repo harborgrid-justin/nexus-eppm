@@ -2,12 +2,13 @@
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useProcurementData } from '../../hooks/index';
 import { useData } from '../../context/DataContext';
-import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search, Briefcase } from 'lucide-react';
+import { Filter, ShieldCheck, AlertCircle, Ban, Plus, Lock, Search, Briefcase, Store } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { usePermissions } from '../../hooks/usePermissions';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface VendorRegistryProps {
   projectId: string;
@@ -52,6 +53,11 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
     }));
   }, [vendors, deferredSearchTerm, state.contracts]);
 
+  const handleAddVendor = () => {
+      // In a real app, open modal
+      console.log("Add vendor clicked");
+  };
+
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}`}>
         <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.surface} flex flex-col md:flex-row justify-between items-center gap-3 shadow-sm z-10`}>
@@ -69,7 +75,7 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                 <Button variant="secondary" size="md" icon={Filter} className="w-full md:w-auto">Status</Button>
             </div>
             {canEditProcurement ? (
-                <Button variant="primary" size="md" icon={Plus} className="w-full md:w-auto">Add Vendor</Button>
+                <Button variant="primary" size="md" icon={Plus} className="w-full md:w-auto" onClick={handleAddVendor}>Add Vendor</Button>
             ) : (
                 <div className={`flex items-center gap-2 text-xs ${theme.colors.text.tertiary} ${theme.colors.background} px-3 py-2 rounded-lg border ${theme.colors.border}`}>
                     <Lock size={14}/> Read Only
@@ -78,59 +84,68 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
         </div>
         
         <div className={`flex-1 overflow-auto ${theme.colors.surface} ${theme.layout.cardPadding} m-4 rounded-xl border ${theme.colors.border} p-0`}>
-            <div className="min-w-[800px]">
-                <table className="min-w-full divide-y divide-slate-200">
-                    <thead className={`${theme.colors.background} sticky top-0`}>
-                        <tr>
-                            <th className={theme.components.table.header}>Vendor Name</th>
-                            <th className={theme.components.table.header}>Category</th>
-                            <th className={theme.components.table.header}>Status</th>
-                            <th className={theme.components.table.header + ' text-center'}>Active Contracts</th>
-                            <th className={theme.components.table.header}>Performance</th>
-                            <th className={theme.components.table.header}>Last Audit</th>
-                        </tr>
-                    </thead>
-                    <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                        {filteredVendors.map(v => (
-                            <tr 
-                                key={v.id} 
-                                className={`${theme.components.table.row} cursor-pointer hover:${theme.colors.background} outline-none`}
-                                onClick={() => handleRowClick(v.id)}
-                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRowClick(v.id)}
-                                tabIndex={0}
-                                role="button"
-                                aria-label={`View details for ${v.name}`}
-                            >
-                                <td className={theme.components.table.cell}>
-                                    <div className={`text-sm font-medium ${theme.colors.text.primary}`}>{v.name}</div>
-                                    <div className={`text-xs ${theme.colors.text.secondary}`}>{v.contact.email}</div>
-                                </td>
-                                <td className={theme.components.table.cell}>{v.category}</td>
-                                <td className={theme.components.table.cell}>{getStatusBadge(v.status)}</td>
-                                <td className={theme.components.table.cell + ' text-center'}>
-                                    {v.activeContracts > 0 ? (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                                            <Briefcase size={10} /> {v.activeContracts}
-                                        </span>
-                                    ) : <span className="text-slate-400 text-xs">-</span>}
-                                </td>
-                                <td className={theme.components.table.cell}>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
-                                            <div className={`h-full ${v.performanceScore > 80 ? 'bg-green-500' : v.performanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${v.performanceScore}%`}}></div>
-                                        </div>
-                                        <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
-                                    </div>
-                                </td>
-                                <td className={theme.components.table.cell}>{v.lastAudit || 'Never'}</td>
+            {filteredVendors.length > 0 ? (
+                <div className="min-w-[800px]">
+                    <table className="min-w-full divide-y divide-slate-200">
+                        <thead className={`${theme.colors.background} sticky top-0`}>
+                            <tr>
+                                <th className={theme.components.table.header}>Vendor Name</th>
+                                <th className={theme.components.table.header}>Category</th>
+                                <th className={theme.components.table.header}>Status</th>
+                                <th className={theme.components.table.header + ' text-center'}>Active Contracts</th>
+                                <th className={theme.components.table.header}>Performance</th>
+                                <th className={theme.components.table.header}>Last Audit</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {filteredVendors.length === 0 && (
-                    <div className="p-12 text-center text-slate-400">No vendors found.</div>
-                )}
-            </div>
+                        </thead>
+                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+                            {filteredVendors.map(v => (
+                                <tr 
+                                    key={v.id} 
+                                    className={`${theme.components.table.row} cursor-pointer hover:${theme.colors.background} outline-none`}
+                                    onClick={() => handleRowClick(v.id)}
+                                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRowClick(v.id)}
+                                    tabIndex={0}
+                                    role="button"
+                                    aria-label={`View details for ${v.name}`}
+                                >
+                                    <td className={theme.components.table.cell}>
+                                        <div className={`text-sm font-medium ${theme.colors.text.primary}`}>{v.name}</div>
+                                        <div className={`text-xs ${theme.colors.text.secondary}`}>{v.contact.email}</div>
+                                    </td>
+                                    <td className={theme.components.table.cell}>{v.category}</td>
+                                    <td className={theme.components.table.cell}>{getStatusBadge(v.status)}</td>
+                                    <td className={theme.components.table.cell + ' text-center'}>
+                                        {v.activeContracts > 0 ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                                                <Briefcase size={10} /> {v.activeContracts}
+                                            </span>
+                                        ) : <span className="text-slate-400 text-xs">-</span>}
+                                    </td>
+                                    <td className={theme.components.table.cell}>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
+                                                <div className={`h-full ${v.performanceScore > 80 ? 'bg-green-500' : v.performanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${v.performanceScore}%`}}></div>
+                                            </div>
+                                            <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
+                                        </div>
+                                    </td>
+                                    <td className={theme.components.table.cell}>{v.lastAudit || 'Never'}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                 <div className="h-full flex items-center justify-center p-8">
+                     <EmptyGrid 
+                        title="Vendor Registry Empty" 
+                        description={deferredSearchTerm ? `No vendors found matching "${deferredSearchTerm}".` : "No suppliers are currently registered in this project scope."}
+                        onAdd={canEditProcurement ? handleAddVendor : undefined}
+                        actionLabel="Register Vendor"
+                        icon={Store}
+                     />
+                 </div>
+            )}
         </div>
     </div>
   );

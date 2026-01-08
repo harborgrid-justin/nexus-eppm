@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useData } from '../../context/DataContext';
 import { MapPin, Plus, Search, Globe, MoreHorizontal, Edit2, Trash2, Save, X, Navigation } from 'lucide-react';
@@ -8,6 +9,7 @@ import { SidePanel } from '../ui/SidePanel';
 import { Location } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const LocationSettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -83,46 +85,55 @@ const LocationSettings: React.FC = () => {
                 </div>
             </div>
 
-            <div className={`${theme.components.card} overflow-hidden flex-1 overflow-auto`}>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className={`${theme.colors.background} sticky top-0`}>
-                            <tr>
-                                <th className={theme.components.table.header + " whitespace-nowrap"}>Site Name</th>
-                                <th className={theme.components.table.header + " whitespace-nowrap"}>Region / City</th>
-                                <th className={theme.components.table.header + " whitespace-nowrap"}>Coordinates</th>
-                                <th className={theme.components.table.header + " text-right whitespace-nowrap"}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                            {filteredLocations.map(loc => (
-                                <tr key={loc.id} className={theme.components.table.row + " group"}>
-                                    <td className={theme.components.table.cell}>
-                                        <div className="flex items-center gap-3">
-                                            <MapPin size={16} className={`${theme.colors.text.tertiary} group-hover:text-nexus-500 transition-colors`}/>
-                                            <span className={`font-bold text-sm ${theme.colors.text.primary}`}>{loc.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className={theme.components.table.cell + ` text-sm ${theme.colors.text.secondary}`}>
-                                        {loc.city}, {loc.country}
-                                    </td>
-                                    <td className={theme.components.table.cell + ` font-mono text-xs ${theme.colors.text.tertiary}`}>
-                                        {loc.coordinates ? `${loc.coordinates.lat.toFixed(4)}, ${loc.coordinates.lng.toFixed(4)}` : 'Manual Entry'}
-                                    </td>
-                                    <td className={theme.components.table.cell + " text-right"}>
-                                        <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleOpenPanel(loc)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={16}/></button>
-                                            <button onClick={() => handleDelete(loc.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={16}/></button>
-                                        </div>
-                                    </td>
+            <div className={`${theme.components.card} overflow-hidden flex-1 flex flex-col`}>
+                {filteredLocations.length > 0 ? (
+                    <div className="overflow-x-auto flex-1">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className={`${theme.colors.background} sticky top-0`}>
+                                <tr>
+                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Site Name</th>
+                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Region / City</th>
+                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Coordinates</th>
+                                    <th className={theme.components.table.header + " text-right whitespace-nowrap"}>Actions</th>
                                 </tr>
-                            ))}
-                            {filteredLocations.length === 0 && (
-                                <tr><td colSpan={4} className={`p-8 text-center ${theme.colors.text.tertiary} text-sm italic`}>No locations found.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+                                {filteredLocations.map(loc => (
+                                    <tr key={loc.id} className={theme.components.table.row + " group"}>
+                                        <td className={theme.components.table.cell}>
+                                            <div className="flex items-center gap-3">
+                                                <MapPin size={16} className={`${theme.colors.text.tertiary} group-hover:text-nexus-500 transition-colors`}/>
+                                                <span className={`font-bold text-sm ${theme.colors.text.primary}`}>{loc.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className={theme.components.table.cell + ` text-sm ${theme.colors.text.secondary}`}>
+                                            {loc.city}, {loc.country}
+                                        </td>
+                                        <td className={theme.components.table.cell + ` font-mono text-xs ${theme.colors.text.tertiary}`}>
+                                            {loc.coordinates ? `${loc.coordinates.lat.toFixed(4)}, ${loc.coordinates.lng.toFixed(4)}` : 'Manual Entry'}
+                                        </td>
+                                        <td className={theme.components.table.cell + " text-right"}>
+                                            <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleOpenPanel(loc)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={16}/></button>
+                                                <button onClick={() => handleDelete(loc.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={16}/></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="flex-1">
+                        <EmptyGrid 
+                            title={searchTerm ? "No Sites Found" : "Global Registry Empty"}
+                            description={searchTerm ? `No locations match "${searchTerm}".` : "Define standard geographical sites for project mapping."}
+                            onAdd={() => handleOpenPanel()}
+                            actionLabel="Register Site"
+                            icon={Globe}
+                        />
+                    </div>
+                )}
             </div>
 
             <SidePanel

@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -15,11 +14,9 @@ interface ErrorBoundaryState {
 /**
  * Standard Error Boundary component to catch and display runtime errors gracefully.
  */
-// Fix: Explicitly import and use Component to ensure TypeScript correctly recognizes instance properties like state and props
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    // Fix: Access state property defined in base Component class
     this.state = {
       hasError: false,
       error: undefined,
@@ -31,19 +28,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Fix: Access props property defined in base Component class
     console.error("Uncaught error in component:", this.props.name, error, errorInfo);
   }
 
   handleRetry = () => {
-    // Fix: Access setState method defined in base Component class
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
-    // Fix: Access state property defined in base Component class
     if (this.state.hasError) {
-      // Fix: Access state property defined in base Component class
       const { error } = this.state;
       let errorMessage = 'An unexpected error occurred.';
       let errorStack: string | undefined = undefined;
@@ -65,7 +58,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
           <h2 className="font-bold flex items-center gap-2">
             <AlertTriangle size={20} /> 
-            {/* Fix: Access props property defined in base Component class */}
             Error in {this.props.name || 'Component'}
           </h2>
           <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
@@ -84,7 +76,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // Fix: Access props property defined in base Component class
     return this.props.children;
   }
 }

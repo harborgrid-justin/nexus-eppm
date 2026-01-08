@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { CheckCircle, Loader2, XCircle, AlertCircle, ChevronDown, ChevronRight, FileText, Terminal } from 'lucide-react';
+import { CheckCircle, Loader2, XCircle, AlertCircle, ChevronDown, ChevronRight, FileText, Terminal, History } from 'lucide-react';
 import { useJobHistoryLogic } from '../../../hooks/domain/useJobHistoryLogic';
+import { EmptyGrid } from '../../common/EmptyGrid';
 
 export const JobHistory: React.FC = () => {
     const theme = useTheme();
@@ -34,91 +35,99 @@ export const JobHistory: React.FC = () => {
                 </div>
             </div>
             <div className="flex-1 overflow-auto">
-                <div className="min-w-[800px]">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
-                            <tr>
-                            <th className="w-10 px-4 py-3"></th>
-                            <th className={theme.components.table.header}>Job ID</th>
-                            <th className={theme.components.table.header}>Type / Format</th>
-                            <th className={theme.components.table.header}>Status</th>
-                            <th className={theme.components.table.header}>Submitted By</th>
-                            <th className={theme.components.table.header}>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                            {dataJobs.length > 0 ? dataJobs.map(job => (
-                                <React.Fragment key={job.id}>
-                                    <tr className={`hover:${theme.colors.background} transition-colors cursor-pointer ${expandedJobId === job.id ? `${theme.colors.background}` : ''}`} onClick={() => toggleExpand(job.id)}>
-                                        <td className={`px-4 py-4 ${theme.colors.text.tertiary}`}>
-                                            {expandedJobId === job.id ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
-                                        </td>
-                                        <td className={`px-6 py-4 text-xs font-mono ${theme.colors.text.secondary}`}>{job.id}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className={`font-bold ${theme.colors.text.primary} text-sm`}>{job.type}</span>
-                                                <span className={`text-[10px] ${theme.colors.text.tertiary} uppercase tracking-wider`}>{job.format}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                {getStatusIcon(job.status)}
-                                                <span className={`text-sm ${job.status === 'Completed' ? 'text-green-700' : job.status === 'Failed' ? 'text-red-700' : 'text-slate-600'}`}>{job.status}</span>
-                                            </div>
-                                            {job.status === 'In Progress' && <div className="w-20 h-1 bg-slate-200 rounded-full mt-1 overflow-hidden"><div className="bg-nexus-500 h-full transition-all duration-300" style={{ width: `${job.progress || 0}%` }}></div></div>}
-                                        </td>
-                                        <td className={`px-6 py-4 text-sm ${theme.colors.text.secondary}`}>{job.submittedBy}</td>
-                                        <td className={`px-6 py-4 text-xs ${theme.colors.text.tertiary}`}>{job.timestamp}</td>
-                                    </tr>
-                                    {expandedJobId === job.id && (
-                                        <tr>
-                                            <td colSpan={6} className={`${theme.colors.background}/50 p-6 border-b border-slate-200 shadow-inner`}>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                    <div className="space-y-4">
-                                                        <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
-                                                            <FileText size={14}/> Execution Details
-                                                        </h4>
-                                                        <div className={`${theme.colors.surface} p-4 rounded-lg border ${theme.colors.border} space-y-2 text-sm ${theme.colors.text.secondary}`}>
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>File Name</p>
-                                                                    <p className={`${theme.colors.text.primary} font-mono truncate`}>{job.fileName || 'system_generated.dat'}</p>
-                                                                </div>
-                                                                <div>
-                                                                    <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>Size</p>
-                                                                    <p className={`${theme.colors.text.primary} font-mono`}>{job.fileSize || '42 KB'}</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className={`pt-2 border-t ${theme.colors.border} mt-2`}>
-                                                                <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold mb-1`}>Result Message</p>
-                                                                <p className={theme.colors.text.primary}>{job.details}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="space-y-4">
-                                                        <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
-                                                            <Terminal size={14}/> Engine Log
-                                                        </h4>
-                                                        <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs font-mono text-green-400 overflow-y-auto max-h-40">
-                                                            {generateLogs(job).map((log, i) => (
-                                                                <div key={i} className="mb-1 last:mb-0 border-b border-slate-800/50 pb-0.5 last:border-0 last:pb-0">
-                                                                    <span className="opacity-70 mr-2">{'>'}</span>
-                                                                    {log}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
+                {dataJobs.length > 0 ? (
+                    <div className="min-w-[800px]">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
+                                <tr>
+                                <th className="w-10 px-4 py-3"></th>
+                                <th className={theme.components.table.header}>Job ID</th>
+                                <th className={theme.components.table.header}>Type / Format</th>
+                                <th className={theme.components.table.header}>Status</th>
+                                <th className={theme.components.table.header}>Submitted By</th>
+                                <th className={theme.components.table.header}>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+                                {dataJobs.map(job => (
+                                    <React.Fragment key={job.id}>
+                                        <tr className={`hover:${theme.colors.background} transition-colors cursor-pointer ${expandedJobId === job.id ? `${theme.colors.background}` : ''}`} onClick={() => toggleExpand(job.id)}>
+                                            <td className={`px-4 py-4 ${theme.colors.text.tertiary}`}>
+                                                {expandedJobId === job.id ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}
+                                            </td>
+                                            <td className={`px-6 py-4 text-xs font-mono ${theme.colors.text.secondary}`}>{job.id}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className={`font-bold ${theme.colors.text.primary} text-sm`}>{job.type}</span>
+                                                    <span className={`text-[10px] ${theme.colors.text.tertiary} uppercase tracking-wider`}>{job.format}</span>
                                                 </div>
                                             </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {getStatusIcon(job.status)}
+                                                    <span className={`text-sm ${job.status === 'Completed' ? 'text-green-700' : job.status === 'Failed' ? 'text-red-700' : 'text-slate-600'}`}>{job.status}</span>
+                                                </div>
+                                                {job.status === 'In Progress' && <div className="w-20 h-1 bg-slate-200 rounded-full mt-1 overflow-hidden"><div className="bg-nexus-500 h-full transition-all duration-300" style={{ width: `${job.progress || 0}%` }}></div></div>}
+                                            </td>
+                                            <td className={`px-6 py-4 text-sm ${theme.colors.text.secondary}`}>{job.submittedBy}</td>
+                                            <td className={`px-6 py-4 text-xs ${theme.colors.text.tertiary}`}>{job.timestamp}</td>
                                         </tr>
-                                    )}
-                                </React.Fragment>
-                            )) : (
-                                <tr><td colSpan={6} className={`px-6 py-12 text-center ${theme.colors.text.tertiary}`}><div className="flex flex-col items-center"><AlertCircle size={24} className="mb-2 opacity-50"/><p>No job history available.</p></div></td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        {expandedJobId === job.id && (
+                                            <tr>
+                                                <td colSpan={6} className={`${theme.colors.background}/50 p-6 border-b border-slate-200 shadow-inner`}>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                        <div className="space-y-4">
+                                                            <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
+                                                                <FileText size={14}/> Execution Details
+                                                            </h4>
+                                                            <div className={`${theme.colors.surface} p-4 rounded-lg border ${theme.colors.border} space-y-2 text-sm ${theme.colors.text.secondary}`}>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>File Name</p>
+                                                                        <p className={`${theme.colors.text.primary} font-mono truncate`}>{job.fileName || 'system_generated.dat'}</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold`}>Size</p>
+                                                                        <p className={`${theme.colors.text.primary} font-mono`}>{job.fileSize || '42 KB'}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className={`pt-2 border-t ${theme.colors.border} mt-2`}>
+                                                                    <p className={`text-xs ${theme.colors.text.tertiary} uppercase font-bold mb-1`}>Result Message</p>
+                                                                    <p className={theme.colors.text.primary}>{job.details}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-4">
+                                                            <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
+                                                                <Terminal size={14}/> Engine Log
+                                                            </h4>
+                                                            <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs font-mono text-green-400 overflow-y-auto max-h-40">
+                                                                {generateLogs(job).map((log, i) => (
+                                                                    <div key={i} className="mb-1 last:mb-0 border-b border-slate-800/50 pb-0.5 last:border-0 last:pb-0">
+                                                                        <span className="opacity-70 mr-2">{'>'}</span>
+                                                                        {log}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="h-full flex items-center justify-center">
+                         <EmptyGrid 
+                            title="No Job History"
+                            description="No data import/export jobs have been processed yet."
+                            icon={History}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

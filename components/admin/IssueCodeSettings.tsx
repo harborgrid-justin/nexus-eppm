@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const IssueCodeSettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -71,42 +72,51 @@ export const IssueCodeSettings: React.FC = () => {
                 </button>
             </div>
 
-            <div className={`border ${theme.colors.border} rounded-xl overflow-hidden shadow-sm ${theme.colors.surface} flex-1 overflow-y-auto`}>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className={`${theme.colors.background} sticky top-0`}>
-                            <tr>
-                                <th className={theme.components.table.header + " whitespace-nowrap"}>Code Name</th>
-                                <th className={theme.components.table.header + " min-w-[200px]"}>Allowed Values</th>
-                                <th className={theme.components.table.header + " text-right whitespace-nowrap"}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                            {filteredCodes.map(code => (
-                                <tr key={code.id} className={theme.components.table.row + " group"}>
-                                    <td className={`${theme.components.table.cell} text-sm font-bold whitespace-nowrap`}>{code.name}</td>
-                                    <td className={theme.components.table.cell + " text-sm"}>
-                                        <div className="flex flex-wrap gap-1">
-                                            {code.values.map(v => (
-                                                <span key={v.id} className={`px-2 py-0.5 ${theme.colors.background} rounded text-[10px] font-mono border ${theme.colors.border}`}>{v.value}</span>
-                                            ))}
-                                            {code.values.length === 0 && <span className={`italic ${theme.colors.text.tertiary}`}>No values defined</span>}
-                                        </div>
-                                    </td>
-                                    <td className={theme.components.table.cell + " text-right"}>
-                                        <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleOpenPanel(code)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={14}/></button>
-                                            <button onClick={() => handleDelete(code.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={14}/></button>
-                                        </div>
-                                    </td>
+            <div className={`border ${theme.colors.border} rounded-xl overflow-hidden shadow-sm ${theme.colors.surface} flex-1 flex flex-col`}>
+                {filteredCodes.length > 0 ? (
+                    <div className="overflow-x-auto flex-1">
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className={`${theme.colors.background} sticky top-0`}>
+                                <tr>
+                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Code Name</th>
+                                    <th className={theme.components.table.header + " min-w-[200px]"}>Allowed Values</th>
+                                    <th className={theme.components.table.header + " text-right whitespace-nowrap"}>Actions</th>
                                 </tr>
-                            ))}
-                            {filteredCodes.length === 0 && (
-                                <tr><td colSpan={3} className={`p-8 text-center ${theme.colors.text.tertiary} text-sm italic`}>No codes defined for this scope.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+                                {filteredCodes.map(code => (
+                                    <tr key={code.id} className={theme.components.table.row + " group"}>
+                                        <td className={`${theme.components.table.cell} text-sm font-bold whitespace-nowrap`}>{code.name}</td>
+                                        <td className={theme.components.table.cell + " text-sm"}>
+                                            <div className="flex flex-wrap gap-1">
+                                                {code.values.map(v => (
+                                                    <span key={v.id} className={`px-2 py-0.5 ${theme.colors.background} rounded text-[10px] font-mono border ${theme.colors.border}`}>{v.value}</span>
+                                                ))}
+                                                {code.values.length === 0 && <span className={`italic ${theme.colors.text.tertiary}`}>No values defined</span>}
+                                            </div>
+                                        </td>
+                                        <td className={theme.components.table.cell + " text-right"}>
+                                            <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleOpenPanel(code)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={14}/></button>
+                                                <button onClick={() => handleDelete(code.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={14}/></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="flex-1">
+                         <EmptyGrid 
+                            title={`No ${activeScope} Codes`}
+                            description={`No issue codes defined for the ${activeScope} scope. Define standard values for root cause analysis.`}
+                            onAdd={() => handleOpenPanel()}
+                            actionLabel="Define Code"
+                            icon={FileWarning}
+                         />
+                    </div>
+                )}
             </div>
 
             <SidePanel

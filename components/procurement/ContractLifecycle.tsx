@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { useProcurementData } from '../../hooks';
-import { Plus, FileText, AlertOctagon, Lock } from 'lucide-react';
+import { Plus, FileText, AlertOctagon, Lock, FileSignature } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { usePermissions } from '../../hooks/usePermissions';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ContractLifecycleProps {
   projectId: string;
@@ -16,6 +17,11 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
   const { hasPermission } = usePermissions();
   const canEditProcurement = hasPermission('financials:write');
 
+  const handleCreateContract = () => {
+      // In real app, open modal
+      console.log("Create contract");
+  };
+
   return (
     <div className="h-full flex flex-col">
        <div className={`p-4 ${theme.layout.headerBorder} ${theme.colors.background}/50 flex justify-between items-center`}>
@@ -23,7 +29,10 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                 <FileText size={16} className="text-nexus-600"/> Contract Repository
             </h3>
             {canEditProcurement ? (
-                <button className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-medium flex items-center gap-2 ${theme.colors.primaryHover} shadow-sm`}>
+                <button 
+                    onClick={handleCreateContract}
+                    className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-medium flex items-center gap-2 ${theme.colors.primaryHover} shadow-sm`}
+                >
                     <Plus size={16}/> <span className="hidden sm:inline">Create Contract</span>
                 </button>
             ) : (
@@ -33,7 +42,7 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
             )}
         </div>
         <div className={`flex-1 overflow-auto ${theme.layout.pagePadding} space-y-4`}>
-            {projectContracts.map(contract => {
+            {projectContracts.length > 0 ? projectContracts.map(contract => {
                 const vendor = vendors.find(v => v.id === contract.vendorId);
                 const claims = projectClaims.filter(c => c.contractId === contract.id);
                 
@@ -89,12 +98,15 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                         )}
                     </div>
                 );
-            })}
-            
-            {projectContracts.length === 0 && (
-                <div className={`flex flex-col items-center justify-center h-64 ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl`}>
-                    <FileText size={48} className="mb-4 opacity-50" />
-                    <p>No contracts found for this project.</p>
+            }) : (
+                <div className="h-full flex flex-col items-center justify-center p-8">
+                     <EmptyGrid 
+                        title="No Contracts Executed"
+                        description="The contract repository is empty. Execute a contract to begin tracking commitments."
+                        actionLabel="Create Contract"
+                        onAdd={canEditProcurement ? handleCreateContract : undefined}
+                        icon={FileSignature}
+                     />
                 </div>
             )}
         </div>
