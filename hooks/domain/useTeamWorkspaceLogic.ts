@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 export const useTeamWorkspaceLogic = () => {
-  const [activeTab, setActiveTab] = useState<'tasks' | 'timesheet'>('tasks');
+  const [activeTab, setActiveTab] = useState<'tasks' | 'timesheet' | 'board'>('tasks');
 
   return {
     activeTab,

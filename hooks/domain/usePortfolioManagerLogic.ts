@@ -4,7 +4,7 @@ import { NavGroup } from '../../components/common/ModuleNavigation';
 import { 
     LayoutDashboard, Layers, Leaf, BookOpen, Map as MapIcon, 
     ListOrdered, PieChart, TrendingUp, Star, BarChart2, 
-    MessageSquare, Gavel, RefreshCw, ShieldAlert 
+    MessageSquare, Gavel, RefreshCw, ShieldAlert, Globe 
 } from 'lucide-react';
 
 export const usePortfolioManagerLogic = () => {
@@ -17,6 +17,7 @@ export const usePortfolioManagerLogic = () => {
   const navGroups: NavGroup[] = useMemo(() => [
     { id: 'dashboards', label: 'Dashboards', items: [
       { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
+      { id: 'map', label: 'Geospatial Map', icon: Globe },
       { id: 'programs', label: 'Program Portfolio', icon: Layers },
       { id: 'esg', label: 'ESG & Compliance', icon: Leaf }
     ]},

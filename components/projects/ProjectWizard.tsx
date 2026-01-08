@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Project } from '../../types/index';
@@ -262,7 +263,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
                             <div key={step.id} className={`flex flex-col items-center gap-2 ${theme.colors.surface} px-2`}>
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${
                                     isActive ? 'border-nexus-600 bg-nexus-50 text-nexus-600' :
-                                    isComplete ? 'border-green-500 bg-green-50 text-green-600' :
+                                    isComplete ? 'border-green-50 bg-green-50 text-green-600' :
                                     'border-slate-300 text-slate-400'
                                 }`}>
                                     {isComplete ? <CheckCircle size={16}/> : step.id}

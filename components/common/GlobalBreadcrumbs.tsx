@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Home, LayoutGrid, Briefcase, ChevronRight, PieChart, Globe } from 'lucide-react';
 import { useData } from '../../context/DataContext';

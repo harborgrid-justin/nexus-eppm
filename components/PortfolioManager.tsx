@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, Loader2, ArrowLeft, Layers } from 'lucide-react';
+import { LayoutDashboard, Loader2, ArrowLeft, Layers, Map } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -17,6 +17,7 @@ import PortfolioValue from './portfolio/PortfolioValue';
 import PortfolioGovernance from './portfolio/PortfolioGovernance';
 import PortfolioESG from './portfolio/PortfolioESG';
 import PortfolioPrograms from './portfolio/PortfolioPrograms';
+import { PortfolioMap } from './portfolio/PortfolioMap';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import ProgramManager from './ProgramManager';
@@ -48,6 +49,7 @@ const PortfolioManager: React.FC = () => {
 
     switch(activeTab) {
       case 'overview': return <Dashboard />;
+      case 'map': return <PortfolioMap />;
       case 'programs': return <PortfolioPrograms onSelectProgram={handleProgramDrillDown} />;
       case 'esg': return <PortfolioESG />;
       case 'financials': return <PortfolioFinancials projects={state.projects} />;
