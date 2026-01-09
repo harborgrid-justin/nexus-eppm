@@ -241,5 +241,3 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
     </div>
   );
 };
-
-export default ProgramRisks;

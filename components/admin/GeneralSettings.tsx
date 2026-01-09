@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { Building2, Globe, Clock, Landmark, Image as ImageIcon, Save } from 'lucide-react';
+import { Building2, Globe, Clock, Landmark, Image as ImageIcon, Save, Upload } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,6 +16,18 @@ const GeneralSettings: React.FC = () => {
         alert("Organization profile updated.");
     };
 
+    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const result = ev.target?.result as string;
+                setOrgData({ ...orgData, logoUrl: result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div className="space-y-8 max-w-4xl h-full flex flex-col">
             <div className="flex-1 overflow-y-auto pr-2 space-y-8">
@@ -25,14 +37,24 @@ const GeneralSettings: React.FC = () => {
                     </h3>
                     <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 p-6 ${theme.components.card}`}>
                         <div className="md:col-span-2 flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-4 border-b border-slate-100 text-center sm:text-left">
-                            <div className={`w-20 h-20 ${theme.colors.background} rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors shrink-0`}>
-                                <ImageIcon size={24}/>
-                                <span className="text-[10px] font-bold mt-1 uppercase">Logo</span>
+                            <div className={`w-20 h-20 ${theme.colors.background} rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors shrink-0 overflow-hidden relative group`}>
+                                {orgData.logoUrl ? (
+                                    <img src={orgData.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                                ) : (
+                                    <ImageIcon size={24}/>
+                                )}
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Upload size={16} className="text-white"/>
+                                </div>
+                                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleLogoUpload} />
                             </div>
                             <div>
                                 <h4 className="font-bold text-slate-800">Corporate Branding</h4>
                                 <p className="text-xs text-slate-500 mt-1">Logo will appear on all exported reports and dashlets.</p>
-                                <button className="mt-2 text-xs font-bold text-nexus-600 hover:underline">Upload SVG or PNG</button>
+                                <label className="mt-2 text-xs font-bold text-nexus-600 hover:underline cursor-pointer block">
+                                    Upload SVG or PNG
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                                </label>
                             </div>
                         </div>
                         <div>

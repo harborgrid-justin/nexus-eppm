@@ -179,7 +179,6 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                                         <Folder size={16} className="text-slate-400"/>
                                         <h4 className="font-bold text-sm text-slate-900 truncate">{proj.name}</h4>
                                     </div>
-                                    {/* Fix: Applied professional empty pattern and CRUD alignment path for unlinked projects as per instructions */}
                                     {linkedObj ? (
                                         <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto truncate">
                                             <CheckSquare size={12} className="shrink-0"/> Aligned to Objective

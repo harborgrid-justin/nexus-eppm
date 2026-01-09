@@ -10,7 +10,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { GovernanceRole } from '../../types';
 import { generateId } from '../../utils/formatters';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramGovernanceProps {
   programId: string;
@@ -135,11 +135,12 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                     </div>
                 </>
             ) : (
-                <EmptyState 
+                <EmptyGrid 
                     title="Governance Structure Undefined" 
-                    description="Define the core leadership team to establish program authority."
+                    description="Define the core leadership team to establish program authority and escalation paths."
                     icon={Gavel}
-                    action={<Button size="sm" variant="ghost" onClick={() => setIsRolePanelOpen(true)}>Add Sponsor or Manager</Button>}
+                    actionLabel="Add Sponsor or Manager"
+                    onAdd={() => setIsRolePanelOpen(true)}
                 />
             )}
             

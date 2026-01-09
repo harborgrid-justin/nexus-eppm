@@ -13,9 +13,11 @@ import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
 import { Input } from '../../ui/Input';
 import { useIntegrationDesignerLogic } from '../../../hooks/domain/useIntegrationDesignerLogic';
+import { useToast } from '../../../context/ToastContext';
 
 export const IntegrationDesigner: React.FC = () => {
     const theme = useTheme();
+    const { success } = useToast();
     const {
         activeTab,
         setActiveTab,
@@ -38,6 +40,11 @@ export const IntegrationDesigner: React.FC = () => {
         handleSaveConfig
     } = useIntegrationDesignerLogic();
 
+    const onSaveClick = () => {
+        handleSaveConfig();
+        success("Configuration Saved", "ETL Pipeline and Schema Map committed to system core.");
+    };
+
     return (
         <div className="h-full flex flex-col">
             {/* Header */}
@@ -56,7 +63,7 @@ export const IntegrationDesigner: React.FC = () => {
                 </div>
                 <div className="flex gap-3">
                      <Button variant="outline" icon={PlayCircle}>Test Pipeline</Button>
-                     <Button icon={Save} onClick={handleSaveConfig}>Save Config</Button>
+                     <Button icon={Save} onClick={onSaveClick}>Save Config</Button>
                 </div>
             </div>
 

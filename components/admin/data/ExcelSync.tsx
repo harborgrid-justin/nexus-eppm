@@ -4,9 +4,11 @@ import { Upload, CheckCircle, Grid, FilePlus, ArrowDownCircle } from 'lucide-rea
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { useExcelSyncLogic } from '../../../hooks/domain/useExcelSyncLogic';
+import { useToast } from '../../../context/ToastContext';
 
 export const ExcelSync: React.FC = () => {
     const theme = useTheme();
+    const { success, error } = useToast();
     const {
         data,
         selectedCell,
@@ -24,8 +26,11 @@ export const ExcelSync: React.FC = () => {
 
     const onUploadClick = () => {
         const res = handleUpload();
-        if (res.error) alert(res.error);
-        else alert("Data pushed to Import Staging Area. Please switch to 'Data Import' tab to review and commit.");
+        if (res.error) {
+            error("Sync Failed", res.error);
+        } else {
+            success("Data Staged", "Rows pushed to Import Staging. Switch to 'Data Import' to commit.");
+        }
     };
 
     return (

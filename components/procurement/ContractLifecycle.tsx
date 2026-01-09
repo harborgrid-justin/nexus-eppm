@@ -1,11 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useProcurementData } from '../../hooks';
-import { Plus, FileText, AlertOctagon, Lock, FileSignature } from 'lucide-react';
+import { Plus, FileText, AlertOctagon, Lock, FileSignature, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, generateId } from '../../utils/formatters';
 import { usePermissions } from '../../hooks/usePermissions';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { SidePanel } from '../ui/SidePanel';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Contract } from '../../types';
+import { useData } from '../../context/DataContext';
 
 interface ContractLifecycleProps {
   projectId: string;
@@ -13,13 +18,44 @@ interface ContractLifecycleProps {
 
 const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
   const { projectContracts, vendors, projectClaims } = useProcurementData(projectId);
+  const { dispatch } = useData();
   const theme = useTheme();
   const { hasPermission } = usePermissions();
   const canEditProcurement = hasPermission('financials:write');
 
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [newContract, setNewContract] = useState<Partial<Contract>>({
+      title: '', vendorId: '', contractValue: 0, status: 'Draft', type: 'Fixed Price', 
+      startDate: '', endDate: '', retainagePercent: 10
+  });
+
   const handleCreateContract = () => {
-      // In real app, open modal
-      console.log("Create contract");
+      setNewContract({ title: '', vendorId: '', contractValue: 0, status: 'Draft', type: 'Fixed Price', startDate: '', endDate: '', retainagePercent: 10 });
+      setIsPanelOpen(true);
+  };
+
+  const handleSave = () => {
+      if (!newContract.title || !newContract.vendorId || !newContract.contractValue) return;
+
+      const contractToSave: Contract = {
+          id: generateId('CTR'),
+          projectId,
+          title: newContract.title,
+          vendorId: newContract.vendorId,
+          solicitationId: 'NA', // Or link to one
+          contractValue: Number(newContract.contractValue),
+          status: newContract.status || 'Draft',
+          startDate: newContract.startDate || '',
+          endDate: newContract.endDate || '',
+          type: newContract.type || 'Fixed Price',
+          retainagePercent: Number(newContract.retainagePercent),
+          invoicedToDate: 0,
+          retainedToDate: 0,
+          paidToDate: 0
+      };
+
+      dispatch({ type: 'ADD_CONTRACT', payload: contractToSave });
+      setIsPanelOpen(false);
   };
 
   return (
@@ -110,6 +146,37 @@ const ContractLifecycle: React.FC<ContractLifecycleProps> = ({ projectId }) => {
                 </div>
             )}
         </div>
+
+        <SidePanel
+            isOpen={isPanelOpen}
+            onClose={() => setIsPanelOpen(false)}
+            title="Execute New Contract"
+            footer={<><Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button><Button onClick={handleSave} icon={Save}>Save Contract</Button></>}
+        >
+            <div className="space-y-6">
+                <Input label="Contract Title" value={newContract.title} onChange={e => setNewContract({...newContract, title: e.target.value})} placeholder="e.g. Master Service Agreement" />
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Vendor</label>
+                        <select className="w-full p-2.5 border rounded-lg text-sm bg-white" value={newContract.vendorId} onChange={e => setNewContract({...newContract, vendorId: e.target.value})}>
+                            <option value="">Select Vendor...</option>
+                            {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Type</label>
+                        <select className="w-full p-2.5 border rounded-lg text-sm bg-white" value={newContract.type} onChange={e => setNewContract({...newContract, type: e.target.value})}>
+                            <option>Fixed Price</option><option>Time & Materials</option><option>Cost Plus</option>
+                        </select>
+                    </div>
+                </div>
+                <Input type="number" label="Contract Value ($)" value={newContract.contractValue} onChange={e => setNewContract({...newContract, contractValue: parseFloat(e.target.value)})} />
+                <div className="grid grid-cols-2 gap-4">
+                    <Input type="date" label="Start Date" value={newContract.startDate} onChange={e => setNewContract({...newContract, startDate: e.target.value})} />
+                    <Input type="date" label="End Date" value={newContract.endDate} onChange={e => setNewContract({...newContract, endDate: e.target.value})} />
+                </div>
+            </div>
+        </SidePanel>
     </div>
   );
 };

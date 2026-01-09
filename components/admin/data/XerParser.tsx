@@ -4,9 +4,11 @@ import { FileCode, Upload, ArrowRight, CheckCircle, List, Calendar, Activity, La
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { useXerParserLogic } from '../../../hooks/domain/useXerParserLogic';
+import { useToast } from '../../../context/ToastContext';
 
 export const XerParser: React.FC = () => {
     const theme = useTheme();
+    const { success, error } = useToast();
     const {
         file,
         status,
@@ -18,8 +20,12 @@ export const XerParser: React.FC = () => {
     } = useXerParserLogic();
 
     const onPushClick = () => {
-        handlePushToStaging();
-        alert("File analyzed. Data pushed to Import Staging Area for mapping.");
+        const res = handlePushToStaging();
+        if (res?.success) {
+            success("Import Staged", "Schedule data pushed to Import Staging Area for mapping.");
+        } else {
+            error("Import Failed", "Could not stage data. Check file validity.");
+        }
     };
 
     return (
@@ -53,6 +59,20 @@ export const XerParser: React.FC = () => {
                         {file && (
                             <Button className="mt-6 pointer-events-none" onClick={(e) => e.preventDefault()} icon={Play}>Analyze File Structure</Button>
                         )}
+                    </div>
+                )}
+
+                {status === 'processing' && (
+                     <div className="flex flex-col items-center justify-center h-full">
+                         <div className="w-16 h-16 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin mb-4"></div>
+                         <p className="text-nexus-700 font-bold">Parsing Binary Structure...</p>
+                     </div>
+                )}
+
+                {status === 'error' && (
+                    <div className="flex flex-col items-center justify-center h-full text-red-600">
+                        <p className="font-bold text-lg mb-2">Parsing Error</p>
+                        <Button variant="secondary" onClick={reset}>Try Again</Button>
                     </div>
                 )}
 

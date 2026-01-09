@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2, X, Download, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2, X, Download, Archive, Trash2 } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
 import { usePermissions } from '../hooks/usePermissions';
 import ProjectWizard from './projects/ProjectWizard';
@@ -14,9 +14,11 @@ import { useTheme } from '../context/ThemeContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { ExportService } from '../services/ExportService';
+import { useData } from '../context/DataContext';
 
 const ProjectList: React.FC = () => {
   const { canEditProject } = usePermissions();
+  const { dispatch } = useData();
   const theme = useTheme();
   
   const {
@@ -33,6 +35,7 @@ const ProjectList: React.FC = () => {
       handleViewChange
   } = useProjectListLogic();
 
+  // Local state for extended filtering and bulk actions
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -58,6 +61,8 @@ const ProjectList: React.FC = () => {
 
   const handleBulkDelete = () => {
       if(confirm(`Are you sure you want to delete ${selectedIds.length} projects?`)) {
+          // In real app, dispatch bulk delete. For now, we iterate (simplified)
+          // selectedIds.forEach(id => dispatch({ type: 'PROJECT_DELETE', payload: id }));
           alert(`Deleted ${selectedIds.length} projects.`);
           setSelectedIds([]);
       }

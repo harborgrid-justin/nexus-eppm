@@ -12,7 +12,7 @@ import ProgramScope from './ProgramScope';
 import ProgramFinancials from './ProgramFinancials';
 import ProgramResources from './ProgramResources';
 import ProgramVendors from './ProgramVendors';
-import ProgramRisks from './ProgramRisks';
+import { ProgramRisks } from './ProgramRisks';
 import ProgramIssues from './ProgramIssues';
 import ProgramIntegratedChange from './ProgramIntegratedChange';
 import ProgramQuality from './ProgramQuality';

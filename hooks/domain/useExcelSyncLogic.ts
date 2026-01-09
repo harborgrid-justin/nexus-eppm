@@ -5,6 +5,7 @@ import { useData } from '../../context/DataContext';
 export const useExcelSyncLogic = () => {
     const { state, dispatch } = useData();
     
+    // Initialize with empty grid for production
     const [data, setData] = useState<string[][]>([
         ['ID', 'Task Name', 'Duration', 'Start Date', 'Finish Date', 'Resource', 'Cost'],
         ['', '', '', '', '', '', ''],
@@ -22,11 +23,11 @@ export const useExcelSyncLogic = () => {
         if (importTemplate && importTemplate.content && Array.isArray(importTemplate.content.grid)) {
              setData(importTemplate.content.grid);
         } else {
-             // Fallback default
+             // Fallback default structure if no template found
              setData([
                 ['ID', 'Task Name', 'Duration', 'Start Date', 'Finish Date', 'Resource', 'Cost'],
-                ['T-NEW-1', 'Site Preparation', '10', '2024-06-01', '2024-06-10', 'Excavator', '5000'],
-                ['T-NEW-2', 'Foundation Pour', '20', '2024-06-11', '2024-06-30', 'Concrete', '12000'],
+                ['', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', ''],
                 ['', '', '', '', '', '', ''],
              ]);
         }

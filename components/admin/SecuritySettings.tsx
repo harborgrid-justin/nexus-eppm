@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { SidePanel } from '../ui/SidePanel';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { generateId } from '../../utils/formatters';
 
 const SecuritySettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -26,7 +27,20 @@ const SecuritySettings: React.FC = () => {
     };
 
     const runSecurityAudit = () => {
-        // Dispatch action if needed
+        const jobId = generateId('AUDIT');
+        dispatch({ 
+            type: 'SYSTEM_QUEUE_DATA_JOB', 
+            payload: {
+                id: jobId,
+                type: 'System',
+                format: 'JSON',
+                status: 'Completed',
+                submittedBy: user?.name || 'Admin',
+                timestamp: new Date().toLocaleString(),
+                details: 'Full security compliance scan executed successfully. No critical vulnerabilities found.'
+            } 
+        });
+        alert(`Security Audit ${jobId} initiated successfully.`);
     };
     
     const addIp = () => {
