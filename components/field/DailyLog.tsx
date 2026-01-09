@@ -1,15 +1,15 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { CloudRain, Sun, Users, Clock, AlertCircle, Plus, Calendar, Clipboard } from 'lucide-react';
+import { Users, Clock, Clipboard, Calendar } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { Button } from '../ui/Button';
 import { DailyLogEntry } from '../../types';
 import { generateId } from '../../utils/formatters';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { NarrativeField } from '../common/NarrativeField';
-import { FieldPlaceholder } from '../common/FieldPlaceholder';
+import { WeatherWidget } from './daily/WeatherWidget';
+import { WorkforceGrid } from './daily/WorkforceGrid';
+import { Card } from '../ui/Card';
 
 interface DailyLogProps {
   projectId: string;
@@ -39,7 +39,7 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
           weather: { condition: 'Sunny', temperature: '75°F' },
           workLogs: [],
           delays: [],
-          submittedBy: user?.name || 'System User', // Updated User Context
+          submittedBy: user?.name || 'System User',
           notes: ''
       };
       dispatch({ type: 'FIELD_ADD_LOG', payload: newLog });
@@ -57,6 +57,11 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
       }]};
       dispatch({ type: 'FIELD_UPDATE_LOG', payload: updatedLog });
   };
+  
+  const handleUpdateNotes = (notes: string) => {
+       if (!activeLog) return;
+       dispatch({ type: 'FIELD_UPDATE_LOG', payload: { ...activeLog, notes } });
+  };
 
   if (!selectedDate) return <div className={`p-6 ${theme.colors.text.secondary} animate-pulse font-bold uppercase tracking-widest text-xs`}>Initializing Site Logs...</div>;
 
@@ -65,6 +70,7 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
 
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}`}>
+      {/* Date Header */}
       <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center gap-4 ${theme.colors.surface}`}>
         <div className="flex items-center gap-2">
             <Calendar size={18} className={theme.colors.text.tertiary}/>
@@ -97,64 +103,23 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
                 icon={Clipboard}
             />
         ) : (
-            <div className="space-y-8 animate-nexus-in max-w-6xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className={`${theme.components.card} p-5`}>
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <CloudRain size={16} className="text-nexus-500"/> Meteorological Conditions
-                        </h3>
-                        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <div className="flex items-center gap-4">
-                                <Sun size={32} className="text-yellow-500" />
-                                <div>
-                                    <p className="text-2xl font-black text-slate-900">{activeLog.weather.temperature}</p>
-                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{activeLog.weather.condition}</p>
-                                </div>
-                            </div>
-                            <Button size="sm" variant="ghost">Adjust Conditions</Button>
-                        </div>
-                    </div>
-
-                    <NarrativeField 
-                        label="Site Safety & General Notes"
-                        value={activeLog.notes}
-                        placeholderLabel="No strategic site observations recorded."
-                        onAdd={() => {}}
-                    />
+            <div className="space-y-6 animate-nexus-in max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <WeatherWidget weather={activeLog.weather} onAdjust={() => {}} />
+                    
+                    <Card className="p-5">
+                         <NarrativeField 
+                            label="Site Safety & General Notes"
+                            value={activeLog.notes}
+                            placeholderLabel="No strategic site observations recorded."
+                            onSave={handleUpdateNotes}
+                        />
+                    </Card>
                 </div>
 
-                <div className={`${theme.components.card} overflow-hidden`}>
-                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center`}>
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <Users size={16} className="text-blue-600"/> Workforce Distribution
-                        </h3>
-                        <Button size="sm" icon={Plus} onClick={handleAddWork}>Add Labor Entry</Button>
-                    </div>
-                    <div className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                        {activeLog.workLogs.length > 0 ? (
-                            activeLog.workLogs.map(log => (
-                                <div key={log.id} className={`p-5 hover:${theme.colors.background} transition-colors group`}>
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className={`font-black text-slate-900`}>{log.contractor}</span>
-                                        <span className={`text-[10px] font-mono font-bold ${theme.colors.background} border ${theme.colors.border} px-2 py-1 rounded text-slate-500 uppercase`}>Code: {log.costCode || 'General'}</span>
-                                    </div>
-                                    <p className="text-sm text-slate-600 mb-3">{log.description}</p>
-                                    <div className={`flex gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400`}>
-                                        <span className="flex items-center gap-1.5"><Users size={12}/> {log.headcount} Pax</span>
-                                        <span className="flex items-center gap-1.5"><Clock size={12}/> {log.hours} Man-Hours</span>
-                                        <span>Loc: {log.location}</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="p-1">
-                                <FieldPlaceholder label="No labor records logged for this shift." onAdd={handleAddWork} />
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <WorkforceGrid logs={activeLog.workLogs} onAdd={handleAddWork} />
                 
-                <div className="text-xs text-slate-400 text-right font-mono">
+                <div className="text-xs text-slate-400 text-right font-mono mt-4">
                     Filed by: {activeLog.submittedBy}
                 </div>
             </div>

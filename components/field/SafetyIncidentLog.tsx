@@ -1,14 +1,14 @@
+
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { AlertTriangle, Plus, ShieldCheck, Activity, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
-import StatCard from '../shared/StatCard';
 import { SafetyIncident } from '../../types';
 import { generateId } from '../../utils/formatters';
 import { getDaysDiff } from '../../utils/dateUtils';
-import { EmptyGrid } from '../common/EmptyGrid';
+import { IncidentStats } from './safety/IncidentStats';
+import { IncidentList } from './safety/IncidentList';
 
 interface SafetyIncidentLogProps {
   projectId: string;
@@ -49,11 +49,11 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
 
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}/50`}>
-       <div className={`p-6 grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
-           <StatCard title="Days Without Incident" value={daysWithoutIncident} icon={ShieldCheck} trend="up" />
-           <StatCard title="Total Incidents" value={incidents.length} subtext="Project Lifetime" icon={Activity} />
-           <StatCard title="Open Observations" value={incidents.filter(i => i.status === 'Open').length} icon={AlertTriangle} />
-       </div>
+       <IncidentStats 
+            daysWithoutIncident={daysWithoutIncident} 
+            totalIncidents={incidents.length} 
+            openIncidents={incidents.filter(i => i.status === 'Open').length} 
+       />
 
        <div className="flex-1 overflow-hidden p-6 pt-0 flex flex-col">
            <div className={theme.layout.panelContainer}>
@@ -68,38 +68,7 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
                    <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident}>Report Incident</Button>
                </div>
                <div className="flex-1 overflow-auto">
-                   {incidents.length > 0 ? (
-                       <table className="min-w-full divide-y divide-slate-100">
-                           <thead className="bg-slate-50 sticky top-0">
-                               <tr>
-                                   <th className={theme.components.table.header}>Date</th>
-                                   <th className={theme.components.table.header}>Type</th>
-                                   <th className={theme.components.table.header}>Description</th>
-                                   <th className={theme.components.table.header}>Location</th>
-                                   <th className={theme.components.table.header}>Status</th>
-                               </tr>
-                           </thead>
-                           <tbody className="divide-y divide-slate-100 bg-white">
-                               {incidents.map(inc => (
-                                   <tr key={inc.id} className={`${theme.components.table.row} hover:bg-slate-50 cursor-pointer`}>
-                                       <td className={theme.components.table.cell + " font-mono text-xs font-bold text-slate-500"}>{inc.date}</td>
-                                       <td className={theme.components.table.cell}><Badge variant={inc.type === 'Near Miss' ? 'warning' : 'danger'}>{inc.type}</Badge></td>
-                                       <td className={`${theme.components.table.cell} font-bold text-slate-800`}>{inc.description || <span className="text-slate-300 italic font-normal">Pending detail...</span>}</td>
-                                       <td className={theme.components.table.cell + " text-sm text-slate-500"}>{inc.location}</td>
-                                       <td className={theme.components.table.cell}><Badge variant={inc.status === 'Closed' ? 'success' : 'neutral'}>{inc.status}</Badge></td>
-                                   </tr>
-                               ))}
-                           </tbody>
-                       </table>
-                   ) : (
-                       <EmptyGrid 
-                            title="Safe Site: Zero Incidents"
-                            description="No safety incidents or near-miss observations have been recorded for this project lifecycle."
-                            onAdd={handleAddIncident}
-                            actionLabel="Record Safety Observation"
-                            icon={ShieldCheck}
-                       />
-                   )}
+                   <IncidentList incidents={incidents} onAdd={handleAddIncident} />
                </div>
            </div>
        </div>
