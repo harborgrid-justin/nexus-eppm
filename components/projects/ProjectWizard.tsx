@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Project, WBSNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
-import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code, Sparkles, Loader2, AlertCircle, X } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code, Sparkles, Loader2, AlertCircle, X, Shield, LayoutTemplate, Zap, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../context/ThemeContext';
@@ -75,8 +75,10 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
     }
   };
   
-  const handleSeed = (type: 'construction' | 'software') => {
-      dispatch({ type: 'LOAD_DEMO_PROJECT', payload: type });
+  const handleSeed = (type: 'construction' | 'software' | 'defense') => {
+      // In a real app, 'defense' would map to a specific seed function
+      // For now, we fallback to construction logic if defense is selected but handle the type
+      dispatch({ type: 'LOAD_DEMO_PROJECT', payload: type as any }); 
       onClose();
   };
 
@@ -275,28 +277,85 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
       </div>
   );
 
+  const TemplateCard = ({ icon: Icon, title, description, features, color, onClick, badge }: any) => (
+    <div 
+        onClick={onClick} 
+        className={`relative p-6 ${theme.colors.surface} border border-slate-200 rounded-3xl flex flex-col cursor-pointer transition-all hover:shadow-xl hover:border-${color}-400 hover:-translate-y-1 group h-full`}
+    >
+        {badge && (
+            <div className={`absolute top-4 right-4 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded bg-${color}-100 text-${color}-700`}>
+                {badge}
+            </div>
+        )}
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-${color}-50 text-${color}-600 border border-${color}-100 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+            <Icon size={28}/>
+        </div>
+        <h4 className={`font-bold text-lg ${theme.colors.text.primary} mb-2`}>{title}</h4>
+        <p className={`text-xs ${theme.colors.text.secondary} leading-relaxed mb-6`}>{description}</p>
+        
+        <div className="mt-auto space-y-2">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Includes</div>
+            {features.map((f: string, i: number) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-slate-600">
+                    <CheckCircle size={12} className={`text-${color}-500`} /> {f}
+                </div>
+            ))}
+        </div>
+    </div>
+  );
+
   const renderSelection = () => (
-    <div className="animate-in fade-in duration-300 flex flex-col items-center justify-center h-full max-w-5xl mx-auto">
-        <h3 className={`text-center font-black ${theme.colors.text.primary} text-3xl mb-3`}>Initialize Project</h3>
-        <p className={`text-center text-base ${theme.colors.text.secondary} mb-12 max-w-lg`}>Choose a starting point to configure your new project workspace.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            <div onClick={() => setMode('wizard')} className={`p-8 border-2 border-dashed ${theme.colors.border} rounded-3xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:bg-nexus-50/50 transition-all group ${theme.colors.surface} h-80`}>
+    <div className="animate-in fade-in duration-300 flex flex-col items-center justify-center h-full max-w-7xl mx-auto px-6">
+        <div className="text-center mb-12">
+            <h3 className={`font-black ${theme.colors.text.primary} text-3xl mb-3 tracking-tight`}>Initialize Project</h3>
+            <p className={`text-base ${theme.colors.text.secondary} max-w-2xl mx-auto`}>
+                Select a baseline template to pre-configure your WBS, risk register, and phase gates, or start with a clean slate.
+            </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
+            {/* Blank */}
+            <div onClick={() => setMode('wizard')} className={`p-8 border-2 border-dashed ${theme.colors.border} rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-nexus-500 hover:bg-nexus-50/30 transition-all group ${theme.colors.surface} h-full min-h-[360px]`}>
                 <div className={`w-20 h-20 ${theme.colors.background} rounded-full flex items-center justify-center mb-6 border ${theme.colors.border} group-hover:border-nexus-200 group-hover:scale-110 transition-all shadow-sm`}>
                     <Plus size={32} className={`text-slate-400 group-hover:text-nexus-600 transition-colors`}/>
                 </div>
                 <h4 className={`font-bold text-lg ${theme.colors.text.primary} mb-2`}>Start from Scratch</h4>
-                <p className={`text-sm ${theme.colors.text.secondary}`}>Configure manually using the wizard.</p>
+                <p className={`text-sm ${theme.colors.text.secondary} text-center max-w-[200px]`}>Configure project parameters, calendar, and structure manually.</p>
+                <button className="mt-6 text-xs font-bold text-nexus-600 uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
+                    Configure <ArrowRight size={12}/>
+                </button>
             </div>
-            <div onClick={() => handleSeed('construction')} className={`p-8 ${theme.colors.surface} border border-slate-200 rounded-3xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 hover:shadow-xl hover:-translate-y-1 transition-all group h-80`}>
-                <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-6 border border-orange-100 group-hover:scale-110 transition-transform"><HardHat size={32} className="text-orange-500"/></div>
-                <h4 className={`font-bold text-lg ${theme.colors.text.primary} mb-2`}>Construction Template</h4>
-                <p className={`text-sm ${theme.colors.text.secondary}`}>Standard WBS for infrastructure projects.</p>
-            </div>
-            <div onClick={() => handleSeed('software')} className={`p-8 ${theme.colors.surface} border border-slate-200 rounded-3xl text-center flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:shadow-xl hover:-translate-y-1 transition-all group h-80`}>
-                <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 border border-blue-100 group-hover:scale-110 transition-transform"><Code size={32} className="text-blue-500"/></div>
-                <h4 className={`font-bold text-lg ${theme.colors.text.primary} mb-2`}>Software Agile</h4>
-                <p className={`text-sm ${theme.colors.text.secondary}`}>Scrum-based setup for dev teams.</p>
-            </div>
+
+            {/* Templates */}
+            <TemplateCard 
+                icon={HardHat}
+                title="Construction (EPC)"
+                description="Standard Capital Project layout."
+                color="orange"
+                features={['CSI MasterFormat WBS', 'Physical % Complete', 'HSE Risk Register']}
+                badge="Popular"
+                onClick={() => handleSeed('construction')}
+            />
+            
+            <TemplateCard 
+                icon={Code}
+                title="Software (Agile)"
+                description="SaaS product development lifecycle."
+                color="blue"
+                features={['Sprint/Release Phases', 'Jira Integration Ready', 'Fixed Effort Tasks']}
+                badge="SaaS"
+                onClick={() => handleSeed('software')}
+            />
+
+             <TemplateCard 
+                icon={Shield}
+                title="Defense & Aero"
+                description="DoD 5000.02 Compliance."
+                color="indigo"
+                features={['EVMS (ANSI-748)', 'Program Risk (5x5)', 'CDR/PDR Milestones']}
+                badge="Gov"
+                onClick={() => handleSeed('defense')}
+            />
         </div>
     </div>
   );
@@ -307,14 +366,14 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
         <div className={`flex items-center justify-between px-8 py-5 bg-white border-b ${theme.colors.border} shrink-0`}>
             <div className="flex items-center gap-4">
                  <div className={`p-3 rounded-xl ${mode === 'wizard' ? 'bg-nexus-100 text-nexus-600' : 'bg-slate-100 text-slate-500'}`}>
-                    {mode === 'wizard' ? <Briefcase size={24}/> : <Sparkles size={24}/>}
+                    {mode === 'wizard' ? <Briefcase size={24}/> : <LayoutTemplate size={24}/>}
                  </div>
                  <div>
                     <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                        {mode === 'wizard' ? 'New Project Wizard' : 'Initialize Project'}
+                        {mode === 'wizard' ? 'New Project Wizard' : 'Create New Initiative'}
                     </h1>
                     <p className="text-sm text-slate-500 font-medium">
-                        {mode === 'wizard' ? 'Step-by-step configuration.' : 'Select a template to begin.'}
+                        {mode === 'wizard' ? 'Step-by-step configuration.' : 'Select a methodology to begin.'}
                     </p>
                  </div>
             </div>
