@@ -2,10 +2,9 @@
 import React, { useState, useTransition, useMemo } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Sliders, Check, AlertTriangle, RefreshCw, BarChart2, Plus } from 'lucide-react';
+import { Sliders, Check, AlertTriangle, RefreshCw, BarChart2 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import { EmptyGrid } from '../common/EmptyGrid';
-// Added missing import for Card component
 import { Card } from '../ui/Card';
 
 interface ResourceLevelingProps {

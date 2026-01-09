@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect, useDeferredValue } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Loader2, Filter } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import { useTheme } from '../../context/ThemeContext';
 

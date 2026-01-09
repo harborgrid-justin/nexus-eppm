@@ -1,24 +1,24 @@
 
 import React from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { DollarSign } from 'lucide-react';
-import CostDashboard from './cost/CostDashboard';
-import CostPlanEditor from './cost/CostPlanEditor';
-import CostEstimating from './cost/CostEstimating';
-import CostBudgetView from './cost/CostBudgetView';
-import CostChangeOrders from './cost/CostChangeOrders';
-import CostExpenses from './cost/CostExpenses';
-import { BudgetLog } from './cost/BudgetLog';
-import { ProjectFunding } from './cost/ProjectFunding';
-import EarnedValue from './cost/EarnedValue';
-import ReserveAnalysis from './cost/ReserveAnalysis';
-import CostProcurement from './cost/CostProcurement';
-import CostCommunications from './cost/CostCommunications'; 
-import { useTheme } from '../context/ThemeContext';
+import CostDashboard from './CostDashboard';
+import CostPlanEditor from './CostPlanEditor';
+import CostEstimating from './CostEstimating';
+import CostBudgetView from './CostBudgetView';
+import CostChangeOrders from './CostChangeOrders';
+import CostExpenses from './CostExpenses';
+import { BudgetLog } from './BudgetLog';
+import { ProjectFunding } from './ProjectFunding';
+import EarnedValue from './EarnedValue';
+import ReserveAnalysis from './ReserveAnalysis';
+import CostProcurement from './CostProcurement';
+import CostCommunications from './CostCommunications'; 
+import { useTheme } from '../../context/ThemeContext';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { PageHeader } from '../common/PageHeader';
 import { ModuleNavigation } from '../common/ModuleNavigation';
-import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
+import { useCostManagementLogic } from '../../hooks/domain/useCostManagementLogic';
 
 const CostManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
