@@ -60,7 +60,7 @@ const ProgramScope: React.FC<ProgramScopeProps> = ({ programId }) => {
                     <AlertTriangle className="text-nexus-600" size={24}/>
                     <h2 className={theme.typography.h2}>Program Change Control Board (PCCB)</h2>
                 </div>
-                <button className={`px-4 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}>
+                <button className={`px-4 py-2 ${theme.colors.accent} text-white rounded-lg text-sm font-medium hover:bg-nexus-700`}>
                     New Change Request
                 </button>
             </div>

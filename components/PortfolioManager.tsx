@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, Loader2, ArrowLeft, Layers, Map } from 'lucide-react';
+import { LayoutDashboard, Loader2, ArrowLeft, Layers, Map, Briefcase } from 'lucide-react';
 import Dashboard from './Dashboard';
 import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
 import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
@@ -65,7 +65,7 @@ const PortfolioManager: React.FC = () => {
       case 'value': return <PortfolioValue />;
       case 'governance': return <PortfolioGovernance />;
       case 'risks': return <PortfolioRisks />;
-      default: return <div className="p-6 text-slate-500">Module under construction</div>;
+      default: return <Dashboard />;
     }
   };
 

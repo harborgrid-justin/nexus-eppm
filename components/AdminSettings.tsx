@@ -70,7 +70,7 @@ const AdminSettings: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4 flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Enterprise Administration" 
         subtitle="Configure global system logic and enterprise data definitions."

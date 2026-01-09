@@ -23,6 +23,7 @@ import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
 const CostManagement: React.FC = () => {
   const workspace = useProjectWorkspace();
   const project = workspace?.project;
+  const theme = useTheme();
 
   const {
       activeGroup,
@@ -33,9 +34,8 @@ const CostManagement: React.FC = () => {
       handleItemChange
   } = useCostManagementLogic();
 
-  // FIX: Sourcing projectId dynamically and providing a professional placeholder if project context is null.
   if (!project) return (
-    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className={`p-6 space-y-4 flex flex-col h-full ${theme.colors.background}`}>
         <PageHeader title="Cost Management" subtitle="Staffing and allocation hub" icon={DollarSign} />
         <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
             <DollarSign size={48} className="mb-4 opacity-10" />
@@ -65,15 +65,15 @@ const CostManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Cost Management" 
         subtitle="Plan, estimate, and control project costs with precision."
         icon={DollarSign}
       />
 
-      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50">
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b ${theme.colors.border} bg-slate-50/50`}>
             <ModuleNavigation 
                 groups={navGroups}
                 activeGroup={activeGroup}

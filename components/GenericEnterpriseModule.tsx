@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Construction, RefreshCw } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface GenericModuleProps {
   title: string;
@@ -10,29 +11,31 @@ interface GenericModuleProps {
 }
 
 const GenericEnterpriseModule: React.FC<GenericModuleProps> = ({ title, description, type, icon: Icon = Construction }) => {
+  const theme = useTheme();
+
   return (
-    <div className="h-full flex flex-col p-[var(--spacing-gutter)]">
+    <div className={`h-full flex flex-col p-[var(--spacing-gutter)]`}>
        <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-text-primary">
+            <h2 className={`text-2xl font-bold ${theme.colors.text.primary}`}>
                {title}
             </h2>
-            <p className="text-sm text-text-secondary">{description}</p>
+            <p className={`text-sm ${theme.colors.text.secondary}`}>{description}</p>
           </div>
           <div className="flex gap-2">
-             <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-sm text-sm font-medium">
+             <button className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} text-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-sm text-sm font-medium`}>
                 <RefreshCw size={16} /> Refresh
              </button>
-             <button className="px-4 py-2 bg-accent text-white rounded-lg shadow-sm text-sm font-medium hover:bg-nexus-700">
+             <button className={`px-4 py-2 ${theme.colors.accent} text-white rounded-lg shadow-sm text-sm font-medium hover:brightness-110`}>
                 Actions
              </button>
           </div>
        </div>
 
-       <div className="bg-surface border border-border rounded-xl flex-1 flex flex-col overflow-hidden relative shadow-sm">
+       <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl flex-1 flex flex-col overflow-hidden relative shadow-sm`}>
           {/* Mock Enterprise UI scaffold */}
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center text-center p-8">
-             <div className="w-16 h-16 bg-surface rounded-full shadow-sm border border-border flex items-center justify-center mb-4">
+          <div className={`absolute inset-0 ${theme.colors.background}/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center text-center p-8`}>
+             <div className={`w-16 h-16 ${theme.colors.surface} rounded-full shadow-sm border ${theme.colors.border} flex items-center justify-center mb-4`}>
                 <Icon size={32} className="text-slate-400" />
              </div>
              <h2 className="text-xl font-bold text-slate-800 mb-2">Module Initialized</h2>
@@ -40,8 +43,8 @@ const GenericEnterpriseModule: React.FC<GenericModuleProps> = ({ title, descript
                 The <span className="font-semibold text-nexus-600">{title}</span> module is active. Connect an enterprise data source to populate real-time records.
              </p>
              <div className="flex gap-3">
-                <button className="px-4 py-2 bg-white border border-slate-300 rounded-md text-sm font-medium text-slate-700">View Demo Data</button>
-                <button className="px-4 py-2 bg-accent rounded-md text-sm font-medium text-white">Connect Source</button>
+                <button className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-md text-sm font-medium text-slate-700`}>View Demo Data</button>
+                <button className={`px-4 py-2 ${theme.colors.accent} rounded-md text-sm font-medium text-white`}>Connect Source</button>
              </div>
           </div>
 

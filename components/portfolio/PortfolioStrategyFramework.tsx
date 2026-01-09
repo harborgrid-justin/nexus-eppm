@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { 
-  Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Gavel, Target
+  Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2, Gavel, Target
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -13,7 +13,6 @@ import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
-import { EmptyGrid } from '../common/EmptyGrid';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
@@ -146,9 +145,9 @@ const PortfolioStrategyFramework: React.FC = () => {
               </div>
               <div className="space-y-2">
                 {strategicGoals.length > 0 ? strategicGoals.map(goal => (
-                    <div key={goal.id} className={`p-4 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm group hover:border-nexus-300 transition-all`}>
-                        <span className={`font-bold ${theme.colors.text.primary} block mb-1`}>{goal.name}</span>
-                        <span className={`${theme.typography.small} ${theme.colors.text.secondary} leading-relaxed`}>{goal.description}</span>
+                    <div key={goal.id} className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex flex-col gap-1`}>
+                        <span className="font-bold text-sm text-slate-800">{goal.name}</span>
+                        <span className="text-xs text-slate-500 leading-relaxed">{goal.description}</span>
                     </div>
                 )) : (
                     <FieldPlaceholder label="No strategic goals defined." onAdd={() => {}} icon={Target} />
@@ -157,74 +156,61 @@ const PortfolioStrategyFramework: React.FC = () => {
             </div>
             <div>
               <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Portfolio Scoring Model</h3>
-              {scoringCriteria.length > 0 ? (
-                  <div className={`${theme.colors.background} rounded-xl border ${theme.colors.border} overflow-hidden`}>
-                    <table className="w-full text-sm">
-                        <thead className={`${theme.colors.surface} border-b ${theme.colors.border}`}>
-                            <tr>
-                                <th className={`px-4 py-3 text-left ${theme.typography.label} ${theme.colors.text.tertiary}`}>Criteria</th>
-                                <th className={`px-4 py-3 text-right ${theme.typography.label} ${theme.colors.text.tertiary}`}>Weight</th>
-                            </tr>
-                        </thead>
-                        <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                            {scoringCriteria.map(c => (
-                                <tr key={c.id}>
-                                    <td className={`px-4 py-3 text-sm font-medium ${theme.colors.text.primary}`}>{c.name}</td>
-                                    <td className={`px-4 py-3 text-right font-mono font-bold text-nexus-600`}>{(c.weight * 100).toFixed(0)}%</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                  </div>
-              ) : (
-                  <FieldPlaceholder label="No scoring criteria established." onAdd={() => {}} icon={Scale} />
-              )}
-            </div>
-          </div>
-          <div className={`mt-8 pt-8 border-t ${theme.colors.border}`}>
-            <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-6`}>Project Evaluation Matrix</h3>
-            {projects.length > 0 ? (
-                <div className={`overflow-x-auto border ${theme.colors.border} rounded-xl shadow-inner`}>
-                <table className="w-full text-sm border-collapse">
+              <div className="overflow-x-auto rounded-xl border border-slate-200">
+                <table className="w-full text-sm">
                     <thead>
-                    <tr className={`border-b ${theme.colors.border} ${theme.colors.background}`}>
-                        <th className={`px-4 py-3 text-left ${theme.typography.label} ${theme.colors.text.tertiary}`}>Component</th>
-                        {(scoringCriteria || []).map(c => <th key={c.id} className={`px-4 py-3 text-center ${theme.typography.label} ${theme.colors.text.tertiary}`}>{c.name.split(' ')[0]}</th>)}
-                        <th className={`px-4 py-3 text-right ${theme.typography.label} text-nexus-600 bg-nexus-50/50`}>Score</th>
+                    <tr className={`border-b ${theme.colors.border} bg-slate-50`}>
+                        <th className={`py-3 px-4 text-left font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Criteria</th>
+                        <th className={`py-3 px-4 text-center font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Weight</th>
                     </tr>
                     </thead>
-                    <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                    {projects.map((project) => {
-                        const scores = calculateProjectScores(project);
-                        const weighted = calculateWeightedScore(scores);
-                        return (
-                        <tr key={project.id} className={`hover:${theme.colors.background} transition-colors`}>
-                            <td className="px-4 py-3">
-                                <div className={`font-bold ${theme.colors.text.primary}`}>{project.name}</div>
-                                <div className={`${theme.typography.small} ${theme.colors.text.tertiary} font-mono mt-0.5`}>{project.code}</div>
-                            </td>
-                            {scoringCriteria.map(c => <td key={c.id} className={`px-4 py-3 text-center ${theme.colors.text.secondary} font-mono`}>{scores[c.id]}</td>)}
-                            <td className={`px-4 py-3 text-right font-black text-lg text-nexus-700 bg-nexus-50/20`}>{weighted}</td>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                    {scoringCriteria.map(c => (
+                        <tr key={c.id}>
+                        <td className={`py-3 px-4 font-medium ${theme.colors.text.primary}`}>{c.name}</td>
+                        <td className={`py-3 px-4 text-center font-mono font-bold ${theme.colors.text.secondary}`}>{(c.weight * 100).toFixed(0)}%</td>
                         </tr>
-                        )
-                    })}
+                    ))}
                     </tbody>
                 </table>
-                </div>
-            ) : (
-                <EmptyGrid 
-                    title="Evaluation Registry Empty"
-                    description="Launch your first project initiative to activate the portfolio scoring and strategic alignment engine."
-                    icon={Scale}
-                    actionLabel="Initialize Project"
-                    onAdd={() => {}}
-                />
-            )}
+              </div>
+            </div>
+          </div>
+          <div className={`mt-8 pt-6 border-t ${theme.colors.border}`}>
+            <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Project Evaluation</h3>
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={`border-b ${theme.colors.border} ${theme.colors.background}`}>
+                    <th className={`p-3 text-left font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Project</th>
+                    {scoringCriteria.map(c => <th key={c.id} className={`p-3 text-center font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>{c.name.split(' ')[0]}</th>)}
+                    <th className="p-3 text-center font-black text-nexus-800 bg-nexus-50 text-xs uppercase tracking-wider">Weighted Score</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {projects.map((project) => {
+                    const scores = calculateProjectScores(project);
+                    return (
+                      <tr key={project.id} className="hover:bg-slate-50 transition-colors">
+                        <td className={`p-3 font-medium ${theme.colors.text.primary}`}>
+                            {project.name}
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">{project.code}</div>
+                        </td>
+                        {scoringCriteria.map(c => <td key={c.id} className={`p-3 text-center ${theme.colors.text.secondary}`}>{scores[c.id]}</td>)}
+                        <td className="p-3 text-center font-bold text-lg text-nexus-700 bg-nexus-50/50">{calculateWeightedScore(scores)}</td>
+                      </tr>
+                    )
+                  })}
+                  {projects.length === 0 && (
+                      <tr><td colSpan={scoringCriteria.length + 2} className="p-8 text-center text-slate-400 italic">No active projects to evaluate.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </Card>
       </section>
 
-      {/* 3. Component Structure */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Layers className="text-nexus-600" size={20} />
@@ -235,26 +221,30 @@ const PortfolioStrategyFramework: React.FC = () => {
             const projectsInCategory = projects.filter(p => p.category === category);
             return (
               <div key={category} className="flex flex-col gap-3">
-                <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} flex justify-between items-center`}>
-                    <h3 className={`${theme.typography.label} ${theme.colors.text.tertiary}`}>{category}</h3>
-                    <span className={`${theme.typography.small} font-bold ${theme.colors.text.tertiary} ${theme.colors.surface} px-1.5 py-0.5 rounded border ${theme.colors.border}`}>{projectsInCategory.length}</span>
+                <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} flex justify-between items-center shadow-sm`}>
+                    <h3 className={`font-black ${theme.colors.text.secondary} text-[10px] uppercase tracking-widest`}>{category}</h3>
+                    <button className={`${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>
+                        <Plus size={14} />
+                    </button>
                 </div>
                 <div className="space-y-3 min-h-[150px]">
                     {projectsInCategory.length > 0 ? projectsInCategory.map(project => (
-                        <div key={project.id} className={`${theme.components.card} p-4 group hover:border-nexus-300 relative ${theme.colors.surface}`}>
+                        <div key={project.id} className={`${theme.components.card} p-4 group hover:border-nexus-300 relative transition-all shadow-sm`}>
                             <div className="flex justify-between items-start mb-2">
                                 <h4 className={`font-bold text-sm ${theme.colors.text.primary} group-hover:text-nexus-700 transition-colors line-clamp-2`}>{project.name}</h4>
                                 <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 ${theme.colors.surface} rounded shadow-sm border ${theme.colors.border}`}>
-                                    <button onClick={() => handleEditProject(project.id)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-nexus-600`} title="Edit Alignment"><Edit2 size={12}/></button>
+                                    <button onClick={() => handleEditProject(project.id)} className={`p-1.5 hover:${theme.colors.background} rounded text-slate-500 hover:text-nexus-600`}><Edit2 size={12}/></button>
                                 </div>
                             </div>
-                            <div className={`flex justify-between items-center mt-3 pt-3 border-t ${theme.colors.border}`}>
-                                <span className={`${theme.typography.small} font-mono ${theme.colors.text.tertiary} uppercase tracking-tighter`}>{project.code}</span>
+                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-50">
+                                <span className={`text-[10px] font-mono ${theme.colors.text.tertiary} uppercase tracking-tighter`}>{project.code}</span>
                                 <StatusBadge status={project.health} variant="health" className="scale-75 origin-right" />
                             </div>
                         </div>
                     )) : (
-                        <FieldPlaceholder label="No projects assigned." onAdd={() => {}} icon={Layers} />
+                        <div className={`p-6 border-2 border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center text-center ${theme.colors.background}/50 h-full`}>
+                            <p className={`text-xs ${theme.colors.text.tertiary} italic`}>No projects assigned.</p>
+                        </div>
                     )}
                 </div>
               </div>
@@ -266,33 +256,41 @@ const PortfolioStrategyFramework: React.FC = () => {
       <SidePanel
         isOpen={isEditPanelOpen}
         onClose={() => setIsEditPanelOpen(false)}
-        title={<span className={`${theme.typography.label} ${theme.colors.text.primary}`}>Manage Component Alignment</span>}
+        title="Manage Component Alignment"
         width="md:w-[450px]"
         footer={<Button onClick={() => setIsEditPanelOpen(false)}>Done</Button>}
       >
         {currentProject && (
             <div className="space-y-6">
-                <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl`}>
-                    <p className={`${theme.typography.label} ${theme.colors.text.tertiary} mb-1`}>Project Component</p>
+                <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
+                    <p className={`text-[10px] font-bold ${theme.colors.text.secondary} uppercase tracking-widest mb-1`}>Project Component</p>
                     <p className={`text-lg font-bold ${theme.colors.text.primary}`}>{currentProject.name}</p>
                 </div>
+
                 <div>
-                    <label className={`${theme.typography.label} ${theme.colors.text.tertiary} block mb-3 ml-1`}>Strategic Pillar</label>
+                    <label className={`block text-sm font-bold ${theme.colors.text.primary} mb-3`}>Strategic Category</label>
                     <div className="space-y-2">
                         {PORTFOLIO_CATEGORIES.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => currentProject && handleMoveCategory(currentProject.id, cat)}
-                                className={`w-full text-left p-4 rounded-xl border transition-all ${
+                                className={`w-full text-left p-3 rounded-lg border transition-all ${
                                     currentProject.category === cat 
-                                    ? `bg-nexus-50 border-nexus-500 text-nexus-700 ring-4 ring-nexus-500/5 font-bold` 
-                                    : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.secondary} hover:${theme.colors.background} hover:border-slate-300`
+                                    ? `${theme.colors.semantic.info.bg} border-nexus-500 ${theme.colors.semantic.info.text} ring-1 ring-nexus-500` 
+                                    : `${theme.colors.surface} ${theme.colors.border} hover:${theme.colors.background} hover:border-slate-300`
                                 }`}
                             >
-                                <span className="text-sm">{cat}</span>
+                                <span className="text-sm font-medium">{cat}</span>
                             </button>
                         ))}
                     </div>
+                </div>
+
+                <div className={`${theme.colors.semantic.info.bg} p-4 rounded-lg border ${theme.colors.semantic.info.border} flex items-start gap-3`}>
+                    <div className={`p-1 ${theme.colors.background} rounded text-blue-600 shrink-0`}><Scale size={14}/></div>
+                    <p className="text-xs text-blue-800 leading-relaxed">
+                        Reclassifying a component updates its position in the Strategic Roadmap and resource allocation balancing models.
+                    </p>
                 </div>
             </div>
         )}

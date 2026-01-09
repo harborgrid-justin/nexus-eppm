@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { Task, Project } from '../types/index';
 import { ShieldAlert, FileText, Calendar, Database, ListChecks } from 'lucide-react';
@@ -37,17 +38,17 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
     <SidePanel isOpen={true} onClose={onClose} width="max-w-4xl"
        title={
          <div className="flex flex-col">
-            <span className="text-xs font-mono text-text-secondary">{localTask.wbsCode}</span>
+            <span className="text-xs font-mono text-slate-500">{localTask.wbsCode}</span>
             <div className="flex items-center gap-3">
-                <span className="text-xl font-bold text-text-primary">{localTask.name}</span>
-                {!canComplete && <span className="text-xs font-bold text-error flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200"><ShieldAlert size={12}/> QC Block</span>}
+                <span className="text-xl font-bold text-slate-900">{localTask.name}</span>
+                {!canComplete && <span className="text-xs font-bold text-red-700 flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded border border-red-200"><ShieldAlert size={12}/> QC Block</span>}
             </div>
          </div>
        }
        footer={<><Button variant="secondary" onClick={onClose}>{isReadOnly ? 'Close' : 'Cancel'}</Button>{!isReadOnly && <Button variant="primary" onClick={saveChanges}>Save Changes</Button>}</>}
     >
        <div className="space-y-6">
-          <div className="flex border-b border-border" role="tablist">
+          <div className="flex border-b border-slate-200" role="tablist">
               {[ 
                   { id: 'general', label: 'General', icon: FileText }, 
                   { id: 'schedule', label: 'Schedule', icon: Calendar }, 
@@ -59,7 +60,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                     role="tab"
                     aria-selected={activeTab === tab.id}
                     onClick={() => setActiveTab(tab.id as any)} 
-                    className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded-t ${activeTab === tab.id ? 'border-nexus-600 text-nexus-700' : 'border-transparent text-text-secondary hover:text-text-primary'}`}
+                    className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-nexus-500 rounded-t ${activeTab === tab.id ? 'border-nexus-600 text-nexus-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
                   >
                       <tab.icon size={14}/> {tab.label}
                   </button>

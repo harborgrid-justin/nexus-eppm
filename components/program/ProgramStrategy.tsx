@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-// Fix: Added Briefcase and AlertTriangle to the import list to resolve "Cannot find name" errors
 import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield, Briefcase, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';

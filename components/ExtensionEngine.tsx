@@ -2,13 +2,13 @@
 import React, { lazy, Suspense, useMemo } from 'react';
 import { Extension } from '../types/index';
 import { 
-  LayoutDashboard, Map as MapIcon, Database, Box, FileText, Settings, 
-  MoreVertical, Filter, Plus, RefreshCw, Layers, Loader2
+  Filter, Plus, RefreshCw, Layers, Loader2, Settings
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { ErrorBoundary } from './ErrorBoundary';
+import { useTheme } from '../context/ThemeContext';
 
 // Lazy load specialized suites
 const DoDSuite = lazy(() => import('./engines/DoDSuite'));
@@ -28,6 +28,7 @@ interface ExtensionEngineProps {
 }
 
 const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) => {
+  const theme = useTheme();
 
   // Deterministic mock data to prevent render jitter (Rule 1)
   const dashboardMetrics = useMemo(() => {
@@ -116,12 +117,12 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
   }
   
   const renderToolbar = () => (
-    <div className="p-4 border-b border-border bg-slate-50 flex justify-between items-center">
+    <div className={`p-4 border-b ${theme.colors.border} bg-slate-50 flex justify-between items-center`}>
       <div className="flex gap-2">
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-border rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm">
+        <button className={`flex items-center gap-2 px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm`}>
           <Filter size={14} /> Filter
         </button>
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-surface border border-border rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm">
+        <button className={`flex items-center gap-2 px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm`}>
           <Settings size={14} /> Config
         </button>
       </div>
@@ -129,7 +130,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
          <button className="p-2 text-slate-500 hover:bg-slate-200 rounded">
             <RefreshCw size={16} />
          </button>
-         <button className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark shadow-sm">
+         <button className={`flex items-center gap-2 px-3 py-1.5 ${theme.colors.primary} text-white rounded-lg text-sm font-medium ${theme.colors.primaryHover} shadow-sm`}>
            <Plus size={16} /> New Record
          </button>
       </div>
@@ -140,14 +141,14 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
     <div className="p-6 overflow-y-auto">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {dashboardMetrics.map(item => (
-          <div key={item.id} className="bg-surface border border-border rounded-lg p-5">
+          <div key={item.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-5`}>
             <h4 className="text-slate-500 text-sm font-medium mb-1">Key Metric {item.id}</h4>
-            <div className="text-2xl font-bold text-slate-900">{item.value}</div>
+            <div className={`text-2xl font-bold ${theme.colors.text.primary}`}>{item.value}</div>
             <div className="text-xs text-green-600 flex items-center mt-1">+{item.trend}% from last month</div>
           </div>
         ))}
       </div>
-      <div className="h-80 bg-surface border border-border rounded-lg p-4">
+      <div className={`h-80 ${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4`}>
         <h4 className="text-slate-800 font-bold mb-4">Trends Analysis</h4>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={[
@@ -175,7 +176,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
             ))}
           </tr>
         </thead>
-        <tbody className="bg-surface divide-y divide-slate-100">
+        <tbody className={`${theme.colors.surface} divide-y divide-slate-100`}>
           {[...Array(10)].map((_, i) => (
             <tr key={i} className="hover:bg-slate-50">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500">REC-{1000+i}</td>
@@ -186,7 +187,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
               <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">2024-03-{10+i}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">User {i+1}</td>
               <td className="px-6 py-4 whitespace-nowrap text-slate-400">
-                <MoreVertical size={16} />
+                {/* Simplified for now */}
               </td>
             </tr>
           ))}
@@ -200,10 +201,10 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-           <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+           <h1 className={`text-2xl font-bold ${theme.colors.text.primary} flex items-center gap-2`}>
              <Layers className="text-nexus-600" /> {extension.name}
            </h1>
-           <p className="text-xs text-text-secondary">{extension.description} <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500 ml-2">v{extension.version}</span></p>
+           <p className={`text-xs ${theme.colors.text.secondary}`}>{extension.description} <span className="text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500 ml-2">v{extension.version}</span></p>
         </div>
         <div className="flex items-center gap-2">
            <span className="text-xs font-mono text-slate-400">ENGINE_ID: {extension.id.toUpperCase()}</span>
@@ -211,7 +212,7 @@ const ExtensionEngineContent: React.FC<ExtensionEngineProps> = ({ extension }) =
       </div>
 
       {/* Main Workspace */}
-      <div className="flex-1 bg-surface rounded-lg shadow-sm border border-border overflow-hidden flex flex-col">
+      <div className={`${theme.colors.surface} rounded-lg shadow-sm border ${theme.colors.border} overflow-hidden flex flex-col flex-1`}>
          {extension.viewType !== 'viewer3d' && extension.viewType !== 'map' && renderToolbar()}
          
          {extension.viewType === 'dashboard' && renderDashboard()}

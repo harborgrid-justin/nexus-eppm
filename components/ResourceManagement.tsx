@@ -14,9 +14,11 @@ import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { Resource } from '../types/index';
 import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
+import { useTheme } from '../context/ThemeContext';
 
 const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
+  const theme = useTheme();
   
   const {
       activeGroup,
@@ -29,7 +31,6 @@ const ResourceManagement: React.FC = () => {
   } = useResourceManagementLogic();
 
   const renderContent = () => {
-    // FIX: Using proper project context variables
     const projectId = project?.id || '';
     const projectResources = (assignedResources || []) as Resource[];
 
@@ -45,9 +46,8 @@ const ResourceManagement: React.FC = () => {
     }
   };
 
-  // FIX: Replaced simple loading text with professional grey fill placeholder to avoid layout shift
   if (!project) return (
-    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className={`p-6 space-y-4 flex flex-col h-full ${theme.colors.background}`}>
         <PageHeader title="Resource Management" subtitle="Staffing and allocation hub" icon={Users} />
         <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
             <Users size={48} className="mb-4 opacity-10" />
@@ -57,15 +57,15 @@ const ResourceManagement: React.FC = () => {
   );
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
       <PageHeader 
         title="Resource Management" 
         subtitle="Plan, staff, and manage your project and enterprise resources."
         icon={Users}
       />
 
-      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="flex-shrink-0 border-b border-border bg-slate-50/50 z-10">
+      <div className={theme.layout.panelContainer}>
+        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-slate-50/50 z-10`}>
           <ModuleNavigation 
               groups={navStructure}
               activeGroup={activeGroup}
@@ -76,7 +76,7 @@ const ResourceManagement: React.FC = () => {
           />
         </div>
         <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          <ErrorBoundary>
+          <ErrorBoundary name="Resource Module">
             {renderContent()}
           </ErrorBoundary>
         </div>

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { PageHeader } from './common/PageHeader';
+import { useTheme } from '../context/ThemeContext';
 
 const iconMap: Record<string, any> = {
   Box, Radio, Calculator, Receipt, Banknote, TrendingUp, ShoppingCart, 
@@ -20,6 +21,7 @@ const iconMap: Record<string, any> = {
 
 const ExtensionMarketplace: React.FC = () => {
   const { state, dispatch } = useData();
+  const theme = useTheme();
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -47,8 +49,8 @@ const ExtensionMarketplace: React.FC = () => {
         icon={LayoutGrid}
       />
 
-      <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+        <div className={`p-4 border-b ${theme.colors.border} bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4`}>
             {/* Category Tabs */}
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide max-w-full">
                 {categories.map(cat => (
@@ -57,8 +59,8 @@ const ExtensionMarketplace: React.FC = () => {
                     onClick={() => setCategoryFilter(cat)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide whitespace-nowrap transition-colors ${
                     categoryFilter === cat 
-                        ? 'bg-primary text-white shadow-sm' 
-                        : 'bg-white border border-slate-200 text-slate-500 hover:text-slate-800'
+                        ? `${theme.colors.primary} shadow-sm` 
+                        : `bg-white border ${theme.colors.border} text-slate-500 hover:text-slate-800`
                     }`}
                 >
                     {cat}
@@ -73,19 +75,19 @@ const ExtensionMarketplace: React.FC = () => {
                    placeholder="Search extensions..." 
                    value={searchTerm}
                    onChange={(e) => setSearchTerm(e.target.value)}
-                   className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-1 focus:ring-nexus-500 w-full md:w-64" 
+                   className={`pl-9 pr-4 py-2 border ${theme.colors.border} rounded-lg text-sm focus:ring-1 focus:ring-nexus-500 w-full md:w-64 ${theme.colors.background} ${theme.colors.text.primary}`} 
                  />
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-background">
+        <div className={`flex-1 overflow-y-auto p-6 ${theme.colors.background}`}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredExtensions.map(ext => {
                 const IconComponent = iconMap[ext.icon] || Package;
                 const isInstalled = ext.status === 'Installed' || ext.status === 'Active';
 
                 return (
-                <div key={ext.id} className="bg-surface border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group h-full">
+                <div key={ext.id} className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col group h-full`}>
                     <div className="flex justify-between items-start mb-4">
                         <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-nexus-600 group-hover:bg-nexus-50 transition-colors shrink-0">
                         <IconComponent size={24} />
@@ -101,8 +103,8 @@ const ExtensionMarketplace: React.FC = () => {
                         )}
                     </div>
                     
-                    <h3 className="text-base font-bold text-text-primary mb-1 truncate">{ext.name}</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed mb-4 line-clamp-3 min-h-[60px]">{ext.description}</p>
+                    <h3 className={`text-base font-bold ${theme.colors.text.primary} mb-1 truncate`}>{ext.name}</h3>
+                    <p className={`text-sm ${theme.colors.text.secondary} leading-relaxed mb-4 line-clamp-3 min-h-[60px]`}>{ext.description}</p>
                     
                     <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                         <span className="text-xs text-slate-400 font-medium uppercase tracking-wider truncate mr-2">{ext.category}</span>

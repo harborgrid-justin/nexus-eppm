@@ -1,3 +1,4 @@
+
 import React, { useRef, useMemo } from 'react';
 import { Download, MoreHorizontal, Upload, Search, Folder, Filter, Lock, Loader2 } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
@@ -7,11 +8,13 @@ import { generateId, formatFileSize } from '../utils/formatters';
 import { Document } from '../types/index';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const DocumentControl: React.FC = () => {
   const { state, dispatch } = useData();
   const { user } = useAuth();
-  const { project } = useProjectWorkspace(); // Get active project context
+  const { project } = useProjectWorkspace(); 
+  const theme = useTheme();
   
   const {
     searchTerm,
@@ -44,7 +47,6 @@ const DocumentControl: React.FC = () => {
               type: docType,
               size: formatFileSize(file.size),
               version: '1.0',
-              // FIX: source uploader from auth context
               uploadedBy: user?.name || 'System User', 
               status: 'Draft',
               url: '#'
@@ -58,7 +60,6 @@ const DocumentControl: React.FC = () => {
       fileInputRef.current?.click();
   };
 
-  // FIX: Dynamic storage calculation from global state replacing static 65% mock
   const storageMetrics = useMemo(() => {
     const totalLimitGB = state.governance.billing.storageLimitGB || 10;
     const totalBytes = state.documents.reduce((acc, d) => {
@@ -78,7 +79,7 @@ const DocumentControl: React.FC = () => {
   }, [state.documents, state.governance.billing.storageLimitGB]);
 
   return (
-    <div className="p-[var(--spacing-gutter)] flex flex-col h-full">
+    <div className={`p-[var(--spacing-gutter)] flex flex-col h-full`}>
        <PageHeader
             title="Document Control"
             subtitle="Central repository for all project specifications, drawings, and reports."
@@ -93,7 +94,7 @@ const DocumentControl: React.FC = () => {
                     />
                     <button 
                         onClick={triggerUpload}
-                        className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:bg-primary-dark shadow-sm text-sm font-medium"
+                        className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg flex items-center gap-2 hover:brightness-110 shadow-sm text-sm font-medium`}
                     >
                         <Upload size={16} /> <span className="hidden sm:inline">Upload Document</span>
                     </button>
@@ -105,15 +106,15 @@ const DocumentControl: React.FC = () => {
               )}
        />
 
-       <div className="bg-surface border border-border rounded-lg flex-1 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-border flex flex-col md:flex-row justify-between items-center gap-4">
+       <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg flex-1 overflow-hidden flex flex-col`}>
+          <div className={`p-4 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center gap-4`}>
              <div className="flex gap-4 w-full md:w-auto">
                  <div className="relative flex-1 md:flex-none">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                         type="text" 
                         placeholder="Search files..." 
-                        className="pl-9 pr-10 py-1.5 text-sm border border-border rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500 transition-all"
+                        className={`pl-9 pr-10 py-1.5 text-sm border ${theme.colors.border} rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500 transition-all ${theme.colors.background} ${theme.colors.text.primary}`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -123,7 +124,7 @@ const DocumentControl: React.FC = () => {
                         </div>
                     )}
                  </div>
-                 <button className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border rounded-md text-sm text-slate-600 hover:bg-slate-50">
+                 <button className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded-md text-sm text-slate-600 hover:bg-slate-50`}>
                     <Filter size={14} /> Filter
                  </button>
              </div>
@@ -137,12 +138,12 @@ const DocumentControl: React.FC = () => {
           </div>
 
           <div className={`flex-1 overflow-auto p-6 transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
-             <h3 className="text-sm font-bold text-text-primary mb-4 uppercase tracking-wider">Recent Uploads</h3>
+             <h3 className={`text-sm font-bold ${theme.colors.text.primary} mb-4 uppercase tracking-wider`}>Recent Uploads</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {docs.map(doc => (
                    <div 
                       key={doc.id} 
-                      className="p-4 border border-border rounded-lg hover:border-nexus-300 hover:shadow-md transition-all bg-surface group cursor-pointer relative focus:outline-none focus:ring-2 focus:ring-nexus-500"
+                      className={`p-4 border ${theme.colors.border} rounded-lg hover:border-nexus-300 hover:shadow-md transition-all ${theme.colors.surface} group cursor-pointer relative focus:outline-none focus:ring-2 focus:ring-nexus-500`}
                       tabIndex={0}
                       role="button"
                    >
@@ -154,14 +155,14 @@ const DocumentControl: React.FC = () => {
                             </button>
                          </div>
                       </div>
-                      <h4 className="text-sm font-semibold text-text-primary truncate" title={doc.name}>{doc.name}</h4>
+                      <h4 className={`text-sm font-semibold ${theme.colors.text.primary} truncate`} title={doc.name}>{doc.name}</h4>
                       <div className="flex justify-between items-end mt-2">
-                         <div className="text-xs text-text-secondary">
+                         <div className={`text-xs ${theme.colors.text.secondary}`}>
                             <p>{doc.size} • v{doc.version}</p>
                             <p className="mt-0.5">{doc.uploadedBy}</p>
                          </div>
                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${
-                            doc.status === 'Final' ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'
+                            doc.status === 'Final' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'
                          }`}>
                             {doc.status}
                          </span>
