@@ -4,6 +4,7 @@ import { useData } from '../../../context/DataContext';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { EnterpriseRole } from '../../../types';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface RoleSettingsProps {
     handleOpenPanel: (role?: EnterpriseRole) => void;
@@ -11,10 +12,11 @@ interface RoleSettingsProps {
 
 export const RoleSettings: React.FC<RoleSettingsProps> = ({ handleOpenPanel }) => {
     const { state } = useData();
+    const theme = useTheme();
 
     return (
         <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className={`flex justify-between items-center ${theme.colors.background} p-4 rounded-xl border ${theme.colors.border}`}>
                 <div>
                     <h4 className="font-bold text-slate-900">Role Taxonomy</h4>
                     <p className="text-xs text-slate-500">Standardized roles drive automated resource-loading and cross-project staffing.</p>
@@ -24,7 +26,7 @@ export const RoleSettings: React.FC<RoleSettingsProps> = ({ handleOpenPanel }) =
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {state.roles.map(role => (
-                    <div key={role.id} className="p-4 border border-slate-200 rounded-xl hover:border-nexus-400 transition-all group bg-white shadow-sm flex flex-col justify-between h-40">
+                    <div key={role.id} className={`p-4 border ${theme.colors.border} rounded-xl hover:border-nexus-400 transition-all group ${theme.colors.surface} shadow-sm flex flex-col justify-between h-40`}>
                         <div className="flex justify-between items-start">
                             <div className="min-w-0 flex-1">
                                 <h4 className="font-bold text-slate-900 group-hover:text-nexus-700 truncate">{role.title}</h4>

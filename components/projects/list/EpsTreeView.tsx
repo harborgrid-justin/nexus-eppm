@@ -49,7 +49,7 @@ export const EpsTreeView: React.FC<EpsTreeViewProps> = ({ projects, onSelect }) 
         {isExpanded && (
           <div className="flex flex-col">
             {nodeProjects.map(project => (
-               <div key={project.id} onClick={() => onSelect(project.id)} className={`group flex items-center px-4 py-4 border-b ${theme.colors.border.replace('border-','border-slate-').replace('200','100')} hover:bg-nexus-50/10 cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-nexus-500`} style={{ paddingLeft: `${(level + 1) * 24 + 36}px` }}>
+               <div key={project.id} onClick={() => onSelect(project.id)} className={`group flex items-center px-4 py-4 border-b ${theme.colors.border.replace('border-','border-slate-').replace('200','100')} hover:${theme.colors.background} cursor-pointer transition-all border-l-4 border-l-transparent hover:border-l-nexus-500`} style={{ paddingLeft: `${(level + 1) * 24 + 36}px` }}>
                   <div className="flex-1 flex min-w-0 items-center gap-6">
                       <div className="flex-1 min-w-0">
                           <div className={`font-semibold text-sm ${theme.colors.text.primary} group-hover:text-nexus-600 truncate`}>{project.name}</div>

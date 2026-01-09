@@ -4,6 +4,7 @@ import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Copy, AlertTriangle } from 'lucide-react';
 import { useData } from '../../../context/DataContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface CostPlanTemplatePanelProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface CostPlanTemplatePanelProps {
 
 export const CostPlanTemplatePanel: React.FC<CostPlanTemplatePanelProps> = ({ isOpen, onClose, onApply }) => {
     const { state } = useData();
+    const theme = useTheme();
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
     
     // Filter for Cost templates
@@ -30,9 +32,9 @@ export const CostPlanTemplatePanel: React.FC<CostPlanTemplatePanelProps> = ({ is
             </>}
         >
             <div className="space-y-6">
-                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
-                    <AlertTriangle className="text-amber-600 shrink-0" size={18}/>
-                    <span className="text-xs text-amber-900 leading-relaxed font-medium">Applying a template will overwrite current strategy text.</span>
+                <div className={`p-4 ${theme.colors.semantic.warning.bg} border ${theme.colors.semantic.warning.border} rounded-2xl flex items-start gap-3`}>
+                    <AlertTriangle className={`${theme.colors.semantic.warning.icon} shrink-0`} size={18}/>
+                    <span className={`text-xs ${theme.colors.semantic.warning.text} leading-relaxed font-medium`}>Applying a template will overwrite current strategy text.</span>
                 </div>
                 <div className="space-y-4">
                     {templates.map(t => (

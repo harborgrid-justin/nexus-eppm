@@ -10,8 +10,6 @@ export const ErpConnector: React.FC = () => {
     const { state } = useData();
     const transactions = state.extensionData.erpTransactions || [];
 
-    // Derive active change order to display in the gate visual
-    // We pick the most recently updated change order for demo purposes
     const latestChangeOrder = useMemo(() => {
         const cos = state.changeOrders;
         return cos.length > 0 ? cos[cos.length - 1] : null;
@@ -29,7 +27,7 @@ export const ErpConnector: React.FC = () => {
                         </h2>
                         <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>SAP / Oracle Financials Gateway</p>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-200 text-xs font-bold uppercase tracking-wider">
+                    <div className={`flex items-center gap-2 px-3 py-1 ${theme.colors.semantic.success.bg} ${theme.colors.semantic.success.text} rounded-full border ${theme.colors.semantic.success.border} text-xs font-bold uppercase tracking-wider`}>
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> Live Sync
                     </div>
                 </div>

@@ -16,7 +16,7 @@ export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect }
 
     return (
         <div className={`w-72 border-r ${theme.colors.border} flex flex-col overflow-hidden h-full ${theme.colors.background}/50`}>
-            <div className={`p-4 border-b ${theme.colors.border} font-bold text-[10px] uppercase ${theme.colors.text.tertiary} tracking-wider bg-white`}>Business Automation Catalog</div>
+            <div className={`p-4 border-b ${theme.colors.border} font-bold text-[10px] uppercase ${theme.colors.text.tertiary} tracking-wider ${theme.colors.surface}`}>Business Automation Catalog</div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1">
                 {definitions.length > 0 ? (
                     definitions.map(def => (
@@ -25,8 +25,8 @@ export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect }
                             onClick={() => onSelect(def.id)} 
                             className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center gap-3 transition-all duration-200 ${
                                 selectedId === def.id 
-                                ? `bg-white shadow-sm ring-1 ring-nexus-100 border border-nexus-200 text-nexus-700 font-bold` 
-                                : `text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-sm border border-transparent`
+                                ? `${theme.colors.surface} shadow-sm ring-1 ring-nexus-100 border border-nexus-200 text-nexus-700 font-bold` 
+                                : `text-slate-500 hover:${theme.colors.surface} hover:text-slate-900 hover:shadow-sm border border-transparent`
                             }`}
                             aria-pressed={selectedId === def.id}
                         >
@@ -44,7 +44,7 @@ export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect }
                     </div>
                 )}
             </div>
-            <div className={`p-4 bg-white border-t ${theme.colors.border}`}>
+            <div className={`p-4 ${theme.colors.surface} border-t ${theme.colors.border}`}>
                 <p className={`text-[9px] ${theme.colors.text.tertiary} leading-relaxed font-medium uppercase tracking-tight`}>
                     Business Processes (BPs) drive financial and document workflows across the enterprise.
                 </p>

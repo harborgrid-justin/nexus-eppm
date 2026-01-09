@@ -118,7 +118,7 @@ const ResourceNegotiationHub: React.FC = () => {
                     <div className="w-[450px] flex flex-col gap-6 animate-in slide-in-from-right-4 duration-300">
                         {selectedReq ? (
                             <>
-                                <Card className={`p-6 ${theme.colors.background} border-${theme.colors.border}`}>
+                                <Card className={`p-6 ${theme.colors.background} ${theme.colors.border}`}>
                                     <h3 className={`font-bold ${theme.colors.text.primary} mb-4 flex items-center gap-2`}>
                                         <TrendingUp size={18} className="text-nexus-600"/> Impact Analysis
                                     </h3>
@@ -140,7 +140,7 @@ const ResourceNegotiationHub: React.FC = () => {
                                                 </div>
                                                 <ProgressBar value={impactData.newUtilization} thresholds />
                                                 {impactData.newUtilization > 100 && (
-                                                    <div className="mt-2 p-2 bg-red-100 border border-red-200 text-red-800 text-xs rounded flex items-center gap-2">
+                                                    <div className={`mt-2 p-2 ${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.border} ${theme.colors.semantic.danger.text} text-xs rounded flex items-center gap-2`}>
                                                         <AlertCircle size={14}/> <strong>Conflict Detected:</strong> Threshold exceeded.
                                                     </div>
                                                 )}

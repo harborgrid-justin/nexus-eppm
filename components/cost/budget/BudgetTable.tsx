@@ -2,6 +2,7 @@
 import React from 'react';
 import { formatCurrency } from '../../../utils/formatters';
 import { BudgetLineItem } from '../../../types';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface BudgetTableProps {
     items: (BudgetLineItem & { committed: number; totalExposure: number; remaining: number })[];
@@ -9,6 +10,7 @@ interface BudgetTableProps {
 }
 
 export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem }) => {
+    const theme = useTheme();
     const totals = {
         planned: items.reduce((a, c) => a + c.planned, 0),
         committed: items.reduce((a, c) => a + c.committed, 0),
@@ -20,7 +22,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
-                <thead className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                <thead className={`${theme.colors.background}/80 sticky top-0 z-10 backdrop-blur-sm`}>
                 <tr>
                     <th className="px-6 py-4 text-left text-[10px] font-bold uppercase">Category (CBS)</th>
                     <th className="px-6 py-4 text-right text-[10px] font-bold uppercase">Planned</th>
@@ -32,7 +34,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-50">
                 {items.map(item => (
-                    <tr key={item.id} onClick={() => onSelectItem(item.id)} className="hover:bg-slate-50/80 cursor-pointer">
+                    <tr key={item.id} onClick={() => onSelectItem(item.id)} className={`hover:${theme.colors.background}/80 cursor-pointer`}>
                         <td className="px-6 py-4 text-sm font-bold">{item.category}</td>
                         <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(item.planned)}</td>
                         <td className="px-6 py-4 text-right text-sm font-bold text-blue-600 bg-blue-50/20 font-mono">{formatCurrency(item.committed)}</td>

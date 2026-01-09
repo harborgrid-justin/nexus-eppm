@@ -38,7 +38,7 @@ export const XerParser: React.FC = () => {
                     <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>Directly import .XER (Primavera) or .MPP (MS Project) binary files.</p>
                 </div>
                 <div className="flex gap-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded border border-blue-200">v18.8+ Supported</span>
+                    <span className={`px-2 py-1 ${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.text} text-xs font-bold rounded border ${theme.colors.semantic.info.border}`}>v18.8+ Supported</span>
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded border border-purple-200">2016+ Supported</span>
                 </div>
             </div>
@@ -84,11 +84,11 @@ export const XerParser: React.FC = () => {
 
                 {status === 'complete' && (
                     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
-                        <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 flex items-center gap-4">
-                            <div className="p-3 bg-green-100 rounded-full text-green-700"><CheckCircle size={32}/></div>
+                        <div className={`${theme.colors.semantic.success.bg} border ${theme.colors.semantic.success.border} rounded-xl p-6 mb-8 flex items-center gap-4`}>
+                            <div className={`p-3 bg-white rounded-full ${theme.colors.semantic.success.text}`}><CheckCircle size={32}/></div>
                             <div>
-                                <h3 className="text-lg font-bold text-green-800">File Analyzed</h3>
-                                <p className="text-green-700 text-sm">Ready for staging and mapping.</p>
+                                <h3 className={`text-lg font-bold ${theme.colors.semantic.success.text}`}>File Analyzed</h3>
+                                <p className={`${theme.colors.semantic.success.text} text-sm`}>Ready for staging and mapping.</p>
                             </div>
                         </div>
 
