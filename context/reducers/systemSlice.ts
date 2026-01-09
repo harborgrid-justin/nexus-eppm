@@ -46,6 +46,32 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
                 }
             };
             
+        case 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE':
+             return {
+                 ...state,
+                 governance: {
+                     ...state.governance,
+                     notificationPreferences: state.governance.notificationPreferences.map(p => 
+                         p.id === action.payload.id ? { ...p, [action.payload.field]: !p[action.payload.field] } : p
+                     )
+                 }
+             };
+
+        case 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE':
+             return {
+                 ...state,
+                 governance: {
+                     ...state.governance,
+                     notificationPreferences: [...state.governance.notificationPreferences, action.payload]
+                 }
+             };
+             
+        case 'PROJECT_ADD_STAKEHOLDER':
+            return {
+                ...state,
+                stakeholders: [...state.stakeholders, action.payload]
+            };
+
         // --- Extensions ---
         case 'SYSTEM_INSTALL_EXTENSION':
              return { ...state, extensions: state.extensions.map(e => e.id === action.payload ? { ...e, status: 'Installed' } : e) };
@@ -59,6 +85,9 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
              return { ...state, benefits: [...state.benefits, action.payload] };
         case 'ADD_ARCH_STANDARD':
              return { ...state, programArchitectureStandards: [...state.programArchitectureStandards, action.payload] };
+        
+        case 'ADD_STAKEHOLDER': // Explicit Global
+             return { ...state, stakeholders: [...state.stakeholders, action.payload] };
              
         default: return state;
     }

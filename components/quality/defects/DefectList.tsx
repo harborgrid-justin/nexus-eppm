@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { NonConformanceReport } from '../../../types';
-import { Search, AlertOctagon } from 'lucide-react';
+import { Search, AlertOctagon, Bug } from 'lucide-react';
 import { Badge } from '../../ui/Badge';
+import { EmptyGrid } from '../../common/EmptyGrid';
 
 interface DefectListProps {
     defects: NonConformanceReport[];
@@ -28,7 +29,7 @@ export const DefectList: React.FC<DefectListProps> = ({ defects, selectedDefectI
                  </div>
              </div>
              <div className="flex-1 overflow-y-auto">
-                 {defects.map(d => (
+                 {defects.length > 0 ? defects.map(d => (
                      <div 
                         key={d.id} 
                         onClick={() => onSelectDefect(d.id)}
@@ -44,8 +45,15 @@ export const DefectList: React.FC<DefectListProps> = ({ defects, selectedDefectI
                             <span className={`font-bold ${d.status === 'Open' ? 'text-red-600' : 'text-green-600'}`}>{d.status}</span>
                         </div>
                      </div>
-                 ))}
-                 {defects.length === 0 && <div className="p-8 text-center text-slate-400 text-sm">No defects found.</div>}
+                 )) : (
+                     <div className="h-full flex items-center justify-center p-6">
+                        <EmptyGrid 
+                            title="No Defects Found"
+                            description={searchTerm ? "No NCRs match your search." : "No non-conformance reports active."}
+                            icon={Bug}
+                        />
+                     </div>
+                 )}
              </div>
         </div>
     );

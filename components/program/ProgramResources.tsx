@@ -4,6 +4,7 @@ import { useProgramData } from '../../hooks/useProgramData';
 import { Users, AlertTriangle, Briefcase } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramResourcesProps {
   programId: string;
@@ -18,7 +19,7 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
   const roleDistribution = useMemo(() => {
     const roleStats: Record<string, { demand: number; capacity: number }> = {};
     
-    // 1. Calculate Capacity by Role (Global or Filtered if needed)
+    // 1. Calculate Capacity by Role
     state.resources.forEach(r => {
         if (!roleStats[r.role]) roleStats[r.role] = { demand: 0, capacity: 0 };
         roleStats[r.role].capacity += (r.capacity || 160);
@@ -33,7 +34,6 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                     const res = state.resources.find(r => r.id === a.resourceId);
                     if (res) {
                         // Assignment units (percentage) * 160h (monthly base)
-                        // Simplified heuristic for aggregate view
                         const demandHours = (a.units / 100) * 160; 
                         if (roleStats[res.role]) {
                             roleStats[res.role].demand += demandHours;
@@ -67,6 +67,18 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
         .filter(r => programResourceIds.has(r.id) && r.allocated > r.capacity * 1.1)
         .slice(0, 5);
   }, [state.resources, projects]);
+
+  if (projects.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-8">
+              <EmptyGrid 
+                title="Resource Demand Pool Empty"
+                description="Link projects to this program to aggregate resource requirements."
+                icon={Users}
+              />
+          </div>
+      );
+  }
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -136,7 +148,10 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                             ))}
                         </ul>
                     ) : (
-                        <p className="text-center text-slate-500 text-sm italic py-8">No critical resource conflicts detected.</p>
+                        <div className="h-full flex flex-col items-center justify-center text-slate-400 p-8">
+                            <AlertTriangle size={32} className="opacity-20 mb-2"/>
+                            <p className="text-sm italic">No critical resource conflicts detected.</p>
+                        </div>
                     )}
                 </div>
             </div>

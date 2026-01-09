@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { CreditCard, Package, Users, Database, Zap, Download, ExternalLink, ShieldCheck, TrendingUp, DollarSign } from 'lucide-react';
+import { CreditCard, Users, Database, Zap, Download, ExternalLink, ShieldCheck, DollarSign } from 'lucide-react';
 import StatCard from '../shared/StatCard';
-import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 import { ProgressBar } from '../common/ProgressBar';
 import { useData } from '../../context/DataContext';

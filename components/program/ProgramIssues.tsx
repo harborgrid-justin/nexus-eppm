@@ -10,6 +10,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ProgramIssue } from '../../types';
 import { generateId } from '../../utils/formatters';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramIssuesProps {
   programId: string;
@@ -183,9 +184,14 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                     </div>
                 ))}
                 {filteredIssues.length === 0 && (
-                    <div className="text-center py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 text-slate-400">
-                        <AlertOctagon size={48} className="mx-auto mb-3 opacity-20"/>
-                        <p>No issues found matching criteria.</p>
+                    <div className="flex items-center justify-center p-8">
+                         <EmptyGrid 
+                            title="No Issues Found"
+                            description={searchTerm ? `No issues match "${searchTerm}".` : "No active issues or escalations."}
+                            icon={AlertOctagon}
+                            actionLabel="Log Issue"
+                            onAdd={() => handleOpenPanel()}
+                         />
                     </div>
                 )}
             </div>

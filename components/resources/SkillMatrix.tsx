@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useResourcePlanning } from '../../hooks/useResourcePlanning';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';

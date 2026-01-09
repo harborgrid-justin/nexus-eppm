@@ -6,7 +6,6 @@ import { Button } from '../ui/Button';
 import { SidePanel } from '../ui/SidePanel';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Input } from '../ui/Input';
 
 const SecuritySettings: React.FC = () => {
     const { state, dispatch } = useData();

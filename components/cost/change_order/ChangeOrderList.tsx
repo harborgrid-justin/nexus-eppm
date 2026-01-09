@@ -4,9 +4,10 @@ import { ChangeOrder } from '../../../types';
 import DataTable, { Column } from '../../common/DataTable';
 import { Badge } from '../../ui/Badge';
 import { formatCurrency } from '../../../utils/formatters';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, FileDiff } from 'lucide-react';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useData } from '../../../context/DataContext';
+import { EmptyGrid } from '../../common/EmptyGrid';
 
 interface ChangeOrderListProps {
     orders: ChangeOrder[];
@@ -30,6 +31,19 @@ export const ChangeOrderList: React.FC<ChangeOrderListProps> = ({ orders, onSele
             ) : null
         ) }
       ], [canApproveBudget, dispatch]);
+
+    if (orders.length === 0) {
+        return (
+             <div className="h-full flex items-center justify-center">
+                 <EmptyGrid 
+                    title="Change Log Empty"
+                    description="No change orders matched your filter. Draft a new change request to modify the baseline."
+                    icon={FileDiff}
+                    // Action handled by parent for now, but could propagate here
+                 />
+             </div>
+        );
+    }
 
     return (
         <DataTable 

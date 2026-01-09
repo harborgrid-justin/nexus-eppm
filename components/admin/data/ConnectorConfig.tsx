@@ -31,6 +31,13 @@ export const ConnectorConfig: React.FC = () => {
         }
     };
 
+    const getStatusIndicator = (health: string | undefined) => {
+        if (health === 'Good') return `bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]`;
+        if (health === 'Warning') return `bg-yellow-500`;
+        if (health === 'Critical') return `bg-red-500`;
+        return `bg-slate-300`;
+    };
+
     return (
         <div className="h-full flex flex-col space-y-6">
             <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm gap-4`}>
@@ -56,10 +63,7 @@ export const ConnectorConfig: React.FC = () => {
                                     <Icon size={24} />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {conn.health === 'Good' && <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></div>}
-                                    {conn.health === 'Warning' && <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>}
-                                    {conn.health === 'Critical' && <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>}
-                                    {(!conn.health || conn.health === 'Unknown') && <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>}
+                                    <div className={`w-2.5 h-2.5 rounded-full ${getStatusIndicator(conn.health)}`}></div>
                                 </div>
                             </div>
                             
@@ -69,7 +73,7 @@ export const ConnectorConfig: React.FC = () => {
                             <div className="flex gap-2 mb-6">
                                  <span className={`text-[10px] font-bold ${theme.colors.background} ${theme.colors.text.tertiary} px-2 py-1 rounded border ${theme.colors.border} uppercase`}>{conn.type}</span>
                                  <span className={`text-[10px] font-bold ${theme.colors.background} ${theme.colors.text.tertiary} px-2 py-1 rounded border ${theme.colors.border} uppercase`}>{conn.protocol || 'REST'}</span>
-                                 <span className={`text-[10px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded border border-slate-100 uppercase ml-auto`}>{conn.lastSync}</span>
+                                 <span className={`text-[10px] font-bold ${theme.colors.background} ${theme.colors.text.secondary} px-2 py-1 rounded border ${theme.colors.border} uppercase ml-auto`}>{conn.lastSync}</span>
                             </div>
 
                             <div className={`mt-auto pt-4 border-t ${theme.colors.border.replace('border-','border-slate-')}100 flex gap-2`}>
@@ -108,7 +112,7 @@ export const ConnectorConfig: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={theme.typography.label + " block mb-1"}>Type</label>
-                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface}`} value={editingConn?.type} onChange={e => setEditingConn({...editingConn, type: e.target.value})}>
+                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`} value={editingConn?.type} onChange={e => setEditingConn({...editingConn, type: e.target.value})}>
                                 <option>ERP</option>
                                 <option>Schedule</option>
                                 <option>CRM</option>
@@ -118,7 +122,7 @@ export const ConnectorConfig: React.FC = () => {
                         </div>
                         <div>
                             <label className={theme.typography.label + " block mb-1"}>Protocol</label>
-                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface}`} value={editingConn?.protocol} onChange={e => setEditingConn({...editingConn, protocol: e.target.value as any})}>
+                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`} value={editingConn?.protocol} onChange={e => setEditingConn({...editingConn, protocol: e.target.value as any})}>
                                 <option>REST API</option>
                                 <option>SOAP / WSDL</option>
                                 <option>OData</option>
@@ -140,7 +144,7 @@ export const ConnectorConfig: React.FC = () => {
                             <Key size={14}/> Authentication
                         </h4>
                         <div className="space-y-3">
-                             <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} mb-2`}>
+                             <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} mb-2 ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}>
                                 <option>OAuth 2.0 (Client Creds)</option>
                                 <option>Basic Auth</option>
                                 <option>API Key</option>
@@ -152,7 +156,7 @@ export const ConnectorConfig: React.FC = () => {
 
                     <Button 
                         variant="secondary" 
-                        className={`w-full ${isTesting ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : ''}`} 
+                        className={`w-full ${isTesting ? `${theme.colors.semantic.warning.bg} ${theme.colors.semantic.warning.text} ${theme.colors.semantic.warning.border}` : ''}`} 
                         onClick={handleTestConnection}
                         disabled={isTesting}
                     >

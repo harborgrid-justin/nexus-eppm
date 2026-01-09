@@ -6,7 +6,7 @@ import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource
 import { Risk, Issue, IssueCode } from './risk';
 import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
 import { QualityReport, NonConformanceReport } from './quality';
-import { Document, ActivityCode, UserDefinedField, Integration, Extension, DataJob, WorkflowDefinition, QualityStandard, GlobalChangeRule } from './common';
+import { Document, ActivityCode, UserDefinedField, Integration, Extension, DataJob, WorkflowDefinition, EtlMapping, QualityStandard, GlobalChangeRule } from './common';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
 import { ServiceStatus, PipelineStage } from './business';
@@ -17,6 +17,7 @@ import { KanbanTask, TeamEvent, ActivityItem } from './collaboration';
 export type Action =
     | { type: 'PROJECT_IMPORT'; payload: any[] }
     | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: any } }
+    | { type: 'PROJECT_ADD_STAKEHOLDER'; payload: any }
     | { type: 'TASK_UPDATE'; payload: { projectId: string; task: any } }
     | { type: 'PROJECT_CLOSE'; payload: string }
     | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: any } }
@@ -108,6 +109,7 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_INFLATION_RATE'; payload: number }
     | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: any }
     | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: any }
+    | { type: 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE'; payload: any }
     | { type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES'; payload: any }
     | { type: 'GOVERNANCE_SYNC_PARAMETERS', payload: any }
     | { type: 'GOVERNANCE_ADD_DECISION', payload: any }
@@ -188,4 +190,6 @@ export type Action =
     | { type: 'DELETE_ARTICLE'; payload: string }
     | { type: 'ADD_REPORT_DEF'; payload: any }
     | { type: 'DELETE_REPORT_DEF'; payload: string }
+    | { type: 'ADD_STAKEHOLDER'; payload: any }
+    | { type: 'PROGRAM_UPDATE_GATE'; payload: any } // Ensure this is present
 ;

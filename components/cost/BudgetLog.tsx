@@ -118,15 +118,13 @@ export const BudgetLog: React.FC = () => {
 
             <div className={`flex-1 overflow-auto ${theme.colors.surface}`}>
                 {!hasTransactions ? (
-                    <div className="h-full flex items-center justify-center">
-                        <EmptyGrid 
-                            title="Transaction Log Clear"
-                            description="No budgetary adjustments or baseline snapshots have been recorded for this fiscal period."
-                            onAdd={canWriteBudget ? () => setIsPanelOpen(true) : undefined}
-                            actionLabel="Record Adjustment"
-                            icon={History}
-                        />
-                    </div>
+                    <EmptyGrid 
+                        title="Transaction Log Clear"
+                        description="No budgetary adjustments or baseline snapshots have been recorded for this fiscal period."
+                        onAdd={canWriteBudget ? () => setIsPanelOpen(true) : undefined}
+                        actionLabel="Record Adjustment"
+                        icon={History}
+                    />
                 ) : (
                     <table className="min-w-full divide-y divide-slate-100">
                         <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
@@ -205,10 +203,10 @@ export const BudgetLog: React.FC = () => {
                     <div>
                         <label className={`${theme.typography.label} block mb-1.5`}>Delta Amount ($)</label>
                         <div className="relative">
-                            <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme.colors.text.secondary} font-bold`}>$</span>
+                            <span className={`absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold`}>$</span>
                             <input 
                                 type="number" 
-                                className={`w-full pl-8 pr-4 py-3 border ${theme.colors.border} rounded-xl text-lg font-mono font-black focus:ring-2 focus:ring-nexus-500 outline-none`}
+                                className={`w-full pl-8 pr-4 py-3 border ${theme.colors.border} rounded-xl text-lg font-mono font-black focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.text.primary}`}
                                 value={newItem.amount}
                                 onChange={e => setNewItem({...newItem, amount: parseFloat(e.target.value)})}
                                 placeholder="0.00"

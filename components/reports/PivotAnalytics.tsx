@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Table, BarChart2, Download, RefreshCw, Layers, Plus } from 'lucide-react';
+import { Table, BarChart2, Download, RefreshCw, Layers } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { formatCompactCurrency } from '../../utils/formatters';

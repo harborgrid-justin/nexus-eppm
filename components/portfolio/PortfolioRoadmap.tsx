@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Map as MapIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -5,10 +6,12 @@ import { AlignmentPanel } from './roadmap/AlignmentPanel';
 import { RoadmapTimeline } from './roadmap/RoadmapTimeline';
 import { DependencyLog } from './roadmap/DependencyLog';
 import { usePortfolioRoadmapLogic } from '../../hooks/domain/usePortfolioRoadmapLogic';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useNavigate } from 'react-router-dom';
 
 const PortfolioRoadmap: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   
   const {
       drivers,
@@ -25,10 +28,12 @@ const PortfolioRoadmap: React.FC = () => {
   if (isEmpty) {
       return (
         <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
-             <EmptyState 
-                title="No Roadmap Data" 
-                description="Populate the portfolio with projects to visualize the strategic roadmap." 
+             <EmptyGrid 
+                title="Strategic Roadmap Empty" 
+                description="Populate the portfolio with projects to visualize the long-range plan aligned to strategic drivers." 
                 icon={MapIcon}
+                actionLabel="Create Initiative"
+                onAdd={() => navigate('/projectList?action=create')}
              />
         </div>
       );

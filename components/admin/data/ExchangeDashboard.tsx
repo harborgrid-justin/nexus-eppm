@@ -21,14 +21,14 @@ export const ExchangeDashboard: React.FC = () => {
 
     return (
         <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
                 <StatCard title="Portfolio Ingestion" value="1.2M" subtext="24h Volume" icon={Activity} trend="up" />
                 <StatCard title="API Integrity" value="99.8%" subtext="14 Faults Logged" icon={CheckCircle} />
                 <StatCard title="Active Sockets" value={`${services.filter(s => s.status === 'Operational').length}/${services.length || 12}`} subtext="Healthy Handshake" icon={Server} />
                 <StatCard title="Sync Latency" value="142ms" subtext="Avg Payload Wait" icon={Zap} trend="down" />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 xl:grid-cols-3 ${theme.layout.gridGap}`}>
                 <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col h-[400px]`}>
                     <div className="flex justify-between items-center mb-8">
                         <div>
@@ -44,13 +44,13 @@ export const ExchangeDashboard: React.FC = () => {
                         </div>
                     </div>
                     <div className={`flex-1 min-h-0 transition-opacity duration-300 ${isPending ? 'opacity-40' : 'opacity-100'}`}>
-                        <Suspense fallback={<div className="h-full w-full flex items-center justify-center bg-slate-50 rounded-xl animate-pulse"><Loader2 className="animate-spin text-slate-200" size={32}/></div>}>
+                        <Suspense fallback={<div className={`h-full w-full flex items-center justify-center ${theme.colors.background} rounded-xl animate-pulse`}><Loader2 className="animate-spin text-slate-200" size={32}/></div>}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={deferredData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                    <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} />
-                                    <YAxis tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} />
-                                    <Tooltip contentStyle={theme.charts.tooltip} />
+                                    <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
+                                    <Tooltip contentStyle={theme.charts.tooltip} cursor={{stroke: theme.colors.border}} />
                                     <Area type="monotone" dataKey="records" stroke={theme.charts.palette[0]} fill={`${theme.charts.palette[0]}20`} strokeWidth={3} />
                                 </AreaChart>
                             </ResponsiveContainer>
@@ -71,7 +71,7 @@ export const ExchangeDashboard: React.FC = () => {
                             return (
                                 <div key={i} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl hover:shadow-sm transition-all group cursor-default`}>
                                     <div className="flex items-center gap-4">
-                                        <div className={`p-2 rounded-xl transition-colors ${theme.colors.surface} border shadow-sm ${theme.colors.text.tertiary} group-hover:text-nexus-600`}>
+                                        <div className={`p-2 rounded-xl transition-colors ${theme.colors.surface} border shadow-sm ${theme.colors.text.tertiary} group-hover:text-nexus-600 ${theme.colors.border}`}>
                                             <Icon size={18} />
                                         </div>
                                         <div>

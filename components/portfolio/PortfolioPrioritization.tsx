@@ -2,9 +2,8 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
-import { TrendingUp, ListOrdered, AlertCircle, Briefcase } from 'lucide-react';
+import { TrendingUp, ListOrdered, AlertCircle } from 'lucide-react';
 import { usePortfolioPrioritizationLogic } from '../../hooks/domain/usePortfolioPrioritizationLogic';
-import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { useNavigate } from 'react-router-dom';
 

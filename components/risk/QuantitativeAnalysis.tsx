@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { BarChart2, TrendingUp, Info, Play, AlertCircle } from 'lucide-react';
+import { BarChart2, TrendingUp, Info, Play, AlertCircle, RefreshCw } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 import StatCard from '../shared/StatCard';
 import { Button } from '../ui/Button';
 import { useQuantitativeAnalysisLogic } from '../../hooks/domain/useQuantitativeAnalysisLogic';
 import { formatCompactCurrency } from '../../utils/formatters';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const QuantitativeAnalysis: React.FC = () => {
   const theme = useTheme();
@@ -52,13 +53,14 @@ const QuantitativeAnalysis: React.FC = () => {
        </div>
 
        {!results ? (
-           <div className={`flex flex-col items-center justify-center h-[400px] ${theme.colors.background} border-2 border-dashed ${theme.colors.border} rounded-xl text-slate-400`}>
-                <BarChart2 size={64} className="mb-4 opacity-20" />
-                <h3 className="text-lg font-semibold text-slate-500">No Simulation Data</h3>
-                <p className="max-w-md text-center mt-2 text-sm">Run the Monte Carlo simulation to analyze schedule risk based on task variance (PERT) and active risk register events.</p>
-                <Button variant="ghost" onClick={runSimulation} className="mt-6" icon={TrendingUp}>
-                    Start Analysis
-                </Button>
+           <div className={`h-[400px] flex items-center justify-center`}>
+                <EmptyGrid 
+                    title="Simulation Required"
+                    description="Run the Monte Carlo simulation to analyze schedule risk based on task variance (PERT) and active risk register events."
+                    icon={BarChart2}
+                    actionLabel="Start Analysis"
+                    onAdd={runSimulation}
+                />
            </div>
        ) : (
            <div className={theme.layout.sectionSpacing}>

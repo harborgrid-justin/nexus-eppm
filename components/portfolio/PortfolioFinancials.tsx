@@ -3,7 +3,7 @@ import React from 'react';
 import { Project } from '../../types';
 import { formatCompactCurrency, formatCurrency, formatDate } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, ReferenceLine } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, ReferenceLine, Cell } from 'recharts';
 import { DollarSign, TrendingUp, Lock, Unlock, AlertCircle } from 'lucide-react';
 import { usePortfolioFinancialsLogic } from '../../hooks/domain/usePortfolioFinancialsLogic';
 import { EmptyGrid } from '../common/EmptyGrid';

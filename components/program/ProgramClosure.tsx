@@ -1,9 +1,10 @@
 
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Flag, CheckSquare, RefreshCw, FileCheck } from 'lucide-react';
+import { Flag, RefreshCw, FileCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramClosureProps {
   programId: string;
@@ -30,43 +31,48 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Operational Readiness */}
             <div className="lg:col-span-2">
-                <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+                <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-full`}>
                     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2"><RefreshCw size={18} className="text-orange-500"/> Operational Readiness Checklist</h3>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-white">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-slate-100">
-                                {transitionItems.map(item => (
-                                    <tr key={item.id} className="hover:bg-slate-50">
-                                        <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.category}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.description}</td>
-                                        <td className="px-6 py-4 text-sm text-slate-600">{item.ownerId}</td>
-                                        <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.dueDate}</td>
-                                        <td className="px-6 py-4">
-                                            <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
-                                                {item.status}
-                                            </Badge>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {transitionItems.length === 0 && (
+                    {transitionItems.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-slate-200">
+                                <thead className="bg-white">
                                     <tr>
-                                        <td colSpan={5} className="text-center p-8 text-slate-400 italic">No transition items defined.</td>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-slate-100">
+                                    {transitionItems.map(item => (
+                                        <tr key={item.id} className="hover:bg-slate-50">
+                                            <td className="px-6 py-4 text-sm font-bold text-slate-700">{item.category}</td>
+                                            <td className="px-6 py-4 text-sm text-slate-600">{item.description}</td>
+                                            <td className="px-6 py-4 text-sm text-slate-600">{item.ownerId}</td>
+                                            <td className="px-6 py-4 text-sm font-mono text-slate-500">{item.dueDate}</td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
+                                                    {item.status}
+                                                </Badge>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="p-6 h-full">
+                            <EmptyGrid 
+                                title="No Transition Items"
+                                description="Define operational handover tasks."
+                                icon={Flag}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 

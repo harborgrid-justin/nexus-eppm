@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Scale, TrendingUp, AlertTriangle, ArrowRight, DollarSign } from 'lucide-react';
+import { Scale, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ZAxis, ReferenceLine } from 'recharts';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramTradeoffProps {
   programId: string;
@@ -24,6 +25,20 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
   }));
 
   const activeScenario = tradeoffScenarios.find(s => s.id === selectedScenario);
+
+  if (tradeoffScenarios.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-8">
+              <EmptyGrid 
+                title="Trade-off Analysis Unavailable"
+                description="Create scenarios to compare benefit vs. risk exposure."
+                icon={Scale}
+                actionLabel="Create Scenario"
+                onAdd={() => {}} // Placeholder for creation logic
+              />
+          </div>
+      );
+  }
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>

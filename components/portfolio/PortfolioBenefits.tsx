@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Star, DollarSign, CheckCircle, Clock } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { usePortfolioBenefitsLogic } from '../../hooks/domain/usePortfolioBenefitsLogic';
-import { EmptyState } from '../common/EmptyState';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const PortfolioBenefits: React.FC = () => {
     const theme = useTheme();
@@ -21,7 +22,7 @@ const PortfolioBenefits: React.FC = () => {
     if (isEmpty) {
         return (
             <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
-                <EmptyState 
+                <EmptyGrid 
                     title="No Benefits Tracked" 
                     description="Define benefits in programs or projects to track value realization." 
                     icon={Star} 

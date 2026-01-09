@@ -13,11 +13,7 @@ const NotificationSettings: React.FC = () => {
     const [newLabel, setNewLabel] = useState('');
 
     const togglePref = (id: string, channel: 'email' | 'app' | 'sms') => {
-        const pref = preferences.find(p => p.id === id);
-        if (pref) {
-            const newValue = !pref[channel];
-            dispatch({ type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE', payload: { id, field: channel, value: newValue } });
-        }
+        dispatch({ type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE', payload: { id, field: channel } });
     };
 
     const addRule = () => {
@@ -29,20 +25,7 @@ const NotificationSettings: React.FC = () => {
             app: true,
             sms: false
         };
-        // We reuse the update logic or dispatch a specific Add action if available. 
-        // For simplicity in this demo, assuming update reducer handles array push via generic system update or we'd need a new action.
-        // Actually, the reducer `GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE` maps over existing array.
-        // I need a way to ADD. Since `GOVERNANCE_UPDATE_ORG_PROFILE` handles nested object, but this is an array.
-        // I will assume `GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE` can accept a new object payload if `id` is new or create a dedicated action.
-        // Given constraints, I will add `GOVERNANCE_ADD_NOTIFICATION_RULE` to reducer in next iteration or piggyback on update.
-        // Let's implement it cleanly: I can't modify reducer in this file. 
-        // I will assume the reducer can handle it or use a workaround.
-        // Workaround: Overwrite the whole array via `GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES` equivalent? No.
-        // I will use `GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE` with a special `isNew` flag or modify reducer in next step?
-        // Actually, looking at `systemSlice.ts`, `GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE` only maps.
-        // I should have updated the reducer. For now, I will display the UI and allow logging.
-        console.log("Adding Rule:", newRule);
-        alert("Rule definition staged. (Reducer update required for persistence)");
+        dispatch({ type: 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE', payload: newRule });
         setNewLabel('');
     };
 
@@ -55,10 +38,11 @@ const NotificationSettings: React.FC = () => {
                     </h3>
                     <div className="flex gap-2">
                         <input 
-                            className="px-3 py-1.5 border rounded-lg text-sm bg-slate-50" 
+                            className="px-3 py-1.5 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-nexus-500 outline-none" 
                             placeholder="New Alert Category..." 
                             value={newLabel}
                             onChange={(e) => setNewLabel(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addRule()}
                         />
                         <Button size="sm" icon={Plus} onClick={addRule}>Add Rule</Button>
                     </div>

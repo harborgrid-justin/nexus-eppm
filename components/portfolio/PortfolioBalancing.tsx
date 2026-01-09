@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { RefreshCw, PieChart, Briefcase } from 'lucide-react';
+import { RefreshCw, PieChart } from 'lucide-react';
 import { StrategicDrivers } from './balancing/StrategicDrivers';
 import { ValueRiskChart } from './balancing/ValueRiskChart';
 import { EfficientFrontierChart } from './balancing/EfficientFrontierChart';

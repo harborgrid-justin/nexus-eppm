@@ -1,10 +1,12 @@
+
 import React from 'react';
-import { Plus, Search, Loader2 } from 'lucide-react';
+import { Plus, Search, Loader2, Receipt } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { useCostExpensesLogic } from '../../hooks/domain/useCostExpensesLogic';
 import { ExpenseForm } from './expenses/ExpenseForm';
 import { ExpenseTable } from './expenses/ExpenseTable';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface CostExpensesProps {
     projectId: string;
@@ -48,7 +50,19 @@ const CostExpenses: React.FC<CostExpensesProps> = ({ projectId }) => {
             </div>
 
             <div className={`flex-1 overflow-auto transition-opacity duration-200 ${searchTerm !== deferredSearch ? 'opacity-60' : 'opacity-100'}`}>
-                <ExpenseTable expenses={filteredExpenses} />
+                {filteredExpenses.length > 0 ? (
+                    <ExpenseTable expenses={filteredExpenses} />
+                ) : (
+                     <div className="h-full flex items-center justify-center">
+                         <EmptyGrid 
+                            title="No Expenses Logged"
+                            description={deferredSearch ? `No expenses found matching "${deferredSearch}".` : "The expense ledger is empty. Add non-labor costs like travel or materials."}
+                            icon={Receipt}
+                            actionLabel="Add Expense"
+                            onAdd={() => setIsPanelOpen(true)}
+                         />
+                     </div>
+                )}
             </div>
 
             <ExpenseForm 

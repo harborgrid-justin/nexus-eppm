@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon, Edit2, Save } from 'lucide-react';
+import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon, Edit2, Save, FileText } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
@@ -10,6 +10,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { ProgramBudgetAllocation } from '../../types';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramFinancialsProps {
   programId: string;
@@ -26,8 +27,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const remainingBudget = aggregateMetrics.totalBudget - aggregateMetrics.totalSpent;
   const projectNamesMap = new Map(projects.map(p => [p.id, p.name]));
 
-  // Live aggregation: Link chart data directly to Project current state
-  // Fallback: If no allocations exist, create a virtual list from projects for visualization
+  // Live aggregation
   const chartData = useMemo(() => {
       if (programFinancials.allocations.length > 0) {
           return programFinancials.allocations.map(a => {
@@ -50,7 +50,6 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   }, [programFinancials.allocations, projects]);
 
   const handleOpenAllocationPanel = () => {
-      // If no allocations exist, initialize them from projects
       const allocationsToEdit = programFinancials.allocations.length > 0 
           ? JSON.parse(JSON.stringify(programFinancials.allocations))
           : projects.map(p => ({
@@ -76,6 +75,18 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
   const handleAllocationChange = (id: string, value: number) => {
       setEditAllocations(prev => prev.map(a => a.id === id ? { ...a, allocated: value } : a));
   };
+
+  if (projects.length === 0) {
+      return (
+          <div className="h-full flex items-center justify-center p-8">
+              <EmptyGrid 
+                title="No Financial Data"
+                description="This program has no linked projects to track budget against."
+                icon={DollarSign}
+              />
+          </div>
+      );
+  }
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -145,7 +156,13 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
                     ))}
                 </div>
             ) : (
-                <div className={`p-8 text-center ${theme.colors.text.tertiary} italic`}>No funding gates defined for this program.</div>
+                <div className="p-8">
+                     <EmptyGrid 
+                        title="No Funding Gates"
+                        description="Define strategic funding release points linked to milestones."
+                        icon={FileText}
+                     />
+                </div>
             )}
         </div>
 

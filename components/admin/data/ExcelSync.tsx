@@ -41,7 +41,7 @@ export const ExcelSync: React.FC = () => {
                     
                     <div className="flex items-center gap-2">
                         <select 
-                            className={`text-xs border ${theme.colors.border} rounded-md py-1 px-2 w-40 ${theme.colors.surface} ${theme.colors.text.primary}`}
+                            className={`text-xs border ${theme.colors.border} rounded-md py-1 px-2 w-40 ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-1 focus:ring-nexus-500 focus:outline-none`}
                             value={selectedProjectId}
                             onChange={(e) => setSelectedProjectId(e.target.value)}
                         >

@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ArchitectureStandardForm } from './ArchitectureStandardForm';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramArchitectureProps {
   programId: string;
@@ -48,8 +49,14 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                         </div>
                     ))}
                     {architectureStandards.length === 0 && (
-                        <div className="text-center text-slate-400 p-8 text-sm italic border-2 border-dashed border-slate-100 rounded m-2">
-                            No architecture standards defined.
+                        <div className="h-full flex flex-col justify-center">
+                            <EmptyGrid 
+                                title="No Standards Defined"
+                                description="Establish architectural baselines."
+                                icon={Layers}
+                                onAdd={() => setIsFormOpen(true)}
+                                actionLabel="Define Standard"
+                            />
                         </div>
                     )}
                 </div>
@@ -61,37 +68,42 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><CheckCircle size={18} className="text-purple-500"/> Review Gates</h3>
                 </div>
                 <div className="flex-1 overflow-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Milestone / Gate</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-slate-100">
-                            {architectureReviews.map(rev => (
-                                <tr key={rev.id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-slate-900">{rev.gate}</div>
-                                        <div className="text-xs text-slate-500 italic mt-1">{rev.notes}</div>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600 font-mono">{rev.date}</td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant={rev.status === 'Completed' ? 'success' : 'neutral'}>
-                                            {rev.status === 'Completed' ? <CheckCircle size={12} className="mr-1"/> : <Clock size={12} className="mr-1"/>}
-                                            {rev.status}
-                                        </Badge>
-                                    </td>
-                                </tr>
-                            ))}
-                            {architectureReviews.length === 0 && (
+                    {architectureReviews.length > 0 ? (
+                        <table className="min-w-full divide-y divide-slate-200">
+                            <thead className="bg-white">
                                 <tr>
-                                    <td colSpan={3} className="text-center p-8 text-slate-400 text-sm italic">No reviews scheduled.</td>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Milestone / Gate</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-slate-100">
+                                {architectureReviews.map(rev => (
+                                    <tr key={rev.id} className="hover:bg-slate-50">
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm font-medium text-slate-900">{rev.gate}</div>
+                                            <div className="text-xs text-slate-500 italic mt-1">{rev.notes}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-600 font-mono">{rev.date}</td>
+                                        <td className="px-6 py-4">
+                                            <Badge variant={rev.status === 'Completed' ? 'success' : 'neutral'}>
+                                                {rev.status === 'Completed' ? <CheckCircle size={12} className="mr-1"/> : <Clock size={12} className="mr-1"/>}
+                                                {rev.status}
+                                            </Badge>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                         <div className="h-full flex flex-col justify-center">
+                            <EmptyGrid 
+                                title="No Reviews Scheduled"
+                                description="Plan architectural review gates."
+                                icon={CheckCircle}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
@@ -11,6 +10,7 @@ import FundingAllocationModal from './FundingAllocationModal';
 import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
 import { ProjectFunding as ProjectFundingType } from '../../types/index';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
@@ -154,7 +154,7 @@ export const ProjectFunding: React.FC = () => {
                         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                             <div className="p-4 bg-slate-50 border-b border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-500">Source Restrictions & Compliance</div>
                             <div className="p-6 space-y-6 flex-1 overflow-y-auto scrollbar-thin">
-                                {projectFundingSources.map(f => (
+                                {projectFundingSources.length > 0 ? projectFundingSources.map(f => (
                                     <div key={f.id} className="border-l-4 border-l-nexus-500 pl-4 py-1 group hover:bg-slate-50 transition-colors">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -170,12 +170,16 @@ export const ProjectFunding: React.FC = () => {
                                             </span>
                                         </div>
                                     </div>
-                                ))}
-                                {projectFundingSources.length === 0 && (
-                                    <div className="h-full flex flex-col items-center justify-center text-slate-300">
-                                        <Lock size={48} className="opacity-20 mb-4"/>
-                                        <p className="text-sm font-bold uppercase tracking-widest">No Funding Allocated</p>
-                                    </div>
+                                )) : (
+                                     <div className="h-full flex flex-col justify-center">
+                                         <EmptyGrid 
+                                            title="No Funding Sources"
+                                            description="This project has no allocated funds. Add a funding source to enable budget release."
+                                            icon={Banknote}
+                                            actionLabel="Allocate Funds"
+                                            onAdd={() => setIsModalOpen(true)}
+                                         />
+                                     </div>
                                 )}
                             </div>
                         </div>

@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { Plus, Filter, Download } from 'lucide-react';
+import { Plus, Filter, Download, ShieldAlert } from 'lucide-react';
 import { RiskDetailPanel as RiskDetailModal } from './RiskDetailPanel'; 
 import { useTheme } from '../../context/ThemeContext';
 import { Risk } from '../../types/index';
@@ -12,6 +12,7 @@ import DataTable, { Column } from '../common/DataTable';
 import { RiskForm } from './RiskForm';
 import { useData } from '../../context/DataContext';
 import { ExportService } from '../../services/ExportService';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 export const RiskRegisterGrid: React.FC = () => {
   const { project, risks } = useProjectWorkspace();
@@ -135,13 +136,25 @@ export const RiskRegisterGrid: React.FC = () => {
       </div>
 
       <div className={`flex-1 overflow-hidden p-4 ${theme.colors.background}`}>
-        <DataTable<Risk>
-          data={filteredRisks}
-          columns={columns}
-          onRowClick={(r) => setSelectedRiskId(r.id)}
-          keyField="id"
-          emptyMessage="No risks found matching criteria."
-        />
+        {filteredRisks.length > 0 ? (
+            <DataTable<Risk>
+              data={filteredRisks}
+              columns={columns}
+              onRowClick={(r) => setSelectedRiskId(r.id)}
+              keyField="id"
+              emptyMessage="No risks found matching criteria."
+            />
+        ) : (
+             <div className="h-full flex flex-col justify-center">
+                 <EmptyGrid 
+                    title="Risk Register Clean"
+                    description={searchTerm ? "No risks found matching search." : "No risks identified yet. Start identifying threats to manage project exposure."}
+                    icon={ShieldAlert}
+                    actionLabel="Identify Risk"
+                    onAdd={handleCreate}
+                 />
+             </div>
+        )}
       </div>
     </div>
   );

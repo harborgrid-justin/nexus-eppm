@@ -5,6 +5,7 @@ import { History, Shield, Filter, Search, Download, Clock, User, Loader2 } from 
 import { Badge } from '../ui/Badge';
 import { useVirtualScroll } from '../../hooks/useVirtualScroll';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const AuditLog: React.FC = () => {
     const { state } = useData();
@@ -102,47 +103,51 @@ const AuditLog: React.FC = () => {
                     className="flex-1 overflow-y-auto scrollbar-thin relative"
                     onScroll={(e) => onScroll(e.currentTarget.scrollTop)}
                 >
-                    <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
-                        {virtualItems.map(({ index, offsetTop }) => {
-                            const log = logs[index];
-                            return (
-                                <div 
-                                    key={index}
-                                    className={`absolute top-0 left-0 w-full grid grid-cols-[180px_160px_160px_1fr_100px] items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-b-').replace('200','100').replace('800','800/50')} hover:${theme.colors.background} transition-colors`}
-                                    style={{ 
-                                        height: `${ROW_HEIGHT}px`,
-                                        transform: `translateY(${offsetTop}px)`
-                                    }}
-                                >
-                                    <div className={`flex items-center gap-2 text-xs ${theme.colors.text.tertiary}`}>
-                                        <Clock size={12}/>
-                                        {log.date}
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-6 h-6 rounded-full ${theme.colors.background} flex items-center justify-center text-[10px] font-bold shrink-0 border ${theme.colors.border}`}>
-                                            {log.user.charAt(0)}
+                    {logs.length > 0 ? (
+                         <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
+                            {virtualItems.map(({ index, offsetTop }) => {
+                                const log = logs[index];
+                                return (
+                                    <div 
+                                        key={index}
+                                        className={`absolute top-0 left-0 w-full grid grid-cols-[180px_160px_160px_1fr_100px] items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-b-').replace('200','100').replace('800','800/50')} hover:${theme.colors.background} transition-colors`}
+                                        style={{ 
+                                            height: `${ROW_HEIGHT}px`,
+                                            transform: `translateY(${offsetTop}px)`
+                                        }}
+                                    >
+                                        <div className={`flex items-center gap-2 text-xs ${theme.colors.text.tertiary}`}>
+                                            <Clock size={12}/>
+                                            {log.date}
                                         </div>
-                                        <span className={`text-sm font-medium ${theme.colors.text.primary} truncate`} title={log.user}>{log.user}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className={`w-6 h-6 rounded-full ${theme.colors.background} flex items-center justify-center text-[10px] font-bold shrink-0 border ${theme.colors.border}`}>
+                                                {log.user.charAt(0)}
+                                            </div>
+                                            <span className={`text-sm font-medium ${theme.colors.text.primary} truncate`} title={log.user}>{log.user}</span>
+                                        </div>
+                                        <div>
+                                            <span className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-tighter ${theme.colors.background} px-2 py-0.5 rounded truncate inline-block max-w-full border ${theme.colors.border}`}>
+                                                {log.action}
+                                            </span>
+                                        </div>
+                                        <div className={`text-sm ${theme.colors.text.secondary} truncate`} title={log.details}>
+                                            {log.details}
+                                        </div>
+                                        <div className="text-right">
+                                            <Badge variant="success">Verified</Badge>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-tighter ${theme.colors.background} px-2 py-0.5 rounded truncate inline-block max-w-full border ${theme.colors.border}`}>
-                                            {log.action}
-                                        </span>
-                                    </div>
-                                    <div className={`text-sm ${theme.colors.text.secondary} truncate`} title={log.details}>
-                                        {log.details}
-                                    </div>
-                                    <div className="text-right">
-                                        <Badge variant="success">Verified</Badge>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    
-                    {logs.length === 0 && (
-                        <div className={`h-full flex items-center justify-center ${theme.colors.text.tertiary}`}>
-                            No activity recorded for this period.
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className={`h-full flex items-center justify-center`}>
+                            <EmptyGrid 
+                                title="Audit Trail Clear"
+                                description={searchTerm ? `No logs found matching "${searchTerm}".` : "No system events recorded in the current retention period."}
+                                icon={History}
+                            />
                         </div>
                     )}
                 </div>
