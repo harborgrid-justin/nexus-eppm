@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Dashboard from '../Dashboard';
+import Dashboard from '../dashboard/Dashboard';
 import PortfolioStrategyFramework from './PortfolioStrategyFramework';
 import PortfolioPrioritization from './PortfolioPrioritization';
 import PortfolioBalancing from './PortfolioBalancing';

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -25,7 +26,24 @@
                 primary: 'var(--color-text)',
                 secondary: 'var(--color-textMuted)',
                 inverted: '#ffffff'
+              },
+              nexus: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+                950: '#172554',
               }
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace']
             }
           }
         }
@@ -35,8 +53,11 @@
     <link rel="stylesheet" href="/styles/theme.css">
     <style>
       html, body, #root { height: 100%; -webkit-font-smoothing: antialiased; }
+      body { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+      ::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
       .perspective-grid {
         background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
         background-size: 20px 20px;
