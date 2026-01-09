@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Table, BarChart2, Download, RefreshCw, Layers } from 'lucide-react';
+import { Table, BarChart2, Download, Layers } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { formatCompactCurrency } from '../../utils/formatters';
 import { usePivotAnalyticsLogic } from '../../hooks/domain/usePivotAnalyticsLogic';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { useData } from '../../context/DataContext';
+import { PivotConfigPanel } from './pivot/PivotConfigPanel';
+import { PivotView } from './pivot/PivotView';
 
 const PivotAnalytics: React.FC = () => {
     const theme = useTheme();
@@ -22,7 +22,6 @@ const PivotAnalytics: React.FC = () => {
 
     const hasData = pivotData.rowKeys.length > 0 && pivotData.colKeys.length > 0;
 
-    // Discovery logic for available pivot dimensions
     const availablePivotFields = React.useMemo(() => {
         if (state.projects.length === 0) return ['Category', 'Status', 'Health', 'Manager', 'EPS'];
         const sample = state.projects[0];
@@ -51,32 +50,15 @@ const PivotAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Config Panel */}
-            <div className={`${theme.colors.surface} p-4 rounded-xl border ${theme.colors.border} shadow-sm mb-6 flex flex-wrap gap-6 items-center`}>
-                <div className="flex flex-col gap-1">
-                    <label className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest`}>Rows</label>
-                    <select className={`${theme.colors.background} border ${theme.colors.border} rounded-lg py-1.5 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-nexus-500`} value={rowField} onChange={e => setRowField(e.target.value as any)}>
-                        {availablePivotFields.map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <label className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest`}>Columns</label>
-                    <select className={`${theme.colors.background} border ${theme.colors.border} rounded-lg py-1.5 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-nexus-500`} value={colField} onChange={e => setColField(e.target.value as any)}>
-                        {availablePivotFields.map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                </div>
-                <div className="flex flex-col gap-1">
-                    <label className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest`}>Values</label>
-                    <select className={`${theme.colors.background} border ${theme.colors.border} rounded-lg py-1.5 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-nexus-500`} value={valField} onChange={e => setValField(e.target.value as any)}>
-                        {availableAggregateFields.map(f => <option key={f} value={f}>{f}</option>)}
-                    </select>
-                </div>
-                <div className="ml-auto">
-                    <Button size="sm" variant="ghost" icon={RefreshCw}>Recalculate</Button>
-                </div>
-            </div>
+            <PivotConfigPanel 
+                rowField={rowField} setRowField={setRowField as any}
+                colField={colField} setColField={setColField as any}
+                valField={valField} setValField={setValField as any}
+                availablePivotFields={availablePivotFields}
+                availableAggregateFields={availableAggregateFields}
+                onRecalculate={() => {}}
+            />
 
-            {/* Content */}
             <div className={`flex-1 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 {!hasData ? (
                     <div className="flex-1 flex flex-col items-center justify-center">
@@ -89,61 +71,13 @@ const PivotAnalytics: React.FC = () => {
                         />
                     </div>
                 ) : (
-                    viewMode === 'Table' ? (
-                        <div className="h-full overflow-auto">
-                            <table className="min-w-full divide-y divide-slate-200">
-                                <thead className={`${theme.colors.background} sticky top-0 z-10`}>
-                                    <tr>
-                                        <th className={`px-6 py-4 text-left text-xs font-black ${theme.colors.text.secondary} uppercase tracking-widest border-r ${theme.colors.border} ${theme.colors.background} sticky left-0 shadow-sm`}>{rowField} \ {colField}</th>
-                                        {pivotData.colKeys.map(c => (
-                                            <th key={c} className={`px-6 py-4 text-right text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wide whitespace-nowrap min-w-[120px]`}>{c}</th>
-                                        ))}
-                                        <th className={`px-6 py-4 text-right text-xs font-black ${theme.colors.text.primary} uppercase tracking-widest ${theme.colors.surface} border-l ${theme.colors.border}`}>Grand Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                                    {pivotData.rowKeys.map(r => {
-                                        let rowTotal = 0;
-                                        return (
-                                            <tr key={r} className={`hover:${theme.colors.background} transition-colors group`}>
-                                                <td className={`px-6 py-3 text-sm font-bold ${theme.colors.text.primary} ${theme.colors.background} sticky left-0 border-r ${theme.colors.border} shadow-sm`}>{r}</td>
-                                                {pivotData.colKeys.map(c => {
-                                                    const val = pivotData.values[`${r}::${c}`] || 0;
-                                                    rowTotal += val;
-                                                    return (
-                                                        <td key={c} className={`px-6 py-3 text-right text-sm font-mono ${theme.colors.text.secondary} group-hover:${theme.colors.text.primary}`}>
-                                                            {valField === 'Count' ? val : val === 0 ? '-' : formatCompactCurrency(val)}
-                                                        </td>
-                                                    );
-                                                })}
-                                                <td className={`px-6 py-3 text-right text-sm font-mono font-bold ${theme.colors.text.primary} ${theme.colors.background} border-l ${theme.colors.border} shadow-sm`}>
-                                                    {valField === 'Count' ? rowTotal : formatCompactCurrency(rowTotal)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="h-full p-6 animate-nexus-in">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={pivotData.chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                    <XAxis dataKey="name" stroke={theme.colors.text.secondary} />
-                                    <YAxis tickFormatter={(val) => valField === 'Count' ? val : formatCompactCurrency(val)} stroke={theme.colors.text.secondary} />
-                                    <Tooltip 
-                                        formatter={(val: number) => valField === 'Count' ? val : formatCompactCurrency(val)} 
-                                        contentStyle={theme.charts.tooltip}
-                                    />
-                                    <Legend />
-                                    {pivotData.colKeys.map((c, i) => (
-                                        <Bar key={c} dataKey={c} stackId="a" fill={theme.charts.palette[i % theme.charts.palette.length]} />
-                                    ))}
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    )
+                    <PivotView 
+                        viewMode={viewMode} 
+                        pivotData={pivotData} 
+                        valField={valField}
+                        rowField={rowField}
+                        colField={colField}
+                    />
                 )}
             </div>
         </div>

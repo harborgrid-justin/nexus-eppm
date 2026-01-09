@@ -1,24 +1,6 @@
 
 import React from 'react';
-import { LayoutDashboard, Loader2, ArrowLeft, Layers, Map, Briefcase } from 'lucide-react';
-import Dashboard from './Dashboard';
-import PortfolioStrategyFramework from './portfolio/PortfolioStrategyFramework';
-import PortfolioPrioritization from './portfolio/PortfolioPrioritization';
-import PortfolioBalancing from './portfolio/PortfolioBalancing';
-import PortfolioBenefits from './portfolio/PortfolioBenefits';
-import PortfolioRisks from './portfolio/PortfolioRisks';
-import PortfolioCapacity from './portfolio/PortfolioCapacity';
-import PortfolioFinancials from './portfolio/PortfolioFinancials';
-import PortfolioCommunications from './portfolio/PortfolioCommunications';
-import PortfolioOptimization from './portfolio/PortfolioOptimization';
-import PortfolioRoadmap from './portfolio/PortfolioRoadmap';
-import PortfolioScenarios from './portfolio/PortfolioScenarios';
-import PortfolioValue from './portfolio/PortfolioValue';
-import PortfolioGovernance from './portfolio/PortfolioGovernance';
-import PortfolioESG from './portfolio/PortfolioESG';
-import PortfolioPrograms from './portfolio/PortfolioPrograms';
-import StrategicAlignmentBoard from './portfolio/StrategicAlignmentBoard';
-import { PortfolioMap } from './portfolio/PortfolioMap';
+import { LayoutDashboard, Loader2, ArrowLeft, Layers } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import ProgramManager from './ProgramManager';
@@ -26,52 +8,18 @@ import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { ErrorBoundary } from './ErrorBoundary';
 import { usePortfolioManagerLogic } from '../hooks/domain/usePortfolioManagerLogic';
+import { PortfolioContent } from './portfolio/PortfolioContent';
 
 const PortfolioManager: React.FC = () => {
   const { state } = useData();
   const theme = useTheme();
 
   const {
-    activeGroup,
-    activeTab,
-    drilledProgramId,
-    isPending,
-    navGroups,
-    handleGroupChange,
-    handleItemChange,
-    handleProgramDrillDown,
-    clearDrillDown
+    activeGroup, activeTab, drilledProgramId, isPending,
+    navGroups, handleGroupChange, handleItemChange,
+    handleProgramDrillDown, clearDrillDown
   } = usePortfolioManagerLogic();
 
-  const renderContent = () => {
-    if (drilledProgramId) {
-        return <ProgramManager forcedProgramId={drilledProgramId} />;
-    }
-
-    switch(activeTab) {
-      case 'overview': return <Dashboard />;
-      case 'map': return <PortfolioMap />;
-      case 'programs': return <PortfolioPrograms onSelectProgram={handleProgramDrillDown} />;
-      case 'esg': return <PortfolioESG />;
-      case 'financials': return <PortfolioFinancials projects={state.projects} />;
-      case 'capacity': return <PortfolioCapacity />;
-      case 'communications': return <PortfolioCommunications />;
-      case 'optimization': return <PortfolioOptimization />;
-      case 'roadmap': return <PortfolioRoadmap />;
-      case 'scenarios': return <PortfolioScenarios />;
-      case 'framework': return <PortfolioStrategyFramework />;
-      case 'alignment': return <StrategicAlignmentBoard />;
-      case 'prioritization': return <PortfolioPrioritization />;
-      case 'balancing': return <PortfolioBalancing />;
-      case 'benefits': return <PortfolioBenefits />;
-      case 'value': return <PortfolioValue />;
-      case 'governance': return <PortfolioGovernance />;
-      case 'risks': return <PortfolioRisks />;
-      default: return <Dashboard />;
-    }
-  };
-
-  // Special case for full-screen drilldown to maintain context
   if (drilledProgramId) {
        return (
          <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full animate-in slide-in-from-bottom-4 fade-in`}>
@@ -80,16 +28,12 @@ const PortfolioManager: React.FC = () => {
                 subtitle="Deep dive into program execution and governance."
                 icon={Layers}
                 actions={
-                    <button 
-                        onClick={clearDrillDown}
-                        className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-sm"
-                    >
+                    <button onClick={clearDrillDown} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-sm">
                         <ArrowLeft size={16}/> Back to Portfolio
                     </button>
                 }
              />
              <div className={theme.layout.panelContainer}>
-                 {/* ProgramManager handles its own internal layout, but we wrap it in the panel for consistency */}
                  <ProgramManager forcedProgramId={drilledProgramId} />
              </div>
          </div>
@@ -107,11 +51,8 @@ const PortfolioManager: React.FC = () => {
       <div className={theme.layout.panelContainer}>
         <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
             <ModuleNavigation 
-                groups={navGroups}
-                activeGroup={activeGroup}
-                activeItem={activeTab}
-                onGroupChange={handleGroupChange}
-                onItemChange={handleItemChange}
+                groups={navGroups} activeGroup={activeGroup} activeItem={activeTab}
+                onGroupChange={handleGroupChange} onItemChange={handleItemChange}
                 className="bg-transparent border-0 shadow-none"
             />
         </div>
@@ -123,7 +64,7 @@ const PortfolioManager: React.FC = () => {
                  </div>
              )}
              <ErrorBoundary name="Portfolio Module">
-                {renderContent()}
+                <PortfolioContent activeTab={activeTab} projects={state.projects} onSelectProgram={handleProgramDrillDown} />
              </ErrorBoundary>
         </div>
       </div>

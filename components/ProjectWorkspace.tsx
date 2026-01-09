@@ -1,6 +1,6 @@
 
-import React, { Suspense, lazy } from 'react';
-import { Network, GanttChartSquare, Loader2, GitBranch, Briefcase } from 'lucide-react';
+import React, { Suspense } from 'react';
+import { Network, GanttChartSquare, GitBranch, Briefcase } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
@@ -9,38 +9,15 @@ import SuspenseFallback from './layout/SuspenseFallback';
 import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLogic';
 import { EmptyGrid } from './common/EmptyGrid';
 import { useNavigate } from 'react-router-dom';
-
-const ProjectIntegrationManagement = lazy(() => import('./integration/ProjectIntegrationManagement'));
-const ProjectGantt = lazy(() => import('./ProjectGantt'));
-const CostManagement = lazy(() => import('./CostManagement'));
-const ProjectRiskManager = lazy(() => import('./risk/ProjectRiskManager'));
-const IssueLog = lazy(() => import('./IssueLog'));
-const ScopeManagement = lazy(() => import('./ScopeManagement'));
-const StakeholderManagement = lazy(() => import('./StakeholderManagement'));
-const ProcurementManagement = lazy(() => import('./ProcurementManagement'));
-const QualityManagement = lazy(() => import('./QualityManagement'));
-const CommunicationsManagement = lazy(() => import('./CommunicationsManagement'));
-const ResourceManagement = lazy(() => import('./ResourceManagement'));
-const NetworkDiagram = lazy(() => import('./scheduling/NetworkDiagram'));
-const DocumentControl = lazy(() => import('./DocumentControl'));
-const BaselineManager = lazy(() => import('./scheduling/BaselineManager'));
-const ScheduleHealthReport = lazy(() => import('./scheduling/ScheduleHealthReport'));
-const FieldManagement = lazy(() => import('./FieldManagement'));
+import { ProjectContent } from './project/ProjectContent';
 
 const ProjectWorkspace: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   
   const {
-      projectData,
-      activeGroup,
-      activeArea,
-      scheduleView,
-      setScheduleView,
-      isPending,
-      navGroups,
-      handleGroupChange,
-      handleItemChange
+      projectData, activeGroup, activeArea, scheduleView, setScheduleView,
+      isPending, navGroups, handleGroupChange, handleItemChange
   } = useProjectWorkspaceLogic();
 
   if (!projectData) {
@@ -57,33 +34,10 @@ const ProjectWorkspace: React.FC = () => {
       );
   }
 
-  const { project } = projectData;
-
-  const renderContent = () => {
-    switch (activeArea) {
-      case 'integration': return <ProjectIntegrationManagement />;
-      case 'scope': return <ScopeManagement />;
-      case 'schedule': return scheduleView === 'gantt' ? <ProjectGantt /> : <NetworkDiagram />;
-      case 'cost': return <CostManagement />;
-      case 'risk': return <ProjectRiskManager />;
-      case 'issues': return <IssueLog />;
-      case 'stakeholder': return <StakeholderManagement />;
-      case 'procurement': return <ProcurementManagement />;
-      case 'quality': return <QualityManagement />;
-      case 'communications': return <CommunicationsManagement />;
-      case 'resources': return <ResourceManagement />;
-      case 'documents': return <DocumentControl />;
-      case 'baseline': return <BaselineManager />;
-      case 'health': return <ScheduleHealthReport />;
-      case 'field': return <FieldManagement />;
-      default: return <div>Module not found</div>;
-    }
-  };
-
   return (
     <ProjectWorkspaceProvider value={projectData}>
         <div className={`h-full w-full flex flex-col ${theme.colors.background}`}>
-        {project.isReflection && (
+        {projectData.project.isReflection && (
             <div className="bg-purple-600 text-white px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 shadow-sm z-50">
                 <GitBranch size={16} /> SANDBOX MODE: You are editing a Reflection Project. Changes are isolated until merged.
             </div>
@@ -106,7 +60,7 @@ const ProjectWorkspace: React.FC = () => {
             <ErrorBoundary name={`${activeArea} Module`}>
                 <Suspense fallback={<SuspenseFallback />}>
                     <div className={`h-full w-full transition-opacity duration-300 ${isPending ? 'opacity-70 pointer-events-none' : 'opacity-100'}`}>
-                        {renderContent()}
+                        <ProjectContent activeArea={activeArea} scheduleView={scheduleView} />
                     </div>
                 </Suspense>
             </ErrorBoundary>
