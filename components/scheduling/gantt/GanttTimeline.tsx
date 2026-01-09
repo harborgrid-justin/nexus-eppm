@@ -1,10 +1,11 @@
 
-import React, { forwardRef, useRef, useEffect } from 'react';
+import React, { forwardRef } from 'react';
 import { Task, TaskStatus, ProjectCalendar, WBSNode } from '../../../types/index';
 import GanttTaskBar from '../GanttTaskBar';
 import DependencyLines from '../DependencyLines';
 import { getDaysDiff } from '../../../utils/dateUtils';
 import { useTheme } from '../../../context/ThemeContext';
+import { useGanttLink } from '../../../hooks/gantt/useGanttLink';
 
 interface TimelineHeaders {
     months: Map<string, { start: number, width: number }>;
@@ -56,6 +57,16 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
 }, ref) => {
   const theme = useTheme();
   
+  // Initialize Linking Logic
+  const { draftLink, handleLinkStart, handleLinkHoverTask } = useGanttLink(
+      { id: 'PROJ', tasks: projectTasks } as any, // Minimal project obj
+      projectStart,
+      dayWidth,
+      rowHeight,
+      taskRowMap,
+      ganttContainerRef
+  );
+
   // Calculate Today Line Position
   const today = new Date();
   const todayOffset = getDaysDiff(projectStart, today);
@@ -71,7 +82,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
   return (
     <div 
         ref={ref} 
-        className={`flex-1 overflow-auto bg-white relative scrollbar-thin will-change-transform`}
+        className={`flex-1 overflow-auto bg-white relative scrollbar-thin will-change-transform ${draftLink ? 'cursor-crosshair' : ''}`}
         onScroll={handleScroll}
         onContextMenu={(e) => onTimelineContextMenu?.(e, null)}
         style={{ contain: 'strict' }}
@@ -100,7 +111,6 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                             style={{ width: `${dayWidth}px` }}
                         >
                             <span className="font-bold">{day.date.getDate()}</span>
-                            {/* Optional: Add Day Name Letter (M, T, W...) if width permits */}
                             {dayWidth > 30 && <span className="text-[8px] opacity-60 font-normal">{day.date.toLocaleDateString('en-US', {weekday: 'narrow'})}</span>}
                         </div>
                     ))}
@@ -128,8 +138,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                 </div>
             )}
 
-            {/* --- 4. DEPENDENCY LINES (SVG Layer) --- */}
-            {/* Rendered at z-index 10, below task bars but above grid */}
+            {/* --- 4. DEPENDENCY LINES & RUBBER BAND --- */}
             <div className="absolute top-[56px] left-0 w-full pointer-events-none z-10">
                 <DependencyLines 
                     renderList={renderList}
@@ -140,6 +149,7 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                     timelineWidth={totalWidth}
                     dayWidth={dayWidth}
                     rowHeight={rowHeight}
+                    draftLink={draftLink}
                 />
             </div>
 
@@ -147,24 +157,22 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
             <div className="relative z-20 top-[0px]"> 
                 {virtualItems.map(({ index, offsetTop }) => {
                     const item = renderList[index];
-                    // Skip WBS rows in timeline view (they are just spacers/groupers usually)
                     if (!item || item.type !== 'task') return null;
                     
                     const offsetDays = getDaysDiff(projectStart, new Date(item.task.startDate));
-                    const width = Math.max(item.task.duration * dayWidth, 2); // Min width visibility
+                    const width = Math.max(item.task.duration * dayWidth, 2); 
                     const baselineData = baselineMap ? baselineMap[item.task.id] : null;
 
                     return (
                         <div 
                             key={item.task.id} 
                             style={{ 
-                                transform: `translateY(${offsetTop + 56}px)`, // Offset by header height
+                                transform: `translateY(${offsetTop + 56}px)`,
                                 position: 'absolute', 
                                 width: '100%', 
                                 height: `${rowHeight}px`, 
                                 top: 0, 
                                 left: 0,
-                                // Row hover effect line
                                 borderBottom: '1px solid transparent' 
                             }}
                             className="hover:bg-blue-50/30 transition-colors"
@@ -185,6 +193,12 @@ export const GanttTimeline = forwardRef<HTMLDivElement, GanttTimelineProps>(({
                                 baselineStart={baselineData?.baselineStartDate}
                                 baselineEnd={baselineData?.baselineEndDate}
                                 projectStart={projectStart}
+                                
+                                // Linking Handlers
+                                isLinking={!!draftLink}
+                                onLinkStart={handleLinkStart}
+                                onLinkEnter={handleLinkHoverTask}
+                                onLinkLeave={() => { /* Optional: Clear target highlight */ }}
                             />
                         </div>
                     );

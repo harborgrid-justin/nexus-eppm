@@ -1,123 +1,128 @@
 
 import React from 'react';
-import { BarChart2, TrendingUp, Info, Play, AlertCircle, RefreshCw } from 'lucide-react';
+import { BarChart2, Play, RefreshCw, AlertCircle, Info, TrendingUp, ShieldAlert } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
-import StatCard from '../shared/StatCard';
-import { Button } from '../ui/Button';
 import { useQuantitativeAnalysisLogic } from '../../hooks/domain/useQuantitativeAnalysisLogic';
-import { formatCompactCurrency } from '../../utils/formatters';
+import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
+import StatCard from '../shared/StatCard';
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
 
 const QuantitativeAnalysis: React.FC = () => {
   const theme = useTheme();
-  const {
-      project,
-      iterations,
-      setIterations,
-      isSimulating,
-      results,
-      runSimulation
+  const { 
+    project, 
+    iterations, 
+    setIterations, 
+    isSimulating, 
+    results, 
+    runSimulation 
   } = useQuantitativeAnalysisLogic();
 
-  if (!project) return <div className="p-6">Loading project context...</div>;
+  if (!project) return null;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in`}>
-        <div className={theme.layout.header}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+       {/* Header & Controls */}
+       <div className={`${theme.components.card} p-4 flex flex-col md:flex-row justify-between items-center gap-4`}>
           <div>
-            <h1 className={theme.typography.h1}>
-              <BarChart2 className="text-nexus-600" /> Quantitative Risk Analysis
-            </h1>
-            <p className={theme.typography.small}>Monte Carlo Simulation (Schedule Risk)</p>
+              <h2 className={`${theme.typography.h2} flex items-center gap-2`}>
+                  <BarChart2 className="text-nexus-600" size={24}/> Quantitative Risk Analysis
+              </h2>
+              <p className={theme.typography.small}>Monte Carlo Simulation (Schedule Risk)</p>
           </div>
-          <div className="flex gap-2 items-center">
-             <select 
-                className="bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-nexus-500 outline-none"
-                value={iterations}
-                onChange={(e) => setIterations(parseInt(e.target.value))}
-             >
-                 <option value="500">500 Iterations</option>
-                 <option value="1000">1,000 Iterations</option>
-                 <option value="5000">5,000 Iterations</option>
-             </select>
-             <Button 
-                onClick={runSimulation}
-                disabled={isSimulating}
-                isLoading={isSimulating}
-                icon={Play}
-             >
-                {isSimulating ? 'Running Model...' : 'Run Simulation'}
-             </Button>
+          <div className="flex items-center gap-3">
+              <select 
+                  className={`p-2 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none font-medium text-slate-700`}
+                  value={iterations}
+                  onChange={(e) => setIterations(Number(e.target.value))}
+                  disabled={isSimulating}
+              >
+                  <option value="500">500 Iterations</option>
+                  <option value="1000">1,000 Iterations</option>
+                  <option value="5000">5,000 Iterations</option>
+              </select>
+              <Button 
+                  onClick={runSimulation} 
+                  disabled={isSimulating}
+                  icon={isSimulating ? RefreshCw : Play}
+                  className={isSimulating ? 'animate-pulse' : ''}
+              >
+                  {isSimulating ? 'Running Model...' : 'Run Simulation'}
+              </Button>
           </div>
        </div>
 
+       {/* Results Area */}
        {!results ? (
-           <div className={`h-[400px] flex items-center justify-center`}>
-                <EmptyGrid 
-                    title="Simulation Required"
-                    description="Run the Monte Carlo simulation to analyze schedule risk based on task variance (PERT) and active risk register events."
-                    icon={BarChart2}
-                    actionLabel="Start Analysis"
-                    onAdd={runSimulation}
-                />
+           <div className="h-[500px] flex flex-col items-center justify-center">
+               <EmptyGrid 
+                   title="Simulation Required"
+                   description="Run the Monte Carlo simulation to analyze schedule risk based on task variance (PERT) and active risk register events."
+                   icon={BarChart2}
+                   actionLabel="Start Analysis"
+                   onAdd={runSimulation}
+               />
            </div>
        ) : (
-           <div className={theme.layout.sectionSpacing}>
-                <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
+           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+               {/* KPI Cards */}
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                   <StatCard 
+                       title="Deterministic Duration" 
+                       value={`${results.deterministic} Days`} 
+                       icon={Info} 
+                       subtext="CPM Base Schedule"
+                   />
+                   <StatCard 
+                       title="P50 Confidence" 
+                       value={`${results.p50} Days`} 
+                       icon={TrendingUp} 
+                       subtext="50% Probability"
+                       trend={results.p50 > results.deterministic ? 'down' : 'up'}
+                   />
+                   <StatCard 
+                       title="P80 Confidence" 
+                       value={`${results.p80} Days`} 
+                       icon={AlertCircle} 
+                       subtext="Target for Reliability"
+                   />
                     <StatCard 
-                        title="Deterministic Duration" 
-                        value={`${results.deterministic} Days`} 
-                        subtext="Based on Critical Path only" 
-                        icon={AlertCircle} 
-                    />
-                    <StatCard 
-                        title="P50 Confidence" 
-                        value={`${results.p50} Days`} 
-                        subtext="50% likelihood of meeting" 
-                        icon={TrendingUp} 
-                        trend={results.p50 > results.deterministic ? 'down' : 'up'}
-                    />
-                    <StatCard 
-                        title="P80 Confidence" 
-                        value={`${results.p80} Days`} 
-                        subtext="Target for High Reliability" 
-                        icon={TrendingUp} 
-                    />
-                    <StatCard 
-                        title="Risk Contingency" 
-                        value={`+${results.p80 - results.deterministic} Days`} 
-                        subtext="Recommended Schedule Buffer" 
-                        icon={Info} 
-                    />
-                </div>
+                       title="Risk Contingency" 
+                       value={`+${results.p80 - results.deterministic} Days`} 
+                       icon={ShieldAlert}
+                       subtext="Required Schedule Buffer"
+                   />
+               </div>
 
-                <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[500px]`}>
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className={theme.typography.h3}>Duration Frequency & Cumulative Probability (S-Curve)</h3>
-                        <div className="flex gap-4 text-xs">
-                            <span className="flex items-center gap-1"><div className="w-3 h-3 bg-slate-300"></div> Frequency</span>
-                            <span className="flex items-center gap-1"><div className="w-3 h-1 bg-nexus-500"></div> Probability %</span>
-                        </div>
-                    </div>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={results.data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="range" tick={{fontSize: 10}} label={{ value: 'Project Duration (Days)', position: 'bottom', offset: 0 }} />
-                            <YAxis yAxisId="left" label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: {fontSize: 12} }} />
-                            <YAxis yAxisId="right" orientation="right" unit="%" label={{ value: 'Probability', angle: 90, position: 'insideRight', style: {fontSize: 12} }} />
-                            <Tooltip 
-                                contentStyle={theme.charts.tooltip}
-                                labelStyle={{fontWeight: 'bold', color: '#1e293b'}}
-                            />
-                            <Bar yAxisId="left" dataKey="frequency" fill="#cbd5e1" name="Frequency" barSize={30} radius={[4, 4, 0, 0]} />
-                            <Line yAxisId="right" type="monotone" dataKey="cumulative" stroke="#0ea5e9" strokeWidth={3} name="Cumulative Probability" dot={false} />
-                            
-                            <ReferenceLine x={results.data.find((d:any) => d.cumulative >= 50)?.range} stroke="#22c55e" strokeDasharray="3 3" label={{ value: 'P50', fill: '#22c55e', fontSize: 12 }} yAxisId="left" />
-                            <ReferenceLine x={results.data.find((d:any) => d.cumulative >= 80)?.range} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'P80', fill: '#f59e0b', fontSize: 12 }} yAxisId="left" />
-                        </ComposedChart>
-                    </ResponsiveContainer>
-                </div>
+               {/* Chart */}
+               <div className={`${theme.components.card} ${theme.layout.cardPadding} h-[500px] flex flex-col`}>
+                   <h3 className={`${theme.typography.h3} mb-6`}>Duration Frequency & Cumulative Probability (S-Curve)</h3>
+                   <div className="flex-1 min-h-0">
+                       <ResponsiveContainer width="100%" height="100%">
+                           <ComposedChart data={results.data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                               <XAxis 
+                                   dataKey="range" 
+                                   label={{ value: 'Project Duration (Days)', position: 'bottom', offset: 0, style: { fontSize: 12, fill: '#64748b' } }} 
+                                   tick={{ fontSize: 11 }}
+                               />
+                               <YAxis yAxisId="left" label={{ value: 'Frequency', angle: -90, position: 'insideLeft', style: { fontSize: 12, fill: '#64748b' } }} />
+                               <YAxis yAxisId="right" orientation="right" unit="%" />
+                               <Tooltip 
+                                   labelStyle={{ fontWeight: 'bold' }}
+                                   contentStyle={theme.charts.tooltip}
+                               />
+                               <Bar yAxisId="left" dataKey="frequency" fill="#cbd5e1" name="Frequency" barSize={30} radius={[4, 4, 0, 0]} />
+                               <Line yAxisId="right" type="monotone" dataKey="cumulative" stroke="#0ea5e9" strokeWidth={3} name="Cumulative Probability" dot={false} />
+                               
+                               {/* P-Value Reference Lines */}
+                               <ReferenceLine x={results.data.find(d => d.rawRange >= results.p50)?.range} stroke="#eab308" strokeDasharray="3 3" label={{ value: 'P50', fill: '#eab308', fontSize: 12, position: 'top' }} yAxisId="left" />
+                               <ReferenceLine x={results.data.find(d => d.rawRange >= results.p80)?.range} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'P80', fill: '#ef4444', fontSize: 12, position: 'top' }} yAxisId="left" />
+                           </ComposedChart>
+                       </ResponsiveContainer>
+                   </div>
+               </div>
            </div>
        )}
     </div>
