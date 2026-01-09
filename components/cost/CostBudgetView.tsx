@@ -6,16 +6,18 @@ import { BudgetTable } from './budget/BudgetTable';
 import { BudgetDetailPanel } from './budget/BudgetDetailPanel';
 import { calculateCommittedCost } from '../../utils/integrationUtils';
 import { Button } from '../ui/Button';
-import { Plus } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { useData } from '../../context/DataContext';
 import { BudgetLineItem } from '../../types/index';
-import { generateId } from '../../utils/formatters';
+import { generateId, formatCurrency } from '../../utils/formatters';
+import { useToast } from '../../context/ToastContext';
 
 const CostBudgetView: React.FC = () => {
     const { project, budgetItems, purchaseOrders } = useProjectWorkspace();
     const { dispatch } = useData();
+    const { success } = useToast();
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [newItem, setNewItem] = useState<Partial<BudgetLineItem>>({ category: '', planned: 0 });
@@ -29,6 +31,11 @@ const CostBudgetView: React.FC = () => {
             return { ...item, committed, totalExposure, remaining };
         });
     }, [budgetItems, purchaseOrders]);
+
+    const totalAllocated = tableData.reduce((sum, item) => sum + item.planned, 0);
+    const projectBudget = project ? project.budget : 0;
+    const variance = projectBudget - totalAllocated;
+    const isBalanced = Math.abs(variance) < 0.01;
 
     const selectedItem = tableData.find(i => i.id === selectedItemId);
     const linkedPOs = selectedItem ? purchaseOrders.filter(po => po.linkedBudgetLineItemId === selectedItemId) : [];
@@ -45,15 +52,33 @@ const CostBudgetView: React.FC = () => {
         dispatch({ type: 'ADD_BUDGET_ITEM', payload: item });
         setIsCreateOpen(false);
         setNewItem({ category: '', planned: 0 });
+        success("Budget Item Created", `Added ${item.category} to CBS.`);
     };
 
     return (
         <div className="h-full flex relative overflow-hidden">
             <div className={`flex-1 flex flex-col transition-all duration-300 ${selectedItemId ? 'w-2/3' : 'w-full'}`}>
-                <div className="p-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-800">Cost Breakdown Structure (CBS)</h3>
+                {/* Rollup Validation Header */}
+                <div className={`p-4 border-b border-slate-200 flex justify-between items-center ${isBalanced ? 'bg-slate-50' : 'bg-red-50'}`}>
+                    <div>
+                        <h3 className="font-bold text-slate-800">Cost Breakdown Structure (CBS)</h3>
+                        <div className="flex items-center gap-4 mt-1 text-xs">
+                            <span className="text-slate-500">Project Budget: <strong>{formatCurrency(projectBudget)}</strong></span>
+                            <span className="text-slate-500">Allocated: <strong>{formatCurrency(totalAllocated)}</strong></span>
+                        </div>
+                    </div>
+                    {isBalanced ? (
+                        <div className="flex items-center gap-2 text-green-700 font-bold text-xs bg-green-100 px-3 py-1.5 rounded-full border border-green-200">
+                            <CheckCircle size={14}/> Fully Allocated
+                        </div>
+                    ) : (
+                         <div className="flex items-center gap-2 text-red-700 font-bold text-xs bg-white px-3 py-1.5 rounded-full border border-red-200 shadow-sm">
+                            <AlertTriangle size={14}/> Variance: {formatCurrency(variance)}
+                        </div>
+                    )}
                     <Button size="sm" icon={Plus} onClick={() => setIsCreateOpen(true)}>Add Cost Code</Button>
                 </div>
+                
                 <div className="flex-1 overflow-auto">
                     <BudgetTable items={tableData} onSelectItem={setSelectedItemId} />
                 </div>

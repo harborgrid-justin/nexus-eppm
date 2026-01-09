@@ -8,7 +8,7 @@ export const ExportService = {
   /**
    * Generates a file content string based on the format and triggers a browser download.
    */
-  exportProjects: async (projects: Project[], format: ExportFormat): Promise<void> => {
+  exportData: async <T extends Record<string, any>>(data: T[], fileName: string, format: ExportFormat): Promise<void> => {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -18,17 +18,18 @@ export const ExportService = {
 
     switch(format) {
         case 'P6 XML':
-            content = generateP6XML(projects);
+            // XML export is specific to Projects currently
+            content = generateP6XML(data as unknown as Project[]);
             mimeType = 'application/xml';
             extension = 'xml';
             break;
         case 'CSV':
-            content = flattenProjectsToCSV(projects);
+            content = convertToCSV(data);
             mimeType = 'text/csv';
             extension = 'csv';
             break;
         case 'JSON':
-            content = JSON.stringify(projects, null, 2);
+            content = JSON.stringify(data, null, 2);
             mimeType = 'application/json';
             extension = 'json';
             break;
@@ -36,6 +37,31 @@ export const ExportService = {
             throw new Error(`Unsupported export format: ${format}`);
     }
 
-    triggerDownload(content, `nexus_export_${Date.now()}.${extension}`, mimeType);
+    triggerDownload(content, `${fileName}_${Date.now()}.${extension}`, mimeType);
+  },
+
+  // Legacy support alias
+  exportProjects: async (projects: Project[], format: ExportFormat) => {
+      return ExportService.exportData(projects, 'nexus_projects', format);
   }
+};
+
+// Generic CSV Converter
+const convertToCSV = (objArray: any[]) => {
+    if (!objArray || objArray.length === 0) return '';
+    
+    // Flatten objects if needed or just take top level keys
+    // For simplicity, we take keys of the first object
+    // In a real app, we might need a schema mapping
+    const header = Object.keys(objArray[0]);
+    const csv = [
+        header.join(','), // Header row
+        ...objArray.map(row => header.map(fieldName => {
+            let val = row[fieldName];
+            if (typeof val === 'object') val = JSON.stringify(val); // Simple serialization for complex props
+            return JSON.stringify(val ?? ''); // Handles quotes/escaping
+        }).join(','))
+    ].join('\r\n');
+
+    return csv;
 };

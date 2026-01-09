@@ -15,10 +15,13 @@ interface ErrorBoundaryState {
  * Standard Error Boundary component to catch and display runtime errors gracefully.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined,
-  };
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+    };
+  }
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };

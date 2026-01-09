@@ -52,6 +52,14 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
         case 'SYSTEM_ACTIVATE_EXTENSION':
              return { ...state, extensions: state.extensions.map(e => e.id === action.payload ? { ...e, status: 'Active' } : e) };
 
+        // --- NEW GOVERNANCE & PROGRAM ACTIONS ---
+        case 'GOVERNANCE_ADD_DECISION':
+             return { ...state, governanceDecisions: [action.payload, ...state.governanceDecisions] };
+        case 'ADD_BENEFIT':
+             return { ...state, benefits: [...state.benefits, action.payload] };
+        case 'ADD_ARCH_STANDARD':
+             return { ...state, programArchitectureStandards: [...state.programArchitectureStandards, action.payload] };
+             
         default: return state;
     }
 };

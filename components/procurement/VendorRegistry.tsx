@@ -9,9 +9,16 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { usePermissions } from '../../hooks/usePermissions';
 import { EmptyGrid } from '../common/EmptyGrid';
+import DataTable, { Column } from '../common/DataTable';
+import { Vendor } from '../../types';
 
 interface VendorRegistryProps {
   projectId: string;
+}
+
+// Vendor type needs to be extended with activeContracts for display purposes in the useMemo below
+interface EnrichedVendor extends Vendor {
+    activeContracts: number;
 }
 
 const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
@@ -23,40 +30,93 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
+  const [statusFilter, setStatusFilter] = useState('All');
 
-  const getStatusBadge = (status: string) => {
-      switch(status) {
-          case 'Preferred': return <Badge variant="success" icon={ShieldCheck}>Preferred</Badge>;
-          case 'Blacklisted': return <Badge variant="danger" icon={Ban}>Blacklisted</Badge>;
-          case 'Probationary': return <Badge variant="warning" icon={AlertCircle}>Probation</Badge>;
-          default: return <Badge variant="neutral">{status}</Badge>;
-      }
-  };
-
-  const handleRowClick = (vendorId: string) => {
-      console.log('Selected vendor:', vendorId);
+  const handleRowClick = (vendor: EnrichedVendor) => {
+      console.log('Selected vendor:', vendor.id);
   };
 
   const filteredVendors = useMemo(() => {
     let list = vendors;
+    
+    // Apply Search
     if (deferredSearchTerm) {
         const term = deferredSearchTerm.toLowerCase();
-        list = vendors.filter(v => 
+        list = list.filter(v => 
             v.name.toLowerCase().includes(term) ||
             v.category.toLowerCase().includes(term)
         );
     }
-    // Calculate contracts count
+    
+    // Apply Status Filter
+    if (statusFilter !== 'All') {
+        list = list.filter(v => v.status === statusFilter);
+    }
+    
+    // Enrich Data
     return list.map(v => ({
         ...v,
         activeContracts: state.contracts.filter(c => c.vendorId === v.id && c.status === 'Active').length
-    }));
-  }, [vendors, deferredSearchTerm, state.contracts]);
+    })) as EnrichedVendor[];
+  }, [vendors, deferredSearchTerm, state.contracts, statusFilter]);
 
   const handleAddVendor = () => {
       // In a real app, open modal
       console.log("Add vendor clicked");
   };
+
+  const columns = useMemo<Column<EnrichedVendor>[]>(() => [
+    {
+        key: 'name',
+        header: 'Vendor Name',
+        sortable: true,
+        render: (v) => (
+            <div>
+                <div className={`text-sm font-medium ${theme.colors.text.primary}`}>{v.name}</div>
+                <div className={`text-xs ${theme.colors.text.secondary}`}>{v.contact.email}</div>
+            </div>
+        )
+    },
+    { key: 'category', header: 'Category', sortable: true },
+    {
+        key: 'status',
+        header: 'Status',
+        sortable: true,
+        render: (v) => {
+            switch(v.status) {
+                case 'Preferred': return <Badge variant="success" icon={ShieldCheck}>Preferred</Badge>;
+                case 'Blacklisted': return <Badge variant="danger" icon={Ban}>Blacklisted</Badge>;
+                case 'Probationary': return <Badge variant="warning" icon={AlertCircle}>Probation</Badge>;
+                default: return <Badge variant="neutral">{v.status}</Badge>;
+            }
+        }
+    },
+    {
+        key: 'activeContracts',
+        header: 'Active Contracts',
+        align: 'center',
+        sortable: true,
+        render: (v) => v.activeContracts > 0 ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                <Briefcase size={10} /> {v.activeContracts}
+            </span>
+        ) : <span className="text-slate-400 text-xs">-</span>
+    },
+    {
+        key: 'performanceScore',
+        header: 'Performance',
+        sortable: true,
+        render: (v) => (
+            <div className="flex items-center gap-2">
+                <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
+                    <div className={`h-full ${v.performanceScore > 80 ? 'bg-green-500' : v.performanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${v.performanceScore}%`}}></div>
+                </div>
+                <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
+            </div>
+        )
+    },
+    { key: 'lastAudit', header: 'Last Audit', sortable: true, render: (v) => <span className="text-xs font-mono">{v.lastAudit || 'Never'}</span> }
+  ], [theme]);
 
   return (
     <div className={`h-full flex flex-col ${theme.colors.background}`}>
@@ -72,7 +132,17 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
                         className="pl-9" 
                     />
                 </div>
-                <Button variant="secondary" size="md" icon={Filter} className="w-full md:w-auto">Status</Button>
+                <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    {['All', 'Preferred', 'Approved'].map(status => (
+                        <button 
+                            key={status} 
+                            onClick={() => setStatusFilter(status)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${statusFilter === status ? 'bg-white shadow-sm text-nexus-700' : 'text-slate-500 hover:text-slate-800'}`}
+                        >
+                            {status}
+                        </button>
+                    ))}
+                </div>
             </div>
             {canEditProcurement ? (
                 <Button variant="primary" size="md" icon={Plus} className="w-full md:w-auto" onClick={handleAddVendor}>Add Vendor</Button>
@@ -83,58 +153,16 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
             )}
         </div>
         
-        <div className={`flex-1 overflow-auto ${theme.colors.surface} ${theme.layout.cardPadding} m-4 rounded-xl border ${theme.colors.border} p-0`}>
+        <div className="flex-1 overflow-hidden p-4">
             {filteredVendors.length > 0 ? (
-                <div className="min-w-[800px]">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className={`${theme.colors.background} sticky top-0`}>
-                            <tr>
-                                <th className={theme.components.table.header}>Vendor Name</th>
-                                <th className={theme.components.table.header}>Category</th>
-                                <th className={theme.components.table.header}>Status</th>
-                                <th className={theme.components.table.header + ' text-center'}>Active Contracts</th>
-                                <th className={theme.components.table.header}>Performance</th>
-                                <th className={theme.components.table.header}>Last Audit</th>
-                            </tr>
-                        </thead>
-                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
-                            {filteredVendors.map(v => (
-                                <tr 
-                                    key={v.id} 
-                                    className={`${theme.components.table.row} cursor-pointer hover:${theme.colors.background} outline-none`}
-                                    onClick={() => handleRowClick(v.id)}
-                                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRowClick(v.id)}
-                                    tabIndex={0}
-                                    role="button"
-                                    aria-label={`View details for ${v.name}`}
-                                >
-                                    <td className={theme.components.table.cell}>
-                                        <div className={`text-sm font-medium ${theme.colors.text.primary}`}>{v.name}</div>
-                                        <div className={`text-xs ${theme.colors.text.secondary}`}>{v.contact.email}</div>
-                                    </td>
-                                    <td className={theme.components.table.cell}>{v.category}</td>
-                                    <td className={theme.components.table.cell}>{getStatusBadge(v.status)}</td>
-                                    <td className={theme.components.table.cell + ' text-center'}>
-                                        {v.activeContracts > 0 ? (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                                                <Briefcase size={10} /> {v.activeContracts}
-                                            </span>
-                                        ) : <span className="text-slate-400 text-xs">-</span>}
-                                    </td>
-                                    <td className={theme.components.table.cell}>
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-16 h-2 ${theme.colors.background} rounded-full overflow-hidden border ${theme.colors.border}`}>
-                                                <div className={`h-full ${v.performanceScore > 80 ? 'bg-green-500' : v.performanceScore > 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${v.performanceScore}%`}}></div>
-                                            </div>
-                                            <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{v.performanceScore}</span>
-                                        </div>
-                                    </td>
-                                    <td className={theme.components.table.cell}>{v.lastAudit || 'Never'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable
+                    data={filteredVendors}
+                    columns={columns}
+                    keyField="id"
+                    onRowClick={handleRowClick}
+                    enableToolbar={true}
+                    fileName={`project_${projectId}_vendors`}
+                />
             ) : (
                  <div className="h-full flex items-center justify-center p-8">
                      <EmptyGrid 

@@ -14,9 +14,14 @@ import { useTheme } from '../../../context/ThemeContext';
 interface ProjectListTableProps {
   projects: Project[];
   onSelect: (id: string) => void;
+  selectable?: boolean;
+  selectedIds?: string[];
+  onSelectionChange?: (ids: string[]) => void;
 }
 
-export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, onSelect }) => {
+export const ProjectListTable: React.FC<ProjectListTableProps> = ({ 
+    projects, onSelect, selectable, selectedIds, onSelectionChange 
+}) => {
   const { state } = useData();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -74,5 +79,16 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({ projects, on
     }
   ], [state.resources, theme]);
 
-  return <DataTable data={projects} columns={columns} onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} keyField="id" emptyMessage="No projects found." />;
+  return (
+    <DataTable 
+        data={projects} 
+        columns={columns} 
+        onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} 
+        keyField="id" 
+        emptyMessage="No projects found." 
+        selectable={selectable}
+        selectedIds={selectedIds}
+        onSelectionChange={onSelectionChange}
+    />
+  );
 };

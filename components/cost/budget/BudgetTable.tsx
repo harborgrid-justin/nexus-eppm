@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { formatCurrency, formatPercentage } from '../../../utils/formatters';
+import { formatCurrency } from '../../../utils/formatters';
 import { BudgetLineItem } from '../../../types';
 
 interface BudgetTableProps {
@@ -38,18 +38,20 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
                         <td className="px-6 py-4 text-right text-sm font-bold text-blue-600 bg-blue-50/20 font-mono">{formatCurrency(item.committed)}</td>
                         <td className="px-6 py-4 text-right text-sm font-bold text-nexus-700 bg-nexus-50/20 font-mono">{formatCurrency(item.actual)}</td>
                         <td className="px-6 py-4 text-right text-sm font-black font-mono">{formatCurrency(item.totalExposure)}</td>
-                        <td className={`px-6 py-4 text-right text-sm font-bold font-mono ${item.remaining < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(item.remaining)}</td>
+                        <td className={`px-6 py-4 text-right text-sm font-bold font-mono ${item.remaining < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                            {formatCurrency(item.remaining)}
+                        </td>
                     </tr>
                 ))}
                 </tbody>
-                <tfoot className="bg-slate-100/50 font-black">
+                <tfoot className="bg-slate-100 font-black border-t-2 border-slate-200 sticky bottom-0 z-10 shadow-inner">
                     <tr>
-                        <td className="px-6 py-4 text-[10px] uppercase">Totals</td>
+                        <td className="px-6 py-4 text-[10px] uppercase tracking-widest text-slate-500">Grand Total</td>
                         <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(totals.planned)}</td>
-                        <td className="px-6 py-4 text-right text-sm text-blue-700 font-mono">{formatCurrency(totals.committed)}</td>
-                        <td className="px-6 py-4 text-right text-sm text-nexus-700 font-mono">{formatCurrency(totals.actual)}</td>
+                        <td className="px-6 py-4 text-right text-sm text-blue-700 font-mono bg-blue-50/20">{formatCurrency(totals.committed)}</td>
+                        <td className="px-6 py-4 text-right text-sm text-nexus-700 font-mono bg-nexus-50/20">{formatCurrency(totals.actual)}</td>
                         <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(totals.exposure)}</td>
-                        <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(totals.remaining)}</td>
+                        <td className={`px-6 py-4 text-right text-sm font-mono ${totals.remaining < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(totals.remaining)}</td>
                     </tr>
                 </tfoot>
             </table>

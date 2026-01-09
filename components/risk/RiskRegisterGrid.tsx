@@ -1,9 +1,7 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { Plus, Filter } from 'lucide-react';
+import { Plus, Filter, Download } from 'lucide-react';
 import { RiskDetailPanel as RiskDetailModal } from './RiskDetailPanel'; 
 import { useTheme } from '../../context/ThemeContext';
 import { Risk } from '../../types/index';
@@ -13,6 +11,7 @@ import { Badge } from '../ui/Badge';
 import DataTable, { Column } from '../common/DataTable';
 import { RiskForm } from './RiskForm';
 import { useData } from '../../context/DataContext';
+import { ExportService } from '../../services/ExportService';
 
 export const RiskRegisterGrid: React.FC = () => {
   const { project, risks } = useProjectWorkspace();
@@ -55,6 +54,10 @@ export const RiskRegisterGrid: React.FC = () => {
     } else {
          dispatch({ type: 'ADD_RISK', payload: risk });
     }
+  };
+
+  const handleExport = async () => {
+      await ExportService.exportData(filteredRisks, `project_risks_${projectId}`, 'CSV');
   };
 
   const columns = useMemo<Column<Risk>[]>(() => [
@@ -126,7 +129,7 @@ export const RiskRegisterGrid: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)} 
             className="w-full sm:w-64"
           />
-          <Button variant="secondary" size="md" icon={Filter} className="w-full sm:w-auto">Filter</Button>
+          <Button variant="secondary" size="md" icon={Download} className="w-full sm:w-auto" onClick={handleExport}>Export</Button>
         </div>
         <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto" onClick={handleCreate}>Add Risk</Button>
       </div>

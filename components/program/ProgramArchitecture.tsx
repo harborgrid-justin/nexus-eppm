@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Server, ShieldCheck, Database, Layers, CheckCircle, Clock } from 'lucide-react';
+import { Server, ShieldCheck, Database, Layers, CheckCircle, Clock, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { ArchitectureStandardForm } from './ArchitectureStandardForm';
 
 interface ProgramArchitectureProps {
   programId: string;
@@ -12,6 +14,7 @@ interface ProgramArchitectureProps {
 const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) => {
   const { architectureStandards, architectureReviews } = useProgramData(programId);
   const theme = useTheme();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
@@ -23,8 +26,9 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Standards Library */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Layers size={18} className="text-blue-500"/> Standards Baseline</h3>
+                    <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Define Standard</Button>
                 </div>
                 <div className="flex-1 overflow-auto p-4 space-y-3">
                     {architectureStandards.map(std => (
@@ -43,6 +47,11 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                             <p className="text-sm text-slate-600 mt-2 pl-6">{std.description}</p>
                         </div>
                     ))}
+                    {architectureStandards.length === 0 && (
+                        <div className="text-center text-slate-400 p-8 text-sm italic border-2 border-dashed border-slate-100 rounded m-2">
+                            No architecture standards defined.
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -76,11 +85,17 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                                     </td>
                                 </tr>
                             ))}
+                            {architectureReviews.length === 0 && (
+                                <tr>
+                                    <td colSpan={3} className="text-center p-8 text-slate-400 text-sm italic">No reviews scheduled.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+        <ArchitectureStandardForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
     </div>
   );
 };

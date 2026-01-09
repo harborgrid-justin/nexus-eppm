@@ -110,6 +110,7 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: any }
     | { type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES'; payload: any }
     | { type: 'GOVERNANCE_SYNC_PARAMETERS', payload: any }
+    | { type: 'GOVERNANCE_ADD_DECISION', payload: any }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any } 
     | { type: 'RESET_SYSTEM' }
     | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any; action: string; user: any } }
@@ -180,4 +181,6 @@ export type Action =
     | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string; data: any } }
     | { type: 'STAGING_COMMIT_SELECTED'; payload: string[] }
     | { type: 'STAGING_CLEAR' }
+    | { type: 'ADD_BENEFIT'; payload: any }
+    | { type: 'ADD_ARCH_STANDARD'; payload: any }
 ;

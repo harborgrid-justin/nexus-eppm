@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Star, TrendingUp, DollarSign, Clock, Plus } from 'lucide-react';
@@ -8,7 +8,9 @@ import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { BenefitForm } from './BenefitForm';
 
 interface ProgramBenefitsProps {
   programId: string;
@@ -18,6 +20,7 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   const { state } = useData();
   const { projects } = useProgramData(programId);
   const theme = useTheme();
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Filter benefits for this program (via projects)
   const programBenefits = state.benefits.filter(b => 
@@ -50,11 +53,6 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
       }
       return data;
   }, [plannedValue, realizedValue]);
-
-  const handleAddBenefit = () => {
-      // Future: Open modal
-      console.log('Add Benefit');
-  };
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
@@ -89,8 +87,9 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
             </div>
 
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                     <h3 className="font-bold text-slate-800">Benefits Register</h3>
+                    <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Add Benefit</Button>
                 </div>
                 <div className="flex-1 overflow-auto max-h-72">
                     {programBenefits.length > 0 ? (
@@ -126,13 +125,14 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
                                 description="Define financial or non-financial benefits to track program value."
                                 icon={Star}
                                 actionLabel="Add Benefit"
-                                onAdd={handleAddBenefit}
+                                onAdd={() => setIsFormOpen(true)}
                             />
                         </div>
                     )}
                 </div>
             </div>
         </div>
+        <BenefitForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} programId={programId} projects={projects} />
     </div>
   );
 };

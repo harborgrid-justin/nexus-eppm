@@ -21,12 +21,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   const theme = useTheme();
   const baseClasses = theme.components.badge.base;
   
-  // Safe primitive conversion to prevent Error #31
   const displayStatus = (status === null || status === undefined) ? '-' : String(status);
   const s = displayStatus.toLowerCase();
   
-  let colors = theme.colors.semantic.neutral.bg + ' ' + theme.colors.semantic.neutral.text + ' ' + theme.colors.semantic.neutral.border;
-
   if (customColorClass) {
       return (
         <span className={`${baseClasses} ${customColorClass} ${className}`}>
@@ -35,36 +32,26 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       );
   }
 
-  // Helper to construct color string
   const getSemanticColor = (type: 'success' | 'warning' | 'danger' | 'info' | 'neutral') => {
       const t = theme.colors.semantic[type];
       return `${t.bg} ${t.text} ${t.border}`;
   };
 
-  // Map status text to semantic theme tokens
-  if (variant === 'health') {
-      if (['good', 'healthy', 'on track'].includes(s)) colors = getSemanticColor('success');
-      else if (['warning', 'at risk'].includes(s)) colors = getSemanticColor('warning');
-      else if (['critical', 'poor', 'off track'].includes(s)) colors = getSemanticColor('danger');
-  } else if (variant === 'priority') {
-      if (['high', 'critical', 'urgent'].includes(s)) colors = getSemanticColor('danger');
-      else if (['medium'].includes(s)) colors = getSemanticColor('warning');
-      else if (['low'].includes(s)) colors = getSemanticColor('info');
-  } else if (variant === 'success') {
-      colors = getSemanticColor('success');
-  } else if (variant === 'warning') {
-      colors = getSemanticColor('warning');
-  } else if (variant === 'danger') {
-      colors = getSemanticColor('danger');
-  } else if (variant === 'info') {
-      colors = getSemanticColor('info');
-  } else {
-      // General Status
-      if (['approved', 'active', 'completed', 'paid', 'met', 'resolved', 'success'].includes(s)) colors = getSemanticColor('success');
-      else if (['pending', 'in progress', 'open', 'conditional', 'draft', 'review'].includes(s)) colors = getSemanticColor('warning');
-      else if (['rejected', 'critical', 'blocked', 'failed', 'not met', 'blacklisted', 'error'].includes(s)) colors = getSemanticColor('danger');
-      else if (['closed', 'archived', 'inactive'].includes(s)) colors = getSemanticColor('neutral');
-      else if (['issued', 'sent'].includes(s)) colors = getSemanticColor('info');
+  let colors = getSemanticColor('neutral');
+
+  // Comprehensive Status Mapping
+  if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
+      colors = 'bg-slate-100 text-slate-600 border-slate-200'; // Draft = Grey
+  } else if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'compliant', 'approved', 'pass', 'valid', 'issued', 'released'].includes(s)) {
+      colors = getSemanticColor('success'); // Active = Green
+  } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
+      colors = 'bg-slate-800 text-slate-200 border-slate-700'; // Closed = Dark Slate
+  } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {
+      colors = getSemanticColor('warning'); // Warning = Yellow/Amber
+  } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted'].includes(s)) {
+      colors = getSemanticColor('danger'); // Danger = Red
+  } else if (['info', 'new', 'allocation'].includes(s)) {
+      colors = getSemanticColor('info'); // Info = Blue
   }
 
   return (

@@ -1,14 +1,17 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { ShieldAlert, Plus, ArrowUpRight } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { usePortfolioRisksLogic } from '../../hooks/domain/usePortfolioRisksLogic';
 import { EmptyState } from '../common/EmptyState';
+import { PortfolioRiskForm } from './PortfolioRiskForm';
 
 const PortfolioRisks: React.FC = () => {
     const theme = useTheme();
     const { allRisks, isEmpty } = usePortfolioRisksLogic();
+    const [isFormOpen, setIsFormOpen] = useState(false);
 
     const getScoreVariant = (score: number): 'danger' | 'warning' | 'success' => {
         if (score >= 15) return 'danger';
@@ -16,15 +19,16 @@ const PortfolioRisks: React.FC = () => {
         return 'success';
     };
 
-    if (isEmpty) {
+    if (isEmpty && !isFormOpen) {
         return (
             <div className={`h-full flex items-center justify-center ${theme.colors.background}`}>
                  <EmptyState 
                     title="No Active Portfolio Risks" 
                     description="No systemic or escalated risks currently tracked." 
                     icon={ShieldAlert}
-                    action={<Button variant="primary" icon={Plus}>Add Risk</Button>}
+                    action={<Button variant="primary" icon={Plus} onClick={() => setIsFormOpen(true)}>Add Risk</Button>}
                  />
+                 <PortfolioRiskForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
             </div>
         );
     }
@@ -36,7 +40,7 @@ const PortfolioRisks: React.FC = () => {
                     <h2 className={theme.typography.h2}>Portfolio Risk Register</h2>
                     <p className={theme.typography.small}>Systemic risks and escalated project threats.</p>
                 </div>
-                 <Button variant="primary" icon={Plus}>Add Portfolio Risk</Button>
+                 <Button variant="primary" icon={Plus} onClick={() => setIsFormOpen(true)}>Add Portfolio Risk</Button>
             </div>
             
             <div className={`${theme.components.card} overflow-hidden`}>
@@ -84,6 +88,7 @@ const PortfolioRisks: React.FC = () => {
                     </table>
                 </div>
             </div>
+            <PortfolioRiskForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
         </div>
     );
 };

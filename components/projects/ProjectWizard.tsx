@@ -4,7 +4,7 @@ import { Modal } from '../ui/Modal';
 import { Project, WBSNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
-import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code, Sparkles, Loader2 } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../context/ThemeContext';
@@ -29,6 +29,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isGeneratingWBS, setIsGeneratingWBS] = useState(false);
   const [generatedWBS, setGeneratedWBS] = useState<any[] | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
@@ -51,7 +52,22 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
     }
   });
 
-  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+  const validateDates = () => {
+      if (formData.startDate && formData.endDate) {
+          if (new Date(formData.endDate) < new Date(formData.startDate)) {
+              setValidationError("Planned Finish date cannot be before Start date.");
+              return false;
+          }
+      }
+      setValidationError(null);
+      return true;
+  };
+
+  const handleNext = () => {
+      if (currentStep === 2 && !validateDates()) return;
+      setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+  };
+
   const handleBack = () => {
     if (currentStep === 1) {
       setMode('select');
@@ -96,6 +112,8 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   };
 
   const handleSubmit = () => {
+    if (!validateDates()) return;
+
     const newProject: Project = {
       id: generateId('P'),
       ...formData as Project,
@@ -161,6 +179,12 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
                 <input type="date" className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
             </div>
         </div>
+
+        {validationError && (
+            <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-200 flex items-center gap-2">
+                <AlertCircle size={14} /> {validationError}
+            </div>
+        )}
         
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
             <div className="flex justify-between items-center mb-3">

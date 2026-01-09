@@ -1,6 +1,11 @@
-// 1. Standard Currency ($1,234.56)
+
+// 1. Standard Currency ($1,234.56) or ($1,234.56)
 export const formatCurrency = (amount: number): string => 
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: 'USD',
+    currencySign: 'accounting' // Uses parentheses for negative values
+  }).format(amount);
 
 // 2. Compact Currency ($1.2M, $500k)
 export const formatCompactCurrency = (amount: number): string => 
@@ -137,9 +142,9 @@ export const formatPhoneNumber = (phone: string): string => {
   return phone;
 };
 
-// 27. Generate ID
+// 27. Generate ID (Collision resistant)
 export const generateId = (prefix = 'ID'): string => 
-  `${prefix}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+  `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
 
 // 28. Slugify
 export const slugify = (text: string): string => 

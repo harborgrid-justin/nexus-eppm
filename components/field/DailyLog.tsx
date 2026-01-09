@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { CloudRain, Sun, Users, Clock, AlertCircle, Plus, Calendar, Clipboard } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
@@ -15,6 +17,7 @@ interface DailyLogProps {
 
 const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
   const { state, dispatch } = useData();
+  const { user } = useAuth();
   const theme = useTheme();
   const [selectedDate, setSelectedDate] = useState('');
 
@@ -36,7 +39,7 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
           weather: { condition: 'Sunny', temperature: '75°F' },
           workLogs: [],
           delays: [],
-          submittedBy: 'CurrentUser',
+          submittedBy: user?.name || 'System User', // Updated User Context
           notes: ''
       };
       dispatch({ type: 'FIELD_ADD_LOG', payload: newLog });
@@ -149,6 +152,10 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
                             </div>
                         )}
                     </div>
+                </div>
+                
+                <div className="text-xs text-slate-400 text-right font-mono">
+                    Filed by: {activeLog.submittedBy}
                 </div>
             </div>
         )}

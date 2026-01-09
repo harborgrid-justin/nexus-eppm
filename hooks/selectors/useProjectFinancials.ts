@@ -25,12 +25,21 @@ export const useProjectFinancials = (
     const budgetUtilization = revisedBudget > 0 ? ((totalActual + totalCommitted) / revisedBudget) * 100 : 0;
     const totalFunding = project.funding?.reduce((sum, f) => sum + f.amount, 0) || 0;
 
+    // Auto-calculate Health based on Performance Indices
+    let calculatedHealth: 'Good' | 'Warning' | 'Critical' = 'Good';
+    if (evmMetrics.cpi < 0.8 || evmMetrics.spi < 0.8) {
+        calculatedHealth = 'Critical';
+    } else if (evmMetrics.cpi < 0.95 || evmMetrics.spi < 0.95) {
+        calculatedHealth = 'Warning';
+    }
+
     return {
       totalPlanned, totalActual, totalCommitted,
       variance: revisedBudget - (totalActual + totalCommitted), 
       approvedCOAmount: approvedCO, pendingCOAmount: pendingCO,
       revisedBudget, budgetUtilization, evm: evmMetrics,
-      solvency: checkFundingSolvency(totalActual, totalCommitted, totalFunding)
+      solvency: checkFundingSolvency(totalActual, totalCommitted, totalFunding),
+      calculatedHealth // Dynamic health status
     };
   }, [budgetItems, changeOrders, project, purchaseOrders]);
 };
