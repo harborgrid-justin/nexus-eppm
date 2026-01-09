@@ -78,6 +78,85 @@ export const analyzeProjectRisks = async (project: Project): Promise<AIAnalysisR
   }
 };
 
+export const generateWBS = async (projectName: string, description: string): Promise<any[]> => {
+  const ai = getAiClient();
+  const model = "gemini-3-pro-preview";
+
+  const prompt = `
+    Generate a Work Breakdown Structure (WBS) for a project named "${projectName}".
+    Context: ${description}.
+    Return a flat array of WBS nodes. The root node should be level 1.
+    Include 3-5 high level phases (Level 2) and 2-3 deliverables under each (Level 3).
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              description: { type: Type.STRING },
+              wbsCode: { type: Type.STRING }
+            }
+          }
+        }
+      }
+    });
+    
+    const text = response.text;
+    if (text) return JSON.parse(text);
+    return [];
+  } catch (error) {
+    console.error("Error generating WBS:", error);
+    return [];
+  }
+};
+
+export const suggestRisks = async (projectDescription: string, category: string): Promise<any[]> => {
+    const ai = getAiClient();
+    const model = "gemini-3-pro-preview";
+    
+    const prompt = `
+        Identify 3 potential risks for a project described as: "${projectDescription}".
+        Focus on the category: "${category}".
+        Return structured data for a Risk Register.
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            description: { type: Type.STRING },
+                            probability: { type: Type.STRING, enum: ['High', 'Medium', 'Low'] },
+                            impact: { type: Type.STRING, enum: ['High', 'Medium', 'Low'] },
+                            mitigationPlan: { type: Type.STRING }
+                        }
+                    }
+                }
+            }
+        });
+        const text = response.text;
+        if (text) return JSON.parse(text);
+        return [];
+    } catch (error) {
+        console.error("Error generating risks:", error);
+        return [];
+    }
+};
+
 export const generatePortfolioOptimization = async (projects: Project[], budgetLimit: number): Promise<string> => {
     const ai = getAiClient();
     const model = 'gemini-3-pro-preview';

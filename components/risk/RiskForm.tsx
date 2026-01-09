@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Risk, RiskBreakdownStructureNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters';
-import { AlertTriangle, DollarSign, Calendar, Shield, Zap } from 'lucide-react';
+import { AlertTriangle, DollarSign, Calendar, Shield, Zap, Sparkles, Loader2 } from 'lucide-react';
+import { suggestRisks } from '../../services/geminiService';
 
 interface RiskFormProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
   });
 
   const [automationTriggered, setAutomationTriggered] = useState<string | null>(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
 
   // Flatten RBS to get categories
   const rbsCategories = useMemo(() => {
@@ -63,6 +66,32 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
         });
     }
   }, [existingRisk, isOpen, rbsCategories]);
+
+  const handleAiSuggest = async () => {
+      if (!project) return;
+      setIsSuggesting(true);
+      try {
+          const risks = await suggestRisks(project.description || project.name, formData.category || 'Technical');
+          if (risks && risks.length > 0) {
+              const suggested = risks[0];
+              const pVal = suggested.probability === 'High' ? 5 : suggested.probability === 'Medium' ? 3 : 1;
+              const iVal = suggested.impact === 'High' ? 5 : suggested.impact === 'Medium' ? 3 : 1;
+              
+              setFormData(prev => ({
+                  ...prev,
+                  description: suggested.description,
+                  probabilityValue: pVal,
+                  impactValue: iVal,
+                  mitigationPlan: suggested.mitigationPlan
+              }));
+              setAutomationTriggered("Risk details populated by AI Advisor based on category.");
+          }
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setIsSuggesting(false);
+      }
+  };
 
   // --- Automation Logic ---
   const calculateScore = (prob: number, imp: number) => prob * imp;
@@ -99,6 +128,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
         impactValue: formData.impactValue || 1,
         financialImpact: formData.financialImpact || 0,
         strategy: formData.strategy || 'Mitigate',
+        mitigationPlan: formData.mitigationPlan || '',
         
         // Calculated Fields
         score: currentScore,
@@ -133,7 +163,14 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             {/* Left Column: Definition */}
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Description <span className="text-red-500">*</span></label>
+                    <div className="flex justify-between items-center mb-1">
+                         <label className="block text-sm font-medium text-slate-700">Description <span className="text-red-500">*</span></label>
+                         {!existingRisk && (
+                             <button onClick={handleAiSuggest} className="text-xs text-purple-600 font-bold flex items-center gap-1 hover:text-purple-800 disabled:opacity-50" disabled={isSuggesting}>
+                                 {isSuggesting ? <Loader2 size={12} className="animate-spin"/> : <Sparkles size={12}/>} AI Suggest
+                             </button>
+                         )}
+                    </div>
                     <textarea 
                         className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none"
                         placeholder="Describe the risk event and its cause..."
@@ -165,6 +202,16 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                             {state.resources.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                         </select>
                     </div>
+                </div>
+                
+                <div>
+                     <label className="block text-sm font-medium text-slate-700 mb-1">Mitigation Plan</label>
+                     <textarea 
+                        className="w-full p-2 border border-slate-300 rounded-lg text-sm h-20 resize-none"
+                        value={formData.mitigationPlan}
+                        onChange={e => setFormData({...formData, mitigationPlan: e.target.value})}
+                        placeholder="Action plan to reduce probability or impact..."
+                     />
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">

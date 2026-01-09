@@ -1,13 +1,14 @@
 
 import React, { useState } from 'react';
 import { Modal } from '../ui/Modal';
-import { Project } from '../../types/index';
+import { Project, WBSNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
-import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code } from 'lucide-react';
+import { Briefcase, Calendar, DollarSign, Users, CheckCircle, ArrowRight, ArrowLeft, Plus, HardHat, Code, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { useTheme } from '../../context/ThemeContext';
+import { generateWBS } from '../../services/geminiService';
 
 interface ProjectWizardProps {
   onClose: () => void;
@@ -26,6 +27,9 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const theme = useTheme();
   const [mode, setMode] = useState<'select' | 'wizard'>('select');
   const [currentStep, setCurrentStep] = useState(1);
+  const [isGeneratingWBS, setIsGeneratingWBS] = useState(false);
+  const [generatedWBS, setGeneratedWBS] = useState<any[] | null>(null);
+
   const [formData, setFormData] = useState<Partial<Project>>({
     name: '',
     code: '',
@@ -59,6 +63,36 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   const handleSeed = (type: 'construction' | 'software') => {
       dispatch({ type: 'LOAD_DEMO_PROJECT', payload: type });
       onClose();
+  };
+
+  const handleGenerateWBS = async () => {
+      if (!formData.name) {
+          alert("Please enter a project name first.");
+          return;
+      }
+      setIsGeneratingWBS(true);
+      try {
+          const wbsNodes = await generateWBS(formData.name, formData.businessCase || "Standard project");
+          setGeneratedWBS(wbsNodes);
+          
+          // Convert flat AI response to WBSNode structure (Simplified for demo)
+          const convertedWbs: WBSNode[] = wbsNodes.map((n, i) => ({
+              id: generateId('WBS'),
+              wbsCode: n.wbsCode || `${i+1}`,
+              name: n.name,
+              description: n.description || '',
+              children: []
+          }));
+          
+          setFormData(prev => ({
+              ...prev,
+              wbs: convertedWbs
+          }));
+      } catch (e) {
+          console.error(e);
+      } finally {
+          setIsGeneratingWBS(false);
+      }
   };
 
   const handleSubmit = () => {
@@ -106,7 +140,7 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
   );
 
   const renderStep2 = () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
         <div>
             <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Enterprise Project Structure (EPS)</label>
             <select 
@@ -126,6 +160,30 @@ const ProjectWizard: React.FC<ProjectWizardProps> = ({ onClose, onSave }) => {
                 <label className={`block text-sm font-medium ${theme.colors.text.secondary} mb-1`}>Planned Finish</label>
                 <input type="date" className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
             </div>
+        </div>
+        
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="flex justify-between items-center mb-3">
+                <h4 className="text-sm font-bold text-slate-800 flex items-center gap-2"><Sparkles size={14} className="text-purple-500"/> AI Schedule Assistant</h4>
+                <Button size="sm" variant="secondary" onClick={handleGenerateWBS} disabled={isGeneratingWBS}>
+                    {isGeneratingWBS ? <Loader2 className="animate-spin" size={14}/> : <Plus size={14}/>} 
+                    {isGeneratingWBS ? "Thinking..." : "Auto-Generate WBS"}
+                </Button>
+            </div>
+            {generatedWBS ? (
+                <div className="max-h-32 overflow-y-auto bg-white border border-slate-200 rounded-lg p-2 text-xs">
+                    {generatedWBS.map((node, i) => (
+                        <div key={i} className="flex gap-2 py-1 border-b border-slate-50 last:border-0">
+                            <span className="font-mono font-bold text-slate-500">{node.wbsCode}</span>
+                            <span className="text-slate-800">{node.name}</span>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-xs text-slate-500 italic">
+                    Click to let AI structure your project deliverables based on the business case.
+                </p>
+            )}
         </div>
     </div>
   );
