@@ -1,16 +1,23 @@
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { NavGroup } from '../../components/common/ModuleNavigation';
 import { 
     LayoutDashboard, Layers, Leaf, BookOpen, Map as MapIcon, 
     ListOrdered, PieChart, TrendingUp, Star, BarChart2, 
-    MessageSquare, Gavel, RefreshCw, ShieldAlert, Globe 
+    MessageSquare, Gavel, RefreshCw, ShieldAlert, Globe, Target
 } from 'lucide-react';
 
-export const usePortfolioManagerLogic = () => {
-  const [activeGroup, setActiveGroup] = useState('dashboards');
-  const [activeTab, setActiveTab] = useState('overview');
-  const [drilledProgramId, setDrilledProgramId] = useState<string | null>(null);
+export const usePortfolioManagerLogic = (forcedProgramId?: string) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [internalProgramId, setInternalProgramId] = useState<string | null>(null);
+  
+  // If forcedProgramId is provided, it's a controlled component. Use that ID.
+  const selectedProgramId = forcedProgramId !== undefined ? forcedProgramId : internalProgramId;
+
+  // Use URL params for state if not in forced mode, otherwise default
+  const activeGroup = forcedProgramId ? 'Overview' : (searchParams.get('group') || 'dashboards');
+  const activeTab = forcedProgramId ? 'dashboard' : (searchParams.get('view') || 'overview');
   
   const [isPending, startTransition] = useTransition();
 
@@ -23,6 +30,7 @@ export const usePortfolioManagerLogic = () => {
     ]},
     { id: 'strategy', label: 'Strategy & Selection', items: [
       { id: 'framework', label: 'Strategic Framework', icon: BookOpen },
+      { id: 'alignment', label: 'Alignment Board', icon: Target },
       { id: 'roadmap', label: 'Strategic Roadmap', icon: MapIcon },
       { id: 'prioritization', label: 'Prioritization', icon: ListOrdered },
       { id: 'scenarios', label: 'Scenario Planning', icon: Layers },
@@ -45,36 +53,39 @@ export const usePortfolioManagerLogic = () => {
     const newGroup = navGroups.find(g => g.id === groupId);
     if (newGroup?.items.length) {
       startTransition(() => {
-        setActiveGroup(groupId);
-        setActiveTab(newGroup.items[0].id);
-        setDrilledProgramId(null); 
+        if (!forcedProgramId) {
+            setSearchParams({ group: groupId, view: newGroup.items[0].id });
+            setInternalProgramId(null);
+        }
       });
     }
   };
 
   const handleItemChange = (tabId: string) => {
     startTransition(() => {
-        setActiveTab(tabId);
-        setDrilledProgramId(null);
+        if (!forcedProgramId) {
+            setSearchParams({ group: activeGroup, view: tabId });
+            setInternalProgramId(null);
+        }
     });
   };
 
   const handleProgramDrillDown = (programId: string) => {
     startTransition(() => {
-      setDrilledProgramId(programId);
+      setInternalProgramId(programId);
     });
   };
 
   const clearDrillDown = () => {
     startTransition(() => {
-        setDrilledProgramId(null);
+        setInternalProgramId(null);
     });
   };
 
   return {
     activeGroup,
     activeTab,
-    drilledProgramId,
+    drilledProgramId: selectedProgramId,
     isPending,
     navGroups,
     handleGroupChange,

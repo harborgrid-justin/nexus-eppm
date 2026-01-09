@@ -73,24 +73,45 @@ export const CreateEstimateModal: React.FC<CreateEstimateModalProps> = ({
         }
     >
         <div className="space-y-6">
-            <h3 className="font-bold text-slate-800">Estimate for: <span className="text-nexus-600">{wbsName}</span></h3>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <h3 className="font-bold text-slate-800 text-sm">Target Scope: <span className="text-nexus-600">{wbsName}</span></h3>
+                <p className="text-xs text-slate-500 mt-1">Estimates are linked to WBS work packages.</p>
+            </div>
+
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Estimate Class (AACE)</label>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Estimate Class (AACE)</label>
                 <select 
-                    className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                    className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none"
                     value={formData.class}
                     onChange={e => setFormData({...formData, class: e.target.value as any})}
                 >
                     {ESTIMATE_CLASSES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
                 </select>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-2 italic bg-slate-50 p-2 rounded border border-slate-100">
+                    <Info size={12} className="inline mr-1 mb-0.5"/>
                     {ESTIMATE_CLASSES.find(c => c.id === formData.class)?.description}
                 </p>
             </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+                <Input 
+                    type="number" 
+                    label="Contingency %" 
+                    value={formData.contingencyPercent} 
+                    onChange={e => setFormData({...formData, contingencyPercent: parseFloat(e.target.value)})}
+                />
+                <Input 
+                    type="number" 
+                    label="Escalation %" 
+                    value={formData.escalationPercent} 
+                    onChange={e => setFormData({...formData, escalationPercent: parseFloat(e.target.value)})}
+                />
+            </div>
+
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Basis of Estimate (BoE)</label>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Basis of Estimate (BoE)</label>
                 <textarea 
-                    className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32"
+                    className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none"
                     value={formData.basisOfEstimate}
                     onChange={e => setFormData({...formData, basisOfEstimate: e.target.value})}
                     placeholder="Describe the methodology, data sources, and assumptions..."

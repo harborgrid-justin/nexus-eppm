@@ -13,17 +13,20 @@ import { RiskForm } from './RiskForm';
 import { useData } from '../../context/DataContext';
 import { ExportService } from '../../services/ExportService';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { useToast } from '../../context/ToastContext';
 
 export const RiskRegisterGrid: React.FC = () => {
   const { project, risks } = useProjectWorkspace();
   const projectId = project.id;
   const { state, dispatch } = useData();
+  const { success } = useToast();
   const theme = useTheme();
 
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [riskToEdit, setRiskToEdit] = useState<Risk | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
 
   const getResourceName = (id: string) => {
     return state.resources.find(r => r.id === id)?.name || 'Unknown';
@@ -52,13 +55,18 @@ export const RiskRegisterGrid: React.FC = () => {
   const handleSaveRisk = (risk: Risk) => {
     if (riskToEdit) {
          dispatch({ type: 'UPDATE_RISK', payload: { risk } });
+         success("Risk Updated", `Risk ${risk.id} modifications saved.`);
     } else {
          dispatch({ type: 'ADD_RISK', payload: risk });
+         success("Risk Identified", `New risk ${risk.id} added to register.`);
     }
   };
 
   const handleExport = async () => {
+      setIsExporting(true);
       await ExportService.exportData(filteredRisks, `project_risks_${projectId}`, 'CSV');
+      setIsExporting(false);
+      success("Export Complete", "Risk register downloaded.");
   };
 
   const columns = useMemo<Column<Risk>[]>(() => [
@@ -130,7 +138,9 @@ export const RiskRegisterGrid: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)} 
             className="w-full sm:w-64"
           />
-          <Button variant="secondary" size="md" icon={Download} className="w-full sm:w-auto" onClick={handleExport}>Export</Button>
+          <Button variant="secondary" size="md" icon={Download} className="w-full sm:w-auto" onClick={handleExport} isLoading={isExporting}>
+             {isExporting ? 'Exporting...' : 'Export'}
+          </Button>
         </div>
         <Button variant="primary" size="md" icon={Plus} className="w-full sm:w-auto" onClick={handleCreate}>Add Risk</Button>
       </div>

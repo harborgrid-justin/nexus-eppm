@@ -7,12 +7,15 @@ import { ResourceTableHeader } from './ResourceTableHeader';
 import { ResourceFormPanel } from './ResourceFormPanel';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Users, Filter, Plus, Lock, Loader2 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { Button } from '../ui/Button';
 
 interface ResourcePoolProps {
   resources: Resource[] | undefined;
 }
 
 const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
+  const theme = useTheme();
   const {
       searchTerm, deferredSearchTerm, isPanelOpen, editingResource,
       filteredResources, canEdit, setSearchTerm, handleOpenPanel,
@@ -33,10 +36,10 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
 
   return (
     <div className="h-full flex flex-col bg-white">
-      <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+      <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center bg-slate-50/50`}>
         <div className="relative">
           <input 
-            className="pl-9 pr-4 py-2 border rounded-lg text-sm w-80 nexus-focus-ring"
+            className={`pl-9 pr-4 py-2 border ${theme.colors.border} rounded-lg text-sm w-80 focus:ring-2 focus:ring-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.text.primary}`}
             placeholder="Search registry..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
@@ -45,9 +48,7 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
           {searchTerm !== deferredSearchTerm && <Loader2 size={12} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-nexus-500"/>}
         </div>
         {canEdit ? (
-          <button onClick={() => handleOpenPanel()} className="px-4 py-2 bg-nexus-600 text-white rounded-lg text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-md hover:bg-nexus-700 transition-all">
-            <Plus size={14}/> Provision
-          </button>
+          <Button onClick={() => handleOpenPanel()} icon={Plus}>Provision</Button>
         ) : (
           <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
             <Lock size={14}/> Access Restricted
@@ -58,7 +59,7 @@ const ResourcePool: React.FC<ResourcePoolProps> = ({ resources }) => {
       <div className="flex-1 overflow-auto">
         <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
           <ResourceTableHeader />
-          <tbody className="divide-y divide-slate-100">
+          <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
             {filteredResources.map(res => (
               <ResourceRow 
                 key={res.id} resource={res} 

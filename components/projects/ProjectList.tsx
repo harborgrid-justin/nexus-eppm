@@ -15,11 +15,13 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ExportService } from '../../services/ExportService';
 import { useData } from '../../context/DataContext';
+import { useToast } from '../../context/ToastContext';
 
 const ProjectList: React.FC = () => {
   const { canEditProject } = usePermissions();
   const { dispatch } = useData();
   const theme = useTheme();
+  const { success, error } = useToast();
   
   const {
       searchTerm,
@@ -38,6 +40,7 @@ const ProjectList: React.FC = () => {
   // Local state for extended filtering and bulk actions
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
   const filteredAndStatusProjects = useMemo(() => {
       if (statusFilter === 'All') return filteredProjects;
@@ -52,18 +55,32 @@ const ProjectList: React.FC = () => {
   ], []);
 
   const handleExport = async () => {
-      const dataToExport = selectedIds.length > 0 
-        ? filteredAndStatusProjects.filter(p => selectedIds.includes(p.id)) 
-        : filteredAndStatusProjects;
-      
-      await ExportService.exportData(dataToExport, 'project_export', 'CSV');
+      setIsExporting(true);
+      try {
+          const dataToExport = selectedIds.length > 0 
+            ? filteredAndStatusProjects.filter(p => selectedIds.includes(p.id)) 
+            : filteredAndStatusProjects;
+          
+          await ExportService.exportData(dataToExport, 'project_export', 'CSV');
+          success("Export Complete", `${dataToExport.length} projects exported to CSV.`);
+      } catch (e) {
+          error("Export Failed", "Could not generate project export.");
+      } finally {
+          setIsExporting(false);
+      }
   };
 
   const handleBulkDelete = () => {
-      if(confirm(`Are you sure you want to delete ${selectedIds.length} projects?`)) {
-          // In real app, dispatch bulk delete. For now, we iterate (simplified)
-          // selectedIds.forEach(id => dispatch({ type: 'PROJECT_DELETE', payload: id }));
-          alert(`Deleted ${selectedIds.length} projects.`);
+      if(confirm(`Are you sure you want to delete ${selectedIds.length} projects? This action cannot be undone.`)) {
+          selectedIds.forEach(id => {
+              // Dispatch delete for each ID
+              // Note: In a real app, we'd have a BULK_DELETE action
+              // For now, we simulate by dispatching individual deletes or assumes backend handles it
+              // We'll define a loop here as a pragmatic solution for the mock reducer
+              // Ideally, add DELETE_PROJECT to reducer. Assuming it might exist or use PROJECT_CLOSE
+              dispatch({ type: 'PROJECT_CLOSE', payload: id }); 
+          });
+          success("Projects Archived", `${selectedIds.length} projects have been closed/archived.`);
           setSelectedIds([]);
       }
   };
@@ -119,8 +136,15 @@ const ProjectList: React.FC = () => {
                             <option value="Closed">Closed</option>
                         </select>
                     </div>
-                    <Button variant="outline" size="md" icon={Download} onClick={handleExport} className="shrink-0">
-                        Export
+                    <Button 
+                        variant="outline" 
+                        size="md" 
+                        icon={isExporting ? Loader2 : Download} 
+                        onClick={handleExport} 
+                        disabled={isExporting}
+                        className="shrink-0"
+                    >
+                        {isExporting ? 'Exporting...' : 'Export'}
                     </Button>
                 </div>
             )}
@@ -171,7 +195,7 @@ const ProjectList: React.FC = () => {
                                 <Download size={14}/> Export
                             </button>
                             <button onClick={handleBulkDelete} className="flex items-center gap-2 text-xs font-bold hover:text-red-400 transition-colors">
-                                <Trash2 size={14}/> Delete
+                                <Trash2 size={14}/> Close/Archive
                             </button>
                             <button onClick={() => setSelectedIds([])} className="ml-2 p-1 hover:bg-white/20 rounded-full">
                                 <X size={14}/>

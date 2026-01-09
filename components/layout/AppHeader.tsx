@@ -4,6 +4,7 @@ import { Menu, Search, Sparkles, History } from 'lucide-react';
 import { GlobalBreadcrumbs } from '../common/GlobalBreadcrumbs';
 import { NotificationCenter } from '../common/NotificationCenter';
 import { useFeatureFlag } from '../../context/FeatureFlagContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface AppHeaderProps {
     activeTab: string;
@@ -15,48 +16,55 @@ interface AppHeaderProps {
     onPulseOpen: () => void;
     onAiToggle: () => void;
     onNavigate: (tab: string, id?: string) => void;
+    isSidebarCollapsed: boolean;
+    onToggleCollapse: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
-    activeTab, projectId, isPulseOpen, onSidebarOpen, onPulseOpen, onNavigate
+    activeTab, projectId, isPulseOpen, onSidebarOpen, onPulseOpen, onNavigate, onPaletteOpen
 }) => {
     const enableAi = useFeatureFlag('enableAi');
+    const theme = useTheme();
     
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                 e.preventDefault();
-                onNavigate('search');
+                onPaletteOpen();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
-        // CRITICAL: Memory leak prevention
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onNavigate]);
+    }, [onPaletteOpen]);
 
     return (
-        <header className="sticky top-0 h-12 bg-surface border-b border-border flex justify-between items-center px-3 md:px-4 flex-shrink-0 z-50 shadow-sm transition-colors duration-300">
+        <header className={`sticky top-0 h-14 ${theme.colors.surface} border-b ${theme.colors.border} flex justify-between items-center px-4 flex-shrink-0 z-40 shadow-sm transition-colors duration-300`}>
            <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
-              <button onClick={onSidebarOpen} className="md:hidden p-1.5 -ml-1 text-text-secondary hover:bg-background rounded-md flex-shrink-0"><Menu size={18} /></button>
-              <div className="min-w-0 overflow-hidden">
+              <button onClick={onSidebarOpen} className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-md flex-shrink-0"><Menu size={20} /></button>
+              <div className="min-w-0 overflow-hidden hidden sm:block">
                 <GlobalBreadcrumbs activeTab={activeTab} projectId={activeTab === 'projectWorkspace' ? projectId || undefined : undefined} onNavigate={onNavigate} />
               </div>
            </div>
 
-           <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+           <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               <div 
-                  className="hidden md:flex items-center bg-background rounded-md px-2 py-1 border border-border hover:border-slate-300 transition-colors w-56 cursor-pointer group"
-                  onClick={() => onNavigate('search')}
+                  className={`hidden md:flex items-center ${theme.colors.background} rounded-lg px-3 py-1.5 border ${theme.colors.border} hover:border-nexus-300 transition-colors w-64 cursor-pointer group`}
+                  onClick={onPaletteOpen}
               >
-                  <Search size={12} className="text-text-tertiary mr-2 group-hover:text-nexus-500 transition-colors"/>
-                  <span className="text-[11px] text-text-secondary font-medium">Search (Cmd+K)</span>
+                  <Search size={14} className="text-slate-400 mr-2 group-hover:text-nexus-500 transition-colors"/>
+                  <span className="text-xs text-slate-500 font-medium">Search...</span>
+                  <div className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded border border-slate-200">⌘K</div>
               </div>
 
-              <div className="h-4 w-px bg-border hidden md:block"></div>
+              <div className="h-5 w-px bg-slate-200 hidden md:block"></div>
 
-              <div className="flex items-center gap-0.5">
-                <button onClick={onPulseOpen} className={`p-1.5 rounded-md transition-all ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : 'text-text-secondary hover:text-nexus-600 hover:bg-background'}`} title="Activity Stream">
-                    <History size={16} />
+              <div className="flex items-center gap-1">
+                <button 
+                    onClick={onPulseOpen} 
+                    className={`p-2 rounded-lg transition-all relative ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : 'text-slate-500 hover:text-nexus-600 hover:bg-slate-50'}`} 
+                    title="Activity Stream"
+                >
+                    <History size={18} />
                 </button>
                 <NotificationCenter />
               </div>
@@ -64,9 +72,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               {enableAi && (
                 <button 
                     onClick={() => onNavigate('ai')} 
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700 shadow-inner' : 'bg-surface border-border text-text-secondary hover:bg-background shadow-sm hover:shadow'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border shadow-sm active:scale-95 hover:shadow-md ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                 >
-                    <Sparkles size={12} className={activeTab === 'ai' ? 'text-nexus-600' : 'text-purple-500'} />
+                    <Sparkles size={14} className={activeTab === 'ai' ? 'text-nexus-600' : 'text-purple-500'} />
                     <span className="hidden sm:inline">Advisor</span>
                 </button>
               )}

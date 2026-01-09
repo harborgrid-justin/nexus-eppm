@@ -1,8 +1,7 @@
 
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Smartphone, Tablet, Monitor, Box, Folder, Search, Grid, List, MoreVertical, Wifi, Battery, Signal, User, Bell, CheckCircle, AlertTriangle, Wrench, Globe } from 'lucide-react';
+import { Smartphone, Tablet, Monitor, Box, Folder, Search, Grid, List, MoreVertical, Wifi, Battery, Signal, User, Bell, CheckCircle, AlertTriangle, Wrench, Globe, Maximize2 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 
@@ -182,12 +181,3 @@ export const CommandCenterTmpl: React.FC = () => {
         </div>
     );
 };
-
-export const MobileAppShellTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Mobile Shell Template</div>;
-export const TabletDashTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Tablet Dashboard Template</div>;
-export const MaintenanceOverlayTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Maintenance Overlay Template</div>;
-export const EmptyDashboardTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Empty Dashboard Template</div>;
-export const ApiPlaygroundTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">API Playground Template</div>;
-export const OnboardingChecklistTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Onboarding Checklist Template</div>;
-export const DataMigrationTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Data Migration Template</div>;
-export const WizardStepVerticalTmpl: React.FC = () => <div className="p-12 text-center text-slate-400">Wizard Step Vertical Template</div>;

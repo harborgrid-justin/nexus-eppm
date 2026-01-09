@@ -2,12 +2,12 @@
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { ShieldAlert, TrendingUp, AlertOctagon, Layers, Plus, Trash2 } from 'lucide-react';
+import { ShieldAlert, TrendingUp, AlertOctagon, Layers, Plus, Trash2, Save } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel'; // Replaced Modal
 import { Input } from '../ui/Input';
 import { ProgramRisk } from '../../types';
 import { generateId } from '../../utils/formatters';
@@ -22,7 +22,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
   const { state, dispatch } = useData();
   const theme = useTheme();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [newRisk, setNewRisk] = useState<Partial<ProgramRisk>>({
       description: '',
       category: 'External',
@@ -57,7 +57,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
       };
 
       dispatch({ type: 'PROGRAM_ADD_RISK', payload: risk });
-      setIsModalOpen(false);
+      setIsPanelOpen(false);
       setNewRisk({ description: '', category: 'External', probability: 'Medium', impact: 'Medium', ownerId: '', mitigationPlan: '' });
   };
 
@@ -83,7 +83,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 <ShieldAlert className="text-nexus-600" size={24}/>
                 <h2 className={theme.typography.h2}>Program Risk Management</h2>
             </div>
-            <Button size="sm" icon={Plus} onClick={() => setIsModalOpen(true)}>Add Program Risk</Button>
+            <Button size="sm" icon={Plus} onClick={() => setIsPanelOpen(true)}>Add Program Risk</Button>
         </div>
 
         <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
@@ -140,7 +140,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                             description="The program register is currently clear of overarching threats. Use project-level escalations to populate this view."
                             icon={ShieldAlert}
                             actionLabel="Identify Program Threat"
-                            onAdd={() => setIsModalOpen(true)}
+                            onAdd={() => setIsPanelOpen(true)}
                         />
                     </div>
                 )}
@@ -190,30 +190,32 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
             </div>
         </div>
 
-        <Modal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
+        <SidePanel
+            isOpen={isPanelOpen}
+            onClose={() => setIsPanelOpen(false)}
             title="New Program Risk"
+            width="md:w-[500px]"
             footer={
                 <>
-                    <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                    <Button onClick={handleAddRisk}>Save Risk</Button>
+                    <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                    <Button onClick={handleAddRisk} icon={Save}>Save Risk</Button>
                 </>
             }
         >
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Risk Description</label>
                     <textarea 
-                        className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm h-20 ${theme.colors.surface} ${theme.colors.text.primary}`}
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}
                         value={newRisk.description}
                         onChange={e => setNewRisk({...newRisk, description: e.target.value})}
+                        placeholder="Describe the systemic threat..."
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className={theme.typography.label + " block mb-1"}>Probability</label>
-                        <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={newRisk.probability} onChange={e => setNewRisk({...newRisk, probability: e.target.value as any})}>
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`} value={newRisk.probability} onChange={e => setNewRisk({...newRisk, probability: e.target.value as any})}>
                             <option>Low</option>
                             <option>Medium</option>
                             <option>High</option>
@@ -221,7 +223,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     </div>
                     <div>
                         <label className={theme.typography.label + " block mb-1"}>Impact</label>
-                        <select className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary}`} value={newRisk.impact} onChange={e => setNewRisk({...newRisk, impact: e.target.value as any})}>
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`} value={newRisk.impact} onChange={e => setNewRisk({...newRisk, impact: e.target.value as any})}>
                             <option>Low</option>
                             <option>Medium</option>
                             <option>High</option>
@@ -230,14 +232,14 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 </div>
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Mitigation Plan</label>
-                    <Input value={newRisk.mitigationPlan} onChange={e => setNewRisk({...newRisk, mitigationPlan: e.target.value})} />
+                    <Input value={newRisk.mitigationPlan} onChange={e => setNewRisk({...newRisk, mitigationPlan: e.target.value})} placeholder="Response strategy..." />
                 </div>
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Owner ID</label>
-                    <Input value={newRisk.ownerId} onChange={e => setNewRisk({...newRisk, ownerId: e.target.value})} placeholder="e.g. R-001" />
+                    <Input value={newRisk.ownerId} onChange={e => setNewRisk({...newRisk, ownerId: e.target.value})} placeholder="e.g. Program Manager" />
                 </div>
             </div>
-        </Modal>
+        </SidePanel>
     </div>
   );
 };

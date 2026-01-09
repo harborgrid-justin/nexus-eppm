@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ProjectFunding, FundingSource } from '../../types';
 import { Save, DollarSign, AlertCircle } from 'lucide-react';
-import { Modal } from '../ui/Modal';
+import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 
 interface FundingAllocationModalProps {
@@ -47,13 +47,13 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
   };
 
   return (
-    <Modal
+    <SidePanel
        isOpen={true}
        onClose={onClose}
-       size="md"
+       width="md:w-[500px]"
        title={
-          <div className="flex items-center gap-2">
-             <DollarSign className="text-green-600" size={20}/> Allocate Funds
+          <div className="flex items-center gap-2 text-green-700">
+             <DollarSign size={20}/> Allocate Funds
           </div>
        }
        footer={
@@ -65,7 +65,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
     >
        <div className="space-y-6">
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Funding Source</label>
+             <label className="block text-sm font-bold text-slate-700 mb-1">Funding Source</label>
              <select 
                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-nexus-500"
                  onChange={e => setFormData({...formData, fundingSourceId: e.target.value})}
@@ -77,7 +77,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
 
           <div className="grid grid-cols-2 gap-4">
               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-1">Fiscal Year</label>
+                 <label className="block text-sm font-bold text-slate-700 mb-1">Fiscal Year</label>
                  <select 
                      className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white"
                      value={formData.fiscalYear}
@@ -90,7 +90,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
                  </select>
               </div>
               <div>
-                 <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                 <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
                  <select 
                      className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white"
                      value={formData.status}
@@ -104,9 +104,9 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
           </div>
 
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
+             <label className="block text-sm font-bold text-slate-700 mb-1">Amount</label>
              <div className="relative">
-                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
                  <input 
                      type="number" 
                      className="w-full border border-slate-300 rounded-lg pl-8 pr-4 py-3 text-lg font-mono font-bold focus:ring-2 focus:ring-nexus-500"
@@ -117,23 +117,23 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
           </div>
 
           <div>
-             <label className="block text-sm font-medium text-slate-700 mb-1">Restrictions / Notes</label>
+             <label className="block text-sm font-bold text-slate-700 mb-1">Restrictions / Notes</label>
              <textarea 
-                 className="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-nexus-500"
+                 className="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-nexus-500 resize-none"
                  placeholder="e.g., Cannot be used for software licensing..."
                  value={transactionNote}
                  onChange={e => setTransactionNote(e.target.value)}
              />
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-lg flex gap-3 items-start border border-blue-100">
+          <div className="bg-blue-50 p-4 rounded-xl flex gap-3 items-start border border-blue-100">
              <AlertCircle size={20} className="text-blue-600 mt-0.5 shrink-0"/>
-             <p className="text-xs text-blue-800 leading-relaxed">
+             <p className="text-xs text-blue-800 leading-relaxed font-medium">
                  Allocating funds creates a ledger entry. Ensure authorization documents are signed before setting status to 'Released'.
              </p>
           </div>
        </div>
-    </Modal>
+    </SidePanel>
   );
 };
 

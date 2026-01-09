@@ -338,4 +338,28 @@ export const InlineEditingGridTmpl: React.FC = () => {
                         <tr>
                             <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase w-12">#</th>
                             <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Item</th>
-                            <th className="px-4 py-3 text-left text-xs font-bold text-slate-50
+                            <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Value</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">Note</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <tr key={i} className="group hover:bg-slate-50">
+                                <td className="px-4 py-3 text-xs text-slate-400">{i}</td>
+                                <td className="px-4 py-3">
+                                    <input className="w-full bg-transparent border-b border-transparent focus:border-nexus-500 outline-none text-sm font-medium" defaultValue={`Record ${i}`} />
+                                </td>
+                                <td className="px-4 py-3">
+                                    <input className="w-full bg-transparent border-b border-transparent focus:border-nexus-500 outline-none text-sm font-mono" defaultValue={(i * 123.45).toFixed(2)} />
+                                </td>
+                                <td className="px-4 py-3">
+                                    <input className="w-full bg-transparent border-b border-transparent focus:border-nexus-500 outline-none text-sm text-slate-500 italic" placeholder="Add note..." />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </Card>
+        </div>
+    );
+};

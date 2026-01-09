@@ -17,6 +17,7 @@ import PortfolioValue from './portfolio/PortfolioValue';
 import PortfolioGovernance from './portfolio/PortfolioGovernance';
 import PortfolioESG from './portfolio/PortfolioESG';
 import PortfolioPrograms from './portfolio/PortfolioPrograms';
+import StrategicAlignmentBoard from './portfolio/StrategicAlignmentBoard';
 import { PortfolioMap } from './portfolio/PortfolioMap';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation } from './common/ModuleNavigation';
@@ -59,6 +60,7 @@ const PortfolioManager: React.FC = () => {
       case 'roadmap': return <PortfolioRoadmap />;
       case 'scenarios': return <PortfolioScenarios />;
       case 'framework': return <PortfolioStrategyFramework />;
+      case 'alignment': return <StrategicAlignmentBoard />;
       case 'prioritization': return <PortfolioPrioritization />;
       case 'balancing': return <PortfolioBalancing />;
       case 'benefits': return <PortfolioBenefits />;

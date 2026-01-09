@@ -4,22 +4,25 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { BudgetTable } from './budget/BudgetTable';
 import { BudgetDetailPanel } from './budget/BudgetDetailPanel';
-import { calculateCommittedCost } from '../../utils/integrationUtils';
+import { calculateCommittedCost } from '../../utils/integrations/cost';
 import { Button } from '../ui/Button';
-import { Plus, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle, ArrowRightLeft } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { useData } from '../../context/DataContext';
 import { BudgetLineItem } from '../../types/index';
 import { generateId, formatCurrency } from '../../utils/formatters';
 import { useToast } from '../../context/ToastContext';
+import BudgetTransfer from './BudgetTransfer';
 
 const CostBudgetView: React.FC = () => {
     const { project, budgetItems, purchaseOrders } = useProjectWorkspace();
     const { dispatch } = useData();
-    const { success } = useToast();
+    const { success, error } = useToast();
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isTransferOpen, setIsTransferOpen] = useState(false);
+    
     const [newItem, setNewItem] = useState<Partial<BudgetLineItem>>({ category: '', planned: 0 });
     const theme = useTheme();
 
@@ -41,7 +44,15 @@ const CostBudgetView: React.FC = () => {
     const linkedPOs = selectedItem ? purchaseOrders.filter(po => po.linkedBudgetLineItemId === selectedItemId) : [];
 
     const handleAddItem = () => {
-        if (!newItem.category || !newItem.planned) return;
+        if (!newItem.category) {
+            error("Validation Error", "Category name is required.");
+            return;
+        }
+        if (!newItem.planned || newItem.planned <= 0) {
+            error("Validation Error", "Planned amount must be greater than zero.");
+            return;
+        }
+        
         const item: BudgetLineItem = {
             id: generateId('BLI'),
             projectId: project.id,
@@ -52,7 +63,7 @@ const CostBudgetView: React.FC = () => {
         dispatch({ type: 'ADD_BUDGET_ITEM', payload: item });
         setIsCreateOpen(false);
         setNewItem({ category: '', planned: 0 });
-        success("Budget Item Created", `Added ${item.category} to CBS.`);
+        success("Budget Item Created", `Added ${item.category} to Cost Breakdown Structure.`);
     };
 
     return (
@@ -67,35 +78,57 @@ const CostBudgetView: React.FC = () => {
                             <span className="text-slate-500">Allocated: <strong>{formatCurrency(totalAllocated)}</strong></span>
                         </div>
                     </div>
-                    {isBalanced ? (
-                        <div className="flex items-center gap-2 text-green-700 font-bold text-xs bg-green-100 px-3 py-1.5 rounded-full border border-green-200">
-                            <CheckCircle size={14}/> Fully Allocated
-                        </div>
-                    ) : (
-                         <div className="flex items-center gap-2 text-red-700 font-bold text-xs bg-white px-3 py-1.5 rounded-full border border-red-200 shadow-sm">
-                            <AlertTriangle size={14}/> Variance: {formatCurrency(variance)}
-                        </div>
-                    )}
-                    <Button size="sm" icon={Plus} onClick={() => setIsCreateOpen(true)}>Add Cost Code</Button>
+                    <div className="flex items-center gap-3">
+                        {isBalanced ? (
+                            <div className="flex items-center gap-2 text-green-700 font-bold text-xs bg-green-100 px-3 py-1.5 rounded-full border border-green-200">
+                                <CheckCircle size={14}/> Fully Allocated
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 text-red-700 font-bold text-xs bg-white px-3 py-1.5 rounded-full border border-red-200 shadow-sm">
+                                <AlertTriangle size={14}/> Variance: {formatCurrency(variance)}
+                            </div>
+                        )}
+                        <Button size="sm" variant="outline" icon={ArrowRightLeft} onClick={() => setIsTransferOpen(true)}>Transfer</Button>
+                        <Button size="sm" icon={Plus} onClick={() => setIsCreateOpen(true)}>Add Cost Code</Button>
+                    </div>
                 </div>
                 
                 <div className="flex-1 overflow-auto">
                     <BudgetTable items={tableData} onSelectItem={setSelectedItemId} />
                 </div>
             </div>
+            
             <BudgetDetailPanel item={selectedItem} linkedPOs={linkedPOs} onClose={() => setSelectedItemId(null)} />
             
+            {/* Create Modal */}
             <SidePanel
                 isOpen={isCreateOpen}
                 onClose={() => setIsCreateOpen(false)}
                 title="New Budget Item"
-                footer={<Button onClick={handleAddItem}>Create Item</Button>}
+                footer={
+                    <div className="flex justify-end gap-2 w-full">
+                        <Button variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddItem} icon={Plus}>Create Item</Button>
+                    </div>
+                }
             >
                 <div className="space-y-4">
                     <Input label="Category / Cost Code" value={newItem.category} onChange={e => setNewItem({...newItem, category: e.target.value})} placeholder="e.g. 03-3000 Concrete" />
                     <Input label="Planned Budget" type="number" value={newItem.planned} onChange={e => setNewItem({...newItem, planned: parseFloat(e.target.value)})} />
                 </div>
             </SidePanel>
+            
+            {/* Transfer Modal */}
+            {isTransferOpen && (
+                <SidePanel 
+                    isOpen={isTransferOpen}
+                    onClose={() => setIsTransferOpen(false)}
+                    title="Budget Transfer"
+                    width="md:w-[600px]"
+                >
+                    <BudgetTransfer projectId={project.id} onClose={() => setIsTransferOpen(false)} />
+                </SidePanel>
+            )}
         </div>
     );
 };
