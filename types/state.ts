@@ -26,6 +26,7 @@ import { ExtensionDataState } from './extensions';
 import { DailyLogEntry, SafetyIncident, PunchItem } from './field';
 import { RoadmapLane, RoadmapItem } from './strategy';
 import { KanbanTask, TeamEvent, ActivityItem } from './collaboration';
+import { ReportDefinition } from './analytics';
 
 export interface StagingRecord {
   id: string;
@@ -127,6 +128,7 @@ export interface DataState {
   costReports: CostReport[];
   costMeetings: any[];
   costAlerts: any[];
+  reportDefinitions: ReportDefinition[];
   systemMonitoring: {
     metrics: SystemMetric[];
     services: ServiceStatus[];

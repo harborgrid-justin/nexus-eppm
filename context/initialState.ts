@@ -66,6 +66,7 @@ export const initialState: DataState = {
           passwordComplexity: 'High',
           sessionLimit: 30,
           ipLock: false,
+          allowedIps: [],
           allowPublicLinks: false,
           enforceHttps: true,
           loginRetries: 5
@@ -150,11 +151,29 @@ export const initialState: DataState = {
   activities: [],
   teamEvents: [],
   pipelineStages: [],
-  knowledgeBase: [],
+  knowledgeBase: [
+      { 
+          id: 'KB-001', 
+          title: 'Budget Transfer Policy', 
+          category: 'Finance', 
+          content: '<h3>Overview</h3><p>All transfers above $10k require PMO approval...</p>',
+          authorId: 'U-001',
+          lastUpdated: '2024-05-15',
+          views: 42,
+          tags: ['Compliance', 'Finance']
+      }
+  ],
   etlMappings: [],
   costReports: [],
   costMeetings: [],
   costAlerts: [],
+  reportDefinitions: [
+      { id: 'status_summary', title: 'Monthly Status Report', category: 'General', description: 'High-level executive summary of project health, schedule, and key issues.', icon: 'FileText', type: 'Standard' },
+      { id: 'cost_ledger', title: 'Cost Ledger Detail', category: 'Financial', description: 'Detailed transaction log of all budget changes, commitments, and actuals.', icon: 'Table', type: 'Standard' },
+      { id: 'risk_register', title: 'Risk Register Export', category: 'Risk', description: 'Comprehensive list of active risks, scores, and mitigation plans.', icon: 'AlertTriangle', type: 'Standard' },
+      { id: 'evm_analysis', title: 'Earned Value Analysis', category: 'Performance', description: 'SPI, CPI, and EAC forecasting metrics by WBS.', icon: 'TrendingUp', type: 'Standard' },
+      { id: 'resource_load', title: 'Resource Utilization', category: 'Resource', description: 'Staffing demand vs capacity heatmaps.', icon: 'Activity', type: 'Standard' },
+  ],
   systemMonitoring: {
       metrics: [
           { id: 'm-db-size', name: 'Database Size', value: 0.0, unit: 'MB', threshold: 500, trend: [] },

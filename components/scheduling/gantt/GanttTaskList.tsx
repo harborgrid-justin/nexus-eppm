@@ -2,6 +2,7 @@
 import React, { forwardRef } from 'react';
 import { Task, WBSNode } from '../../../types';
 import { useTheme } from '../../../context/ThemeContext';
+import { ChevronRight, ChevronDown, Folder, FileText, AlertTriangle } from 'lucide-react';
 
 interface GanttTaskListProps {
   renderList: ({ type: 'wbs', node: WBSNode, level: number } | { type: 'task', task: Task, level: number })[];
@@ -26,63 +27,94 @@ export const GanttTaskList = forwardRef<HTMLDivElement, GanttTaskListProps>(({
   return (
     <div 
         className={`
-            flex-shrink-0 border-r ${theme.colors.border} flex flex-col ${theme.colors.surface} z-20
-            absolute inset-y-0 left-0 w-[85%] sm:w-3/4 shadow-xl transform transition-transform duration-300 md:relative md:w-[380px] md:shadow-none md:translate-x-0
+            flex-shrink-0 border-r border-slate-200 flex flex-col bg-white z-30 shadow-[4px_0_10px_rgba(0,0,0,0.05)]
+            absolute inset-y-0 left-0 w-[85%] sm:w-3/4 transform transition-transform duration-300 md:relative md:w-[400px] md:translate-x-0
             ${showTaskList ? 'translate-x-0' : '-translate-x-full'}
         `} 
         role="treegrid"
     >
-        <div className={`sticky top-0 z-30 ${theme.colors.background}/95 backdrop-blur-sm border-b ${theme.colors.border} h-[50px] flex items-center px-4 font-bold text-[10px] ${theme.colors.text.secondary} uppercase tracking-widest flex-shrink-0 shadow-sm`}>
-            <div className="flex-1 truncate">Task / Element Name</div>
-            <div className="w-12 text-center flex-shrink-0">Dur.</div>
+        {/* Sticky Header */}
+        <div className="h-[56px] border-b border-slate-200 bg-slate-50 flex items-end pb-2 px-4 font-bold text-[10px] text-slate-500 uppercase tracking-widest sticky top-0 z-20">
+            <div className="flex-1 truncate">Activity Name</div>
+            <div className="w-16 text-center flex-shrink-0">Dur</div>
+            <div className="w-16 text-center flex-shrink-0">%</div>
         </div>
         
         <div 
             ref={ref}
-            className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin"
+            className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin bg-white"
             onScroll={onScroll}
         >
             <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
                 {virtualItems.map(({ index, offsetTop }) => {
                     const item = renderList[index];
                     if (!item) return null;
+                    
+                    const paddingLeft = item.level * 16 + 12;
 
+                    // --- WBS NODE ROW ---
                     if (item.type === 'wbs') {
-                        return (
-                            <button 
-                                key={item.node.id}
-                                className={`group h-[44px] w-full flex items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-b-').replace('200','100')} hover:${theme.colors.background} text-xs text-left font-bold ${theme.colors.background}/50 focus:outline-none transition-all flex-shrink-0 min-w-0 absolute top-0 left-0`}
-                                style={{ 
-                                    paddingLeft: `${Math.min(item.level * 16 + 12, 100)}px`,
-                                    transform: `translateY(${offsetTop}px)`
-                                }}
-                                onClick={() => toggleNode(item.node.id)}
-                            >
-                                <span className={`mr-2 transition-transform duration-200 ${theme.colors.text.tertiary} w-4 flex-shrink-0 ${expandedNodes.has(item.node.id) ? 'rotate-0' : '-rotate-90'}`}>▼</span>
-                                <span className={`truncate flex-1 ${theme.colors.text.primary}`}>{item.node.name}</span>
-                            </button>
-                        );
-                    } else {
-                        const isSelected = selectedTask?.id === item.task.id;
+                        const isExpanded = expandedNodes.has(item.node.id);
                         return (
                             <div 
-                                key={item.task.id}
-                                onClick={() => setSelectedTask(item.task)}
-                                onContextMenu={(e) => onRowContextMenu?.(e, item.task)}
-                                className={`
-                                  h-[44px] w-full flex items-center px-4 border-b ${theme.colors.border.replace('border-', 'border-b-').replace('200','100')} text-xs text-left cursor-pointer transition-all flex-shrink-0 min-w-0 border-l-4 absolute top-0 left-0
-                                  ${isSelected ? 'bg-nexus-50/50 border-l-nexus-600 font-semibold text-nexus-900' : `hover:${theme.colors.background} border-l-transparent ${theme.colors.text.secondary}`}
-                                `}
-                                style={{ 
-                                    paddingLeft: `${Math.min(item.level * 16 + 32, 120)}px`,
-                                    transform: `translateY(${offsetTop}px)`
-                                }}
+                                key={item.node.id}
+                                className="absolute top-0 left-0 w-full flex items-center border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer select-none bg-slate-50/30"
+                                style={{ height: `${rowHeight}px`, transform: `translateY(${offsetTop}px)` }}
+                                onClick={() => toggleNode(item.node.id)}
                             >
-                                <div className="flex-1 truncate">{item.task.name}</div>
-                                <div className={`w-12 text-center text-[10px] ${theme.colors.text.tertiary} font-mono font-bold flex-shrink-0`}>{item.task.duration}d</div>
+                                <div className="flex-1 flex items-center pr-2" style={{ paddingLeft: `${paddingLeft}px` }}>
+                                    <span className="p-0.5 mr-1 text-slate-400">
+                                        {isExpanded ? <ChevronDown size={14}/> : <ChevronRight size={14}/>}
+                                    </span>
+                                    <Folder size={14} className="text-blue-400 mr-2 flex-shrink-0 fill-blue-50" />
+                                    <span className="font-bold text-xs text-slate-800 truncate">{item.node.name}</span>
+                                </div>
                             </div>
                         );
-                    }
+                    } 
+                    
+                    // --- TASK ROW ---
+                    const task = item.task;
+                    const isSelected = selectedTask?.id === task.id;
+                    const isCritical = task.critical;
+                    
+                    return (
+                        <div 
+                            key={task.id}
+                            onClick={() => setSelectedTask(task)}
+                            onContextMenu={(e) => onRowContextMenu?.(e, task)}
+                            className={`
+                              absolute top-0 left-0 w-full flex items-center border-b border-slate-100 cursor-pointer transition-colors
+                              ${isSelected ? 'bg-nexus-50' : 'hover:bg-slate-50 bg-white'}
+                            `}
+                            style={{ 
+                                height: `${rowHeight}px`, 
+                                transform: `translateY(${offsetTop}px)`,
+                                borderLeft: isSelected ? '4px solid #3b82f6' : '4px solid transparent'
+                            }}
+                        >
+                            <div className="flex-1 flex items-center pr-2 overflow-hidden" style={{ paddingLeft: `${paddingLeft + 18}px` }}>
+                                {/* Task Icon based on type */}
+                                {task.type === 'Milestone' ? (
+                                    <div className="w-2.5 h-2.5 bg-slate-800 rotate-45 mr-3 flex-shrink-0"></div>
+                                ) : (
+                                    <div className={`w-3 h-3 rounded-full mr-2 flex-shrink-0 ${task.status === 'Completed' ? 'bg-green-500' : isCritical ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                                )}
+                                
+                                <span className={`text-xs truncate ${isSelected ? 'font-bold text-nexus-900' : 'text-slate-700'}`}>
+                                    {task.name}
+                                </span>
+                                {isCritical && <AlertTriangle size={10} className="text-red-500 ml-2 flex-shrink-0" />}
+                            </div>
+
+                            <div className="w-16 text-center text-xs font-mono text-slate-600 border-l border-slate-50 h-full flex items-center justify-center">
+                                {task.duration}d
+                            </div>
+                            <div className="w-16 text-center text-xs font-mono text-slate-600 border-l border-slate-50 h-full flex items-center justify-center">
+                                {Math.round(task.progress)}%
+                            </div>
+                        </div>
+                    );
                 })}
             </div>
         </div>

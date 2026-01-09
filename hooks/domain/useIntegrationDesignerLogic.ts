@@ -12,6 +12,24 @@ export const useIntegrationDesignerLogic = () => {
     // Mapping State populated from global store
     const [mappings, setMappings] = useState<EtlMapping[]>([]);
     
+    // Orchestration State
+    const [orchestration, setOrchestration] = useState({
+        triggerType: 'Scheduled',
+        cronExpression: '0 0 * * *',
+        frequency: 'Daily',
+        retryAttempts: 3,
+        backoffInterval: 300, // seconds
+        dependencyJobId: ''
+    });
+
+    // Governance State
+    const [governance, setGovernance] = useState({
+        validationMode: 'Strict',
+        errorThreshold: 5, // %
+        notifyEmails: 'admin@nexus.com',
+        dataSteward: 'Chief Data Officer'
+    });
+
     // Editable Test Payload State
     const [testPayload, setTestPayload] = useState(JSON.stringify({
         EXTERNAL_ID: "PRJ-9920",
@@ -58,7 +76,9 @@ export const useIntegrationDesignerLogic = () => {
 
     const handleSaveConfig = () => {
         dispatch({ type: 'SYSTEM_SAVE_ETL_MAPPINGS', payload: mappings });
-        // In a real app, this would trigger a toast
+        // In a real app, this would trigger a toast and save orchestration/governance
+        // Here we simulate saving the full config
+        console.log("Saving Full Integration Config:", { mappings, orchestration, governance });
         alert("ETL Configuration Saved to System Core.");
     };
 
@@ -120,6 +140,10 @@ export const useIntegrationDesignerLogic = () => {
         setTestPayload,
         availableTargets,
         previewOutput,
+        orchestration,
+        setOrchestration,
+        governance,
+        setGovernance,
         handleAddMapping,
         handleRemoveMapping,
         handleTargetChange,

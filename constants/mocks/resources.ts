@@ -2,6 +2,7 @@
 import { Resource, Timesheet } from '../../types';
 
 export const MOCK_RESOURCES: Resource[] = [
+  // --- LEADERSHIP ---
   { 
     id: 'R-001', 
     userId: 'U-003', 
@@ -26,11 +27,121 @@ export const MOCK_RESOURCES: Resource[] = [
     capacity: 160, 
     allocated: 180, 
     hourlyRate: 150, 
-    skills: ['Scheduling', 'P6'], 
+    skills: ['Scheduling', 'P6', 'Risk Mgmt'], 
     costRates: [], 
     calendarId: 'CAL-STD' 
   },
-  // --- EQUIPMENT (Matching Request: 50% Availability) ---
+  { 
+    id: 'R-003', 
+    userId: 'U-004', 
+    name: 'Louis Litt', 
+    role: 'Financial Controller', 
+    type: 'Human', 
+    status: 'Active', 
+    capacity: 160, 
+    allocated: 150, 
+    hourlyRate: 200, 
+    skills: ['Cost Controls', 'Auditing'], 
+    costRates: [], 
+    calendarId: 'CAL-STD' 
+  },
+
+  // --- CONSTRUCTION CREW ---
+  {
+    id: 'R-CON-01',
+    name: 'Site Foreman (General)',
+    role: 'Superintendent',
+    type: 'Human',
+    status: 'Active',
+    capacity: 180,
+    allocated: 160,
+    hourlyRate: 110,
+    skills: ['Safety', 'Logistics'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+  {
+    id: 'R-CON-02',
+    name: 'Civil Crew A',
+    role: 'Civil Team',
+    type: 'Labor',
+    status: 'Active',
+    capacity: 640, // 4 people * 160
+    allocated: 400,
+    hourlyRate: 85,
+    skills: ['Excavation', 'Concrete'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+  {
+    id: 'R-CON-03',
+    name: 'Ironworkers Local 4',
+    role: 'Structural Team',
+    type: 'Labor',
+    status: 'Active',
+    capacity: 800, // 5 people
+    allocated: 0,
+    hourlyRate: 120,
+    skills: ['Welding', 'Rigging'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+  {
+    id: 'R-CON-04',
+    name: 'MEP Engineers',
+    role: 'MEP Team',
+    type: 'Labor',
+    status: 'Active',
+    capacity: 320,
+    allocated: 100,
+    hourlyRate: 145,
+    skills: ['Electrical', 'HVAC', 'Plumbing'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+
+  // --- SOFTWARE TEAM ---
+  {
+    id: 'R-SW-01',
+    name: 'Sarah Chen',
+    role: 'Senior Architect',
+    type: 'Human',
+    status: 'Active',
+    capacity: 160,
+    allocated: 140,
+    hourlyRate: 180,
+    skills: ['Cloud Architecture', 'System Design'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+  {
+    id: 'R-SW-02',
+    name: 'Frontend Squad Alpha',
+    role: 'Development Team',
+    type: 'Labor',
+    status: 'Active',
+    capacity: 480, // 3 devs
+    allocated: 400,
+    hourlyRate: 110,
+    skills: ['React', 'TypeScript', 'Tailwind'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+  {
+    id: 'R-SW-03',
+    name: 'Backend Squad Beta',
+    role: 'Development Team',
+    type: 'Labor',
+    status: 'Active',
+    capacity: 480,
+    allocated: 420,
+    hourlyRate: 115,
+    skills: ['Node.js', 'Python', 'SQL'],
+    costRates: [],
+    calendarId: 'CAL-STD'
+  },
+
+  // --- EQUIPMENT ---
   { 
     id: 'EQ-001', 
     name: 'Caterpillar 320 GC', 
@@ -42,7 +153,7 @@ export const MOCK_RESOURCES: Resource[] = [
     hourlyRate: 450, 
     skills: [], 
     costRates: [], 
-    calendarId: '24/7',
+    calendarId: 'CAL-247',
     maintenanceStatus: 'Good',
     location: 'Sector A-4',
     serialNumber: 'CAT-320-99X'
@@ -63,7 +174,8 @@ export const MOCK_RESOURCES: Resource[] = [
     location: 'Yard 2',
     serialNumber: 'LB-HEAVY-01'
   },
-  // --- MATERIALS (Matching Request) ---
+
+  // --- MATERIALS ---
   { 
     id: 'MAT-001', 
     name: 'Ready-Mix Concrete Grade 40', 
@@ -72,7 +184,7 @@ export const MOCK_RESOURCES: Resource[] = [
     status: 'Active', 
     capacity: 0, 
     allocated: 0, 
-    hourlyRate: 0, 
+    hourlyRate: 120, // Unit Price
     skills: [], 
     costRates: [], 
     calendarId: 'CAL-STD',
@@ -89,7 +201,7 @@ export const MOCK_RESOURCES: Resource[] = [
     status: 'Active', 
     capacity: 0, 
     allocated: 0, 
-    hourlyRate: 0, 
+    hourlyRate: 850, // Unit Price
     skills: [], 
     costRates: [], 
     calendarId: 'CAL-STD',

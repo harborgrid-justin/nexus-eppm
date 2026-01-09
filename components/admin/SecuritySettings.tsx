@@ -1,13 +1,12 @@
 
-// ... existing imports
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
-import { Shield, Lock, Fingerprint, Globe, ShieldAlert, CheckCircle, Save, Key, Wifi, Clock, AlertTriangle, UserX, RotateCcw } from 'lucide-react';
+import { Shield, Lock, Fingerprint, Globe, CheckCircle, Save, Key, Clock, AlertTriangle, UserX, RotateCcw, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { Input } from '../ui/Input';
 
 const SecuritySettings: React.FC = () => {
     const { state, dispatch } = useData();
@@ -16,6 +15,7 @@ const SecuritySettings: React.FC = () => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     
     const [policies, setPolicies] = useState(state.governance.security);
+    const [newIp, setNewIp] = useState('');
 
     useEffect(() => {
         setPolicies(state.governance.security);
@@ -23,10 +23,28 @@ const SecuritySettings: React.FC = () => {
 
     const handleSave = () => {
         dispatch({ type: 'GOVERNANCE_UPDATE_SECURITY_POLICY', payload: policies });
+        alert("Security policy updated.");
     };
 
     const runSecurityAudit = () => {
         // Dispatch action if needed
+    };
+    
+    const addIp = () => {
+        if (newIp && /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(newIp)) {
+            const currentIps = policies.allowedIps || [];
+            if (!currentIps.includes(newIp)) {
+                setPolicies({ ...policies, allowedIps: [...currentIps, newIp] });
+                setNewIp('');
+            }
+        } else {
+            alert("Invalid IP Address or CIDR block.");
+        }
+    };
+
+    const removeIp = (ip: string) => {
+        const currentIps = policies.allowedIps || [];
+        setPolicies({ ...policies, allowedIps: currentIps.filter(i => i !== ip) });
     };
 
     // Generate a visual hash based on the current user ID to simulate a linked key
@@ -110,6 +128,33 @@ const SecuritySettings: React.FC = () => {
                             <span className="text-sm font-bold text-slate-700">Strict IP Whitelisting</span>
                             <input type="checkbox" checked={policies.ipLock} onChange={() => setPolicies({...policies, ipLock: !policies.ipLock})} className="w-10 h-5 rounded-full appearance-none bg-slate-200 checked:bg-nexus-600 relative cursor-pointer transition-all before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:left-5 shadow-inner" />
                         </div>
+                        
+                        {policies.ipLock && (
+                            <div className="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="0.0.0.0/0" 
+                                        className="flex-1 text-xs border rounded px-2 py-1"
+                                        value={newIp}
+                                        onChange={e => setNewIp(e.target.value)}
+                                    />
+                                    <button onClick={addIp} className="bg-nexus-600 text-white rounded p-1"><Plus size={14}/></button>
+                                </div>
+                                <div className="max-h-32 overflow-y-auto space-y-1">
+                                    {policies.allowedIps?.map(ip => (
+                                        <div key={ip} className="flex justify-between items-center text-xs bg-white border px-2 py-1 rounded">
+                                            <span className="font-mono">{ip}</span>
+                                            <button onClick={() => removeIp(ip)} className="text-red-500 hover:text-red-700"><Trash2 size={12}/></button>
+                                        </div>
+                                    ))}
+                                    {(!policies.allowedIps || policies.allowedIps.length === 0) && (
+                                        <div className="text-[10px] text-slate-400 text-center italic">No IPs whitelisted. Access restricted.</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-bold text-slate-700">Enforce TLS 1.3</span>
                             <input type="checkbox" checked={true} readOnly className="w-10 h-5 rounded-full appearance-none bg-nexus-600 relative cursor-default before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-5 shadow-inner" />

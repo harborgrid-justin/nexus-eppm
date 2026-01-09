@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import { Project } from '../../types';
 import { getDaysDiff } from '../../utils/dateUtils';
 
-export const DAY_WIDTH = 50;
+// Standard width for daily view visibility
+export const DAY_WIDTH = 40; 
 
 export const useGanttTimeline = (
   project: Project,
@@ -11,23 +12,26 @@ export const useGanttTimeline = (
   dayWidth: number
 ) => {
   const projectStart = useMemo(() => {
-    if (!project.tasks.length) return new Date();
+    if (!project.tasks || !project.tasks.length) return new Date();
     const starts = project.tasks.map(t => new Date(t.startDate).getTime()).filter(t => !isNaN(t));
     if (starts.length === 0) return new Date();
-    return new Date(Math.min(...starts));
+    // Buffer start by 7 days for aesthetics
+    const min = new Date(Math.min(...starts));
+    min.setDate(min.getDate() - 7); 
+    return min;
   }, [project.tasks]);
 
   const projectEnd = useMemo(() => {
-    if (!project.tasks.length) return new Date();
+    if (!project.tasks || !project.tasks.length) return new Date();
     const ends = project.tasks.map(t => new Date(t.endDate).getTime()).filter(t => !isNaN(t));
     if (ends.length === 0) return new Date();
     return new Date(Math.max(...ends));
   }, [project.tasks]);
 
-  // Add buffer to end
+  // Add large buffer to end for drag space
   const displayEnd = useMemo(() => {
       const d = new Date(projectEnd);
-      d.setDate(d.getDate() + 30); 
+      d.setDate(d.getDate() + 60); 
       return d;
   }, [projectEnd]);
 
@@ -43,7 +47,7 @@ export const useGanttTimeline = (
         const currentDate = new Date(projectStart);
         currentDate.setDate(currentDate.getDate() + i);
         
-        // Month grouping
+        // Month grouping logic
         if (currentDate.getMonth() !== currentMonth) {
             if (currentMonth !== -1) {
                 const key = new Date(projectStart.getFullYear(), currentMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -54,7 +58,8 @@ export const useGanttTimeline = (
         }
 
         // Days
-        const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+        const dayOfWeek = currentDate.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sun = 0, Sat = 6
         days.push({
             date: currentDate,
             isWorking: !isWeekend

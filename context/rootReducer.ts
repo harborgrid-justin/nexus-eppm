@@ -1,3 +1,4 @@
+
 import { DataState, Action } from '../types/index';
 import { projectReducer } from './reducers/projectSlice';
 import { programReducer } from './reducers/programSlice';
@@ -13,6 +14,8 @@ import { fieldReducer } from './reducers/fieldSlice';
 import { strategyReducer } from './reducers/strategySlice';
 import { extensionReducer } from './reducers/extensionSlice';
 import { stagingReducer } from './reducers/stagingSlice';
+import { knowledgeReducer } from './reducers/knowledgeSlice';
+import { reportReducer } from './reducers/reportSlice';
 import { applyBusinessLogic } from '../utils/businessLogic';
 import { initialState } from './initialState';
 import { constructionDemoData } from '../constants/demos/constructionDemo';
@@ -63,6 +66,10 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
       nextState = extensionReducer(state, action);
   } else if (action.type.startsWith('STAGING_')) {
       nextState = stagingReducer(state, action);
+  } else if (action.type.includes('ARTICLE')) {
+      nextState = knowledgeReducer(state, action);
+  } else if (action.type.includes('REPORT_DEF')) {
+      nextState = reportReducer(state, action);
   }
   
   return applyBusinessLogic(nextState, action, state);

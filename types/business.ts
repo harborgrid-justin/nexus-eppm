@@ -34,6 +34,7 @@ export interface SecurityPolicy {
   passwordComplexity: string;
   sessionLimit: number;
   ipLock: boolean;
+  allowedIps?: string[];
   allowPublicLinks: boolean;
   enforceHttps: boolean;
   loginRetries: number;

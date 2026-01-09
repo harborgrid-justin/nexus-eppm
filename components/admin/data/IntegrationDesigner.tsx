@@ -5,132 +5,38 @@ import { NEXUS_SCHEMAS } from '../../../constants/index';
 import { EtlMapping } from '../../../types';
 import { 
     GitMerge, ArrowRight, Save, Clock, Shield, Plus,
-    Database, Shuffle, Variable, X, PlayCircle, Layers
+    Database, Shuffle, Variable, X, PlayCircle, Layers,
+    Calendar, RefreshCw, AlertTriangle, UserCheck
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
+import { Input } from '../../ui/Input';
+import { useIntegrationDesignerLogic } from '../../../hooks/domain/useIntegrationDesignerLogic';
 
 export const IntegrationDesigner: React.FC = () => {
     const theme = useTheme();
-    const { state, dispatch } = useData();
-    const [activeTab, setActiveTab] = useState<'mapping' | 'transform' | 'orchestration' | 'governance'>('mapping');
-    const [targetEntity, setTargetEntity] = useState('Project');
-    const [mappings, setMappings] = useState<EtlMapping[]>([]);
-    
-    const [testPayload, setTestPayload] = useState('');
-
-    // Hydrate test payload with real data sample if available
-    useEffect(() => {
-        if (state.projects.length > 0) {
-            const sample = state.projects[0];
-            setTestPayload(JSON.stringify({
-                EXTERNAL_ID: sample.code || "EXT-001",
-                PROJ_NAME: sample.name || "Sample Project",
-                BUDGET_AMT: sample.budget ? String(sample.budget) : "0",
-                START_DT: sample.startDate || new Date().toISOString(),
-                COST_CENTER: "CC-DEFAULT",
-                STATUS_CODE: sample.status === 'Active' ? "A" : "I"
-            }, null, 2));
-        } else {
-            // Fallback if no projects exist
-            setTestPayload(JSON.stringify({
-                EXTERNAL_ID: "PRJ-9920",
-                PROJ_NAME: "Global Expansion Initiative", 
-                BUDGET_AMT: "1250000.00",
-                START_DT: "2024-10-01T00:00:00Z"
-            }, null, 2));
-        }
-    }, [state.projects]);
-
-    useEffect(() => {
-        if(state.etlMappings && state.etlMappings.length > 0) {
-            setMappings(state.etlMappings);
-        }
-    }, [state.etlMappings]);
-
-    const availableTargets = useMemo(() => NEXUS_SCHEMAS[targetEntity] || [], [targetEntity]);
-
-    const handleAddMapping = () => {
-        setMappings([...mappings, { 
-            id: Date.now(), 
-            source: '', 
-            target: availableTargets[0] || '', 
-            transform: 'Direct', 
-            type: 'String' 
-        }]);
-    };
-
-    const handleRemoveMapping = (id: number) => {
-        setMappings(mappings.filter(m => m.id !== id));
-    };
-
-    const handleTargetChange = (id: number, newTarget: string) => {
-        setMappings(mappings.map(m => m.id === id ? { ...m, target: newTarget } : m));
-    };
-
-    const handleSourceChange = (id: number, newSource: string) => {
-        setMappings(mappings.map(m => m.id === id ? { ...m, source: newSource } : m));
-    };
-
-    const handleTransformChange = (id: number, newTransform: string) => {
-        setMappings(mappings.map(m => m.id === id ? { ...m, transform: newTransform } : m));
-    };
-
-    const handleSaveConfig = () => {
-        dispatch({ type: 'SYSTEM_SAVE_ETL_MAPPINGS', payload: mappings });
-    };
-
-    // --- Dynamic Preview Generation ---
-    const previewOutput = useMemo(() => {
-        let sourceData: Record<string, unknown> = {};
-        try {
-            sourceData = JSON.parse(testPayload);
-        } catch (e) {
-            return { error: "Invalid JSON in Source Payload" };
-        }
-
-        const result: Record<string, unknown> = {};
-        
-        mappings.forEach(m => {
-            if (!m.target) return;
-            
-            let val: unknown = sourceData[m.source] !== undefined ? sourceData[m.source] : null;
-
-            if (val !== null) {
-                if (m.transform === 'Trim Whitespace' && typeof val === 'string') {
-                    val = val.trim();
-                } else if ((m.transform === 'Currency(USD)' || m.transform === 'Number') && (typeof val === 'string' || typeof val === 'number')) {
-                    val = parseFloat(String(val));
-                } else if (m.transform === 'Date(ISO8601)' && typeof val === 'string') {
-                    try { val = new Date(val).toISOString().split('T')[0]; } catch {}
-                } else if (m.transform === 'Uppercase' && typeof val === 'string') {
-                    val = val.toUpperCase();
-                }
-            }
-
-            if (m.target.includes('.')) {
-                const parts = m.target.split('.');
-                const root = parts[0];
-                const key = parts[1];
-                
-                if (typeof result[root] !== 'object' || result[root] === null) {
-                    result[root] = {};
-                }
-                (result[root] as Record<string, unknown>)[key] = val;
-            } else {
-                result[m.target] = val;
-            }
-        });
-
-        return {
-            source_id: sourceData.EXTERNAL_ID,
-            timestamp: new Date().toISOString(),
-            status: "Transformed",
-            entity: targetEntity,
-            data: result
-        };
-    }, [mappings, targetEntity, testPayload]);
+    const {
+        activeTab,
+        setActiveTab,
+        targetEntity,
+        setTargetEntity,
+        mappings,
+        testPayload,
+        setTestPayload,
+        availableTargets,
+        previewOutput,
+        orchestration,
+        setOrchestration,
+        governance,
+        setGovernance,
+        handleAddMapping,
+        handleRemoveMapping,
+        handleTargetChange,
+        handleSourceChange,
+        handleTransformChange,
+        handleSaveConfig
+    } = useIntegrationDesignerLogic();
 
     return (
         <div className="h-full flex flex-col">
@@ -292,6 +198,125 @@ export const IntegrationDesigner: React.FC = () => {
                                     <pre className="text-green-400">
                                         {JSON.stringify(previewOutput, null, 2)}
                                     </pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'orchestration' && (
+                    <div className="max-w-2xl mx-auto space-y-6">
+                        <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm`}>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Clock size={18} className="text-nexus-600"/> Scheduling & Triggers</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Trigger Type</label>
+                                    <div className="flex gap-2">
+                                        {['Scheduled', 'Event-Based', 'Manual'].map(t => (
+                                            <button 
+                                                key={t}
+                                                onClick={() => setOrchestration({...orchestration, triggerType: t})}
+                                                className={`flex-1 py-2 text-sm rounded border ${orchestration.triggerType === t ? 'bg-nexus-50 border-nexus-200 text-nexus-700 font-bold' : 'border-slate-200 text-slate-600'}`}
+                                            >
+                                                {t}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                {orchestration.triggerType === 'Scheduled' && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Frequency</label>
+                                            <select 
+                                                className="w-full p-2 border border-slate-300 rounded text-sm"
+                                                value={orchestration.frequency}
+                                                onChange={e => setOrchestration({...orchestration, frequency: e.target.value})}
+                                            >
+                                                <option>Hourly</option>
+                                                <option>Daily</option>
+                                                <option>Weekly</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">CRON Expression</label>
+                                            <Input 
+                                                value={orchestration.cronExpression} 
+                                                onChange={e => setOrchestration({...orchestration, cronExpression: e.target.value})} 
+                                                className="font-mono text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm`}>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><RefreshCw size={18} className="text-orange-500"/> Retry Policy</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Max Attempts</label>
+                                    <Input 
+                                        type="number" 
+                                        value={orchestration.retryAttempts} 
+                                        onChange={e => setOrchestration({...orchestration, retryAttempts: parseInt(e.target.value)})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Backoff (Seconds)</label>
+                                    <Input 
+                                        type="number" 
+                                        value={orchestration.backoffInterval} 
+                                        onChange={e => setOrchestration({...orchestration, backoffInterval: parseInt(e.target.value)})}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'governance' && (
+                    <div className="max-w-2xl mx-auto space-y-6">
+                        <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm`}>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Shield size={18} className="text-green-600"/> Data Quality Gates</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Validation Mode</label>
+                                    <select 
+                                        className="w-full p-2 border border-slate-300 rounded text-sm"
+                                        value={governance.validationMode}
+                                        onChange={e => setGovernance({...governance, validationMode: e.target.value})}
+                                    >
+                                        <option value="Strict">Strict (Fail Batch on Any Error)</option>
+                                        <option value="Permissive">Permissive (Skip Errors & Log)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Error Threshold (%)</label>
+                                    <div className="flex items-center gap-2">
+                                        <input 
+                                            type="range" min="0" max="20" 
+                                            value={governance.errorThreshold} 
+                                            onChange={e => setGovernance({...governance, errorThreshold: parseInt(e.target.value)})}
+                                            className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-nexus-600"
+                                        />
+                                        <span className="w-12 text-right font-bold text-sm">{governance.errorThreshold}%</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1">Job aborts if error rate exceeds this value.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm`}>
+                            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><UserCheck size={18} className="text-blue-600"/> Stewardship & Alerting</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Data Steward</label>
+                                    <Input value={governance.dataSteward} onChange={e => setGovernance({...governance, dataSteward: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Failure Notification</label>
+                                    <Input value={governance.notifyEmails} onChange={e => setGovernance({...governance, notifyEmails: e.target.value})} placeholder="email@company.com" />
                                 </div>
                             </div>
                         </div>

@@ -1,3 +1,4 @@
+
 // This barrel file re-exports all types from their domain-specific files.
 
 export * from './actions';
@@ -21,3 +22,4 @@ export * from './strategy';
 export * from './structure';
 export * from './ui';
 export * from './unifier';
+export * from './analytics';

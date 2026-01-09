@@ -29,6 +29,9 @@ const ResourceNegotiationHub = lazy(() => import('./components/resources/Resourc
 const StrategicAlignmentBoard = lazy(() => import('./components/portfolio/StrategicAlignmentBoard'));
 const PivotAnalytics = lazy(() => import('./components/reports/PivotAnalytics'));
 
+// Phase 9
+const KnowledgeBaseExplorer = lazy(() => import('./components/knowledge/KnowledgeBaseExplorer').then(module => ({ default: module.KnowledgeBaseExplorer })));
+
 export const routes: RouteObject[] = [
     {
         path: '/',
@@ -59,6 +62,9 @@ export const routes: RouteObject[] = [
             { path: 'negotiation', element: <ResourceNegotiationHub /> },
             { path: 'strategy-board', element: <StrategicAlignmentBoard /> },
             { path: 'analytics', element: <PivotAnalytics /> },
+            
+            // New Phase 9 Route
+            { path: 'knowledge', element: <KnowledgeBaseExplorer /> },
         ]
     },
     { path: '/login', element: <LoginPage /> }

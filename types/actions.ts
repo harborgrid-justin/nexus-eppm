@@ -183,4 +183,9 @@ export type Action =
     | { type: 'STAGING_CLEAR' }
     | { type: 'ADD_BENEFIT'; payload: any }
     | { type: 'ADD_ARCH_STANDARD'; payload: any }
+    | { type: 'ADD_ARTICLE'; payload: any }
+    | { type: 'UPDATE_ARTICLE'; payload: any }
+    | { type: 'DELETE_ARTICLE'; payload: string }
+    | { type: 'ADD_REPORT_DEF'; payload: any }
+    | { type: 'DELETE_REPORT_DEF'; payload: string }
 ;
