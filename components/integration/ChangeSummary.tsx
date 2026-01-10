@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { formatCurrency } from '../../utils/formatters';
 import { FileText, CheckCircle, Clock } from 'lucide-react';

@@ -1,10 +1,10 @@
-
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Users, AlertTriangle, Briefcase } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { FieldPlaceholder } from '../common/FieldPlaceholder';
 
 interface ProgramResourcesProps {
   programId: string;
@@ -92,7 +92,7 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Briefcase size={18}/> Shared Capabilities</h3>
                 <div className="space-y-4">
-                    {roleDistribution.map(role => (
+                    {roleDistribution.length > 0 ? roleDistribution.map(role => (
                         <div key={role.role} className="space-y-1">
                             <div className="flex justify-between text-sm">
                                 <span className="font-medium text-slate-700">{role.role}</span>
@@ -117,9 +117,12 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                                 <span>Cap: {role.capacity}h</span>
                             </div>
                         </div>
-                    ))}
-                    {roleDistribution.length === 0 && (
-                        <div className="p-8 text-center text-slate-400 italic text-sm">No active resource assignments found in program.</div>
+                    )) : (
+                        <FieldPlaceholder 
+                            label="No active resource assignments found in program." 
+                            onAdd={() => {}} 
+                            icon={Briefcase}
+                        />
                     )}
                 </div>
             </div>
