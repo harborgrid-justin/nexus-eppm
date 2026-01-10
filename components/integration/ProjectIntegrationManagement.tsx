@@ -29,13 +29,11 @@ const ProjectIntegrationManagement: React.FC = () => {
     };
   }, [project, changeOrders]);
 
-  // Fix: Derive next board meeting from global governance state
   const boardMeetingInfo = useMemo(() => {
     const boardEvent = state.governanceEvents.find(e => e.type === 'Steering Committee');
     return boardEvent ? `${boardEvent.name} is scheduled for ${boardEvent.nextDate}.` : 'No upcoming board meetings scheduled.';
   }, [state.governanceEvents]);
 
-  // Fix: Derive exposure status dynamically from financials
   const exposureInfo = useMemo(() => {
       if (!financials || !project) return '';
       const threshold = project.originalBudget * 0.15;
@@ -79,7 +77,6 @@ const ProjectIntegrationManagement: React.FC = () => {
               />
               <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
                 <ProjectCharterSummary project={project} financials={financials} />
-                {/* Fix: Pass dynamic governance data to ChangeSummary */}
                 <ChangeSummary 
                     approvedCOAmount={financials.approvedCOAmount} 
                     pendingCOAmount={financials.pendingCOAmount} 

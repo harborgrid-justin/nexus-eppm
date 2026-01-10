@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useProgramScopeLogic } from '../../hooks/domain/useProgramScopeLogic';
 import { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock, Plus, Edit2, Trash2, Target } from 'lucide-react';
@@ -65,11 +64,13 @@ const ProgramScope: React.FC<ProgramScopeProps> = ({ programId }) => {
                         </div>
                     </Card>
                 )) : (
-                    <EmptyGrid 
-                        title="No Outcomes Defined" 
-                        description="Define the strategic outcomes and benefits this program will deliver."
-                        icon={Target}
-                    />
+                    <div className="h-[250px] flex">
+                        <EmptyGrid 
+                            title="Program Logic Undefined" 
+                            description="No high-level outcomes or strategic benefits have been identified for this program lifecycle."
+                            icon={Sliders}
+                        />
+                    </div>
                 )}
             </div>
         </section>
@@ -151,8 +152,8 @@ const ProgramScope: React.FC<ProgramScopeProps> = ({ programId }) => {
                 ) : (
                     <div className="p-12">
                         <EmptyGrid 
-                            title="No Change Requests"
-                            description="The change log is clear. Submit a request to modify program baseline scope, budget, or timeline."
+                            title="Change Control Queue Clear"
+                            description="No formal change requests (PCRs) have been registered for this program scope. All execution remains aligned to the strategic baseline."
                             icon={Clock}
                             actionLabel="Submit Change Request"
                             onAdd={() => handleOpenPanel()}

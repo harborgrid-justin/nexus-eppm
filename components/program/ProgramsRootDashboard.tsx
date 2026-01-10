@@ -1,7 +1,7 @@
-
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
 import { ProgramCommandBar } from './dashboard/ProgramCommandBar';
 import { ProgramPortfolioStats } from './dashboard/ProgramPortfolioStats';
 import { ProgramListGrid } from './dashboard/ProgramListGrid';
@@ -11,8 +11,9 @@ interface ProgramsRootDashboardProps {
 }
 
 const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectProgram }) => {
-  const { state, dispatch } = useData();
+  const { state } = useData();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const metrics = useMemo(() => {
     const totalBudget = state.programs.reduce((acc, p) => acc + p.budget, 0);
@@ -30,29 +31,8 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
   }, [state.programs, state.projects]);
 
   const handleCreateProgram = () => {
-    const id = `PRG-${Date.now()}`;
-    dispatch({ 
-        type: 'ADD_PROGRAM', 
-        payload: {
-            id,
-            name: 'New Strategic Initiative',
-            managerId: 'Unassigned',
-            description: 'Define program scope and strategic alignment...',
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: '',
-            budget: 0,
-            benefits: '',
-            status: 'Planned',
-            health: 'Good',
-            strategicImportance: 5,
-            financialValue: 0,
-            riskScore: 0,
-            calculatedPriorityScore: 0,
-            category: 'Strategic',
-            businessCase: ''
-        }
-    });
-    onSelectProgram(id);
+    // Navigate to dedicated enterprise creation page
+    navigate('/programs/create');
   };
 
   return (

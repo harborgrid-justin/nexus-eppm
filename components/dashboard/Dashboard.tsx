@@ -1,6 +1,5 @@
-
 import React, { useState, useTransition } from 'react';
-import { Sparkles, Loader2, Briefcase, TrendingUp, AlertTriangle, Target } from 'lucide-react';
+import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { usePortfolioState } from '../../hooks/usePortfolioState';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
 import { SidePanel } from '../ui/SidePanel';
@@ -13,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { PortfolioCommandBar } from './PortfolioCommandBar';
 import { SystemPulse } from './SystemPulse';
-import { Card } from '../ui/Card';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
@@ -27,6 +25,7 @@ const Dashboard: React.FC = () => {
   const handleGenerateReport = () => { setIsReportOpen(true); generateReport(projects); };
   const handleViewChange = (t: 'financial' | 'strategic') => startTransition(() => setViewType(t));
 
+  // Oracle P6 Parity: Check for Portfolio-level initialization (EPS presence)
   if (summary.totalProjects === 0) {
       return (
           <div className="h-full flex flex-col p-6 md:p-8 animate-in fade-in duration-500">
@@ -39,17 +38,16 @@ const Dashboard: React.FC = () => {
               <div className="flex-1 flex items-center justify-center">
                   <EmptyGrid 
                     title="Portfolio Not Initialized"
-                    description="The executive dashboard requires active project data to generate insights. Initialize your first strategic initiative to activate real-time analytics."
-                    icon={Briefcase}
-                    actionLabel="Launch First Project"
-                    onAdd={() => navigate('/projectList?action=create')}
+                    description="Your executive dashboard requires a defined Enterprise Project Structure (EPS) and active programs to generate insights. Establish your first strategic portfolio to activate real-time analytics."
+                    icon={Globe}
+                    actionLabel="Provision Strategic Portfolio"
+                    onAdd={() => navigate('/getting-started?action=wizard')}
                   />
               </div>
           </div>
       );
   }
 
-  // Dynamic Strategic Insight based on Portfolio Data
   const strategicInsight = React.useMemo(() => {
      const atRisk = summary.healthCounts.critical + summary.healthCounts.warning;
      const riskRatio = atRisk / summary.totalProjects;
@@ -67,7 +65,6 @@ const Dashboard: React.FC = () => {
 
       <DashboardHeader onGenerateReport={handleGenerateReport} isGenerating={isGenerating} viewType={viewType} onViewChange={handleViewChange} />
       
-      {/* Strategic Insight Banner */}
       <div className={`p-4 rounded-xl border flex items-start gap-4 shadow-sm ${
           strategicInsight.type === 'critical' ? 'bg-red-50 border-red-200' : 
           strategicInsight.type === 'warning' ? 'bg-amber-50 border-amber-200' : 

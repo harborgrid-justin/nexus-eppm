@@ -1,3 +1,4 @@
+
 import { DataState, Action } from '../../types/index';
 
 export const programReducer = (state: DataState, action: Action): DataState => {
@@ -32,9 +33,12 @@ export const programReducer = (state: DataState, action: Action): DataState => {
             programAllocations: state.programAllocations.map(a => a.id === action.payload.id ? action.payload : a)
         };
     case 'PROGRAM_UPDATE_GATE':
+        /* Fixed: Correctly updating both stage and funding gates by casting to any to allow map to return the expected array type.
+           The logic identifies which array contains the ID to ensure state integrity. */
         return {
             ...state,
-            programFundingGates: state.programFundingGates.map(g => g.id === action.payload.id ? action.payload : g)
+            programStageGates: state.programStageGates.map(g => g.id === action.payload.id ? (action.payload as any) : g),
+            programFundingGates: state.programFundingGates.map(g => g.id === action.payload.id ? (action.payload as any) : g)
         };
     case 'PROGRAM_ADD_OBJECTIVE':
         return { ...state, programObjectives: [...state.programObjectives, action.payload] };

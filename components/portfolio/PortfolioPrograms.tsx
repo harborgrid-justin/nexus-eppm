@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { useData } from '../../context/DataContext';
@@ -12,6 +11,7 @@ import { EmptyGrid } from '../common/EmptyGrid';
 import { Button } from '../ui/Button';
 import { ProgramForm } from './ProgramForm';
 import { Program } from '../../types';
+import { useNavigate } from 'react-router-dom';
 
 interface PortfolioProgramsProps {
   onSelectProgram: (programId: string) => void;
@@ -21,13 +21,13 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
   const { programs, projects } = usePortfolioData();
   const { dispatch } = useData();
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
   const handleCreate = () => {
-      setEditingProgram(null);
-      setIsFormOpen(true);
+      navigate('/programs/create');
   };
 
   const handleEdit = (program: Program) => {
@@ -51,7 +51,6 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
                 actionLabel="Establish Program"
                 onAdd={handleCreate}
               />
-              <ProgramForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} program={null} />
           </div>
       );
   }
@@ -149,7 +148,7 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
         })}
       </div>
       
-      <ProgramForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} program={editingProgram} />
+      {isFormOpen && <ProgramForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} program={editingProgram} />}
     </div>
   );
 };

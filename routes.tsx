@@ -1,4 +1,3 @@
-
 import React, { lazy } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
@@ -8,9 +7,10 @@ import RouteError from './components/RouteError';
 // Lazy Loads
 const PortfolioManager = lazy(() => import('./components/PortfolioManager'));
 const ProgramManager = lazy(() => import('./components/ProgramManager'));
+const ProgramCreatePage = lazy(() => import('./components/program/ProgramCreatePage'));
 const ProjectList = lazy(() => import('./components/ProjectList'));
 const ProjectWorkspace = lazy(() => import('./components/ProjectWorkspace'));
-const ProjectSchedulePage = lazy(() => import('./components/projects/ProjectSchedulePage')); // Added
+const ProjectSchedulePage = lazy(() => import('./components/projects/ProjectSchedulePage'));
 const EnterpriseResources = lazy(() => import('./components/EnterpriseResources'));
 const UnifierModule = lazy(() => import('./components/UnifierModule'));
 const RiskManagement = lazy(() => import('./components/risk/RiskManagement'));
@@ -42,10 +42,11 @@ export const routes: RouteObject[] = [
             { path: 'getting-started', element: <GettingStarted /> },
             { path: 'portfolio', element: <PortfolioManager /> },
             { path: 'programs', element: <ProgramManager /> },
+            { path: 'programs/create', element: <ProgramCreatePage /> },
             { path: 'projectList', element: <ProjectList /> },
             { path: 'projectWorkspace/:projectId', element: <ProjectWorkspace /> },
-            { path: 'schedule', element: <ProjectSchedulePage /> }, // New Route
-            { path: 'schedule/:projectId', element: <ProjectSchedulePage /> }, // New Route with ID
+            { path: 'schedule', element: <ProjectSchedulePage /> },
+            { path: 'schedule/:projectId', element: <ProjectSchedulePage /> },
             { path: 'resources', element: <EnterpriseResources /> },
             { path: 'unifier', element: <UnifierModule /> },
             { path: 'enterpriseRisks', element: <RiskManagement /> },
