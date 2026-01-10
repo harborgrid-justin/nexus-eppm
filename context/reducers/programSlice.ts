@@ -1,4 +1,3 @@
-
 import { DataState, Action } from '../../types/index';
 
 export const programReducer = (state: DataState, action: Action): DataState => {
@@ -67,6 +66,15 @@ export const programReducer = (state: DataState, action: Action): DataState => {
         return { ...state, programChangeRequests: state.programChangeRequests.map(c => c.id === action.payload.id ? action.payload : c) };
     case 'DELETE_PROGRAM_CHANGE_REQUEST':
         return { ...state, programChangeRequests: state.programChangeRequests.filter(c => c.id !== action.payload) };
+
+    case 'ADD_STRATEGIC_DRIVER':
+        return { ...state, strategicDrivers: [...state.strategicDrivers, action.payload] };
+    
+    case 'ADD_PROGRAM_DEPENDENCY':
+        return { ...state, programDependencies: [...state.programDependencies, action.payload] };
+    
+    case 'DELETE_PROGRAM_DEPENDENCY':
+        return { ...state, programDependencies: state.programDependencies.filter(d => d.id !== action.payload) };
 
     default:
       return state;

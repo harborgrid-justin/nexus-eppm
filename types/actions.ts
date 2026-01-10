@@ -1,6 +1,6 @@
 import { DataState, StagingRecord } from './state';
 import { Project } from './project';
-import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal } from './program';
+import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal, StrategicDriver, ProgramDependency } from './program';
 import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
 import { Risk, Issue, IssueCode } from './risk';
 import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
@@ -56,6 +56,9 @@ export type Action =
     | { type: 'ADD_PROGRAM_CHANGE_REQUEST'; payload: any }
     | { type: 'UPDATE_PROGRAM_CHANGE_REQUEST'; payload: any }
     | { type: 'DELETE_PROGRAM_CHANGE_REQUEST'; payload: string }
+    | { type: 'ADD_STRATEGIC_DRIVER'; payload: StrategicDriver }
+    | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
+    | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string }
     | { type: 'ADMIN_ADD_LOCATION'; payload: any }
     | { type: 'ADMIN_UPDATE_LOCATION'; payload: any }
     | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
@@ -77,7 +80,7 @@ export type Action =
     | { type: 'ADMIN_UPDATE_FUNDING_SOURCE'; payload: any }
     | { type: 'ADMIN_DELETE_FUNDING_SOURCE'; payload: string }
     | { type: 'ADMIN_ADD_CALENDAR'; payload: any }
-    | { type: 'ADMIN_UPDATE_CALENDAR'; payload: any }
+    | { id: string; type: 'ADMIN_UPDATE_CALENDAR'; payload: any }
     | { type: 'ADMIN_DELETE_CALENDAR'; payload: string }
     | { type: 'ADMIN_ADD_ISSUE_CODE'; payload: any }
     | { type: 'ADMIN_UPDATE_ISSUE_CODE'; payload: any }
