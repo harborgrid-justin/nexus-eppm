@@ -5,52 +5,78 @@ import { createAlert } from './common';
 
 export const applyResourceRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
   
-  // Hook: Vendor Concentration Risk
-  if (action.type === 'UPDATE_VENDOR' || action.type === 'PROJECT_IMPORT') {
-      const totalValue = state.contracts.reduce((sum, c) => sum + c.contractValue, 0);
-      const vendorExposure: Record<string, number> = {};
-      
-      state.contracts.forEach(c => {
-          vendorExposure[c.vendorId] = (vendorExposure[c.vendorId] || 0) + c.contractValue;
-      });
+  const resources = state.resources;
 
-      Object.entries(vendorExposure).forEach(([vId, val]) => {
-          if (val > totalValue * 0.3) {
-              const vendorName = state.vendors.find(v => v.id === vId)?.name || vId;
-               if(!alerts.some(a => a.title === 'Vendor Concentration' && a.message.includes(vendorName)))
-                  alerts.push(createAlert('Critical', 'Supply Chain', 'Vendor Concentration', 
-                      `Vendor ${vendorName} holds >30% of portfolio value.`, { type: 'Vendor', id: vId }));
-          }
-      });
-  }
-
-  // Hook: Skill Shortage on Critical Path
-  if (action.type === 'TASK_UPDATE') {
-      const t = action.payload.task;
-      if (t.critical && (!t.assignments || t.assignments.length === 0)) {
-           // Simplify: Just check if empty assignment on critical task
-           alerts.push(createAlert('Warning', 'Resource', 'Critical Skill Gap', 
-              `Critical task ${t.name} has no resources assigned.`, { type: 'Task', id: t.id }));
+  // Rule 19: Resource Over-allocation
+  resources.forEach(r => {
+      if (r.capacity > 0 && r.allocated > r.capacity) {
+          alerts.push(createAlert('Warning', 'Resource', 'Over-allocation', 
+              `${r.name} is allocated at ${((r.allocated/r.capacity)*100).toFixed(0)}%.`, { type: 'Resource', id: r.id }));
       }
-  }
+  });
 
-  // Hook: Key Person Dependency
-  // Check if a resource is on >3 critical paths (Cross-project check)
-  // This requires full graph traversal, simplified here for performance
-  
-  // Hook: Contract Expiry
-  // Periodically checked (e.g. on load or daily job)
-  if (action.type === 'SYSTEM_QUEUE_DATA_JOB') {
-      const today = new Date();
-      state.contracts.forEach(c => {
-          const endDate = new Date(c.endDate);
-          const diffDays = (endDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
-          if (diffDays > 0 && diffDays < 90) {
-               alerts.push(createAlert('Info', 'Supply Chain', 'Contract Expiring', 
-                  `Contract ${c.title} expires in ${Math.ceil(diffDays)} days.`, { type: 'Project', id: c.projectId }));
+  // Rule 20: Missing Standard Rate
+  resources.forEach(r => {
+      if (r.type === 'Human' && r.status === 'Active' && (!r.hourlyRate || r.hourlyRate <= 0)) {
+          alerts.push(createAlert('Info', 'Finance', 'Missing Cost Rate', 
+              `Resource ${r.name} has no hourly rate defined.`, { type: 'Resource', id: r.id }));
+      }
+  });
+
+  // Rule 21: Role Mismatch
+  // Checked when assignments happen
+  state.projects.forEach(p => {
+      p.tasks.forEach(t => {
+          t.assignments.forEach(a => {
+             const res = resources.find(r => r.id === a.resourceId);
+             // Assuming task has a 'role' field in a real app, logic would go here.
+             // Mock logic: If resource is inactive but assigned
+             if (res && res.status === 'Inactive') {
+                 alerts.push(createAlert('Critical', 'Resource', 'Inactive Resource Assigned', 
+                     `${res.name} is Inactive but assigned to ${t.name}.`, { type: 'Task', id: t.id }));
+             }
+          });
+      });
+  });
+
+  // Rule 22: Time logged on Closed Project
+  state.timesheets.forEach(ts => {
+      ts.rows.forEach(row => {
+          const proj = state.projects.find(p => p.id === row.projectId);
+          if (proj && (proj.status === 'Closed' || proj.status === 'Archived')) {
+               alerts.push(createAlert('Warning', 'Compliance', 'Late Time Entry', 
+                  `Time logged against closed project ${proj.code}.`, { type: 'Project', id: proj.id }));
           }
       });
+  });
+
+  // Rule 23: No Manager Assigned to Department (OBS)
+  state.obs.forEach(node => {
+      if (!node.managerId) {
+          alerts.push(createAlert('Info', 'Governance', 'OBS Empty Chair', 
+              `OBS Node ${node.name} has no responsible manager.`, { type: 'Resource', id: node.id }));
+      }
+  });
+
+  // Rule 24: Generic Resource Overuse
+  const genericCount = resources.filter(r => r.name.toLowerCase().includes('tbd') || r.name.toLowerCase().includes('new hire')).length;
+  if (genericCount > 5) {
+      alerts.push(createAlert('Info', 'Resource', 'Placeholder Saturation', 
+          `High number of TBD resources (${genericCount}). Impact on scheduling accuracy.`));
   }
+
+  // Rule 25: Maintenance Overdue (Equipment)
+  const today = new Date();
+  resources.filter(r => r.type === 'Equipment').forEach(eq => {
+      if (eq.nextMaintenanceDate && new Date(eq.nextMaintenanceDate) < today) {
+           alerts.push(createAlert('Warning', 'Supply Chain', 'Maintenance Overdue', 
+              `Equipment ${eq.name} is past due for service.`, { type: 'Resource', id: eq.id }));
+      }
+  });
+
+  // Rule 26: Vendor Concentration Risk (Resources)
+  // If > 50% of resources belong to one vendor (mocked via skill/tag)
+  // Placeholder logic
 
   return {};
 };

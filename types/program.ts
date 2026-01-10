@@ -1,5 +1,4 @@
 
-
 export interface Program {
   id: string;
   name: string;
@@ -178,6 +177,7 @@ export interface ProgramOutcome {
 
 export interface ProgramChangeRequest {
     id: string;
+    programId: string;
     title: string;
     description: string;
     submittedDate: string;

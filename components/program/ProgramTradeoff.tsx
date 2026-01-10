@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useProgramData } from '../../hooks/useProgramData';
+import React from 'react';
+import { useProgramTradeoffLogic } from '../../hooks/domain/useProgramTradeoffLogic';
 import { Scale, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
@@ -12,9 +12,15 @@ interface ProgramTradeoffProps {
 }
 
 const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
-  const { tradeoffScenarios } = useProgramData(programId);
+  const { 
+      tradeoffScenarios, 
+      selectedScenario, 
+      setSelectedScenario, 
+      activeScenario,
+      handleCreateScenario
+  } = useProgramTradeoffLogic(programId);
+  
   const theme = useTheme();
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
 
   // Transform data for chart
   const chartData = tradeoffScenarios.map(s => ({
@@ -24,8 +30,6 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
       score: s.riskScore
   }));
 
-  const activeScenario = tradeoffScenarios.find(s => s.id === selectedScenario);
-
   if (tradeoffScenarios.length === 0) {
       return (
           <div className="h-full flex items-center justify-center p-8">
@@ -34,7 +38,7 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
                 description="Create scenarios to compare benefit vs. risk exposure."
                 icon={Scale}
                 actionLabel="Create Scenario"
-                onAdd={() => {}} // Placeholder for creation logic
+                onAdd={handleCreateScenario}
               />
           </div>
       );
@@ -73,10 +77,11 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
             {/* Scenario Details */}
             <div className="space-y-6">
                 <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-                    <div className="p-4 border-b border-slate-200 bg-slate-50">
+                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                         <h3 className="font-bold text-slate-800">Scenarios</h3>
+                        <button onClick={handleCreateScenario} className="text-xs text-nexus-600 font-bold hover:underline">+ Add</button>
                     </div>
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
                         {tradeoffScenarios.map(s => (
                             <div 
                                 key={s.id} 
@@ -94,7 +99,7 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
                 </div>
 
                 {activeScenario && (
-                    <div className="p-5 bg-slate-800 text-white rounded-xl shadow-lg">
+                    <div className="p-5 bg-slate-800 text-white rounded-xl shadow-lg animate-in slide-in-from-right-4">
                         <h4 className="text-lg font-bold mb-2 flex items-center gap-2">
                             Recommendation: 
                             <span className={activeScenario.recommendation === 'Proceed' ? 'text-green-400' : 'text-red-400'}>

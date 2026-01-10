@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Layers, ArrowRight, Activity, TrendingUp, DollarSign, Plus } from 'lucide-react';
+import { useData } from '../../context/DataContext';
+import { Layers, ArrowRight, Activity, TrendingUp, DollarSign, Plus, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { ProgressBar } from '../common/ProgressBar';
@@ -9,6 +10,8 @@ import { StatusBadge } from '../common/StatusBadge';
 import { Card } from '../ui/Card';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Button } from '../ui/Button';
+import { ProgramForm } from './ProgramForm';
+import { Program } from '../../types';
 
 interface PortfolioProgramsProps {
   onSelectProgram: (programId: string) => void;
@@ -16,7 +19,27 @@ interface PortfolioProgramsProps {
 
 const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }) => {
   const { programs, projects } = usePortfolioData();
+  const { dispatch } = useData();
   const theme = useTheme();
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+
+  const handleCreate = () => {
+      setEditingProgram(null);
+      setIsFormOpen(true);
+  };
+
+  const handleEdit = (program: Program) => {
+      setEditingProgram(program);
+      setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+      if (confirm("Are you sure you want to delete this program? Linked projects will remain but be unlinked.")) {
+          dispatch({ type: 'DELETE_PROGRAM', payload: id });
+      }
+  };
 
   if (programs.length === 0) {
       return (
@@ -26,8 +49,9 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
                 description="No cross-functional programs identified. Establish a program to aggregate strategic project delivery."
                 icon={Layers}
                 actionLabel="Establish Program"
-                onAdd={() => {}} // CRUD action path
+                onAdd={handleCreate}
               />
+              <ProgramForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} program={null} />
           </div>
       );
   }
@@ -39,7 +63,7 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
           <h2 className={theme.typography.h2}>Program Portfolio Summary</h2>
           <p className={theme.typography.small}>Aggregated oversight of cross-project delivery groups.</p>
         </div>
-        <Button size="sm" icon={Plus}>Establish Program</Button>
+        <Button size="sm" icon={Plus} onClick={handleCreate}>Establish Program</Button>
       </div>
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
@@ -52,7 +76,17 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
             : 0;
 
           return (
-            <Card key={program.id} className="p-0 overflow-hidden group hover:border-nexus-400 transition-all">
+            <Card key={program.id} className="p-0 overflow-hidden group hover:border-nexus-400 transition-all relative">
+              {/* Card Actions Overlay */}
+              <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white/80 backdrop-blur rounded-lg p-1 shadow-sm border border-slate-100">
+                   <button onClick={() => handleEdit(program)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600" title="Edit Program">
+                       <Edit2 size={14}/>
+                   </button>
+                   <button onClick={() => handleDelete(program.id)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-red-500" title="Delete Program">
+                       <Trash2 size={14}/>
+                   </button>
+              </div>
+
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-start">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-nexus-600 text-white rounded-xl shadow-lg shadow-nexus-500/20">
@@ -98,6 +132,9 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
                       + {childProjects.length - 3} more projects
                     </p>
                   )}
+                  {childProjects.length === 0 && (
+                      <p className="text-xs text-slate-400 italic text-center py-2">No projects assigned.</p>
+                  )}
                 </div>
               </div>
 
@@ -111,6 +148,8 @@ const PortfolioPrograms: React.FC<PortfolioProgramsProps> = ({ onSelectProgram }
           );
         })}
       </div>
+      
+      <ProgramForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} program={editingProgram} />
     </div>
   );
 };

@@ -1,17 +1,37 @@
 
 import React, { useState } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Gavel, FileText, Plus } from 'lucide-react';
+import { Gavel, FileText, Plus, Edit2, Trash2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Button } from '../ui/Button';
 import { GovernanceDecisionForm } from './GovernanceDecisionForm';
+import { GovernanceDecision } from '../../types';
+import { useData } from '../../context/DataContext';
 
 const PortfolioGovernance: React.FC = () => {
   const { governanceDecisions } = usePortfolioData();
+  const { dispatch } = useData();
   const theme = useTheme();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingDecision, setEditingDecision] = useState<GovernanceDecision | null>(null);
+
+  const handleEdit = (decision: GovernanceDecision) => {
+    setEditingDecision(decision);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this decision record?")) {
+        dispatch({ type: 'GOVERNANCE_DELETE_DECISION', payload: id });
+    }
+  };
+
+  const handleCreate = () => {
+      setEditingDecision(null);
+      setIsFormOpen(true);
+  };
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
@@ -20,7 +40,7 @@ const PortfolioGovernance: React.FC = () => {
                 <Gavel className="text-nexus-600" size={24}/>
                 <h2 className={theme.typography.h2}>Governance Board</h2>
             </div>
-            <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Log Decision</Button>
+            <Button size="sm" icon={Plus} onClick={handleCreate}>Log Decision</Button>
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
@@ -56,7 +76,7 @@ const PortfolioGovernance: React.FC = () => {
                                 description="The board has not recorded any formal decisions for the current portfolio period."
                                 icon={Gavel}
                                 actionLabel="Log First Decision"
-                                onAdd={() => setIsFormOpen(true)}
+                                onAdd={handleCreate}
                             />
                         </div>
                     ) : (
@@ -67,11 +87,12 @@ const PortfolioGovernance: React.FC = () => {
                                     <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Item</th>
                                     <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Authority</th>
                                     <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Outcome</th>
+                                    <th className="px-6 py-3 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} ${theme.colors.surface}`}>
                                 {governanceDecisions.map(d => (
-                                    <tr key={d.id} className={`hover:${theme.colors.background} transition-colors`}>
+                                    <tr key={d.id} className={`hover:${theme.colors.background} transition-colors group`}>
                                         <td className="px-6 py-4 text-sm font-mono text-slate-600 font-bold">{d.date}</td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-bold text-slate-900">{d.title}</div>
@@ -86,6 +107,16 @@ const PortfolioGovernance: React.FC = () => {
                                                 {d.decision}
                                             </Badge>
                                         </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleEdit(d)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600">
+                                                    <Edit2 size={14} />
+                                                </button>
+                                                <button onClick={() => handleDelete(d.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-500 hover:text-red-500">
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -94,7 +125,11 @@ const PortfolioGovernance: React.FC = () => {
                 </div>
             </div>
         </div>
-        <GovernanceDecisionForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
+        <GovernanceDecisionForm 
+            isOpen={isFormOpen} 
+            onClose={() => setIsFormOpen(false)} 
+            decision={editingDecision}
+        />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 export type AlertSeverity = 'Info' | 'Warning' | 'Critical' | 'Blocker';
-export type AlertCategory = 'Finance' | 'Schedule' | 'Resource' | 'Risk' | 'Strategy' | 'Compliance' | 'Quality' | 'Portfolio' | 'Governance' | 'Supply Chain' | 'ESG' | 'IT' | 'Architecture';
+export type AlertCategory = 'Finance' | 'Schedule' | 'Resource' | 'Risk' | 'Strategy' | 'Compliance' | 'Quality' | 'Portfolio' | 'Governance' | 'Supply Chain' | 'ESG' | 'IT' | 'Architecture' | 'Data' | 'Legal';
 
 export interface SystemAlert {
   id: string;

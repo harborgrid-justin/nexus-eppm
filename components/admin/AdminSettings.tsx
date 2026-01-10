@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Settings, RefreshCw, Database } from 'lucide-react';
 import { PageHeader } from '../common/PageHeader';
@@ -53,7 +52,7 @@ const AdminSettings: React.FC = () => {
         
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
             <ErrorBoundary name="Admin Settings">
-                <div className="h-full overflow-y-auto p-6 md:p-8">
+                <div className="h-full overflow-y-auto">
                     <AdminContent activeView={activeView} />
                 </div>
             </ErrorBoundary>

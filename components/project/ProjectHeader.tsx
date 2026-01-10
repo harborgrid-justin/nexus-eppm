@@ -35,7 +35,7 @@ export const ProjectHeader: React.FC<Props> = ({ project, onCreateReflection, on
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
       <div>
-        <h1 className={`text-3xl font-black tracking-tighter ${theme.colors.text.primary}`}>
+        <h1 className={theme.typography.h1}>
           <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
           {project.name}
         </h1>

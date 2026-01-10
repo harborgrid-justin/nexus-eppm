@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useData } from '../../context/DataContext';
 import { MapPin, Plus, Search, Globe, MoreHorizontal, Edit2, Trash2, Save, X, Navigation } from 'lucide-react';
@@ -20,7 +19,6 @@ const LocationSettings: React.FC = () => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [editingLoc, setEditingLoc] = useState<Partial<Location> | null>(null);
 
-    // Rule 8 & 12: Memoize filter with deferred term
     const filteredLocations = useMemo(() => {
         const term = deferredSearchTerm.toLowerCase();
         return state.locations.filter(loc => 
@@ -58,64 +56,65 @@ const LocationSettings: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
-            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center ${theme.colors.background} p-4 rounded-xl border ${theme.colors.border} shadow-sm gap-4 shrink-0`}>
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-blue-600 text-white rounded-lg shadow-blue-200 shadow-lg">
-                        <Globe size={22}/>
+        <div className={`h-full flex flex-col ${theme.layout.sectionSpacing}`}>
+            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 ${theme.layout.cardPadding} rounded-2xl border border-slate-800 shadow-xl gap-4 shrink-0 relative overflow-hidden`}>
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="p-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30">
+                        <Globe size={24}/>
                     </div>
                     <div>
-                        <h4 className={`font-bold ${theme.colors.text.primary}`}>Global Site Registry</h4>
-                        <p className={`text-xs ${theme.colors.text.secondary}`}>Standardized geographical entities for field telemetry.</p>
+                        <h4 className={`text-xl font-black text-white uppercase tracking-tighter`}>Global Site Registry</h4>
+                        <p className="text-slate-400 text-xs mt-1 font-medium leading-relaxed">Geographical master data for logistics and field telemetry.</p>
                     </div>
                 </div>
-                <Button size="sm" icon={Plus} onClick={() => handleOpenPanel()} className="w-full sm:w-auto">Register New Site</Button>
+                <Button size="md" icon={Plus} onClick={() => handleOpenPanel()} className="relative z-10 w-full sm:w-auto">Register New Site</Button>
             </div>
 
-            <div className="flex items-center gap-4 mb-4 shrink-0">
+            <div className="flex items-center gap-4 shrink-0">
                 <div className="relative flex-1 max-w-md">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"/>
                     <input 
                         type="text" 
-                        placeholder="Search sites by name, city, or country..." 
+                        placeholder="Search sites by name, city, or region..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className={`pl-10 pr-4 py-2 w-full border ${theme.colors.border} rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.text.primary}`}
+                        className={`pl-11 pr-4 py-2.5 w-full border ${theme.colors.border} rounded-xl text-sm focus:ring-2 focus:ring-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.text.primary} font-medium shadow-sm`}
                     />
                 </div>
             </div>
 
             <div className={`${theme.components.card} overflow-hidden flex-1 flex flex-col`}>
                 {filteredLocations.length > 0 ? (
-                    <div className="overflow-x-auto flex-1">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className={`${theme.colors.background} sticky top-0`}>
+                    <div className="overflow-x-auto flex-1 scrollbar-thin">
+                        <table className="min-w-full divide-y divide-slate-100">
+                            <thead className={`${theme.colors.background} sticky top-0 z-10 border-b`}>
                                 <tr>
-                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Site Name</th>
-                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Region / City</th>
-                                    <th className={theme.components.table.header + " whitespace-nowrap"}>Coordinates</th>
-                                    <th className={theme.components.table.header + " text-right whitespace-nowrap"}>Actions</th>
+                                    <th className={`${theme.components.table.header} px-8`}>Site Name</th>
+                                    <th className={theme.components.table.header}>Region / City</th>
+                                    <th className={theme.components.table.header}>Topology</th>
+                                    <th className={`${theme.components.table.header} text-right px-8`}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                 {filteredLocations.map(loc => (
-                                    <tr key={loc.id} className={theme.components.table.row + " group"}>
-                                        <td className={theme.components.table.cell}>
+                                    <tr key={loc.id} className={`${theme.components.table.row} group`}>
+                                        <td className={`${theme.components.table.cell} px-8`}>
                                             <div className="flex items-center gap-3">
-                                                <MapPin size={16} className={`${theme.colors.text.tertiary} group-hover:text-nexus-500 transition-colors`}/>
-                                                <span className={`font-bold text-sm ${theme.colors.text.primary}`}>{loc.name}</span>
+                                                <MapPin size={16} className={`${theme.colors.text.tertiary} group-hover:text-nexus-600 transition-colors`}/>
+                                                <span className={`font-bold text-sm text-slate-800`}>{loc.name}</span>
                                             </div>
                                         </td>
-                                        <td className={theme.components.table.cell + ` text-sm ${theme.colors.text.secondary}`}>
+                                        <td className={`${theme.components.table.cell} text-sm font-medium text-slate-600`}>
                                             {loc.city}, {loc.country}
                                         </td>
-                                        <td className={theme.components.table.cell + ` font-mono text-xs ${theme.colors.text.tertiary}`}>
-                                            {loc.coordinates ? `${loc.coordinates.lat.toFixed(4)}, ${loc.coordinates.lng.toFixed(4)}` : 'Manual Entry'}
+                                        <td className={`${theme.components.table.cell} font-mono text-[10px] font-bold text-slate-400 uppercase tracking-widest`}>
+                                            {loc.coordinates ? `LAT ${loc.coordinates.lat.toFixed(4)} / LNG ${loc.coordinates.lng.toFixed(4)}` : 'MANUAL_ENTRY'}
                                         </td>
-                                        <td className={theme.components.table.cell + " text-right"}>
-                                            <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleOpenPanel(loc)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.secondary}`}><Edit2 size={16}/></button>
-                                                <button onClick={() => handleDelete(loc.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.secondary} hover:text-red-500`}><Trash2 size={16}/></button>
+                                        <td className={`${theme.components.table.cell} text-right px-8`}>
+                                            <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleOpenPanel(loc)} className={`p-2 hover:${theme.colors.background} rounded-lg text-slate-500 hover:text-nexus-600 transition-colors`}><Edit2 size={16}/></button>
+                                                <button onClick={() => handleDelete(loc.id)} className={`p-2 hover:bg-red-50 rounded-lg text-slate-500 hover:text-red-600 transition-colors`}><Trash2 size={16}/></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -126,10 +125,10 @@ const LocationSettings: React.FC = () => {
                 ) : (
                     <div className="flex-1">
                         <EmptyGrid 
-                            title={searchTerm ? "No Sites Found" : "Global Registry Empty"}
-                            description={searchTerm ? `No locations match "${searchTerm}".` : "Define standard geographical sites for project mapping."}
+                            title={searchTerm ? "No Match Identified" : "Global Site Registry Empty"}
+                            description={searchTerm ? `The filter "${searchTerm}" returned zero geolocated results.` : "Initialize standardized site master data to enable field logistics."}
                             onAdd={() => handleOpenPanel()}
-                            actionLabel="Register Site"
+                            actionLabel="Provision Site"
                             icon={Globe}
                         />
                     </div>
@@ -139,60 +138,61 @@ const LocationSettings: React.FC = () => {
             <SidePanel
                 isOpen={isPanelOpen}
                 onClose={() => setIsPanelOpen(false)}
-                title={editingLoc?.id ? "Edit Site Record" : "Register New Site"}
-                width="md:w-[450px]"
+                title={editingLoc?.id ? "Edit Site Parameters" : "Register Enterprise Site"}
+                width="md:w-[500px]"
                 footer={
                     <>
                         <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSave} icon={Save}>Commit Changes</Button>
+                        <Button onClick={handleSave} icon={Save}>Commit Record</Button>
                     </>
                 }
             >
                  <div className="space-y-6">
                     <div>
-                        <label className={theme.typography.label + " block mb-1"}>Site Label</label>
-                        <Input value={editingLoc?.name} onChange={e => setEditingLoc({...editingLoc, name: e.target.value})} placeholder="e.g. London Logistics Center" />
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Friendly Label</label>
+                        <Input value={editingLoc?.name} onChange={e => setEditingLoc({...editingLoc!, name: e.target.value})} placeholder="e.g. London Logistics Center" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className={theme.typography.label + " block mb-1"}>City</label>
-                            <Input value={editingLoc?.city} onChange={e => setEditingLoc({...editingLoc, city: e.target.value})} placeholder="City" />
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Settlement / City</label>
+                            <Input value={editingLoc?.city} onChange={e => setEditingLoc({...editingLoc!, city: e.target.value})} placeholder="City" />
                         </div>
                         <div>
-                            <label className={theme.typography.label + " block mb-1"}>Country</label>
-                            <Input value={editingLoc?.country} onChange={e => setEditingLoc({...editingLoc, country: e.target.value})} placeholder="Country" />
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Sovereign State / Country</label>
+                            <Input value={editingLoc?.country} onChange={e => setEditingLoc({...editingLoc!, country: e.target.value})} placeholder="Country" />
                         </div>
                     </div>
-                    <div className="p-4 bg-slate-900 rounded-xl text-white">
-                        <h4 className="text-[10px] font-black uppercase text-slate-400 mb-3 flex items-center gap-2">
-                            <Navigation size={12} className="text-nexus-400"/> GIS Precision Data
+                    <div className="p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-xl">
+                        <h4 className="text-[10px] font-black uppercase text-slate-500 mb-6 flex items-center gap-2">
+                            <Navigation size={14} className="text-nexus-400"/> GIS Precision Parameters
                         </h4>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-6">
                              <div>
-                                <label className="block text-[10px] text-slate-500 mb-1">Latitude</label>
+                                <label className="block text-[10px] text-slate-500 mb-2 font-bold uppercase tracking-wider">Latitude</label>
                                 <input 
                                     type="number" 
-                                    className="w-full bg-slate-800 border-slate-700 rounded p-2 text-sm font-mono outline-none focus:ring-1 focus:ring-nexus-500"
+                                    className="w-full bg-slate-800 border-slate-700 rounded-xl p-3 text-sm font-mono font-bold text-white outline-none focus:ring-1 focus:ring-nexus-500 shadow-inner"
                                     value={editingLoc?.coordinates?.lat ?? 0}
                                     onChange={e => {
                                         const coords = editingLoc?.coordinates || { lat: 0, lng: 0 };
-                                        setEditingLoc({...editingLoc, coordinates: { ...coords, lat: parseFloat(e.target.value) }})
+                                        setEditingLoc({...editingLoc!, coordinates: { ...coords, lat: parseFloat(e.target.value) }})
                                     }}
                                 />
                              </div>
                              <div>
-                                <label className="block text-[10px] text-slate-500 mb-1">Longitude</label>
+                                <label className="block text-[10px] text-slate-500 mb-2 font-bold uppercase tracking-wider">Longitude</label>
                                 <input 
                                     type="number" 
-                                    className="w-full bg-slate-800 border-slate-700 rounded p-2 text-sm font-mono outline-none focus:ring-1 focus:ring-nexus-500"
+                                    className="w-full bg-slate-800 border-slate-700 rounded-xl p-3 text-sm font-mono font-bold text-white outline-none focus:ring-1 focus:ring-nexus-500 shadow-inner"
                                     value={editingLoc?.coordinates?.lng ?? 0}
                                     onChange={e => {
                                         const coords = editingLoc?.coordinates || { lat: 0, lng: 0 };
-                                        setEditingLoc({...editingLoc, coordinates: { ...coords, lng: parseFloat(e.target.value) }})
+                                        setEditingLoc({...editingLoc!, coordinates: { ...coords, lng: parseFloat(e.target.value) }})
                                     }}
                                 />
                              </div>
                         </div>
+                        <Navigation size={120} className="absolute -right-8 -bottom-8 text-white/5 opacity-5 pointer-events-none" />
                     </div>
                 </div>
             </SidePanel>

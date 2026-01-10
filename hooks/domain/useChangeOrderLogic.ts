@@ -6,7 +6,7 @@ import { generateId } from '../../utils/formatters';
 export const useChangeOrderLogic = () => {
     const { project, changeOrders } = useProjectWorkspace();
     const { hasPermission, user } = usePermissions();
-    const projectId = project.id;
+    const projectId = project?.id || 'UNSET';
     const canCreate = hasPermission('financials:write');
 
     const [viewMode, setViewMode] = useState<'list' | 'board' | 'analytics'>('list');
@@ -24,6 +24,19 @@ export const useChangeOrderLogic = () => {
             stage: co.stage || (co.status === 'Pending Approval' ? 'CCB Review' : co.status === 'Approved' ? 'Execution' : 'Initiation')
         }));
     }, [changeOrders]);
+
+    const stats = useMemo(() => {
+        const approved = enrichedOrders.filter(co => co.status === 'Approved');
+        const pending = enrichedOrders.filter(co => co.status === 'Pending Approval');
+        
+        return {
+            totalVolume: enrichedOrders.length,
+            approvedAmount: approved.reduce((sum, co) => sum + co.amount, 0),
+            pendingExposure: pending.reduce((sum, co) => sum + co.amount, 0),
+            scheduleDrift: approved.reduce((sum, co) => sum + co.scheduleImpactDays, 0),
+            pendingCount: pending.length
+        };
+    }, [enrichedOrders]);
 
     const filteredOrders = useMemo(() => {
         return enrichedOrders.filter(co =>
@@ -67,6 +80,7 @@ export const useChangeOrderLogic = () => {
         filteredOrders,
         selectedOrder,
         canCreate,
+        stats,
         handleViewChange,
         setSearchTerm,
         setSelectedCoId,

@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ListCheck, Info } from 'lucide-react';
+import { ListChecks, Info } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
 export const SourceSelectionView: React.FC = () => {
@@ -19,7 +20,7 @@ export const SourceSelectionView: React.FC = () => {
 
     return (
         <div className="p-6 bg-white rounded-xl shadow-sm border h-full">
-            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ListCheck /> Source Selection Criteria</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><ListChecks /> Source Selection Criteria</h2>
             <div className="bg-slate-50 p-4 rounded-lg border">
                 <p className="text-sm text-slate-600 mb-4 flex items-center gap-2">
                     <Info size={14}/> Criteria used to rate or score vendor proposals.

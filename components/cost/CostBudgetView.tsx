@@ -13,7 +13,7 @@ import { useData } from '../../context/DataContext';
 import { BudgetLineItem } from '../../types/index';
 import { generateId, formatCurrency } from '../../utils/formatters';
 import { useToast } from '../../context/ToastContext';
-import BudgetTransfer from './BudgetTransfer';
+import BudgetTransfer from '../finance/BudgetTransfer';
 
 const CostBudgetView: React.FC = () => {
     const { project, budgetItems, purchaseOrders } = useProjectWorkspace();

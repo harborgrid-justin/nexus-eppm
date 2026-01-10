@@ -20,6 +20,42 @@ import { applyBusinessLogic } from '../utils/businessLogic';
 import { initialState } from './initialState';
 import { constructionDemoData } from '../constants/demos/constructionDemo';
 import { softwareDemoData } from '../constants/demos/softwareDemo';
+import { generateId } from '../utils/formatters';
+
+// Helper to generate human-readable audit logs from actions
+const generateAuditEntry = (action: Action) => {
+    const timestamp = new Date().toISOString();
+    const user = 'System/User'; // In a real app, this would come from the action meta or auth context
+    let description = '';
+    let entity = '';
+
+    if (action.type.includes('ADD')) {
+        description = `Created new record`;
+        entity = action.type.split('_')[1] || 'Entity';
+    } else if (action.type.includes('UPDATE')) {
+        description = `Modified record details`;
+        entity = action.type.split('_')[1] || 'Entity';
+    } else if (action.type.includes('DELETE')) {
+        description = `Deleted record`;
+        entity = action.type.split('_')[1] || 'Entity';
+    } else if (action.type === 'APPROVE_CHANGE_ORDER') {
+        description = 'Approved Change Order';
+        entity = 'ChangeOrder';
+    } else if (action.type === 'TRANSFER_BUDGET') {
+        description = 'Transferred Budget Funds';
+        entity = 'Budget';
+    }
+
+    if (!description) return null;
+
+    return {
+        date: timestamp,
+        user,
+        action: description,
+        details: `Action: ${action.type}`,
+        entity
+    };
+};
 
 export const rootReducer = (state: DataState, action: Action): DataState => {
   // Global Interceptors
@@ -38,6 +74,7 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
   
   let nextState = { ...state };
 
+  // Dispatcher Routing
   if (action.type.startsWith('PROJECT_') || action.type.startsWith('TASK_') || action.type.startsWith('BASELINE_') || action.type.startsWith('WBS_') || action.type.startsWith('COST_ESTIMATE_')) {
       nextState = projectReducer(state, action);
   } else if (action.type.startsWith('PROGRAM_')) {
@@ -72,5 +109,50 @@ export const rootReducer = (state: DataState, action: Action): DataState => {
       nextState = reportReducer(state, action);
   }
   
+  // Middleware: Centralized Audit Logging
+  // Automatically captures any state-changing action into the governance audit log
+  const auditEntry = generateAuditLog(action);
+  if (auditEntry) {
+      // Ensure governance object exists
+      if (!nextState.governance) nextState.governance = { ...initialState.governance };
+      
+      nextState = {
+          ...nextState,
+          governance: {
+              ...nextState.governance,
+              auditLog: [
+                  { ...auditEntry, id: `AUD-${Date.now()}` }, // Ensure unique ID
+                  ...(nextState.governance.auditLog || []).slice(0, 99) // Keep last 100 logs
+              ]
+          }
+      };
+  }
+
+  // Post-Processing: Business Rules Engine
+  // Runs 50+ data integrity and business logic checks
   return applyBusinessLogic(nextState, action, state);
 };
+
+// Internal helper for the reducer
+function generateAuditLog(action: Action) {
+    if (action.type === 'MARK_ALERT_READ' || action.type.startsWith('STAGING_') || action.type.startsWith('SYSTEM_')) return null;
+    
+    const timestamp = new Date().toISOString();
+    let details = '';
+    
+    if ('payload' in action && typeof action.payload === 'object') {
+        // Try to extract a name or ID for context
+        const p = action.payload as any;
+        if (p.name) details = `Name: ${p.name}`;
+        else if (p.title) details = `Title: ${p.title}`;
+        else if (p.id) details = `ID: ${p.id}`;
+        else if (p.projectId) details = `Project: ${p.projectId}`;
+    }
+
+    return {
+        date: timestamp,
+        user: 'Current User', // In a real app, pass user from action payload or context
+        action: action.type,
+        details: details || 'State mutation'
+    };
+}

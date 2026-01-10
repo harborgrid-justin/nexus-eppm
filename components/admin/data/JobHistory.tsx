@@ -101,7 +101,7 @@ export const JobHistory: React.FC = () => {
                                                             <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-widest flex items-center gap-2`}>
                                                                 <Terminal size={14}/> Engine Log
                                                             </h4>
-                                                            <div className={`bg-slate-950 p-4 rounded-lg border ${theme.isDark ? 'border-slate-700' : 'border-slate-800'} text-xs font-mono text-green-400 overflow-y-auto max-h-40`}>
+                                                            <div className={`bg-slate-900 p-4 rounded-lg border ${theme.isDark ? 'border-slate-700' : 'border-slate-800'} text-xs font-mono text-green-400 overflow-y-auto max-h-40`}>
                                                                 {generateLogs(job).map((log, i) => (
                                                                     <div key={i} className="mb-1 last:mb-0 border-b border-slate-800/50 pb-0.5 last:border-0 last:pb-0">
                                                                         <span className="opacity-70 mr-2">{'>'}</span>

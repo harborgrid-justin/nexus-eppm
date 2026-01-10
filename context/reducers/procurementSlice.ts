@@ -42,6 +42,10 @@ export const procurementSlice = (state: DataState, action: Action): DataState =>
             procurementPlans: state.procurementPlans.map(p => p.id === action.payload.id ? action.payload : p) 
         };
 
+    // Supplier Reviews
+    case 'ADD_SUPPLIER_REVIEW':
+        return { ...state, supplierReviews: [...state.supplierReviews, action.payload] };
+
     default:
       return state;
   }

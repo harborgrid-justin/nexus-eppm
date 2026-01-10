@@ -81,6 +81,11 @@ export const systemReducer = (state: DataState, action: Action): DataState => {
         // --- NEW GOVERNANCE & PROGRAM ACTIONS ---
         case 'GOVERNANCE_ADD_DECISION':
              return { ...state, governanceDecisions: [action.payload, ...state.governanceDecisions] };
+        case 'GOVERNANCE_UPDATE_DECISION':
+             return { ...state, governanceDecisions: state.governanceDecisions.map(d => d.id === action.payload.id ? action.payload : d) };
+        case 'GOVERNANCE_DELETE_DECISION':
+             return { ...state, governanceDecisions: state.governanceDecisions.filter(d => d.id !== action.payload) };
+
         case 'ADD_BENEFIT':
              return { ...state, benefits: [...state.benefits, action.payload] };
         case 'ADD_ARCH_STANDARD':

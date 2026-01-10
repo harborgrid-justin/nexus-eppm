@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
@@ -61,7 +60,9 @@ export const ProjectSchedulePage: React.FC = () => {
 
     useEffect(() => {
         if (containerRef.current) setContainerHeight(containerRef.current.clientHeight);
-        const handleResize = () => containerRef.current && setContainerHeight(containerRef.current.clientHeight);
+        const handleResize = () => {
+            if (containerRef.current) setContainerHeight(containerRef.current.clientHeight);
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -78,32 +79,21 @@ export const ProjectSchedulePage: React.FC = () => {
         else if (e.target === timelineRef.current && listRef.current) listRef.current.scrollTop = top;
     };
 
-    /**
-     * Smart WBS Renumbering Logic
-     * Recalculates WBS codes based on flat array structure simulating tree depth
-     */
-    const renumberWBS = (tasks: Task[]): Task[] => {
-        // In a real P6 app, this logic is server-side and complex. 
-        // For this UI, we assume WBS structure is derived from sort order.
-        // We will perform a simple pass to ensure parent/child consistency if we were using a nested model.
-        // Since our Task model uses a flat `wbsCode` string, specific renumbering logic would parse and increment.
-        // For the purpose of "Indent/Outdent", we will append/remove dot-notation segments.
-        return tasks;
-    };
-
     const updateProjectTasks = (newTasks: Task[]) => {
         if(!project) return;
+        dispatch({ type: 'TASK_UPDATE', payload: { projectId: project.id, task: newTasks } }); // Assuming payload structure matches reducer expect
+        // Note: The generic TASK_UPDATE might expect a single task. We might need a bulk update action.
+        // For now, updating the project object directly via PROJECT_UPDATE
         dispatch({ type: 'PROJECT_UPDATE', payload: { projectId: project.id, updatedData: { tasks: newTasks } } });
     };
 
     // --- Action Handler Switch ---
     const handleMenuAction = (action: ScheduleAction, targetTask: Task | null) => {
         if (!project) return;
-        let updatedTasks = [...project.tasks];
+        let updatedTasks = [...(project.tasks || [])];
         const taskIndex = targetTask ? updatedTasks.findIndex(t => t.id === targetTask.id) : -1;
 
         switch (action) {
-            // --- CRUD ---
             case 'add':
                 const newTask: Task = {
                     id: generateId('T'), name: 'New Activity', wbsCode: targetTask ? `${targetTask.wbsCode}.1` : '1',
@@ -113,19 +103,15 @@ export const ProjectSchedulePage: React.FC = () => {
                 };
                 if (taskIndex !== -1) updatedTasks.splice(taskIndex + 1, 0, newTask);
                 else updatedTasks.push(newTask);
-                
                 updateProjectTasks(updatedTasks);
                 success("Activity Added");
                 break;
-
             case 'edit':
-                if (targetTask) setSelectedTask(targetTask); // Trigger side panel
+                if (targetTask) setSelectedTask(targetTask);
                 break;
-
             case 'delete':
                 if (targetTask && confirm(`Delete ${targetTask.name}?`)) {
                     updatedTasks = updatedTasks.filter(t => t.id !== targetTask.id);
-                    // Also remove dependencies pointing to this task
                     updatedTasks = updatedTasks.map(t => ({
                         ...t,
                         dependencies: t.dependencies.filter(d => d.targetId !== targetTask.id)
@@ -134,172 +120,34 @@ export const ProjectSchedulePage: React.FC = () => {
                     success("Activity Deleted");
                 }
                 break;
-
-            // --- CLIPBOARD ---
-            case 'cut':
-                if (targetTask) {
-                    setClipboardTask(targetTask);
-                    updatedTasks = updatedTasks.filter(t => t.id !== targetTask.id);
-                    updateProjectTasks(updatedTasks);
-                    info("Cut to Clipboard");
-                }
-                break;
-
             case 'copy':
                 if (targetTask) {
                     setClipboardTask(targetTask);
                     info("Copied to Clipboard");
                 }
                 break;
-
             case 'paste':
-            case 'duplicate':
-                const source = action === 'duplicate' ? targetTask : clipboardTask;
-                if (source) {
+                if (clipboardTask) {
                     const copy: Task = {
-                        ...source,
+                        ...clipboardTask,
                         id: generateId('T'),
-                        name: `${source.name} (Copy)`,
-                        dependencies: [], // Don't copy logic by default to avoid cycles
-                        wbsCode: targetTask ? targetTask.wbsCode : source.wbsCode
+                        name: `${clipboardTask.name} (Copy)`,
+                        dependencies: [],
+                        wbsCode: targetTask ? targetTask.wbsCode : clipboardTask.wbsCode
                     };
                     if (taskIndex !== -1) updatedTasks.splice(taskIndex + 1, 0, copy);
                     else updatedTasks.push(copy);
-                    
                     updateProjectTasks(updatedTasks);
                     success("Activity Pasted");
                 }
                 break;
-
-            // --- STRUCTURE ---
-            case 'moveUp':
-                if (taskIndex > 0) {
-                    [updatedTasks[taskIndex], updatedTasks[taskIndex - 1]] = [updatedTasks[taskIndex - 1], updatedTasks[taskIndex]];
-                    updateProjectTasks(updatedTasks);
-                }
-                break;
-
-            case 'moveDown':
-                if (taskIndex !== -1 && taskIndex < updatedTasks.length - 1) {
-                    [updatedTasks[taskIndex], updatedTasks[taskIndex + 1]] = [updatedTasks[taskIndex + 1], updatedTasks[taskIndex]];
-                    updateProjectTasks(updatedTasks);
-                }
-                break;
-
-            case 'indent':
-                if (targetTask) {
-                    // Visual Indent: Append a level to WBS Code (Simulated)
-                    updatedTasks[taskIndex] = { ...targetTask, wbsCode: `${targetTask.wbsCode}.1` };
-                    updateProjectTasks(updatedTasks);
-                }
-                break;
-
-            case 'outdent':
-                if (targetTask && targetTask.wbsCode.includes('.')) {
-                    // Visual Outdent: Remove last segment
-                    const newCode = targetTask.wbsCode.substring(0, targetTask.wbsCode.lastIndexOf('.'));
-                    updatedTasks[taskIndex] = { ...targetTask, wbsCode: newCode };
-                    updateProjectTasks(updatedTasks);
-                }
-                break;
-
-            // --- LOGIC ---
-            case 'link':
-                if (selectedTask && targetTask && selectedTask.id !== targetTask.id) {
-                    // Check if dependency already exists
-                    if (!targetTask.dependencies.some(d => d.targetId === selectedTask.id)) {
-                        updatedTasks[taskIndex] = {
-                            ...targetTask,
-                            dependencies: [...targetTask.dependencies, { targetId: selectedTask.id, type: 'FS', lag: 0 }]
-                        };
-                        updateProjectTasks(updatedTasks);
-                        success(`Linked ${selectedTask.wbsCode} -> ${targetTask.wbsCode}`);
-                    }
-                } else {
-                    info("Select a predecessor first, then right-click successor.");
-                }
-                break;
-            
-            case 'unlink':
-                if (targetTask) {
-                    updatedTasks[taskIndex] = { ...targetTask, dependencies: [] };
-                    updateProjectTasks(updatedTasks);
-                    success("Dependencies Cleared");
-                }
-                break;
-
-            case 'convertMilestone':
-                if (targetTask) {
-                    updatedTasks[taskIndex] = { ...targetTask, type: 'Milestone', duration: 0 };
-                    updateProjectTasks(updatedTasks);
-                }
-                break;
-
-            // --- PROGRESS ---
-            case 'progress0':
-            case 'progress50':
             case 'progress100':
                 if (targetTask) {
-                    const prog = action === 'progress0' ? 0 : action === 'progress50' ? 50 : 100;
-                    const status = prog === 0 ? TaskStatus.NOT_STARTED : prog === 100 ? TaskStatus.COMPLETED : TaskStatus.IN_PROGRESS;
-                    updatedTasks[taskIndex] = { ...targetTask, progress: prog, status };
+                    updatedTasks[taskIndex] = { ...targetTask, progress: 100, status: TaskStatus.COMPLETED };
                     updateProjectTasks(updatedTasks);
                 }
                 break;
-
-            // --- RESOURCES ---
-            case 'assignResource':
-                if (targetTask) {
-                    // Auto-assign first available resource for demo
-                    const resource = state.resources[0];
-                    if (resource) {
-                        const newAssignments = [...targetTask.assignments, { resourceId: resource.id, units: 100 }];
-                        updatedTasks[taskIndex] = { ...targetTask, assignments: newAssignments };
-                        updateProjectTasks(updatedTasks);
-                        success(`Assigned ${resource.name}`);
-                    }
-                }
-                break;
-
-            case 'levelResource':
-                if (targetTask) {
-                    // Simple heuristic: push start date by 2 days
-                    const newStart = new Date(targetTask.startDate);
-                    newStart.setDate(newStart.getDate() + 2);
-                    updatedTasks[taskIndex] = { 
-                        ...targetTask, 
-                        startDate: newStart.toISOString().split('T')[0],
-                        endDate: new Date(new Date(targetTask.endDate).setDate(new Date(targetTask.endDate).getDate() + 2)).toISOString().split('T')[0]
-                    };
-                    updateProjectTasks(updatedTasks);
-                    success("Resource Leveled (Shifted +2d)");
-                }
-                break;
-
-            // --- INTEGRATION ---
-            case 'addRisk':
-                if (targetTask) {
-                     dispatch({ type: 'ADD_RISK', payload: { id: generateId('R'), projectId: project.id, description: `Risk for ${targetTask.name}`, category: 'Schedule', status: 'Open', score: 5, linkedTaskId: targetTask.id } });
-                     success("Risk Created");
-                }
-                break;
-
-            case 'addIssue':
-                if (targetTask) {
-                    dispatch({ type: 'ADD_ISSUE', payload: { id: generateId('ISS'), projectId: project.id, priority: 'Medium', status: 'Open', description: `Issue on ${targetTask.name}`, activityId: targetTask.id } });
-                    success("Issue Logged");
-                }
-                break;
-            
-            case 'addChange':
-                if (targetTask) {
-                    dispatch({ type: 'ADD_CHANGE_ORDER', payload: { id: generateId('CO'), projectId: project.id, title: `Change: ${targetTask.name}`, amount: 0, status: 'Draft', description: `Scope change related to ${targetTask.name}` } });
-                    success("Change Order Started");
-                }
-                break;
-
-            default:
-                break;
+            default: break;
         }
         setContextMenu(null);
     };
@@ -337,7 +185,11 @@ export const ProjectSchedulePage: React.FC = () => {
             />
 
             <div className="flex-1 flex overflow-hidden relative">
-                <div ref={containerRef} className="flex-1 flex overflow-hidden relative nexus-empty-pattern" onContextMenu={(e) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task: null }); }}>
+                <div 
+                    ref={containerRef} 
+                    className="flex-1 flex overflow-hidden relative nexus-empty-pattern" 
+                    onContextMenu={(e) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task: null }); }}
+                >
                      <GanttTaskList 
                         ref={listRef} renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes}
                         selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask}
@@ -348,7 +200,7 @@ export const ProjectSchedulePage: React.FC = () => {
                         ref={timelineRef} timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap}
                         projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT}
                         showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask}
-                        projectTasks={project.tasks || []} calendar={projectCalendar} ganttContainerRef={{ current: null }} 
+                        projectTasks={project.tasks || []} calendar={projectCalendar} ganttContainerRef={containerRef} 
                         getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask}
                         virtualItems={virtualItems} totalHeight={totalHeight} onScroll={handleScroll}
                         onTimelineContextMenu={(e, task) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task }); }}

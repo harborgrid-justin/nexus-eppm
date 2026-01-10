@@ -5,8 +5,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { UserPlus, Search } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { useData } from '../../../context/DataContext';
-import { UserTable } from './users/UserTable';
-import { UserPanel } from './users/UserPanel';
+import { UserTable } from './UserTable';
+import { UserPanel } from './UserPanel';
 import { EmptyState } from '../../common/EmptyState';
 import { useTheme } from '../../../context/ThemeContext';
 

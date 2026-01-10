@@ -1,17 +1,17 @@
-
 import React from 'react';
 import { BPDefinition } from '../../types/unifier';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
-import { Settings } from 'lucide-react';
+import { Settings, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   definitions: BPDefinition[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onProvision?: () => void;
 }
 
-export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect }) => {
+export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect, onProvision }) => {
     const theme = useTheme();
 
     return (
@@ -38,7 +38,7 @@ export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect }
                     <div className="p-2">
                         <FieldPlaceholder 
                             label="No Processes Registered" 
-                            onAdd={() => {}} 
+                            onAdd={onProvision} 
                             icon={Settings}
                         />
                     </div>

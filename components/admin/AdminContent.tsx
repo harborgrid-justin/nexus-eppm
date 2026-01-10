@@ -1,7 +1,6 @@
-
 import React from 'react';
 import GeneralSettings from './GeneralSettings';
-import UserManagement from './UserManagement';
+import UserManagement from './users/UserManagement';
 import SecuritySettings from './SecuritySettings';
 import NotificationSettings from './NotificationSettings';
 import BillingSettings from './BillingSettings';
@@ -17,6 +16,8 @@ import { ExpenseCategorySettings } from './ExpenseCategorySettings';
 import { FundingSourceSettings } from './FundingSourceSettings';
 import WorkflowDesigner from './WorkflowDesigner';
 import GlobalChangeWorkbench from './GlobalChangeWorkbench';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { Settings } from 'lucide-react';
 
 interface AdminContentProps {
     activeView: string;
@@ -24,31 +25,31 @@ interface AdminContentProps {
 
 export const AdminContent: React.FC<AdminContentProps> = ({ activeView }) => {
     switch(activeView) {
-      // System
       case 'general': return <GeneralSettings />;
       case 'users': return <UserManagement />;
       case 'security': return <SecuritySettings />;
       case 'notifications': return <NotificationSettings />;
       case 'billing': return <BillingSettings />;
       case 'audit': return <AuditLog />;
-      
-      // Enterprise
       case 'epsobs': return <EpsObsSettings />;
       case 'calendars': return <CalendarEditor />;
       case 'locations': return <LocationSettings />;
       case 'resources': return <EnterpriseResourceSettings />;
-
-      // Dictionaries
       case 'activityCodes': return <ActivityCodeSettings />;
       case 'udfs': return <UdfSettings />;
       case 'issueCodes': return <IssueCodeSettings />;
       case 'expenseCategories': return <ExpenseCategorySettings />;
       case 'fundingSources': return <FundingSourceSettings />;
-
-      // Automation
       case 'workflows': return <WorkflowDesigner />;
       case 'globalChange': return <GlobalChangeWorkbench />;
-      
-      default: return <div>Select a setting to configure.</div>;
+      default: return (
+        <div className="p-12">
+            <EmptyGrid 
+                title="View Not Configured" 
+                description="The requested administrative module is not currently routed. Select a valid category from the navigation group."
+                icon={Settings}
+            />
+        </div>
+      );
     }
 };

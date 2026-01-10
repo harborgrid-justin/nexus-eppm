@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { User, Role } from '../../types/auth';
 import { useAuth } from '../../context/AuthContext';
@@ -49,32 +48,37 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col">
-        <div className={`p-4 ${theme.layout.headerBorder} flex flex-col md:flex-row justify-between items-center ${theme.colors.background} gap-4`}>
-            <input
-                type="text"
-                placeholder="Search directory..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full md:w-80 pl-4 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.border}`}
-            />
+    <div className={`h-full flex flex-col ${theme.layout.sectionSpacing}`}>
+        <div className={`p-4 ${theme.layout.headerBorder} flex flex-col md:flex-row justify-between items-center bg-slate-50/30 gap-4 rounded-xl border ${theme.colors.border}`}>
+            <div className="relative w-full md:w-80">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                <input
+                    type="text"
+                    placeholder="Search directory..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.primary} text-sm font-medium`}
+                />
+            </div>
             <Button icon={UserPlus} onClick={() => handleOpenPanel()} className="w-full md:w-auto">
                 Provision User
             </Button>
         </div>
 
-        <div className={`flex-1 overflow-auto p-4 ${theme.colors.background}/50`}>
+        <div className={`flex-1 overflow-hidden rounded-xl border ${theme.colors.border} bg-white`}>
             {filteredUsers.length > 0 ? (
-                <UserTable 
-                    users={filteredUsers}
-                    onEdit={handleOpenPanel}
-                    onDelete={handleDelete}
-                />
+                <div className="h-full overflow-auto">
+                    <UserTable 
+                        users={filteredUsers}
+                        onEdit={handleOpenPanel}
+                        onDelete={handleDelete}
+                    />
+                </div>
             ) : (
                 <div className="h-full flex flex-col justify-center">
                     <EmptyState 
                         title="No Users Found" 
-                        description={searchTerm ? `No users match "${searchTerm}"` : "The user directory is empty."}
+                        description={searchTerm ? `No users match "${searchTerm}"` : "The enterprise user directory is currently unpopulated."}
                         icon={Search}
                         action={searchTerm ? undefined : <Button size="sm" onClick={() => handleOpenPanel()}>Add User</Button>}
                     />

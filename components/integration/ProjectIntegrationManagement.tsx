@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { ProjectHeader } from '../project/ProjectHeader';
@@ -11,13 +11,16 @@ import ProjectCharter from './ProjectCharter';
 import ChangeLog from './ChangeLog';
 import { calculateScopeCreep } from '../../utils/integrations/cost';
 import { checkTaskStagnation } from '../../utils/integrations/schedule';
+import { formatCompactCurrency } from '../../utils/formatters';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Briefcase } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 const ProjectIntegrationManagement: React.FC = () => {
   const { project, summary, financials, riskProfile, qualityProfile, changeOrders } = useProjectWorkspace();
-  const { dispatch } = useData();
+  const { state, dispatch } = useData();
   const [activeTab, setActiveTab] = useState('dashboard');
+  const theme = useTheme();
 
   const integrationMetrics = useMemo(() => {
     if (!project) return { scopeCreep: 0, stagnantTasks: 0 };
@@ -26,6 +29,20 @@ const ProjectIntegrationManagement: React.FC = () => {
         stagnantTasks: project.tasks.filter(t => checkTaskStagnation(t)).length
     };
   }, [project, changeOrders]);
+
+  // Fix: Derive next board meeting from global governance state
+  const boardMeetingInfo = useMemo(() => {
+    const boardEvent = state.governanceEvents.find(e => e.type === 'Steering Committee');
+    return boardEvent ? `${boardEvent.name} is scheduled for ${boardEvent.nextDate}.` : 'No upcoming board meetings scheduled.';
+  }, [state.governanceEvents]);
+
+  // Fix: Derive exposure status dynamically from financials
+  const exposureInfo = useMemo(() => {
+      if (!financials || !project) return '';
+      const threshold = project.originalBudget * 0.15;
+      const isWithin = financials.pendingCOAmount <= threshold;
+      return `Current unapproved exposure (${formatCompactCurrency(financials.pendingCOAmount)}) is ${isWithin ? 'within' : 'exceeding'} the 15% contingency threshold.`;
+  }, [financials, project]);
 
   if (!project) {
       return (
@@ -40,7 +57,7 @@ const ProjectIntegrationManagement: React.FC = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 md:p-8 bg-slate-100/50 scrollbar-thin animate-in fade-in duration-500">
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.colors.background} scrollbar-thin animate-in fade-in duration-500`}>
       <ProjectHeader 
         project={project} 
         onCreateReflection={() => dispatch({ type: 'PROJECT_CREATE_REFLECTION', payload: { sourceProjectId: project.id } })} 
@@ -61,9 +78,15 @@ const ProjectIntegrationManagement: React.FC = () => {
                 qualityProfile={qualityProfile} 
                 phase2Metrics={integrationMetrics} 
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
                 <ProjectCharterSummary project={project} financials={financials} />
-                <ChangeSummary approvedCOAmount={financials.approvedCOAmount} pendingCOAmount={financials.pendingCOAmount} />
+                {/* Fix: Pass dynamic governance data to ChangeSummary */}
+                <ChangeSummary 
+                    approvedCOAmount={financials.approvedCOAmount} 
+                    pendingCOAmount={financials.pendingCOAmount} 
+                    boardMeetingInfo={boardMeetingInfo}
+                    exposureInfo={exposureInfo}
+                />
               </div>
             </div>
           )}

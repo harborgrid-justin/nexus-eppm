@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -8,7 +9,7 @@ import ProcurementPlanning from './procurement/ProcurementPlanning';
 import ProcurementSourcing from './procurement/ProcurementSourcing';
 import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
-import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListCheck } from 'lucide-react';
+import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListChecks } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
 import { EmptyGrid } from './common/EmptyGrid';
@@ -40,8 +41,8 @@ const ProcurementManagement: React.FC = () => {
     { id: 'pre-award', label: 'Pre-Award', items: [
       { id: 'planning', label: 'Planning', icon: FileText },
       { id: 'makebuy', label: 'Make-or-Buy', icon: Scale },
-      { id: 'vendors', label: 'Vendors', icon: Users },
-      { id: 'criteria', label: 'Source Selection', icon: ListCheck },
+      { id: 'vendors', label: 'Vendor Registry', icon: Users },
+      { id: 'criteria', label: 'Source Selection', icon: ListChecks },
       { id: 'sourcing', label: 'Sourcing', icon: ShoppingCart },
     ]},
     { id: 'post-award', label: 'Post-Award', items: [
@@ -91,7 +92,7 @@ const ProcurementManagement: React.FC = () => {
             <EmptyGrid 
                 title="Source Selection Criteria" 
                 description="Define weighted technical and financial criteria for evaluating vendor solicitations."
-                icon={ListCheck}
+                icon={ListChecks}
                 actionLabel="Define Criteria"
                 onAdd={() => {}}
             />

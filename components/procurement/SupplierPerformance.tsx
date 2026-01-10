@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Award, Star } from 'lucide-react';
-import { useProcurementData } from '../../hooks';
+import { Award, Star, Plus } from 'lucide-react';
+import { useSupplierPerformanceLogic } from '../../hooks/domain/useSupplierPerformanceLogic';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 
 interface SupplierPerformanceProps {
@@ -11,7 +12,7 @@ interface SupplierPerformanceProps {
 }
 
 const SupplierPerformance: React.FC<SupplierPerformanceProps> = ({ projectId }) => {
-    const { supplierReviews, vendors } = useProcurementData(projectId);
+    const { supplierReviews, vendors, handleLogReview } = useSupplierPerformanceLogic(projectId);
     const theme = useTheme();
 
     return (
@@ -20,6 +21,7 @@ const SupplierPerformance: React.FC<SupplierPerformanceProps> = ({ projectId }) 
                 <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
                     <Award size={16} /> Supplier Performance Reviews
                 </h3>
+                <Button size="sm" icon={Plus} onClick={handleLogReview}>Log Review</Button>
             </div>
 
             <div className="flex-1 overflow-auto p-6 space-y-4">
@@ -57,7 +59,7 @@ const SupplierPerformance: React.FC<SupplierPerformanceProps> = ({ projectId }) 
                             description="Evaluate vendor performance to track compliance and delivery quality."
                             icon={Award}
                             actionLabel="Log Evaluation"
-                            onAdd={() => {}}
+                            onAdd={handleLogReview}
                         />
                     </div>
                 )}

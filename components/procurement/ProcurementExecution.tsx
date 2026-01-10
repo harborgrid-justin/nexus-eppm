@@ -1,16 +1,15 @@
 
 import React from 'react';
-import { DollarSign, Truck, AlertCircle } from 'lucide-react';
-import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { useData } from '../../context/DataContext';
+import { DollarSign, Truck, Plus } from 'lucide-react';
+import { useProcurementExecutionLogic } from '../../hooks/domain/useProcurementExecutionLogic';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 
-const ProcurementExecution: React.FC = () => {
-    const { purchaseOrders } = useProjectWorkspace();
-    const { state } = useData();
+const ProcurementExecution: React.FC<{ projectId: string }> = ({ projectId }) => {
+    const { purchaseOrders, vendors, handleDraftPO } = useProcurementExecutionLogic(projectId);
     const theme = useTheme();
 
     return (
@@ -19,6 +18,7 @@ const ProcurementExecution: React.FC = () => {
                 <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
                     <DollarSign size={16} /> Purchase Orders & Execution
                 </h3>
+                <Button size="sm" icon={Plus} onClick={handleDraftPO}>Draft PO</Button>
             </div>
 
             <div className="flex-1 overflow-auto">
@@ -36,7 +36,7 @@ const ProcurementExecution: React.FC = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">
                             {purchaseOrders.map(po => {
-                                const vendor = state.vendors.find(v => v.id === po.vendorId);
+                                const vendor = vendors.find(v => v.id === po.vendorId);
                                 return (
                                     <tr key={po.id} className="hover:bg-slate-50">
                                         <td className="px-6 py-4 font-mono text-sm font-bold text-slate-700">{po.number}</td>
@@ -63,7 +63,7 @@ const ProcurementExecution: React.FC = () => {
                             description="No committed costs recorded. Issue a PO to a vendor to begin execution."
                             icon={DollarSign}
                             actionLabel="Draft PO"
-                            onAdd={() => {}}
+                            onAdd={handleDraftPO}
                          />
                     </div>
                 )}

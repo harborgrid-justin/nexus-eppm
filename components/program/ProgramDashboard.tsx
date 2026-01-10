@@ -12,7 +12,7 @@ import { Sparkles, Loader2, Target, Lightbulb, Briefcase, Plus } from 'lucide-re
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { usePermissions } from '../../hooks/usePermissions';
-import { generateId } from '../../utils/formatters';
+import { generateId, formatCompactCurrency } from '../../utils/formatters';
 
 const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   const { program, projects, aggregateMetrics, programRisks } = useProgramData(programId);
@@ -64,6 +64,32 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
       });
   };
 
+  // Fix: Replaced static insight text with dynamic calculation from program and component project data.
+  const programInsight = useMemo(() => {
+    if (!program || projects.length === 0) return null;
+    
+    const totalBudget = program.budget || aggregateMetrics.totalBudget;
+    const totalSpent = aggregateMetrics.totalSpent;
+    const remaining = totalBudget - totalSpent;
+    
+    const criticalCount = projects.filter(p => p.health === 'Critical').length;
+    const warningCount = projects.filter(p => p.health === 'Warning').length;
+    
+    if (criticalCount > 0) {
+        return `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated; immediate governance review recommended.`;
+    }
+    
+    if (totalBudget > 0 && (totalSpent / totalBudget) > 0.95) {
+        return `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority. Funding re-alignment may be required for upcoming phases.`;
+    }
+
+    if (warningCount > 3) {
+        return `Trend Warning: ${warningCount} projects reporting warning status. Aggregated schedule drift may impact strategic roadmap milestones.`;
+    }
+
+    return `Operational Stability: Program is tracking within established performance parameters. Available fiscal authority remains healthy at ${formatCompactCurrency(remaining)}.`;
+  }, [program, projects, aggregateMetrics]);
+
   if (!program) return null;
 
   return (
@@ -113,7 +139,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                          <NarrativeField 
                             label="Business Case & Strategic Mandate"
                             value={program.businessCase}
-                            placeholderLabel="Define the overarching strategic mandate and justification for this program."
+                            placeholderLabel="Define the overarching strategic mandate and justification for this project."
                             onSave={(val) => handleUpdate('businessCase', val)}
                             isReadOnly={!canEditProject()}
                         />
@@ -166,8 +192,9 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                  <div className="bg-indigo-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
                      <div className="relative z-10">
                          <h4 className="font-bold flex items-center gap-2 mb-2"><Lightbulb size={18} className="text-yellow-400"/> Program Insight</h4>
+                         {/* Fix: Replaced static text with dynamic programInsight variable. */}
                          <p className="text-xs text-indigo-200 leading-relaxed">
-                             Based on current burn rates, this program is projected to complete <strong>14 days ahead of schedule</strong>, but requires <strong>$1.2M</strong> additional funding for Q4.
+                             {programInsight || "Analyzing portfolio performance and burn rates..."}
                          </p>
                      </div>
                      <Target size={120} className="absolute -right-8 -bottom-8 text-white/5 rotate-12"/>
@@ -177,4 +204,5 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     </div>
   );
 };
+
 export default ProgramDashboard;

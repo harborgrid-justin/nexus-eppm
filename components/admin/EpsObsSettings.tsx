@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layers, Plus, Folder } from 'lucide-react';
 import { useData } from '../../context/DataContext';
@@ -54,34 +53,57 @@ const EpsObsSettings: React.FC = () => {
     const currentNodes = view === 'EPS' ? state.eps : state.obs;
 
     return (
-        <div className="h-full flex flex-col space-y-6">
-            <div className="flex justify-between items-center bg-slate-100 p-1 rounded-lg w-full md:w-auto">
-                <div className="flex gap-1">
-                    <button onClick={() => setView('EPS')} className={`px-6 py-2 text-sm font-bold rounded-md transition-all ${view === 'EPS' ? 'bg-white shadow text-nexus-700' : 'text-slate-500 hover:text-slate-700'}`}>Enterprise Projects (EPS)</button>
-                    <button onClick={() => setView('OBS')} className={`px-6 py-2 text-sm font-bold rounded-md transition-all ${view === 'OBS' ? 'bg-white shadow text-nexus-700' : 'text-slate-500 hover:text-slate-700'}`}>Organizational (OBS)</button>
+        <div className={`h-full flex flex-col ${theme.layout.sectionSpacing}`}>
+            <div className={`flex flex-col md:flex-row justify-between items-center bg-slate-50 p-3 rounded-xl border ${theme.colors.border} shadow-sm gap-3`}>
+                <div className="flex bg-white p-1 rounded-lg border border-slate-200">
+                    <button 
+                        onClick={() => setView('EPS')} 
+                        className={`px-6 py-2 text-xs font-black uppercase tracking-widest rounded-md transition-all ${view === 'EPS' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
+                    >
+                        Project Hierarchy (EPS)
+                    </button>
+                    <button 
+                        onClick={() => setView('OBS')} 
+                        className={`px-6 py-2 text-xs font-black uppercase tracking-widest rounded-md transition-all ${view === 'OBS' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
+                    >
+                        Security Hierarchy (OBS)
+                    </button>
                 </div>
-                <Button size="sm" icon={Plus} onClick={() => handleAdd(null)}>Add Root Node</Button>
+                <Button size="sm" icon={Plus} onClick={() => handleAdd(null)}>Add Root Level</Button>
             </div>
 
-            <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div className="p-4 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-500 uppercase tracking-widest flex justify-between items-center">
-                    <span>Hierarchy Tree</span>
-                    <span className="font-mono text-[10px] text-slate-400">{currentNodes.length} Nodes</span>
+            <div className={`flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col`}>
+                <div className={`p-4 bg-slate-50/50 border-b border-slate-200 font-black text-[10px] text-slate-400 uppercase tracking-widest flex justify-between items-center`}>
+                    <span>Hierarchy Explorer</span>
+                    <span className="font-mono bg-white px-2 py-0.5 rounded border border-slate-200">{currentNodes.length} Elements</span>
                 </div>
-                <div className="flex-1 overflow-auto p-2 scrollbar-thin">
+                <div className="flex-1 overflow-auto p-4 scrollbar-thin">
                     {!hasData ? (
-                        <EmptyGrid title={`${view} Structure Undefined`} description={`Initialize the global hierarchical structure for your ${view === 'EPS' ? 'project database' : 'security and organization'} nodes.`} icon={Layers} actionLabel={`Define Root ${view}`} onAdd={() => handleAdd(null)} />
+                        <EmptyGrid 
+                            title={`${view} Model Uninitialized`} 
+                            description={`Construct the global tree structure for your ${view === 'EPS' ? 'project database' : 'security profiles'}.`} 
+                            icon={Layers} 
+                            actionLabel={`Define Root ${view}`} 
+                            onAdd={() => handleAdd(null)} 
+                        />
                     ) : (
-                        <StructureTree nodes={currentNodes} type={view} onEdit={handleEdit} onAdd={handleAdd} onDelete={handleDelete} />
+                        <div className="max-w-4xl">
+                            <StructureTree nodes={currentNodes} type={view} onEdit={handleEdit} onAdd={handleAdd} onDelete={handleDelete} />
+                        </div>
                     )}
                 </div>
             </div>
             
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 shadow-sm">
-                <div className="p-1 bg-blue-100 rounded text-blue-600 shrink-0"><Layers size={14}/></div>
-                <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                    <strong>P6 Parity Note:</strong> The EPS defines the hierarchical structure of the project database. The OBS creates the security profile structure. Projects are assigned to an EPS node and an OBS Responsible Manager.
-                </p>
+            <div className={`p-5 ${theme.colors.semantic.info.bg} border ${theme.colors.semantic.info.border} rounded-2xl flex gap-4 shadow-sm`}>
+                <div className="p-2 bg-white rounded-xl shadow-sm text-blue-600 shrink-0"><Layers size={20}/></div>
+                <div>
+                    <h4 className={`font-black text-[10px] uppercase tracking-widest text-blue-800 mb-1`}>Architecture Standard</h4>
+                    <p className="text-xs text-blue-700 leading-relaxed font-medium">
+                        The <strong>EPS (Enterprise Project Structure)</strong> controls project categorization. 
+                        The <strong>OBS (Organizational Breakdown Structure)</strong> controls secure resource access. 
+                        Every project must map to a valid node in both hierarchies.
+                    </p>
+                </div>
             </div>
 
             <NodePanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} editingNode={editingNode} type={view} resources={state.resources} onSave={handleSave} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { FieldPlaceholder } from './FieldPlaceholder';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,8 +8,8 @@ interface NarrativeFieldProps {
   value?: string;
   label: string;
   placeholderLabel: string;
-  onAdd?: () => void; // Legacy add handler
-  onSave?: (newValue: string) => void; // New save handler for inline editing
+  onAdd?: () => void; 
+  onSave?: (newValue: string) => void;
   className?: string;
   asHtml?: boolean;
   isReadOnly?: boolean;
@@ -39,9 +38,7 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
   }, [value]);
 
   const handleSave = () => {
-      if (onSave) {
-          onSave(localValue);
-      }
+      if (onSave) onSave(localValue);
       setIsEditing(false);
   };
 
@@ -50,7 +47,6 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
       setIsEditing(false);
   };
 
-  // If no value and not editing, show placeholder
   if (!value && !isEditing) {
     return (
         <div className={`space-y-2 ${className}`}>
@@ -89,7 +85,6 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
                   value={localValue}
                   onChange={(e) => setLocalValue(e.target.value)}
                   autoFocus
-                  placeholder={`Enter ${label}...`}
               />
               <div className="flex justify-end gap-2 mt-2">
                   <Button variant="ghost" size="sm" onClick={handleCancel} icon={X}>Cancel</Button>

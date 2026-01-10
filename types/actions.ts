@@ -1,10 +1,9 @@
-
 import { DataState, StagingRecord } from './state';
 import { Project } from './project';
 import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal } from './program';
 import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
 import { Risk, Issue, IssueCode } from './risk';
-import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
+import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
 import { QualityReport, NonConformanceReport } from './quality';
 import { Document, ActivityCode, UserDefinedField, Integration, Extension, DataJob, WorkflowDefinition, EtlMapping, QualityStandard, GlobalChangeRule } from './common';
 import { GlobalCalendar } from './calendar';
@@ -32,9 +31,10 @@ export type Action =
     | { type: 'WBS_UPDATE_NODE'; payload: { projectId: string; nodeId: string; updatedData: any } }
     | { type: 'WBS_REPARENT'; payload: { projectId: string; nodeId: string; newParentId: string | null } }
     | { type: 'WBS_UPDATE_SHAPE'; payload: { projectId: string; nodeId: string; shape: any } }
-    | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' }
+    | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' | 'defense' }
     | { type: 'ADD_PROGRAM'; payload: any }
     | { type: 'UPDATE_PROGRAM'; payload: any }
+    | { type: 'DELETE_PROGRAM'; payload: string }
     | { type: 'PROGRAM_ADD_STAKEHOLDER'; payload: any }
     | { type: 'PROGRAM_UPDATE_STAKEHOLDER'; payload: any }
     | { type: 'PROGRAM_DELETE_STAKEHOLDER'; payload: string }
@@ -51,6 +51,11 @@ export type Action =
     | { type: 'PROGRAM_ADD_ISSUE'; payload: any }
     | { type: 'PROGRAM_UPDATE_ISSUE'; payload: any }
     | { type: 'PROGRAM_DELETE_ISSUE'; payload: string }
+    | { type: 'PROGRAM_ADD_TRADEOFF'; payload: any }
+    | { type: 'PROGRAM_DELETE_TRADEOFF'; payload: string }
+    | { type: 'ADD_PROGRAM_CHANGE_REQUEST'; payload: any }
+    | { type: 'UPDATE_PROGRAM_CHANGE_REQUEST'; payload: any }
+    | { type: 'DELETE_PROGRAM_CHANGE_REQUEST'; payload: string }
     | { type: 'ADMIN_ADD_LOCATION'; payload: any }
     | { type: 'ADMIN_UPDATE_LOCATION'; payload: any }
     | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
@@ -113,6 +118,8 @@ export type Action =
     | { type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES'; payload: any }
     | { type: 'GOVERNANCE_SYNC_PARAMETERS', payload: any }
     | { type: 'GOVERNANCE_ADD_DECISION', payload: any }
+    | { type: 'GOVERNANCE_UPDATE_DECISION', payload: any }
+    | { type: 'GOVERNANCE_DELETE_DECISION', payload: string }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any } 
     | { type: 'RESET_SYSTEM' }
     | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any; action: string; user: any } }
@@ -191,5 +198,5 @@ export type Action =
     | { type: 'ADD_REPORT_DEF'; payload: any }
     | { type: 'DELETE_REPORT_DEF'; payload: string }
     | { type: 'ADD_STAKEHOLDER'; payload: any }
-    | { type: 'PROGRAM_UPDATE_GATE'; payload: any } // Ensure this is present
+    | { type: 'ADD_SUPPLIER_REVIEW'; payload: any }
 ;

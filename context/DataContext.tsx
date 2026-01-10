@@ -1,10 +1,11 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useCallback, useEffect } from 'react';
 import { 
     RiskManagementPlan, Document, ActivityCode, DataState, Action
 } from '../types/index';
 import { initialState } from './initialState';
 import { rootReducer } from './rootReducer';
+import { loadPersistedState, savePersistedState, clearPersistedState } from '../utils/storage';
 
 const DataContext = createContext<{
   state: DataState;
@@ -15,8 +16,22 @@ const DataContext = createContext<{
 } | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // The root reducer now handles all state logic, including loading demo data.
-  const [state, dispatch] = useReducer(rootReducer, initialState);
+  // Initialize state from LocalStorage if available, passing initialState as the default
+  // The reducer will start with the merged state returned by loadPersistedState
+  const [state, dispatch] = useReducer(rootReducer, initialState, (defaultState) => loadPersistedState(defaultState));
+
+  // Persistence Effect: Save to LocalStorage whenever state changes
+  useEffect(() => {
+    savePersistedState(state);
+  }, [state]);
+
+  // Intercept Reset Logic to clear storage
+  const enhancedDispatch = useCallback((action: Action) => {
+      if (action.type === 'RESET_SYSTEM') {
+          clearPersistedState();
+      }
+      dispatch(action);
+  }, []);
 
   const getRiskPlan = useCallback((projectId: string): RiskManagementPlan | undefined => {
     const project = state.projects.find(p => p.id === projectId);
@@ -32,7 +47,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [state.activityCodes]);
 
   return (
-    <DataContext.Provider value={{ state, dispatch, getRiskPlan, getProjectDocs, getActivityCodesForProject }}>
+    <DataContext.Provider value={{ state, dispatch: enhancedDispatch, getRiskPlan, getProjectDocs, getActivityCodesForProject }}>
       {children}
     </DataContext.Provider>
   );

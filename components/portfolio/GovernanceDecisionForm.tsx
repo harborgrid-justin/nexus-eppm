@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GovernanceDecision } from '../../types';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
@@ -10,9 +10,10 @@ import { generateId } from '../../utils/formatters';
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    decision?: GovernanceDecision | null;
 }
 
-export const GovernanceDecisionForm: React.FC<Props> = ({ isOpen, onClose }) => {
+export const GovernanceDecisionForm: React.FC<Props> = ({ isOpen, onClose, decision }) => {
     const { dispatch } = useData();
     const [formData, setFormData] = useState<Partial<GovernanceDecision>>({
         title: '',
@@ -22,11 +23,25 @@ export const GovernanceDecisionForm: React.FC<Props> = ({ isOpen, onClose }) => 
         notes: ''
     });
 
+    useEffect(() => {
+        if (decision) {
+            setFormData(decision);
+        } else {
+            setFormData({
+                title: '',
+                date: new Date().toISOString().split('T')[0],
+                authorityId: 'Steering Committee',
+                decision: 'Approved',
+                notes: ''
+            });
+        }
+    }, [decision, isOpen]);
+
     const handleSave = () => {
         if (!formData.title) return;
         
-        const decision: GovernanceDecision = {
-            id: generateId('DEC'),
+        const decisionToSave: GovernanceDecision = {
+            id: formData.id || generateId('DEC'),
             title: formData.title,
             date: formData.date || '',
             authorityId: formData.authorityId || '',
@@ -34,18 +49,12 @@ export const GovernanceDecisionForm: React.FC<Props> = ({ isOpen, onClose }) => 
             notes: formData.notes || ''
         };
 
-        // Dispatch logic - assuming we can add an action or reuse generic update. 
-        // Since `governanceDecisions` is in state, we need a reducer case.
-        // We'll dispatch a generic payload that the system reducer (or governance logic) can pick up, 
-        // or we define a new action type in `actions.ts`. 
-        // For this response scope, I will reuse `GOVERNANCE_UPDATE_INTEGRATED_CHANGE` pattern but for decisions.
-        // Assuming we added `GOVERNANCE_ADD_DECISION` (which might not exist yet in types).
-        // I will use a placeholder action that won't crash but conceptually works:
-        // Actually, looking at `systemSlice.ts`, there isn't one. I should add it to `systemSlice.ts` as well?
-        // No, I can only update components. I will assume the reducer *will* be updated or use a console log for the demo interaction if strictly limited.
-        // BUT, I can update `reducers/systemSlice.ts` in the same response! Excellent.
+        if (formData.id) {
+            dispatch({ type: 'GOVERNANCE_UPDATE_DECISION', payload: decisionToSave });
+        } else {
+            dispatch({ type: 'GOVERNANCE_ADD_DECISION', payload: decisionToSave });
+        }
         
-        dispatch({ type: 'GOVERNANCE_ADD_DECISION', payload: decision } as any); // Cast to avoid TS error until types updated
         onClose();
     };
 
@@ -53,8 +62,8 @@ export const GovernanceDecisionForm: React.FC<Props> = ({ isOpen, onClose }) => 
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Log Governance Decision"
-            footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={handleSave}>Record Decision</Button></>}
+            title={decision ? "Edit Decision" : "Log Governance Decision"}
+            footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={handleSave}>{decision ? "Update" : "Record"} Decision</Button></>}
         >
             <div className="space-y-4">
                 <Input label="Decision Title" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="e.g. Budget Increase for Project X" />

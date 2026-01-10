@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2, Gavel, Target
+  Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2, Gavel, Target, CheckCircle, Clock, AlertCircle
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -13,6 +13,7 @@ import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
+import { formatCompactCurrency } from '../../utils/formatters';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
@@ -45,14 +46,38 @@ const PortfolioStrategyFramework: React.FC = () => {
 
   const getProjectById = (id: string) => projects.find(p => p.id === id);
 
-  const getRoleAssignee = (roleName: string): string | null => {
+  const getRoleAssignee = (roleName: string) => {
       const role = (governanceRoles || []).find(r => r.role === roleName);
       if (role) {
           const user = (users || []).find(u => u.id === role.assigneeId);
-          return user ? user.name : role.assigneeId;
+          return {
+              name: user ? user.name : role.assigneeId,
+              status: 'Active',
+              id: role.id
+          };
       }
       return null;
   };
+
+  // Calculate Pipeline Metrics based on Project Status
+  const pipelineStats = useMemo(() => {
+      const stages = [
+          { id: 'Proposal', label: 'Proposal', match: ['Draft'] },
+          { id: 'Review', label: 'Business Case', match: ['Planned'] },
+          { id: 'Approval', label: 'Board Approval', match: ['Pending'] },
+          { id: 'Execution', label: 'Execution', match: ['Active', 'In Progress'] }
+      ];
+
+      return stages.map(stage => {
+          const stageProjects = projects.filter(p => stage.match.includes(p.status || 'Planned'));
+          const value = stageProjects.reduce((sum, p) => sum + p.budget, 0);
+          return {
+              ...stage,
+              count: stageProjects.length,
+              value
+          };
+      });
+  }, [projects]);
 
   const currentProject = selectedProjectId ? getProjectById(selectedProjectId) : null;
 
@@ -83,9 +108,12 @@ const PortfolioStrategyFramework: React.FC = () => {
             <div className="space-y-2">
                 <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Governance Board</label>
                 {getRoleAssignee('Governance Board') ? (
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl`}>
-                        <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Governance Board')}</p>
-                        <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Final authority on funding & strategic alignment.</p>
+                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                        <div>
+                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Governance Board')?.name}</p>
+                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Strategy & Funding Authority</p>
+                        </div>
+                        <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
                     <FieldPlaceholder label="No Board Defined" onAdd={() => {}} icon={Gavel} />
@@ -93,10 +121,13 @@ const PortfolioStrategyFramework: React.FC = () => {
             </div>
             <div className="space-y-2">
                 <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Portfolio Sponsor</label>
-                {getRoleAssignee('Portfolio Sponsor') ? (
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl`}>
-                        <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Portfolio Sponsor')}</p>
-                        <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Champions the portfolio and secures resources.</p>
+                {getRoleAssignee('Sponsor') ? (
+                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                        <div>
+                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Sponsor')?.name}</p>
+                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Executive Champion</p>
+                        </div>
+                         <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
                     <FieldPlaceholder label="Unassigned Sponsor" onAdd={() => {}} icon={Users} />
@@ -104,10 +135,13 @@ const PortfolioStrategyFramework: React.FC = () => {
             </div>
             <div className="space-y-2">
                 <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Portfolio Manager</label>
-                {getRoleAssignee('Portfolio Manager') ? (
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl`}>
-                        <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Portfolio Manager')}</p>
-                        <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Monitors performance and balances the portfolio.</p>
+                {getRoleAssignee('Program Manager') ? ( // Mapping 'Program Manager' mock to Portfolio for demo if specific Portfolio Mgr missing
+                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                        <div>
+                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Program Manager')?.name}</p>
+                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Operations Lead</p>
+                        </div>
+                         <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
                     <FieldPlaceholder label="Unassigned Manager" onAdd={() => {}} icon={Target} />
@@ -115,17 +149,23 @@ const PortfolioStrategyFramework: React.FC = () => {
             </div>
           </div>
           
-          <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Decision & Escalation Path</h3>
-          <div className={`flex flex-wrap items-center gap-2 ${theme.typography.label} ${theme.colors.text.secondary} bg-slate-50/50 p-4 rounded-xl border ${theme.colors.border}`}>
-            <div className={`px-3 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg shadow-sm`}>Proposal</div>
-            <ArrowRight size={14} className={theme.colors.text.tertiary} />
-            <div className={`px-3 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg shadow-sm`}>Business Case Review</div>
-            <ArrowRight size={14} className={theme.colors.text.tertiary} />
-            <div className={`px-3 py-2 ${theme.colors.surface} border ${theme.colors.border} rounded-lg shadow-sm`}>Scoring</div>
-             <ArrowRight size={14} className={theme.colors.text.tertiary} />
-            <div className={`px-3 py-2 ${theme.colors.semantic.info.solid} rounded-lg shadow-md`}>Board Approval</div>
-             <ArrowRight size={14} className={theme.colors.text.tertiary} />
-            <div className={`px-3 py-2 ${theme.colors.semantic.success.solid} rounded-lg shadow-md`}>Execution</div>
+          <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Portfolio Pipeline (Stage Progression)</h3>
+          <div className="flex flex-col md:flex-row gap-4 w-full">
+            {pipelineStats.map((stage, idx) => (
+                <div key={stage.id} className="flex-1 flex items-center">
+                    <div className={`flex-1 p-4 rounded-xl border ${theme.colors.border} ${stage.count > 0 ? 'bg-white shadow-sm' : 'bg-slate-50 opacity-60'} relative overflow-hidden`}>
+                        {stage.count > 0 && <div className={`absolute top-0 left-0 w-1 h-full ${idx === 3 ? 'bg-green-500' : 'bg-blue-500'}`}></div>}
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{stage.label}</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${stage.count > 0 ? 'bg-slate-100 text-slate-700' : 'bg-slate-100 text-slate-400'}`}>{stage.count}</span>
+                        </div>
+                        <div className="text-lg font-black text-slate-900">{formatCompactCurrency(stage.value)}</div>
+                    </div>
+                    {idx < pipelineStats.length - 1 && (
+                        <div className="mx-2 text-slate-300 hidden md:block"><ArrowRight size={20}/></div>
+                    )}
+                </div>
+            ))}
           </div>
         </Card>
       </section>
@@ -219,14 +259,32 @@ const PortfolioStrategyFramework: React.FC = () => {
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
           {PORTFOLIO_CATEGORIES.map((category) => {
             const projectsInCategory = projects.filter(p => p.category === category);
+            const categoryBudget = projectsInCategory.reduce((sum, p) => sum + p.budget, 0);
+            const healthCounts = {
+                good: projectsInCategory.filter(p => p.health === 'Good').length,
+                warning: projectsInCategory.filter(p => p.health === 'Warning').length,
+                critical: projectsInCategory.filter(p => p.health === 'Critical').length
+            };
+
             return (
               <div key={category} className="flex flex-col gap-3">
-                <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} flex justify-between items-center shadow-sm`}>
-                    <h3 className={`font-black ${theme.colors.text.secondary} text-[10px] uppercase tracking-widest`}>{category}</h3>
-                    <button className={`${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>
-                        <Plus size={14} />
-                    </button>
+                <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} shadow-sm`}>
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className={`font-black ${theme.colors.text.secondary} text-[10px] uppercase tracking-widest truncate`}>{category}</h3>
+                        <button className={`${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>
+                            <Plus size={14} />
+                        </button>
+                    </div>
+                    <div className="flex justify-between items-end">
+                        <div className="font-mono text-sm font-bold text-slate-700">{formatCompactCurrency(categoryBudget)}</div>
+                        <div className="flex gap-1 h-1.5 w-16 bg-slate-200 rounded-full overflow-hidden">
+                            <div className="bg-green-500 h-full" style={{width: `${(healthCounts.good/projectsInCategory.length)*100}%`}}></div>
+                            <div className="bg-yellow-500 h-full" style={{width: `${(healthCounts.warning/projectsInCategory.length)*100}%`}}></div>
+                            <div className="bg-red-500 h-full" style={{width: `${(healthCounts.critical/projectsInCategory.length)*100}%`}}></div>
+                        </div>
+                    </div>
                 </div>
+                
                 <div className="space-y-3 min-h-[150px]">
                     {projectsInCategory.length > 0 ? projectsInCategory.map(project => (
                         <div key={project.id} className={`${theme.components.card} p-4 group hover:border-nexus-300 relative transition-all shadow-sm`}>

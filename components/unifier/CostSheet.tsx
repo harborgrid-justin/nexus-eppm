@@ -4,7 +4,7 @@ import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { evaluateFormula } from '../../utils/logic/businessProcessEngine';
 import { formatCurrency } from '../../utils/formatters';
-import { RefreshCw, Calculator, FileSpreadsheet, Plus } from 'lucide-react';
+import { RefreshCw, Calculator, FileSpreadsheet, Plus, LayoutTemplate } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 
@@ -16,6 +16,21 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
   const { state } = useData();
   const theme = useTheme();
   
+  // Guard: Ensure project context exists before checking for rows
+  if (!projectId || projectId === 'UNSET') {
+      return (
+        <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+             <div className="h-full flex flex-col justify-center p-8">
+                <EmptyGrid 
+                    title="Portfolio Context Required"
+                    description="Please select or create a project to view the Master Cost Sheet."
+                    icon={LayoutTemplate}
+                />
+             </div>
+        </div>
+      );
+  }
+
   // In a real app, we filter by projectId. 
   // For mock, we use the static cost sheet data but re-calculate formulas dynamically.
   const { columns, rows } = state.unifier.costSheet;

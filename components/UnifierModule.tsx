@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { CostSheet } from './unifier/CostSheet';
@@ -41,9 +40,14 @@ const UnifierModule: React.FC = () => {
                         <CostSheet projectId={projectId} />
                     ) : (
                         <div className="flex h-full bg-white">
-                            <BPSidebar definitions={definitions} selectedId={selectedBP} onSelect={setSelectedBP} />
+                            <BPSidebar 
+                                definitions={definitions} 
+                                selectedId={selectedBP} 
+                                onSelect={setSelectedBP}
+                                onProvision={() => handleTabChange('uDesigner')}
+                            />
                             <div className="flex-1 flex flex-col overflow-hidden">
-                                <UnifierToolbar title={`${activeDefinition?.name || ''} Log`} onCreate={handleCreate} onRefresh={() => {}} />
+                                <UnifierToolbar title={`${activeDefinition?.name || 'Business Process'} Log`} onCreate={handleCreate} onRefresh={() => {}} />
                                 <BPList records={records} activeDefinition={activeDefinition} onEdit={handleEdit} onCreate={handleCreate} />
                             </div>
                         </div>

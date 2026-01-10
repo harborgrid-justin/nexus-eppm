@@ -10,6 +10,11 @@ export const programReducer = (state: DataState, action: Action): DataState => {
           ...state, 
           programs: state.programs.map(p => p.id === action.payload.id ? action.payload : p) 
       };
+    case 'DELETE_PROGRAM':
+      return { 
+          ...state, 
+          programs: state.programs.filter(p => p.id !== action.payload) 
+      };
     case 'PROGRAM_ADD_STAKEHOLDER':
       return { ...state, programStakeholders: [action.payload, ...state.programStakeholders] };
     case 'PROGRAM_UPDATE_STAKEHOLDER':
@@ -48,6 +53,21 @@ export const programReducer = (state: DataState, action: Action): DataState => {
         return { ...state, programIssues: state.programIssues.map(i => i.id === action.payload.id ? action.payload : i) };
     case 'PROGRAM_DELETE_ISSUE':
         return { ...state, programIssues: state.programIssues.filter(i => i.id !== action.payload) };
+    
+    // Trade-off Scenarios
+    case 'PROGRAM_ADD_TRADEOFF':
+        return { ...state, tradeoffScenarios: [...state.tradeoffScenarios, action.payload] };
+    case 'PROGRAM_DELETE_TRADEOFF':
+        return { ...state, tradeoffScenarios: state.tradeoffScenarios.filter(s => s.id !== action.payload) };
+        
+    // Program Change Requests
+    case 'ADD_PROGRAM_CHANGE_REQUEST':
+        return { ...state, programChangeRequests: [...state.programChangeRequests, action.payload] };
+    case 'UPDATE_PROGRAM_CHANGE_REQUEST':
+        return { ...state, programChangeRequests: state.programChangeRequests.map(c => c.id === action.payload.id ? action.payload : c) };
+    case 'DELETE_PROGRAM_CHANGE_REQUEST':
+        return { ...state, programChangeRequests: state.programChangeRequests.filter(c => c.id !== action.payload) };
+
     default:
       return state;
   }

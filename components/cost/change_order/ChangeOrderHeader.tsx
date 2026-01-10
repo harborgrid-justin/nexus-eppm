@@ -1,29 +1,46 @@
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import StatCard from '../../shared/StatCard';
 import { DollarSign, AlertOctagon, Calendar, FileText } from 'lucide-react';
-import { ChangeOrder } from '../../../types';
 
 interface ChangeOrderHeaderProps {
-    orders: ChangeOrder[];
+    stats: {
+        totalVolume: number;
+        approvedAmount: number;
+        pendingExposure: number;
+        scheduleDrift: number;
+    };
 }
 
-export const ChangeOrderHeader: React.FC<ChangeOrderHeaderProps> = ({ orders }) => {
-    const stats = useMemo(() => {
-        const pending = orders.filter(c => c.status === 'Pending Approval');
-        const approvedCost = orders.filter(c => c.status === 'Approved').reduce((s, c) => s + c.amount, 0);
-        const pendingCost = pending.reduce((s, c) => s + c.amount, 0);
-        const scheduleDrift = orders.filter(c => c.status === 'Approved').reduce((s, c) => s + (c.scheduleImpactDays || 0), 0);
-        return { total: orders.length, pending: pending.length, approvedCost, pendingCost, scheduleDrift };
-    }, [orders]);
-
+export const ChangeOrderHeader: React.FC<ChangeOrderHeaderProps> = ({ stats }) => {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 pb-0">
-            <StatCard title="Approved Changes" value={formatCompactCurrency(stats.approvedCost)} icon={DollarSign} />
-            <StatCard title="Pending Exposure" value={formatCompactCurrency(stats.pendingCost)} icon={AlertOctagon} trend="down" />
-            <StatCard title="Schedule Drift" value={`+${stats.scheduleDrift} Days`} icon={Calendar} trend={stats.scheduleDrift > 10 ? 'down' : 'up'} />
-            <StatCard title="Total Volume" value={stats.total} icon={FileText} />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 pb-2">
+            <StatCard 
+                title="Approved Changes" 
+                value={formatCompactCurrency(stats.approvedAmount)} 
+                icon={DollarSign} 
+                subtext="Committed Budget Delta"
+            />
+            <StatCard 
+                title="Pending Exposure" 
+                value={formatCompactCurrency(stats.pendingExposure)} 
+                icon={AlertOctagon} 
+                trend={stats.pendingExposure > 0 ? "down" : undefined}
+                subtext="Current Unapproved Pipeline"
+            />
+            <StatCard 
+                title="Schedule Drift" 
+                value={`+${stats.scheduleDrift} Days`} 
+                icon={Calendar} 
+                trend={stats.scheduleDrift > 0 ? 'down' : 'up'}
+                subtext="Aggregated Critical Path Impact"
+            />
+            <StatCard 
+                title="Total Volume" 
+                value={stats.totalVolume} 
+                icon={FileText} 
+                subtext="Total Lifecycle Requests"
+            />
         </div>
     );
 };
