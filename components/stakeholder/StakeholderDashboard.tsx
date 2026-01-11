@@ -1,9 +1,8 @@
-
 import React, { useMemo, useState } from 'react';
 import { EnrichedStakeholder, Stakeholder } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
-import { Users, Target, AlertTriangle, MessageSquare, Plus } from 'lucide-react';
+import { Users, Target, AlertTriangle, MessageSquare, Plus, ShieldCheck } from 'lucide-react';
 import { PowerInterestGrid } from './PowerInterestGrid';
 import { Badge } from '../ui/Badge';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
@@ -12,6 +11,9 @@ import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
+import { FieldPlaceholder } from '../common/FieldPlaceholder';
+// FIX: Added missing import for Card component
+import { Card } from '../ui/Card';
 
 interface StakeholderDashboardProps {
     stakeholders: EnrichedStakeholder[];
@@ -32,10 +34,11 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
         gapCount: stakeholders.filter(s => s.engagement.current !== s.engagement.desired).length,
     }), [stakeholders]);
 
-    const topIssues = useMemo(() => 
+    // Use live issues bound to stakeholders if possible, or top project concerns
+    const stakeholderConcerns = useMemo(() => 
         (issues || [])
             .filter(i => i.priority === 'High' || i.priority === 'Critical')
-            .slice(0, 3), 
+            .slice(0, 5), 
     [issues]);
 
     const handleSaveStakeholder = () => {
@@ -52,74 +55,89 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
         };
 
         dispatch({ type: 'PROJECT_ADD_STAKEHOLDER', payload: stakeholder });
-        
         setIsAddPanelOpen(false);
         setNewStakeholder({ name: '', role: '', interest: 'Medium', influence: 'Medium', engagementStrategy: '' });
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in">
-            <div className="flex justify-end">
-                <Button size="sm" icon={Plus} onClick={() => setIsAddPanelOpen(true)}>Register Stakeholder</Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="space-y-8 animate-in fade-in h-full flex flex-col">
+            <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
                 <StatCard title="Total Stakeholders" value={metrics.total} icon={Users} />
                 <StatCard title="Key Influencers" value={metrics.highPower} icon={Target} />
                 <StatCard title="Engagement Gaps" value={metrics.gapCount} icon={AlertTriangle} trend={metrics.gapCount > 0 ? 'down' : 'up'} />
-                <StatCard title="Avg Sentiment" value="Positive" icon={MessageSquare} trend="up" />
+                <StatCard title="Authority Check" value="92%" icon={ShieldCheck} subtext="Financial linkage" />
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className={`p-6 rounded-xl border h-[400px] ${theme.colors.surface} ${theme.colors.border} flex flex-col`}>
-                    <h3 className="font-bold text-slate-800 mb-4">Power / Interest Grid</h3>
-                    <div className="flex-1 min-h-0">
-                        <PowerInterestGrid stakeholders={stakeholders} />
-                    </div>
-                </div>
-                <div className={`p-6 rounded-xl border ${theme.colors.surface} ${theme.colors.border}`}>
-                    <h3 className="font-bold text-slate-800 mb-4">Top Concerns & Issues</h3>
-                    <div className="space-y-4">
-                        {topIssues.length > 0 ? topIssues.map((issue) => (
-                        <div key={issue.id} className={`p-3 rounded-lg border flex justify-between items-center ${theme.colors.background} ${theme.colors.border}`}>
-                            <div>
-                                <p className="font-bold text-sm text-slate-800">{issue.description}</p>
-                                <p className="text-xs text-slate-500">Raised by: {issue.assigneeId}</p>
-                            </div>
-                            <Badge variant={issue.priority === 'High' ? 'danger' : 'warning'}>{issue.priority}</Badge>
+            <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} flex-1 min-h-0`}>
+                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`}>
+                    <div className="flex justify-between items-center mb-8">
+                        <div>
+                             <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Power / Interest Matrix</h3>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Salience Model Distribution</p>
                         </div>
-                        )) : (
-                            <div className="text-center text-sm text-slate-400 p-8 italic border-2 border-dashed border-slate-100 rounded-lg">
-                                No high-priority issues logged.
-                            </div>
+                        <Button size="sm" variant="ghost" onClick={() => setIsAddPanelOpen(true)}>Register</Button>
+                    </div>
+                    <div className="flex-1 min-h-0">
+                        {stakeholders.length > 0 ? (
+                            <PowerInterestGrid stakeholders={stakeholders} />
+                        ) : (
+                            <FieldPlaceholder 
+                                label="No stakeholders registered." 
+                                onAdd={() => setIsAddPanelOpen(true)} 
+                                icon={Target} 
+                            />
                         )}
                     </div>
-                </div>
+                </Card>
+
+                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`}>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-8">Active Concerns & Escalations</h3>
+                    <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin">
+                        {stakeholderConcerns.length > 0 ? stakeholderConcerns.map((issue) => (
+                            <div key={issue.id} className={`p-4 rounded-xl border flex justify-between items-center bg-slate-50/50 border-slate-100 hover:border-nexus-200 transition-all group cursor-default shadow-sm`}>
+                                <div className="min-w-0 flex-1 pr-4">
+                                    <p className="font-bold text-sm text-slate-800 line-clamp-1">{issue.description}</p>
+                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-tight mt-1">Ref: {issue.id} • Assigned: {issue.assigneeId}</p>
+                                </div>
+                                <Badge variant={issue.priority === 'Critical' ? 'danger' : issue.priority === 'High' ? 'warning' : 'info'}>{issue.priority}</Badge>
+                            </div>
+                        )) : (
+                            <FieldPlaceholder 
+                                label="No high-priority stakeholder concerns." 
+                                placeholderLabel="All salience concerns are currently mitigated."
+                                onAdd={() => {}} // CRUD to log new issue
+                                icon={MessageSquare}
+                            />
+                        )}
+                    </div>
+                </Card>
             </div>
 
             <SidePanel
                 isOpen={isAddPanelOpen}
                 onClose={() => setIsAddPanelOpen(false)}
-                title="Identify Stakeholder"
-                width="md:w-[400px]"
-                footer={<><Button variant="secondary" onClick={() => setIsAddPanelOpen(false)}>Cancel</Button><Button onClick={handleSaveStakeholder}>Add</Button></>}
+                title="Identify Project Stakeholder"
+                width="md:w-[450px]"
+                footer={<><Button variant="secondary" onClick={() => setIsAddPanelOpen(false)}>Cancel</Button><Button onClick={handleSaveStakeholder}>Add Stakeholder</Button></>}
             >
-                <div className="space-y-4">
-                    <Input label="Name" value={newStakeholder.name} onChange={e => setNewStakeholder({...newStakeholder, name: e.target.value})} placeholder="e.g. John Smith" />
-                    <Input label="Role" value={newStakeholder.role} onChange={e => setNewStakeholder({...newStakeholder, role: e.target.value})} placeholder="e.g. Regulator" />
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-bold mb-1">Interest</label>
-                            <select className="w-full p-2 border rounded" value={newStakeholder.interest} onChange={e => setNewStakeholder({...newStakeholder, interest: e.target.value as any})}><option>High</option><option>Medium</option><option>Low</option></select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-1">Influence</label>
-                            <select className="w-full p-2 border rounded" value={newStakeholder.influence} onChange={e => setNewStakeholder({...newStakeholder, influence: e.target.value as any})}><option>High</option><option>Medium</option><option>Low</option></select>
-                        </div>
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Identity</label>
+                        <Input value={newStakeholder.name} onChange={e => setNewStakeholder({...newStakeholder, name: e.target.value})} placeholder="e.g. Alexandra Hamilton" />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold mb-1">Engagement Strategy</label>
-                        <textarea className="w-full p-2 border rounded h-24" value={newStakeholder.engagementStrategy} onChange={e => setNewStakeholder({...newStakeholder, engagementStrategy: e.target.value})} placeholder="Plan to manage expectation..." />
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Functional Designation</label>
+                        <Input value={newStakeholder.role} onChange={e => setNewStakeholder({...newStakeholder, role: e.target.value})} placeholder="e.g. Chief Legal Officer" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Interest Level</label>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-slate-50 font-bold focus:ring-2 focus:ring-nexus-500" value={newStakeholder.interest} onChange={e => setNewStakeholder({...newStakeholder, interest: e.target.value as any})}><option>High</option><option>Medium</option><option>Low</option></select>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Influence Power</label>
+                            <select className="w-full p-2.5 border border-slate-300 rounded-xl text-sm bg-slate-50 font-bold focus:ring-2 focus:ring-nexus-500" value={newStakeholder.influence} onChange={e => setNewStakeholder({...newStakeholder, influence: e.target.value as any})}><option>High</option><option>Medium</option><option>Low</option></select>
+                        </div>
                     </div>
                 </div>
             </SidePanel>

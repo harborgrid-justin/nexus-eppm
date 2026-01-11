@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { DollarSign } from 'lucide-react';
+import { DollarSign, Loader2 } from 'lucide-react';
 import CostDashboard from './cost/CostDashboard';
 import CostPlanEditor from './cost/CostPlanEditor';
 import CostEstimating from './cost/CostEstimating';
@@ -19,11 +18,12 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { useCostManagementLogic } from '../hooks/domain/useCostManagementLogic';
+import { useI18n } from '../context/I18nContext';
 
 const CostManagement: React.FC = () => {
-  const workspace = useProjectWorkspace();
-  const project = workspace?.project;
+  const { project } = useProjectWorkspace();
   const theme = useTheme();
+  const { t } = useI18n();
 
   const {
       activeGroup,
@@ -35,45 +35,49 @@ const CostManagement: React.FC = () => {
   } = useCostManagementLogic();
 
   if (!project) return (
-    <div className={`p-6 space-y-4 flex flex-col h-full ${theme.colors.background}`}>
-        <PageHeader title="Cost Management" subtitle="Staffing and allocation hub" icon={DollarSign} />
-        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
-            <DollarSign size={48} className="mb-4 opacity-10" />
-            <p className="font-bold uppercase tracking-widest text-xs">Initializing Cost Context...</p>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} flex flex-col h-full bg-slate-50/50`}>
+        <PageHeader 
+          title={t('cost.title', 'Cost Management')} 
+          subtitle={t('cost.initializing', 'Initializing Fiscal Ledger...')} 
+          icon={DollarSign} 
+        />
+        <div className="flex-1 nexus-empty-pattern border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400">
+            <Loader2 size={48} className="mb-4 animate-spin opacity-20" />
+            <p className="font-black uppercase tracking-widest text-[10px]">{t('common.loading_context', 'Mounting Financial Context...')}</p>
         </div>
     </div>
   );
 
-  const projectId = project.id;
-
   const renderContent = () => {
     switch(activeView) {
       case 'dashboard': return <CostDashboard />;
-      case 'plan': return <CostPlanEditor projectId={projectId} />;
+      case 'plan': return <CostPlanEditor projectId={project.id} />;
       case 'budgetLog': return <BudgetLog />;
       case 'funding': return <ProjectFunding />;
-      case 'estimating': return <CostEstimating projectId={projectId} />;
+      case 'estimating': return <CostEstimating projectId={project.id} />;
       case 'cbs': return <CostBudgetView />;
-      case 'expenses': return <CostExpenses projectId={projectId} />;
+      case 'expenses': return <CostExpenses projectId={project.id} />;
       case 'changes': return <CostChangeOrders />;
       case 'evm': return <EarnedValue />;
       case 'reserves': return <ReserveAnalysis />;
-      case 'procurement': return <CostProcurement projectId={projectId} />;
-      case 'communications': return <CostCommunications projectId={projectId} />;
+      case 'procurement': return <CostProcurement projectId={project.id} />;
+      case 'communications': return <CostCommunications projectId={project.id} />;
       default: return <CostDashboard />;
     }
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Cost Management" 
-        subtitle="Plan, estimate, and control project costs with precision."
-        icon={DollarSign}
-      />
+    <div className={`${theme.layout.pageContainer} ${theme.colors.background}`}>
+      <div className={`${theme.layout.pagePadding} pb-0`}>
+        <PageHeader 
+          title={t('cost.title', 'Strategic Cost Management')} 
+          subtitle={t('cost.subtitle', 'Plan, estimate, and control project costs with precision.')}
+          icon={DollarSign}
+        />
+      </div>
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b ${theme.colors.border} bg-slate-50/50`}>
+      <div className={`${theme.layout.panelContainer} m-6 md:m-8 mt-4 flex-1 flex flex-col overflow-hidden`}>
+        <div className={`flex-shrink-0 z-10 border-b ${theme.colors.border} bg-slate-50/50`}>
             <ModuleNavigation 
                 groups={navGroups}
                 activeGroup={activeGroup}

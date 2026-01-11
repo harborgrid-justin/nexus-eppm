@@ -11,28 +11,37 @@ interface ErrorBoundaryState {
   error?: Error | string | unknown;
 }
 
-// FIX: Use the imported Component class to ensure proper type inheritance for this.props and this.setState
+/**
+ * Enterprise Error Boundary
+ * Provides a fallback UI and diagnostic information when sub-modules fail.
+ */
+// FIX: Using Component explicitly from the react import to resolve inherited member visibility issues (props, state, setState)
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined,
-  };
+  // FIX: Constructor uses props and initializes state correctly on the inherited Component class
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+    };
+  }
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Access inherited props properly
+    // FIX: Inherited props are now correctly recognized by the TS compiler
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   handleRetry = () => {
-    // FIX: Access inherited setState properly
+    // FIX: Inherited setState is now correctly recognized
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
+    // FIX: Inherited state members are now correctly recognized
     if (this.state.hasError) {
       const { error } = this.state;
       let errorMessage = 'A runtime exception occurred in the execution context.';
@@ -47,7 +56,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="p-8 m-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 animate-in fade-in zoom-in-95 duration-200 shadow-xl">
           <h2 className="font-black flex items-center gap-2 uppercase tracking-tighter text-lg">
             <AlertTriangle size={24} /> 
-            {/* FIX: Access inherited props properly */}
+            {/* FIX: Inherited props are now correctly recognized */}
             Module Failure: {this.props.name || 'Runtime'}
           </h2>
           <div className="mt-4 p-4 bg-white rounded-xl border border-red-100 font-mono text-xs overflow-auto max-h-64 shadow-inner text-red-800 leading-relaxed">
@@ -63,7 +72,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // FIX: Return children from inherited props
+    // FIX: Inherited props are now correctly recognized
     return this.props.children;
   }
 }

@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
-import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, ChevronRight, Copy, Info, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { SidePanel } from '../ui/SidePanel';
+import { useI18n } from '../../context/I18nContext';
+import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSign, ChevronDown, Info, ShieldCheck, Copy, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
+import { SidePanel } from '../ui/SidePanel';
+import { NarrativeField } from '../common/NarrativeField';
 
 interface CostPlanEditorProps {
     projectId: string;
@@ -39,7 +39,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
                     <div className={`p-2.5 rounded-xl transition-all duration-300 ${isOpen ? 'bg-nexus-600 text-white shadow-lg shadow-nexus-500/20 scale-110' : 'bg-white border border-slate-200 text-slate-400'}`}>
                         <Icon size={20} />
                     </div>
-                    <h4 className={`font-bold tracking-tight ${isOpen ? 'text-slate-900 text-lg' : 'text-slate-700 text-base'}`}>{title}</h4>
+                    <h4 className={`font-black uppercase text-xs tracking-widest ${isOpen ? 'text-slate-900' : 'text-slate-500'}`}>{title}</h4>
                 </div>
                 <div className={`p-1.5 rounded-full transition-all ${isOpen ? 'bg-nexus-50 text-nexus-600 rotate-0' : 'bg-slate-100 text-slate-400 rotate-180'}`}>
                     <ChevronDown size={18} />
@@ -52,6 +52,7 @@ const PlanSection: React.FC<PlanSectionProps> = ({
 
 const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
     const { state, dispatch } = useData(); 
+    const { t } = useI18n();
     const project = state.projects.find(p => p.id === projectId);
     const plan = project?.costPlan || {
         estimatingMethodology: '',
@@ -85,226 +86,147 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
         { id: 'construction_fixed', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs, retainage, and change order management.' }
     ];
 
-    const toggleSection = (id: string) => {
-        setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
-    };
+    const toggleSection = (id: string) => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
 
     const handleChange = (field: keyof typeof plan, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleSave = () => {
+        const next = { ...formData, [field]: value };
+        setFormData(next);
+        // Direct commit to state for production readiness
         dispatch({
             type: 'PROJECT_UPDATE',
-            payload: {
-                projectId,
-                updatedData: { 
-                    costPlan: {
-                        ...formData,
-                        lastUpdated: new Date().toISOString()
-                    } 
-                }
-            }
+            payload: { projectId, updatedData: { costPlan: { ...next, lastUpdated: new Date().toISOString() } } }
         });
-        alert('Cost Management Plan saved successfully.');
     };
 
     const applyTemplate = () => {
         if (!selectedTemplate) return;
-        const templateText = `[Applied from ${templates.find(t => t.id === selectedTemplate)?.name} Template]\n\n`;
-        setFormData({
+        const template = templates.find(t => t.id === selectedTemplate);
+        const templateText = `[Applied from ${template?.name} Template]\n\n`;
+        const updated = {
             ...formData,
-            estimatingMethodology: templateText + "Definitive estimates required for Phase 2.",
-            controlThresholds: templateText + "SPI/CPI +/- 0.10 requires VAR.",
+            estimatingMethodology: templateText + "Definitive estimates required for all major work packages.",
+            controlThresholds: templateText + "SPI/CPI variance of +/- 0.10 requires formal explanation.",
             status: 'Draft'
-        });
+        };
+        setFormData(updated);
+        dispatch({ type: 'PROJECT_UPDATE', payload: { projectId, updatedData: { costPlan: updated } } });
         setIsTemplatePanelOpen(false);
     };
 
     return (
         <div className="h-full flex flex-col bg-slate-100/30 scrollbar-thin">
-            <div className={`p-6 md:p-8 flex-shrink-0 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white border-b border-slate-200`}>
-                <div className="flex flex-col gap-1">
-                    <h3 className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-                        <FileText size={24} className="text-nexus-600" /> Cost Management Strategy
+            <div className={`p-6 border-b border-slate-200 bg-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4`}>
+                <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tighter flex items-center gap-2 uppercase">
+                        <FileText size={24} className="text-nexus-600" /> {t('cost.plan.title', 'Cost Management Strategy')}
                     </h3>
                     <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50">
                             <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> {formData.status}
                         </div>
                         <span>Protocol: v{formData.version}</span>
-                        <span>Synchronized: {new Date(formData.lastUpdated).toLocaleDateString()}</span>
+                        <span>Synced: {new Date(formData.lastUpdated).toLocaleDateString()}</span>
                     </div>
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
-                    <button 
-                        onClick={() => setIsTemplatePanelOpen(true)}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95 transition-all"
-                    >
-                        <Book size={16} className="text-nexus-600"/> Apply Corporate Baseline
-                    </button>
-                    {canEditProject() ? (
-                        <button 
-                            onClick={handleSave}
-                            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-nexus-600 rounded-xl text-sm font-black text-white hover:bg-nexus-700 shadow-lg shadow-nexus-500/30 active:scale-95 transition-all uppercase tracking-widest`}
-                        >
-                            <Save size={16}/> Save & Version
-                        </button>
-                    ) : (
-                        <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest">
-                            <Lock size={14}/> Read Only Strategy
+                <div className="flex gap-2">
+                    <Button variant="secondary" size="sm" icon={Book} onClick={() => setIsTemplatePanelOpen(true)}>{t('cost.plan.templates', 'Apply Template')}</Button>
+                    {!canEditProject() && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <Lock size={14}/> {t('common.read_only', 'Read Only')}
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
-                <PlanSection 
-                    title="1. Estimating Methodology" 
-                    icon={Calculator} 
-                    isOpen={openSections.methodology} 
-                    onToggle={() => toggleSection('methodology')}
-                >
+            <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full space-y-6">
+                <PlanSection title="1. Estimating Methodology" icon={Calculator} isOpen={openSections.methodology} onToggle={() => toggleSection('methodology')}>
                     <div className="space-y-8 animate-in fade-in slide-in-from-top-4">
-                        <div>
-                            <p className="text-sm font-medium text-slate-500 mb-4 leading-relaxed">Define the standardized methods for cost development (e.g., Analogous, Parametric, Bottom-up) and the mandatory precision levels for the current WBS phase.</p>
-                            <textarea 
-                                disabled={!canEditProject()}
-                                className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 focus:bg-white outline-none disabled:opacity-70 transition-all resize-none shadow-inner"
-                                placeholder="Formalize the estimating approach here..."
-                                value={formData.estimatingMethodology}
-                                onChange={(e) => handleChange('estimatingMethodology', e.target.value)}
+                        <NarrativeField 
+                            label="Corporate Estimating Protocol"
+                            value={formData.estimatingMethodology}
+                            placeholderLabel="Define standard methods for cost development (e.g., Parametric, Bottom-up)."
+                            onSave={(val) => handleChange('estimatingMethodology', val)}
+                            isReadOnly={!canEditProject()}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <NarrativeField 
+                                label="Precision Tolerance"
+                                value={formData.precisionLevel}
+                                placeholderLabel="e.g., +/- 10% Definitive"
+                                onSave={(val) => handleChange('precisionLevel', val)}
+                                isReadOnly={!canEditProject()}
+                            />
+                            <NarrativeField 
+                                label="Standard Units of Measure"
+                                value={formData.unitsOfMeasure}
+                                placeholderLabel="e.g., Man-hours, Cubic Yards"
+                                onSave={(val) => handleChange('unitsOfMeasure', val)}
+                                isReadOnly={!canEditProject()}
                             />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Precision Tolerance</label>
-                                <input 
-                                    disabled={!canEditProject()}
-                                    type="text"
-                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-nexus-500 outline-none"
-                                    placeholder="e.g., +/- 10% Definitive"
-                                    value={formData.precisionLevel}
-                                    onChange={(e) => handleChange('precisionLevel', e.target.value)}
-                                />
-                            </div>
-                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Corporate Units of Measure</label>
-                                <input 
-                                    disabled={!canEditProject()}
-                                    type="text"
-                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-800 focus:ring-2 focus:ring-nexus-500 outline-none"
-                                    placeholder="e.g., Man-hours, Cubic Yards, USD"
-                                    value={formData.unitsOfMeasure}
-                                    onChange={(e) => handleChange('unitsOfMeasure', e.target.value)}
-                                />
-                            </div>
-                        </div>
                     </div>
                 </PlanSection>
 
-                <PlanSection 
-                    title="2. Control Thresholds & Variance" 
-                    icon={TrendingUp} 
-                    isOpen={openSections.controls} 
-                    onToggle={() => toggleSection('controls')}
-                >
-                    <div className="space-y-6">
-                        <p className="text-sm font-medium text-slate-500 leading-relaxed">Specify the formal variance thresholds (CPI/CV) that trigger mandatory Corrective Action Plans or executive escalation.</p>
-                        <textarea 
-                            disabled={!canEditProject()}
-                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
-                            placeholder="e.g., If CPI < 0.90 for two consecutive periods, a formal VAR must be submitted..."
-                            value={formData.controlThresholds}
-                            onChange={(e) => handleChange('controlThresholds', e.target.value)}
-                        />
-                        <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3 shadow-sm">
-                            <Info size={20} className="text-amber-600 shrink-0 mt-0.5"/>
-                            <p className="text-[11px] text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
-                                Threshold breaches are auto-detected by the Performance Measurement Engine and will trigger immediate alerts to the PMO Steering Committee.
-                            </p>
-                        </div>
+                <PlanSection title="2. Control Thresholds & Variance" icon={TrendingUp} isOpen={openSections.controls} onToggle={() => toggleSection('controls')}>
+                    <NarrativeField 
+                        label="Variance Management Protocol"
+                        value={formData.controlThresholds}
+                        placeholderLabel="Specify the formal variance thresholds (CPI/CV) that trigger mandatory escalation."
+                        onSave={(val) => handleChange('controlThresholds', val)}
+                        isReadOnly={!canEditProject()}
+                    />
+                    <div className="mt-6 p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3 shadow-sm">
+                        <Info size={20} className="text-amber-600 shrink-0 mt-0.5"/>
+                        <p className="text-[10px] text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
+                            Fiscal breaches are auto-detected by the Performance Measurement Engine and will trigger immediate alerts to the PMO.
+                        </p>
                     </div>
                 </PlanSection>
 
-                <PlanSection 
-                    title="3. Reporting Formats" 
-                    icon={BarChart2} 
-                    isOpen={openSections.reporting} 
-                    onToggle={() => toggleSection('reporting')}
-                >
-                    <div className="space-y-4">
-                        <p className="text-sm font-medium text-slate-500">Define the formal reporting templates and distribution cadence for financial status.</p>
-                        <textarea 
-                            disabled={!canEditProject()}
-                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
-                            placeholder="Identify specific artifacts like EVM Reports, Burn Rate Charts, and CBS Summaries..."
+                <PlanSection title="3. Reporting & Alignment" icon={BarChart2} isOpen={openSections.reporting} onToggle={() => toggleSection('reporting')}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <NarrativeField 
+                            label="Reporting Formats"
                             value={formData.reportingFormats}
-                            onChange={(e) => handleChange('reportingFormats', e.target.value)}
+                            placeholderLabel="Define artifacts like EVM Reports and Burn Rate Charts."
+                            onSave={(val) => handleChange('reportingFormats', val)}
+                            isReadOnly={!canEditProject()}
+                        />
+                        <NarrativeField 
+                            label="Strategic Funding Strategy"
+                            value={formData.fundingStrategy}
+                            placeholderLabel="Outline funding sources and grant restrictions."
+                            onSave={(val) => handleChange('fundingStrategy', val)}
+                            isReadOnly={!canEditProject()}
                         />
                     </div>
                 </PlanSection>
 
-                <PlanSection 
-                    title="4. Funding Strategy" 
-                    icon={DollarSign} 
-                    isOpen={openSections.funding} 
-                    onToggle={() => toggleSection('funding')}
-                >
-                    <div className="space-y-6">
-                        <p className="text-sm font-medium text-slate-500 leading-relaxed">Outline funding sources, grant restrictions, and the mechanisms for periodic fund reconciliation against spending curves.</p>
-                        <textarea 
-                            disabled={!canEditProject()}
-                            className="w-full h-40 p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none transition-all resize-none shadow-inner"
-                            placeholder="Detail Capital vs Operating fund split and authority limits..."
-                            value={formData.fundingStrategy}
-                            onChange={(e) => handleChange('fundingStrategy', e.target.value)}
-                        />
-                        <div className="p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-xl">
-                            <div className="relative z-10">
-                                <h4 className="font-bold flex items-center gap-2 mb-2 text-base tracking-tight">
-                                    <ShieldCheck size={20} className="text-nexus-400"/> Regulatory Alignment
-                                </h4>
-                                <p className="text-xs text-slate-400 leading-relaxed max-w-lg">
-                                    Funding releases are gated via the Stage-Gate Governance process. All actuals must be reconciled against the approved Fiscal Year budget before next-phase funding is authorized.
-                                </p>
-                            </div>
-                            <DollarSign size={160} className="absolute -right-12 -bottom-12 text-white/5 opacity-10 rotate-12" />
-                        </div>
+                <div className="p-8 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-2xl border border-white/5">
+                    <div className="relative z-10">
+                        <h4 className="font-bold flex items-center gap-2 mb-3 text-base tracking-tight">
+                            <ShieldCheck size={18} className="text-nexus-400"/> Regulatory Compliance
+                        </h4>
+                        <p className="text-sm text-slate-400 leading-relaxed max-w-2xl font-medium">
+                            The Cost Management Plan (CMP) acts as the governance baseline for all fiscal commitments. Any deviation requires a formal change order and CCB approval.
+                        </p>
                     </div>
-                </PlanSection>
+                    <DollarSign size={180} className="absolute -right-12 -bottom-12 text-white/5 rotate-12 pointer-events-none" />
+                </div>
             </div>
 
-            <SidePanel
-                isOpen={isTemplatePanelOpen}
-                onClose={() => setIsTemplatePanelOpen(false)}
-                title="Strategy Template Library"
-                width="md:w-[500px]"
-                footer={
-                    <>
-                        <Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button>
-                        <Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Corporate Policy</Button>
-                    </>
-                }
-            >
+            <SidePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} title="Corporate Strategy Templates" width="md:w-[500px]"
+                footer={<><Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button><Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Policy</Button></>}>
                 <div className="space-y-6">
-                    <p className="text-sm font-medium text-slate-600 bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-start gap-3">
+                    <p className="text-sm text-slate-600 bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                         <AlertTriangle className="text-amber-600 shrink-0" size={18}/>
-                        <span>Applying a template will <strong className="text-amber-900">overwrite</strong> current strategy text. This action is logged in the project audit trail.</span>
+                        <span>Applying a template will <strong className="text-amber-900">overwrite</strong> local strategy text.</span>
                     </p>
                     <div className="space-y-4">
                         {templates.map(t => (
-                            <div 
-                                key={t.id} 
-                                onClick={() => setSelectedTemplate(t.id)}
-                                className={`p-6 rounded-2xl border-2 transition-all cursor-pointer ${
-                                    selectedTemplate === t.id 
-                                    ? 'bg-nexus-50 border-nexus-500 ring-4 ring-nexus-500/10' 
-                                    : 'bg-white border-slate-100 hover:border-nexus-300'
-                                }`}
-                            >
-                                <h4 className="font-black text-slate-900 text-base mb-1">{t.name}</h4>
-                                <p className="text-sm font-medium text-slate-500 leading-relaxed">{t.description}</p>
+                            <div key={t.id} onClick={() => setSelectedTemplate(t.id)} className={`p-5 rounded-2xl border-2 transition-all cursor-pointer ${selectedTemplate === t.id ? 'bg-nexus-50 border-nexus-500 ring-4 ring-nexus-500/10' : 'bg-white border-slate-100 hover:border-nexus-300'}`}>
+                                <h4 className="font-black text-slate-900 text-sm mb-1">{t.name}</h4>
+                                <p className="text-xs text-slate-500 leading-relaxed">{t.description}</p>
                             </div>
                         ))}
                     </div>

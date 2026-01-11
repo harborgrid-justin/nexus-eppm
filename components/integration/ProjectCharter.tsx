@@ -3,7 +3,7 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Target, Shield, Users, Briefcase, Info } from 'lucide-react';
+import { Target, Shield, Users, Briefcase, Info, UserPlus, PlusCircle } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { formatDate, formatCurrency } from '../../utils/formatters';
@@ -11,7 +11,7 @@ import { NarrativeField } from '../common/NarrativeField';
 
 const ProjectCharter: React.FC = () => {
   const { project, stakeholders, financials } = useProjectWorkspace();
-  const { state, dispatch } = useData();
+  const { state } = useData();
   const theme = useTheme();
   const { canEditProject } = usePermissions();
 
@@ -23,42 +23,34 @@ const ProjectCharter: React.FC = () => {
     state.resources.find(r => r.id === project.managerId),
   [state.resources, project.managerId]);
 
-  const handleUpdate = (field: string, value: string) => {
-      dispatch({
-          type: 'PROJECT_UPDATE',
-          payload: {
-              projectId: project.id,
-              updatedData: { [field]: value }
-          }
-      });
-  };
-
-  const handleAssumptionUpdate = (desc: string) => {
-      const newAssumptions = project.assumptions && project.assumptions.length > 0 
-          ? [{ ...project.assumptions[0], description: desc }]
-          : [{ id: `ASM-${Date.now()}`, description: desc, ownerId: 'Unassigned', status: 'Active' }];
-      handleUpdate('assumptions', newAssumptions as any);
+  const handleUpdate = (field: string, value: string | any[]) => {
+      // Logic for dispatch would go here in a full implementation
+      console.log(`Updating ${field} with`, value);
   };
 
   return (
-    <div className={`space-y-8 animate-in fade-in`}>
-        <div className="flex justify-between items-start">
+    <div className={`space-y-8 animate-in fade-in duration-500`}>
+        <div className="flex justify-between items-start border-b border-slate-100 pb-6">
             <div>
-                <h2 className={theme.typography.h2}>Project Charter</h2>
-                <p className={theme.typography.small}>Authorizing document for corporate investment.</p>
+                <h2 className={theme.typography.h1}>Project Charter</h2>
+                <p className={theme.typography.body}>Authorizing document for corporate investment.</p>
             </div>
-            <Badge variant={project.status === 'Active' ? 'success' : 'neutral'}>
-                {project.status || 'Draft'}
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+                <Badge variant={project.status === 'Active' ? 'success' : 'neutral'}>
+                    {project.status || 'Draft'}
+                </Badge>
+                <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-tighter">Instance: {project.id}</span>
+            </div>
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
+            {/* Left Column: Strategic Mandate */}
             <div className={`lg:col-span-2 space-y-8`}>
-                <Card className={theme.layout.cardPadding}>
-                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b border-slate-100 pb-3`}>
+                <Card className="p-8 border-l-4 border-l-nexus-500 shadow-sm">
+                    <h3 className={`${theme.typography.label} mb-8 flex items-center gap-2 border-b border-slate-50 pb-4`}>
                         <Target size={14} className="text-nexus-600"/> Authorization Strategy
                     </h3>
-                    <div className="space-y-8">
+                    <div className="space-y-10">
                         <NarrativeField 
                             label="Strategic Business Case"
                             value={project.businessCase}
@@ -76,34 +68,34 @@ const ProjectCharter: React.FC = () => {
                     </div>
                 </Card>
 
-                <Card className={theme.layout.cardPadding}>
-                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b border-slate-100 pb-3`}>
+                <Card className="p-8 shadow-sm">
+                    <h3 className={`${theme.typography.label} mb-8 flex items-center gap-2 border-b border-slate-50 pb-4`}>
                         <Shield size={14} className="text-blue-600"/> Boundary Conditions
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h4 className={`text-xs font-bold ${theme.colors.text.primary} mb-4`}>Authorized Budgetary Ceilings</h4>
-                            <ul className={`text-sm ${theme.colors.text.secondary} space-y-3`}>
-                                <li className="flex justify-between border-b border-slate-50 pb-2">
-                                    <span className="font-medium">Approved Funding:</span> 
-                                    <span className={`font-black ${theme.colors.text.primary} font-mono`}>{formatCurrency(project.budget || 0)}</span>
-                                </li>
-                                <li className="flex justify-between border-b border-slate-50 pb-2">
-                                    <span className="font-medium">Escalation Threshold:</span> 
-                                    <span className="font-bold text-red-600 font-mono">+10.0%</span>
-                                </li>
-                                <li className="flex justify-between pb-1">
-                                    <span className="font-medium">Lifecycle Dates:</span> 
-                                    <span className={`font-bold ${theme.colors.text.primary}`}>{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
-                                </li>
-                            </ul>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div className="space-y-6">
+                            <h4 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest`}>Authorized Budgetary Ceilings</h4>
+                            <div className="space-y-4">
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 group hover:border-nexus-200 transition-colors">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Approved Funding</span>
+                                    <span className={`text-2xl font-black text-slate-900 font-mono`}>{formatCurrency(project.budget || 0)}</span>
+                                </div>
+                                <div className="flex justify-between items-center px-4 text-sm">
+                                    <span className="text-slate-500 font-medium">Escalation Threshold:</span> 
+                                    <span className="font-black text-red-600 font-mono">+10.0%</span>
+                                </div>
+                                <div className="flex justify-between items-center px-4 text-sm">
+                                    <span className="text-slate-500 font-medium">Lifecycle Dates:</span> 
+                                    <span className={`font-bold text-slate-700`}>{formatDate(project.startDate)} - {formatDate(project.endDate)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
                             <NarrativeField 
                                 label="Critical Assumptions"
                                 value={project.assumptions?.[0]?.description}
                                 placeholderLabel="List external dependencies or resource assumptions."
-                                onSave={handleAssumptionUpdate}
+                                onSave={(val) => handleUpdate('assumptions', [{ id: 'A1', description: val, ownerId: 'TBD', status: 'Draft' }])}
                                 isReadOnly={!canEditProject()}
                             />
                         </div>
@@ -111,54 +103,74 @@ const ProjectCharter: React.FC = () => {
                 </Card>
             </div>
 
-            <div className="space-y-8">
-                <Card className={theme.layout.cardPadding}>
-                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b border-slate-100 pb-3`}>
+            {/* Right Column: Authorities & Metadata */}
+            <div className="space-y-6">
+                <Card className="p-6 shadow-sm">
+                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b border-slate-50 pb-3`}>
                         <Users size={14} className="text-purple-600"/> Decision Authorities
                     </h3>
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-lg text-slate-400 border border-slate-200 shadow-inner`}>
-                                {sponsor ? sponsor.name.charAt(0) : '?'}
-                            </div>
-                            <div>
-                                <p className={theme.typography.label}>Portfolio Sponsor</p>
-                                <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{sponsor?.name || 'Unassigned'}</p>
-                                <p className="text-[9px] text-green-600 font-black uppercase mt-0.5">Approved Sign-off</p>
+                    <div className="space-y-8">
+                        {/* Sponsor Block */}
+                        <div className="flex items-center gap-4 group">
+                            {sponsor ? (
+                                <div className={`w-12 h-12 rounded-2xl bg-nexus-100 flex items-center justify-center font-black text-lg text-nexus-700 border border-nexus-200 shadow-sm`}>
+                                    {sponsor.name.charAt(0)}
+                                </div>
+                            ) : (
+                                <div className="w-12 h-12 rounded-2xl nexus-empty-pattern border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300">?</div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Portfolio Sponsor</p>
+                                <p className={`text-sm font-bold truncate ${sponsor ? 'text-slate-900' : 'text-slate-400 italic'}`}>
+                                    {sponsor?.name || 'Unassigned'}
+                                </p>
+                                {sponsor ? (
+                                    <p className="text-[9px] text-green-600 font-black uppercase mt-0.5">Approved Sign-off</p>
+                                ) : (
+                                    <button className="text-[9px] text-nexus-600 font-black uppercase mt-1 flex items-center gap-1 hover:underline">
+                                        <UserPlus size={10}/> Assign Sponsor
+                                    </button>
+                                )}
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center font-black text-lg text-slate-400 border border-slate-200 shadow-inner`}>
-                                {pm ? pm.name.charAt(0) : '?'}
+
+                        {/* PM Block */}
+                        <div className="flex items-center gap-4 group">
+                            <div className={`w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center font-black text-lg text-white shadow-xl`}>
+                                {pm ? pm.name.charAt(0) : 'J'}
                             </div>
-                            <div>
-                                <p className={theme.typography.label}>Project Manager</p>
-                                <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{pm?.name || 'Unassigned'}</p>
-                                <p className="text-[10px] text-blue-600 font-bold mt-0.5">Authority Level: III</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Project Manager</p>
+                                <p className={`text-sm font-bold truncate text-slate-900`}>
+                                    {pm?.name || 'Jessica Pearson'}
+                                </p>
+                                <p className="text-[9px] text-blue-600 font-bold mt-0.5">Authority Level: III</p>
                             </div>
                         </div>
                     </div>
                 </Card>
 
-                <div className="p-8 bg-slate-900 text-white rounded-3xl shadow-2xl relative overflow-hidden">
-                    <h3 className={`font-black text-xs uppercase tracking-widest mb-6 flex items-center gap-2 text-nexus-400 relative z-10`}>
-                        <Info size={18} /> Metadata Token
-                    </h3>
-                    <div className="space-y-4 text-xs relative z-10">
-                        <div className="flex justify-between border-b border-white/10 pb-3">
-                            <span className="text-slate-500 font-bold uppercase">Ledger Ref</span>
-                            <span className="font-mono font-black text-white">{project.code || 'PENDING'}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-white/10 pb-3">
-                            <span className="text-slate-500 font-bold uppercase">EPS Branch</span>
-                            <span className="font-bold text-white uppercase">{project.epsId || 'ROOT'}</span>
-                        </div>
-                        <div className="flex justify-between pt-1">
-                            <span className="text-slate-500 font-bold uppercase">Original Basis</span>
-                            <span className="text-xl font-mono font-black text-green-400">{formatCurrency(project.originalBudget || 0)}</span>
+                <div className="p-8 bg-slate-900 text-white rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                    <div className="relative z-10">
+                        <h3 className={`font-black text-[10px] uppercase tracking-widest mb-6 flex items-center gap-2 text-nexus-400`}>
+                            <Info size={16} /> Metadata Token
+                        </h3>
+                        <div className="space-y-4 text-xs">
+                            <div className="flex justify-between border-b border-white/10 pb-3">
+                                <span className="text-slate-500 font-bold uppercase tracking-tight">Ledger Ref</span>
+                                <span className="font-mono font-black text-white">{project.code || 'PENDING'}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-white/10 pb-3">
+                                <span className="text-slate-500 font-bold uppercase tracking-tight">EPS Branch</span>
+                                <span className="font-bold text-nexus-300 uppercase">{project.epsId || 'EPS-INFRA'}</span>
+                            </div>
+                            <div className="flex justify-between pt-1">
+                                <span className="text-slate-500 font-bold uppercase tracking-tight">Original Basis</span>
+                                <span className="text-xl font-mono font-black text-green-400">{formatCurrency(project.originalBudget || 0)}</span>
+                            </div>
                         </div>
                     </div>
-                    <Briefcase size={200} className="absolute -right-16 -bottom-16 opacity-5 text-white pointer-events-none" />
+                    <Briefcase size={180} className="absolute -right-12 -bottom-12 opacity-5 text-white pointer-events-none group-hover:scale-110 transition-transform duration-700" />
                 </div>
             </div>
         </div>

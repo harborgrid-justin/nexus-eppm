@@ -1,9 +1,11 @@
 
 import { GoogleGenAI, Type, Chat } from "@google/genai";
 import { Project, AIAnalysisResult, Program } from '../types/index';
+// Added missing calculation import
+import { calculateProjectProgress } from '../utils/calculations';
 
 const getAiClient = () => {
-  // Create a new GoogleGenAI instance on each call to ensure the latest API key from process.env is used.
+  // Always use process.env.API_KEY directly as required by guidelines
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
@@ -236,27 +238,68 @@ export const generatePortfolioReport = async (projects: Project[]): Promise<stri
   }
 };
 
-export const generateProgramReport = async (program: Program, projects: Project[]): Promise<string> => {
+export const generateProgramReport = async (program: Program, projects: Project[], additionalData: any): Promise<string> => {
   const ai = getAiClient();
   const model = 'gemini-3-pro-preview';
+  
   const prompt = `
-    You are an expert Program Manager for Nexus PPM. Generate an executive status report for the following program:
-    Program: ${program.name}
-    Health: ${program.health}
-    Budget: ${program.budget}
-    Description: ${program.description}
+    You are a high-level Strategic Program Advisor for a trillion-dollar enterprise. 
+    Your goal is to provide a "Status Report" that provides executive clarity, competing with Oracle P6 EPPM's best analytics.
+    
+    ### Program Context:
+    - Name: ${program.name}
+    - Manager: ${program.managerId}
+    - Current Health: ${program.health}
+    - Strategy: ${program.businessCase}
+    - Strategic Intent: ${program.benefits}
+    
+    ### Financial Performance (Aggregated):
+    - Total Program Budget Authority: $${additionalData.metrics.totalBudget}
+    - Actuals Consumed to Date: $${additionalData.metrics.totalSpent}
+    - Budget Utilization (Portfolio Burn): ${additionalData.burnRate}%
+    - Available Fiscal Authority: $${additionalData.metrics.totalBudget - additionalData.metrics.totalSpent}
+    
+    ### Execution Statistics:
+    - Active Component Projects: ${projects.length}
+    - High-Severity Risks: ${additionalData.metrics.riskCount}
+    
+    ### Component Project Details:
+    ${JSON.stringify(projects.map(p => ({
+        code: p.code,
+        name: p.name,
+        health: p.health,
+        // FIX: Project interface does not contain progress property; use physical rollup calculation utility.
+        progress: calculateProjectProgress(p),
+        budget: p.budget,
+        spent: p.spent,
+        start: p.startDate,
+        end: p.endDate
+    })))}
 
-    Child Projects:
-    ${JSON.stringify(projects.map(p => ({ name: p.name, health: p.health, progress: p.tasks.length > 0 ? 'Active' : 'Planned' })))}
-
-    Focus on program-level risks, inter-project dependencies, and benefits realization.
-    Provide the output in Markdown format.
+    ### Reporting Requirements:
+    1. Provide an Executive Summary that synthesizes health and strategic alignment.
+    2. Analyze the "Portfolio Burn" and "Financial Performance" with predictive insight (will it overspend?).
+    3. Evaluate the "Execution Summary" - are any projects lagging or showing unhealthy trends?
+    4. List "Critical Risks & Impediments" that require Governance Board action.
+    5. Provide "Strategic Recommendations" for the Program Manager.
+    
+    Output the report in a highly professional Markdown format, suitable for a boardroom presentation. 
+    Use professional, authoritative language.
   `;
+  
   try {
-    const response = await ai.models.generateContent({ model, contents: prompt });
-    return response.text ?? "Empty report.";
+    const response = await ai.models.generateContent({ 
+        model, 
+        contents: prompt,
+        config: {
+            temperature: 0.7,
+            topP: 0.9,
+            topK: 40
+        }
+    });
+    return response.text ?? "Unable to generate executive status report.";
   } catch (error) {
     console.error("Error generating program report:", error);
-    return "Error generating program report.";
+    return "The AI Intelligence Engine encountered an error during report synthesis. Please verify API availability.";
   }
 };

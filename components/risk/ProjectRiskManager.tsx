@@ -1,12 +1,12 @@
-
 import React from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, Plus, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { PageHeader } from '../common/PageHeader';
 import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { useProjectRiskManagerLogic } from '../../hooks/domain/useProjectRiskManagerLogic';
+import { Button } from '../ui/Button';
 
 // Sub-components
 import RiskDashboard from './RiskDashboard';
@@ -42,11 +42,14 @@ const ProjectRiskManager: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
       <PageHeader 
         title="Project Risk Management" 
-        subtitle={`Risk governance for ${project.name} (${project.code})`}
+        subtitle={`Enterprise risk governance for ${project.code}: ${project.name}`}
         icon={ShieldAlert}
+        actions={
+            <Button variant="primary" icon={Plus} size="md">Identify New Risk</Button>
+        }
       />
 
       <div className={theme.layout.panelContainer}>

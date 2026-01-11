@@ -1,6 +1,4 @@
 
-
-
 import { useState, useCallback } from 'react';
 import { generatePortfolioReport, generateProgramReport as genProgramReportService } from '../services/geminiService';
 import { Project, Program } from '../types/index';
@@ -26,13 +24,14 @@ export const useGeminiAnalysis = () => {
     }
   }, []);
 
-  const generateProgramReport = useCallback(async (program: Program, projects: Project[]) => {
+  // FIX: Updated to accept 3 arguments (program, projects, and additionalData) as expected by the genProgramReportService.
+  const generateProgramReport = useCallback(async (program: Program, projects: Project[], additionalData: any) => {
     setIsGenerating(true);
     setReport(null);
     setError(null);
 
     try {
-        const result = await genProgramReportService(program, projects);
+        const result = await genProgramReportService(program, projects, additionalData);
         setReport(result);
     } catch (err) {
         console.error(err);

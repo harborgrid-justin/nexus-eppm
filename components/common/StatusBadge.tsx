@@ -2,8 +2,6 @@ import React from 'react';
 import { StatusVariant } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
 
-export type { StatusVariant };
-
 interface StatusBadgeProps {
   status: any;
   variant?: StatusVariant;
@@ -18,7 +16,7 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
   customColorClass
 }) => {
   const theme = useTheme();
-  const baseClasses = theme.components.badge.base;
+  const baseClasses = "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border";
   
   const displayStatus = (status === null || status === undefined) ? '-' : String(status);
   const s = displayStatus.toLowerCase();
@@ -38,16 +36,17 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
 
   let colors = getSemanticColor('neutral');
 
-  if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
-      colors = 'bg-slate-100 text-slate-600 border-slate-200';
-  } else if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'compliant', 'approved', 'pass', 'valid', 'issued', 'released'].includes(s)) {
+  // Unified Mapping for Enterprise Health & Execution Status
+  if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'approved', 'pass', 'valid', 'issued', 'released', 'solvent'].includes(s)) {
       colors = getSemanticColor('success');
-  } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      colors = 'bg-slate-800 text-slate-200 border-slate-700';
   } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {
       colors = getSemanticColor('warning');
   } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted'].includes(s)) {
       colors = getSemanticColor('danger');
+  } else if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
+      colors = 'bg-slate-50 text-slate-500 border-slate-200';
+  } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
+      colors = 'bg-slate-900 text-slate-200 border-slate-700 shadow-sm';
   } else if (['info', 'new', 'allocation'].includes(s)) {
       colors = getSemanticColor('info');
   }

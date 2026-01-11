@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
@@ -7,7 +8,8 @@ import { ProgramKPIs } from './ProgramKPIs';
 import { ProgramVisuals } from './ProgramVisuals';
 import { NarrativeField } from '../common/NarrativeField';
 import { useTheme } from '../../context/ThemeContext';
-import { Sparkles, Loader2, Target, Lightbulb, Briefcase, Plus } from 'lucide-react';
+// FIX: Added missing Layers icon import from lucide-react
+import { Sparkles, Loader2, Target, Lightbulb, Briefcase, Plus, FileText, Layers } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -18,9 +20,14 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   const { generateProgramReport, report, isGenerating, reset } = useGeminiAnalysis();
   const { dispatch } = useData();
   const theme = useTheme();
-  const { canEditProject } = usePermissions(); // Assuming generic edit permission
+  const { canEditProject } = usePermissions();
   
   const [isReportOpen, setIsReportOpen] = React.useState(false);
+
+  const burnRate = useMemo(() => {
+    if (!aggregateMetrics.totalBudget) return 0;
+    return (aggregateMetrics.totalSpent / aggregateMetrics.totalBudget) * 100;
+  }, [aggregateMetrics]);
 
   // Handlers for direct mutation
   const handleUpdate = (field: string, value: string) => {
@@ -31,10 +38,17 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     });
   };
 
+  const handleGenerateReport = async () => {
+      if (!program) return;
+      setIsReportOpen(true);
+      await generateProgramReport(program, projects, {
+          metrics: aggregateMetrics,
+          burnRate: burnRate.toFixed(1)
+      });
+  };
+
   const handleAddProject = () => {
       const newProjectId = generateId('P');
-      // In a real app, this would open a modal or redirect.
-      // For the "Cage" feel, we'll auto-provision a skeleton to allow immediate work.
       dispatch({
           type: 'PROJECT_IMPORT',
           payload: [{
@@ -63,7 +77,6 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
       });
   };
 
-  // Fix: Replaced static insight text with dynamic calculation from program and component project data.
   const programInsight = useMemo(() => {
     if (!program || projects.length === 0) return null;
     
@@ -94,25 +107,67 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
         {/* AI Sidecar */}
-        <SidePanel isOpen={isReportOpen} onClose={() => { setIsReportOpen(false); reset(); }} width="max-w-xl" title={<span className="flex items-center gap-2"><Sparkles size={18} className="text-nexus-500" /> Executive AI Brief</span>} footer={<Button onClick={() => setIsReportOpen(false)}>Close</Button>}>
+        <SidePanel 
+            isOpen={isReportOpen} 
+            onClose={() => { setIsReportOpen(false); reset(); }} 
+            width="max-w-3xl" 
+            title={
+                <span className="flex items-center gap-2 font-black uppercase text-sm tracking-widest text-slate-900">
+                    <FileText size={18} className="text-nexus-600" /> 
+                    Enterprise Status Report (AI)
+                </span>
+            } 
+            footer={<Button onClick={() => setIsReportOpen(false)}>Close Briefing</Button>}
+        >
             {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-20">
-                    <Loader2 className="animate-spin text-nexus-500 mb-4" size={40} />
-                    <p className="text-slate-500 font-medium">Synthesizing Program Status...</p>
+                <div className="flex flex-col items-center justify-center py-32 space-y-6">
+                    <div className="relative">
+                        <div className="w-16 h-16 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin"></div>
+                        <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-nexus-500 animate-pulse" size={24}/>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-slate-800 font-bold uppercase tracking-widest text-xs">Synthesizing Program Artifacts...</p>
+                        <p className="text-slate-400 text-[10px] mt-2 font-medium uppercase tracking-widest">Integrating Budget, Risk, and Schedule Ledger</p>
+                    </div>
                 </div>
             ) : (
-                report && <div className="prose prose-sm max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">{report}</div>
+                report && (
+                    <div className="animate-in fade-in duration-700 bg-white">
+                        <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Report Date</h4>
+                                <p className="font-bold text-slate-800">{new Date().toLocaleDateString()}</p>
+                            </div>
+                            <div className="text-right">
+                                <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Source Entity</h4>
+                                <p className="font-bold text-slate-800">{program.name}</p>
+                            </div>
+                        </div>
+                        <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">
+                            {report}
+                        </div>
+                    </div>
+                )
             )}
         </SidePanel>
 
         {/* Toolbar */}
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+            <div>
+                 <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <Layers className="text-nexus-600" size={24}/>
+                    Program Dashboard
+                </h2>
+                <p className="text-sm text-slate-500 font-medium">Integrated control center for component project performance.</p>
+            </div>
              <Button 
-                variant="outline" 
-                onClick={() => { setIsReportOpen(true); generateProgramReport(program, projects); }}
+                variant="primary" 
+                onClick={handleGenerateReport}
+                disabled={isGenerating}
                 icon={Sparkles}
+                className="shadow-xl shadow-nexus-500/10"
             >
-                Generate Status Report
+                {isGenerating ? "Synthesizing..." : "Generate Status Report"}
             </Button>
         </div>
         
@@ -188,11 +243,10 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                     </div>
                  </Card>
 
-                 <div className="bg-indigo-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
+                 <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
                      <div className="relative z-10">
                          <h4 className="font-bold flex items-center gap-2 mb-2"><Lightbulb size={18} className="text-yellow-400"/> Program Insight</h4>
-                         {/* Fix: Replaced static text with dynamic programInsight variable. */}
-                         <p className="text-xs text-indigo-200 leading-relaxed">
+                         <p className="text-xs text-slate-300 leading-relaxed font-medium">
                              {programInsight || "Analyzing portfolio performance and burn rates..."}
                          </p>
                      </div>
