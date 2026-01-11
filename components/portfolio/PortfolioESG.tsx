@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Leaf, ShieldCheck, AlertTriangle, Search, Plus } from 'lucide-react';
+import { Leaf, ShieldCheck, AlertTriangle, Search, Plus, Activity } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, Tooltip } from 'recharts';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -11,9 +11,8 @@ const PortfolioESG: React.FC = () => {
   const { esgMetrics, projects } = usePortfolioData();
   const theme = useTheme();
 
-  // Aggregate average scores for radar chart dynamically
   const radarData = useMemo(() => {
-      if (!esgMetrics.length) return [];
+      if (!esgMetrics || esgMetrics.length === 0) return [];
 
       const totals = esgMetrics.reduce((acc, curr) => {
           acc.environmental += curr.environmentalScore;
@@ -37,88 +36,97 @@ const PortfolioESG: React.FC = () => {
       ];
   }, [esgMetrics]);
 
-  if (esgMetrics.length === 0) {
-      return (
-          <div className="h-full flex items-center justify-center p-12">
-              <EmptyGrid 
-                title="ESG Assessment Queue Clean"
-                description="No environmental, social, or governance metrics have been reported. Start a baseline assessment to begin monitoring sustainability compliance."
-                icon={Leaf}
-                actionLabel="Begin ESG Baseline"
-                onAdd={() => {}}
-              />
-          </div>
-      );
-  }
-
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
                 <Leaf className="text-green-600" size={24}/>
-                <h2 className={theme.typography.h2}>ESG & Compliance Monitor</h2>
+                <h2 className={theme.typography.h2}>ESG & Corporate Compliance Monitor</h2>
             </div>
-            <Button size="sm" icon={Plus}>New Assessment</Button>
+            {esgMetrics.length > 0 && <Button size="sm" icon={Plus} onClick={() => {}}>Report Performance</Button>}
         </div>
 
-        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            <div className={`${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[400px] flex flex-col items-center`}>
-                <h3 className="font-bold text-slate-800 mb-2">Portfolio Sustainability Index</h3>
-                <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                        <PolarGrid stroke="#e2e8f0" />
-                        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontWeight: 'bold', fill: '#64748b' }} />
-                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                        <Radar name="Portfolio Average" dataKey="A" stroke="#22c55e" fill="#22c55e" fillOpacity={0.15} strokeWidth={2} />
-                        <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0'}} />
-                        <Legend wrapperStyle={{paddingTop: '20px'}} />
-                    </RadarChart>
-                </ResponsiveContainer>
+        {esgMetrics.length === 0 ? (
+            <div className="flex-1 flex h-full">
+                <EmptyGrid 
+                    title="Sustainability Ledger Inactive"
+                    description="No environmental, social, or governance metrics have been synchronized for the current portfolio period. Conduct an assessment to begin monitoring sustainability compliance."
+                    icon={Leaf}
+                    actionLabel="Initialize ESG Assessment"
+                    onAdd={() => {}}
+                />
             </div>
-
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-800 text-sm uppercase tracking-widest text-[10px]">Component Scorecard</h3>
-                    <div className="relative">
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                        <input className="pl-9 pr-4 py-1.5 text-[11px] border border-slate-300 rounded-lg w-48" placeholder="Filter scorecard..." />
+        ) : (
+            <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} flex-1 min-h-0`}>
+                <div className={`${theme.colors.surface} p-8 rounded-[2.5rem] border ${theme.colors.border} shadow-sm h-[450px] flex flex-col items-center`}>
+                    <div className="flex justify-between items-start w-full mb-4 border-b pb-4">
+                        <div>
+                             <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest">Portfolio Index</h3>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Multi-Vector Sustainability Score</p>
+                        </div>
+                        <Activity className="text-nexus-400" size={18}/>
+                    </div>
+                    <div className="flex-1 w-full min-h-0">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                                <PolarGrid stroke="#e2e8f0" />
+                                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontWeight: 'bold', fill: '#64748b' }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                                <Radar name="Portfolio Average" dataKey="A" stroke="#22c55e" fill="#22c55e" fillOpacity={0.15} strokeWidth={2} />
+                                <Tooltip contentStyle={{borderRadius: '12px', border: '1px solid #e2e8f0'}} />
+                                <Legend wrapperStyle={{paddingTop: '20px'}} />
+                            </RadarChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
-                <div className="flex-1 overflow-auto">
-                    <table className="min-w-full divide-y divide-slate-200">
-                        <thead className="bg-white">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Component</th>
-                                <th className="px-6 py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Env</th>
-                                <th className="px-6 py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Soc</th>
-                                <th className="px-6 py-3 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Gov</th>
-                                <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {esgMetrics.map(m => {
-                                const proj = projects.find(p => p.id === m.componentId);
-                                return (
-                                    <tr key={m.componentId} className="hover:bg-slate-50 transition-colors">
-                                        <td className="px-6 py-4 text-sm font-bold text-slate-700">{proj?.name || m.componentId}</td>
-                                        <td className="px-6 py-4 text-center text-sm font-mono text-green-700">{m.environmentalScore}</td>
-                                        <td className="px-6 py-4 text-center text-sm font-mono text-blue-700">{m.socialScore}</td>
-                                        <td className="px-6 py-4 text-center text-sm font-mono text-purple-700">{m.governanceScore}</td>
-                                        <td className="px-6 py-4">
-                                            {m.complianceStatus === 'Compliant' ? (
-                                                <span className="flex items-center gap-1 text-[10px] font-black uppercase text-green-600"><ShieldCheck size={14}/> Compliant</span>
-                                            ) : (
-                                                <span className="flex items-center gap-1 text-[10px] font-black uppercase text-red-600"><AlertTriangle size={14}/> {m.complianceStatus}</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+
+                <div className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-[450px]`}>
+                    <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+                        <h3 className="font-black text-slate-800 text-xs uppercase tracking-widest">Regulatory Compliance Scorecard</h3>
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                            <input className="pl-9 pr-4 py-1.5 text-[11px] font-bold border border-slate-300 rounded-xl w-48 bg-white focus:ring-4 focus:ring-nexus-500/10 outline-none transition-all" placeholder="Filter entities..." />
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-auto scrollbar-thin">
+                        <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+                            <thead className="bg-white sticky top-0 z-10 border-b">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Entity</th>
+                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Env</th>
+                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Soc</th>
+                                    <th className="px-6 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Gov</th>
+                                    <th className="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest pr-8">Posture</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {esgMetrics.map(m => {
+                                    const proj = projects.find(p => p.id === m.componentId);
+                                    return (
+                                        <tr key={m.componentId} className="nexus-table-row transition-colors hover:bg-slate-50/50">
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm font-black text-slate-800 uppercase tracking-tight">{proj?.name || m.componentId}</div>
+                                                <div className="text-[10px] font-mono text-slate-400 mt-0.5">{proj?.code}</div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center text-sm font-black font-mono text-green-700">{m.environmentalScore}</td>
+                                            <td className="px-6 py-4 text-center text-sm font-black font-mono text-blue-700">{m.socialScore}</td>
+                                            <td className="px-6 py-4 text-center text-sm font-black font-mono text-purple-700">{m.governanceScore}</td>
+                                            <td className="px-6 py-4 text-right pr-8">
+                                                {m.complianceStatus === 'Compliant' ? (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 shadow-sm"><ShieldCheck size={14}/> Compliant</span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100 shadow-sm"><AlertTriangle size={14}/> {m.complianceStatus}</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        )}
     </div>
   );
 };

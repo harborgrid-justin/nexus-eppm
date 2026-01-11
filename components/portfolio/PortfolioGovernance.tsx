@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { usePortfolioData } from '../../hooks/usePortfolioData';
-import { Gavel, FileText, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Gavel, FileText, Plus, Edit2, Trash2, ShieldCheck, Info } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -12,10 +12,16 @@ import { useData } from '../../context/DataContext';
 
 const PortfolioGovernance: React.FC = () => {
   const { governanceDecisions } = usePortfolioData();
-  const { dispatch } = useData();
+  const { state, dispatch } = useData();
   const theme = useTheme();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingDecision, setEditingDecision] = useState<GovernanceDecision | null>(null);
+
+  const authorities = useMemo(() => {
+    const roles = state.governanceRoles.map(r => r.role);
+    const eps = state.eps.map(e => e.name);
+    return Array.from(new Set(['Governance Board', 'Investment Committee', 'Steering Group', ...roles, ...eps]));
+  }, [state.governanceRoles, state.eps]);
 
   const handleEdit = (decision: GovernanceDecision) => {
     setEditingDecision(decision);
@@ -23,7 +29,7 @@ const PortfolioGovernance: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this decision record?")) {
+    if (confirm("Permanently delete this governance record? Baseline audit trails will be impacted.")) {
         dispatch({ type: 'GOVERNANCE_DELETE_DECISION', payload: id });
     }
   };
@@ -35,71 +41,90 @@ const PortfolioGovernance: React.FC = () => {
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
-        <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-                <Gavel className="text-nexus-600" size={24}/>
-                <h2 className={theme.typography.h2}>Governance Board</h2>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-2">
+            <div>
+                <h2 className={theme.typography.h2}>Enterprise Governance Board</h2>
+                <p className={theme.typography.small}>Authoritative registry of investment decisions and strategic pivots.</p>
             </div>
-            <Button size="sm" icon={Plus} onClick={handleCreate}>Log Decision</Button>
+            <Button size="md" icon={Plus} onClick={handleCreate} className="shadow-lg shadow-nexus-500/10">Log Board Action</Button>
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {/* Authority Matrix Sidebar */}
-            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm space-y-6`}>
-                <h3 className="font-bold text-slate-800 border-b border-slate-200 pb-2">Authority Matrix</h3>
-                <div className="space-y-4">
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 shadow-sm">
-                        <h4 className="font-bold text-blue-900 text-sm">Investment Committee</h4>
-                        <p className="text-xs text-blue-700 mt-1 leading-relaxed">Approves new investments > $1M. Meets Quarterly for strategic alignment review.</p>
-                    </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <h4 className="font-bold text-slate-800 text-sm">Steering Group</h4>
-                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">Program-level scope changes and high-impact risks. Meets Monthly.</p>
-                    </div>
-                    <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <h4 className="font-bold text-slate-800 text-sm">Change Control Board</h4>
-                        <p className="text-xs text-slate-600 mt-1 leading-relaxed">Technical & Budget variance > 10% from baseline. Meets Weekly.</p>
-                    </div>
+            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-[2rem] border ${theme.colors.border} shadow-sm space-y-6 flex flex-col`}>
+                <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2 border-b pb-4">
+                    <ShieldCheck size={16} className="text-nexus-600" /> Active Decision Matrix
+                </h3>
+                <div className="space-y-4 flex-1">
+                    {state.governanceRoles.length > 0 ? state.governanceRoles.map(role => (
+                        <div key={role.id} className={`p-4 ${theme.colors.background} rounded-2xl border ${theme.colors.border} hover:border-nexus-200 transition-all cursor-default group`}>
+                            <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight group-hover:text-nexus-700 transition-colors">{role.role}</h4>
+                            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{role.responsibilities}</p>
+                            <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-100">
+                                <span className="text-[9px] font-bold text-slate-400 uppercase">Authority: {role.authorityLevel}</span>
+                                <Badge variant="info" className="scale-75 origin-right">{role.assigneeId}</Badge>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="p-8 text-center text-slate-400 italic bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                            No governance roles defined in System Administration.
+                        </div>
+                    )}
+                </div>
+                <div className="p-4 bg-slate-900 rounded-2xl text-white relative overflow-hidden shadow-xl">
+                    <h4 className="font-bold flex items-center gap-2 mb-2 text-xs">
+                        <Info size={14} className="text-nexus-400"/> Regulatory Note
+                    </h4>
+                    <p className="text-[9px] text-slate-400 leading-relaxed uppercase tracking-tight">
+                        Decisions logged here are immutable and linked to the global project baseline for audit compliance.
+                    </p>
                 </div>
             </div>
 
             {/* Decisions Log */}
-            <div className={`lg:col-span-2 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
-                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2 text-[10px] uppercase tracking-widest"><FileText size={18} className="text-nexus-500"/> Decision Registry</h3>
+            <div className={`lg:col-span-2 ${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[500px]`}>
+                <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50 flex justify-between items-center`}>
+                    <h3 className="font-black text-slate-800 flex items-center gap-2 text-[10px] uppercase tracking-widest">
+                        <FileText size={18} className="text-nexus-500"/> Authority Record Ledger
+                    </h3>
+                    <div className="text-right">
+                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Total Actions: {governanceDecisions.length}</span>
+                    </div>
                 </div>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto scrollbar-thin">
                     {governanceDecisions.length === 0 ? (
                         <div className="h-full flex items-center justify-center">
                             <EmptyGrid 
-                                title="No Governance Records"
-                                description="The board has not recorded any formal decisions for the current portfolio period."
+                                title="Decision Registry Null"
+                                description="The board has not recorded any formal decisions for the current portfolio period. Governance oversight is required to secure the baseline."
                                 icon={Gavel}
-                                actionLabel="Log First Decision"
+                                actionLabel="Record Board Action"
                                 onAdd={handleCreate}
                             />
                         </div>
                     ) : (
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className={theme.colors.surface}>
+                        <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
+                            <thead className="bg-white sticky top-0 z-10 shadow-sm">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Date</th>
-                                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Item</th>
-                                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Authority</th>
-                                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Outcome</th>
-                                    <th className="px-6 py-3 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Actions</th>
+                                    <th className="px-8 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Date</th>
+                                    <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Decision Narrative</th>
+                                    <th className="px-6 py-5 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Acting Authority</th>
+                                    <th className="px-6 py-5 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
+                                    <th className="px-8 py-5 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} ${theme.colors.surface}`}>
+                            <tbody className={`divide-y divide-slate-50 ${theme.colors.surface}`}>
                                 {governanceDecisions.map(d => (
-                                    <tr key={d.id} className={`hover:${theme.colors.background} transition-colors group`}>
-                                        <td className="px-6 py-4 text-sm font-mono text-slate-600 font-bold">{d.date}</td>
+                                    <tr key={d.id} className={`nexus-table-row transition-all group`}>
+                                        <td className="px-8 py-4 text-xs font-mono text-slate-400 font-black">{d.date}</td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-slate-900">{d.title}</div>
-                                            <div className="text-xs text-slate-500 mt-0.5 line-clamp-1 italic">"{d.notes}"</div>
+                                            <div className="text-sm font-black text-slate-800 uppercase tracking-tight">{d.title}</div>
+                                            <div className="text-[10px] text-slate-500 mt-1 line-clamp-1 italic font-medium">"{d.notes}"</div>
                                         </td>
-                                        <td className="px-6 py-4 text-xs font-bold text-slate-600 uppercase tracking-tight">{d.authorityId}</td>
                                         <td className="px-6 py-4">
+                                            <span className="text-[10px] font-black uppercase text-slate-600 bg-slate-100 px-2 py-1 rounded border border-slate-200 shadow-sm">{d.authorityId}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
                                             <Badge variant={
                                                 d.decision === 'Approved' ? 'success' : 
                                                 d.decision === 'Rejected' ? 'danger' : 'warning'
@@ -107,12 +132,12 @@ const PortfolioGovernance: React.FC = () => {
                                                 {d.decision}
                                             </Badge>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleEdit(d)} className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600">
+                                        <td className="px-8 py-4 text-right">
+                                            <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleEdit(d)} className="p-2 hover:bg-slate-100 rounded-xl text-slate-500 hover:text-nexus-600 transition-all border border-transparent hover:border-slate-200">
                                                     <Edit2 size={14} />
                                                 </button>
-                                                <button onClick={() => handleDelete(d.id)} className="p-1.5 hover:bg-red-50 rounded text-slate-500 hover:text-red-500">
+                                                <button onClick={() => handleDelete(d.id)} className="p-2 hover:bg-red-50 rounded-xl text-slate-500 hover:text-red-500 transition-all border border-transparent hover:border-red-100">
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -125,11 +150,13 @@ const PortfolioGovernance: React.FC = () => {
                 </div>
             </div>
         </div>
-        <GovernanceDecisionForm 
-            isOpen={isFormOpen} 
-            onClose={() => setIsFormOpen(false)} 
-            decision={editingDecision}
-        />
+        {isFormOpen && (
+            <GovernanceDecisionForm 
+                isOpen={isFormOpen} 
+                onClose={() => setIsFormOpen(false)} 
+                decision={editingDecision}
+            />
+        )}
     </div>
   );
 };

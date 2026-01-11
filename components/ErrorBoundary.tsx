@@ -1,5 +1,5 @@
 
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -16,8 +16,9 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
+// FIX: Explicitly extending React.Component to resolve member visibility errors (state, props, setState)
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // Added constructor to properly initialize the component and establish inheritance for props and state
+  // FIX: Properly initialize state within constructor to resolve "Property 'state' does not exist" error
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -26,52 +27,53 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     };
   }
 
+  // FIX: Implement standard React lifecycle method for error state derivation
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
+  // FIX: Correctly accessing this.props via the generic class to resolve "Property 'props' does not exist" error
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Accessing this.props from the React.Component base class
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
+  // FIX: Correctly access this.setState to resolve "Property 'setState' does not exist" error
   public handleRetry = () => {
-    // Using this.setState from the React.Component base class
     this.setState({ hasError: false, error: undefined });
   };
 
+  // FIX: Completed the render method with a professional fallback UI including a grey-fill pattern for empty context
   public render() {
     if (this.state.hasError) {
-      const { error } = this.state;
-      let errorMessage = 'A runtime exception occurred in the execution context.';
-      
-      if (error instanceof Error) {
-          errorMessage = error.message;
-      } else if (typeof error === 'string') {
-          errorMessage = error;
-      }
-
       return (
-        <div className="p-8 m-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 animate-in fade-in zoom-in-95 duration-200 shadow-xl">
-          <h2 className="font-black flex items-center gap-2 uppercase tracking-tighter text-lg">
-            <AlertTriangle size={24} /> 
-            {/* Correctly accessing props from the base Component class */}
-            Module Failure: {this.props.name || 'Runtime'}
-          </h2>
-          <div className="mt-4 p-4 bg-white rounded-xl border border-red-100 font-mono text-xs overflow-auto max-h-64 shadow-inner text-red-800 leading-relaxed">
-            {errorMessage}
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
+          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-500 shadow-sm border border-red-100 rotate-3 transition-transform hover:rotate-0">
+            <AlertTriangle size={32} />
           </div>
-          <button 
-            onClick={this.handleRetry} 
-            className="mt-6 px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 rounded-xl flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 active:scale-95"
-          >
-            <RefreshCw size={14}/> Re-initialize Module
-          </button>
+          <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
+          <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
+            The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
+          </p>
+          <div className="flex gap-3">
+             <button 
+                onClick={this.handleRetry}
+                className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm active:scale-95"
+             >
+                <RefreshCw size={14}/> Re-Initialize Module
+             </button>
+          </div>
+          {process.env.NODE_ENV !== 'production' && (
+              <div className="mt-12 w-full max-w-2xl text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Debug Intelligence Output</p>
+                  <pre className="p-5 bg-slate-900 text-red-400 text-[10px] font-mono rounded-2xl border border-slate-800 overflow-auto shadow-2xl max-h-48 scrollbar-thin">
+                      {String(this.state.error)}
+                  </pre>
+              </div>
+          )}
         </div>
       );
     }
 
-    // Accessing children prop from the base Component class
     return this.props.children;
   }
 }

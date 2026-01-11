@@ -7,7 +7,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { Project } from '../../types/index';
+import { Project, GovernanceRole } from '../../types/index';
 import { StatusBadge } from '../common/StatusBadge';
 import { SidePanel } from '../ui/SidePanel';
 import { PORTFOLIO_CATEGORIES } from '../../constants/index';
@@ -17,12 +17,18 @@ import { formatCompactCurrency } from '../../utils/formatters';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
-  const { dispatch, state: { governance, governanceRoles, users } } = useData(); 
-  const { projects, strategicGoals } = usePortfolioData(); 
+  const { state: { governance, governanceRoles, users, workflows, strategicGoals } } = useData(); 
+  const { projects } = usePortfolioData(); 
   
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
   const { scoringCriteria } = governance;
+
+  const lifecycleStages = useMemo(() => {
+      const approvalWf = workflows.find(w => w.trigger === 'ChangeOrder' || w.name.includes('Approval'));
+      if (!approvalWf) return ['Proposal', 'Review', 'Scoring', 'Board Approval', 'Execution'];
+      return ['Proposal', ...approvalWf.steps.map(s => s.name), 'Execution'];
+  }, [workflows]);
 
   const calculateProjectScores = (project: Project): Record<string, number> => {
       return (scoringCriteria || []).reduce((acc, criterion) => {
@@ -44,8 +50,6 @@ const PortfolioStrategyFramework: React.FC = () => {
     return Math.round(totalScore * 100);
   };
 
-  const getProjectById = (id: string) => projects.find(p => p.id === id);
-
   const getRoleAssignee = (roleName: string) => {
       const role = (governanceRoles || []).find(r => r.role === roleName);
       if (role) {
@@ -59,193 +63,121 @@ const PortfolioStrategyFramework: React.FC = () => {
       return null;
   };
 
-  // Calculate Pipeline Metrics based on Project Status
-  const pipelineStats = useMemo(() => {
-      const stages = [
-          { id: 'Proposal', label: 'Proposal', match: ['Draft'] },
-          { id: 'Review', label: 'Business Case', match: ['Planned'] },
-          { id: 'Approval', label: 'Board Approval', match: ['Pending'] },
-          { id: 'Execution', label: 'Execution', match: ['Active', 'In Progress'] }
-      ];
-
-      return stages.map(stage => {
-          const stageProjects = projects.filter(p => stage.match.includes(p.status || 'Planned'));
-          const value = stageProjects.reduce((sum, p) => sum + p.budget, 0);
-          return {
-              ...stage,
-              count: stageProjects.length,
-              value
-          };
-      });
-  }, [projects]);
-
-  const currentProject = selectedProjectId ? getProjectById(selectedProjectId) : null;
-
-  const handleMoveCategory = (projectId: string, newCategory: string) => {
-      dispatch({
-          type: 'PROJECT_UPDATE',
-          payload: { projectId, updatedData: { category: newCategory } }
-      });
-  };
-
-  const handleEditProject = (id: string) => {
-      setSelectedProjectId(id);
-      setIsEditPanelOpen(true);
-  };
-
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
       
-      {/* 1. Governance & Decision Rights */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Shield className="text-nexus-600" size={20} />
           <h2 className={theme.typography.h2}>1. Portfolio Governance & Decision Rights</h2>
         </div>
-        <Card className="p-6">
-          <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Governance Structure & Roles</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card className="p-8 rounded-[2rem] shadow-sm">
+          <div className="flex justify-between items-center mb-6 border-b border-slate-50 pb-4">
+              <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest">Enterprise Leadership & Authorities</h3>
+              <Button size="sm" variant="ghost" icon={Plus} onClick={() => {}}>Assign Role</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div className="space-y-2">
-                <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Governance Board</label>
-                {getRoleAssignee('Governance Board') ? (
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Governance Board</label>
+                {getRoleAssignee('Sponsor') ? (
+                    <div className={`p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between group hover:border-nexus-200 transition-all shadow-sm`}>
                         <div>
-                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Governance Board')?.name}</p>
-                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Strategy & Funding Authority</p>
+                            <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{getRoleAssignee('Sponsor')?.name}</p>
+                            <p className="text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">Strategic Funding Authority</p>
                         </div>
                         <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
-                    <FieldPlaceholder label="No Board Defined" onAdd={() => {}} icon={Gavel} />
+                    <FieldPlaceholder label="No Board Defined" onAdd={() => {}} icon={Gavel} placeholderLabel="Provision Board" />
                 )}
             </div>
             <div className="space-y-2">
-                <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Portfolio Sponsor</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Corporate Sponsor</label>
                 {getRoleAssignee('Sponsor') ? (
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                    <div className={`p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between group hover:border-nexus-200 transition-all shadow-sm`}>
                         <div>
-                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Sponsor')?.name}</p>
-                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Executive Champion</p>
+                            <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{getRoleAssignee('Sponsor')?.name}</p>
+                            <p className="text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">Executive Champion</p>
                         </div>
                          <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
-                    <FieldPlaceholder label="Unassigned Sponsor" onAdd={() => {}} icon={Users} />
+                    <FieldPlaceholder label="Unassigned Sponsor" onAdd={() => {}} icon={Users} placeholderLabel="Assign Sponsor" />
                 )}
             </div>
             <div className="space-y-2">
-                <label className={`${theme.typography.label} ${theme.colors.text.tertiary} ml-1`}>Portfolio Manager</label>
-                {getRoleAssignee('Program Manager') ? ( // Mapping 'Program Manager' mock to Portfolio for demo if specific Portfolio Mgr missing
-                    <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl flex items-center justify-between`}>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Portfolio Manager</label>
+                {getRoleAssignee('Program Manager') ? (
+                    <div className={`p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between group hover:border-nexus-200 transition-all shadow-sm`}>
                         <div>
-                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{getRoleAssignee('Program Manager')?.name}</p>
-                            <p className={`${theme.typography.small} ${theme.colors.text.secondary} mt-1`}>Operations Lead</p>
+                            <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{getRoleAssignee('Program Manager')?.name}</p>
+                            <p className="text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">Portfolio Operations</p>
                         </div>
                          <CheckCircle size={16} className="text-green-500" />
                     </div>
                 ) : (
-                    <FieldPlaceholder label="Unassigned Manager" onAdd={() => {}} icon={Target} />
+                    <FieldPlaceholder label="No Operational Lead" onAdd={() => {}} icon={Target} placeholderLabel="Assign Lead" />
                 )}
             </div>
           </div>
           
-          <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Portfolio Pipeline (Stage Progression)</h3>
-          <div className="flex flex-col md:flex-row gap-4 w-full">
-            {pipelineStats.map((stage, idx) => (
-                <div key={stage.id} className="flex-1 flex items-center">
-                    <div className={`flex-1 p-4 rounded-xl border ${theme.colors.border} ${stage.count > 0 ? 'bg-white shadow-sm' : 'bg-slate-50 opacity-60'} relative overflow-hidden`}>
-                        {stage.count > 0 && <div className={`absolute top-0 left-0 w-1 h-full ${idx === 3 ? 'bg-green-500' : 'bg-blue-500'}`}></div>}
-                        <div className="flex justify-between items-start mb-2">
-                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{stage.label}</span>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${stage.count > 0 ? 'bg-slate-100 text-slate-700' : 'bg-slate-100 text-slate-400'}`}>{stage.count}</span>
-                        </div>
-                        <div className="text-lg font-black text-slate-900">{formatCompactCurrency(stage.value)}</div>
+          <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">Authoritative Escalation Path</h3>
+          <div className="flex flex-wrap items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+            {lifecycleStages.map((stage, idx) => (
+                <React.Fragment key={stage}>
+                    <div className={`px-4 py-2.5 rounded-xl border ${idx === lifecycleStages.length - 1 ? 'bg-green-50 text-green-700 border-green-200 shadow-sm' : 'bg-slate-50 border-slate-200 shadow-inner'}`}>
+                        {stage}
                     </div>
-                    {idx < pipelineStats.length - 1 && (
-                        <div className="mx-2 text-slate-300 hidden md:block"><ArrowRight size={20}/></div>
-                    )}
-                </div>
+                    {idx < lifecycleStages.length - 1 && <ArrowRight size={16} className="text-slate-300" />}
+                </React.Fragment>
             ))}
           </div>
         </Card>
       </section>
 
-      {/* 2. Strategy & Alignment */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <BookOpen className="text-nexus-600" size={20} />
-          <h2 className={theme.typography.h2}>2. Portfolio Strategy & Alignment Criteria</h2>
+          <h2 className={theme.typography.h2}>2. Strategic Drivers & Scoring Weights</h2>
         </div>
-        <Card className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="p-8 rounded-[2rem] shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <div className="flex justify-between items-center mb-4">
-                  <h3 className={`${theme.typography.h3} ${theme.colors.text.primary}`}>Strategic Objectives</h3>
+              <div className="flex justify-between items-center mb-6 border-b border-slate-50 pb-4">
+                  <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest">Active Strategic Drivers</h3>
                   <Button size="sm" variant="ghost" icon={Plus} onClick={() => {}}>Define Goal</Button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {strategicGoals.length > 0 ? strategicGoals.map(goal => (
-                    <div key={goal.id} className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex flex-col gap-1`}>
-                        <span className="font-bold text-sm text-slate-800">{goal.name}</span>
-                        <span className="text-xs text-slate-500 leading-relaxed">{goal.description}</span>
+                    <div key={goal.id} className={`p-5 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col gap-2 group hover:border-nexus-300 transition-all shadow-sm`}>
+                        <span className="font-black text-sm text-slate-800 uppercase tracking-tight">{goal.name}</span>
+                        <span className="text-xs text-slate-500 leading-relaxed font-medium">{goal.description}</span>
                     </div>
                 )) : (
-                    <FieldPlaceholder label="No strategic goals defined." onAdd={() => {}} icon={Target} />
+                    <FieldPlaceholder label="No Strategic Mandates Defined" onAdd={() => {}} icon={Target} placeholderLabel="Define Mandate" />
                 )}
               </div>
             </div>
             <div>
-              <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Portfolio Scoring Model</h3>
-              <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">Corporate Scoring Heuristics</h3>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-inner bg-slate-50/50">
                 <table className="w-full text-sm">
                     <thead>
-                    <tr className={`border-b ${theme.colors.border} bg-slate-50`}>
-                        <th className={`py-3 px-4 text-left font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Criteria</th>
-                        <th className={`py-3 px-4 text-center font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Weight</th>
+                    <tr className={`border-b border-slate-200 bg-white`}>
+                        <th className={`py-4 px-6 text-left font-black text-slate-500 text-[10px] uppercase tracking-widest`}>Criteria</th>
+                        <th className={`py-4 px-6 text-right font-black text-slate-500 text-[10px] uppercase tracking-widest`}>Weight</th>
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
                     {scoringCriteria.map(c => (
                         <tr key={c.id}>
-                        <td className={`py-3 px-4 font-medium ${theme.colors.text.primary}`}>{c.name}</td>
-                        <td className={`py-3 px-4 text-center font-mono font-bold ${theme.colors.text.secondary}`}>{(c.weight * 100).toFixed(0)}%</td>
+                        <td className={`py-4 px-6 font-bold text-slate-700`}>{c.name}</td>
+                        <td className={`py-4 px-6 text-right font-mono font-black text-nexus-700`}>{(c.weight * 100).toFixed(0)}%</td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-          <div className={`mt-8 pt-6 border-t ${theme.colors.border}`}>
-            <h3 className={`${theme.typography.h3} ${theme.colors.text.primary} mb-4`}>Project Evaluation</h3>
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className={`border-b ${theme.colors.border} ${theme.colors.background}`}>
-                    <th className={`p-3 text-left font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>Project</th>
-                    {scoringCriteria.map(c => <th key={c.id} className={`p-3 text-center font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-wider`}>{c.name.split(' ')[0]}</th>)}
-                    <th className="p-3 text-center font-black text-nexus-800 bg-nexus-50 text-xs uppercase tracking-wider">Weighted Score</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {projects.map((project) => {
-                    const scores = calculateProjectScores(project);
-                    return (
-                      <tr key={project.id} className="hover:bg-slate-50 transition-colors">
-                        <td className={`p-3 font-medium ${theme.colors.text.primary}`}>
-                            {project.name}
-                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">{project.code}</div>
-                        </td>
-                        {scoringCriteria.map(c => <td key={c.id} className={`p-3 text-center ${theme.colors.text.secondary}`}>{scores[c.id]}</td>)}
-                        <td className="p-3 text-center font-bold text-lg text-nexus-700 bg-nexus-50/50">{calculateWeightedScore(scores)}</td>
-                      </tr>
-                    )
-                  })}
-                  {projects.length === 0 && (
-                      <tr><td colSpan={scoringCriteria.length + 2} className="p-8 text-center text-slate-400 italic">No active projects to evaluate.</td></tr>
-                  )}
-                </tbody>
-              </table>
             </div>
           </div>
         </Card>
@@ -254,54 +186,35 @@ const PortfolioStrategyFramework: React.FC = () => {
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Layers className="text-nexus-600" size={20} />
-          <h2 className={theme.typography.h2}>3. Portfolio Component Structure</h2>
+          <h2 className={theme.typography.h2}>3. Strategic Component Distribution</h2>
         </div>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
           {PORTFOLIO_CATEGORIES.map((category) => {
             const projectsInCategory = projects.filter(p => p.category === category);
-            const categoryBudget = projectsInCategory.reduce((sum, p) => sum + p.budget, 0);
-            const healthCounts = {
-                good: projectsInCategory.filter(p => p.health === 'Good').length,
-                warning: projectsInCategory.filter(p => p.health === 'Warning').length,
-                critical: projectsInCategory.filter(p => p.health === 'Critical').length
-            };
-
             return (
               <div key={category} className="flex flex-col gap-3">
-                <div className={`${theme.colors.background} p-3 rounded-xl border ${theme.colors.border} shadow-sm`}>
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className={`font-black ${theme.colors.text.secondary} text-[10px] uppercase tracking-widest truncate`}>{category}</h3>
-                        <button className={`${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>
-                            <Plus size={14} />
-                        </button>
-                    </div>
-                    <div className="flex justify-between items-end">
-                        <div className="font-mono text-sm font-bold text-slate-700">{formatCompactCurrency(categoryBudget)}</div>
-                        <div className="flex gap-1 h-1.5 w-16 bg-slate-200 rounded-full overflow-hidden">
-                            <div className="bg-green-500 h-full" style={{width: `${(healthCounts.good/projectsInCategory.length)*100}%`}}></div>
-                            <div className="bg-yellow-500 h-full" style={{width: `${(healthCounts.warning/projectsInCategory.length)*100}%`}}></div>
-                            <div className="bg-red-500 h-full" style={{width: `${(healthCounts.critical/projectsInCategory.length)*100}%`}}></div>
-                        </div>
+                <div className={`bg-white p-4 rounded-2xl border border-slate-200 flex justify-between items-center shadow-sm`}>
+                    <h3 className={`font-black text-slate-500 text-[10px] uppercase tracking-widest truncate`}>{category}</h3>
+                    <div className="bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[10px] font-black text-slate-400">
+                        {projectsInCategory.length}
                     </div>
                 </div>
-                
-                <div className="space-y-3 min-h-[150px]">
+                <div className="space-y-3 min-h-[200px]">
                     {projectsInCategory.length > 0 ? projectsInCategory.map(project => (
-                        <div key={project.id} className={`${theme.components.card} p-4 group hover:border-nexus-300 relative transition-all shadow-sm`}>
-                            <div className="flex justify-between items-start mb-2">
-                                <h4 className={`font-bold text-sm ${theme.colors.text.primary} group-hover:text-nexus-700 transition-colors line-clamp-2`}>{project.name}</h4>
-                                <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2 ${theme.colors.surface} rounded shadow-sm border ${theme.colors.border}`}>
-                                    <button onClick={() => handleEditProject(project.id)} className={`p-1.5 hover:${theme.colors.background} rounded text-slate-500 hover:text-nexus-600`}><Edit2 size={12}/></button>
-                                </div>
+                        <div key={project.id} className={`bg-white p-5 rounded-2xl border border-slate-200 group hover:border-nexus-400 relative transition-all shadow-sm`}>
+                            <div className="flex justify-between items-start mb-3">
+                                <h4 className={`font-black text-sm text-slate-800 group-hover:text-nexus-800 transition-colors line-clamp-2 uppercase tracking-tight`}>{project.name}</h4>
                             </div>
-                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-50">
-                                <span className={`text-[10px] font-mono ${theme.colors.text.tertiary} uppercase tracking-tighter`}>{project.code}</span>
-                                <StatusBadge status={project.health} variant="health" className="scale-75 origin-right" />
+                            <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-50">
+                                <span className={`text-[10px] font-mono font-black text-slate-400 uppercase tracking-tighter`}>{project.code}</span>
+                                <div className="text-right">
+                                     <span className="text-[10px] font-black text-nexus-600 font-mono">{calculateWeightedScore(calculateProjectScores(project))} Pts</span>
+                                </div>
                             </div>
                         </div>
                     )) : (
-                        <div className={`p-6 border-2 border-dashed ${theme.colors.border} rounded-xl flex items-center justify-center text-center ${theme.colors.background}/50 h-full`}>
-                            <p className={`text-xs ${theme.colors.text.tertiary} italic`}>No projects assigned.</p>
+                        <div className="h-full">
+                            <FieldPlaceholder label={`Unpopulated: ${category}`} className="h-full min-h-[160px]" icon={Layers} onAdd={() => {}} placeholderLabel="Align Initiative" />
                         </div>
                     )}
                 </div>
@@ -310,49 +223,6 @@ const PortfolioStrategyFramework: React.FC = () => {
           })}
         </div>
       </section>
-
-      <SidePanel
-        isOpen={isEditPanelOpen}
-        onClose={() => setIsEditPanelOpen(false)}
-        title="Manage Component Alignment"
-        width="md:w-[450px]"
-        footer={<Button onClick={() => setIsEditPanelOpen(false)}>Done</Button>}
-      >
-        {currentProject && (
-            <div className="space-y-6">
-                <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-lg`}>
-                    <p className={`text-[10px] font-bold ${theme.colors.text.secondary} uppercase tracking-widest mb-1`}>Project Component</p>
-                    <p className={`text-lg font-bold ${theme.colors.text.primary}`}>{currentProject.name}</p>
-                </div>
-
-                <div>
-                    <label className={`block text-sm font-bold ${theme.colors.text.primary} mb-3`}>Strategic Category</label>
-                    <div className="space-y-2">
-                        {PORTFOLIO_CATEGORIES.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => currentProject && handleMoveCategory(currentProject.id, cat)}
-                                className={`w-full text-left p-3 rounded-lg border transition-all ${
-                                    currentProject.category === cat 
-                                    ? `${theme.colors.semantic.info.bg} border-nexus-500 ${theme.colors.semantic.info.text} ring-1 ring-nexus-500` 
-                                    : `${theme.colors.surface} ${theme.colors.border} hover:${theme.colors.background} hover:border-slate-300`
-                                }`}
-                            >
-                                <span className="text-sm font-medium">{cat}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className={`${theme.colors.semantic.info.bg} p-4 rounded-lg border ${theme.colors.semantic.info.border} flex items-start gap-3`}>
-                    <div className={`p-1 ${theme.colors.background} rounded text-blue-600 shrink-0`}><Scale size={14}/></div>
-                    <p className="text-xs text-blue-800 leading-relaxed">
-                        Reclassifying a component updates its position in the Strategic Roadmap and resource allocation balancing models.
-                    </p>
-                </div>
-            </div>
-        )}
-      </SidePanel>
     </div>
   );
 };
