@@ -1,11 +1,19 @@
-
 import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
 import { DEFAULT_TOKENS, ThemeDensity, DesignTokens } from './theme/ThemeDefaults';
 
 interface ThemeContextType {
-  tokens: DesignTokens; density: ThemeDensity; setDensity: (d: ThemeDensity) => void;
-  isDark: boolean; toggleDark: () => void;
-  mode: 'light' | 'dark'; colors: any; layout: any; components: any; typography: any; charts: any;
+  tokens: DesignTokens;
+  setTokens: (t: DesignTokens) => void;
+  density: ThemeDensity;
+  setDensity: (d: ThemeDensity) => void;
+  isDark: boolean;
+  toggleDark: () => void;
+  mode: 'light' | 'dark';
+  colors: any;
+  layout: any;
+  components: any;
+  typography: any;
+  charts: any;
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
@@ -19,22 +27,37 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const activeColors = useMemo(() => {
     return isDark 
-      ? { ...tokens.colors, background: '#020617', surface: '#0f172a', text: '#e2e8f0', border: '#1e293b' } 
+      ? { 
+          ...tokens.colors, 
+          background: '#020617', 
+          surface: '#0f172a', 
+          text: '#e2e8f0', 
+          border: '#1e293b',
+          borderLight: '#0f172a'
+        } 
       : tokens.colors;
   }, [isDark, tokens]);
 
   const themeValue = useMemo(() => {
     return {
-      tokens, density, setDensity, isDark, toggleDark,
+      tokens,
+      setTokens,
+      density,
+      setDensity,
+      isDark,
+      toggleDark,
       mode: (isDark ? 'dark' : 'light') as 'light' | 'dark',
-      // Update colors object to return class names that map to the Tailwind config we set in index.html
       colors: { 
           ...activeColors, 
           primary: 'bg-primary text-text-inverted', 
           background: 'bg-background',
           surface: 'bg-surface',
           border: 'border-border',
-          text: { primary: 'text-text-primary', secondary: 'text-text-secondary', tertiary: 'text-slate-400' }, 
+          text: { 
+            primary: 'text-text-primary', 
+            secondary: 'text-text-secondary', 
+            tertiary: 'text-slate-400' 
+          }, 
           semantic: { 
               success: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: 'text-green-500', solid: 'bg-green-600 text-white' }, 
               warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: 'text-amber-500', solid: 'bg-amber-500 text-white' }, 
@@ -43,22 +66,64 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               neutral: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', icon: 'text-slate-400', solid: 'bg-slate-500 text-white' } 
           } 
       },
-      layout: { pageContainer: 'h-full flex flex-col', pagePadding: 'p-6 md:p-8', sectionSpacing: 'space-y-4', gridGap: 'gap-6', panelContainer: 'flex-1 flex flex-col bg-surface rounded-xl border border-border shadow-sm overflow-hidden', headerBorder: 'border-b border-border' },
-      components: { card: 'bg-surface border border-border rounded-xl shadow-sm', badge: { base: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border' }, table: { header: 'px-6 py-4 text-left text-xs font-medium uppercase text-text-secondary', row: 'transition-colors', cell: 'px-6 py-4 whitespace-nowrap' } },
-      typography: { h1: 'text-2xl font-bold tracking-tight text-text-primary', h2: 'text-xl font-bold text-text-primary', h3: 'text-lg font-bold text-text-primary', body: 'text-sm leading-relaxed text-text-secondary', small: 'text-xs text-text-secondary', label: 'text-xs font-bold uppercase tracking-wider text-text-secondary' },
-      charts: { grid: isDark ? '#1e293b' : '#e2e8f0', tooltip: { backgroundColor: isDark ? '#0f172a' : '#fff', borderColor: isDark ? '#1e293b' : '#e2e8f0' }, palette: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'] }
+      layout: { 
+        pageContainer: 'h-full flex flex-col', 
+        pagePadding: 'p-6 md:p-8', 
+        sectionSpacing: 'space-y-4', 
+        gridGap: 'gap-6', 
+        panelContainer: 'flex-1 flex flex-col bg-surface rounded-xl border border-border shadow-sm overflow-hidden', 
+        headerBorder: 'border-b border-border' 
+      },
+      components: { 
+        card: 'bg-surface border border-border rounded-xl shadow-sm', 
+        badge: { base: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border' }, 
+        table: { 
+          header: 'px-6 py-4 text-left text-xs font-medium uppercase text-text-secondary', 
+          row: 'transition-colors', 
+          cell: 'px-6 py-4 whitespace-nowrap' 
+        } 
+      },
+      typography: { 
+        h1: 'text-2xl font-bold tracking-tight text-text-primary', 
+        h2: 'text-xl font-bold text-text-primary', 
+        h3: 'text-lg font-bold text-text-primary', 
+        body: 'text-sm leading-relaxed text-text-secondary', 
+        small: 'text-xs text-text-secondary', 
+        label: 'text-xs font-bold uppercase tracking-wider text-text-secondary' 
+      },
+      charts: { 
+        grid: isDark ? '#1e293b' : '#e2e8f0', 
+        tooltip: { backgroundColor: isDark ? '#0f172a' : '#fff', borderColor: isDark ? '#1e293b' : '#e2e8f0' }, 
+        palette: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'] 
+      }
     };
   }, [activeColors, density, isDark, tokens]);
 
   useEffect(() => {
     const root = document.documentElement;
     const spacing = tokens.spacing[density];
+    
+    // Inject Spacing Variables
     Object.entries(spacing).forEach(([k, v]) => root.style.setProperty(`--spacing-${k}`, v as string));
-    // Set CSS variables for colors from activeColors (which handles dark mode)
+    
+    // Inject Color Variables
     Object.entries(activeColors).forEach(([k, v]) => root.style.setProperty(`--color-${k}`, v as string));
+    
+    // Inject Border Radius Variables
+    Object.entries(tokens.borderRadius).forEach(([k, v]) => root.style.setProperty(`--radius-${k}`, v as string));
+    
+    // Inject Typography Variables
+    root.style.setProperty('--font-sans', tokens.typography.fontSans);
+    root.style.setProperty('--font-mono', tokens.typography.fontMono);
   }, [activeColors, density, tokens]);
 
-  return <ThemeContext.Provider value={themeValue}><div className={`${isDark ? 'dark' : ''} h-full bg-background text-text-primary`}>{children}</div></ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={themeValue}>
+      <div className={`${isDark ? 'dark' : ''} h-full bg-background text-text-primary`}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
 };
 
 export const useTheme = () => {

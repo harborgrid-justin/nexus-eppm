@@ -8,7 +8,7 @@ import { ProgressBar } from '../../common/ProgressBar';
 import DataTable from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
-import { GitBranch } from 'lucide-react';
+import { GitBranch, User, Plus } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 interface ProjectListTableProps {
@@ -26,69 +26,104 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
   const navigate = useNavigate();
   const theme = useTheme();
 
-  const getManagerName = (managerId: string) => state.resources.find(r => r.id === managerId)?.name || 'Unassigned';
+  const getManagerName = (managerId: string) => state.resources.find(r => r.id === managerId)?.name;
 
   const columns = useMemo<Column<Project>[]>(() => [
     {
-      key: 'health', header: 'Status', width: 'w-32', sortable: true,
-      render: (p) => <StatusBadge status={p.health} variant="health" />
+      key: 'health', 
+      header: 'Status', 
+      width: 'w-24', 
+      sortable: true,
+      render: (p) => p.health ? <StatusBadge status={p.health} variant="health" /> : <div className="w-16 h-6 bg-slate-100 rounded-full animate-pulse shadow-inner" />
     },
     {
-      key: 'name', header: 'Project Name', sortable: true,
+      key: 'name', 
+      header: 'Project Name', 
+      sortable: true,
       render: (p) => (
-        <div className="flex flex-col min-w-0 overflow-hidden">
+        <div className="flex flex-col min-w-0 overflow-hidden py-1">
           <div className="flex items-center gap-2">
-              <span className={`text-sm font-semibold ${theme.colors.text.primary} truncate`}>{p.name}</span>
-              {p.isReflection && <GitBranch size={14} className="text-purple-500" title="Reflection Project" />}
+              <span className={`text-sm font-bold ${theme.colors.text.primary} truncate group-hover:text-nexus-600 transition-colors`}>{p.name || 'Untitled Project'}</span>
+              {p.isReflection && <GitBranch size={12} className="text-purple-500" title="Reflection Sandbox" />}
           </div>
-          <span className={`text-xs ${theme.colors.text.secondary} font-mono truncate`}>{p.code}</span>
+          <span className={`text-[10px] font-mono font-black text-slate-400 uppercase tracking-tighter truncate`}>{p.code || 'NO_CODE'}</span>
         </div>
       )
     },
     {
-      key: 'managerId', header: 'Manager', width: 'w-48', sortable: true,
-      render: (p) => (
-        <div className="flex items-center gap-2 min-w-0">
-          <div className={`w-6 h-6 rounded-full ${theme.colors.background} border ${theme.colors.border} flex items-center justify-center text-[10px] font-bold ${theme.colors.text.secondary} flex-shrink-0`}>
-            {formatInitials(getManagerName(p.managerId))}
-          </div>
-          <span className={`text-sm ${theme.colors.text.secondary} truncate`}>{getManagerName(p.managerId)}</span>
-        </div>
-      )
+      key: 'managerId', 
+      header: 'Manager', 
+      width: 'w-56', 
+      sortable: true,
+      render: (p) => {
+          const name = getManagerName(p.managerId);
+          return (
+            <div className="flex items-center gap-3 min-w-0">
+              {name ? (
+                  <div className={`w-8 h-8 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-[10px] font-black text-white shadow-lg shrink-0`}>
+                    {formatInitials(name)}
+                  </div>
+              ) : (
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 shrink-0">
+                    <User size={14}/>
+                  </div>
+              )}
+              <div className="flex flex-col truncate">
+                <span className={`text-sm font-bold ${name ? 'text-slate-700' : 'text-slate-400 italic'}`}>{name || 'Unassigned'}</span>
+                {!name && (
+                    <button className="text-[9px] font-black text-nexus-600 uppercase hover:underline text-left">Assign Lead</button>
+                )}
+              </div>
+            </div>
+          );
+      }
     },
     {
-      key: 'progress', header: 'Progress', width: 'w-56',
+      key: 'progress', 
+      header: 'Execution Progress', 
+      width: 'w-64',
       render: (p) => {
         const prog = calculateProjectProgress(p);
         return (
-          <div className="w-full pr-4">
-            <div className="flex justify-between text-xs mb-1"><span className={`font-medium ${theme.colors.text.secondary}`}>{prog}%</span></div>
-            <ProgressBar value={prog} colorClass={p.health === 'Critical' ? 'bg-red-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-nexus-600'} />
+          <div className="w-full pr-8">
+            <div className="flex justify-between items-end text-[10px] font-black uppercase mb-1.5">
+                <span className={theme.colors.text.tertiary}>Cumulative</span>
+                <span className="text-slate-900 font-mono">{prog}%</span>
+            </div>
+            <ProgressBar value={prog} colorClass={p.health === 'Critical' ? 'bg-red-500' : p.health === 'Warning' ? 'bg-amber-500' : 'bg-nexus-600'} size="sm" />
           </div>
         );
       }
     },
     {
-      key: 'budget', header: 'Budget', width: 'w-32', align: 'right', sortable: true,
+      key: 'budget', 
+      header: 'Capital Authority', 
+      width: 'w-40', 
+      align: 'right', 
+      sortable: true,
       render: (p) => (
-        <div className="text-right overflow-hidden">
-          <div className={`text-sm font-medium ${theme.colors.text.primary} truncate`}>{formatCompactCurrency(p.budget)}</div>
-          <div className={`text-[10px] ${theme.colors.text.secondary} truncate`}>{formatCompactCurrency(p.spent)} spent</div>
+        <div className="text-right overflow-hidden pr-4">
+          <div className={`text-sm font-black ${theme.colors.text.primary} font-mono`}>{formatCompactCurrency(p.budget || 0)}</div>
+          <div className={`text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5`}>
+              {formatCompactCurrency(p.spent || 0)} <span className="font-normal opacity-60 italic">consumed</span>
+          </div>
         </div>
       )
     }
   ], [state.resources, theme]);
 
   return (
-    <DataTable 
-        data={projects} 
-        columns={columns} 
-        onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} 
-        keyField="id" 
-        emptyMessage="No projects found." 
-        selectable={selectable}
-        selectedIds={selectedIds}
-        onSelectionChange={onSelectionChange}
-    />
+    <div className="h-full bg-white flex flex-col">
+        <DataTable 
+            data={projects} 
+            columns={columns} 
+            onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} 
+            keyField="id" 
+            emptyMessage="The project database is unpopulated. Synchronize with external scheduler or create manual initiative." 
+            selectable={selectable}
+            selectedIds={selectedIds}
+            onSelectionChange={onSelectionChange}
+        />
+    </div>
   );
 };

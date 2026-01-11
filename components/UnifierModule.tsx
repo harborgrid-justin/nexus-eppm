@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { CostSheet } from './unifier/CostSheet';
@@ -11,9 +12,11 @@ import { useUnifierLogic } from '../hooks/domain/useUnifierLogic';
 import { BPSidebar } from './unifier/BPSidebar';
 import { BPList } from './unifier/BPList';
 import { UnifierToolbar } from './unifier/UnifierToolbar';
+import { useI18n } from '../context/I18nContext';
 
 const UnifierModule: React.FC = () => {
   const theme = useTheme();
+  const { t } = useI18n();
   const {
       activeGroup, activeTab, selectedBP, isFormOpen, editingRecord,
       projectId, definitions, activeDefinition, records, navGroups,
@@ -23,10 +26,14 @@ const UnifierModule: React.FC = () => {
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} space-y-4 flex flex-col h-full`}>
-        <PageHeader title="Unifier Controls" subtitle="Cost control and business automation" icon={LayoutTemplate} />
+        <PageHeader 
+            title={t('nav.unifier', 'Unifier Controls')} 
+            subtitle={t('unifier.subtitle', 'Enterprise business process automation and cost control.')} 
+            icon={LayoutTemplate} 
+        />
 
         <div className={theme.layout.panelContainer}>
-            <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50`}>
+            <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b ${theme.colors.border} bg-slate-50/50`}>
                 <ModuleNavigation 
                     groups={navGroups} activeGroup={activeGroup} activeItem={activeTab}
                     onGroupChange={handleGroupChange} onItemChange={handleTabChange}
@@ -47,8 +54,18 @@ const UnifierModule: React.FC = () => {
                                 onProvision={() => handleTabChange('uDesigner')}
                             />
                             <div className="flex-1 flex flex-col overflow-hidden">
-                                <UnifierToolbar title={`${activeDefinition?.name || 'Business Process'} Log`} onCreate={handleCreate} onRefresh={() => {}} />
-                                <BPList records={records} activeDefinition={activeDefinition} onEdit={handleEdit} onCreate={handleCreate} />
+                                <UnifierToolbar 
+                                    title={activeDefinition ? `${activeDefinition.name} Registry` : t('unifier.no_def', 'Process Definition Required')} 
+                                    onCreate={handleCreate} 
+                                    onRefresh={() => {}} 
+                                    disabled={!activeDefinition}
+                                />
+                                <BPList 
+                                    records={records} 
+                                    activeDefinition={activeDefinition} 
+                                    onEdit={handleEdit} 
+                                    onCreate={handleCreate} 
+                                />
                             </div>
                         </div>
                     )}

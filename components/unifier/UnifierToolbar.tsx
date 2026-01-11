@@ -8,9 +8,10 @@ interface Props {
   title: string;
   onCreate: () => void;
   onRefresh: () => void;
+  disabled?: boolean;
 }
 
-export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh }) => {
+export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh, disabled }) => {
   const theme = useTheme();
   return (
     <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 gap-3`}>
@@ -27,6 +28,7 @@ export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh }) 
                 onClick={onRefresh} 
                 icon={RefreshCw}
                 className="flex-1 sm:flex-none"
+                disabled={disabled}
             >
                 Refresh
             </Button>
@@ -36,8 +38,9 @@ export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh }) 
                 onClick={onCreate} 
                 icon={Plus}
                 className="flex-1 sm:flex-none"
+                disabled={disabled}
             >
-                Create
+                Initialize
             </Button>
         </div>
     </div>

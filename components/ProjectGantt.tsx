@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
@@ -14,6 +15,7 @@ import { useGanttData } from '../hooks/gantt/useGanttData';
 import { useGanttCalendar } from '../hooks/gantt/useGanttCalendar';
 import { EmptyGrid } from './common/EmptyGrid';
 import { useContainerSize } from '../hooks/useContainerSize';
+import { ConfigService } from '../services/ConfigService';
 
 const ROW_HEIGHT = 44;
 
@@ -50,7 +52,6 @@ const ProjectGantt: React.FC = () => {
     const top = e.currentTarget.scrollTop;
     onScroll(top);
     setScrollTop(top);
-    // Optimized sync
     if (e.target === listRef.current && timelineRef.current) timelineRef.current.scrollTop = top;
     else if (e.target === timelineRef.current && listRef.current) listRef.current.scrollTop = top;
   }, [onScroll]);
@@ -78,11 +79,11 @@ const ProjectGantt: React.FC = () => {
       
       {!hasTasks ? (
           <EmptyGrid 
-            title="Logic Network Isolated"
-            description="The master schedule repository is currently unpopulated. Establish an activity baseline or synchronize with an external XER/MPP artifact to activate the CPM engine."
+            title="Schedule Repository Empty"
+            description="The master schedule logic network is currently unpopulated. Establish an activity baseline or synchronize with an external XER/MPP artifact to activate the CPM engine."
             icon={Network}
             onAdd={() => {}} 
-            actionLabel="Initialize Activities"
+            actionLabel="Initialize Schedule"
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
@@ -128,16 +129,16 @@ const ProjectGantt: React.FC = () => {
             
             {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}
             
-            {/* Status Bar Indicator */}
+            {/* Status Bar Indicator - Dynamically Sourced */}
             <div className={`h-8 border-t ${theme.colors.border} bg-slate-900 text-white flex items-center px-4 justify-between text-[9px] font-black uppercase tracking-widest`}>
                 <div className="flex gap-6">
                     <span>Baseline: {activeBaselineId || 'LATEST'}</span>
-                    <span>Engine: NEXUS_CPM_v4.2</span>
-                    <span className="text-nexus-400">Algorithm: Retained Logic</span>
+                    <span>Engine: NEXUS_CPM_v{ConfigService.appVersion}</span>
+                    <span className="text-nexus-400">Logic: {state.governance.scheduling.retainedLogic ? 'Retained' : 'Progress Override'}</span>
                 </div>
                 <div className="flex gap-4">
                     <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div> {project.tasks.filter(t=>t.critical).length} Critical</span>
-                    <span>Total Activities: {project.tasks.length}</span>
+                    <span>Total: {project.tasks.length}</span>
                 </div>
             </div>
           </div>

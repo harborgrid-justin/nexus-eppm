@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { FileText, Save, Lock, ChevronDown, ChevronRight, Target, AlertCircle, CheckSquare, XSquare, Info, Plus } from 'lucide-react';
+import { FileText, Target, AlertCircle, CheckSquare, XSquare, Info, ChevronDown, Lock } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { NarrativeField } from '../common/NarrativeField';
@@ -64,7 +64,7 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                 updatedData: { [field]: value }
             }
         });
-        success("Scope Baseline Synced", "Organizational delivery boundaries updated in global state.");
+        success("Scope Baseline Updated", "Project boundaries synchronized in the global ledger.");
     };
 
     if (!project) return null;
@@ -72,7 +72,8 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
     return (
         <div className={`h-full flex flex-col bg-slate-50/30 scrollbar-thin`}>
             <div className="flex-1 overflow-y-auto p-10 max-w-6xl mx-auto w-full">
-                <div className="mb-10 p-8 bg-slate-900 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
+                {/* Configuration Baseline Hero Section */}
+                <div className="mb-10 p-8 bg-slate-900 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl border border-white/10">
                     <div className="relative z-10">
                         <h4 className="font-black flex items-center gap-2 mb-3 text-sm uppercase tracking-widest text-nexus-400">
                             <Target size={16}/> Configuration Baseline
@@ -84,6 +85,7 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                     <FileText size={200} className="absolute -right-16 -bottom-16 text-white/5 opacity-5 rotate-12 pointer-events-none" />
                 </div>
 
+                {/* 1. Product & Project Scope */}
                 <ScopeSection title="1. Product & Project Scope" icon={Target} isOpen={sections.description} onToggle={() => toggle('description')}>
                     <NarrativeField 
                         label="Strategic Intent & Characteristics"
@@ -94,6 +96,7 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                     />
                 </ScopeSection>
 
+                {/* 2. Project Deliverables */}
                 <ScopeSection title="2. Project Deliverables" icon={CheckSquare} isOpen={sections.deliverables} onToggle={() => toggle('deliverables')}>
                     <NarrativeField 
                         label="Verifiable Outcomes (WBS Summary)"
@@ -104,22 +107,24 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                     />
                 </ScopeSection>
 
+                {/* 3. Project Exclusions */}
                 <ScopeSection title="3. Project Exclusions" icon={XSquare} isOpen={sections.exclusions} onToggle={() => toggle('exclusions')}>
                     <NarrativeField 
                         label="Out-of-Scope Items (Negative Scope)"
                         value="" 
-                        placeholderLabel="Explicitly state what is excluded to manage stakeholder expectations and prevent creep."
+                        placeholderLabel="Explicitly state what is excluded to manage stakeholder expectations and prevent scope creep."
                         onAdd={() => {}} 
                         isReadOnly={!canEditProject()}
                     />
                 </ScopeSection>
 
+                {/* 4. Constraints & Assumptions */}
                 <ScopeSection title="4. Constraints & Assumptions" icon={AlertCircle} isOpen={sections.constraints} onToggle={() => toggle('constraints')}>
                     <div className="space-y-8">
-                        <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl flex gap-4 items-start">
+                        <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl flex gap-4 items-start shadow-sm">
                              <Info size={24} className="text-blue-600 shrink-0 mt-0.5"/>
                              <p className="text-xs text-blue-900 leading-relaxed font-bold uppercase tracking-tight">
-                                 Assumptions and constraints are critical inputs for risk modeling and Monte Carlo simulations. These parameters are reviewed by the PMO quarterly.
+                                 Assumptions and constraints are critical inputs for risk modeling and Monte Carlo simulations. These parameters are reviewed by the PMO quarterly to ensure roadmap integrity.
                              </p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -146,7 +151,7 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
             </div>
             
             {!canEditProject() && (
-                <div className="p-4 bg-slate-900 text-white flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-widest shrink-0">
+                <div className="p-4 bg-slate-900 text-white flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-widest shrink-0 border-t border-white/10">
                     <Lock size={14} className="text-nexus-400"/> Read-Only Mode: Baseline Protected
                 </div>
             )}

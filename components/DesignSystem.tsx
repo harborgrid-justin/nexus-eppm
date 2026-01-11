@@ -4,7 +4,7 @@ import {
   Table, List, Move, FileText, Folder, PenTool, 
   Calendar, Clock, ClipboardList, GitBranch, Map, 
   Database, AlertTriangle, DollarSign, BarChart3, Sparkles,
-  Menu, X, ChevronRight
+  Menu, X, ChevronRight, Settings2
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
@@ -30,9 +30,11 @@ import { DesignProjectManagement } from './design/DesignProjectManagement';
 import { DesignWorkflow } from './design/DesignWorkflow';
 import { DesignFinance } from './design/DesignFinance';
 import { DesignLegal } from './design/DesignLegal';
+import { DesignThemeEditor } from './design/DesignThemeEditor';
 
 const CATEGORIES = [
   { id: 'intro', label: 'Framework Overview', icon: Sparkles, component: DesignIntro },
+  { id: 'theme', label: 'Theme Variables', icon: Settings2, component: DesignThemeEditor },
   { id: 'colors', label: 'Color Variables', icon: Palette, component: DesignColors },
   { id: 'typography', label: 'Typography', icon: Type, component: DesignTypography },
   { id: 'layouts', label: 'Structural Layouts', icon: LayoutTemplate, component: DesignLayouts },

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users } from 'lucide-react';
+import { Users, Loader2 } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
@@ -47,24 +47,26 @@ const ResourceManagement: React.FC = () => {
   };
 
   if (!project) return (
-    <div className={`p-6 space-y-4 flex flex-col h-full ${theme.colors.background}`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full ${theme.colors.background}`}>
         <PageHeader title="Resource Management" subtitle="Staffing and allocation hub" icon={Users} />
-        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400">
-            <Users size={48} className="mb-4 opacity-10" />
-            <p className="font-bold uppercase tracking-widest text-xs">Initializing Resource Context...</p>
+        <div className="flex-1 nexus-empty-pattern border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400 m-6">
+            <Loader2 size={48} className="mb-4 animate-spin opacity-20 text-nexus-600" />
+            <p className="font-black uppercase tracking-widest text-[10px]">Mounting Resource Context...</p>
         </div>
     </div>
   );
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Resource Management" 
-        subtitle="Plan, staff, and manage your project and enterprise resources."
-        icon={Users}
-      />
+    <div className={`${theme.layout.pageContainer} ${theme.colors.background}`}>
+      <div className={`${theme.layout.pagePadding} pb-0`}>
+        <PageHeader 
+          title="Resource Management" 
+          subtitle="Plan, staff, and manage your project and enterprise resources."
+          icon={Users}
+        />
+      </div>
 
-      <div className={theme.layout.panelContainer}>
+      <div className={`${theme.layout.panelContainer} m-6 md:m-8 mt-4 flex-1 flex flex-col overflow-hidden`}>
         <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-slate-50/50 z-10`}>
           <ModuleNavigation 
               groups={navStructure}

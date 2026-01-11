@@ -14,7 +14,7 @@ import { useData } from '../../context/DataContext';
 import ProjectCharter from './ProjectCharter';
 import ChangeLog from './ChangeLog';
 
-const ProjectIntegrationManagement: React.FC = () => {
+const ProjectDashboard: React.FC = () => {
   const { project, summary, financials, riskProfile, qualityProfile, changeOrders } = useProjectWorkspace();
   const { state } = useData();
   const theme = useTheme();
@@ -33,6 +33,20 @@ const ProjectIntegrationManagement: React.FC = () => {
       return { scopeCreep: scopeCreepValue, stagnantTasks };
   }, [project, changeOrders]);
 
+  // Determine next board meeting info from governance state
+  const boardMeetingInfo = useMemo(() => {
+    const boardEvent = state.governanceEvents.find(e => e.type === 'Steering Committee');
+    return boardEvent ? `${boardEvent.name} is scheduled for ${boardEvent.nextDate}.` : 'No upcoming board meetings scheduled.';
+  }, [state.governanceEvents]);
+
+  // Calculate contingency threshold exposure
+  const exposureInfo = useMemo(() => {
+      if (!financials || !project) return '';
+      const threshold = project.originalBudget * 0.15;
+      const isWithin = financials.pendingCOAmount <= threshold;
+      return `Current unapproved exposure (${formatCompactCurrency(financials.pendingCOAmount)}) is ${isWithin ? 'within' : 'exceeding'} the 15% contingency threshold.`;
+  }, [financials, project]);
+
   if (!project || !summary || !financials || !riskProfile || !qualityProfile || !phase2Metrics) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -48,7 +62,7 @@ const ProjectIntegrationManagement: React.FC = () => {
         <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} activities`} icon={GanttChartSquare} />
         <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`Current working delta`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
         <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} critical path threats`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
-        <StatCard title="Quality Pass Rate" value={formatPercentage(qualityProfile.passRate)} subtext="Last 30 days avg" icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
+        <StatCard title="Quality Pass Rate" value={formatPercentage(qualityProfile.passRate)} subtext="Overall inspection yield" icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>
 
       <div className="mb-4">
@@ -126,7 +140,7 @@ const ProjectIntegrationManagement: React.FC = () => {
                  <span className="font-mono font-black text-amber-700">{formatCurrency(financials.pendingCOAmount)}</span>
               </div>
               <div className="mt-2 text-xs text-slate-500 leading-relaxed italic text-center px-4">
-                  "Board meetings occur every second Tuesday. Current unapproved exposure is within the 15% contingency threshold."
+                  "{boardMeetingInfo} {exposureInfo}"
               </div>
             </div>
         </div>
@@ -163,4 +177,5 @@ const ProjectIntegrationManagement: React.FC = () => {
     </div>
   );
 };
-export default ProjectIntegrationManagement;
+
+export default ProjectDashboard;

@@ -1,5 +1,5 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -16,33 +16,31 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Using named imports and explicitly defining props and state types to ensure the compiler recognizes inherited members
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // Added constructor to properly initialize the component and establish inheritance for props and state
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    // FIX: Initializing state correctly on the component instance
     this.state = {
       hasError: false,
       error: undefined,
     };
   }
 
-  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+  public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Accessing inherited props via this.props to fix compilation errors
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Accessing this.props from the React.Component base class
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  handleRetry = () => {
-    // FIX: Using inherited setState method to reset error state to fix compilation error
+  public handleRetry = () => {
+    // Using this.setState from the React.Component base class
     this.setState({ hasError: false, error: undefined });
   };
 
-  render() {
-    // FIX: Correctly accessing inherited state and props to fix compilation errors
+  public render() {
     if (this.state.hasError) {
       const { error } = this.state;
       let errorMessage = 'A runtime exception occurred in the execution context.';
@@ -57,6 +55,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="p-8 m-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 animate-in fade-in zoom-in-95 duration-200 shadow-xl">
           <h2 className="font-black flex items-center gap-2 uppercase tracking-tighter text-lg">
             <AlertTriangle size={24} /> 
+            {/* Correctly accessing props from the base Component class */}
             Module Failure: {this.props.name || 'Runtime'}
           </h2>
           <div className="mt-4 p-4 bg-white rounded-xl border border-red-100 font-mono text-xs overflow-auto max-h-64 shadow-inner text-red-800 leading-relaxed">
@@ -72,6 +71,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
+    // Accessing children prop from the base Component class
     return this.props.children;
   }
 }
