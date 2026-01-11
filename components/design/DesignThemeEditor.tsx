@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { 
     Settings2, Palette, Type, Layers, Maximize, RotateCcw, 
-    Save, Sun, Moon, Move, Zap, BarChart2, Shadow, 
+    Save, Sun, Moon, Move, Zap, BarChart2, 
     AlignLeft, Hash, Box, Ruler, Layers as LayersIcon,
-    Plus, AlertCircle
+    Plus, AlertCircle, Square
 } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel, EmptyPatternDemo } from './DesignHelpers';
 import { Button } from '../ui/Button';
@@ -199,7 +199,7 @@ export const DesignThemeEditor: React.FC = () => {
             </div>
 
             {/* --- 6. ELEVATION & SHADOWS --- */}
-            <TokenGrid title="Elevation & Depth" icon={Move} items={tokens.shadows} category="shadows" />
+            <TokenGrid title="Elevation & Depth" icon={Square} items={tokens.shadows} category="shadows" />
 
             {/* --- 7. COMPONENT RADIUS --- */}
             <TokenGrid title="Component Geometry (Radius)" icon={Box} items={tokens.borderRadius} category="borderRadius" />
@@ -222,7 +222,7 @@ export const DesignThemeEditor: React.FC = () => {
                 <div className="flex gap-4 w-full md:w-auto">
                     <button 
                         onClick={handleReset}
-                        className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-2xl text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 active:scale-95 transition-all shadow-sm"
+                        className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 active:scale-95 transition-all shadow-sm"
                     >
                         <RotateCcw size={14}/> Factory Reset
                     </button>

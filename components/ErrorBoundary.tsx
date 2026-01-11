@@ -1,5 +1,4 @@
-
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -16,33 +15,30 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Using named Component import to resolve TypeScript resolution issues with property inheritance (state, props, setState)
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    // FIX: Correctly initializing state within the constructor
-    this.state = {
-      hasError: false,
-      error: undefined,
-    };
-  }
+// FIX: Explicitly using React.Component to ensure that 'state', 'props', and 'setState' are correctly inherited and recognized by the TypeScript compiler.
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // FIX: Using property initializer for state to avoid initialization issues in constructor.
+  public state: ErrorBoundaryState = {
+    hasError: false,
+    error: undefined,
+  };
 
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Correctly accessing inherited props
+    // FIX: Accessing props via 'this.props' as inherited from React.Component.
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   private handleRetry = () => {
-    // FIX: Correctly accessing inherited setState
+    // FIX: Using 'this.setState' as inherited from React.Component.
     this.setState({ hasError: false, error: undefined });
   };
 
   public render() {
-    // FIX: Correctly accessing inherited state
+    // FIX: Accessing state via 'this.state' as inherited from React.Component.
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -51,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* FIX: Correctly accessing inherited props */}
+            {/* FIX: Accessing props via 'this.props' as inherited from React.Component. */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -66,7 +62,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <div className="mt-12 w-full max-w-2xl text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Debug Intelligence Output</p>
                   <pre className="p-5 bg-slate-900 text-red-400 text-[10px] font-mono rounded-2xl border border-slate-800 overflow-auto shadow-2xl max-h-48 scrollbar-thin">
-                      {/* FIX: Correctly accessing inherited state */}
+                      {/* FIX: Accessing state via 'this.state' as inherited from React.Component. */}
                       {String(this.state.error)}
                   </pre>
               </div>
@@ -75,7 +71,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // FIX: Correctly accessing inherited props
+    {/* FIX: Accessing children via 'this.props.children' as inherited from React.Component. */}
     return this.props.children;
   }
 }

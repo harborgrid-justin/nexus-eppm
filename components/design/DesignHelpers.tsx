@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus } from 'lucide-react';
 
@@ -35,10 +34,13 @@ export const SectionHeading = ({ title, icon: Icon, count }: { title: string; ic
 );
 
 /**
- * Helper to display the required 'professional light grey fill' pattern in the design system showcase.
+ * Standardized empty state pattern for the enterprise platform.
+ * Provides the required professional light-grey fill and dotted background.
  */
-export const EmptyPatternDemo = ({ label = "Empty Context Pattern" }: { label?: string }) => (
-    <div className="w-full h-32 nexus-empty-pattern border border-slate-200 rounded-xl flex items-center justify-center">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{label}</span>
+export const EmptyPatternDemo = ({ label = "No Data Partitioned" }: { label?: string }) => (
+    <div className="w-full h-32 nexus-empty-pattern border border-slate-200 rounded-xl flex items-center justify-center relative group">
+        <div className="flex flex-col items-center gap-2">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">{label}</span>
+        </div>
     </div>
 );
