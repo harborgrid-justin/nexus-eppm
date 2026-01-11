@@ -1,52 +1,19 @@
 import React from 'react';
-import { 
-  Globe, PieChart, ShieldAlert, LayoutTemplate, Briefcase, 
-  Users, Settings, Database, CheckSquare, FileText, Calendar, Palette
-} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { NavGroup } from '../../types/ui';
 
 interface SidebarNavProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     onClose: () => void;
     isCollapsed?: boolean;
+    navStructure: NavGroup[];
 }
 
-const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab, onClose, isCollapsed }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ 
+    activeTab, setActiveTab, onClose, isCollapsed, navStructure 
+}) => {
     const theme = useTheme();
-
-    const navStructure = React.useMemo(() => [
-        {
-            id: 'strategy', 
-            label: 'Strategy', 
-            items: [
-                { id: 'portfolio', label: 'Portfolio', icon: Globe }, 
-                { id: 'programs', label: 'Programs', icon: PieChart },
-                { id: 'unifier', label: 'Unifier', icon: LayoutTemplate },
-                { id: 'enterpriseRisks', label: 'Global Risk', icon: ShieldAlert },
-            ]
-        },
-        {
-            id: 'execution',
-            label: 'Execution',
-            items: [
-                { id: 'projectList', label: 'Projects', icon: Briefcase },
-                { id: 'schedule', label: 'Schedule', icon: Calendar },
-                { id: 'resources', label: 'Resources', icon: Users },
-                { id: 'myWork', label: 'Work', icon: CheckSquare },
-                { id: 'reports', label: 'Reports', icon: FileText },
-            ]
-        },
-        {
-            id: 'config',
-            label: 'System',
-            items: [
-                { id: 'dataExchange', label: 'Exchange', icon: Database },
-                { id: 'admin', label: 'Admin', icon: Settings },
-                { id: 'design-system', label: 'Design', icon: Palette },
-            ]
-        }
-    ], []);
 
     return (
         <div className="space-y-6 px-0">
@@ -65,11 +32,11 @@ const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab, onClos
                                 }`}
                                 title={isCollapsed ? item.label : undefined}
                             >
-                                <item.icon size={18} className={activeTab === item.id ? 'text-nexus-400' : 'opacity-40 group-hover/item:opacity-100 transition-opacity'} />
+                                {item.icon && <item.icon size={18} className={activeTab === item.id ? 'text-nexus-400' : 'opacity-40 group-hover/item:opacity-100 transition-opacity'} />}
                                 {!isCollapsed && <span className="truncate">{item.label}</span>}
                                 
                                 {isCollapsed && (
-                                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover/item:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] shadow-xl border border-slate-700">
+                                    <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-[10px] font-bold rounded opacity-0 group-hover:item:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-[100] shadow-xl border border-slate-700">
                                         {item.label}
                                     </div>
                                 )}

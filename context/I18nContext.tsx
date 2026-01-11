@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Logger } from '../services/Logger';
 
@@ -22,6 +21,32 @@ const dictionaries: Record<string, Record<string, string>> = {
     'nav.data_exchange': 'Exchange',
     'nav.admin': 'Admin',
     'nav.design_system': 'Design System',
+    // Design System
+    'design.aside_title': 'Pattern Library',
+    'design.title': 'Nexus Design System',
+    'design.subtitle': 'Foundational atomic components and enterprise patterns for the PPM workspace.',
+    'design.cat.intro': 'Framework Overview',
+    'design.cat.theme': 'Theme Variables',
+    'design.cat.colors': 'Color Variables',
+    'design.cat.typography': 'Typography',
+    'design.cat.layouts': 'Structural Layouts',
+    'design.cat.cards': 'Container Patterns',
+    'design.cat.inputs': 'Data Input Controls',
+    'design.cat.controls': 'Buttons & Triggers',
+    'design.cat.datagrid': 'Grids & Tables',
+    'design.cat.feedback': 'State & Feedback',
+    'design.cat.navigation': 'Global Navigation',
+    'design.cat.documents': 'DMS Interface',
+    'design.cat.docediting': 'Rich Text Editor',
+    'design.cat.datamgmt': 'ETL & Ingestion',
+    'design.cat.dragdrop': 'Gestures & Drag',
+    'design.cat.visuals': 'Chart Foundations',
+    'design.cat.calendar': 'Planning Calendar',
+    'design.cat.timeline': 'History & Feeds',
+    'design.cat.pm': 'CPM & Scheduling',
+    'design.cat.workflow': 'Automation Engine',
+    'design.cat.finance': 'Fiscal Patterns',
+    'design.cat.legal': 'Regulatory Layouts',
     // Common
     'common.project': 'Project',
     'common.save': 'Save Changes',
@@ -61,6 +86,7 @@ const dictionaries: Record<string, Record<string, string>> = {
     'nav.reports': 'Informes',
     'nav.data_exchange': 'Intercambio',
     'nav.admin': 'Admin',
+    'nav.design_system': 'Sistema de Diseño',
     // Common
     'common.project': 'Proyecto',
     'common.save': 'Guardar Cambios',

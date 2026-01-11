@@ -1,15 +1,17 @@
-
 import React, { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
 import UserProfile from './user/UserProfile';
 import { SidebarHeader } from './sidebar/SidebarHeader';
-// FIX: Changed SidebarNav from named import to default import
 import SidebarNav from './sidebar/SidebarNav';
 import { SidebarPinned } from './sidebar/SidebarPinned';
 import { SidebarFooter } from './sidebar/SidebarFooter';
 import { useTheme } from '../context/ThemeContext';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { 
+    PanelLeftClose, PanelLeftOpen, Globe, PieChart, LayoutTemplate, 
+    ShieldAlert, Briefcase, Users, CheckSquare, FileText, Database, 
+    Settings, Palette 
+} from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
 interface SidebarProps {
@@ -37,26 +39,27 @@ const Sidebar: React.FC<SidebarProps> = ({
         {
             id: 'strategy', label: t('nav.strategy', 'Strategy'), 
             items: [
-                { id: 'portfolio', label: t('nav.portfolio', 'Portfolio'), icon: 'Globe', permission: 'project:read' }, 
-                { id: 'programs', label: t('nav.programs', 'Programs'), icon: 'PieChart', permission: 'project:read' },
-                { id: 'unifier', label: t('nav.unifier', 'Unifier'), icon: 'LayoutTemplate', permission: 'financials:read' },
-                { id: 'enterpriseRisks', label: t('nav.enterpriseRisks', 'Global Risk'), icon: 'ShieldAlert', permission: 'project:read' },
+                { id: 'portfolio', label: t('nav.portfolio', 'Portfolio'), icon: Globe, permission: 'project:read' }, 
+                { id: 'programs', label: t('nav.programs', 'Programs'), icon: PieChart, permission: 'project:read' },
+                { id: 'unifier', label: t('nav.unifier', 'Unifier'), icon: LayoutTemplate, permission: 'financials:read' },
+                { id: 'enterpriseRisks', label: t('nav.enterpriseRisks', 'Global Risk'), icon: ShieldAlert, permission: 'project:read' },
             ]
         },
         {
             id: 'execution', label: t('nav.execution', 'Execution'),
             items: [
-                { id: 'projectList', label: t('nav.projects', 'Projects'), icon: 'Briefcase', permission: 'project:read' },
-                { id: 'resources', label: t('nav.resources', 'Resources'), icon: 'Users', permission: 'resource:read' },
-                { id: 'myWork', label: t('nav.myWork', 'Work'), icon: 'CheckSquare', permission: 'app:access' },
-                { id: 'reports', label: t('nav.reports', 'Reports'), icon: 'FileText', permission: 'project:read' },
+                { id: 'projectList', label: t('nav.projects', 'Projects'), icon: Briefcase, permission: 'project:read' },
+                { id: 'resources', label: t('nav.resources', 'Resources'), icon: Users, permission: 'resource:read' },
+                { id: 'myWork', label: t('nav.myWork', 'Work'), icon: CheckSquare, permission: 'app:access' },
+                { id: 'reports', label: t('nav.reports', 'Reports'), icon: FileText, permission: 'project:read' },
             ]
         },
         {
             id: 'config', label: t('nav.system', 'System'),
             items: [
-                { id: 'dataExchange', label: t('nav.data_exchange', 'Exchange'), icon: 'Database', permission: 'system:configure' },
-                { id: 'admin', label: t('nav.admin', 'Admin'), icon: 'Settings', permission: 'admin:access' },
+                { id: 'dataExchange', label: t('nav.data_exchange', 'Exchange'), icon: Database, permission: 'system:configure' },
+                { id: 'admin', label: t('nav.admin', 'Admin'), icon: Settings, permission: 'admin:access' },
+                { id: 'design-system', label: t('nav.design_system', 'Design System'), icon: Palette, permission: 'app:access' },
             ]
         }
     ];

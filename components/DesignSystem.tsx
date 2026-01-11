@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { PageHeader } from './common/PageHeader';
+import { useI18n } from '../context/I18nContext';
 
 import { DesignIntro } from './design/DesignIntro';
 import { DesignColors } from './design/DesignColors';
@@ -33,32 +34,33 @@ import { DesignLegal } from './design/DesignLegal';
 import { DesignThemeEditor } from './design/DesignThemeEditor';
 
 const CATEGORIES = [
-  { id: 'intro', label: 'Framework Overview', icon: Sparkles, component: DesignIntro },
-  { id: 'theme', label: 'Theme Variables', icon: Settings2, component: DesignThemeEditor },
-  { id: 'colors', label: 'Color Variables', icon: Palette, component: DesignColors },
-  { id: 'typography', label: 'Typography', icon: Type, component: DesignTypography },
-  { id: 'layouts', label: 'Structural Layouts', icon: LayoutTemplate, component: DesignLayouts },
-  { id: 'cards', label: 'Container Patterns', icon: Box, component: DesignCards },
-  { id: 'inputs', label: 'Data Input Controls', icon: FileText, component: DesignInputs },
-  { id: 'controls', label: 'Buttons & Triggers', icon: Zap, component: DesignControls },
-  { id: 'datagrid', label: 'Grids & Tables', icon: Table, component: DesignDataGrid },
-  { id: 'feedback', label: 'State & Feedback', icon: AlertTriangle, component: DesignFeedback },
-  { id: 'navigation', label: 'Global Navigation', icon: Map, component: DesignNavigation },
-  { id: 'documents', label: 'DMS Interface', icon: Folder, component: DesignDocuments },
-  { id: 'docediting', label: 'Rich Text Editor', icon: PenTool, component: DesignDocEditing },
-  { id: 'datamgmt', label: 'ETL & Ingestion', icon: Database, component: DesignDataManagement },
-  { id: 'dragdrop', label: 'Gestures & Drag', icon: Move, component: DesignDragDrop },
-  { id: 'visuals', label: 'Chart Foundations', icon: BarChart3, component: DesignVisualizations },
-  { id: 'calendar', label: 'Planning Calendar', icon: Calendar, component: DesignCalendar },
-  { id: 'timeline', label: 'History & Feeds', icon: Clock, component: DesignTimeline },
-  { id: 'pm', label: 'CPM & Scheduling', icon: ClipboardList, component: DesignProjectManagement },
-  { id: 'workflow', label: 'Automation Engine', icon: GitBranch, component: DesignWorkflow },
-  { id: 'finance', label: 'Fiscal Patterns', icon: DollarSign, component: DesignFinance },
-  { id: 'legal', label: 'Regulatory Layouts', icon: Scale, component: DesignLegal },
+  { id: 'intro', key: 'design.cat.intro', icon: Sparkles, component: DesignIntro },
+  { id: 'theme', key: 'design.cat.theme', icon: Settings2, component: DesignThemeEditor },
+  { id: 'colors', key: 'design.cat.colors', icon: Palette, component: DesignColors },
+  { id: 'typography', key: 'design.cat.typography', icon: Type, component: DesignTypography },
+  { id: 'layouts', key: 'design.cat.layouts', icon: LayoutTemplate, component: DesignLayouts },
+  { id: 'cards', key: 'design.cat.cards', icon: Box, component: DesignCards },
+  { id: 'inputs', key: 'design.cat.inputs', icon: FileText, component: DesignInputs },
+  { id: 'controls', key: 'design.cat.controls', icon: Zap, component: DesignControls },
+  { id: 'datagrid', key: 'design.cat.datagrid', icon: Table, component: DesignDataGrid },
+  { id: 'feedback', key: 'design.cat.feedback', icon: AlertTriangle, component: DesignFeedback },
+  { id: 'navigation', key: 'design.cat.navigation', icon: Map, component: DesignNavigation },
+  { id: 'documents', key: 'design.cat.documents', icon: Folder, component: DesignDocuments },
+  { id: 'docediting', key: 'design.cat.docediting', icon: PenTool, component: DesignDocEditing },
+  { id: 'datamgmt', key: 'design.cat.datamgmt', icon: Database, component: DesignDataManagement },
+  { id: 'dragdrop', key: 'design.cat.dragdrop', icon: Move, component: DesignDragDrop },
+  { id: 'visuals', key: 'design.cat.visuals', icon: BarChart3, component: DesignVisualizations },
+  { id: 'calendar', key: 'design.cat.calendar', icon: Calendar, component: DesignCalendar },
+  { id: 'timeline', key: 'design.cat.timeline', icon: Clock, component: DesignTimeline },
+  { id: 'pm', key: 'design.cat.pm', icon: ClipboardList, component: DesignProjectManagement },
+  { id: 'workflow', key: 'design.cat.workflow', icon: GitBranch, component: DesignWorkflow },
+  { id: 'finance', key: 'design.cat.finance', icon: DollarSign, component: DesignFinance },
+  { id: 'legal', key: 'design.cat.legal', icon: Scale, component: DesignLegal },
 ];
 
 const DesignSystem: React.FC = () => {
   const theme = useTheme();
+  const { t } = useI18n();
   const [activeComponentId, setActiveComponentId] = useState('intro');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -67,8 +69,8 @@ const DesignSystem: React.FC = () => {
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full flex flex-col`}>
       <PageHeader 
-        title="Nexus Design System" 
-        subtitle="Foundational atomic components and enterprise patterns for the PPM workspace."
+        title={t('design.title', 'Nexus Design System')} 
+        subtitle={t('design.subtitle', 'Foundational atomic components and enterprise patterns for the PPM workspace.')}
         icon={Palette}
         actions={
           <button 
@@ -102,7 +104,7 @@ const DesignSystem: React.FC = () => {
           >
             <div className="p-5 border-b border-slate-200 bg-white flex justify-between items-center shrink-0">
               <h2 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
-                <Box size={14} className="text-nexus-600" /> Pattern Library
+                <Box size={14} className="text-nexus-600" /> {t('design.aside_title', 'Pattern Library')}
               </h2>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)} 
@@ -115,6 +117,7 @@ const DesignSystem: React.FC = () => {
             <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 scrollbar-thin">
               {CATEGORIES.map(category => {
                 const isActive = activeComponentId === category.id;
+                const label = t(category.key, category.id);
                 return (
                   <button
                     key={category.id}
@@ -131,7 +134,7 @@ const DesignSystem: React.FC = () => {
                     `}
                   >
                     <category.icon size={18} className={`shrink-0 ${isActive ? 'text-nexus-600' : 'opacity-40'}`} />
-                    <span className="truncate flex-1 text-left">{category.label}</span>
+                    <span className="truncate flex-1 text-left">{label}</span>
                     {isActive && <ChevronRight size={14} className="text-nexus-400" />}
                   </button>
                 );

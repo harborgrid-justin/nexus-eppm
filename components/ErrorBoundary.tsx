@@ -1,4 +1,5 @@
-import React, { ErrorInfo, ReactNode } from 'react';
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -15,8 +16,8 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Explicitly using React.Component to ensure that 'state', 'props', and 'setState' are correctly inherited and recognized by the TypeScript compiler.
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// FIX: Explicitly importing and using Component to ensure that 'state', 'props', and 'setState' are correctly inherited and recognized by the TypeScript compiler.
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   // FIX: Using property initializer for state to avoid initialization issues in constructor.
   public state: ErrorBoundaryState = {
     hasError: false,
@@ -28,17 +29,17 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Accessing props via 'this.props' as inherited from React.Component.
+    // FIX: Accessing props via 'this.props' as inherited from Component.
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  private handleRetry = () => {
-    // FIX: Using 'this.setState' as inherited from React.Component.
+  public handleRetry = () => {
+    // FIX: Using 'this.setState' as inherited from Component.
     this.setState({ hasError: false, error: undefined });
   };
 
   public render() {
-    // FIX: Accessing state via 'this.state' as inherited from React.Component.
+    // FIX: Accessing state via 'this.state' as inherited from Component.
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -47,7 +48,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* FIX: Accessing props via 'this.props' as inherited from React.Component. */}
+            {/* FIX: Accessing props via 'this.props' as inherited from Component. */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -62,7 +63,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="mt-12 w-full max-w-2xl text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Debug Intelligence Output</p>
                   <pre className="p-5 bg-slate-900 text-red-400 text-[10px] font-mono rounded-2xl border border-slate-800 overflow-auto shadow-2xl max-h-48 scrollbar-thin">
-                      {/* FIX: Accessing state via 'this.state' as inherited from React.Component. */}
+                      {/* FIX: Accessing state via 'this.state' as inherited from Component. */}
                       {String(this.state.error)}
                   </pre>
               </div>
@@ -71,7 +72,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
-    {/* FIX: Accessing children via 'this.props.children' as inherited from React.Component. */}
+    {/* FIX: Accessing children via 'this.props.children' as inherited from Component. */}
     return this.props.children;
   }
 }
