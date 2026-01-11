@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { 
   LayoutTemplate, PanelLeftClose, PanelLeftOpen, Maximize2, Minimize2, 
   Menu, Search, Bell, User, Settings, ChevronRight, MoreHorizontal, 
-  Plus, Filter, Download, Upload, Calendar, Grid, List, CheckSquare
+  Plus, Filter, Download, Upload, Calendar, Grid, List, CheckSquare,
+  ArrowLeft, Sidebar as SidebarIcon, Columns, Monitor, Smartphone, Tablet
 } from 'lucide-react';
 import { SectionHeading, DemoContainer, ComponentLabel } from './DesignHelpers';
 
@@ -66,6 +68,39 @@ export const DesignLayouts = () => {
                         </div>
                     </div>
                 </DemoContainer>
+
+                <DemoContainer>
+                    <ComponentLabel id="LO-30" name="Top Nav Only" />
+                    <div className="h-32 border border-slate-200 rounded flex flex-col bg-white">
+                        <div className="h-8 bg-slate-900 w-full flex items-center px-4 justify-between">
+                            <div className="h-2 w-6 bg-slate-600 rounded"></div>
+                            <div className="flex gap-2"><div className="h-2 w-4 bg-slate-600 rounded"></div><div className="h-2 w-4 bg-slate-600 rounded"></div></div>
+                        </div>
+                        <div className="flex-1 bg-slate-50 p-2">
+                            <div className="h-full bg-white border border-slate-200 rounded"></div>
+                        </div>
+                    </div>
+                </DemoContainer>
+
+                <DemoContainer>
+                    <ComponentLabel id="LO-31" name="Double Sidebar" />
+                    <div className="h-32 border border-slate-200 rounded flex overflow-hidden bg-white">
+                        <div className="w-6 bg-slate-900 h-full flex flex-col items-center pt-2 gap-1">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        </div>
+                        <div className="w-12 bg-slate-100 h-full border-r border-slate-200"></div>
+                        <div className="flex-1 bg-white p-2"></div>
+                    </div>
+                </DemoContainer>
+
+                <DemoContainer>
+                    <ComponentLabel id="LO-32" name="Stacked Headers" />
+                    <div className="h-32 border border-slate-200 rounded flex flex-col bg-white">
+                        <div className="h-6 bg-slate-900 w-full"></div>
+                        <div className="h-6 bg-white border-b border-slate-200 w-full flex items-center px-2"><div className="h-1 w-20 bg-slate-200 rounded"></div></div>
+                        <div className="flex-1 bg-slate-50 p-2"></div>
+                    </div>
+                </DemoContainer>
             </div>
         </div>
 
@@ -111,6 +146,32 @@ export const DesignLayouts = () => {
                                  <div className="h-2 w-2/3 bg-green-100 rounded"></div>
                              </div>
                         </div>
+                    </div>
+                </DemoContainer>
+
+                <DemoContainer>
+                    <ComponentLabel id="LO-45" name="Preview Pane Bottom" />
+                    <div className="h-32 border border-slate-200 rounded flex flex-col overflow-hidden bg-white">
+                        <div className="flex-1 bg-white p-2"></div>
+                        <div className="h-12 bg-slate-50 border-t border-slate-200 p-1">
+                            <div className="h-full bg-white border border-dashed border-slate-300 rounded flex items-center justify-center text-[8px] text-slate-400">Preview</div>
+                        </div>
+                    </div>
+                </DemoContainer>
+
+                <DemoContainer>
+                    <ComponentLabel id="LO-46" name="3-Pane Horizontal" />
+                    <div className="h-32 border border-slate-200 rounded flex overflow-hidden bg-white">
+                        <div className="w-1/4 bg-slate-50 border-r border-slate-200"></div>
+                        <div className="w-1/4 bg-slate-50 border-r border-slate-200"></div>
+                        <div className="flex-1 bg-white"></div>
+                    </div>
+                </DemoContainer>
+
+                 <DemoContainer>
+                    <ComponentLabel id="LO-47" name="Card Grid Layout" />
+                    <div className="h-32 border border-slate-200 rounded bg-slate-50 p-2 grid grid-cols-3 gap-2 overflow-hidden">
+                        {[1,2,3,4,5,6].map(i => <div key={i} className="bg-white rounded border border-slate-200"></div>)}
                     </div>
                 </DemoContainer>
             </div>

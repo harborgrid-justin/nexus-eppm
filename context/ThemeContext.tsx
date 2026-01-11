@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useMemo, ReactNode, useEffect } from 'react';
 import { DEFAULT_TOKENS, ThemeDensity, DesignTokens } from './theme/ThemeDefaults';
 
@@ -26,16 +27,20 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const toggleDark = () => setIsDark(!isDark);
 
   const activeColors = useMemo(() => {
-    return isDark 
-      ? { 
-          ...tokens.colors, 
-          background: '#020617', 
-          surface: '#0f172a', 
-          text: '#e2e8f0', 
-          border: '#1e293b',
-          borderLight: '#0f172a'
-        } 
-      : tokens.colors;
+    if (!isDark) return tokens.colors;
+    
+    return { 
+      ...tokens.colors, 
+      background: '#020617', 
+      surface: '#0f172a', 
+      surfaceMuted: '#1e293b',
+      text: '#f8fafc', 
+      textSecondary: '#94a3b8',
+      textMuted: '#64748b',
+      border: '#1e293b',
+      borderSubtle: '#0f172a',
+      borderStrong: '#334155'
+    };
   }, [isDark, tokens]);
 
   const themeValue = useMemo(() => {
@@ -92,9 +97,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         label: 'text-xs font-bold uppercase tracking-wider text-text-secondary' 
       },
       charts: { 
-        grid: isDark ? '#1e293b' : '#e2e8f0', 
+        grid: isDark ? tokens.charts.grid : '#e2e8f0', 
         tooltip: { backgroundColor: isDark ? '#0f172a' : '#fff', borderColor: isDark ? '#1e293b' : '#e2e8f0' }, 
-        palette: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'] 
+        palette: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#06b6d4', '#84cc16', '#6366f1', '#d946ef', '#f43f5e'] 
       }
     };
   }, [activeColors, density, isDark, tokens]);
@@ -109,12 +114,30 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Inject Color Variables
     Object.entries(activeColors).forEach(([k, v]) => root.style.setProperty(`--color-${k}`, v as string));
     
+    // Inject Layout Variables
+    Object.entries(tokens.layout).forEach(([k, v]) => root.style.setProperty(`--layout-${k}`, v as string));
+    
     // Inject Border Radius Variables
     Object.entries(tokens.borderRadius).forEach(([k, v]) => root.style.setProperty(`--radius-${k}`, v as string));
+
+    // Inject Z-Index Variables
+    Object.entries(tokens.zIndex).forEach(([k, v]) => root.style.setProperty(`--z-${k}`, v as string));
+
+    // Inject Transition Variables
+    Object.entries(tokens.transitions).forEach(([k, v]) => root.style.setProperty(`--transition-${k}`, v as string));
+
+    // Inject Chart Variables
+    Object.entries(tokens.charts).forEach(([k, v]) => root.style.setProperty(`--chart-${k}`, v as string));
     
     // Inject Typography Variables
     root.style.setProperty('--font-sans', tokens.typography.fontSans);
+    root.style.setProperty('--font-display', tokens.typography.fontDisplay);
     root.style.setProperty('--font-mono', tokens.typography.fontMono);
+    root.style.setProperty('--lh-base', tokens.typography.lineHeightBase);
+    root.style.setProperty('--lh-tight', tokens.typography.lineHeightTight);
+    root.style.setProperty('--ls-tight', tokens.typography.letterSpacingTight);
+    root.style.setProperty('--ls-wide', tokens.typography.letterSpacingWide);
+
   }, [activeColors, density, tokens]);
 
   return (

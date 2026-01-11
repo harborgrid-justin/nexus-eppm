@@ -2,45 +2,65 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Logger } from '../services/Logger';
 
-// Mock Dictionary - In a real app, these would be separate JSON files loaded lazily
+// Mock Dictionary - Extended with full navigation and system labels for production use
 const dictionaries: Record<string, Record<string, string>> = {
   'en-US': {
     'app.title': 'Nexus PPM',
-    // Navigation
-    'nav.core_modules': 'Core Modules',
-    'nav.installed_engines': 'Installed Engines',
-    'nav.administration': 'Administration',
+    // Navigation Groups
+    'nav.strategy': 'Strategy',
+    'nav.execution': 'Execution',
+    'nav.system': 'System',
+    // Navigation Items
     'nav.portfolio': 'Portfolio',
     'nav.programs': 'Programs',
+    'nav.unifier': 'Unifier',
+    'nav.enterpriseRisks': 'Global Risk',
     'nav.projects': 'Projects',
-    'nav.data_exchange': 'Data Exchange',
-    'nav.marketplace': 'App Marketplace',
-    'nav.integrations': 'Integration Hub',
-    'nav.settings': 'Settings',
-    'nav.workbench': 'Component Workbench',
+    'nav.resources': 'Resources',
+    'nav.myWork': 'Work',
+    'nav.reports': 'Reports',
+    'nav.data_exchange': 'Exchange',
+    'nav.admin': 'Admin',
+    'nav.design_system': 'Design System',
     // Common
     'common.project': 'Project',
     'common.save': 'Save Changes',
     'common.cancel': 'Cancel',
     'common.loading': 'Loading...',
     'common.welcome': 'Welcome back',
+    'common.back_to_portfolio': 'Back to Portfolio',
+    'common.close': 'Close',
+    'common.analyzing': 'Synthesizing Executive Summary...',
+    'common.analyzing_short': 'Analyzing...',
+    'common.loading_context': 'Mounting Context...',
     'status.active': 'Active',
     'status.closed': 'Closed',
+    // Module Specific
+    'dashboard.title': 'Executive Portfolio Overview',
+    'dashboard.subtitle': 'Consolidated KPIs for organizational investment and delivery.',
+    'dashboard.ai_briefing': 'AI Briefing',
+    'dashboard.ai_brief': 'Executive AI Briefing',
+    'portfolio.provision': 'Provision Portfolio',
+    'portfolio.not_init': 'Portfolio Inactive',
+    'portfolio.not_init_desc': 'The organizational executive layer requires a defined Enterprise Project Structure (EPS) and active programs. Provision a strategic portfolio to activate predictive analytics.',
   },
   'es-ES': {
     'app.title': 'Nexus PPM',
-    // Navigation
-    'nav.core_modules': 'Módulos Principales',
-    'nav.installed_engines': 'Motores Instalados',
-    'nav.administration': 'Administración',
+    // Navigation Groups
+    'nav.strategy': 'Estrategia',
+    'nav.execution': 'Ejecución',
+    'nav.system': 'Sistema',
+    // Navigation Items
     'nav.portfolio': 'Portafolio',
     'nav.programs': 'Programas',
+    'nav.unifier': 'Unifier',
+    'nav.enterpriseRisks': 'Riesgo Global',
     'nav.projects': 'Proyectos',
-    'nav.data_exchange': 'Intercambio de Datos',
-    'nav.marketplace': 'Mercado de Aplicaciones',
-    'nav.integrations': 'Centro de Integración',
-    'nav.settings': 'Configuración',
-    'nav.workbench': 'Banco de Componentes',
+    'nav.resources': 'Recursos',
+    'nav.myWork': 'Trabajo',
+    'nav.reports': 'Informes',
+    'nav.data_exchange': 'Intercambio',
+    'nav.admin': 'Admin',
     // Common
     'common.project': 'Proyecto',
     'common.save': 'Guardar Cambios',

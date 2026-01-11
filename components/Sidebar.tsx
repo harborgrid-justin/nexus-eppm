@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -9,6 +10,7 @@ import { SidebarPinned } from './sidebar/SidebarPinned';
 import { SidebarFooter } from './sidebar/SidebarFooter';
 import { useTheme } from '../context/ThemeContext';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useI18n } from '../context/I18nContext';
 
 interface SidebarProps {
   activeTab: string;
@@ -25,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { user, logout } = useAuth();
   const { hasPermission } = usePermissions();
   const theme = useTheme();
+  const { t } = useI18n();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
   const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
@@ -32,28 +35,28 @@ const Sidebar: React.FC<SidebarProps> = ({
   const filteredNavStructure = useMemo(() => {
     const structure = [
         {
-            id: 'strategy', label: 'Strategy', 
+            id: 'strategy', label: t('nav.strategy', 'Strategy'), 
             items: [
-                { id: 'portfolio', label: 'Portfolio', icon: 'Globe', permission: 'project:read' }, 
-                { id: 'programs', label: 'Programs', icon: 'PieChart', permission: 'project:read' },
-                { id: 'unifier', label: 'Unifier', icon: 'LayoutTemplate', permission: 'financials:read' },
-                { id: 'enterpriseRisks', label: 'Global Risk', icon: 'ShieldAlert', permission: 'project:read' },
+                { id: 'portfolio', label: t('nav.portfolio', 'Portfolio'), icon: 'Globe', permission: 'project:read' }, 
+                { id: 'programs', label: t('nav.programs', 'Programs'), icon: 'PieChart', permission: 'project:read' },
+                { id: 'unifier', label: t('nav.unifier', 'Unifier'), icon: 'LayoutTemplate', permission: 'financials:read' },
+                { id: 'enterpriseRisks', label: t('nav.enterpriseRisks', 'Global Risk'), icon: 'ShieldAlert', permission: 'project:read' },
             ]
         },
         {
-            id: 'execution', label: 'Execution',
+            id: 'execution', label: t('nav.execution', 'Execution'),
             items: [
-                { id: 'projectList', label: 'Projects', icon: 'Briefcase', permission: 'project:read' },
-                { id: 'resources', label: 'Resources', icon: 'Users', permission: 'resource:read' },
-                { id: 'myWork', label: 'Work', icon: 'CheckSquare', permission: 'app:access' },
-                { id: 'reports', label: 'Reports', icon: 'FileText', permission: 'project:read' },
+                { id: 'projectList', label: t('nav.projects', 'Projects'), icon: 'Briefcase', permission: 'project:read' },
+                { id: 'resources', label: t('nav.resources', 'Resources'), icon: 'Users', permission: 'resource:read' },
+                { id: 'myWork', label: t('nav.myWork', 'Work'), icon: 'CheckSquare', permission: 'app:access' },
+                { id: 'reports', label: t('nav.reports', 'Reports'), icon: 'FileText', permission: 'project:read' },
             ]
         },
         {
-            id: 'config', label: 'System',
+            id: 'config', label: t('nav.system', 'System'),
             items: [
-                { id: 'dataExchange', label: 'Exchange', icon: 'Database', permission: 'system:configure' },
-                { id: 'admin', label: 'Admin', icon: 'Settings', permission: 'admin:access' },
+                { id: 'dataExchange', label: t('nav.data_exchange', 'Exchange'), icon: 'Database', permission: 'system:configure' },
+                { id: 'admin', label: t('nav.admin', 'Admin'), icon: 'Settings', permission: 'admin:access' },
             ]
         }
     ];
@@ -62,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         ...group,
         items: group.items.filter(item => hasPermission(item.permission as any))
     })).filter(group => group.items.length > 0);
-  }, [hasPermission]);
+  }, [hasPermission, t]);
 
   return (
     <>

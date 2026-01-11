@@ -16,34 +16,33 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Explicitly extending React.Component to resolve member visibility errors (state, props, setState)
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // FIX: Properly initialize state within constructor to resolve "Property 'state' does not exist" error
+// FIX: Using named Component import to resolve TypeScript resolution issues with property inheritance (state, props, setState)
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    // FIX: Correctly initializing state within the constructor
     this.state = {
       hasError: false,
       error: undefined,
     };
   }
 
-  // FIX: Implement standard React lifecycle method for error state derivation
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  // FIX: Correctly accessing this.props via the generic class to resolve "Property 'props' does not exist" error
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // FIX: Correctly accessing inherited props
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // FIX: Correctly access this.setState to resolve "Property 'setState' does not exist" error
-  public handleRetry = () => {
+  private handleRetry = () => {
+    // FIX: Correctly accessing inherited setState
     this.setState({ hasError: false, error: undefined });
   };
 
-  // FIX: Completed the render method with a professional fallback UI including a grey-fill pattern for empty context
   public render() {
+    // FIX: Correctly accessing inherited state
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -52,6 +51,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
+            {/* FIX: Correctly accessing inherited props */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -66,6 +66,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               <div className="mt-12 w-full max-w-2xl text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Debug Intelligence Output</p>
                   <pre className="p-5 bg-slate-900 text-red-400 text-[10px] font-mono rounded-2xl border border-slate-800 overflow-auto shadow-2xl max-h-48 scrollbar-thin">
+                      {/* FIX: Correctly accessing inherited state */}
                       {String(this.state.error)}
                   </pre>
               </div>
@@ -74,6 +75,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
+    // FIX: Correctly accessing inherited props
     return this.props.children;
   }
 }

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   FileText, Folder, Image, UploadCloud, Search, MoreVertical, 
@@ -19,7 +20,7 @@ export const DesignDocuments = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-        <SectionHeading title="DMS Interface" icon={Folder} count="DOC-01 to DOC-40" />
+        <SectionHeading title="DMS Interface" icon={Folder} count="DOC-01 to DOC-50" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* --- ICONS & THUMBNAILS --- */}
