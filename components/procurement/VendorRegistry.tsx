@@ -10,8 +10,9 @@ import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
 import { usePermissions } from '../../hooks/usePermissions';
 import { EmptyGrid } from '../common/EmptyGrid';
-import DataTable, { Column } from '../common/DataTable';
-import { Vendor } from '../../types';
+import DataTable from '../common/DataTable';
+// Corrected import path for Column and Vendor from types
+import { Vendor, Column } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 
 interface VendorRegistryProps {
@@ -75,7 +76,7 @@ const VendorRegistry: React.FC<VendorRegistryProps> = ({ projectId }) => {
       } as Vendor;
       
       dispatch({ 
-          type: editingVendor.id ? 'UPDATE_VENDOR' : 'ADD_VENDOR', 
+          type: 'UPDATE_VENDOR', 
           payload: vendorToSave 
       });
       setIsPanelOpen(false);

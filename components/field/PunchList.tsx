@@ -5,8 +5,8 @@ import { CheckSquare, Filter, Plus, MapPin, Camera, User, CheckCircle, Circle, S
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import DataTable, { Column } from '../common/DataTable';
-import { PunchItem } from '../../types';
+import DataTable from '../common/DataTable';
+import { PunchItem, Column } from '../../types';
 import { generateId } from '../../utils/formatters';
 
 const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {

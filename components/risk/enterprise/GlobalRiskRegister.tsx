@@ -2,7 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../../context/DataContext';
 import { useTheme } from '../../../context/ThemeContext';
-import DataTable, { Column } from '../../common/DataTable';
+import DataTable from '../../common/DataTable';
+// Corrected import path for Column and other types
+import { Column } from '../../../types';
 import { Badge } from '../../ui/Badge';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import { Filter, Search, Download } from 'lucide-react';
@@ -45,7 +47,7 @@ export const GlobalRiskRegister: React.FC = () => {
                 ...r,
                 context: 'Portfolio',
                 sourceName: 'Enterprise Portfolio',
-                financialImpact: 0 // Portfolio risks mock might typically lack this field or define it differently
+                financialImpact: 0 
             });
         });
 

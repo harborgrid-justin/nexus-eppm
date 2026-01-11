@@ -1,11 +1,11 @@
 
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Project } from '../../../types';
+import { Project, Column } from '../../../types';
 import { useData } from '../../../context/DataContext';
 import { StatusBadge } from '../../common/StatusBadge';
 import { ProgressBar } from '../../common/ProgressBar';
-import DataTable, { Column } from '../../common/DataTable';
+import DataTable from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
 import { GitBranch } from 'lucide-react';

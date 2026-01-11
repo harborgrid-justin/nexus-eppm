@@ -8,7 +8,8 @@ import { useTheme } from '../../../context/ThemeContext';
 import { useSchemaGapAnalysisLogic } from '../../../hooks/domain/useSchemaGapAnalysisLogic';
 import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
-import DataTable, { Column } from '../../common/DataTable';
+import DataTable from '../../common/DataTable';
+import { Column } from '../../../types';
 import { SidePanel } from '../../ui/SidePanel';
 
 export const SchemaGapAnalysis: React.FC = () => {

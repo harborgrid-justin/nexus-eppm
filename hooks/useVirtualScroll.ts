@@ -25,20 +25,14 @@ export const useVirtualScroll = (
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // Optimized Scroll Handler using RAF (Principle 12)
   const onScroll = (newScrollTop: number) => {
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-    }
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
     rafRef.current = requestAnimationFrame(() => {
       setScrollTop(newScrollTop);
       setIsScrolling(true);
       
-      // Debounce scrolling state end
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
       scrollTimeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
       }, 150);
@@ -52,16 +46,12 @@ export const useVirtualScroll = (
     };
   }, []);
 
-  // Calculate visible range
-  const { virtualItems, startIndex, endIndex } = useMemo(() => {
+  const { virtualItems } = useMemo(() => {
     const startNode = Math.floor(scrollTop / itemHeight);
     const visibleNodeCount = Math.ceil(containerHeight / itemHeight);
     
     const startIndex = Math.max(0, startNode - buffer);
-    const endIndex = Math.min(
-      totalItems - 1,
-      startNode + visibleNodeCount + buffer
-    );
+    const endIndex = Math.min(totalItems - 1, startNode + visibleNodeCount + buffer);
 
     const items = [];
     for (let i = startIndex; i <= endIndex; i++) {
@@ -71,15 +61,10 @@ export const useVirtualScroll = (
       });
     }
 
-    return { virtualItems: items, startIndex, endIndex };
+    return { virtualItems: items };
   }, [scrollTop, totalItems, itemHeight, containerHeight, buffer]);
 
   const totalHeight = totalItems * itemHeight;
 
-  return {
-    virtualItems,
-    totalHeight,
-    isScrolling,
-    onScroll
-  };
+  return { virtualItems, totalHeight, isScrolling, onScroll };
 };

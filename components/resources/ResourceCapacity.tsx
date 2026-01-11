@@ -2,9 +2,10 @@
 import React, { useMemo, useState, useEffect, useDeferredValue } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import { useTheme } from '../../context/ThemeContext';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ResourceCapacityProps {
   projectResources: Resource[] | undefined;
@@ -13,22 +14,16 @@ interface ResourceCapacityProps {
 const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources }) => {
   const { state } = useData();
   const theme = useTheme();
-  const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const [currentYear] = useState(() => new Date().getFullYear());
   
-  // Pattern 18: useDeferredValue for the intensive heatmap computation
   const deferredResources = useDeferredValue(projectResources);
   const isStale = projectResources !== deferredResources;
 
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
-  
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const allocationData = useMemo(() => {
       const data: Record<string, number[]> = {};
-      // Ensure we operate on the deferred value to keep UI responsive
-      if (!deferredResources || !currentYear) return {};
+      if (!deferredResources) return {};
 
       deferredResources.forEach(res => {
           data[res.id] = new Array(12).fill(0);
@@ -57,71 +52,61 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
   }, [deferredResources, state.projects, currentYear]);
 
   const getCellColor = (percentage: number) => {
-    if (percentage === 0) return `${theme.colors.surface} ${theme.colors.text.tertiary}`;
-    if (percentage < 80) return `${theme.colors.semantic.success.bg} ${theme.colors.semantic.success.text}`;
-    if (percentage <= 100) return `${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.text}`;
-    return `${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.text} font-bold`;
+    if (percentage === 0) return 'bg-slate-50 text-slate-300';
+    if (percentage < 80) return 'bg-green-50 text-green-700';
+    if (percentage <= 100) return 'bg-blue-50 text-blue-700';
+    return 'bg-red-100 text-red-700 font-bold';
   };
-  
-  // Skeleton Loading State (Principle 1: Zero Layout Shift)
-  if (!deferredResources || !currentYear) {
+
+  if (!projectResources) {
       return (
-          <div className="h-full flex flex-col">
-              <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}/50`}>
-                  <Skeleton width={200} height={20} />
-                  <Skeleton width={150} height={20} />
-              </div>
-              <div className="flex-1 p-4 overflow-hidden">
-                   {/* Table Header Skeleton */}
-                   <div className="flex mb-4 gap-2">
-                       <Skeleton width={250} height={32} />
-                       {[...Array(12)].map((_, i) => <Skeleton key={i} className="flex-1" height={32} />)}
-                   </div>
-                   {/* Table Rows Skeleton */}
-                   {[...Array(10)].map((_, i) => (
-                       <div key={i} className="flex mb-2 gap-2">
-                           <Skeleton width={250} height={40} />
-                           {[...Array(12)].map((_, j) => <Skeleton key={j} className="flex-1" height={40} variant="rect"/>)}
-                       </div>
-                   ))}
-              </div>
+          <div className="h-full flex flex-col p-6 space-y-6">
+              <Skeleton height={100} />
+              <Skeleton height={400} />
           </div>
       );
   }
 
+  if (projectResources.length === 0) {
+      return (
+          <EmptyGrid 
+            title="Capacity Model Empty" 
+            description="No active resources found. Assign resources to project tasks to visualize the demand heatmap."
+            icon={Loader2}
+            actionLabel="Provision Resource"
+            onAdd={() => {}}
+          />
+      );
+  }
+
   return (
-    <div className={`h-full flex flex-col transition-opacity duration-300 ${isStale ? 'opacity-60' : 'opacity-100'}`}>
-      <div className={`p-4 border-b ${theme.colors.border} flex-shrink-0 flex items-center justify-between ${theme.colors.background}/50`}>
-        <h3 className={`font-bold ${theme.colors.text.primary} text-sm`}>Resource Allocation Index ({currentYear})</h3>
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-tighter">
-          {isStale && <span className="text-nexus-600 animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin"/> Recalculating Matrix...</span>}
-          <div className="flex gap-2">
-            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.success.bg} border rounded`}></div> Under</span>
-            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.info.bg} border rounded`}></div> Optimal</span>
-            <span className="flex items-center gap-1"><div className={`w-2.5 h-2.5 ${theme.colors.semantic.danger.bg} border rounded`}></div> Over</span>
-          </div>
+    <div className={`h-full flex flex-col transition-opacity duration-300 ${isStale ? 'opacity-40' : 'opacity-100'}`}>
+      <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50/50">
+        <div>
+            <h3 className="font-bold text-slate-800 text-sm">Enterprise Capacity Heatmap ({currentYear})</h3>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Real-time Allocation Matrix</p>
         </div>
+        {isStale && <div className="flex items-center gap-2 text-nexus-600 animate-pulse text-xs font-bold uppercase tracking-widest"><Loader2 size={12} className="animate-spin"/> Syncing Ledger...</div>}
       </div>
       <div className="overflow-auto flex-1 scrollbar-thin">
-        <div className="min-w-[800px]">
-            <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-            <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
+        <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
+            <thead className="bg-slate-50 sticky top-0 z-10">
                 <tr>
-                <th className={`px-6 py-3 text-left text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-widest ${theme.colors.background} border-b ${theme.colors.border} sticky left-0 z-20 w-64 shadow-[1px_0_0_0_#e2e8f0]`}>Entity Identity</th>
-                {months.map(m => <th key={m} className={`px-4 py-3 text-center text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest ${theme.colors.background} border-b ${theme.colors.border}`}>{m}</th>)}
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 sticky left-0 z-20 border-b w-64 shadow-[2px_0_0_0_#e2e8f0]">Identity</th>
+                    {months.map(m => <th key={m} className="px-4 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-b">{m}</th>)}
                 </tr>
             </thead>
-            <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+            <tbody className="divide-y divide-slate-100 bg-white">
                 {deferredResources.map(res => (
-                <tr key={res.id}>
-                    <td className={`px-6 py-4 whitespace-nowrap ${theme.colors.surface} border-r ${theme.colors.border} sticky left-0 z-10 font-bold text-sm ${theme.colors.text.primary} shadow-[1px_0_0_0_#f1f5f9]`}>
+                <tr key={res.id} className="hover:bg-slate-50/30">
+                    <td className="px-6 py-4 whitespace-nowrap bg-white sticky left-0 z-10 font-bold text-sm text-slate-800 shadow-[2px_0_0_0_#f1f5f9]">
                         {res.name}
                     </td>
                     {months.map((_, idx) => {
                         const alloc = allocationData[res.id]?.[idx] || 0;
                         return (
                             <td key={idx} className="p-1 h-12">
-                                <div className={`w-full h-full rounded flex items-center justify-center text-[11px] font-black transition-colors ${getCellColor(alloc)}`}>
+                                <div className={`w-full h-full rounded flex items-center justify-center text-[11px] font-black transition-all ${getCellColor(alloc)}`}>
                                     {alloc > 0 ? `${alloc}%` : '-'}
                                 </div>
                             </td>
@@ -130,8 +115,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
                 </tr>
                 ))}
             </tbody>
-            </table>
-        </div>
+        </table>
       </div>
     </div>
   );

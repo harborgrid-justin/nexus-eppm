@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState, useDeferredValue } from 'react';
-import { Issue } from '../types/index';
+// Corrected import path for Column from types instead of DataTable
+import { Issue, Column } from '../types/index';
 import { Plus, Filter, FileWarning, ArrowUp, ArrowDown, ChevronsUp, Lock, Search, Edit2, Trash2, Save, AlertCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -12,7 +13,7 @@ import { SidePanel } from './ui/SidePanel';
 import { useData } from '../context/DataContext';
 import { generateId } from '../utils/formatters';
 import { EmptyGrid } from './common/EmptyGrid';
-import DataTable, { Column } from './common/DataTable';
+import DataTable from './common/DataTable';
 
 const IssueLog: React.FC = () => {
   const { project, issues } = useProjectWorkspace();
@@ -79,6 +80,7 @@ const IssueLog: React.FC = () => {
     setIsPanelOpen(false);
   };
 
+  // Fixed: passing id as string string directly to dispatch to match payload type in actions
   const handleDeleteIssue = (id: string) => {
       if (confirm("Are you sure you want to delete this issue?")) {
           dispatch({ type: 'DELETE_ISSUE', payload: id });
@@ -144,7 +146,7 @@ const IssueLog: React.FC = () => {
       
       <div className={theme.layout.panelContainer}>
         <div className={`p-4 ${theme.layout.headerBorder} flex flex-col md:flex-row justify-between items-center ${theme.colors.background}/50 flex-shrink-0 gap-3`}>
-           <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto flex-1">
+           <div className="flex flex-col md:flex-row justify-between items-center gap-2 w-full md:w-auto flex-1">
               <div className="relative w-full md:w-72">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                   <Input 
@@ -289,7 +291,7 @@ const IssueForm: React.FC<IssueFormProps> = ({ isOpen, onClose, onSave, issue, r
                         className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                      >
                          <option value="">Unassigned</option>
-                         {resources.map(r => <option key={r.id} value={r.id}>{r.name} ({r.role})</option>)}
+                         {resources.map((r: any) => <option key={r.id} value={r.id}>{r.name} ({r.role})</option>)}
                      </select>
                 </div>
 
@@ -301,12 +303,12 @@ const IssueForm: React.FC<IssueFormProps> = ({ isOpen, onClose, onSave, issue, r
                         className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                      >
                          <option value="">None</option>
-                         {tasks.map(t => <option key={t.id} value={t.id}>{t.wbsCode} - {t.name}</option>)}
+                         {tasks.map((t: any) => <option key={t.id} value={t.id}>{t.wbsCode} - {t.name}</option>)}
                      </select>
                 </div>
             </div>
         </SidePanel>
-    );
+  );
 };
 
 export default IssueLog;

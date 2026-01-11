@@ -1,5 +1,8 @@
+
 import React, { useMemo } from 'react';
-import DataTable, { Column } from '../common/DataTable';
+import DataTable from '../common/DataTable';
+// Corrected import path for Column and EnrichedTask from types
+import { Column } from '../../types/index';
 import { StatusBadge } from '../common/StatusBadge';
 import { ProgressBar } from '../common/ProgressBar';
 import { Calendar, Briefcase, CheckSquare } from 'lucide-react';

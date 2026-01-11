@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { usePhysicalResources } from '../../../hooks/usePhysicalResources';
-import DataTable, { Column } from '../../common/DataTable';
+import DataTable from '../../common/DataTable';
+// Corrected import path for Column and Resource from types
+import { Resource, Column } from '../../../types';
 import { Badge } from '../../ui/Badge';
-import { Resource } from '../../../types';
 
 export const InventoryList: React.FC = () => {
     const { materials } = usePhysicalResources();

@@ -1,6 +1,7 @@
+
 import React, { useMemo } from 'react';
-import { ChangeOrder } from '../../../types';
-import DataTable, { Column } from '../../common/DataTable';
+import { ChangeOrder, Column } from '../../../types';
+import DataTable from '../../common/DataTable';
 import { Badge } from '../../ui/Badge';
 import { formatCurrency } from '../../../utils/formatters';
 import { CheckCircle, FileDiff } from 'lucide-react';

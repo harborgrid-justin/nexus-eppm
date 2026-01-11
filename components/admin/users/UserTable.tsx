@@ -1,7 +1,8 @@
 
 import React, { useMemo } from 'react';
 import { User } from '../../../types/auth';
-import DataTable, { Column } from '../../common/DataTable';
+import DataTable from '../../common/DataTable';
+import { Column } from '../../../types';
 import { Badge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
 import { Edit2, Trash2 } from 'lucide-react';

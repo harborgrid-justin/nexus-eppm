@@ -4,11 +4,12 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Plus, Filter, Download, ShieldAlert } from 'lucide-react';
 import { RiskDetailPanel as RiskDetailModal } from './RiskDetailPanel'; 
 import { useTheme } from '../../context/ThemeContext';
-import { Risk } from '../../types/index';
+// Added Column import from types/index
+import { Risk, Column } from '../../types/index';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
-import DataTable, { Column } from '../common/DataTable';
+import DataTable from '../common/DataTable';
 import { RiskForm } from './RiskForm';
 import { useData } from '../../context/DataContext';
 import { ExportService } from '../../services/ExportService';

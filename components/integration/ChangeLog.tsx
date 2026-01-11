@@ -3,11 +3,12 @@ import React, { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FileDiff, Filter, Search, Download } from 'lucide-react';
-import DataTable, { Column } from '../common/DataTable';
+import DataTable from '../common/DataTable';
+// Corrected import path for Column and ChangeOrder from types
+import { ChangeOrder, Column } from '../../types';
 import { Badge } from '../ui/Badge';
 import { formatCurrency } from '../../utils/formatters';
 import { Button } from '../ui/Button';
-import { ChangeOrder } from '../../types';
 
 const ChangeLog: React.FC = () => {
     const { changeOrders } = useProjectWorkspace();
