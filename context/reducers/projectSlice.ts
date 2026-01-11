@@ -1,7 +1,7 @@
-
 import { DataState, Action } from '../../types/index';
 import { generateId } from '../../utils/formatters';
-import { Baseline, WBSNode, Project } from '../../types/index';
+import { Baseline, WBSNode, Project, Task } from '../../types/index';
+import { findAndModifyNode, findAndReparentNode } from '../../utils/treeUtils';
 
 // Helper to deep clone project for reflection
 const cloneProject = (project: Project): Project => {
@@ -21,15 +21,24 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             : p
         )
       };
-    case 'TASK_UPDATE':
-      return {
-        ...state,
-        projects: state.projects.map(p => 
-          p.id === action.payload.projectId 
-            ? { ...p, tasks: p.tasks.map(t => t.id === action.payload.task.id ? action.payload.task : t) }
-            : p
-        )
-      };
+    case 'TASK_UPDATE': {
+        const { projectId, task } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                
+                if (Array.isArray(task)) {
+                    return { ...p, tasks: task };
+                }
+                
+                return { 
+                    ...p, 
+                    tasks: p.tasks.map(t => t.id === task.id ? task : t) 
+                };
+            })
+        };
+    }
     case 'PROJECT_CLOSE':
         return { 
             ...state, 
@@ -63,7 +72,6 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             })
         };
     
-    // --- BUDGET LOG ---
     case 'ADD_PROJECT_BUDGET_LOG':
         return {
             ...state,
@@ -75,7 +83,6 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             })
         };
 
-    // --- REFLECTION PROJECTS ---
     case 'PROJECT_CREATE_REFLECTION': {
         const sourceProject = state.projects.find(p => p.id === action.payload.sourceProjectId);
         if (!sourceProject) return state;
@@ -93,19 +100,16 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
         const reflection = state.projects.find(p => p.id === action.payload.reflectionId);
         if (!reflection || !reflection.sourceProjectId) return state;
         
-        // In a real implementation, we would apply selective logic from comparison
-        // Here we overwrite source with reflection data (simplified merge)
         const updatedSource = { ...reflection, id: reflection.sourceProjectId, isReflection: false, name: reflection.name.replace(' (Reflection)', '') };
         
         return {
             ...state,
             projects: state.projects
                 .map(p => p.id === reflection.sourceProjectId ? updatedSource : p)
-                .filter(p => p.id !== reflection.id) // Remove reflection after merge
+                .filter(p => p.id !== reflection.id) 
         };
     }
 
-    // --- BASELINE MANAGEMENT ---
     case 'BASELINE_SET': {
         const { projectId, name, type } = action.payload;
         return {
@@ -133,56 +137,54 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             })
         };
     }
-    case 'BASELINE_UPDATE': {
-        const { projectId, baselineId, name, type } = action.payload;
+
+    case 'WBS_ADD_NODE': {
+        const { projectId, parentId, newNode } = action.payload;
         return {
             ...state,
             projects: state.projects.map(p => {
-                if (p.id === projectId) {
-                    return {
-                        ...p,
-                        baselines: (p.baselines || []).map(b => 
-                            b.id === baselineId ? { ...b, name, type: type as Baseline['type'] } : b
-                        )
-                    };
+                if (p.id !== projectId) return p;
+                
+                let updatedWbs = [...(p.wbs || [])];
+                if (parentId === null) {
+                    updatedWbs.push(newNode);
+                } else {
+                    updatedWbs = findAndModifyNode(updatedWbs, parentId, (node) => ({
+                        ...node,
+                        children: [...(node.children || []), newNode]
+                    }));
                 }
-                return p;
+                return { ...p, wbs: updatedWbs };
             })
         };
     }
-    case 'BASELINE_DELETE': {
-        const { projectId, baselineId } = action.payload;
+    
+    case 'WBS_UPDATE_NODE': {
+        const { projectId, nodeId, updatedData } = action.payload;
         return {
             ...state,
             projects: state.projects.map(p => {
-                if (p.id === projectId) {
-                    return {
-                        ...p,
-                        baselines: (p.baselines || []).filter(b => b.id !== baselineId)
-                    };
-                }
-                return p;
+                if (p.id !== projectId) return p;
+                const updatedWbs = findAndModifyNode(p.wbs || [], nodeId, (node) => ({
+                    ...node,
+                    ...updatedData
+                }));
+                return { ...p, wbs: updatedWbs };
             })
         };
     }
-    case 'WBS_ADD_NODE':
-      // Placeholder for new logic, actual logic in domainLogic.ts is complex
-      return state;
-    case 'WBS_UPDATE_NODE':
-       return {
-        ...state,
-        projects: state.projects.map(p => {
-            if (p.id === action.payload.projectId) {
-                // This is a simplified update. A real one would traverse the tree.
-                return { ...p, wbs: [...(p.wbs || [])] };
-            }
-            return p;
-        })
-       };
-    case 'WBS_REPARENT':
-       return state; // Placeholder
-    case 'WBS_UPDATE_SHAPE':
-       return state; // Placeholder
+
+    case 'WBS_REPARENT': {
+        const { projectId, nodeId, newParentId } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                const { newNodes } = findAndReparentNode(p.wbs || [], nodeId, newParentId);
+                return { ...p, wbs: newNodes };
+            })
+        };
+    }
 
     default:
       return state;
