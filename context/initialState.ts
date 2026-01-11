@@ -1,4 +1,3 @@
-
 import { DataState } from '../types/index';
 
 // This is the "Day Zero" state of the application.

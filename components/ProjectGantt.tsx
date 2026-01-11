@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
 import ScheduleLog from './scheduling/ScheduleLog';
-import { List, X, Calendar, Loader2 } from 'lucide-react';
+import { List, X, Calendar, Loader2, Network } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
 import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
@@ -65,15 +65,24 @@ const ProjectGantt: React.FC = () => {
   return (
     <div className={`flex flex-col h-full bg-white rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1`}>
       <ScheduleLog isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} log={scheduleLog} stats={scheduleStats} />
-      <GanttToolbar project={project} viewMode={viewMode} setViewMode={setViewMode} showCriticalPath={showCriticalPath} setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId} showResources={showResources} setShowResources={setShowResources} onTraceLogic={() => setIsTraceLogicOpen(true)} isTaskSelected={!!selectedTask} taskFilter={taskFilter} setTaskFilter={setTaskFilter} onSchedule={runSchedule} isScheduling={isScheduling} onViewLog={() => setIsLogOpen(true)} dataDate={dataDate} />
+      <GanttToolbar 
+        project={project} 
+        viewMode={viewMode} setViewMode={setViewMode} 
+        showCriticalPath={showCriticalPath} setShowCriticalPath={setShowCriticalPath} 
+        activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId} 
+        showResources={showResources} setShowResources={setShowResources} 
+        onTraceLogic={() => setIsTraceLogicOpen(true)} isTaskSelected={!!selectedTask} 
+        taskFilter={taskFilter} setTaskFilter={setTaskFilter} onSchedule={runSchedule} 
+        isScheduling={isScheduling} onViewLog={() => setIsLogOpen(true)} dataDate={dataDate} 
+      />
       
       {!hasTasks ? (
           <EmptyGrid 
-            title="Logical Network Undefined"
-            description="The master schedule is unpopulated. Import an XER/MPP file or initialize manually to start CPM calculations."
-            icon={Calendar}
+            title="Logic Network Isolated"
+            description="The master schedule repository is currently unpopulated. Establish an activity baseline or synchronize with an external XER/MPP artifact to activate the CPM engine."
+            icon={Network}
             onAdd={() => {}} 
-            actionLabel="Initialize Activity"
+            actionLabel="Initialize Activities"
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
@@ -118,6 +127,19 @@ const ProjectGantt: React.FC = () => {
             </div>
             
             {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}
+            
+            {/* Status Bar Indicator */}
+            <div className={`h-8 border-t ${theme.colors.border} bg-slate-900 text-white flex items-center px-4 justify-between text-[9px] font-black uppercase tracking-widest`}>
+                <div className="flex gap-6">
+                    <span>Baseline: {activeBaselineId || 'LATEST'}</span>
+                    <span>Engine: NEXUS_CPM_v4.2</span>
+                    <span className="text-nexus-400">Algorithm: Retained Logic</span>
+                </div>
+                <div className="flex gap-4">
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div> {project.tasks.filter(t=>t.critical).length} Critical</span>
+                    <span>Total Activities: {project.tasks.length}</span>
+                </div>
+            </div>
           </div>
       )}
     </div>

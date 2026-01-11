@@ -1,4 +1,3 @@
-
 import { DataState, Action } from '../types/index';
 import { projectReducer } from './reducers/projectSlice';
 import { programReducer } from './reducers/programSlice';

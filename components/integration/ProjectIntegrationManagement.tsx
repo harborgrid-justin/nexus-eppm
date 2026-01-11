@@ -25,6 +25,7 @@ const ProjectIntegrationManagement: React.FC = () => {
     if (!project) return { scopeCreep: 0, stagnantTasks: 0 };
     return {
         scopeCreep: calculateScopeCreep(project.originalBudget, changeOrders),
+        // FIX: Removed redundant .filter() call on Task object 't'. Correctly filtering project tasks array directly.
         stagnantTasks: project.tasks.filter(t => checkTaskStagnation(t)).length
     };
   }, [project, changeOrders]);
