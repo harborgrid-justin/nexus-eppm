@@ -1,8 +1,7 @@
-
-import React, { useMemo, useState, useEffect, useDeferredValue } from 'react';
+import React, { useMemo, useState, useDeferredValue } from 'react';
 import { Resource } from '../../types/index';
 import { useData } from '../../context/DataContext';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Skeleton } from '../ui/Skeleton';
 import { useTheme } from '../../context/ThemeContext';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -25,13 +24,11 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
       const data: Record<string, number[]> = {};
       if (!deferredResources) return {};
 
-      deferredResources.forEach(res => {
-          data[res.id] = new Array(12).fill(0);
-      });
+      deferredResources.forEach(res => { data[res.id] = new Array(12).fill(0); });
 
       state.projects.forEach(project => {
           project.tasks.forEach(task => {
-              if (task.assignments?.length) {
+              if (task.assignments?.length && task.status !== 'Completed') {
                   const startDate = new Date(task.startDate);
                   const endDate = new Date(task.endDate);
                   let iterDate = new Date(startDate);
@@ -55,13 +52,13 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
     if (percentage === 0) return 'bg-slate-50 text-slate-300';
     if (percentage < 80) return 'bg-green-50 text-green-700';
     if (percentage <= 100) return 'bg-blue-50 text-blue-700';
-    return 'bg-red-100 text-red-700 font-bold';
+    return 'bg-red-100 text-red-700 font-bold shadow-inner ring-1 ring-red-200';
   };
 
   if (!projectResources) {
       return (
-          <div className="h-full flex flex-col p-6 space-y-6">
-              <Skeleton height={100} />
+          <div className="h-full flex flex-col p-8 space-y-6 bg-white">
+              <div className="flex gap-4"><Skeleton height={80} width="25%" /><Skeleton height={80} width="25%" /></div>
               <Skeleton height={400} />
           </div>
       );
@@ -70,11 +67,9 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
   if (projectResources.length === 0) {
       return (
           <EmptyGrid 
-            title="Capacity Model Empty" 
-            description="No active resources found. Assign resources to project tasks to visualize the demand heatmap."
+            title="Capacity Matrix Null" 
+            description="Assign enterprise resources to active project tasks to generate the demand heatmap."
             icon={Loader2}
-            actionLabel="Provision Resource"
-            onAdd={() => {}}
           />
       );
   }
@@ -83,20 +78,20 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
     <div className={`h-full flex flex-col transition-opacity duration-300 ${isStale ? 'opacity-40' : 'opacity-100'}`}>
       <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50/50">
         <div>
-            <h3 className="font-bold text-slate-800 text-sm">Enterprise Capacity Heatmap ({currentYear})</h3>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Real-time Allocation Matrix</p>
+            <h3 className="font-black text-slate-800 text-sm uppercase tracking-tight">Enterprise Capacity Heatmap ({currentYear})</h3>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">Physical demand per month</p>
         </div>
-        {isStale && <div className="flex items-center gap-2 text-nexus-600 animate-pulse text-xs font-bold uppercase tracking-widest"><Loader2 size={12} className="animate-spin"/> Syncing Ledger...</div>}
+        {isStale && <div className="flex items-center gap-2 text-nexus-600 animate-pulse text-[10px] font-black uppercase"><Loader2 size={12} className="animate-spin"/> Recalculating Matrix...</div>}
       </div>
-      <div className="overflow-auto flex-1 scrollbar-thin">
+      <div className="overflow-auto flex-1 scrollbar-thin bg-white" style={{ contain: 'content' }}>
         <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
-            <thead className="bg-slate-50 sticky top-0 z-10">
+            <thead className="bg-slate-50 sticky top-0 z-20">
                 <tr>
-                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 sticky left-0 z-20 border-b w-64 shadow-[2px_0_0_0_#e2e8f0]">Identity</th>
+                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 sticky left-0 z-30 border-b w-64 shadow-[2px_0_0_0_#e2e8f0]">Identity</th>
                     {months.map(m => <th key={m} className="px-4 py-4 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-b">{m}</th>)}
                 </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-slate-100">
                 {deferredResources.map(res => (
                 <tr key={res.id} className="hover:bg-slate-50/30">
                     <td className="px-6 py-4 whitespace-nowrap bg-white sticky left-0 z-10 font-bold text-sm text-slate-800 shadow-[2px_0_0_0_#f1f5f9]">
@@ -106,7 +101,7 @@ const ResourceCapacity: React.FC<ResourceCapacityProps> = ({ projectResources })
                         const alloc = allocationData[res.id]?.[idx] || 0;
                         return (
                             <td key={idx} className="p-1 h-12">
-                                <div className={`w-full h-full rounded flex items-center justify-center text-[11px] font-black transition-all ${getCellColor(alloc)}`}>
+                                <div className={`w-full h-full rounded-lg flex items-center justify-center text-[11px] font-black transition-all ${getCellColor(alloc)}`}>
                                     {alloc > 0 ? `${alloc}%` : '-'}
                                 </div>
                             </td>

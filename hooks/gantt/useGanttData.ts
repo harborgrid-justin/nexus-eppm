@@ -1,31 +1,33 @@
-
 import { useMemo } from 'react';
 import { Project, Task, WBSNode } from '../../types/index';
 
 export const useGanttData = (project: Project, expandedNodes: Set<string>) => {
   const flatRenderList = useMemo(() => {
-    if (!project || !project.wbs) return [];
+    if (!project || !project.wbs || !project.tasks) return [];
     
     const list: ({ type: 'wbs', node: WBSNode, level: number } | { type: 'task', task: Task, level: number })[] = [];
+    const taskMap = new Map<string, Task[]>();
     
+    // Index tasks by parent code for O(1) lookup during traversal
+    project.tasks.forEach(t => {
+        const lastDot = t.wbsCode.lastIndexOf('.');
+        const parentCode = lastDot === -1 ? t.wbsCode : t.wbsCode.substring(0, lastDot);
+        const group = taskMap.get(parentCode) || [];
+        group.push(t);
+        taskMap.set(parentCode, group);
+    });
+
     const traverse = (nodes: WBSNode[], level: number) => {
       nodes.forEach(node => {
         list.push({ type: 'wbs', node, level });
         if (expandedNodes.has(node.id)) {
-          // Pull child tasks for this specific WBS node
-          const childTasks = (project.tasks || []).filter(t => {
-            const lastDotIndex = t.wbsCode.lastIndexOf('.');
-            const parentCode = lastDotIndex === -1 ? '' : t.wbsCode.substring(0, lastDotIndex);
-            return parentCode === node.wbsCode || t.wbsCode === node.wbsCode; // Handle direct children
-          });
-          
+          // Add child tasks
+          const childTasks = taskMap.get(node.wbsCode) || [];
           childTasks.forEach(task => {
-              if (!list.find(item => item.type === 'task' && item.task.id === task.id)) {
-                  list.push({ type: 'task', task, level: level + 1 });
-              }
+              list.push({ type: 'task', task, level: level + 1 });
           });
-          
-          if (node.children && node.children.length > 0) {
+          // Add child WBS nodes
+          if (node.children?.length) {
               traverse(node.children, level + 1);
           }
         }

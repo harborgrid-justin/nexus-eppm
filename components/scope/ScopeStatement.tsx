@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { FileText, Save, Lock, ChevronDown, ChevronRight, Target, AlertCircle, CheckSquare, XSquare, Info } from 'lucide-react';
+import { FileText, Save, Lock, ChevronDown, ChevronRight, Target, AlertCircle, CheckSquare, XSquare, Info, Plus } from 'lucide-react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
 import { NarrativeField } from '../common/NarrativeField';
@@ -22,14 +23,17 @@ const ScopeSection: React.FC<ScopeSectionProps> = ({ title, icon: Icon, children
             <button 
                 onClick={onToggle} 
                 className={`w-full flex items-center justify-between p-5 text-left transition-all ${isOpen ? 'bg-white border-b border-slate-100' : 'bg-slate-50/50 hover:bg-slate-100'}`}
+                aria-expanded={isOpen}
             >
                 <div className="flex items-center gap-4">
-                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${isOpen ? 'bg-nexus-600 text-white shadow-lg shadow-nexus-500/20' : `bg-white border border-slate-200 text-slate-400`}`}>
+                    <div className={`p-2.5 rounded-xl transition-all duration-300 ${isOpen ? 'bg-nexus-600 text-white shadow-lg shadow-nexus-500/20 scale-110' : `bg-white border border-slate-200 text-slate-400`}`}>
                         <Icon size={20} />
                     </div>
                     <h4 className={`font-black tracking-tight uppercase text-xs tracking-widest ${isOpen ? 'text-slate-900' : 'text-slate-500'}`}>{title}</h4>
                 </div>
-                {isOpen ? <ChevronDown size={18} className="text-slate-400" /> : <ChevronRight size={18} className="text-slate-400" />}
+                <div className={`p-1.5 rounded-full transition-all ${isOpen ? 'bg-nexus-50 text-nexus-600 rotate-0' : 'bg-slate-100 text-slate-400 rotate-180'}`}>
+                    <ChevronDown size={18} />
+                </div>
             </button>
             {isOpen && <div className={`p-8 animate-in slide-in-from-top-2 duration-300 bg-white`}>{children}</div>}
         </div>
@@ -52,7 +56,7 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
 
     const toggle = (key: keyof typeof sections) => setSections(prev => ({ ...prev, [key]: !prev[key] }));
 
-    const handleUpdate = (field: string, value: string) => {
+    const handleUpdate = (field: string, value: any) => {
         dispatch({
             type: 'PROJECT_UPDATE',
             payload: {
@@ -60,51 +64,31 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                 updatedData: { [field]: value }
             }
         });
-        success("Field Updated", "Project scope baseline synchronized.");
+        success("Scope Baseline Synced", "Organizational delivery boundaries updated in global state.");
     };
 
     if (!project) return null;
 
     return (
         <div className={`h-full flex flex-col bg-slate-50/30 scrollbar-thin`}>
-            <div className={`p-6 border-b ${theme.colors.border} flex justify-between items-center bg-white shrink-0`}>
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-nexus-900 text-white rounded-xl">
-                        <FileText size={22} />
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Project Scope Statement</h3>
-                        <p className="text-xs text-slate-500 font-medium">Formal boundary definition for project deliverables.</p>
-                    </div>
-                </div>
-                <div className="flex gap-3">
-                    {!canEditProject() && (
-                        <div className={`flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-black text-slate-400 uppercase tracking-widest`}>
-                            <Lock size={14}/> Read Only
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-8 max-w-6xl mx-auto w-full">
-                <div className="mb-8 p-6 bg-slate-900 rounded-3xl text-white relative overflow-hidden shadow-xl">
+            <div className="flex-1 overflow-y-auto p-10 max-w-6xl mx-auto w-full">
+                <div className="mb-10 p-8 bg-slate-900 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl">
                     <div className="relative z-10">
-                        <h4 className="font-bold flex items-center gap-2 mb-2 text-base tracking-tight">
-                            <Target size={20} className="text-nexus-400"/> Strategic Baseline
+                        <h4 className="font-black flex items-center gap-2 mb-3 text-sm uppercase tracking-widest text-nexus-400">
+                            <Target size={16}/> Configuration Baseline
                         </h4>
-                        <p className="text-xs text-slate-400 leading-relaxed max-w-2xl">
-                            The Scope Statement provides a common understanding of the project's requirements. 
-                            It defines what is <strong>included</strong> and what is <strong>excluded</strong> to prevent scope creep during execution.
+                        <p className="text-slate-300 text-lg leading-relaxed max-w-2xl font-medium">
+                            The Project Scope Statement establishes the authoritative boundary for the Performance Measurement Baseline (PMB). All execution must align with these verified objectives.
                         </p>
                     </div>
-                    <FileText size={180} className="absolute -right-12 -bottom-12 text-white/5 opacity-10 rotate-12" />
+                    <FileText size={200} className="absolute -right-16 -bottom-16 text-white/5 opacity-5 rotate-12 pointer-events-none" />
                 </div>
 
                 <ScopeSection title="1. Product & Project Scope" icon={Target} isOpen={sections.description} onToggle={() => toggle('description')}>
                     <NarrativeField 
-                        label="In-Scope Characteristics"
+                        label="Strategic Intent & Characteristics"
                         value={project.businessCase} 
-                        placeholderLabel="Detailed description of the characteristics of the product or service."
+                        placeholderLabel="No strategic intent defined. Justify the initiative to lock baseline."
                         onSave={(val) => handleUpdate('businessCase', val)}
                         isReadOnly={!canEditProject()}
                     />
@@ -112,9 +96,9 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
 
                 <ScopeSection title="2. Project Deliverables" icon={CheckSquare} isOpen={sections.deliverables} onToggle={() => toggle('deliverables')}>
                     <NarrativeField 
-                        label="Verifiable Outcomes"
+                        label="Verifiable Outcomes (WBS Summary)"
                         value={project.description} 
-                        placeholderLabel="Identify the unique and verifiable products, results, or capabilities to be produced."
+                        placeholderLabel="Unique products or services to be produced are currently unmapped."
                         onSave={(val) => handleUpdate('description', val)}
                         isReadOnly={!canEditProject()}
                     />
@@ -122,37 +106,37 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
 
                 <ScopeSection title="3. Project Exclusions" icon={XSquare} isOpen={sections.exclusions} onToggle={() => toggle('exclusions')}>
                     <NarrativeField 
-                        label="Out-of-Scope Items"
-                        value="" // Assuming a schema extension or using description if needed, for now placeholder
-                        placeholderLabel="Explicitly state what is excluded from the project to manage expectations."
-                        onSave={() => {}} 
+                        label="Out-of-Scope Items (Negative Scope)"
+                        value="" 
+                        placeholderLabel="Explicitly state what is excluded to manage stakeholder expectations and prevent creep."
+                        onAdd={() => {}} 
                         isReadOnly={!canEditProject()}
                     />
                 </ScopeSection>
 
                 <ScopeSection title="4. Constraints & Assumptions" icon={AlertCircle} isOpen={sections.constraints} onToggle={() => toggle('constraints')}>
                     <div className="space-y-8">
-                        <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl flex gap-3">
-                             <Info size={20} className="text-amber-600 mt-0.5 shrink-0"/>
-                             <p className="text-xs text-amber-800 leading-relaxed font-bold uppercase tracking-tight">
-                                 Failure to validate assumptions often results in schedule delay or budget overrun. These should be reviewed by the CCB monthly.
+                        <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-2xl flex gap-4 items-start">
+                             <Info size={24} className="text-blue-600 shrink-0 mt-0.5"/>
+                             <p className="text-xs text-blue-900 leading-relaxed font-bold uppercase tracking-tight">
+                                 Assumptions and constraints are critical inputs for risk modeling and Monte Carlo simulations. These parameters are reviewed by the PMO quarterly.
                              </p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <NarrativeField 
                                 label="Project Constraints"
                                 value="" 
-                                placeholderLabel="Budget, Schedule, Technical, or Resource limitations."
+                                placeholderLabel="Budget caps, hard logic constraints, or resource limitations."
                                 onAdd={() => {}}
                                 isReadOnly={!canEditProject()}
                             />
                             <NarrativeField 
-                                label="Strategic Assumptions"
+                                label="Execution Assumptions"
                                 value={project.assumptions?.[0]?.description} 
-                                placeholderLabel="Factors considered to be true for planning purposes."
+                                placeholderLabel="Factors considered to be true without absolute proof."
                                 onSave={(val) => {
                                     const newAssumptions = [{ id: 'ASM-01', description: val, ownerId: 'Unassigned', status: 'Active' }];
-                                    handleUpdate('assumptions', JSON.stringify(newAssumptions));
+                                    handleUpdate('assumptions', newAssumptions);
                                 }}
                                 isReadOnly={!canEditProject()}
                             />
@@ -160,6 +144,12 @@ const ScopeStatement: React.FC<{ projectId: string }> = ({ projectId }) => {
                     </div>
                 </ScopeSection>
             </div>
+            
+            {!canEditProject() && (
+                <div className="p-4 bg-slate-900 text-white flex justify-center items-center gap-2 text-[10px] font-black uppercase tracking-widest shrink-0">
+                    <Lock size={14} className="text-nexus-400"/> Read-Only Mode: Baseline Protected
+                </div>
+            )}
         </div>
     );
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Zap } from 'lucide-react';
 
@@ -6,7 +5,7 @@ interface SystemPulseProps {
     summary: any;
 }
 
-export const SystemPulse: React.FC<SystemPulseProps> = ({ summary }) => (
+const SystemPulseComponent: React.FC<SystemPulseProps> = ({ summary }) => (
     <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-3">
             <div className="p-2 bg-nexus-600 rounded-lg"><Zap size={20}/></div>
@@ -22,3 +21,5 @@ export const SystemPulse: React.FC<SystemPulseProps> = ({ summary }) => (
         </div>
     </div>
 );
+
+export const SystemPulse = React.memo(SystemPulseComponent);

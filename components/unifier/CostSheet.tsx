@@ -1,10 +1,9 @@
-
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { evaluateFormula } from '../../utils/logic/businessProcessEngine';
 import { formatCurrency } from '../../utils/formatters';
-import { RefreshCw, Calculator, FileSpreadsheet, Plus, LayoutTemplate } from 'lucide-react';
+import { RefreshCw, Calculator, FileSpreadsheet, LayoutTemplate } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 
@@ -16,7 +15,6 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
   const { state } = useData();
   const theme = useTheme();
   
-  // Guard: Ensure project context exists before checking for rows
   if (!projectId || projectId === 'UNSET') {
       return (
         <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
@@ -31,14 +29,11 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
       );
   }
 
-  // In a real app, we filter by projectId. 
-  // For mock, we use the static cost sheet data but re-calculate formulas dynamically.
   const { columns, rows } = state.unifier.costSheet;
 
   const computedRows = useMemo(() => {
     return rows.map(row => {
       const newRow = { ...row };
-      // 1. Calculate Formulas
       columns.filter(c => c.type === 'Formula').forEach(col => {
         if(col.formula) {
             newRow[col.id] = evaluateFormula(col.formula, newRow);
@@ -57,7 +52,6 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
   }, [computedRows, columns]);
 
   const handleRecalculate = () => {
-      // In a real app, this might dispatch an action to re-run server-side logic
       console.log("Recalculating sheet...");
   };
 
@@ -94,7 +88,7 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
             </div>
         </div>
         
-        <div className="flex-1 overflow-auto bg-white relative">
+        <div className="flex-1 overflow-auto bg-white relative" style={{ contain: 'layout paint' }}>
             {computedRows.length === 0 ? (
                  <div className="h-full flex flex-col justify-center p-8">
                     <EmptyGrid 
@@ -134,7 +128,6 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
                                 ))}
                             </tr>
                         ))}
-                        {/* Totals Row */}
                         <tr className={`${theme.colors.background} font-black border-t-2 ${theme.colors.border} sticky bottom-0 z-20 shadow-[0_-2px_5px_-2px_rgba(0,0,0,0.05)]`}>
                             <td className={`px-4 py-3 text-xs uppercase ${theme.colors.text.secondary} sticky left-0 ${theme.colors.background} z-30 border-r ${theme.colors.border} shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>
                                 Grand Total

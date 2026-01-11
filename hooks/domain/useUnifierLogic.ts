@@ -83,6 +83,12 @@ export const useUnifierLogic = () => {
      setIsFormOpen(false);
   };
 
+  const handleSelectBP = (id: string) => {
+    startTransition(() => {
+        setSelectedBP(id);
+    });
+  };
+
   return {
       activeGroup,
       activeTab,
@@ -100,7 +106,7 @@ export const useUnifierLogic = () => {
       handleCreate,
       handleEdit,
       handleSaveRecord,
-      setSelectedBP,
+      setSelectedBP: handleSelectBP,
       setIsFormOpen
   };
 };

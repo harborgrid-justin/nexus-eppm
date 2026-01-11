@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 
 interface VirtualScrollOptions {
   totalItems: number;
@@ -8,45 +7,28 @@ interface VirtualScrollOptions {
   buffer?: number;
 }
 
-interface VirtualScrollResult {
-  virtualItems: { index: number; offsetTop: number }[];
-  totalHeight: number;
-  isScrolling: boolean;
-  onScroll: (scrollTop: number) => void;
-}
-
 export const useVirtualScroll = (
   initialScrollTop: number,
   options: VirtualScrollOptions
-): VirtualScrollResult => {
+) => {
   const { totalItems, itemHeight, containerHeight, buffer = 5 } = options;
   const [scrollTop, setScrollTop] = useState(initialScrollTop);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  const onScroll = (newScrollTop: number) => {
+  const onScroll = useCallback((top: number) => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
     rafRef.current = requestAnimationFrame(() => {
-      setScrollTop(newScrollTop);
-      setIsScrolling(true);
-      
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
+      setScrollTop(top);
     });
-  };
+  }, []);
 
   useEffect(() => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
   }, []);
 
-  const { virtualItems } = useMemo(() => {
+  const virtualItems = useMemo(() => {
     const startNode = Math.floor(scrollTop / itemHeight);
     const visibleNodeCount = Math.ceil(containerHeight / itemHeight);
     
@@ -61,10 +43,10 @@ export const useVirtualScroll = (
       });
     }
 
-    return { virtualItems: items };
+    return items;
   }, [scrollTop, totalItems, itemHeight, containerHeight, buffer]);
 
   const totalHeight = totalItems * itemHeight;
 
-  return { virtualItems, totalHeight, isScrolling, onScroll };
+  return { virtualItems, totalHeight, onScroll };
 };

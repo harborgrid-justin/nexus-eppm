@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Loader2, ArrowLeft, Layers, Globe } from 'lucide-react';
+import { Layers, Globe, Loader2, ArrowLeft } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import ProgramManager from './ProgramManager';
@@ -9,10 +9,12 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { usePortfolioManagerLogic } from '../hooks/domain/usePortfolioManagerLogic';
 import { PortfolioContent } from './portfolio/PortfolioContent';
 import { EmptyGrid } from './common/EmptyGrid';
+import { useI18n } from '../context/I18nContext';
 
 const PortfolioManager: React.FC = () => {
   const { state } = useData();
   const theme = useTheme();
+  const { t } = useI18n();
 
   const {
     activeGroup, activeTab, drilledProgramId, isPending,
@@ -20,19 +22,21 @@ const PortfolioManager: React.FC = () => {
     handleProgramDrillDown, clearDrillDown
   } = usePortfolioManagerLogic();
 
-  // Pattern: Verify EPS initialization before rendering complex strategy modules
   const hasPortfolioStructure = state.eps.length > 1;
 
   if (drilledProgramId) {
        return (
-         <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full animate-in slide-in-from-bottom-4 fade-in`}>
+         <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in slide-in-from-bottom-4 fade-in`}>
              <PageHeader 
-                title="Program Detail" 
-                subtitle="Deep dive into program execution and governance."
+                title={t('program.detail.title', 'Program Detail')} 
+                subtitle={t('program.detail.subtitle', 'Deep dive into program execution and governance.')}
                 icon={Layers}
                 actions={
-                    <button onClick={clearDrillDown} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-sm transition-all active:scale-95">
-                        <ArrowLeft size={16}/> Back to Portfolio
+                    <button 
+                      onClick={clearDrillDown} 
+                      className={`px-4 py-2 border rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition-all active:scale-95 ${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.secondary} hover:${theme.colors.background}`}
+                    >
+                        <ArrowLeft size={16}/> {t('common.back_to_portfolio', 'Back to Portfolio')}
                     </button>
                 }
              />
@@ -44,18 +48,23 @@ const PortfolioManager: React.FC = () => {
   }
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Strategic Portfolio Management" 
-        subtitle="Executive oversight, strategic alignment, and investment optimization."
-        icon={Globe}
-      />
+    <div className={`${theme.layout.pageContainer} ${theme.colors.background}`}>
+      <div className={`${theme.layout.pagePadding} pb-0`}>
+        <PageHeader 
+          title={t('nav.portfolio', 'Strategic Portfolio Management')} 
+          subtitle={t('portfolio.subtitle', 'Executive oversight, strategic alignment, and investment optimization.')}
+          icon={Globe}
+        />
+      </div>
       
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
+      <div className={`${theme.layout.panelContainer} m-6 md:m-8 mt-4 flex-1 flex flex-col overflow-hidden`}>
+        <div className={`flex-shrink-0 z-10 border-b ${theme.colors.border} bg-slate-50/50`}>
             <ModuleNavigation 
-                groups={navGroups} activeGroup={activeGroup} activeItem={activeTab}
-                onGroupChange={handleGroupChange} onItemChange={handleItemChange}
+                groups={navGroups} 
+                activeGroup={activeGroup} 
+                activeItem={activeTab}
+                onGroupChange={handleGroupChange} 
+                onItemChange={handleItemChange}
                 className="bg-transparent border-0 shadow-none"
             />
         </div>
@@ -70,9 +79,9 @@ const PortfolioManager: React.FC = () => {
              <ErrorBoundary name="Portfolio Module">
                 {!hasPortfolioStructure && (activeTab === 'framework' || activeTab === 'alignment') ? (
                     <EmptyGrid 
-                        title="Strategic Structure Isolated"
-                        description="Global strategy mapping requires a defined Enterprise Project Structure (EPS). Organize your portfolio branches to begin alignment."
-                        actionLabel="Initialize Portfolio Hierarchy"
+                        title={t('portfolio.structure.empty', 'Strategic Structure Isolated')}
+                        description={t('portfolio.structure.empty_desc', 'Global strategy mapping requires a defined Enterprise Project Structure (EPS). Organize your portfolio branches to begin alignment.')}
+                        actionLabel={t('portfolio.structure.action', 'Initialize Portfolio Hierarchy')}
                         onAdd={() => handleItemChange('framework')}
                         icon={Layers}
                     />

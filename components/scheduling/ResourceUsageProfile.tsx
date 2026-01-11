@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { Project } from '../../types';
 import { useData } from '../../context/DataContext';
@@ -36,9 +35,8 @@ const ResourceUsageProfile: React.FC<ResourceUsageProfileProps> = ({ project, st
         weekStart.setDate(weekStart.getDate() + (w * 7));
         const weekLabel = `W${w+1}`;
         
-        // Capacity: Sum of capacities of all filtered resources (Hours per week)
-        // Assume capacity is weekly hours in this view
-        const totalCapacity = relevantResources.reduce((sum, r) => sum + 40, 0); // Mock 40h/week
+        // FIX: Derive capacity from actual resource definitions instead of hardcoded 40h/week.
+        const totalCapacity = relevantResources.reduce((sum, r) => sum + ((r.capacity || 160) / 4), 0);
 
         // Demand: Sum of task assignments active in this week
         let totalDemand = 0;
@@ -53,8 +51,9 @@ const ResourceUsageProfile: React.FC<ResourceUsageProfileProps> = ({ project, st
                 task.assignments.forEach(assign => {
                     const res = relevantResources.find(r => r.id === assign.resourceId);
                     if (res) {
-                        // Assignment units % * 40 hours
-                        totalDemand += (assign.units / 100) * 40;
+                        // FIX: Calculate effort based on assignment units relative to resource standard work week.
+                        const effortHours = (assign.units / 100) * (state.governance.resourceDefaults.defaultWorkHoursPerDay || 8) * 5;
+                        totalDemand += (effortHours / 5); // Distributed daily avg for the week
                     }
                 });
             }
@@ -62,14 +61,14 @@ const ResourceUsageProfile: React.FC<ResourceUsageProfileProps> = ({ project, st
 
         timePoints.push({
             name: weekLabel,
-            Capacity: totalCapacity,
-            Demand: Math.round(totalDemand),
-            OverAllocation: Math.max(0, Math.round(totalDemand - totalCapacity))
+            Capacity: Math.round(totalCapacity),
+            Demand: Math.round(totalDemand * 5), // Scale back up to weekly for chart representation
+            OverAllocation: Math.max(0, Math.round((totalDemand * 5) - totalCapacity))
         });
     }
 
     return timePoints;
-  }, [project, startDate, endDate, state.resources, filterRole]);
+  }, [project, startDate, endDate, state.resources, filterRole, state.governance.resourceDefaults]);
 
   const roles = Array.from(new Set(state.resources.map(r => r.role)));
 

@@ -29,11 +29,13 @@ const ProjectIntegrationManagement: React.FC = () => {
     };
   }, [project, changeOrders]);
 
+  // FIX: Dynamically determine next board meeting info from governance state
   const boardMeetingInfo = useMemo(() => {
     const boardEvent = state.governanceEvents.find(e => e.type === 'Steering Committee');
     return boardEvent ? `${boardEvent.name} is scheduled for ${boardEvent.nextDate}.` : 'No upcoming board meetings scheduled.';
   }, [state.governanceEvents]);
 
+  // FIX: Dynamically calculate contingency threshold exposure
   const exposureInfo = useMemo(() => {
       if (!financials || !project) return '';
       const threshold = project.originalBudget * 0.15;

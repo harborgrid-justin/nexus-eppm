@@ -36,7 +36,7 @@ export const ChangeSummary: React.FC<ChangeSummaryProps> = ({
                  <span className="font-mono font-black text-amber-700">{formatCurrency(pendingCOAmount)}</span>
               </div>
               
-              {/* Fix: Replaced hardcoded flavor text with dynamic props. If data is absent, a generic placeholder is shown. */}
+              {/* FIX: Replaced hardcoded flavor text with dynamic props. If data is absent, a generic placeholder is shown. */}
               {(boardMeetingInfo || exposureInfo) ? (
                   <div className="mt-2 text-xs text-slate-500 leading-relaxed italic text-center px-4">
                       "{boardMeetingInfo} {exposureInfo}"

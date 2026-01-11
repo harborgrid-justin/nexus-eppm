@@ -1,14 +1,26 @@
+
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { Layers, ListChecks, FileWarning, CheckCircle, Target, Activity } from 'lucide-react';
+import { Layers, ListChecks, FileWarning, CheckCircle, Target, Activity, Plus } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { CustomBarChart } from '../charts/CustomBarChart';
 import { useTheme } from '../../context/ThemeContext';
 import { formatPercentage } from '../../utils/formatters';
+import { EmptyGrid } from '../common/EmptyGrid';
+import { useSearchParams } from 'react-router-dom';
 
 const ScopeDashboard: React.FC = () => {
   const { project, summary, changeOrders } = useProjectWorkspace();
   const theme = useTheme();
+  const [, setSearchParams] = useSearchParams();
+
+  const handleNavigateToView = (view: string) => {
+      setSearchParams(prev => {
+          const params = new URLSearchParams(prev);
+          params.set('view', view);
+          return params;
+      });
+  };
 
   const metrics = useMemo(() => {
       const requirements = project?.requirements || [];
@@ -23,7 +35,7 @@ const ScopeDashboard: React.FC = () => {
           if (!nodes || nodes.length === 0) return currentDepth;
           return Math.max(...nodes.map(n => getDepth(n.children, currentDepth + 1)));
       };
-      const wbsDepth = getDepth(wbsNodes);
+      const wbsDepth = wbsNodes.length > 0 ? getDepth(wbsNodes) : 0;
       
       // Count total WBS elements (flat count)
       const countNodes = (nodes: any[]): number => {
@@ -66,12 +78,12 @@ const ScopeDashboard: React.FC = () => {
   if (!project) return null;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-nexus-in`}>
+    <div className={`h-full overflow-y-auto p-8 space-y-8 animate-nexus-in scrollbar-thin`}>
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard 
                 title="WBS Elements" 
                 value={metrics.totalWbsElements} 
-                subtext={`Maximum Depth: Level ${metrics.wbsDepth}`} 
+                subtext={metrics.totalWbsElements > 0 ? `Maximum Depth: Level ${metrics.wbsDepth}` : 'Registry Empty'} 
                 icon={Layers} 
             />
             <StatCard 
@@ -97,9 +109,9 @@ const ScopeDashboard: React.FC = () => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col h-[400px]`}>
-                <h3 className={`${theme.typography.h3} mb-6 flex items-center gap-2 font-black uppercase tracking-tighter`}>
-                    <Target size={18} className="text-nexus-600"/> Requirements Traceability
+            <div className={`${theme.components.card} p-8 flex flex-col h-[400px]`}>
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+                    <Target size={16} className="text-nexus-600"/> Requirements Traceability
                 </h3>
                 <div className="flex-1">
                     {metrics.totalRequirements > 0 ? (
@@ -108,46 +120,66 @@ const ScopeDashboard: React.FC = () => {
                             xAxisKey="name"
                             dataKey="count"
                             height={250}
-                            barColor={theme.charts.palette[1]}
+                            barColor="#3b82f6"
                         />
                     ) : (
-                        <div className="h-full nexus-empty-pattern rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
-                            <ListChecks size={32} className="opacity-20 mb-2"/>
-                            <p className="text-xs font-bold uppercase tracking-widest">Registry Null</p>
+                        <div className="h-full border-2 border-dashed border-slate-100 rounded-2xl">
+                            <EmptyGrid 
+                                title="Requirements Registry Null"
+                                description="No functional or technical requirements have been mapped to the current scope baseline."
+                                icon={ListChecks}
+                                actionLabel="Provision Requirements"
+                                onAdd={() => handleNavigateToView('requirements')}
+                            />
                         </div>
                     )}
                 </div>
             </div>
             
-            <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-                <h3 className={`${theme.typography.h3} mb-6 flex items-center gap-2 font-black uppercase tracking-tighter`}>
-                    <Activity size={18} className="text-blue-500"/> Definition Quality Metrics
+            <div className={`${theme.components.card} p-8 flex flex-col h-[400px]`}>
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+                    <Activity size={16} className="text-blue-500"/> Definition Quality Metrics
                 </h3>
-                <div className="space-y-6">
-                    <div className={`p-5 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all`}>
+                <div className="space-y-4 flex-1">
+                    <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all ${metrics.totalWbsElements === 0 ? 'nexus-empty-pattern' : ''}`}>
                         <div>
-                            <p className={`${theme.typography.label} font-black`}>WBS Dictionary Completeness</p>
-                            <p className={`${theme.typography.small} mt-0.5`}>Physical scope description coverage</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">WBS Dictionary Completeness</p>
+                            <p className="text-xs text-slate-400 mt-0.5">Physical scope description coverage</p>
                         </div>
-                        <span className="text-2xl font-black text-nexus-700 font-mono">{metrics.completeness.toFixed(0)}%</span>
+                        <div className="text-right">
+                            <span className={`text-2xl font-black font-mono ${metrics.completeness < 50 ? 'text-orange-500' : 'text-nexus-700'}`}>{metrics.completeness.toFixed(0)}%</span>
+                            {metrics.totalWbsElements === 0 && (
+                                <button onClick={() => handleNavigateToView('wbs')} className="block text-[10px] font-black text-nexus-600 uppercase mt-1 hover:underline">+ Define</button>
+                            )}
+                        </div>
                     </div>
-                    <div className={`p-5 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all`}>
+                    <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all ${metrics.totalRequirements === 0 ? 'nexus-empty-pattern' : ''}`}>
                         <div>
-                            <p className={`${theme.typography.label} font-black`}>RTM Mapping</p>
-                            <p className={`${theme.typography.small} mt-0.5`}>Requirements linked to deliverables</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">RTM Mapping</p>
+                            <p className="text-xs text-slate-400 mt-0.5">Requirements linked to deliverables</p>
                         </div>
-                        <span className="text-2xl font-black text-green-600 font-mono">
-                            {metrics.totalRequirements > 0 ? '100%' : '0%'}
-                        </span>
+                        <div className="text-right">
+                            <span className={`text-2xl font-black font-mono ${metrics.totalRequirements > 0 ? 'text-green-600' : 'text-slate-300'}`}>
+                                {metrics.totalRequirements > 0 ? '100%' : '0%'}
+                            </span>
+                            {metrics.totalRequirements === 0 && (
+                                <button onClick={() => handleNavigateToView('requirements')} className="block text-[10px] font-black text-nexus-600 uppercase mt-1 hover:underline">+ Map</button>
+                            )}
+                        </div>
                     </div>
-                    <div className={`p-5 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all`}>
+                    <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} flex justify-between items-center group hover:border-nexus-300 transition-all`}>
                         <div>
-                            <p className={`${theme.typography.label} font-black`}>Configuration Status</p>
-                            <p className={`${theme.typography.small} mt-0.5`}>Latest baseline alignment</p>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Configuration Status</p>
+                            <p className="text-xs text-slate-400 mt-0.5">Latest baseline alignment</p>
                         </div>
-                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${metrics.pendingCOs > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
-                            {metrics.pendingCOs > 0 ? 'Variance Detected' : 'Compliant'}
-                        </span>
+                        <div className="text-right">
+                            <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${metrics.pendingCOs > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                                {metrics.pendingCOs > 0 ? 'Variance Detected' : 'Compliant'}
+                            </span>
+                             {metrics.pendingCOs > 0 && (
+                                <button onClick={() => handleNavigateToView('integration')} className="block text-[10px] font-black text-nexus-600 uppercase mt-1 hover:underline">View COs</button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -29,10 +29,11 @@ const ScopeManagement: React.FC = () => {
 
   // Handle case where project is undefined (e.g. direct navigation or loading)
   if (!project) return (
-    <div className="p-8 flex items-center justify-center h-full text-slate-400">
-        <div className="flex flex-col items-center gap-2">
-            <Sliders size={32} className="opacity-20"/>
-            <span className="font-bold text-xs uppercase tracking-widest">Initializing Scope Context...</span>
+    <div className={`p-6 space-y-4 flex flex-col h-full ${theme.colors.background}`}>
+        <PageHeader title="Scope Management" subtitle="Deliverable and requirements hub" icon={Sliders} />
+        <div className="flex-1 bg-slate-100 border border-slate-200 rounded-xl animate-pulse flex flex-col items-center justify-center text-slate-400 nexus-empty-pattern">
+            <Sliders size={48} className="mb-4 opacity-10" />
+            <p className="font-black uppercase tracking-widest text-[10px]">Initializing Scope Registry...</p>
         </div>
     </div>
   );
@@ -50,15 +51,17 @@ const ScopeManagement: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Scope Management" 
-        subtitle="Define, validate, and control project scope and deliverables."
-        icon={Sliders}
-      />
+    <div className={`${theme.layout.pageContainer} flex flex-col h-full bg-slate-50/30`}>
+      <div className={`${theme.layout.pagePadding} pb-0 shrink-0`}>
+        <PageHeader 
+          title="Project Scope Management" 
+          subtitle="Define, validate, and control project deliverables through the Work Breakdown Structure."
+          icon={Sliders}
+        />
+      </div>
 
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 ${theme.layout.headerBorder} z-10 bg-slate-50/50`}>
+      <div className={`${theme.layout.panelContainer} m-6 mt-4 flex-1 flex flex-col overflow-hidden`}>
+        <div className={`flex-shrink-0 border-b ${theme.colors.border} bg-slate-50/50 z-10`}>
           <ModuleNavigation 
               groups={navStructure}
               activeGroup={activeGroup}
@@ -68,7 +71,7 @@ const ScopeManagement: React.FC = () => {
               className="bg-transparent border-0 shadow-none"
           />
         </div>
-        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'} flex flex-col`}>
           <ErrorBoundary name="Scope Module">
             {renderContent()}
           </ErrorBoundary>

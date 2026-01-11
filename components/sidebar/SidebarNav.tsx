@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { 
   Globe, PieChart, ShieldAlert, LayoutTemplate, Briefcase, 
-  Users, Settings, Database, CheckSquare, FileText, HardDrive, Rocket, Calendar, CornerDownRight, Palette
+  Users, Settings, Database, CheckSquare, FileText, Calendar, Palette
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -13,10 +12,10 @@ interface SidebarNavProps {
     isCollapsed?: boolean;
 }
 
-export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab, onClose, isCollapsed }) => {
+const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab, onClose, isCollapsed }) => {
     const theme = useTheme();
 
-    const navStructure = [
+    const navStructure = React.useMemo(() => [
         {
             id: 'strategy', 
             label: 'Strategy', 
@@ -47,7 +46,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
                 { id: 'design-system', label: 'Design', icon: Palette },
             ]
         }
-    ];
+    ], []);
 
     return (
         <div className="space-y-6 px-0">
@@ -82,3 +81,5 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, setActiveTab,
         </div>
     );
 };
+
+export default React.memo(SidebarNav);

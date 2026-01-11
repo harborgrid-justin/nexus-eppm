@@ -1,14 +1,8 @@
-
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { 
-  ChevronDown, ChevronUp, ArrowUpDown, AlertCircle, 
-  ChevronLeft, ChevronRight, Settings, Download, Columns, 
-  Maximize2, Minimize2 
-} from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Skeleton } from '../ui/Skeleton';
-import { Column, SortConfig } from '../../types/ui';
-import { ExportService } from '../../services/ExportService';
+import { Column } from '../../types/ui';
 import { useVirtualScroll } from '../../hooks/useVirtualScroll';
 
 interface DataTableProps<T> {
@@ -18,24 +12,21 @@ interface DataTableProps<T> {
   keyField: keyof T;
   emptyMessage?: string;
   isLoading?: boolean;
-  rowsPerPage?: number;
   selectable?: boolean;
   selectedIds?: string[];
   onSelectionChange?: (ids: string[]) => void;
   enableToolbar?: boolean;
   fileName?: string;
+  rowsPerPage?: number;
 }
 
 function DataTable<T>({ 
-  data, columns, onRowClick, keyField, emptyMessage = "No records found.",
-  isLoading = false, selectable = false, selectedIds = [],
-  onSelectionChange, enableToolbar = true, fileName = 'export_data'
+  data, columns, onRowClick, keyField, emptyMessage = "No records found.", isLoading = false
 }: DataTableProps<T>) {
   const theme = useTheme();
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(500);
-  const ITEM_HEIGHT = 56;
+  const [containerHeight, setContainerHeight] = useState(600);
+  const ROW_HEIGHT = 56;
 
   useEffect(() => {
     if (containerRef.current) setContainerHeight(containerRef.current.clientHeight);
@@ -46,56 +37,55 @@ function DataTable<T>({
     return () => obs.disconnect();
   }, []);
 
-  const sortedData = useMemo(() => {
-    if (!sortConfig.key || !sortConfig.direction) return data;
-    return [...data].sort((a: any, b: any) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
-      if (aVal === bVal) return 0;
-      return aVal < bVal ? (sortConfig.direction === 'asc' ? -1 : 1) : (sortConfig.direction === 'asc' ? 1 : -1);
-    });
-  }, [data, sortConfig]);
-
   const { virtualItems, totalHeight, onScroll } = useVirtualScroll(0, {
-    totalItems: sortedData.length,
-    itemHeight: ITEM_HEIGHT,
-    containerHeight: containerHeight - 48 // Subtract header
+    totalItems: data.length,
+    itemHeight: ROW_HEIGHT,
+    containerHeight: containerHeight - 48
   });
 
   if (isLoading) return <div className="p-8"><Skeleton height={400} /></div>;
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden border border-slate-200 rounded-xl bg-white shadow-sm">
-      <div className="overflow-x-auto flex-1 flex flex-col" ref={containerRef}>
-        <table className="min-w-full divide-y divide-slate-100 table-fixed border-separate border-spacing-0">
+    <div className="flex flex-col h-full w-full overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
+      <div 
+        ref={containerRef}
+        className="flex-1 overflow-y-auto scrollbar-thin relative" 
+        onScroll={(e) => onScroll(e.currentTarget.scrollTop)}
+        style={{ 
+          contain: 'strict',
+          willChange: 'scroll-position'
+        }}
+      >
+        <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
           <thead className="bg-slate-50 sticky top-0 z-20 shadow-sm">
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest border-b bg-slate-50">
+                <th key={col.key} className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest border-b bg-slate-50">
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="relative" onScroll={(e) => onScroll(e.currentTarget.scrollTop)} style={{ height: `${totalHeight}px` }}>
+          <tbody className="relative" style={{ height: `${totalHeight}px`, contain: 'layout' }}>
             {virtualItems.map(({ index, offsetTop }) => {
-              const item = sortedData[index];
+              const item = data[index];
+              if (!item) return null;
               return (
                 <tr 
                   key={String((item as any)[keyField])}
                   onClick={() => onRowClick?.(item)}
-                  className="absolute left-0 w-full hover:bg-slate-50 cursor-pointer transition-colors"
-                  style={{ height: `${ITEM_HEIGHT}px`, transform: `translateY(${offsetTop}px)` }}
+                  className="absolute left-0 w-full hover:bg-slate-50/50 cursor-pointer transition-colors border-b border-slate-50 will-change-transform"
+                  style={{ height: `${ROW_HEIGHT}px`, transform: `translateY(${offsetTop}px)` }}
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+                    <td key={col.key} className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium">
                       {col.render ? col.render(item) : String((item as any)[col.key])}
                     </td>
                   ))}
                 </tr>
               );
             })}
-            {sortedData.length === 0 && (
+            {data.length === 0 && !isLoading && (
               <div className="absolute inset-0 nexus-empty-pattern flex flex-col items-center justify-center p-12 text-slate-400">
                 <AlertCircle size={40} className="opacity-20 mb-3" />
                 <p className="font-bold uppercase tracking-widest text-xs">{emptyMessage}</p>
@@ -108,4 +98,4 @@ function DataTable<T>({
   );
 }
 
-export default DataTable;
+export default React.memo(DataTable) as typeof DataTable;

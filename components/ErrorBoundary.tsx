@@ -1,4 +1,3 @@
-
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -12,79 +11,59 @@ interface ErrorBoundaryState {
   error?: Error | string | unknown;
 }
 
-/**
- * Standard Error Boundary component to catch and display runtime errors gracefully.
- */
-// Fixed: Explicitly using React.Component to ensure props and state are correctly inherited.
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// FIX: Use the imported Component class to ensure proper type inheritance for this.props and this.setState
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
     error: undefined,
   };
 
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-  }
-
-  // Required static method to handle state transition on error.
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  // Lifecycle method to capture component errors
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Fixed: Correctly accessing props via 'this'
-    console.error("Uncaught error in component:", this.props.name, error, errorInfo);
+    // FIX: Access inherited props properly
+    console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // Reset error state for manual retry actions
   handleRetry = () => {
-    // Fixed: Correctly accessing setState via 'this'
+    // FIX: Access inherited setState properly
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
-    // Fixed: Correctly accessing state and props via 'this'
     if (this.state.hasError) {
       const { error } = this.state;
-      let errorMessage = 'An unexpected error occurred.';
-      let errorStack: string | undefined = undefined;
-
+      let errorMessage = 'A runtime exception occurred in the execution context.';
+      
       if (error instanceof Error) {
           errorMessage = error.message;
-          errorStack = error.stack;
       } else if (typeof error === 'string') {
           errorMessage = error;
-      } else if (typeof error === 'object' && error !== null) {
-          try {
-              errorMessage = JSON.stringify(error, null, 2);
-          } catch (e) {
-              errorMessage = 'Non-serializable error object caught';
-          }
       }
 
       return (
-        <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg text-red-700 animate-in fade-in zoom-in-95 duration-200">
-          <h2 className="font-bold flex items-center gap-2">
-            <AlertTriangle size={20} /> 
-            Error in {this.props.name || 'Component'}
+        <div className="p-8 m-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 animate-in fade-in zoom-in-95 duration-200 shadow-xl">
+          <h2 className="font-black flex items-center gap-2 uppercase tracking-tighter text-lg">
+            <AlertTriangle size={24} /> 
+            {/* FIX: Access inherited props properly */}
+            Module Failure: {this.props.name || 'Runtime'}
           </h2>
-          <p className="text-sm mt-2 font-mono whitespace-pre-wrap break-all">{errorMessage}</p>
-          {errorStack && (
-             <pre className="text-xs bg-white p-4 mt-3 rounded border border-red-100 font-mono overflow-auto max-h-64">
-                {errorStack}
-             </pre>
-          )}
+          <div className="mt-4 p-4 bg-white rounded-xl border border-red-100 font-mono text-xs overflow-auto max-h-64 shadow-inner text-red-800 leading-relaxed">
+            {errorMessage}
+          </div>
           <button 
             onClick={this.handleRetry} 
-            className="mt-4 px-4 py-2 bg-white border border-slate-200 text-red-700 hover:bg-red-50 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors shadow-sm"
+            className="mt-6 px-6 py-2.5 bg-red-600 text-white hover:bg-red-700 rounded-xl flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 active:scale-95"
           >
-            <RefreshCw size={14}/> Try again
+            <RefreshCw size={14}/> Re-initialize Module
           </button>
         </div>
       );
     }
 
+    // FIX: Return children from inherited props
     return this.props.children;
   }
 }

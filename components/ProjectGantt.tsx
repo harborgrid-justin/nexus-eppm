@@ -1,9 +1,8 @@
-
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
 import ScheduleLog from './scheduling/ScheduleLog';
-import { List, X, Calendar } from 'lucide-react';
+import { List, X, Calendar, Loader2 } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
 import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
@@ -37,20 +36,21 @@ const ProjectGantt: React.FC = () => {
   const projectCalendar = useGanttCalendar(project, state.calendars);
   const [scrollTop, setScrollTop] = useState(0);
   
-  // Optimization: Resize Observer API
   const { ref: containerRef, height: containerHeight } = useContainerSize();
-
   const listRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const { virtualItems, totalHeight, onScroll } = useVirtualScroll(scrollTop, {
-    totalItems: flatRenderList.length, itemHeight: ROW_HEIGHT, containerHeight: containerHeight || 600
+    totalItems: flatRenderList.length, 
+    itemHeight: ROW_HEIGHT, 
+    containerHeight: containerHeight || 600
   });
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const top = e.currentTarget.scrollTop;
     onScroll(top);
     setScrollTop(top);
+    // Optimized sync
     if (e.target === listRef.current && timelineRef.current) timelineRef.current.scrollTop = top;
     else if (e.target === timelineRef.current && listRef.current) listRef.current.scrollTop = top;
   }, [onScroll]);
@@ -63,26 +63,58 @@ const ProjectGantt: React.FC = () => {
   const hasTasks = project.tasks && project.tasks.length > 0;
 
   return (
-    <div className={`flex flex-col h-full ${theme.colors.surface} rounded-lg border ${theme.colors.border} shadow-sm flex-1`}>
+    <div className={`flex flex-col h-full bg-white rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1`}>
       <ScheduleLog isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} log={scheduleLog} stats={scheduleStats} />
       <GanttToolbar project={project} viewMode={viewMode} setViewMode={setViewMode} showCriticalPath={showCriticalPath} setShowCriticalPath={setShowCriticalPath} activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId} showResources={showResources} setShowResources={setShowResources} onTraceLogic={() => setIsTraceLogicOpen(true)} isTaskSelected={!!selectedTask} taskFilter={taskFilter} setTaskFilter={setTaskFilter} onSchedule={runSchedule} isScheduling={isScheduling} onViewLog={() => setIsLogOpen(true)} dataDate={dataDate} />
       
       {!hasTasks ? (
           <EmptyGrid 
-            title="Schedule Logic Missing"
-            description="The master schedule currently has no activities. Import an XER file or manually add tasks to calculate the critical path."
+            title="Logical Network Undefined"
+            description="The master schedule is unpopulated. Import an XER/MPP file or initialize manually to start CPM calculations."
             icon={Calendar}
             onAdd={() => {}} 
-            actionLabel="Add First Task"
+            actionLabel="Initialize Activity"
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
             <button className="md:hidden absolute bottom-20 left-4 z-30 p-3 bg-primary text-white rounded-full shadow-lg" onClick={() => setShowTaskList(!showTaskList)}>{showTaskList ? <X size={20} /> : <List size={20} />}</button>
             
-            {/* Main Gantt Container attached to ResizeObserver */}
-            <div ref={containerRef} className="flex flex-1 overflow-hidden relative">
-              <GanttTaskList ref={listRef} renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes} selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask} virtualItems={virtualItems} totalHeight={totalHeight} rowHeight={ROW_HEIGHT} onScroll={handleScroll} />
-              <GanttTimeline ref={timelineRef} timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap} projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT} showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask} projectTasks={project.tasks} calendar={projectCalendar} ganttContainerRef={containerRef} getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask} virtualItems={virtualItems} totalHeight={totalHeight} onScroll={handleScroll} />
+            <div ref={containerRef} className="flex flex-1 overflow-hidden relative bg-slate-50/20">
+              <GanttTaskList 
+                ref={listRef} 
+                renderList={flatRenderList} 
+                showTaskList={showTaskList} 
+                expandedNodes={expandedNodes} 
+                selectedTask={selectedTask} 
+                toggleNode={toggleNode} 
+                setSelectedTask={setSelectedTask} 
+                virtualItems={virtualItems} 
+                totalHeight={totalHeight} 
+                rowHeight={ROW_HEIGHT} 
+                onScroll={handleScroll} 
+              />
+              <GanttTimeline 
+                ref={timelineRef} 
+                timelineHeaders={timelineHeaders} 
+                renderList={flatRenderList} 
+                taskRowMap={taskRowMap} 
+                projectStart={projectStart} 
+                projectEnd={projectEnd} 
+                dayWidth={DAY_WIDTH} 
+                rowHeight={ROW_HEIGHT} 
+                showCriticalPath={showCriticalPath} 
+                baselineMap={baselineMap} 
+                selectedTask={selectedTask} 
+                projectTasks={project.tasks} 
+                calendar={projectCalendar} 
+                ganttContainerRef={containerRef} 
+                getStatusColor={getStatusColor} 
+                handleMouseDown={handleMouseDown} 
+                setSelectedTask={setSelectedTask} 
+                virtualItems={virtualItems} 
+                totalHeight={totalHeight} 
+                onScroll={handleScroll} 
+              />
             </div>
             
             {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}

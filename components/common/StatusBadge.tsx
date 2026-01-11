@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { StatusVariant } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
@@ -12,7 +11,7 @@ interface StatusBadgeProps {
   customColorClass?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ 
+const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({ 
   status, 
   variant = 'status', 
   className = '',
@@ -39,19 +38,18 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   let colors = getSemanticColor('neutral');
 
-  // Comprehensive Status Mapping
   if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
-      colors = 'bg-slate-100 text-slate-600 border-slate-200'; // Draft = Grey
+      colors = 'bg-slate-100 text-slate-600 border-slate-200';
   } else if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'compliant', 'approved', 'pass', 'valid', 'issued', 'released'].includes(s)) {
-      colors = getSemanticColor('success'); // Active = Green
+      colors = getSemanticColor('success');
   } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      colors = 'bg-slate-800 text-slate-200 border-slate-700'; // Closed = Dark Slate
+      colors = 'bg-slate-800 text-slate-200 border-slate-700';
   } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {
-      colors = getSemanticColor('warning'); // Warning = Yellow/Amber
+      colors = getSemanticColor('warning');
   } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted'].includes(s)) {
-      colors = getSemanticColor('danger'); // Danger = Red
+      colors = getSemanticColor('danger');
   } else if (['info', 'new', 'allocation'].includes(s)) {
-      colors = getSemanticColor('info'); // Info = Blue
+      colors = getSemanticColor('info');
   }
 
   return (
@@ -60,3 +58,5 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     </span>
   );
 };
+
+export const StatusBadge = React.memo(StatusBadgeComponent);

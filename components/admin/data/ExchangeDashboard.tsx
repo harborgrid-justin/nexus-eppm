@@ -1,10 +1,10 @@
-
 import React, { Suspense } from 'react';
 import { Activity, CheckCircle, Server, Zap, Loader2, Plus } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import StatCard from '../../shared/StatCard';
 import { useTheme } from '../../../context/ThemeContext';
 import { useExchangeDashboardLogic } from '../../../hooks/domain/useExchangeDashboardLogic';
+import { useLazyLoad } from '../../../hooks/useLazyLoad';
 
 export const ExchangeDashboard: React.FC = () => {
     const theme = useTheme();
@@ -19,6 +19,8 @@ export const ExchangeDashboard: React.FC = () => {
         handleAddService
     } = useExchangeDashboardLogic();
 
+    const { containerRef, isVisible } = useLazyLoad();
+
     return (
         <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">
             <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
@@ -29,7 +31,7 @@ export const ExchangeDashboard: React.FC = () => {
             </div>
 
             <div className={`grid grid-cols-1 xl:grid-cols-3 ${theme.layout.gridGap}`}>
-                <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col h-[400px]`}>
+                <div className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col h-[400px]`} ref={containerRef}>
                     <div className="flex justify-between items-center mb-8">
                         <div>
                             <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest flex items-center gap-2`}>
@@ -44,17 +46,23 @@ export const ExchangeDashboard: React.FC = () => {
                         </div>
                     </div>
                     <div className={`flex-1 min-h-0 transition-opacity duration-300 ${isPending ? 'opacity-40' : 'opacity-100'}`}>
-                        <Suspense fallback={<div className={`h-full w-full flex items-center justify-center ${theme.colors.background} rounded-xl animate-pulse`}><Loader2 className="animate-spin text-slate-200" size={32}/></div>}>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={deferredData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                                    <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
-                                    <Tooltip contentStyle={theme.charts.tooltip} cursor={{stroke: theme.colors.border}} />
-                                    <Area type="monotone" dataKey="records" stroke={theme.charts.palette[0]} fill={`${theme.charts.palette[0]}20`} strokeWidth={3} />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </Suspense>
+                        {isVisible ? (
+                            <Suspense fallback={<div className={`h-full w-full flex items-center justify-center ${theme.colors.background} rounded-xl animate-pulse`}><Loader2 className="animate-spin text-slate-200" size={32}/></div>}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={deferredData}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                                        <XAxis dataKey="time" tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{fontSize: 10, fontWeight: 'bold', fill: theme.colors.text.secondary}} axisLine={false} tickLine={false} />
+                                        <Tooltip contentStyle={theme.charts.tooltip} cursor={{stroke: theme.colors.border}} />
+                                        <Area type="monotone" dataKey="records" stroke={theme.charts.palette[0]} fill={`${theme.charts.palette[0]}20`} strokeWidth={3} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </Suspense>
+                        ) : (
+                            <div className="h-full w-full nexus-empty-pattern rounded-xl flex items-center justify-center">
+                                <Loader2 className="animate-spin text-slate-200" size={32}/>
+                            </div>
+                        )}
                     </div>
                 </div>
 

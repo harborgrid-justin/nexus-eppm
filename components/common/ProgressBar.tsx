@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ProgressBarProps {
@@ -11,7 +10,7 @@ interface ProgressBarProps {
   colorClass?: string; 
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({ 
+const ProgressBarComponent: React.FC<ProgressBarProps> = ({ 
   value, 
   max = 100, 
   thresholds = false, 
@@ -54,3 +53,5 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     </div>
   );
 };
+
+export const ProgressBar = React.memo(ProgressBarComponent);
