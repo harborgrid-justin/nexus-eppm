@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { Project, Program } from '../../types/index';
 
 interface PrioritizedItem {
     id: string;
@@ -16,16 +15,43 @@ interface PrioritizedItem {
 export const usePortfolioPrioritizationLogic = () => {
     const { state } = useData();
     
-    // Combine Projects and Programs into a single rankable list
-    const rawItems = useMemo(() => {
-        const projects = state.projects.map(p => ({ ...p, type: 'Project' as const }));
-        const programs = state.programs.map(p => ({ ...p, type: 'Program' as const }));
-        return [...projects, ...programs];
-    }, [state.projects, state.programs]);
+    // Core Logic: Derived Priority Score
+    // Score = SUM(AlignmentValue * DriverWeight)
+    const calculateDynamicScore = (item: any) => {
+        const drivers = state.strategicDrivers || [];
+        if (drivers.length === 0) return item.calculatedPriorityScore || 50;
 
-    // Sort by priority score descending
+        // Use global weights from governance or default to equal distribution
+        const weights = state.governance.strategicWeights || {};
+        
+        let score = 0;
+        drivers.forEach(driver => {
+            const weight = weights[driver.id] || (1 / drivers.length);
+            // Project alignment score (1-10) or fallback
+            const alignment = item.driverAlignments?.[driver.id] || 5;
+            score += (alignment * weight);
+        });
+
+        // Scale to 0-100
+        return Math.round(score * 10);
+    };
+
+    const rawItems = useMemo(() => {
+        const projects = state.projects.map(p => ({ 
+            ...p, 
+            type: 'Project' as const,
+            dynamicScore: calculateDynamicScore(p)
+        }));
+        const programs = state.programs.map(p => ({ 
+            ...p, 
+            type: 'Program' as const,
+            dynamicScore: calculateDynamicScore(p)
+        }));
+        return [...projects, ...programs];
+    }, [state.projects, state.programs, state.strategicDrivers, state.governance.strategicWeights]);
+
     const sortedItems = useMemo(() => {
-        return [...rawItems].sort((a, b) => b.calculatedPriorityScore - a.calculatedPriorityScore);
+        return [...rawItems].sort((a, b) => b.dynamicScore - a.dynamicScore);
     }, [rawItems]);
 
     const totalPortfolioValue = useMemo(() => 
@@ -34,7 +60,6 @@ export const usePortfolioPrioritizationLogic = () => {
 
     const [fundingLimit, setFundingLimit] = useState(totalPortfolioValue * 0.8);
 
-    // Calculate cumulative budget and funding status
     const prioritizedItems: PrioritizedItem[] = useMemo(() => {
         let runningTotal = 0;
         return sortedItems.map(item => {
@@ -44,7 +69,7 @@ export const usePortfolioPrioritizationLogic = () => {
                 name: item.name,
                 type: item.type,
                 category: item.category || 'Unassigned',
-                score: item.calculatedPriorityScore,
+                score: item.dynamicScore,
                 budget: item.budget,
                 cumulativeBudget: runningTotal,
                 isFunded: runningTotal <= fundingLimit

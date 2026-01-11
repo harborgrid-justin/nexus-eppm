@@ -1,3 +1,4 @@
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -15,7 +16,7 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Extending Component directly to ensure inherited members like props, state, and setState are correctly recognized by the compiler
+// FIX: Using named imports and explicitly defining props and state types to ensure the compiler recognizes inherited members
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
@@ -31,17 +32,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Accessing inherited props via this.props
+    // FIX: Accessing inherited props via this.props to fix compilation errors
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   handleRetry = () => {
-    // FIX: Using inherited setState method to reset error state
+    // FIX: Using inherited setState method to reset error state to fix compilation error
     this.setState({ hasError: false, error: undefined });
   };
 
   render() {
-    // FIX: Correctly accessing inherited state and props
+    // FIX: Correctly accessing inherited state and props to fix compilation errors
     if (this.state.hasError) {
       const { error } = this.state;
       let errorMessage = 'A runtime exception occurred in the execution context.';

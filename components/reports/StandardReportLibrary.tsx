@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { FileText, Table, Activity, TrendingUp, AlertTriangle, Play, Printer, Plus, Trash2 } from 'lucide-react';
+import { FileText, Table, Activity, TrendingUp, AlertTriangle, Play, Printer, Plus, Trash2, Library } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ReportDocument } from './ReportDocument';
 import { ReportBuilder } from './ReportBuilder';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const ICON_MAP: Record<string, any> = {
     FileText, Table, Activity, TrendingUp, AlertTriangle
@@ -18,7 +19,7 @@ export const StandardReportLibrary: React.FC = () => {
     const [selectedReport, setSelectedReport] = useState<string | null>(null);
     const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
-    const reports = state.reportDefinitions;
+    const reports = state.reportDefinitions || [];
 
     const runReport = (id: string) => {
         setSelectedReport(id);
@@ -50,32 +51,45 @@ export const StandardReportLibrary: React.FC = () => {
                     </div>
                 </div>
             ) : (
-                <div className="p-8 overflow-y-auto">
+                <div className="p-8 overflow-y-auto h-full flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <h3 className="text-xl font-bold text-slate-900">Standard Report Library</h3>
                         <Button icon={Plus} onClick={() => setIsBuilderOpen(true)}>Create Report</Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {reports.map(report => {
-                            const Icon = ICON_MAP[report.icon] || FileText;
-                            return (
-                                <Card key={report.id} className="p-6 flex flex-col hover:border-nexus-400 transition-colors group cursor-pointer relative" onClick={() => runReport(report.id)}>
-                                    {report.type === 'Custom' && (
-                                        <button onClick={(e) => handleDelete(report.id, e)} className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><Trash2 size={14}/></button>
-                                    )}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className={`p-3 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-nexus-50 group-hover:text-nexus-600 transition-colors`}>
-                                            <Icon size={24}/>
+                    {/* FIX: Replaced empty list with professional EmptyGrid component when no reports are configured */}
+                    {reports.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {reports.map(report => {
+                                const Icon = ICON_MAP[report.icon] || FileText;
+                                return (
+                                    <Card key={report.id} className="p-6 flex flex-col hover:border-nexus-400 transition-colors group cursor-pointer relative" onClick={() => runReport(report.id)}>
+                                        {report.type === 'Custom' && (
+                                            <button onClick={(e) => handleDelete(report.id, e)} className="absolute top-2 right-2 p-1.5 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity z-10"><Trash2 size={14}/></button>
+                                        )}
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className={`p-3 rounded-xl bg-slate-50 text-slate-600 group-hover:bg-nexus-50 group-hover:text-nexus-600 transition-colors`}>
+                                                <Icon size={24}/>
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">{report.category}</span>
                                         </div>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">{report.category}</span>
-                                    </div>
-                                    <h4 className="font-bold text-lg text-slate-900 mb-2 group-hover:text-nexus-700">{report.title}</h4>
-                                    <p className="text-sm text-slate-500 mb-6 flex-1 leading-relaxed">{report.description}</p>
-                                    <Button className="w-full" variant="secondary" icon={Play}>Generate Report</Button>
-                                </Card>
-                            );
-                        })}
-                    </div>
+                                        <h4 className="font-bold text-lg text-slate-900 mb-2 group-hover:text-nexus-700">{report.title}</h4>
+                                        <p className="text-sm text-slate-500 mb-6 flex-1 leading-relaxed">{report.description}</p>
+                                        <Button className="w-full" variant="secondary" icon={Play}>Generate Report</Button>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex-1">
+                            <EmptyGrid 
+                                title="No Reports Configured" 
+                                description="The enterprise reporting library is unpopulated. Create a custom report to begin analyzing portfolio artifacts."
+                                icon={Library}
+                                actionLabel="Create Report"
+                                onAdd={() => setIsBuilderOpen(true)}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
             <ReportBuilder isOpen={isBuilderOpen} onClose={() => setIsBuilderOpen(false)} onSave={handleCreate} />

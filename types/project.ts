@@ -22,9 +22,17 @@ export interface Dependency {
 export interface ActivityStep {
     id: string;
     name: string;
-    weight: number; // 0-1 or 1-100, used to calculate physical % complete
+    weight: number; 
     completed: boolean;
     completedDate?: string;
+}
+
+export interface NotebookEntry {
+    id: string;
+    topic: string;
+    content: string;
+    lastUpdated: string;
+    updatedBy: string;
 }
 
 export interface Task {
@@ -50,8 +58,8 @@ export interface Task {
   primaryConstraint?: { type: string; date: string };
   totalFloat?: number;
   freeFloat?: number;
-  steps?: ActivityStep[]; // P6 Parity: Activity Steps
-  notebooks?: any[];
+  steps?: ActivityStep[];
+  notebooks?: NotebookEntry[];
   // CPM Calculated fields
   earlyStart?: Date;
   earlyFinish?: Date;
@@ -134,13 +142,11 @@ export interface Project {
   lessonsLearned?: LessonLearned[];
   qualityPlan?: any;
   costPlan?: any;
-  notebooks?: any[];
+  notebooks?: NotebookEntry[];
   percentCompleteType?: 'Duration' | 'Physical' | 'Units';
   dataDate?: string;
   totalFloat?: number;
   description?: string;
-  
-  // Reflection / What-If Props
   isReflection?: boolean;
   sourceProjectId?: string;
 }

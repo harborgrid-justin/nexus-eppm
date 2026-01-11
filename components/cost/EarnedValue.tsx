@@ -3,10 +3,11 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
 import { getDaysDiff } from '../../utils/dateUtils';
-import { BarChart2, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { BarChart2, TrendingUp, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
 import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomLineChart } from '../charts/CustomLineChart';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const EarnedValue: React.FC = () => {
   const { project, budgetItems } = useProjectWorkspace();
@@ -56,7 +57,16 @@ const EarnedValue: React.FC = () => {
     return data;
   }, [project, evm, today]);
 
-  if (!evm || !project || !today) return <div className="p-6 text-slate-500">Insufficient data for EVM analysis.</div>;
+  // FIX: Replaced simple text fallback with professional EmptyGrid component when EVM data is unavailable
+  if (!project || !today || !evm || evm.bac === 0) {
+      return (
+          <EmptyGrid 
+            title="EVM Metrics Isolated"
+            description="Earned Value Management (EVM) requires an approved budget baseline and physical progress updates to calculate performance indices."
+            icon={Activity}
+          />
+      );
+  }
 
   return (
     <div className="h-full overflow-y-auto p-6 space-y-6">

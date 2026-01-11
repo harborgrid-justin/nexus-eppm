@@ -1,8 +1,5 @@
-import { DataState } from '../types/index';
 
-// This is the "Day Zero" state of the application.
-// All data is initialized as empty to ensure no mock or static data leaks into production.
-// The application is designed to be populated from a dynamic data source (e.g., API, local DB).
+import { DataState } from '../types/index';
 
 export const initialState: DataState = {
   projects: [],
@@ -40,12 +37,17 @@ export const initialState: DataState = {
   governance: {
       alerts: [],
       auditLog: [],
-      exchangeRates: { 'USD': 1.0 },
-      inflationRate: 0.03,
+      exchangeRates: { 'USD': 1.0, 'EUR': 0.92, 'GBP': 0.78 },
+      inflationRate: 0.035,
       riskTolerance: 'Moderate',
-      strategicWeights: {},
+      strategicWeights: { 'financial': 0.5, 'strategic': 0.3, 'risk': 0.2 },
       vendorBlacklist: [],
-      scoringCriteria: [],
+      scoringCriteria: [
+          { id: 'strategic', name: 'Strategic Alignment', weight: 0.4, description: 'Direct contribution to corporate goals.' },
+          { id: 'financial', name: 'NPV / ROI', weight: 0.3, description: 'Projected financial return.' },
+          { id: 'risk', name: 'Risk Profile', weight: 0.2, description: 'Inherent execution uncertainty.' },
+          { id: 'feasibility', name: 'Resource Availability', weight: 0.1, description: 'Ability to staff without conflict.' }
+      ],
       scheduling: {
           retainedLogic: true,
           calculateCriticalPathUsing: 'Longest Path',
@@ -71,9 +73,9 @@ export const initialState: DataState = {
           loginRetries: 5
       },
       organization: {
-          name: 'Nexus PPM',
-          shortName: 'NEXUS',
-          taxId: '',
+          name: 'Acme Corp Construction',
+          shortName: 'ACC',
+          taxId: 'TX-99201-B',
           fiscalYearStart: 'January',
           timezone: 'UTC -5 (Eastern Time)',
           language: 'English (US)',
@@ -82,9 +84,9 @@ export const initialState: DataState = {
       notificationPreferences: [],
       billing: {
           licenseType: 'Enterprise',
-          renewalDate: '',
-          seatLimit: 0,
-          storageLimitGB: 0,
+          renewalDate: '2024-12-31',
+          seatLimit: 500,
+          storageLimitGB: 1000,
           history: []
       }
   },
@@ -150,37 +152,29 @@ export const initialState: DataState = {
   activities: [],
   teamEvents: [],
   pipelineStages: [],
-  knowledgeBase: [
-      { 
-          id: 'KB-001', 
-          title: 'Budget Transfer Policy', 
-          category: 'Finance', 
-          content: '<h3>Overview</h3><p>All transfers above $10k require PMO approval...</p>',
-          authorId: 'U-001',
-          lastUpdated: '2024-05-15',
-          views: 42,
-          tags: ['Compliance', 'Finance']
-      }
-  ],
+  knowledgeBase: [],
   etlMappings: [],
   costReports: [],
   costMeetings: [],
   costAlerts: [],
-  reportDefinitions: [
-      { id: 'status_summary', title: 'Monthly Status Report', category: 'General', description: 'High-level executive summary of project health, schedule, and key issues.', icon: 'FileText', type: 'Standard' },
-      { id: 'cost_ledger', title: 'Cost Ledger Detail', category: 'Financial', description: 'Detailed transaction log of all budget changes, commitments, and actuals.', icon: 'Table', type: 'Standard' },
-      { id: 'risk_register', title: 'Risk Register Export', category: 'Risk', description: 'Comprehensive list of active risks, scores, and mitigation plans.', icon: 'AlertTriangle', type: 'Standard' },
-      { id: 'evm_analysis', title: 'Earned Value Analysis', category: 'Performance', description: 'SPI, CPI, and EAC forecasting metrics by WBS.', icon: 'TrendingUp', type: 'Standard' },
-      { id: 'resource_load', title: 'Resource Utilization', category: 'Resource', description: 'Staffing demand vs capacity heatmaps.', icon: 'Activity', type: 'Standard' },
-  ],
+  reportDefinitions: [],
   systemMonitoring: {
       metrics: [
-          { id: 'm-db-size', name: 'Database Size', value: 0.0, unit: 'MB', threshold: 500, trend: [] },
-          { id: 'm-schema', name: 'Schema Version', value: 1.3, unit: 'v', threshold: 2.0, trend: [] },
-          { id: 'm-backup', name: 'Last Backup', value: 0, unit: 'mins ago', threshold: 60, trend: [] }
+          { id: 'm-db-size', name: 'Database Size', value: 142.4, unit: 'MB', threshold: 1000, trend: [120, 125, 130, 142] },
+          { id: 'm-schema', name: 'Schema Version', value: 2.4, unit: 'v', threshold: 3.0, trend: [] },
+          { id: 'm-backup', name: 'Last Backup', value: 4, unit: 'mins ago', threshold: 60, trend: [] }
       ],
-      services: [],
-      throughput: []
+      services: [
+          { id: 'svc-api', name: 'Core API Gateway', status: 'Operational', uptime: '99.99%', latency: '12ms' },
+          { id: 'svc-sched', name: 'CPM Engine', status: 'Operational', uptime: '100%', latency: '45ms' },
+          { id: 'svc-erp', name: 'SAP Bridge', status: 'Degraded', uptime: '98.5%', latency: '240ms' }
+      ],
+      throughput: [
+          { time: '10:00', records: 450 },
+          { time: '11:00', records: 620 },
+          { time: '12:00', records: 890 },
+          { time: '13:00', records: 710 }
+      ]
   },
   staging: {
       activeImportId: null,
@@ -191,11 +185,25 @@ export const initialState: DataState = {
   },
   extensionData: {
       financial: { allocation: [], cashFlow: [], regulatoryAudits: [], initiatives: [] },
-      construction: { submittals: [] },
+      construction: { submittals: [ { status: 'Pending', count: 14 }, { status: 'Approved', count: 42 }, { status: 'Rejected', count: 3 } ] },
       government: { fundsFlow: [], fiscalYears: [], appropriations: [], treasuryStats: [], acquisitionPrograms: [], defenseStats: { readiness: 'N/A', personnel: 'N/A', budget: 'N/A', cyberStatus: 'Unknown', logisticsStatus: 'Unknown' }, energyStats: { gridLoad: 'N/A', capacity: 'N/A', reserve: 'N/A', renewablePercent: 0, renewableTarget: 0, mix: [] } },
       dod: { milestones: [], phases: [], evmsData: [], quadChart: { performance: [], schedule: [], cost: [], technical: [] } },
-      erpTransactions: [],
-      bim: { tree: [] },
-      gis: { features: [] }
+      erpTransactions: [
+          { id: 'ERP-TX-001', type: 'Journal Entry', amount: 45000, status: 'Success', response: 'Committed to S/4HANA' },
+          { id: 'ERP-TX-002', type: 'AP Invoice', amount: 125000, status: 'Success', response: 'Voucher #99201 generated' },
+          { id: 'ERP-TX-003', type: 'PO Release', amount: 8000, status: 'Failed', response: 'Cost center authorization failure' }
+      ],
+      bim: { 
+          tree: [
+              { id: 'bim-01', name: 'Substructure', visible: true, children: [ { id: 'bim-01-1', name: 'Pile Caps', visible: true }, { id: 'bim-01-2', name: 'Grade Beams', visible: true } ] },
+              { id: 'bim-02', name: 'Superstructure', visible: true, children: [ { id: 'bim-02-1', name: 'Steel Frame', visible: true } ] }
+          ]
+      },
+      gis: { 
+          features: [
+              { id: 'gis-01', name: 'Site Boundary', type: 'Polygon', coordinates: '100,100 400,100 400,400 100,400', properties: { fill: 'rgba(59, 130, 246, 0.1)', stroke: '#3b82f6' } },
+              { id: 'gis-02', name: 'Crane Area', type: 'Polygon', coordinates: '200,200 300,200 300,300 200,300', properties: { fill: 'rgba(239, 68, 68, 0.1)', stroke: '#ef4444' } }
+          ]
+      }
   }
 };

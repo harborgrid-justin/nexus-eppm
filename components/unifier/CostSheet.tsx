@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 import { evaluateFormula } from '../../utils/logic/businessProcessEngine';
 import { formatCurrency } from '../../utils/formatters';
-import { RefreshCw, Calculator, FileSpreadsheet, LayoutTemplate } from 'lucide-react';
+import { RefreshCw, Calculator, FileSpreadsheet, LayoutTemplate, Plus, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
 
@@ -51,10 +51,6 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
       return t;
   }, [computedRows, columns]);
 
-  const handleRecalculate = () => {
-      console.log("Recalculating sheet...");
-  };
-
   return (
     <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
         <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50`}>
@@ -68,27 +64,12 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
                 </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-                <Button 
-                    variant="outline" 
-                    size="sm" 
-                    icon={Calculator} 
-                    onClick={handleRecalculate}
-                    className="flex-1 sm:flex-none"
-                >
-                    Recalculate
-                </Button>
-                <Button 
-                    variant="primary" 
-                    size="sm" 
-                    icon={RefreshCw}
-                    className="flex-1 sm:flex-none"
-                >
-                    Refresh
-                </Button>
+                <Button variant="outline" size="sm" icon={Calculator}>Recalculate</Button>
+                <Button variant="primary" size="sm" icon={RefreshCw}>Refresh</Button>
             </div>
         </div>
         
-        <div className="flex-1 overflow-auto bg-white relative" style={{ contain: 'layout paint' }}>
+        <div className="flex-1 overflow-auto bg-white relative">
             {computedRows.length === 0 ? (
                  <div className="h-full flex flex-col justify-center p-8">
                     <EmptyGrid 
@@ -103,7 +84,7 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
                 <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
                     <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
                         <tr>
-                            <th className={`px-4 py-3 text-left text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} sticky left-0 ${theme.colors.background} z-20 min-w-[150px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>WBS / Cost Code</th>
+                            <th className={`px-4 py-3 text-left text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} sticky left-0 ${theme.colors.background} z-20 min-w-[150px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>Cost Code</th>
                             <th className={`px-4 py-3 text-left text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} min-w-[200px]`}>Description</th>
                             {columns.map(col => (
                                 <th key={col.id} className={`px-4 py-3 text-right text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider border-r ${theme.colors.border} min-w-[140px] ${col.type === 'Formula' ? 'bg-blue-50/30' : ''}`}>
@@ -116,16 +97,29 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
                         {computedRows.map((row, idx) => (
                             <tr key={idx} className={`hover:${theme.colors.background} transition-colors group`}>
                                 <td className={`px-4 py-3 text-sm font-mono ${theme.colors.text.secondary} border-r ${theme.colors.border} sticky left-0 bg-white group-hover:${theme.colors.background} z-10 font-bold shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]`}>
-                                    {row.wbsCode} <span className="text-slate-300">|</span> {row.costCode}
+                                    {row.costCode}
                                 </td>
                                 <td className={`px-4 py-3 text-sm ${theme.colors.text.primary} border-r ${theme.colors.border}`}>
-                                    {row.description}
+                                    {row.description || (
+                                        <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-nexus-600 transition-colors font-bold uppercase tracking-tighter">
+                                            <Plus size={12}/> Map Description
+                                        </button>
+                                    )}
                                 </td>
                                 {columns.map(col => (
                                     <td key={col.id} className={`px-4 py-3 text-sm text-right font-mono border-r ${theme.colors.border} ${col.type === 'Formula' ? 'font-bold text-slate-900 bg-blue-50/10' : 'text-slate-600'}`}>
-                                        {formatCurrency(row[col.id])}
+                                        {row[col.id] !== undefined ? formatCurrency(row[col.id]) : (
+                                            <div className="w-full h-4 bg-slate-50 rounded animate-pulse opacity-50"></div>
+                                        )}
                                     </td>
                                 ))}
+                            </tr>
+                        ))}
+                        {/* Empty Rows Pattern */}
+                        {[...Array(5)].map((_, i) => (
+                            <tr key={`empty-${i}`} className="nexus-empty-pattern h-10 border-b border-slate-50">
+                                <td className="border-r border-slate-100 sticky left-0 bg-white opacity-40"></td>
+                                <td colSpan={columns.length + 1} className="opacity-10"></td>
                             </tr>
                         ))}
                         <tr className={`${theme.colors.background} font-black border-t-2 ${theme.colors.border} sticky bottom-0 z-20 shadow-[0_-2px_5px_-2px_rgba(0,0,0,0.05)]`}>

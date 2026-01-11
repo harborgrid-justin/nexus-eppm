@@ -1,9 +1,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { ShieldAlert, RefreshCw } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Loader2 } from 'lucide-react';
 import { calculateRiskExposure } from '../../utils/integrationUtils';
-import { Button } from '../../ui/Button';
+import { Button } from '../ui/Button';
 import { ReserveKPIs } from './reserves/ReserveKPIs';
 import { CompositionChart } from './reserves/CompositionChart';
 import { BurndownChart } from './reserves/BurndownChart';
@@ -39,10 +39,18 @@ const ReserveAnalysis: React.FC = () => {
     };
   }, [project, risks, budgetItems]);
 
-  if (!project || !analysisData) return <div>Loading...</div>;
+  // FIX: Replaced simple "Loading..." text with professional grey-fill and pulse pattern for production readiness
+  if (!project || !analysisData) {
+      return (
+          <div className="h-full flex flex-col items-center justify-center nexus-empty-pattern">
+              <Loader2 className="animate-spin text-slate-300 mb-4" size={40}/>
+              <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Synthesizing Reserve Data...</span>
+          </div>
+      );
+  }
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
+    <div className="h-full overflow-y-auto p-6 space-y-6 animate-nexus-in">
         <ReserveKPIs data={analysisData} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
