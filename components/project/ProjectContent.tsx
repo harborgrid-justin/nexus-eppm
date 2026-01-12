@@ -3,7 +3,7 @@ import React, { lazy } from 'react';
 
 const ProjectIntegrationManagement = lazy(() => import('../integration/ProjectIntegrationManagement'));
 const ProjectGantt = lazy(() => import('../ProjectGantt'));
-const CostManagement = lazy(() => import('../CostManagement'));
+const CostManagement = lazy(() => import('../cost/CostManagement'));
 const ProjectRiskManager = lazy(() => import('../risk/ProjectRiskManager'));
 const IssueLog = lazy(() => import('../IssueLog'));
 const ScopeManagement = lazy(() => import('../ScopeManagement'));

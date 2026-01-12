@@ -6,19 +6,20 @@ import { useTheme } from '../../context/ThemeContext';
 import { CustomBarChart } from '../charts/CustomBarChart';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { useRiskDashboardLogic } from '../../hooks/domain/useRiskDashboardLogic';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const RiskDashboard: React.FC = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { 
       hasData, categoryData, avgRiskScore, openRisksCount, mitigatedCount, topRisks, totalRisks
   } = useRiskDashboardLogic();
 
   const handleAddRisk = () => {
-      // Navigate to register view to add a risk since this is a dashboard
-      // Alternatively, we could open a modal here if provided by the hook, but navigation is safer for dashboard
-      navigate('../register');
+      // Update URL param to switch view to register within the same module
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('view', 'register');
+      setSearchParams(newParams);
   };
 
   if (!hasData) {
