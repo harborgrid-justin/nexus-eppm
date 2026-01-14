@@ -11,7 +11,7 @@ import { WbsTree } from './estimating/WbsTree';
 import { EstimateHeader } from './estimating/EstimateHeader';
 import { BasisOfEstimate } from './estimating/BasisOfEstimate';
 import { Calculator } from 'lucide-react';
-import { ESTIMATE_CLASSES } from '../../constants/index';
+import { ESTIMATE_CLASSES, RESOURCE_TYPES } from '../../constants/index';
 import { generateId } from '../../utils/formatters';
 
 interface CostEstimatingProps {

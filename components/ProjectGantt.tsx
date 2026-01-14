@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';

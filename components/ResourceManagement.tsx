@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Users, Loader2 } from 'lucide-react';
+import { Users, Loader2, AlertTriangle } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
@@ -96,5 +97,5 @@ const ResourceManagement: React.FC = () => {
     </div>
   );
 };
-import { AlertTriangle } from 'lucide-react';
+
 export default ResourceManagement;

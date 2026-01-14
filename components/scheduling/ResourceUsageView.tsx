@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useMemo } from 'react';
 // FIX: Corrected import path to use the barrel file to resolve module ambiguity.
 import { Project } from '../../types/index';

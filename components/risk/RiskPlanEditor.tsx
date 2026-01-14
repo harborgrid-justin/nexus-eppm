@@ -27,10 +27,14 @@ const RiskPlanEditor: React.FC = () => {
     useEffect(() => { if (riskPlan) setFormData(riskPlan); }, [riskPlan]);
 
     const handleSave = () => {
-        if (formData) {
+        if (formData && project) {
             dispatch({ type: 'PROJECT_UPDATE_RISK_PLAN', payload: { projectId: project.id, plan: formData } });
-            alert("Risk Management Plan updated.");
         }
+    };
+
+    const handleApplyTemplate = (templateId: string | null) => {
+        // Logic to apply selected template
+        setIsTemplatePanelOpen(false);
     };
 
     if (!formData || !project) return <div className="p-8 text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Initializing Plan Context...</div>;
@@ -61,7 +65,7 @@ const RiskPlanEditor: React.FC = () => {
                     <button 
                         key={tab.id} 
                         onClick={() => setActiveTab(tab.id as any)} 
-                        className={`px-6 py-3 text-sm font-medium border-b-2 flex items-center gap-2 ${activeTab === tab.id ? `border-nexus-600 text-nexus-700` : `border-transparent text-slate-500 hover:text-slate-800`}`}
+                        className={`px-6 py-3 text-sm font-medium border-b-2 flex items-center gap-2 transition-all ${activeTab === tab.id ? `border-nexus-600 text-nexus-700` : `border-transparent text-slate-500 hover:text-slate-800`}`}
                     >
                         <tab.icon size={14}/> {tab.label}
                     </button>
@@ -76,39 +80,37 @@ const RiskPlanEditor: React.FC = () => {
                                 label="Risk Management Objectives"
                                 value={formData.objectives}
                                 placeholderLabel="Objectives not established for this project."
-                                onAdd={() => {}}
+                                onSave={(val) => setFormData({...formData, objectives: val})}
                             />
                             <NarrativeField 
                                 label="Execution Scope"
                                 value={formData.scope}
                                 placeholderLabel="Plan scope boundaries undefined."
-                                onAdd={() => {}}
+                                onSave={(val) => setFormData({...formData, scope: val})}
                             />
                         </div>
                     )}
                     
                     {activeTab === 'methodology' && (
                         <div className="animate-nexus-in">
-                            <NarrativeField 
-                                label="Risk Approach & Methodology"
-                                value={formData.approach}
-                                placeholderLabel="No approach defined. Using standard corporate policy by default."
-                                onAdd={() => {}}
-                                className="mb-8"
-                            />
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
-                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Frequency</h4><p className="text-sm font-bold">Weekly Review</p></div>
-                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Analysis</h4><p className="text-sm font-bold">Qualitative & Monte Carlo</p></div>
-                                <div className="p-4 rounded-xl border bg-slate-50"><h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Escalation</h4><p className="text-sm font-bold">Score >= 15</p></div>
-                            </div>
+                             <PlanMethodology formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />
                         </div>
                     )}
 
-                    {activeTab === 'taxonomy' && <PlanTaxonomy formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />}
-                    {activeTab === 'thresholds' && <PlanThresholds formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />}
+                    {activeTab === 'taxonomy' && (
+                        <div className="animate-nexus-in">
+                             <PlanTaxonomy formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />
+                        </div>
+                    )}
+
+                    {activeTab === 'thresholds' && (
+                        <div className="animate-nexus-in">
+                             <PlanThresholds formData={formData} setFormData={setFormData} isReadOnly={!canEditProject()} />
+                        </div>
+                    )}
                 </div>
             </div>
-            <PlanTemplatePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} onApply={() => {}} />
+            <PlanTemplatePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} onApply={handleApplyTemplate} />
         </div>
     );
 };

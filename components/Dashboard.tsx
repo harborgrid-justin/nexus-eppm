@@ -1,3 +1,4 @@
+
 import React, { useState, useTransition, useMemo } from 'react';
 import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { usePortfolioState } from '../hooks/usePortfolioState';

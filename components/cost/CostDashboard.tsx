@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect, useTransition, useDeferredValue } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
@@ -57,11 +58,12 @@ const CostDashboard: React.FC = () => {
     const totalDays = getDaysDiff(project.startDate, project.endDate);
     const data = [];
     for (let i = 0; i <= 12; i++) {
+        const iVal = i;
         const curDate = new Date(startDate);
-        curDate.setDate(curDate.getDate() + (i * Math.floor(totalDays / 12)));
-        const pct = i / 12;
+        curDate.setDate(curDate.getDate() + (iVal * Math.floor(totalDays / 12)));
+        const pct = iVal / 12;
         const curve = (1 - Math.cos(pct * Math.PI)) / 2;
-        const pv = (project.originalBudget * curve) * Math.pow(1.03, (i * 30 / 365));
+        const pv = (project.originalBudget * curve) * Math.pow(1.03, (iVal * 30 / 365));
         let evVal = curDate <= today ? evm.ev * pct : undefined;
         let acVal = curDate <= today ? (evm.ac * pct) + (costOfQuality * pct) : undefined;
         data.push({ 
@@ -69,7 +71,7 @@ const CostDashboard: React.FC = () => {
             PV: Math.round(pv), 
             EV: evVal ? Math.round(evVal) : undefined, 
             AC: acVal ? Math.round(acVal) : undefined, 
-            Forecast: i > 6 ? eac * curve : undefined 
+            Forecast: iVal > 6 ? eac * curve : undefined 
         });
     }
     return data;

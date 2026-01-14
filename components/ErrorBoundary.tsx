@@ -16,9 +16,9 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// Fixed: Explicitly use React.Component to ensure props and state are correctly typed and accessible
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public override state: ErrorBoundaryState = {
+// Fix: Removed 'override' modifiers as they were causing compilation issues when extending React.Component
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
     hasError: false,
     error: undefined,
   };
@@ -27,27 +27,25 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return { hasError: true, error };
   }
 
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Fixed: Accessing this.props to retrieve the component name for logging
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Correctly accessing this.props for logging
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // Fixed: Define handleRetry as an arrow function to preserve 'this' context
   public handleRetry = () => {
-    // Fixed: Using this.setState to reset the error boundary state
+    // Using this.setState to reset the error boundary state
     this.setState({ hasError: false, error: undefined });
   };
 
-  public override render() {
+  public render() {
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
           <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-4 text-red-500 shadow-sm border border-red-100 rotate-3 transition-transform hover:rotate-0">
             <AlertTriangle size={32} />
           </div>
-          <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* Fixed: Accessing this.props.name to display which module failed */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -70,7 +68,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
-    // Fixed: Accessing this.props.children to render sub-components when no error occurs
     return this.props.children;
   }
 }

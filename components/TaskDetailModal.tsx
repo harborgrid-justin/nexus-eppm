@@ -1,7 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
 import { Task, Project, TaskStatus, ActivityStep, NotebookEntry } from '../types/index';
-// Added missing Users icon import from lucide-react to fix compilation error on line 152
 import { ShieldAlert, FileText, Calendar, Database, ListChecks, Book, Plus, Clock, Trash2, CheckCircle, Circle, Users } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useTaskForm } from '../hooks/useTaskForm';
