@@ -3,6 +3,7 @@ import React from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { useTheme } from '../../context/ThemeContext';
 
 interface FilterBarProps {
   onSearch: (term: string) => void;
@@ -21,6 +22,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   actions,
   className = ""
 }) => {
+  const theme = useTheme();
   return (
     <div className={`flex flex-col sm:flex-row justify-between items-center gap-3 ${className}`}>
       <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -32,7 +34,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           className="w-full sm:w-64"
         />
         {onFilterClick && (
-          <Button variant="secondary" size="md" icon={Filter} onClick={onFilterClick}>
+          <Button variant="outline" size="md" icon={Filter} onClick={onFilterClick}>
             Filter
           </Button>
         )}

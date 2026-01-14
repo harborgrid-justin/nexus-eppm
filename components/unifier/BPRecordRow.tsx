@@ -14,10 +14,9 @@ export const BPRecordRow: React.FC<Props> = ({ record, fields, onClick }) => {
 
   const renderCell = (val: any) => {
     if (val === null || val === undefined) return '-';
-    // Defense: Ensure only primitives are rendered to prevent Error #31
     if (typeof val === 'object') {
         try {
-            return Array.isArray(val) ? `[List: ${val.length}]` : '[Object Detail]';
+            return Array.isArray(val) ? `[List: ${val.length}]` : '[Object]';
         } catch (e) {
             return '-';
         }
@@ -28,19 +27,16 @@ export const BPRecordRow: React.FC<Props> = ({ record, fields, onClick }) => {
   return (
     <tr 
         onClick={onClick} 
-        className={`nexus-table-row cursor-pointer transition-all duration-150 group border-b ${theme.colors.border.replace('border-','border-b-')} outline-none focus:${theme.colors.background}`}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
+        className={`nexus-table-row cursor-pointer transition-all duration-150 group border-b ${theme.colors.border.replace('border-','border-b-')}50 outline-none hover:${theme.colors.background}/50`}
     >
-      <td className={`px-6 py-4 text-xs font-mono font-bold ${theme.colors.text.tertiary} group-hover:text-nexus-600 transition-colors`}>
+      <td className={`px-6 py-4 text-xs font-mono font-bold ${theme.colors.text.tertiary} group-hover:text-nexus-600`}>
         {String(record.id)}
       </td>
       <td className={`px-6 py-4 text-sm font-bold ${theme.colors.text.primary}`}>
         {renderCell(record.title)}
       </td>
       <td className="px-6 py-4">
-        <span className={`bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black ${theme.colors.text.secondary} border ${theme.colors.border} uppercase tracking-tight`}>
+        <span className={`bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black ${theme.colors.text.secondary} border ${theme.colors.border} uppercase`}>
           {renderCell(record.status)}
         </span>
       </td>

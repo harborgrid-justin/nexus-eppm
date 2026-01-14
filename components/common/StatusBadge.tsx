@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { StatusVariant } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
@@ -11,7 +12,6 @@ interface StatusBadgeProps {
 
 const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({ 
   status, 
-  variant = 'status', 
   className = '',
   customColorClass
 }) => {
@@ -36,7 +36,6 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
 
   let colors = getSemanticColor('neutral');
 
-  // Unified Mapping for Enterprise Health & Execution Status
   if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'approved', 'pass', 'valid', 'issued', 'released', 'solvent'].includes(s)) {
       colors = getSemanticColor('success');
   } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {

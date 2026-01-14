@@ -16,8 +16,6 @@ interface AppHeaderProps {
     onPulseOpen: () => void;
     onAiToggle: () => void;
     onNavigate: (tab: string, id?: string) => void;
-    isSidebarCollapsed: boolean;
-    onToggleCollapse: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -48,22 +46,22 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               <div 
-                  className={`hidden md:flex items-center bg-slate-50/50 rounded-lg px-3 py-1.5 border ${theme.colors.border} hover:border-nexus-300 hover:bg-white transition-all w-64 cursor-pointer group`}
+                  className={`hidden md:flex items-center ${theme.colors.background}/50 rounded-lg px-3 py-1.5 border ${theme.colors.border} hover:border-nexus-300 hover:bg-white transition-all w-64 cursor-pointer group`}
                   onClick={onPaletteOpen}
               >
                   <Search size={14} className="text-slate-400 mr-2 group-hover:text-nexus-500 transition-colors"/>
-                  <span className="text-xs text-slate-500 font-medium group-hover:text-slate-700">Search...</span>
-                  <div className="ml-auto flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200 shadow-sm">
+                  <span className={`text-xs ${theme.colors.text.tertiary} font-medium group-hover:${theme.colors.text.secondary}`}>Search...</span>
+                  <div className={`ml-auto flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded border ${theme.colors.border} shadow-sm`}>
                       <Command size={10} /> K
                   </div>
               </div>
 
-              <div className="h-5 w-px bg-slate-200 hidden md:block"></div>
+              <div className={`h-5 w-px ${theme.colors.border} hidden md:block`}></div>
 
               <div className="flex items-center gap-1">
                 <button 
                     onClick={onPulseOpen} 
-                    className={`p-2 rounded-lg transition-all relative group ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : 'text-slate-500 hover:text-nexus-600 hover:bg-slate-50'}`} 
+                    className={`p-2 rounded-lg transition-all relative group ${isPulseOpen ? 'bg-nexus-50 text-nexus-600' : `${theme.colors.text.tertiary} hover:text-nexus-600 hover:${theme.colors.background}`}`} 
                     title="System Pulse"
                 >
                     <History size={18} className="group-hover:scale-105 transition-transform"/>
@@ -74,7 +72,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               {enableAi && (
                 <button 
                     onClick={() => onNavigate('ai')} 
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border shadow-sm active:scale-95 hover:shadow-md ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700' : 'bg-gradient-to-br from-white to-slate-50 border-slate-200 text-slate-600 hover:text-nexus-600'}`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border shadow-sm active:scale-95 hover:shadow-md ${activeTab === 'ai' ? 'bg-nexus-50 border-nexus-200 text-nexus-700' : `bg-white ${theme.colors.border} ${theme.colors.text.tertiary} hover:text-nexus-600`}`}
                 >
                     <Sparkles size={14} className={activeTab === 'ai' ? 'text-nexus-600' : 'text-purple-500'} />
                     <span className="hidden sm:inline">Advisor</span>

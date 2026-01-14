@@ -13,7 +13,6 @@ interface Props {
 export const ProjectHeader: React.FC<Props> = ({ project, onCreateReflection, onMergeReflection }) => {
   const theme = useTheme();
 
-  // Optimization: Native Web Share API
   const handleShare = async () => {
       if (navigator.share) {
           try {
@@ -26,7 +25,6 @@ export const ProjectHeader: React.FC<Props> = ({ project, onCreateReflection, on
               console.log('Error sharing:', error);
           }
       } else {
-          // Fallback to Clipboard API
           navigator.clipboard.writeText(window.location.href);
           alert("Link copied to clipboard");
       }
@@ -35,14 +33,16 @@ export const ProjectHeader: React.FC<Props> = ({ project, onCreateReflection, on
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
       <div>
-        <h1 className={theme.typography.h1}>
+        <h1 className={`${theme.typography.h1} flex items-center`}>
           <Briefcase className="inline-block mr-3 text-nexus-600 mb-1" size={28} />
           {project.name}
         </h1>
         <p className={`${theme.colors.text.secondary} font-medium text-sm mt-1`}>{project.code} • {project.category}</p>
       </div>
       <div className="flex gap-2">
-        <Button onClick={handleShare} variant="ghost" size="sm" icon={Share2}>Share</Button>
+        <button onClick={handleShare} className={`px-4 py-2 bg-white border ${theme.colors.border} ${theme.colors.text.secondary} rounded-lg text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2`}>
+            <Share2 size={16}/> Share
+        </button>
         {!project.isReflection && <Button onClick={onCreateReflection} variant="outline" size="sm" icon={GitBranch}>What-If Reflection</Button>}
         {project.isReflection && <Button onClick={onMergeReflection} variant="primary" size="sm" icon={GitMerge}>Merge Scenarios</Button>}
       </div>

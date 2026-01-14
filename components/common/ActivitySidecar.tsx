@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { History, User, Zap, MessageSquare, Clock, X, Terminal, CheckCircle } from 'lucide-react';
 import { EmptyGrid } from './EmptyGrid';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ActivitySidecarProps {
   isOpen: boolean;
@@ -10,6 +12,7 @@ interface ActivitySidecarProps {
 
 export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClose }) => {
   const { state } = useData();
+  const theme = useTheme();
   const auditLogs = state.governance.auditLog || [];
 
   const [mounted, setMounted] = useState(false);
@@ -35,12 +38,12 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-80 bg-surface border-l border-border shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300">
-      <div className="p-4 border-b border-border flex justify-between items-center bg-background">
-        <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+    <div className={`fixed inset-y-0 right-0 w-80 ${theme.colors.surface} border-l ${theme.colors.border} shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300`}>
+      <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
+        <h3 className={`text-xs font-black uppercase tracking-widest ${theme.colors.text.tertiary} flex items-center gap-2`}>
           <History size={14} className="text-nexus-600" /> Live Project Pulse
         </h3>
-        <button onClick={onClose} className="p-1 hover:bg-slate-200 rounded-full text-slate-400"><X size={16} /></button>
+        <button onClick={onClose} className={`p-1 hover:${theme.colors.background} rounded-full text-slate-400`}><X size={16} /></button>
       </div>
       
       <div className="flex-1 overflow-y-auto scrollbar-thin">
@@ -51,11 +54,11 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
                         <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-slate-200 border-2 border-white group-hover:bg-nexus-500 transition-colors"></div>
                         <div className="text-xs">
                         <div className="flex justify-between items-center mb-1">
-                            <span className="font-bold text-slate-900 truncate max-w-[120px]">{log.user}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">{getTimeString(log.date)}</span>
+                            <span className={`font-bold ${theme.colors.text.primary} truncate max-w-[120px]`}>{log.user}</span>
+                            <span className={`text-[10px] ${theme.colors.text.tertiary} font-mono`}>{getTimeString(log.date)}</span>
                         </div>
-                        <p className="text-slate-500 leading-relaxed">
-                            <span className="font-semibold text-slate-600">{log.action}</span> - {log.details}
+                        <p className={`${theme.colors.text.secondary} leading-relaxed`}>
+                            <span className={`font-semibold ${theme.colors.text.secondary}`}>{log.action}</span> - {log.details}
                         </p>
                         {log.action.includes('Approved') && (
                             <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold border border-green-100">
@@ -82,8 +85,8 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
         )}
       </div>
 
-      <div className="p-4 border-t border-border bg-background">
-         <button className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-nexus-600 transition-colors">View Full Audit Ledger</button>
+      <div className={`p-4 border-t ${theme.colors.border} ${theme.colors.background}`}>
+         <button className={`w-full py-2 text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>View Full Audit Ledger</button>
       </div>
     </div>
   );

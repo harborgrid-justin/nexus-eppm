@@ -7,8 +7,10 @@ import { ErrorBoundary } from '../ErrorBoundary';
 import { AppHeader } from './AppHeader';
 import { AppFooter } from './AppFooter';
 import SuspenseFallback from './SuspenseFallback';
+import { useTheme } from '../../context/ThemeContext';
 
 const MainLayout: React.FC = () => {
+  const theme = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isPulseOpen, setIsPulseOpen] = useState(false);
@@ -31,10 +33,9 @@ const MainLayout: React.FC = () => {
   };
 
   const activeTab = location.pathname.split('/')[1] || 'portfolio';
-  const isScheduleMode = activeTab === 'schedule';
 
   return (
-    <div className="flex h-screen w-full font-sans overflow-hidden relative bg-background text-text-primary">
+    <div className={`flex h-screen w-full font-sans overflow-hidden relative ${theme.colors.background} ${theme.colors.text.primary}`}>
       <ActivitySidecar isOpen={isPulseOpen} onClose={() => setIsPulseOpen(false)} />
 
       <Sidebar 
@@ -46,7 +47,7 @@ const MainLayout: React.FC = () => {
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       
-      <div className={`flex-1 flex flex-col min-w-0 bg-background relative z-0 transition-all duration-300`}>
+      <div className="flex-1 flex flex-col min-w-0 relative z-0 transition-all duration-300">
         <AppHeader 
           activeTab={activeTab} 
           projectId={projectIdFromUrl}

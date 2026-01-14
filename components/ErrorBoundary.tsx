@@ -15,7 +15,7 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Explicitly extending React.Component to ensure props and setState are correctly inherited and recognized by the TypeScript compiler
+// Use React.Component explicitly to ensure correct inheritance of props and setState
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
@@ -27,13 +27,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Successfully access this.props within the class lifecycle method
+    // Accessing this.props to retrieve the component name for logging
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // FIX: handleRetry defined as an arrow function to preserve 'this' context for calling this.setState
+  // Define handleRetry as an arrow function to preserve 'this' context
   public handleRetry = () => {
-    // FIX: Successfully access this.setState to clear the error state and trigger a re-render
+    // Using this.setState to reset the error boundary state
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -46,7 +46,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* FIX: Correctly access this.props.name in the render method */}
+            {/* Accessing this.props.name to display which module failed */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -69,7 +69,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
-    // FIX: Correctly access this.props.children to continue normal component rendering when no error is present
+    // Accessing this.props.children to render sub-components when no error occurs
     return this.props.children;
   }
 }

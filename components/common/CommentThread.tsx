@@ -12,15 +12,10 @@ interface Comment {
     time: string;
 }
 
-interface CommentThreadProps {
-    comments?: Comment[];
-}
-
-export const CommentThread: React.FC<CommentThreadProps> = ({ comments: initialComments = [] }) => {
+export const CommentThread: React.FC = () => {
   const theme = useTheme();
   const { user } = useAuth();
-  const [comments, setComments] = useState<Comment[]>(initialComments.length > 0 ? initialComments : [
-      // Fallback mock if empty to show UI
+  const [comments, setComments] = useState<Comment[]>([
       { id: 1, user: 'System', text: 'Thread started.', time: 'Just now' }
   ]);
   const [input, setInput] = useState('');
@@ -44,7 +39,6 @@ export const CommentThread: React.FC<CommentThreadProps> = ({ comments: initialC
                       <p className={theme.colors.text.secondary}>{c.text}</p>
                   </div>
               ))}
-              {comments.length === 0 && <p className="text-center text-slate-400 text-xs italic">No comments yet.</p>}
           </div>
           <div className="flex gap-2">
               <input 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useDeferredValue, useMemo } from 'react';
-import { Search, Command, Briefcase, Settings, Users, FileText, X, Sparkles, ChevronRight, Loader2 } from 'lucide-react';
+import { Search, Command, Briefcase, Settings, Users, X, Sparkles, ChevronRight, Loader2 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -12,20 +12,18 @@ interface CommandPaletteProps {
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose, onNavigate }) => {
   const { state } = useData();
+  const theme = useTheme();
   const [query, setQuery] = useState('');
-  // Principle 10: Separate high-priority input state from low-priority filter state
   const deferredQuery = useDeferredValue(query);
   const isStale = query !== deferredQuery;
   
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const theme = useTheme();
 
   useEffect(() => {
     if (isOpen) {
       setQuery('');
       setSelectedIndex(0);
-      // Small timeout to ensure DOM mount before focus
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
@@ -82,7 +80,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           <input
             ref={inputRef}
             type="text"
-            className="flex-1 bg-transparent border-none outline-none text-lg font-medium text-slate-800 placeholder:text-slate-400"
+            className={`flex-1 bg-transparent border-none outline-none text-lg font-medium ${theme.colors.text.primary} placeholder:text-slate-400`}
             placeholder="Type a command or search..."
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -120,7 +118,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                         <p className={`text-sm font-bold truncate ${selectedIndex === idx ? 'text-slate-900' : 'text-slate-700'}`}>
                             {item.label}
                         </p>
-                        <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">{item.type}</p>
+                        <p className={`text-[10px] ${theme.colors.text.tertiary} uppercase tracking-widest font-bold`}>{item.type}</p>
                     </div>
                   </div>
                   {selectedIndex === idx && (
@@ -132,7 +130,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center text-slate-400">
+            <div className={`py-12 text-center ${theme.colors.text.tertiary}`}>
                 {query ? (
                     <>
                         <Search size={32} className="mx-auto mb-3 opacity-20"/>
@@ -148,7 +146,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
           )}
         </div>
         
-        <div className={`px-4 py-3 ${theme.colors.background} border-t ${theme.colors.border} flex justify-between items-center text-[10px] text-slate-400 font-medium select-none`}>
+        <div className={`px-4 py-3 ${theme.colors.background} border-t ${theme.colors.border} flex justify-between items-center text-[10px] ${theme.colors.text.tertiary} font-medium select-none`}>
              <div className="flex gap-4">
                 <span className="flex items-center gap-1"><kbd className="font-sans px-1 bg-white border rounded">↑</kbd> <kbd className="font-sans px-1 bg-white border rounded">↓</kbd> Navigate</span>
                 <span className="flex items-center gap-1"><kbd className="font-sans px-1 bg-white border rounded">↵</kbd> Select</span>

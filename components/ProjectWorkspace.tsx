@@ -1,9 +1,9 @@
-
 import React, { Suspense } from 'react';
 import { Network, GanttChartSquare, GitBranch, Briefcase } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
+import { useI18n } from '../context/I18nContext';
 import { ProjectWorkspaceProvider } from '../context/ProjectWorkspaceContext';
 import SuspenseFallback from './layout/SuspenseFallback';
 import { useProjectWorkspaceLogic } from '../hooks/domain/useProjectWorkspaceLogic';
@@ -13,6 +13,7 @@ import { ProjectContent } from './project/ProjectContent';
 
 const ProjectWorkspace: React.FC = () => {
   const theme = useTheme();
+  const { t } = useI18n();
   const navigate = useNavigate();
   
   const {
@@ -22,13 +23,13 @@ const ProjectWorkspace: React.FC = () => {
 
   if (!projectData) {
       return (
-        <div className="h-full w-full flex items-center justify-center p-12 bg-slate-50">
+        <div className={`h-full w-full flex items-center justify-center p-12 ${theme.colors.background}`}>
             <EmptyGrid 
-                title="Project Context Undefined"
-                description="Select an active initiative from the portfolio registry to initialize the command center."
+                title={t('project.workspace_null', 'Project Context Undefined')}
+                description={t('project.workspace_null_desc', 'Select an active initiative from the portfolio registry to initialize the command center.')}
                 icon={Briefcase}
                 onAdd={() => navigate('/projectList')}
-                actionLabel="Browse Projects"
+                actionLabel={t('project.browse', 'Browse Projects')}
             />
         </div>
       );
@@ -38,8 +39,8 @@ const ProjectWorkspace: React.FC = () => {
     <ProjectWorkspaceProvider value={projectData}>
         <div className={`h-full w-full flex flex-col ${theme.colors.background}`}>
         {projectData.project.isReflection && (
-            <div className="bg-purple-600 text-white px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 shadow-sm z-50">
-                <GitBranch size={16} /> SANDBOX MODE: You are editing a Reflection Project. Changes are isolated until merged.
+            <div className={`${theme.colors.semantic.warning.bg} ${theme.colors.semantic.warning.text} px-4 py-2 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm z-50 border-b ${theme.colors.semantic.warning.border}`}>
+                <GitBranch size={16} /> {t('project.sandbox_warning', 'Sandbox Mode: Simulation Project')}
             </div>
         )}
         <ModuleNavigation 

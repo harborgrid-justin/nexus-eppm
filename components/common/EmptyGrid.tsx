@@ -23,7 +23,6 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
 
   return (
     <div className={`flex-1 flex flex-col items-center justify-center p-12 nexus-empty-pattern border-2 border-dashed ${theme.colors.border} rounded-[2.5rem] m-6 animate-nexus-in shadow-inner overflow-hidden relative min-h-[400px]`}>
-      {/* Visual Background Element */}
       <div className="absolute -right-20 -bottom-20 opacity-[0.03] rotate-12 pointer-events-none select-none">
           <Icon size={400} />
       </div>
@@ -33,7 +32,7 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
       </div>
       
       <div className="relative z-10 max-w-sm text-center">
-          <h3 className={`text-2xl font-bold ${theme.colors.text.primary} mb-3 uppercase tracking-tighter`}>
+          <h3 className={`${theme.typography.h1} mb-3 uppercase tracking-tighter`}>
             {title}
           </h3>
           <p className={`text-sm ${theme.colors.text.secondary} mb-10 font-medium leading-relaxed`}>

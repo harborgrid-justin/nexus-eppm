@@ -10,6 +10,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '', icon: Icon, isSearch, label, ...props }, ref) => {
+  const theme = useTheme();
   const IconToRender = isSearch ? Search : Icon;
   const id = props.id || props.name;
 
@@ -24,9 +25,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '',
         ref={ref}
         id={id}
         className={`
-          w-full bg-surface border-border border rounded-lg transition-all
+          w-full ${theme.colors.surface} ${theme.colors.border} border rounded-lg transition-all
           focus:outline-none focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 
-          text-text-primary placeholder:text-text-tertiary font-medium
+          ${theme.colors.text.primary} placeholder:text-text-tertiary font-medium
           disabled:bg-background disabled:text-text-tertiary
           h-10 text-sm
           ${IconToRender ? 'pl-11' : 'pl-4'} 
@@ -41,7 +42,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '',
   if (label) {
     return (
       <div>
-        <label htmlFor={id} className="block text-sm font-medium text-text-primary mb-1">{label}</label>
+        <label htmlFor={id} className={`block text-sm font-medium ${theme.colors.text.primary} mb-1`}>{label}</label>
         {inputElement}
       </div>
     );

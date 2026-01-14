@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Network, Plus, Settings, RefreshCw, Save, Key, Globe, Database, Server, Link, Activity } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
@@ -46,8 +47,8 @@ export const ConnectorConfig: React.FC = () => {
                         <Network size={24} />
                     </div>
                     <div>
-                        <h3 className={`font-black text-slate-900 text-lg uppercase tracking-tighter`}>Enterprise Connectors</h3>
-                        <p className={`text-sm ${theme.colors.text.secondary} font-medium`}>Manage API endpoints, authentication handshakes, and global sync intervals.</p>
+                        <h3 className={`font-black ${theme.colors.text.primary} text-lg uppercase tracking-tighter`}>Enterprise Connectors</h3>
+                        <p className={`text-sm ${theme.colors.text.secondary} font-medium`}>Manage API endpoints and global sync intervals.</p>
                     </div>
                 </div>
                 <Button icon={Plus} onClick={() => handleOpen(null)} className="shadow-lg shadow-nexus-500/10 font-bold uppercase tracking-widest text-[10px]">Add Connector</Button>
@@ -57,7 +58,7 @@ export const ConnectorConfig: React.FC = () => {
                 <div className="flex-1">
                     <EmptyGrid 
                         title="Infrastructure Fabric Clean"
-                        description="No external data connectors are currently provisioned. Establish a bridge to ERP or Schedule sources to activate real-time ingestion."
+                        description="No external data connectors are currently provisioned."
                         onAdd={() => handleOpen(null)}
                         actionLabel="Provision Connector"
                         icon={Network}
@@ -82,18 +83,17 @@ export const ConnectorConfig: React.FC = () => {
                                 <p className={`text-[10px] ${theme.colors.text.secondary} font-mono truncate mb-6 bg-slate-50 p-1.5 rounded border border-slate-100`}>{conn.endpoint || 'ENDPOINT_NOT_CONFIGURED'}</p>
                                 
                                 <div className="flex gap-2 mb-8 flex-wrap">
-                                    <span className={`text-[9px] font-black uppercase text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200 tracking-tighter`}>{conn.type}</span>
-                                    <span className={`text-[9px] font-black uppercase text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200 tracking-tighter`}>{conn.protocol || 'REST'}</span>
+                                    <span className={`text-[9px] font-black uppercase ${theme.colors.text.tertiary} ${theme.colors.background} px-2 py-1 rounded border ${theme.colors.border} tracking-tighter`}>{conn.type}</span>
                                     <span className={`text-[9px] font-black uppercase text-nexus-600 bg-nexus-50 px-2 py-1 rounded border border-nexus-100 tracking-tighter ml-auto`}>Last: {conn.lastSync}</span>
                                 </div>
 
-                                <div className={`mt-auto pt-4 border-t ${theme.colors.border.replace('border-','border-slate-')}100 flex gap-3`}>
-                                    <button onClick={() => handleOpen(conn)} className={`flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 hover:border-nexus-200 transition-all shadow-sm active:scale-95`}>
+                                <div className={`mt-auto pt-4 border-t ${theme.colors.border} flex gap-3`}>
+                                    <button onClick={() => handleOpen(conn)} className={`flex-1 py-2.5 bg-white border ${theme.colors.border} rounded-xl text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary} hover:text-nexus-600 hover:border-nexus-200 transition-all shadow-sm active:scale-95`}>
                                         <Settings size={12} className="inline mr-1.5"/> Settings
                                     </button>
                                     <button 
                                         onClick={() => handleSync(conn)}
-                                        className={`flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 hover:border-nexus-200 transition-all shadow-sm active:scale-95`}
+                                        className={`flex-1 py-2.5 bg-white border ${theme.colors.border} rounded-xl text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary} hover:text-nexus-600 hover:border-nexus-200 transition-all shadow-sm active:scale-95`}
                                     >
                                         <RefreshCw size={12} className={`inline mr-1.5 ${conn.lastSync === 'Syncing...' ? 'animate-spin' : ''}`}/> Sync Now
                                     </button>
@@ -118,53 +118,19 @@ export const ConnectorConfig: React.FC = () => {
             >
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Entity Label</label>
+                        <label className={`block text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest mb-1.5 ml-1`}>Entity Label</label>
                         <Input value={editingConn?.name} onChange={e => setEditingConn({...editingConn!, name: e.target.value})} placeholder="e.g. Master Financial ERP" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Topology Type</label>
-                            <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold bg-slate-50 focus:ring-2 focus:ring-nexus-500 outline-none transition-colors`} value={editingConn?.type} onChange={e => setEditingConn({...editingConn!, type: e.target.value})}>
+                            <label className={`block text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest mb-1.5 ml-1`}>Topology Type</label>
+                            <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold ${theme.colors.background} focus:ring-2 focus:ring-nexus-500 outline-none transition-colors`} value={editingConn?.type} onChange={e => setEditingConn({...editingConn!, type: e.target.value})}>
                                 <option>ERP</option>
                                 <option>Schedule</option>
                                 <option>CRM</option>
-                                <option>Document</option>
-                                <option>Data</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Protocol Handshake</label>
-                            <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold bg-slate-50 focus:ring-2 focus:ring-nexus-500 outline-none transition-colors`} value={editingConn?.protocol} onChange={e => setEditingConn({...editingConn!, protocol: e.target.value as any})}>
-                                <option>REST API</option>
-                                <option>SOAP / WSDL</option>
-                                <option>OData v4</option>
-                                <option>JDBC (SQL)</option>
                             </select>
                         </div>
                     </div>
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Uniform Resource Identifier (URI)</label>
-                        <div className="relative group">
-                            <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-nexus-500 transition-colors"/>
-                            <Input className="pl-11 font-mono text-xs h-12" value={editingConn?.endpoint} onChange={e => setEditingConn({...editingConn!, endpoint: e.target.value})} placeholder="https://api.gateway.corp/v1" />
-                        </div>
-                    </div>
-                    
-                    <div className={`p-6 ${theme.colors.background} rounded-2xl border ${theme.colors.border} shadow-inner`}>
-                        <h4 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2`}>
-                            <Key size={14}/> Credential Management
-                        </h4>
-                        <div className="space-y-4">
-                             <select className={`w-full p-2.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 bg-white shadow-sm`}>
-                                <option>OAuth 2.0 (Client Credentials)</option>
-                                <option>Basic Access Authentication</option>
-                                <option>Bearer Token (Secret)</option>
-                            </select>
-                            <Input type="password" placeholder="System ID / Account" className="bg-white" />
-                            <Input type="password" placeholder="Secure Secret / Token" className="bg-white" />
-                        </div>
-                    </div>
-
                     <Button 
                         variant="secondary" 
                         className={`w-full h-12 shadow-sm ${isTesting ? 'animate-pulse' : ''}`} 

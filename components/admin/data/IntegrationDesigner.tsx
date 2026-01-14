@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NEXUS_SCHEMAS } from '../../../constants/index';
 import { GitMerge, ArrowRight, Save, Shuffle, Variable, Clock, Shield, PlayCircle } from 'lucide-react';
@@ -24,7 +25,7 @@ export const IntegrationDesigner: React.FC = () => {
 
     const onSaveClick = () => {
         handleSaveConfig();
-        success("Configuration Saved", "ETL Pipeline and Schema Map committed to system core.");
+        success("Configuration Saved", "ETL Pipeline committed to core.");
     };
 
     return (
@@ -37,7 +38,7 @@ export const IntegrationDesigner: React.FC = () => {
                             <h3 className={`font-bold ${theme.colors.text.primary} text-xl tracking-tight`}>ETL Pipeline Designer</h3>
                             <Badge variant="success" className="font-mono">VER_2.4_STABLE</Badge>
                         </div>
-                        <p className={`text-sm ${theme.colors.text.secondary} mt-1 font-medium`}>Orchestrate automated data flow from external ERP/BIM sources to Nexus Core.</p>
+                        <p className={`text-sm ${theme.colors.text.secondary} mt-1 font-medium`}>Orchestrate automated data flow into Nexus Core.</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -87,15 +88,6 @@ export const IntegrationDesigner: React.FC = () => {
                 )}
                 {activeTab === 'governance' && (
                     <div className="animate-nexus-in"><GovernanceTab governance={governance} setGovernance={setGovernance} /></div>
-                )}
-                {activeTab === 'transform' && (
-                    <div className={`h-full flex items-center justify-center`}>
-                         <div className="text-center p-12 nexus-empty-pattern rounded-[2rem] border-2 border-dashed border-slate-200">
-                             <Variable size={64} className="mx-auto mb-4 opacity-10 text-slate-400"/>
-                             <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">Advanced Scripting Sandbox</p>
-                             <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto">Custom transformation scripts (JS/Python) are currently isolated. Contact system administrator for script execution privileges.</p>
-                         </div>
-                    </div>
                 )}
             </div>
         </div>

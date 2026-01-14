@@ -1,26 +1,10 @@
 
 import React from 'react';
 import { Settings, RefreshCw, Database } from 'lucide-react';
-import EpsObsSettings from './admin/EpsObsSettings';
-import CalendarEditor from './admin/CalendarEditor';
-import GlobalChangeWorkbench from './admin/GlobalChangeWorkbench';
-import UserManagement from './admin/UserManagement';
 import { PageHeader } from './common/PageHeader';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { ErrorBoundary } from './ErrorBoundary';
-import BillingSettings from './admin/BillingSettings';
-import NotificationSettings from './admin/NotificationSettings';
-import SecuritySettings from './admin/SecuritySettings';
-import LocationSettings from './admin/LocationSettings';
-import { ActivityCodeSettings } from './admin/ActivityCodeSettings';
-import { UdfSettings } from './admin/UdfSettings';
-import { IssueCodeSettings } from './admin/IssueCodeSettings';
-import { ExpenseCategorySettings } from './admin/ExpenseCategorySettings';
-import { FundingSourceSettings } from './admin/FundingSourceSettings';
-import EnterpriseResourceSettings from './resources/EnterpriseResourceSettings';
-import WorkflowDesigner from './admin/WorkflowDesigner';
-import AuditLog from './admin/AuditLog';
-import GeneralSettings from './admin/GeneralSettings';
+import { AdminContent } from './admin/AdminContent';
 import { useAdminSettingsLogic } from '../hooks/domain/useAdminSettingsLogic';
 import { useTheme } from '../context/ThemeContext';
 
@@ -37,37 +21,6 @@ const AdminSettings: React.FC = () => {
       handleItemChange,
       handleResetSystem
   } = useAdminSettingsLogic();
-
-  const renderContent = () => {
-    switch(activeView) {
-      // System
-      case 'general': return <GeneralSettings />;
-      case 'users': return <UserManagement />;
-      case 'security': return <SecuritySettings />;
-      case 'notifications': return <NotificationSettings />;
-      case 'billing': return <BillingSettings />;
-      case 'audit': return <AuditLog />;
-      
-      // Enterprise
-      case 'epsobs': return <EpsObsSettings />;
-      case 'calendars': return <CalendarEditor />;
-      case 'locations': return <LocationSettings />;
-      case 'resources': return <EnterpriseResourceSettings />;
-
-      // Dictionaries
-      case 'activityCodes': return <ActivityCodeSettings />;
-      case 'udfs': return <UdfSettings />;
-      case 'issueCodes': return <IssueCodeSettings />;
-      case 'expenseCategories': return <ExpenseCategorySettings />;
-      case 'fundingSources': return <FundingSourceSettings />;
-
-      // Automation
-      case 'workflows': return <WorkflowDesigner />;
-      case 'globalChange': return <GlobalChangeWorkbench />;
-      
-      default: return <div className="p-8 text-center text-slate-400 italic">Select a setting from the navigation menu above to configure.</div>;
-    }
-  };
 
   return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
@@ -110,8 +63,8 @@ const AdminSettings: React.FC = () => {
         
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
             <ErrorBoundary name="Admin Settings">
-                <div className="h-full overflow-y-auto p-6 md:p-8">
-                    {renderContent()}
+                <div className="h-full overflow-y-auto">
+                    <AdminContent activeView={activeView} />
                 </div>
             </ErrorBoundary>
         </div>

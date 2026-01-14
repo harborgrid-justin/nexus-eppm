@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, LayoutGrid, Briefcase, ChevronRight, PieChart, Globe } from 'lucide-react';
+import { Home, ChevronRight, Briefcase } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -16,7 +16,6 @@ export const GlobalBreadcrumbs: React.FC<BreadcrumbProps> = ({ activeTab, projec
   
   const currentProject = state.projects.find(p => p.id === projectId);
   
-  // Resolve Module Group
   const getModuleGroup = () => {
       switch(activeTab) {
           case 'myWork': return 'Personal';

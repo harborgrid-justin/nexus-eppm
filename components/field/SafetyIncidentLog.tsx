@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Plus, Search } from 'lucide-react';
@@ -58,13 +59,9 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
            <div className={`${theme.layout.panelContainer} shadow-md`}>
                <div className={`p-5 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center ${theme.colors.surface} gap-4`}>
                    <div className="flex items-center gap-6">
-                       <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>Occupational Safety Registry</h3>
-                       <div className="relative">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input type="text" placeholder="Search incidents..." className="pl-9 pr-4 py-2 text-xs font-bold border border-slate-200 rounded-xl w-64 nexus-focus-ring bg-slate-50" />
-                       </div>
+                       <h3 className={`text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary}`}>Occupational Safety Registry</h3>
                    </div>
-                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident} className="shadow-lg shadow-red-500/20 font-bold uppercase tracking-widest text-[10px]">Report Critical Incident</Button>
+                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident}>Report Critical Incident</Button>
                </div>
                <div className="flex-1 overflow-auto scrollbar-thin">
                    <IncidentList incidents={incidents} onAdd={handleAddIncident} />

@@ -29,13 +29,12 @@ export const ExcelSync: React.FC = () => {
         if (res.error) {
             error("Sync Failed", res.error);
         } else {
-            success("Data Staged", "Rows pushed to Import Staging. Switch to 'Data Import' to commit.");
+            success("Data Staged", "Rows pushed to Import Staging.");
         }
     };
 
     return (
         <div className={`h-full flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-xl shadow-sm overflow-hidden`}>
-            {/* Toolbar */}
             <div className={`p-3 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center ${theme.colors.background} gap-3`}>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-green-700 font-bold">
@@ -56,7 +55,7 @@ export const ExcelSync: React.FC = () => {
                         <button 
                             onClick={handleLoadProject}
                             disabled={!selectedProjectId}
-                            className={`p-1 ${theme.colors.text.secondary} hover:text-nexus-600 disabled:opacity-30`}
+                            className={`p-1 ${theme.colors.text.tertiary} hover:text-nexus-600 disabled:opacity-30`}
                             title="Load Project Data"
                         >
                             <ArrowDownCircle size={16}/>
@@ -69,21 +68,18 @@ export const ExcelSync: React.FC = () => {
                 </div>
             </div>
 
-            {/* Grid */}
             <div className={`flex-1 overflow-auto relative ${theme.colors.background}/10`}>
                 <div className="min-w-[800px]" onPaste={handlePaste}>
                     <div className="flex">
-                        {/* Row Numbers */}
                         <div className={`w-10 flex-shrink-0 ${theme.colors.background} border-r ${theme.colors.border} pt-8 select-none shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] z-10`}>
                             {data.map((_, i) => (
-                                <div key={i} className={`h-8 flex items-center justify-center text-xs ${theme.colors.text.secondary} font-medium border-b ${theme.colors.border} ${theme.colors.background}`}>
+                                <div key={i} className={`h-8 flex items-center justify-center text-xs ${theme.colors.text.tertiary} font-medium border-b ${theme.colors.border} ${theme.colors.background}`}>
                                     {i + 1}
                                 </div>
                             ))}
                         </div>
                         
                         <div className="flex-1">
-                            {/* Column Headers */}
                             <div className={`flex h-8 ${theme.colors.background} border-b ${theme.colors.border} sticky top-0 z-20`}>
                                 {data[0].map((col, i) => (
                                     <div key={i} className={`flex-1 min-w-[100px] flex items-center justify-center text-xs font-bold ${theme.colors.text.secondary} border-r ${theme.colors.border} relative`}>
@@ -92,13 +88,12 @@ export const ExcelSync: React.FC = () => {
                                 ))}
                             </div>
 
-                            {/* Cells */}
                             {data.map((row, r) => (
                                 <div key={r} className={`flex h-8 border-b ${theme.colors.border}`}>
                                     {row.map((cell, c) => (
                                         <input
                                             key={`${r}-${c}`}
-                                            className={`flex-1 min-w-[100px] px-2 text-sm border-r ${theme.colors.border} outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 focus:bg-green-50 transition-colors ${r === 0 ? `font-bold ${theme.colors.background} ${theme.colors.text.secondary}` : `${theme.colors.text.primary} ${theme.colors.surface}`}`}
+                                            className={`flex-1 min-w-[100px] px-2 text-sm border-r ${theme.colors.border} outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 focus:bg-green-50 transition-colors ${r === 0 ? `font-bold ${theme.colors.background} ${theme.colors.text.tertiary}` : `${theme.colors.text.primary} ${theme.colors.surface}`}`}
                                             value={cell}
                                             readOnly={r === 0}
                                             onClick={() => setSelectedCell({r, c})}
@@ -112,13 +107,12 @@ export const ExcelSync: React.FC = () => {
                 </div>
             </div>
 
-            {/* Status Bar */}
-            <div className={`h-8 ${theme.colors.background} border-t ${theme.colors.border} flex items-center px-4 justify-between text-xs ${theme.colors.text.secondary} select-none`}>
+            <div className={`h-8 ${theme.colors.background} border-t ${theme.colors.border} flex items-center px-4 justify-between text-xs ${theme.colors.text.tertiary} select-none`}>
                 <span>{selectedCell ? `Cell: ${String.fromCharCode(65 + selectedCell.c)}${selectedCell.r + 1}` : 'Ready'}</span>
                 <div className="flex gap-4">
                     <span>Rows: {Math.max(0, data.length - 1)}</span>
                     <span className="text-green-600 font-medium flex items-center gap-1">
-                        <CheckCircle size={10}/> Validation: {hasData ? 'Active' : 'Waiting for Data'}
+                        <CheckCircle size={10}/> Validation Active
                     </span>
                 </div>
             </div>

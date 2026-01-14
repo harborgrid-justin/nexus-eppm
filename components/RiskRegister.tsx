@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ShieldAlert, BarChart2, List, Download, Plus, DollarSign, Activity, AlertOctagon, Loader2, ArrowUpRight, LayoutGrid } from 'lucide-react';
 import { Input } from './ui/Input';
@@ -11,24 +10,20 @@ import { RiskMatrixView } from './risk/views/RiskMatrixView';
 import { RiskAnalyticsView } from './risk/views/RiskAnalyticsView';
 import { useRiskRegisterLogic } from '../hooks/domain/useRiskRegisterLogic';
 import { useTheme } from '../context/ThemeContext';
+import { useI18n } from '../context/I18nContext';
+import StatCard from './shared/StatCard';
+import { EmptyGrid } from './common/EmptyGrid';
 
 const RiskRegister: React.FC = () => {
   const theme = useTheme();
+  const { t } = useI18n();
   const {
-    viewMode,
-    searchTerm,
-    deferredSearchTerm,
-    selectedRiskId,
-    isPending,
-    filteredRisks,
-    metrics,
-    setSearchTerm,
-    setSelectedRiskId,
-    handleViewChange
+    viewMode, searchTerm, deferredSearchTerm, selectedRiskId, isPending,
+    filteredRisks, metrics, setSearchTerm, setSelectedRiskId, handleViewChange
   } = useRiskRegisterLogic();
 
   return (
-    <div className={`${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col ${theme.colors.background}`}>
+    <div className={`h-full flex flex-col ${theme.layout.pagePadding} ${theme.colors.background}`}>
       {selectedRiskId && (
         <RiskDetailModal 
             riskId={selectedRiskId} 
@@ -38,47 +33,53 @@ const RiskRegister: React.FC = () => {
       )}
       
       <PageHeader 
-        title="Enterprise Risk Register" 
-        subtitle="Centralized governance of uncertainty." 
+        title={t('risk.registry_title', 'Enterprise Risk Register')} 
+        subtitle={t('risk.registry_subtitle', 'Centralized governance of uncertainty.')} 
         icon={ShieldAlert} 
-        actions={<><Button variant="outline" size="sm" icon={Download}>Export</Button><Button variant="primary" size="sm" icon={Plus}>New Risk</Button></>} 
+        actions={<><Button variant="outline" size="sm" icon={Download}>{t('common.export', 'Export')}</Button><Button variant="primary" size="sm" icon={Plus}>{t('risk.new', 'New Risk')}</Button></>} 
       />
 
-      <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
-         <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Total EMV</p><p className={`text-xl font-bold font-mono ${theme.colors.text.primary}`}>{formatCurrency(metrics.totalExposure)}</p></div><DollarSign className="text-slate-300"/></div>
-         <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Active Risks</p><p className={`text-xl font-bold ${theme.colors.text.primary}`}>{metrics.activeCount}</p></div><Activity className="text-blue-400"/></div>
-         <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Critical</p><p className="text-xl font-bold text-red-600">{metrics.criticalCount}</p></div><AlertOctagon className="text-red-400"/></div>
-         <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Escalated</p><p className="text-xl font-bold text-orange-500">{metrics.escalatedCount}</p></div><ArrowUpRight className="text-orange-400"/></div>
+      <div className={`mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
+         <StatCard title={t('risk.total_emv', 'Total EMV')} value={formatCurrency(metrics.totalExposure)} icon={DollarSign} />
+         <StatCard title={t('risk.active_count', 'Active Risks')} value={metrics.activeCount} icon={Activity} />
+         <StatCard title={t('risk.critical', 'Critical Threats')} value={metrics.criticalCount} icon={AlertOctagon} />
+         <StatCard title={t('risk.escalated', 'Escalated')} value={metrics.escalatedCount} icon={ArrowUpRight} />
       </div>
 
-      <div className={`flex flex-col flex-1 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-        <div className={`p-4 border-b ${theme.colors.border} flex flex-col gap-4 bg-slate-50/50`}>
-           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className={`flex ${theme.colors.surface} border border-slate-200 rounded-lg p-1 shadow-sm`}>
-                  {['list', 'matrix', 'analytics'].map(m => (
-                      <button key={m} onClick={() => handleViewChange(m as any)} className={`px-3 py-1.5 text-sm font-medium rounded-md flex items-center gap-2 capitalize transition-all ${viewMode === m ? 'bg-slate-100 text-slate-900 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-700'}`}>
-                          {m === 'list' ? <List size={16}/> : m === 'matrix' ? <LayoutGrid size={16}/> : <BarChart2 size={16}/>} {m}
-                      </button>
-                  ))}
-              </div>
-              <div className="relative w-full sm:w-64">
-                  <Input 
-                    isSearch 
-                    placeholder="Search risks..." 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)} 
-                    className="w-full"
-                  />
-                  {searchTerm !== deferredSearchTerm && <div className="absolute right-10 top-1/2 -translate-y-1/2"><Loader2 size={14} className="animate-spin text-slate-300"/></div>}
-              </div>
-           </div>
+      <div className={`mt-8 flex flex-col flex-1 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+        <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50`}>
+            <div className={`flex ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border} shadow-inner`}>
+                {['list', 'matrix', 'analytics'].map(m => (
+                    <button key={m} onClick={() => handleViewChange(m as any)} className={`px-4 py-1.5 text-xs font-bold rounded-md flex items-center gap-2 capitalize transition-all ${viewMode === m ? `${theme.colors.surface} text-nexus-700 shadow-sm` : `${theme.colors.text.tertiary} hover:${theme.colors.text.secondary}`}`}>
+                        {m === 'list' ? <List size={14}/> : m === 'matrix' ? <LayoutGrid size={14}/> : <BarChart2 size={14}/>} {m}
+                    </button>
+                ))}
+            </div>
+            <Input 
+                isSearch 
+                placeholder={t('risk.search', 'Search risks...')} 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className="w-full sm:w-64"
+            />
         </div>
         
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-60' : 'opacity-100'}`}>
-           {(isPending || searchTerm !== deferredSearchTerm) && <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/20 backdrop-blur-[1px]"><Loader2 className="animate-spin text-nexus-500" size={32}/></div>}
-           {viewMode === 'list' && <RiskListView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
-           {viewMode === 'matrix' && <RiskMatrixView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
-           {viewMode === 'analytics' && <RiskAnalyticsView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
+           {filteredRisks.length > 0 ? (
+               <>
+                {viewMode === 'list' && <RiskListView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
+                {viewMode === 'matrix' && <RiskMatrixView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
+                {viewMode === 'analytics' && <RiskAnalyticsView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
+               </>
+           ) : (
+                <EmptyGrid 
+                    title={t('risk.empty', 'No Risks Identified')} 
+                    description={t('risk.empty_desc', 'The risk registry is currently clear of threats.')}
+                    icon={ShieldAlert}
+                    onAdd={() => setSelectedRiskId('NEW')}
+                    actionLabel={t('risk.init_action', 'Identify Risk')}
+                />
+           )}
         </div>
       </div>
     </div>

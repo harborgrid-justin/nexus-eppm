@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -12,7 +13,6 @@ export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, ico
   const theme = useTheme();
   const colors = theme.colors.semantic[variant];
 
-  // Safeguard against Error #31 for string/number children
   const content = (typeof children === 'string' || typeof children === 'number') 
     ? String(children) 
     : children;

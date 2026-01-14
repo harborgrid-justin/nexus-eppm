@@ -22,26 +22,8 @@ export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh, di
             <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest truncate`}>{title}</h3>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onRefresh} 
-                icon={RefreshCw}
-                className="flex-1 sm:flex-none"
-                disabled={disabled}
-            >
-                Refresh
-            </Button>
-            <Button 
-                variant="primary"
-                size="sm"
-                onClick={onCreate} 
-                icon={Plus}
-                className="flex-1 sm:flex-none"
-                disabled={disabled}
-            >
-                Initialize
-            </Button>
+            <Button variant="ghost" size="sm" onClick={onRefresh} icon={RefreshCw} disabled={disabled}>Refresh</Button>
+            <Button variant="primary" size="sm" onClick={onCreate} icon={Plus} disabled={disabled}>Initialize</Button>
         </div>
     </div>
   );

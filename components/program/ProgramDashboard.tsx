@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
@@ -13,6 +14,7 @@ import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { usePermissions } from '../../hooks/usePermissions';
 import { generateId, formatCompactCurrency } from '../../utils/formatters';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   const { program, projects, aggregateMetrics, programRisks } = useProgramData(programId);
@@ -86,18 +88,14 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     const warningCount = projects.filter(p => p.health === 'Warning').length;
     
     if (criticalCount > 0) {
-        return t('program.insights.critical', `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated; immediate governance review recommended.`);
+        return t('program.insights.critical', `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated.`);
     }
     
     if (totalBudget > 0 && (totalSpent / totalBudget) > 0.95) {
-        return t('program.insights.budget', `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority. Funding re-alignment may be required.`);
+        return t('program.insights.budget', `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority.`);
     }
 
-    if (warningCount > 3) {
-        return t('program.insights.warning', `Trend Warning: ${warningCount} projects reporting warning status. Aggregated schedule drift may impact strategic roadmap milestones.`);
-    }
-
-    return t('program.insights.stable', `Operational Stability: Program is tracking within established performance parameters. Available fiscal authority remains healthy at ${formatCompactCurrency(remaining)}.`);
+    return t('program.insights.stable', `Operational Stability: Program is tracking within established performance parameters.`);
   }, [program, projects, aggregateMetrics, t]);
 
   if (!program) return null;
@@ -130,10 +128,10 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
             )}
         </SidePanel>
 
-        <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div className={`flex justify-between items-center border-b ${theme.colors.border} pb-4`}>
             <div>
-                 <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3"><Layers className="text-nexus-600" size={24}/>{t('program.dashboard', 'Program Dashboard')}</h2>
-                 <p className="text-sm text-slate-500 font-medium">{t('program.dashboard_desc', 'Integrated control center for component project performance.')}</p>
+                 <h2 className={`${theme.typography.h1} flex items-center gap-3`}><Layers className="text-nexus-600" size={24}/>{t('program.dashboard', 'Program Dashboard')}</h2>
+                 <p className={`text-sm ${theme.colors.text.secondary} font-medium`}>{t('program.dashboard_desc', 'Integrated control center for component project performance.')}</p>
             </div>
              <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating} icon={Sparkles}>{isGenerating ? t('common.analyzing_short', 'Synthesizing...') : t('program.gen_report', 'Generate Status Report')}</Button>
         </div>
@@ -143,19 +141,19 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             <div className={`lg:col-span-2 flex flex-col ${theme.layout.gridGap}`}>
                 <Card className="p-8 border-l-4 border-l-nexus-500">
-                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}><Target size={14} className="text-nexus-600"/>{t('program.strategy_cage', 'Executive Strategy')}</h3>
+                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b pb-3`}><Target size={14} className="text-nexus-600"/>{t('program.strategy_cage', 'Executive Strategy')}</h3>
                     <div className="space-y-8">
                          <NarrativeField 
                             label={t('program.business_case', 'Business Case & Strategic Mandate')}
                             value={program.businessCase}
-                            placeholderLabel={t('program.business_case_placeholder', 'Define the overarching strategic mandate and justification for this project.')}
+                            placeholderLabel={t('program.business_case_placeholder', 'Define the strategic mandate.')}
                             onSave={(val) => handleUpdate('businessCase', val)}
                             isReadOnly={!canEditProject()}
                         />
                         <NarrativeField 
                             label={t('program.benefits_strategy', 'Benefits Realization Strategy')}
                             value={program.benefits}
-                            placeholderLabel={t('program.benefits_strategy_placeholder', 'How will value be delivered and measured? Outline key KPIs.')}
+                            placeholderLabel={t('program.benefits_strategy_placeholder', 'Outline key KPIs.')}
                             onSave={(val) => handleUpdate('benefits', val)}
                             isReadOnly={!canEditProject()}
                         />
@@ -166,15 +164,22 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
 
             <div className={`flex flex-col ${theme.layout.gridGap}`}>
                  <Card className="p-6">
-                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}><Briefcase size={14} className="text-green-600"/>{t('program.components', 'Component Initiatives')}</h3>
+                    <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b pb-3`}><Briefcase size={14} className="text-green-600"/>{t('program.components', 'Component Initiatives')}</h3>
                     <div className="space-y-3">
                         {projects.length > 0 ? projects.map(p => (
-                            <div key={p.id} className="p-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-nexus-300 transition-colors group cursor-pointer">
-                                <div className="flex justify-between items-start mb-1"><span className="font-bold text-sm text-slate-800 group-hover:text-nexus-700">{p.name}</span><span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span></div>
-                                <div className="flex justify-between text-xs text-slate-500"><span className="font-mono">{p.code}</span><span>{(p.spent/p.budget*100).toFixed(0)}%</span></div>
+                            <div key={p.id} className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border} hover:border-nexus-300 transition-colors group cursor-pointer`}>
+                                <div className="flex justify-between items-start mb-1"><span className={`font-bold text-sm ${theme.colors.text.primary} group-hover:text-nexus-700`}>{p.name}</span><span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span></div>
+                                <div className={`flex justify-between text-xs ${theme.colors.text.tertiary}`}><span className="font-mono">{p.code}</span><span>{(p.spent/p.budget*100).toFixed(0)}%</span></div>
                             </div>
-                        )) : <div className="text-center p-6 text-slate-400 text-sm italic border-2 border-dashed border-slate-100 rounded-xl">{t('program.no_projects', 'No active projects.')}</div>}
-                        {canEditProject() && (
+                        )) : (
+                            <EmptyGrid 
+                                title="No Component Projects" 
+                                description="This program has no linked projects." 
+                                onAdd={canEditProject() ? handleAddProject : undefined}
+                                actionLabel="Align Project"
+                            />
+                        )}
+                        {canEditProject() && projects.length > 0 && (
                             <button onClick={handleAddProject} className="w-full py-3 mt-2 border-2 border-dashed border-nexus-200 rounded-xl text-nexus-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-nexus-50 transition-all">
                                 <Plus size={14}/> {t('program.add_initiative', 'Add Initiative')}
                             </button>

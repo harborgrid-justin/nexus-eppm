@@ -39,7 +39,6 @@ export const XerParser: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                     <span className={`px-2 py-1 ${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.text} text-xs font-bold rounded border ${theme.colors.semantic.info.border}`}>v18.8+ Supported</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded border border-purple-200">2016+ Supported</span>
                 </div>
             </div>
 
@@ -56,24 +55,14 @@ export const XerParser: React.FC = () => {
                         <p className={`text-sm ${theme.colors.text.tertiary}`}>
                             {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "Supports .XER, .MPP, .XML"}
                         </p>
-                        {file && (
-                            <Button className="mt-6 pointer-events-none" onClick={(e) => e.preventDefault()} icon={Play}>Analyze File Structure</Button>
-                        )}
                     </div>
                 )}
 
                 {status === 'processing' && (
                      <div className="flex flex-col items-center justify-center h-full">
                          <div className="w-16 h-16 border-4 border-nexus-200 border-t-nexus-600 rounded-full animate-spin mb-4"></div>
-                         <p className="text-nexus-700 font-bold">Parsing Binary Structure...</p>
+                         <p className={`font-bold ${theme.colors.text.primary}`}>Parsing Binary Structure...</p>
                      </div>
-                )}
-
-                {status === 'error' && (
-                    <div className="flex flex-col items-center justify-center h-full text-red-600">
-                        <p className="font-bold text-lg mb-2">Parsing Error</p>
-                        <Button variant="secondary" onClick={reset}>Try Again</Button>
-                    </div>
                 )}
 
                 {status === 'idle' && file && (

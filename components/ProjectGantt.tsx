@@ -80,14 +80,14 @@ const ProjectGantt: React.FC = () => {
       {!hasTasks ? (
           <EmptyGrid 
             title="Schedule Repository Empty"
-            description="The master schedule logic network is currently unpopulated. Establish an activity baseline or synchronize with an external XER/MPP artifact to activate the CPM engine."
+            description="The master schedule logic network is currently unpopulated."
             icon={Network}
             onAdd={() => {}} 
             actionLabel="Initialize Schedule"
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
-            <button className="md:hidden absolute bottom-20 left-4 z-30 p-3 bg-primary text-white rounded-full shadow-lg" onClick={() => setShowTaskList(!showTaskList)}>{showTaskList ? <X size={20} /> : <List size={20} />}</button>
+            <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>{showTaskList ? <X size={20} /> : <List size={20} />}</button>
             
             <div ref={containerRef} className="flex flex-1 overflow-hidden relative bg-slate-50/20">
               <GanttTaskList 
@@ -129,12 +129,10 @@ const ProjectGantt: React.FC = () => {
             
             {showResources && <ResourceUsageProfile project={project} startDate={projectStart} endDate={projectEnd} />}
             
-            {/* Status Bar Indicator - Dynamically Sourced */}
             <div className={`h-8 border-t ${theme.colors.border} bg-slate-900 text-white flex items-center px-4 justify-between text-[9px] font-black uppercase tracking-widest`}>
                 <div className="flex gap-6">
                     <span>Baseline: {activeBaselineId || 'LATEST'}</span>
                     <span>Engine: NEXUS_CPM_v{ConfigService.appVersion}</span>
-                    <span className="text-nexus-400">Logic: {state.governance.scheduling.retainedLogic ? 'Retained' : 'Progress Override'}</span>
                 </div>
                 <div className="flex gap-4">
                     <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div> {project.tasks.filter(t=>t.critical).length} Critical</span>

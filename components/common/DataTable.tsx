@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -46,7 +47,7 @@ function DataTable<T>({
   if (isLoading) return <div className="p-8"><Skeleton height={400} /></div>;
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
+    <div className={`flex flex-col h-full w-full overflow-hidden border ${theme.colors.border} rounded-2xl bg-white shadow-sm`}>
       <div 
         ref={containerRef}
         className="flex-1 overflow-y-auto scrollbar-thin relative" 
@@ -57,10 +58,10 @@ function DataTable<T>({
         }}
       >
         <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
-          <thead className="bg-slate-50 sticky top-0 z-20 shadow-sm">
+          <thead className={`${theme.colors.background} sticky top-0 z-20 shadow-sm`}>
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest border-b bg-slate-50">
+                <th key={col.key} className={`px-6 py-4 text-left text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest border-b ${theme.colors.background}`}>
                   {col.header}
                 </th>
               ))}
@@ -74,11 +75,11 @@ function DataTable<T>({
                 <tr 
                   key={String((item as any)[keyField])}
                   onClick={() => onRowClick?.(item)}
-                  className="absolute left-0 w-full hover:bg-slate-50/50 cursor-pointer transition-colors border-b border-slate-50 will-change-transform"
+                  className={`absolute left-0 w-full hover:${theme.colors.background}/50 cursor-pointer transition-colors border-b border-slate-50 will-change-transform`}
                   style={{ height: `${ROW_HEIGHT}px`, transform: `translateY(${offsetTop}px)` }}
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-medium">
+                    <td key={col.key} className={`px-6 py-4 whitespace-nowrap text-sm ${theme.colors.text.secondary} font-medium`}>
                       {col.render ? col.render(item) : String((item as any)[col.key])}
                     </td>
                   ))}
