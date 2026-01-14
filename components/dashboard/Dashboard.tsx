@@ -1,3 +1,4 @@
+
 import React, { useState, useTransition, useMemo } from 'react';
 import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { usePortfolioState } from '../../hooks/usePortfolioState';
@@ -59,7 +60,7 @@ const Dashboard: React.FC = () => {
   }, [summary]);
 
   return (
-    <div className={`h-full overflow-y-auto scrollbar-thin ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-500`}>
+    <div className={`h-full overflow-y-auto scrollbar-thin ${theme.layout.pagePadding} animate-in fade-in duration-500`}>
       <SidePanel 
         isOpen={isReportOpen} 
         onClose={() => { setIsReportOpen(false); reset(); }} 
@@ -77,30 +78,31 @@ const Dashboard: React.FC = () => {
            )}
       </SidePanel>
 
-      <DashboardHeader onGenerateReport={handleGenerateReport} isGenerating={isGenerating} viewType={viewType} onViewChange={handleViewChange} />
-      
-      <div className={`p-5 rounded-2xl border flex items-start gap-4 shadow-sm transition-all duration-500 ${
-          strategicInsight.type === 'critical' ? 'bg-red-50 border-red-200' : 
-          strategicInsight.type === 'warning' ? 'bg-amber-50 border-amber-200' : 
-          'bg-slate-900 border-slate-800 text-white shadow-xl'
-      }`}>
-          <div className={`p-2.5 rounded-xl shrink-0 ${strategicInsight.type === 'good' ? 'bg-white/10 text-nexus-400' : 'bg-white shadow-sm'}`}>
-              {strategicInsight.type === 'good' ? <Target size={22} /> : <AlertTriangle size={22} className={strategicInsight.type === 'critical' ? 'text-red-500' : 'text-amber-500'} />}
-          </div>
-          <div>
-              <h4 className={`font-black text-sm uppercase tracking-tight ${strategicInsight.type === 'good' ? 'text-white' : 'text-slate-900'}`}>{strategicInsight.title}</h4>
-              <p className={`text-xs mt-1.5 leading-relaxed font-medium ${strategicInsight.type === 'good' ? 'text-slate-300' : 'text-slate-600'}`}>{strategicInsight.msg}</p>
-          </div>
-      </div>
+      <div className={`flex flex-col ${theme.layout.gridGap}`}>
+        <DashboardHeader onGenerateReport={handleGenerateReport} isGenerating={isGenerating} viewType={viewType} onViewChange={handleViewChange} />
+        
+        <div className={`p-5 rounded-2xl border flex items-start gap-4 shadow-sm transition-all duration-500 ${
+            strategicInsight.type === 'critical' ? 'bg-red-50 border-red-200' : 
+            strategicInsight.type === 'warning' ? 'bg-amber-50 border-amber-200' : 
+            'bg-slate-900 border-slate-800 text-white shadow-xl'
+        }`}>
+            <div className={`p-2.5 rounded-xl shrink-0 ${strategicInsight.type === 'good' ? 'bg-white/10 text-nexus-400' : 'bg-white shadow-sm'}`}>
+                {strategicInsight.type === 'good' ? <Target size={22} /> : <AlertTriangle size={22} className={strategicInsight.type === 'critical' ? 'text-red-500' : 'text-amber-500'} />}
+            </div>
+            <div>
+                <h4 className={`font-black text-sm uppercase tracking-tight ${strategicInsight.type === 'good' ? 'text-white' : 'text-slate-900'}`}>{strategicInsight.title}</h4>
+                <p className={`text-xs mt-1.5 leading-relaxed font-medium ${strategicInsight.type === 'good' ? 'text-slate-300' : 'text-slate-600'}`}>{strategicInsight.msg}</p>
+            </div>
+        </div>
 
-      <div className={theme.layout.sectionSpacing}>
-          <DashboardKPIs summary={summary} />
-          <PortfolioCommandBar />
-      </div>
-      
-      <div className="relative">
-          <DashboardVisuals budgetData={budgetDataForChart} healthData={healthDataForChart} viewType={viewType} isPending={isPending} />
-          <SystemPulse summary={summary} />
+        <DashboardKPIs summary={summary} />
+        <PortfolioCommandBar />
+        
+        <div className="relative">
+            <DashboardVisuals budgetData={budgetDataForChart} healthData={healthDataForChart} viewType={viewType} isPending={isPending} />
+        </div>
+
+        <SystemPulse summary={summary} />
       </div>
     </div>
   );

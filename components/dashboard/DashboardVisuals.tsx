@@ -1,3 +1,4 @@
+
 import React, { useDeferredValue, Suspense } from 'react';
 import { Filter, PieChart as PieIcon, BarChart2, Loader2 } from 'lucide-react';
 import { Card } from '../ui/Card';
@@ -7,6 +8,7 @@ import { CustomPieChart } from '../charts/CustomPieChart';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { useLazyLoad } from '../../hooks/useLazyLoad';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   budgetData: any[];
@@ -16,6 +18,7 @@ interface Props {
 }
 
 export const DashboardVisuals: React.FC<Props> = ({ budgetData, healthData, viewType, isPending }) => {
+    const theme = useTheme();
     const deferredBudget = useDeferredValue(budgetData);
     const deferredHealth = useDeferredValue(healthData);
     
@@ -23,7 +26,7 @@ export const DashboardVisuals: React.FC<Props> = ({ budgetData, healthData, view
     const { containerRef: healthRef, isVisible: healthVisible } = useLazyLoad();
 
     return (
-        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-opacity duration-500 ${isPending ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} transition-opacity duration-500 ${isPending ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
             <Card className="p-8 h-[450px] flex flex-col relative" >
                 <div className="flex justify-between items-center mb-8">
                     <div>

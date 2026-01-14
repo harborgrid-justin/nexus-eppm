@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Zap } from 'lucide-react';
 
@@ -6,7 +7,7 @@ interface SystemPulseProps {
 }
 
 const SystemPulseComponent: React.FC<SystemPulseProps> = ({ summary }) => (
-    <div className="mt-6 p-4 bg-slate-900 rounded-xl text-white flex justify-between items-center shadow-lg">
+    <div className="p-4 bg-slate-900 rounded-xl text-white flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-3">
             <div className="p-2 bg-nexus-600 rounded-lg"><Zap size={20}/></div>
             <div>

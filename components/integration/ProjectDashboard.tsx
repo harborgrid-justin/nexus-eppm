@@ -57,21 +57,21 @@ const ProjectDashboard: React.FC = () => {
   }
 
   const renderDashboard = () => (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8`}>
+    <div className={`animate-in fade-in slide-in-from-bottom-2 duration-500 flex flex-col ${theme.layout.gridGap}`}>
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
         <StatCard title="Overall Progress" value={formatPercentage(summary.overallProgress)} subtext={`${summary.completedTasks} / ${summary.totalTasks} activities`} icon={GanttChartSquare} />
         <StatCard title="Budget Variance" value={formatCompactCurrency(financials.variance)} subtext={`Current working delta`} icon={DollarSign} trend={financials.variance >= 0 ? 'up' : 'down'} />
         <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} critical path threats`} icon={AlertTriangle} trend={riskProfile.openRisks > 5 ? 'down' : undefined} />
         <StatCard title="Quality Pass Rate" value={formatPercentage(qualityProfile.passRate)} subtext="Overall inspection yield" icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-2">
         <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
             <ActivityIcon size={12}/> Global Health Indicators
         </h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center justify-between group hover:border-orange-300 transition-all">
             <div>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Scope Creep Rate</p>
@@ -102,7 +102,7 @@ const ProjectDashboard: React.FC = () => {
          </div>
       </div>
 
-      <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><BookOpen size={18} className="text-nexus-600"/> High-Level Charter</h3>
@@ -149,7 +149,7 @@ const ProjectDashboard: React.FC = () => {
   );
 
   return (
-    <div className={`h-full overflow-y-auto p-6 md:p-8 bg-slate-100/50 scrollbar-thin`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} bg-slate-50/50 scrollbar-thin`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tighter">

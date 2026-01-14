@@ -8,7 +8,6 @@ import { ProgramKPIs } from './ProgramKPIs';
 import { ProgramVisuals } from './ProgramVisuals';
 import { NarrativeField } from '../common/NarrativeField';
 import { useTheme } from '../../context/ThemeContext';
-// FIX: Added missing Layers icon import from lucide-react
 import { Sparkles, Loader2, Target, Lightbulb, Briefcase, Plus, FileText, Layers } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -105,7 +104,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   if (!program) return null;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} flex flex-col ${theme.layout.gridGap} animate-in fade-in`}>
         {/* AI Sidecar */}
         <SidePanel 
             isOpen={isReportOpen} 
@@ -136,7 +135,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                         <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center">
                             <div>
                                 <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Report Date</h4>
-                                <p className="font-bold text-slate-800">{new Date().toLocaleDateString()}</p>
+                                <p className="text-bold text-slate-800">{new Date().toLocaleDateString()}</p>
                             </div>
                             <div className="text-right">
                                 <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Source Entity</h4>
@@ -181,10 +180,10 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
         />
         
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             
             {/* Left Column: Strategic Narrative (The Cage) */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className={`lg:col-span-2 flex flex-col ${theme.layout.gridGap}`}>
                 <Card className="p-8 border-l-4 border-l-nexus-500">
                     <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
                         <Target size={14} className="text-nexus-600"/> Executive Strategy
@@ -212,7 +211,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
             </div>
 
             {/* Right Column: Execution & Quick Actions */}
-            <div className="space-y-6">
+            <div className={`flex flex-col ${theme.layout.gridGap}`}>
                  <Card className="p-6">
                     <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
                         <Briefcase size={14} className="text-green-600"/> Component Initiatives

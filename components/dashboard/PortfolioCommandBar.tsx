@@ -1,11 +1,15 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, PieChart, Briefcase } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export const PortfolioCommandBar: React.FC = () => {
     const navigate = useNavigate();
+    const theme = useTheme();
+    
     return (
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
           <button 
             onClick={() => navigate('/getting-started')}
             className={`p-5 rounded-2xl border border-dashed border-nexus-300 bg-nexus-50/50 hover:bg-nexus-50 transition-all flex items-center gap-4 group text-left shadow-sm`}

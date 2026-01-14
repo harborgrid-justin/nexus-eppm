@@ -37,7 +37,7 @@ const PortfolioBalancing: React.FC = () => {
     }
 
     return (
-        <div className={`h-full overflow-y-auto p-6 space-y-6 animate-in fade-in`}>
+        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in`}>
             <div className={`${theme.colors.surface} p-5 rounded-xl border ${theme.colors.border} flex flex-col xl:flex-row justify-between items-center gap-6 shadow-sm`}>
                 <div>
                     <h2 className={theme.typography.h2}>Portfolio Optimization</h2>
@@ -55,7 +55,7 @@ const PortfolioBalancing: React.FC = () => {
                 </Button>
             </div>
 
-            <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto`}>
+            <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} h-auto`}>
                 <ValueRiskChart data={portfolioData} />
                 <EfficientFrontierChart data={portfolioData} budget={budgetConstraint} onBudgetChange={setBudgetConstraint} />
             </div>

@@ -12,8 +12,8 @@ const StrategicAlignmentBoard: React.FC = () => {
     const { boardData, totalPortfolioBudget } = useStrategicAlignmentLogic();
 
     return (
-        <div className={`h-full overflow-hidden flex flex-col ${theme.layout.pagePadding}`}>
-            <div className="flex justify-between items-center mb-6 flex-shrink-0">
+        <div className={`h-full overflow-hidden flex flex-col ${theme.layout.pagePadding} ${theme.layout.sectionSpacing}`}>
+            <div className="flex justify-between items-center flex-shrink-0">
                 <div>
                     <h2 className={theme.typography.h2}>Strategic Alignment Board</h2>
                     <p className={theme.typography.small}>Balance investment across strategic pillars.</p>
@@ -24,7 +24,7 @@ const StrategicAlignmentBoard: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4">
-                <div className="flex h-full gap-4 min-w-max">
+                <div className={`flex h-full ${theme.layout.gridGap} min-w-max`}>
                     {boardData.map(column => (
                         <div key={column.id} className={`w-80 flex flex-col h-full ${theme.colors.background} rounded-xl border ${theme.colors.border} shadow-sm`}>
                             {/* Column Header */}

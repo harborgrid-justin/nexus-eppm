@@ -13,7 +13,7 @@ const PortfolioCapacity: React.FC = () => {
     } = usePortfolioCapacityLogic();
 
     return (
-        <div className={`h-full flex flex-col ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
+        <div className={`h-full flex flex-col ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in`}>
             <div className="flex justify-between items-center">
                 <h2 className={theme.typography.h2}>Portfolio Capacity Matrix</h2>
                 <div className="bg-white border border-slate-200 rounded-lg p-1 flex text-xs font-medium shadow-sm">
