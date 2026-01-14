@@ -1,7 +1,6 @@
-
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { ShieldCheck, Book, ClipboardList, CheckCircle, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Book, ClipboardList, CheckCircle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 
@@ -27,14 +26,13 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
   }, [assuranceReviews]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 scrollbar-thin`}>
         <div className="flex items-center gap-2 mb-2">
             <ShieldCheck className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Program Quality Assurance Framework</h2>
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            {/* Standards */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Book size={18} className="text-nexus-500"/> Program Standards</h3>
@@ -51,11 +49,10 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
                             <p className="text-sm text-slate-600">{std.description}</p>
                         </div>
                     ))}
-                    {qualityStandards.length === 0 && <div className="text-center text-slate-400 p-4 text-sm italic">No standards defined.</div>}
+                    {qualityStandards.length === 0 && <div className="text-center text-slate-400 p-4 text-sm italic">No program-level standards defined.</div>}
                 </div>
             </div>
 
-            {/* Assurance Reviews */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><ClipboardList size={18} className="text-green-500"/> Assurance Log</h3>
@@ -71,11 +68,11 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {assuranceReviews.map(review => (
-                                <tr key={review.id} className="hover:bg-slate-50">
-                                    <td className="px-4 py-3 text-sm font-mono text-slate-600">{review.date}</td>
+                                <tr key={review.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-4 py-3 text-sm font-mono text-slate-600 font-bold">{review.date}</td>
                                     <td className="px-4 py-3">
                                         <div className="text-sm font-medium text-slate-900">{review.type}</div>
-                                        <div className="text-xs text-slate-500">{review.scope}</div>
+                                        <div className="text-xs text-slate-500 font-bold uppercase">{review.scope}</div>
                                         <div className="text-xs text-slate-600 mt-1 italic">"{review.findings}"</div>
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -87,7 +84,7 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
                             ))}
                             {assuranceReviews.length === 0 && (
                                 <tr>
-                                    <td colSpan={3} className="text-center p-8 text-slate-400 text-sm italic">No assurance reviews logged.</td>
+                                    <td colSpan={3} className="text-center p-8 text-slate-400 text-sm italic">No cross-project assurance reviews logged.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -96,22 +93,21 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
             </div>
         </div>
 
-        {/* Continuous Improvement */}
-        <div className="p-6 bg-blue-50 border border-blue-100 rounded-xl">
-            <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2"><CheckCircle size={18}/> Continuous Improvement</h3>
-            <p className="text-sm text-blue-800 mb-4">Lessons learned are aggregated quarterly and applied to the Program Quality Standards to reduce rework across all component projects.</p>
+        <div className="p-6 bg-blue-50 border border-blue-100 rounded-xl shadow-sm">
+            <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2"><CheckCircle size={18}/> Process Improvement Engine</h3>
+            <p className="text-sm text-blue-800 mb-4 font-medium leading-relaxed">Continuous improvement signals derived from aggregated non-conformances across the program portfolio.</p>
             <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white p-3 rounded shadow-sm">
-                    <div className="text-xs text-slate-500 uppercase font-bold">Defect Trend</div>
-                    <div className="text-lg font-bold text-green-600">{improvementMetrics.trend}</div>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-200/50">
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Defect Rate Vector</div>
+                    <div className="text-lg font-black text-green-600">{improvementMetrics.trend}</div>
                 </div>
-                <div className="bg-white p-3 rounded shadow-sm">
-                    <div className="text-xs text-slate-500 uppercase font-bold">Standard Adoption</div>
-                    <div className="text-lg font-bold text-blue-600">{improvementMetrics.passRate}%</div>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-200/50">
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Assurance Adoption</div>
+                    <div className="text-lg font-black text-blue-600">{improvementMetrics.passRate}%</div>
                 </div>
-                <div className="bg-white p-3 rounded shadow-sm">
-                    <div className="text-xs text-slate-500 uppercase font-bold">Review Velocity</div>
-                    <div className="text-lg font-bold text-slate-700">{improvementMetrics.velocity}</div>
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-blue-200/50">
+                    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">Review Cycle Latency</div>
+                    <div className="text-lg font-black text-slate-700">{improvementMetrics.velocity}</div>
                 </div>
             </div>
         </div>

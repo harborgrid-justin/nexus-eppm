@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield, Briefcase, AlertTriangle } from 'lucide-react';
+import { Target, ArrowDown, CheckSquare, Plus, Edit2, Trash2, Shield, Briefcase, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { StrategicGoal, ProgramObjective } from '../../types';
@@ -8,7 +9,6 @@ import { generateId } from '../../utils/formatters';
 import { StrategicGoalForm } from './StrategicGoalForm';
 import { ProgramObjectiveForm } from './ProgramObjectiveForm';
 import { EmptyGrid } from '../common/EmptyGrid';
-import { Button } from '../ui/Button';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
 
 interface ProgramStrategyProps {
@@ -17,17 +17,15 @@ interface ProgramStrategyProps {
 
 const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
   const { strategicGoals, programObjectives, projects } = useProgramData(programId);
-  const { dispatch, state } = useData(); 
+  // Fixed: Destructured state from useData to allow access to global strategic goals
+  const { state, dispatch } = useData(); 
   const theme = useTheme();
 
-  // --- Modal State ---
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<StrategicGoal | null>(null);
-  
   const [isObjModalOpen, setIsObjModalOpen] = useState(false);
   const [editingObj, setEditingObj] = useState<ProgramObjective | null>(null);
 
-  // --- Goal Handlers ---
   const handleEditGoal = (goal: StrategicGoal) => {
       setEditingGoal(goal);
       setIsGoalModalOpen(true);
@@ -53,7 +51,6 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
       }
   };
 
-  // --- Objective Handlers ---
   const handleEditObj = (obj: ProgramObjective) => {
       setEditingObj(obj);
       setIsObjModalOpen(true);
@@ -87,7 +84,6 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
         </div>
 
         <div className="relative">
-            {/* Layer 1: Corporate Strategy */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
                     <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>1. Organizational Strategy</h3>
@@ -122,7 +118,6 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                 )}
             </div>
 
-            {/* Layer 2: Program Objectives */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
                     <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>2. Program Objectives</h3>
@@ -169,7 +164,6 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                 )}
             </div>
 
-            {/* Layer 3: Project Deliverables */}
             <div>
                 <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution Topology</h3>
                 {projects.length > 0 ? (
@@ -177,7 +171,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         {projects.map(proj => {
                             const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
                             return (
-                                <div key={proj.id} className={`${theme.components.card} p-5 flex flex-col justify-between h-full border border-slate-200 transition-all ${!linkedObj ? 'bg-slate-50/50 border-dashed opacity-70' : 'hover:border-nexus-300'}`}>
+                                <div key={proj.id} className={`${theme.components.card} p-5 flex flex-col justify-between h-full border border-slate-200 transition-all ${!linkedObj ? 'bg-slate-50/50 border-dashed opacity-70' : 'hover:border-nexus-300 shadow-sm'}`}>
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <div className={`p-1.5 rounded-lg border ${linkedObj ? 'bg-white text-nexus-600 border-nexus-100' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
@@ -233,7 +227,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             onClose={() => setIsObjModalOpen(false)}
             onSave={saveObj}
             objective={editingObj}
-            strategicGoals={strategicGoals}
+            strategicGoals={state.strategicGoals}
             projects={projects}
         />
     </div>

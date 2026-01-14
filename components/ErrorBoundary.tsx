@@ -1,3 +1,4 @@
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -15,9 +16,9 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// FIX: Explicitly use Component to ensure props and state are correctly typed and accessible
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
+// Fixed: Explicitly use React.Component to ensure props and state are correctly typed and accessible
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public override state: ErrorBoundaryState = {
     hasError: false,
     error: undefined,
   };
@@ -26,18 +27,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // FIX: Accessing this.props to retrieve the component name for logging
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Fixed: Accessing this.props to retrieve the component name for logging
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // FIX: Define handleRetry as an arrow function to preserve 'this' context
+  // Fixed: Define handleRetry as an arrow function to preserve 'this' context
   public handleRetry = () => {
-    // FIX: Using this.setState to reset the error boundary state
+    // Fixed: Using this.setState to reset the error boundary state
     this.setState({ hasError: false, error: undefined });
   };
 
-  public render() {
+  public override render() {
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -46,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* FIX: Accessing this.props.name to display which module failed */}
+            {/* Fixed: Accessing this.props.name to display which module failed */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -69,7 +70,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // FIX: Accessing this.props.children to render sub-components when no error occurs
+    // Fixed: Accessing this.props.children to render sub-components when no error occurs
     return this.props.children;
   }
 }

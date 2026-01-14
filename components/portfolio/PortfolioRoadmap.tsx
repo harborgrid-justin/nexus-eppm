@@ -8,15 +8,13 @@ import { DependencyForm } from './roadmap/DependencyForm';
 import { usePortfolioRoadmapLogic } from '../../hooks/domain/usePortfolioRoadmapLogic';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Button } from '../ui/Button';
-// Added missing useNavigate import to fix "Cannot find name 'navigate'" error on line 56
 import { useNavigate } from 'react-router-dom';
 
 const PortfolioRoadmap: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
-  // Initialized navigate variable via useNavigate hook
   const navigate = useNavigate();
-  const { lanes, projects, isDependencyModalOpen, setIsDependencyModalOpen, handleEditAlignment, handleQuickAlign, handleAddDependency } = usePortfolioRoadmapLogic();
+  const { lanes, projects, isDependencyModalOpen, setIsDependencyModalOpen, handleEditAlignment, handleQuickAlign, handleAddDependency, isEmpty } = usePortfolioRoadmapLogic();
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-10 animate-in fade-in duration-500 scrollbar-thin`}>
@@ -34,7 +32,7 @@ const PortfolioRoadmap: React.FC = () => {
             </div>
         </div>
 
-        {projects.length > 0 ? (
+        {!isEmpty ? (
             <div className="space-y-12">
                 <section>
                     <div className="flex items-center gap-2 mb-6">
@@ -54,7 +52,7 @@ const PortfolioRoadmap: React.FC = () => {
         ) : (
             <EmptyGrid 
                 title={t('portfolio.roadmap_empty', 'Roadmap Context Null')} 
-                description={t('portfolio.roadmap_empty_desc', 'Populate the organizational ledger to visualize the long-range integrated roadmap.')} 
+                description={t('portfolio.roadmap_empty_desc', 'Populate the organizational ledger to visualize the long-range integrated roadmap across strategic lanes.')} 
                 icon={MapIcon} 
                 actionLabel={t('project.init_action', 'Initialize Pilot Project')} 
                 onAdd={() => navigate('/projectList?action=create')} 

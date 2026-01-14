@@ -6,7 +6,8 @@ import { Star, TrendingUp, DollarSign, Clock, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { formatCurrency } from '../../utils/formatters';
+// Fixed: Added formatCompactCurrency to the import list
+import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -22,16 +23,14 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   const theme = useTheme();
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Filter benefits for this program (via projects)
-  const programBenefits = state.benefits.filter(b => 
+  const programBenefits = useMemo(() => state.benefits.filter(b => 
     b.componentId === programId || projects.some(p => p.id === b.componentId)
-  );
+  ), [state.benefits, programId, projects]);
 
-  const realizedValue = programBenefits.reduce((sum, b) => sum + (b.realizedValue || 0), 0);
-  const plannedValue = programBenefits.reduce((sum, b) => sum + b.value, 0);
+  const realizedValue = useMemo(() => programBenefits.reduce((sum, b) => sum + (b.realizedValue || 0), 0), [programBenefits]);
+  const plannedValue = useMemo(() => programBenefits.reduce((sum, b) => sum + b.value, 0), [programBenefits]);
   const realizationRate = plannedValue > 0 ? (realizedValue / plannedValue) * 100 : 0;
 
-  // Calculate Trend Data (Simulated S-Curve based on actual totals)
   const trendData = useMemo(() => {
       const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
       const data = [];
@@ -39,11 +38,8 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
       let cumulativeRealized = 0;
       
       for(let i=0; i<4; i++) {
-          const incrementPlanned = plannedValue * (i === 0 ? 0.1 : i === 1 ? 0.2 : i === 2 ? 0.3 : 0.4);
-          const incrementRealized = realizedValue * (i === 0 ? 0.05 : i === 1 ? 0.15 : i === 2 ? 0.3 : 0.5);
-          
-          cumulativePlanned += incrementPlanned;
-          cumulativeRealized += incrementRealized;
+          cumulativePlanned += plannedValue * (i === 0 ? 0.1 : i === 1 ? 0.2 : i === 2 ? 0.3 : 0.4);
+          cumulativeRealized += realizedValue * (i === 0 ? 0.05 : i === 1 ? 0.15 : i === 2 ? 0.3 : 0.5);
           
           data.push({
               month: quarters[i],
@@ -55,7 +51,7 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   }, [plannedValue, realizedValue]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 scrollbar-thin`}>
         <div className="flex items-center gap-2 mb-2">
             <Star className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Benefits Realization Plan</h2>
@@ -69,46 +65,48 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
-                <h3 className={`font-bold ${theme.colors.text.primary} mb-4`}>Realization Curve (Planned vs Actual)</h3>
-                <div className="h-64">
+            <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-[2rem] border ${theme.colors.border} shadow-sm h-80 flex flex-col`}>
+                <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2 border-b pb-3`}><TrendingUp size={14}/> Realization Velocity Curve</h3>
+                <div className="flex-1 min-h-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={trendData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                            <XAxis dataKey="month" tick={{fontSize: 12}} />
-                            <YAxis tick={{fontSize: 12}} />
+                            <XAxis dataKey="month" tick={{fontSize: 10, fontWeight: 'bold'}} />
+                            {/* Fixed: formatCompactCurrency is now available */}
+                            <YAxis tick={{fontSize: 10, fontWeight: 'bold'}} tickFormatter={(val) => formatCompactCurrency(val)} />
                             <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
-                            <Legend />
-                            <Area type="monotone" dataKey="planned" stroke="#94a3b8" fill="#e2e8f0" name="Planned Value" />
-                            <Area type="monotone" dataKey="actual" stroke="#22c55e" fill="#dcfce7" name="Realized Value" />
+                            <Legend wrapperStyle={{fontSize: '10px', textTransform: 'uppercase', fontWeight: 'bold', paddingTop: '10px'}} />
+                            <Area type="monotone" dataKey="planned" stroke="#94a3b8" fill="#e2e8f0" name="Planned Value" strokeWidth={2} />
+                            <Area type="monotone" dataKey="actual" stroke="#22c55e" fill="#dcfce7" name="Realized Value" strokeWidth={3} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
             </div>
 
-            <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className={`bg-slate-50 px-6 py-4 border-b ${theme.colors.border} flex justify-between items-center`}>
-                    <h3 className={`font-bold ${theme.colors.text.primary}`}>Benefits Register</h3>
-                    <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Add Benefit</Button>
+            <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-80`}>
+                <div className={`bg-slate-50/50 px-6 py-4 border-b ${theme.colors.border} flex justify-between items-center`}>
+                    <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2`}><Star size={14} className="text-nexus-500"/> Value Ledger</h3>
+                    <Button size="sm" variant="ghost" icon={Plus} onClick={() => setIsFormOpen(true)}>Identify Benefit</Button>
                 </div>
-                <div className="flex-1 overflow-auto max-h-72">
+                <div className="flex-1 overflow-auto scrollbar-thin">
                     {programBenefits.length > 0 ? (
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-white">
+                        <table className="min-w-full divide-y divide-slate-100">
+                            <thead className="bg-white sticky top-0 z-10 border-b">
                                 <tr>
-                                    <th className={`px-6 py-3 text-left text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Benefit</th>
-                                    <th className={`px-6 py-3 text-left text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Source</th>
-                                    <th className={`px-6 py-3 text-right text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Target</th>
-                                    <th className={`px-6 py-3 text-right text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Status</th>
+                                    <th className={theme.components.table.header + " pl-6"}>Benefit</th>
+                                    <th className={theme.components.table.header + " text-right"}>Target</th>
+                                    <th className={theme.components.table.header + " text-right"}>Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-100">
+                            <tbody className="bg-white divide-y divide-slate-50">
                                 {programBenefits.map(b => (
-                                    <tr key={b.id}>
-                                        <td className={`px-6 py-3 text-sm font-medium ${theme.colors.text.primary}`}>{b.description}</td>
-                                        <td className={`px-6 py-3 text-xs ${theme.colors.text.secondary}`}>{b.componentId}</td>
-                                        <td className="px-6 py-3 text-sm text-right font-mono">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
-                                        <td className="px-6 py-3 text-right">
+                                    <tr key={b.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className={`px-6 py-4`}>
+                                            <div className="text-sm font-bold text-slate-800 uppercase tracking-tight">{b.description}</div>
+                                            <div className="text-[9px] text-slate-400 font-mono mt-0.5">{b.id}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-right font-mono font-black text-slate-700">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
+                                        <td className="px-6 py-4 text-right">
                                             <Badge variant={
                                                 b.status === 'Realized' ? 'success' : 
                                                 b.status === 'In Progress' ? 'info' : 'neutral'
@@ -119,12 +117,12 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
                             </tbody>
                         </table>
                     ) : (
-                        <div className="h-full">
+                        <div className="h-full flex flex-col justify-center">
                             <EmptyGrid 
-                                title="No Benefits Defined" 
-                                description="Define financial or non-financial benefits to track program value."
+                                title="Harvest Stream Null" 
+                                description="No strategic or operational benefits have been mapped to the program execution plan."
                                 icon={Star}
-                                actionLabel="Add Benefit"
+                                actionLabel="Identify Strategic Benefit"
                                 onAdd={() => setIsFormOpen(true)}
                             />
                         </div>

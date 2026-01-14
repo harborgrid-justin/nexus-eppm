@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Users, AlertTriangle, Briefcase, TrendingUp } from 'lucide-react';
+import { Users, AlertTriangle, Briefcase, TrendingUp, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -15,27 +15,21 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
   const { state } = useData();
   const theme = useTheme();
 
-  // Dynamic calculation of resource load aggregation from the live ledger
   const roleDistribution = useMemo(() => {
     const roleStats: Record<string, { demand: number; capacity: number }> = {};
     
-    // 1. Calculate Capacity by Role
     state.resources.forEach(r => {
         if (r.status !== 'Active') return;
         if (!roleStats[r.role]) roleStats[r.role] = { demand: 0, capacity: 0 };
         roleStats[r.role].capacity += (r.capacity || 160);
     });
 
-    // 2. Calculate Demand from Program Projects
     projects.forEach(p => {
         p.tasks.forEach(t => {
-            // Only count active/future demand to prevent historical noise
             if (t.status !== 'Completed') {
                 t.assignments.forEach(a => {
                     const res = state.resources.find(r => r.id === a.resourceId);
                     if (res && res.status === 'Active') {
-                        // Effort = (Units/100) * duration (approx monthly slice)
-                        // This logic is optimized for the program view granularity
                         const demandHours = (a.units / 100) * 160; 
                         if (roleStats[res.role]) {
                             roleStats[res.role].demand += demandHours;
@@ -60,7 +54,6 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
     const programResourceIds = new Set<string>();
     projects.forEach(p => p.tasks.forEach(t => t.assignments.forEach(a => programResourceIds.add(a.resourceId))));
 
-    // Threshold: >110% allocation defines a critical conflict
     return state.resources
         .filter(r => programResourceIds.has(r.id) && r.status === 'Active' && r.allocated > r.capacity * 1.1)
         .slice(0, 10);
@@ -86,7 +79,6 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            {/* Shared Capabilities Heatmap */}
             <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm p-8 flex flex-col`}>
                 <div className="flex justify-between items-center mb-8">
                     <div>
@@ -132,7 +124,6 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                 </div>
             </div>
 
-            {/* Inter-Project Conflicts */}
             <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className="p-6 border-b border-slate-200 bg-red-50/30 flex justify-between items-center">
                     <div>
@@ -176,5 +167,5 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
     </div>
   );
 };
-import { ShieldCheck } from 'lucide-react';
+
 export default ProgramResources;

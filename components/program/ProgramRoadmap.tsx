@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Map as MapIcon, Loader2 } from 'lucide-react';
@@ -31,16 +30,16 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
       return yr;
   }, [program]);
 
-  if (!program || !today) return <div className={`flex h-full items-center justify-center ${theme.colors.text.tertiary} font-bold uppercase tracking-widest`}><Loader2 className="animate-spin mr-2"/> Painting Roadmap...</div>;
+  if (!program || !today) return <div className={`flex h-full items-center justify-center ${theme.colors.text.tertiary} font-bold uppercase tracking-widest`}><Loader2 className="animate-spin mr-2"/> Synchronizing Portfolio Timeline...</div>;
 
   if (projects.length === 0) {
       return (
           <div className="h-full flex items-center justify-center p-8">
               <EmptyGrid 
-                title="Roadmap Empty"
-                description="No projects aligned to this program. Add initiatives to visualize the timeline."
+                title="Integrated Roadmap Null"
+                description="This program has no project components aligned to its strategic lifecycle. Align initiatives to activate the timeline visualization."
                 icon={MapIcon}
-                actionLabel="Add Project"
+                actionLabel="Align Initiative"
                 onAdd={() => {}}
               />
           </div>
@@ -49,7 +48,7 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
 
   const start = new Date(program.startDate);
   const end = new Date(program.endDate);
-  const totalDuration = getDaysDiff(start, end) || 1; // Prevent division by zero
+  const totalDuration = getDaysDiff(start, end) || 1; 
   const todayPosition = Math.max(0, Math.min(100, (getDaysDiff(start, today) / totalDuration) * 100));
 
   const getPosition = (dateStr: string) => {
@@ -68,42 +67,46 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-nexus-900 text-white rounded-2xl shadow-xl border border-slate-700"><MapIcon size={24}/></div>
                 <div>
-                    <h2 className={`text-2xl font-black ${theme.colors.text.primary} tracking-tight`}>Integrated Strategic Roadmap</h2>
-                    <p className={`text-xs ${theme.colors.text.secondary} font-medium uppercase tracking-widest mt-0.5`}>Program ID: {programId}</p>
+                    <h2 className={`text-2xl font-black ${theme.colors.text.primary} tracking-tight uppercase`}>Program Delivery Roadmap</h2>
+                    <p className={`text-xs ${theme.colors.text.secondary} font-bold uppercase tracking-widest mt-0.5`}>Consolidated Multi-Project Lifecycle</p>
                 </div>
             </div>
-            <div className={`flex items-center gap-4 text-[10px] font-bold ${theme.colors.text.secondary} uppercase px-4 ${theme.colors.surface} border ${theme.colors.border} p-1.5 rounded-xl shadow-sm`}>
-                <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-blue-500 rounded-full shadow-sm shadow-blue-500/50"></div> Healthy</span>
-                <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-sm shadow-red-500/50"></div> Delay</span>
+            <div className={`flex items-center gap-4 text-[10px] font-black uppercase px-6 ${theme.colors.surface} border ${theme.colors.border} py-3 rounded-2xl shadow-sm`}>
+                <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-nexus-500 rounded-full shadow-[0_0_8px_#0ea5e9]"></div> Active</span>
+                <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></div> Delay Vector</span>
+                <div className="w-px h-4 bg-slate-200 mx-2"></div>
+                <span className="text-slate-400">Context: {programId}</span>
             </div>
         </div>
 
-        <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1 min-h-[400px] relative`}>
-            {/* Header Years */}
+        <div className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex-1 min-h-[400px] relative`}>
             <div className={`flex border-b ${theme.colors.border} ${theme.colors.background}`}>
-                <div className={`w-64 border-r ${theme.colors.border} p-4 font-bold ${theme.colors.text.secondary} text-xs uppercase tracking-widest`}>Work Stream</div>
+                <div className={`w-64 border-r ${theme.colors.border} p-5 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] bg-slate-50/50`}>Component Track</div>
                 <div className="flex-1 flex">
                     {years.map(y => (
-                        <div key={y} className={`flex-1 border-r ${theme.colors.border} p-2 text-center font-bold text-slate-400 text-sm`}>{y}</div>
+                        <div key={y} className={`flex-1 border-r ${theme.colors.border} p-3 text-center font-black text-slate-400 text-sm`}>{y}</div>
                     ))}
                 </div>
             </div>
 
-            {/* Timeline Body */}
-            <div className="overflow-y-auto">
+            <div className="overflow-y-auto scrollbar-thin">
                 {projects.map(proj => (
-                    <div key={proj.id} className={`flex border-b ${theme.colors.border.replace('border-', 'border-slate-').replace('200','100')} min-h-[60px] group hover:${theme.colors.background} transition-colors`}>
-                        <div className={`w-64 border-r ${theme.colors.border} p-4 shrink-0`}>
-                            <h4 className={`font-bold text-sm ${theme.colors.text.primary} truncate`}>{proj.name}</h4>
-                            <p className={`text-[10px] ${theme.colors.text.secondary} uppercase`}>{proj.code}</p>
+                    <div key={proj.id} className={`flex border-b border-slate-50 min-h-[80px] group hover:${theme.colors.background}/50 transition-colors`}>
+                        <div className={`w-64 border-r ${theme.colors.border} p-5 shrink-0 bg-white group-hover:bg-slate-50/50 transition-colors`}>
+                            <h4 className={`font-black text-sm text-slate-800 uppercase tracking-tight truncate`}>{proj.name}</h4>
+                            <p className={`text-[10px] text-slate-400 font-mono mt-1 font-bold`}>{proj.code}</p>
                         </div>
-                        <div className="flex-1 relative my-auto h-full">
-                            <div className="absolute inset-0 flex pointer-events-none">
-                                {years.map((_, i) => <div key={i} className={`flex-1 border-r border-dashed ${theme.colors.border.replace('border-', 'border-slate-').replace('200','200/50')}`}></div>)}
+                        <div className="flex-1 relative my-auto h-full px-4">
+                            <div className="absolute inset-0 flex pointer-events-none opacity-30">
+                                {years.map((_, i) => <div key={i} className={`flex-1 border-r border-dashed border-slate-200`}></div>)}
                             </div>
                             
                             <div 
-                                className={`absolute h-8 top-1/2 -translate-y-1/2 rounded-md shadow-sm flex items-center px-3 text-xs font-bold text-white transition-all hover:scale-105 cursor-pointer ${proj.health === 'Critical' ? 'bg-red-500' : proj.health === 'Warning' ? 'bg-yellow-500' : 'bg-blue-500'}`}
+                                className={`absolute h-8 top-1/2 -translate-y-1/2 rounded-xl shadow-lg flex items-center px-4 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:scale-[1.02] hover:shadow-xl cursor-pointer ${
+                                    proj.health === 'Critical' ? 'bg-red-500 border border-red-600 shadow-red-500/20' : 
+                                    proj.health === 'Warning' ? 'bg-yellow-500 border border-yellow-600 shadow-yellow-500/20' : 
+                                    'bg-nexus-600 border border-nexus-700 shadow-nexus-500/20'
+                                }`}
                                 style={{
                                     left: `${getPosition(proj.startDate)}%`,
                                     width: `${getWidth(proj.startDate, proj.endDate)}%`
@@ -116,10 +119,10 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
                 ))}
             </div>
 
-            {/* Today Line */}
             <div className="absolute top-10 bottom-0 border-l-2 border-red-500 border-dashed z-10 pointer-events-none" style={{ left: `calc(16rem + ((100% - 16rem) * ${todayPosition / 100}))` }}>
-                 <div className="absolute -top-3 -translate-x-1/2 bg-red-500 text-white text-[9px] font-bold px-1.5 rounded">TODAY</div>
+                 <div className="absolute -top-3 -translate-x-1/2 bg-red-600 text-white text-[9px] font-black tracking-widest uppercase px-2 py-1 rounded-full shadow-xl">Data Date</div>
             </div>
+            <div className="absolute inset-0 nexus-empty-pattern -z-10 opacity-40"></div>
         </div>
     </div>
   );

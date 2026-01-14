@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
@@ -82,10 +81,8 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     
     const totalBudget = program.budget || aggregateMetrics.totalBudget;
     const totalSpent = aggregateMetrics.totalSpent;
-    const remaining = totalBudget - totalSpent;
     
     const criticalCount = projects.filter(p => p.health === 'Critical').length;
-    const warningCount = projects.filter(p => p.health === 'Warning').length;
     
     if (criticalCount > 0) {
         return t('program.insights.critical', `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated.`);
@@ -95,13 +92,13 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
         return t('program.insights.budget', `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority.`);
     }
 
-    return t('program.insights.stable', `Operational Stability: Program is tracking within established performance parameters.`);
+    return t('program.insights.stable', `Operational Stability: Program is tracking within established performance parameters across ${projects.length} component initiatives.`);
   }, [program, projects, aggregateMetrics, t]);
 
   if (!program) return null;
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} flex flex-col ${theme.layout.gridGap} animate-in fade-in`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} flex flex-col ${theme.layout.gridGap} animate-in fade-in duration-500 scrollbar-thin`}>
         <SidePanel 
             isOpen={isReportOpen} 
             onClose={() => { setIsReportOpen(false); reset(); }} 
@@ -140,20 +137,20 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
         
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             <div className={`lg:col-span-2 flex flex-col ${theme.layout.gridGap}`}>
-                <Card className="p-8 border-l-4 border-l-nexus-500">
+                <Card className="p-8 border-l-4 border-l-nexus-500 shadow-sm">
                     <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b pb-3`}><Target size={14} className="text-nexus-600"/>{t('program.strategy_cage', 'Executive Strategy')}</h3>
                     <div className="space-y-8">
                          <NarrativeField 
                             label={t('program.business_case', 'Business Case & Strategic Mandate')}
                             value={program.businessCase}
-                            placeholderLabel={t('program.business_case_placeholder', 'Define the strategic mandate.')}
+                            placeholderLabel={t('program.business_case_placeholder', 'Define the strategic mandate for this program to lock the performance baseline.')}
                             onSave={(val) => handleUpdate('businessCase', val)}
                             isReadOnly={!canEditProject()}
                         />
                         <NarrativeField 
                             label={t('program.benefits_strategy', 'Benefits Realization Strategy')}
                             value={program.benefits}
-                            placeholderLabel={t('program.benefits_strategy_placeholder', 'Outline key KPIs.')}
+                            placeholderLabel={t('program.benefits_strategy_placeholder', 'Outline key value indicators and harvest targets.')}
                             onSave={(val) => handleUpdate('benefits', val)}
                             isReadOnly={!canEditProject()}
                         />
@@ -163,33 +160,43 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
             </div>
 
             <div className={`flex flex-col ${theme.layout.gridGap}`}>
-                 <Card className="p-6">
+                 <Card className="p-6 shadow-sm">
                     <h3 className={`${theme.typography.label} mb-6 flex items-center gap-2 border-b pb-3`}><Briefcase size={14} className="text-green-600"/>{t('program.components', 'Component Initiatives')}</h3>
                     <div className="space-y-3">
-                        {projects.length > 0 ? projects.map(p => (
-                            <div key={p.id} className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border} hover:border-nexus-300 transition-colors group cursor-pointer`}>
-                                <div className="flex justify-between items-start mb-1"><span className={`font-bold text-sm ${theme.colors.text.primary} group-hover:text-nexus-700`}>{p.name}</span><span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span></div>
-                                <div className={`flex justify-between text-xs ${theme.colors.text.tertiary}`}><span className="font-mono">{p.code}</span><span>{(p.spent/p.budget*100).toFixed(0)}%</span></div>
-                            </div>
-                        )) : (
+                        {projects.length > 0 ? (
+                            <>
+                                {projects.map(p => (
+                                    <div key={p.id} className={`p-3 ${theme.colors.background} rounded-lg border ${theme.colors.border} hover:border-nexus-300 transition-colors group cursor-pointer`}>
+                                        <div className="flex justify-between items-start mb-1"><span className={`font-bold text-sm ${theme.colors.text.primary} group-hover:text-nexus-700`}>{p.name}</span><span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span></div>
+                                        <div className={`flex justify-between text-xs ${theme.colors.text.tertiary}`}><span className="font-mono">{p.code}</span><span>{(p.spent/(p.budget||1)*100).toFixed(0)}%</span></div>
+                                    </div>
+                                ))}
+                                {canEditProject() && (
+                                    <button onClick={handleAddProject} className="w-full py-3 mt-2 border-2 border-dashed border-nexus-200 rounded-xl text-nexus-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-nexus-50 transition-all">
+                                        <Plus size={14}/> {t('program.add_initiative', 'Add Initiative')}
+                                    </button>
+                                )}
+                            </>
+                        ) : (
                             <EmptyGrid 
                                 title="No Component Projects" 
-                                description="This program has no linked projects." 
+                                description="This program has no linked projects to aggregate performance data." 
                                 onAdd={canEditProject() ? handleAddProject : undefined}
                                 actionLabel="Align Project"
+                                icon={Briefcase}
                             />
-                        )}
-                        {canEditProject() && projects.length > 0 && (
-                            <button onClick={handleAddProject} className="w-full py-3 mt-2 border-2 border-dashed border-nexus-200 rounded-xl text-nexus-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-nexus-50 transition-all">
-                                <Plus size={14}/> {t('program.add_initiative', 'Add Initiative')}
-                            </button>
                         )}
                     </div>
                  </Card>
 
-                 <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
-                     <div className="relative z-10"><h4 className="font-bold flex items-center gap-2 mb-2"><Lightbulb size={18} className="text-yellow-400"/> {t('program.ai_insight', 'Program Insight')}</h4><p className="text-xs text-slate-300 leading-relaxed font-medium">{programInsight}</p></div>
-                     <Target size={120} className="absolute -right-8 -bottom-8 text-white/5 rotate-12"/>
+                 <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-2xl">
+                     <div className="relative z-10">
+                        <h4 className="font-bold flex items-center gap-2 mb-2 text-sm uppercase tracking-widest">
+                            <Lightbulb size={18} className="text-yellow-400"/> {t('program.ai_insight', 'Strategic Inference')}
+                        </h4>
+                        <p className="text-xs text-slate-300 leading-relaxed font-medium uppercase tracking-tight">{programInsight}</p>
+                    </div>
+                     <Target size={120} className="absolute -right-8 -bottom-8 text-white/5 rotate-12 pointer-events-none"/>
                  </div>
             </div>
         </div>

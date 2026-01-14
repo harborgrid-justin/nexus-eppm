@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCurrency, formatDate } from '../../utils/formatters';
@@ -21,7 +20,7 @@ const PortfolioBenefits: React.FC = () => {
     };
 
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+        <div className={`h-full overflow-y-auto ${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 scrollbar-thin`}>
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <h2 className={theme.typography.h2}>Benefits Realization Register</h2>
@@ -44,8 +43,8 @@ const PortfolioBenefits: React.FC = () => {
                 ) : (
                     <div className={`${theme.components.card} overflow-hidden shadow-sm`}>
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-slate-100">
-                                <thead className="bg-slate-50/80 backdrop-blur-md sticky top-0 z-10">
+                            <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
+                                <thead className="bg-slate-50/80 backdrop-blur-md sticky top-0 z-10 shadow-sm border-b">
                                     <tr>
                                         <th className={theme.components.table.header + " py-6 px-8"}>Strategic Benefit</th>
                                         <th className={theme.components.table.header}>Origin Component</th>
@@ -65,7 +64,7 @@ const PortfolioBenefits: React.FC = () => {
                                             <td className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">{benefit.componentName}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
-                                                    benefit.type === 'Financial' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                                                    benefit.type === 'Financial' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-100'
                                                 }`}>
                                                     {benefit.type === 'Financial' ? <DollarSign size={12}/> : <Star size={12}/>}
                                                     {benefit.type}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { useData } from '../../context/DataContext';
-import { Server, ShieldCheck, Database, Layers, CheckCircle, Clock, Plus, Settings } from 'lucide-react';
+import { Server, ShieldCheck, Database, Layers, CheckCircle, Plus, Settings } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -23,8 +22,8 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
             <div className="flex items-center gap-3">
                 <div className="p-3 bg-nexus-600 text-white rounded-2xl shadow-xl shadow-nexus-500/20"><Server size={24}/></div>
                 <div>
-                    <h2 className={theme.typography.h1}>Architecture & Governance</h2>
-                    <p className={theme.typography.small}>Standards, application topology, and technical review gates.</p>
+                    <h2 className={theme.typography.h1}>Architecture & Technical Governance</h2>
+                    <p className={theme.typography.small}>Standards registry, application topology, and technical review gates.</p>
                 </div>
             </div>
             <div className={`flex bg-white border border-slate-200 p-1.5 rounded-xl shadow-sm`}>
@@ -33,7 +32,6 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Standards Library */}
             <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[400px]`}>
                 <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50 flex justify-between items-center`}>
                     <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
@@ -52,7 +50,7 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                                          <Server size={16}/>}
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-slate-800 text-sm uppercase tracking-tight">{std.title}</h4>
+                                        <h4 className="font-black text-sm text-slate-800 uppercase tracking-tight">{std.title}</h4>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{std.category} Domain</p>
                                     </div>
                                 </div>
@@ -66,7 +64,7 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                         <div className="h-full flex flex-col justify-center">
                             <EmptyGrid 
                                 title="Technology Ledger Neutral"
-                                description="No architectural standards or application policies have been registered for this program. Technical governance is required for solution integrity."
+                                description="No architectural standards or application policies have been registered for this program."
                                 icon={Settings}
                                 actionLabel="Provision Standard"
                                 onAdd={() => setIsFormOpen(true)}
@@ -76,7 +74,6 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                 </div>
             </div>
 
-            {/* Architectural Reviews */}
             <div className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[400px]`}>
                 <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50`}>
                     <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
@@ -106,12 +103,6 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                                                 {rev.status === 'Completed' ? 'Certified ✓' : 'Queued'}
                                             </Badge>
                                         </td>
-                                    </tr>
-                                ))}
-                                {/* Filler */}
-                                {[...Array(3)].map((_, i) => (
-                                    <tr key={`fill-${i}`} className="nexus-empty-pattern opacity-10 h-14">
-                                        <td colSpan={3}></td>
                                     </tr>
                                 ))}
                             </tbody>

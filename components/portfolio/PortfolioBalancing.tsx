@@ -12,7 +12,7 @@ import { EmptyGrid } from '../common/EmptyGrid';
 const PortfolioBalancing: React.FC = () => {
     const theme = useTheme();
     const { t } = useI18n();
-    const { portfolioData, weights, setWeights, budgetConstraint, setBudgetConstraint } = usePortfolioBalancingLogic();
+    const { portfolioData, weights, setWeights, budgetConstraint, setBudgetConstraint, isEmpty } = usePortfolioBalancingLogic();
 
     return (
         <div className={`h-full flex flex-col ${theme.layout.pagePadding} space-y-6 animate-in fade-in`}>
@@ -28,13 +28,17 @@ const PortfolioBalancing: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-hidden relative">
-                {portfolioData.length > 0 ? (
-                    <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} h-full overflow-y-auto pr-2`}>
+                {!isEmpty ? (
+                    <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} h-full overflow-y-auto pr-2 scrollbar-thin`}>
                         <ValueRiskChart data={portfolioData} />
                         <EfficientFrontierChart data={portfolioData} budget={budgetConstraint} onBudgetChange={setBudgetConstraint} />
                     </div>
                 ) : (
-                    <EmptyGrid title={t('portfolio.opt_empty', 'Model Inactive')} description={t('portfolio.opt_empty_desc', 'Requires active projects to calculate the efficient frontier.')} icon={PieChart} />
+                    <EmptyGrid 
+                        title={t('portfolio.opt_empty', 'Model Inactive')} 
+                        description={t('portfolio.opt_empty_desc', 'Requires active projects with associated risk and value metrics to calculate the efficient frontier.')} 
+                        icon={PieChart} 
+                    />
                 )}
             </div>
         </div>

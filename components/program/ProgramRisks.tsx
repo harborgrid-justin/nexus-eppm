@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -7,7 +6,7 @@ import StatCard from '../shared/StatCard';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { SidePanel } from '../ui/SidePanel'; // Replaced Modal
+import { SidePanel } from '../ui/SidePanel';
 import { Input } from '../ui/Input';
 import { ProgramRisk } from '../../types';
 import { generateId } from '../../utils/formatters';
@@ -77,7 +76,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
   }, [programRisks, escalatedRisks]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 scrollbar-thin`}>
         <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
                 <ShieldAlert className="text-nexus-600" size={24}/>
@@ -98,7 +97,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                     <h3 className={`font-bold ${theme.colors.text.primary}`}>Program Risk Register (Systemic)</h3>
                 </div>
                 {programRisks.length > 0 ? (
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1 overflow-auto scrollbar-thin">
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className={theme.colors.surface}>
                                 <tr>
@@ -111,12 +110,12 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                             </thead>
                             <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
                                 {programRisks.map(risk => (
-                                    <tr key={risk.id} className={`hover:${theme.colors.background} group`}>
+                                    <tr key={risk.id} className={`hover:${theme.colors.background} group transition-colors`}>
                                         <td className={`px-4 py-3 text-sm font-medium ${theme.colors.text.primary}`}>
                                             {risk.description}
-                                            <div className="text-xs text-slate-500 mt-1">Mitigation: {risk.mitigationPlan}</div>
+                                            <div className="text-xs text-slate-500 mt-1 italic">Mitigation: {risk.mitigationPlan}</div>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-slate-600">{risk.category}</td>
+                                        <td className="px-4 py-3 text-sm text-slate-600 font-bold uppercase">{risk.category}</td>
                                         <td className="px-4 py-3 text-center">
                                             <span className={`inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 ${risk.score >= 12 ? 'bg-red-500' : 'bg-yellow-500'}`}>
                                                 {risk.score}
@@ -150,7 +149,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 <div className="p-4 border-b border-red-200 bg-red-50">
                     <h3 className="font-bold text-red-900">Escalated Project Risks</h3>
                 </div>
-                <div className="flex-1 overflow-auto">
+                <div className="flex-1 overflow-auto scrollbar-thin">
                      {escalatedRisks.length > 0 ? (
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className={theme.colors.surface}>
@@ -164,8 +163,8 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                                 {escalatedRisks.map(risk => {
                                     const proj = projects.find(p => p.id === risk.projectId);
                                     return (
-                                        <tr key={risk.id} className={`hover:${theme.colors.background}`}>
-                                            <td className="px-4 py-3 text-sm text-slate-600">{proj?.name || risk.projectId}</td>
+                                        <tr key={risk.id} className={`hover:${theme.colors.background} transition-colors`}>
+                                            <td className="px-4 py-3 text-sm text-slate-600 font-bold uppercase">{proj?.code || risk.projectId}</td>
                                             <td className={`px-4 py-3 text-sm font-medium ${theme.colors.text.primary}`}>{risk.description}</td>
                                             <td className="px-4 py-3 text-center">
                                                 <span className="inline-block w-8 text-center rounded font-bold text-white text-xs py-0.5 bg-red-600">
@@ -182,7 +181,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                              <div className="text-center p-8 text-slate-400 italic">
                                 <AlertOctagon size={32} className="mx-auto mb-2 opacity-30"/>
                                 <p className="font-bold uppercase tracking-widest text-[10px]">No Escalated Threats</p>
-                                <p className="text-xs mt-1">All project-level risks are currently below the escalation threshold.</p>
+                                <p className="text-xs mt-1">All project-level risks are currently below the critical escalation threshold.</p>
                              </div>
                          </div>
                     )}
@@ -206,7 +205,7 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Risk Description</label>
                     <textarea 
-                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none resize-none shadow-inner`}
                         value={newRisk.description}
                         onChange={e => setNewRisk({...newRisk, description: e.target.value})}
                         placeholder="Describe the systemic threat..."
@@ -243,3 +242,4 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
     </div>
   );
 };
+export default ProgramRisks;

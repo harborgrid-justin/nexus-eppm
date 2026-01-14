@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useProgramScopeLogic } from '../../hooks/domain/useProgramScopeLogic';
-import { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock, Plus, Edit2, Trash2, Target } from 'lucide-react';
+import { Sliders, FileText, CheckCircle, AlertTriangle, Clock, Plus, Trash2 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { useTheme } from '../../context/ThemeContext';
@@ -25,8 +25,7 @@ const ProgramScope: React.FC<ProgramScopeProps> = ({ programId }) => {
       handleClosePanel,
       handleSaveRequest,
       handleDeleteRequest,
-      handleApprove,
-      handleReject
+      handleApprove
   } = useProgramScopeLogic(programId);
 
   return (

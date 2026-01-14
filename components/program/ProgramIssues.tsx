@@ -1,9 +1,7 @@
-
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-// FIX: Added missing Activity and Save icons to the lucide-react import list
-import { AlertOctagon, ArrowUpRight, Folder, Shield, CheckCircle, Plus, Edit2, Trash2, Search, Filter, ShieldAlert, Activity, Save } from 'lucide-react';
+import { AlertOctagon, ArrowUpRight, CheckCircle, Plus, Edit2, Trash2, Search, ShieldAlert, Activity, Save } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { SidePanel } from '../ui/SidePanel';
@@ -192,7 +190,6 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                         <h4 className="font-black text-green-900 text-xl tracking-tight uppercase">Productivity Flow</h4>
                         <p className="text-xs text-green-700 font-bold uppercase tracking-tight mt-2">{programIssues.filter(i => i.status === 'Resolved').length} Impediments Resolved (MTD)</p>
                     </div>
-                    {/* FIX: Correctly imported Activity icon from lucide-react */}
                     <Activity size={160} className="absolute -right-16 -bottom-16 opacity-5 text-green-800 pointer-events-none rotate-12" />
                 </div>
             </div>
@@ -208,7 +205,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <div>
                     <label className={theme.typography.label + " block mb-1.5 ml-1"}>Narrative Summary</label>
                     <textarea 
-                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none bg-slate-50/30 transition-all`}
+                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none bg-slate-50/30 transition-all shadow-inner`}
                         value={currentIssue.description} 
                         onChange={e => setCurrentIssue({...currentIssue, description: e.target.value})} 
                     />

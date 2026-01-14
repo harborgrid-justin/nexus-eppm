@@ -25,7 +25,9 @@ const PortfolioPrioritization: React.FC = () => {
                 </div>
                 <div className="bg-slate-900 text-white px-4 py-2 rounded-xl flex items-center gap-3 shadow-xl">
                     <ShieldCheck size={16} className="text-nexus-400"/>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Weights: Financial {(state.governance.strategicWeights.financial * 100).toFixed(0)}% | Strategic {(state.governance.strategicWeights.strategic * 100).toFixed(0)}%</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                        Weights: Financial {(state.governance.strategicWeights.financial * 100).toFixed(0)}% | Strategic {(state.governance.strategicWeights.strategic * 100).toFixed(0)}%
+                    </span>
                 </div>
             </div>
             

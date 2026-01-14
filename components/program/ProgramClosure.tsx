@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Flag, RefreshCw, FileCheck, CheckCircle, UserCheck } from 'lucide-react';
+import { Flag, RefreshCw, FileCheck, UserCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -23,7 +23,6 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
       return `FY${endYear + 1} - FY${endYear + 3}`;
   }, [program]);
 
-  // Derive signatory status from governance roles
   const signatories = useMemo(() => {
       const roles = state.governanceRoles.filter(r => r.programId === programId || !r.programId);
       return roles.map(r => ({
@@ -41,7 +40,6 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
-            {/* Operational Readiness */}
             <div className="lg:col-span-2">
                 <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-full`}>
                     <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50 flex justify-between items-center`}>
@@ -49,14 +47,14 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                             <RefreshCw size={16} className="text-orange-500"/> Operational Readiness Checklist
                         </h3>
                     </div>
-                    <div className="flex-1 overflow-auto">
+                    <div className="flex-1 overflow-auto scrollbar-thin">
                         {transitionItems.length > 0 ? (
                             <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
                                 <thead className="bg-white sticky top-0 z-10 border-b">
                                     <tr>
                                         <th className={theme.components.table.header + " pl-8"}>Classification</th>
                                         <th className={theme.components.table.header}>Action Item</th>
-                                        <th className={theme.components.table.header}>Post-Closure Owner</th>
+                                        <th className={theme.components.table.header}>Sustainment Owner</th>
                                         <th className={theme.components.table.header}>Target Date</th>
                                         <th className={theme.components.table.header + " text-center pr-8"}>Status</th>
                                     </tr>
@@ -68,15 +66,15 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                                                 <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">{item.category}</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <p className={`text-sm font-bold text-slate-800 group-hover:text-nexus-700 transition-colors`}>{item.description}</p>
+                                                <p className={`text-sm font-bold text-slate-800 group-hover:text-nexus-700 transition-colors uppercase tracking-tight`}>{item.description}</p>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
-                                                    <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[8px]">{item.ownerId.charAt(0)}</div>
+                                                    <div className="w-6 h-6 rounded-full bg-slate-900 border border-slate-200 flex items-center justify-center text-white text-[8px] font-black">{item.ownerId.charAt(0)}</div>
                                                     {item.ownerId}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 font-mono text-[11px] font-black text-slate-400">{item.dueDate}</td>
+                                            <td className="px-6 py-4 font-mono text-[11px] font-black text-slate-400 uppercase">{item.dueDate}</td>
                                             <td className="px-6 py-4 text-center pr-8">
                                                 <Badge variant={item.status === 'Complete' ? 'success' : item.status === 'In Progress' ? 'warning' : 'neutral'}>
                                                     {item.status}
@@ -90,7 +88,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                             <div className="p-12 h-full flex flex-col justify-center">
                                 <EmptyGrid 
                                     title="Transition Ledger Neutral"
-                                    description="No operational handover tasks have been identified. Formal transition planning is required for benefit sustainment."
+                                    description="No operational handover tasks have been identified. Formal transition planning is required for sustainable benefit realization."
                                     icon={Flag}
                                     actionLabel="Define Readiness Items"
                                     onAdd={() => {}}
@@ -101,7 +99,6 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                 </div>
             </div>
 
-            {/* Governance Sign-off */}
             <div className="space-y-6">
                 <div className={`${theme.colors.surface} p-8 rounded-[2rem] border ${theme.colors.border} shadow-sm flex flex-col`}>
                     <h3 className="font-black text-slate-800 text-xs uppercase tracking-widest mb-8 flex items-center gap-2 border-b pb-4">
@@ -110,14 +107,14 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                     <div className="space-y-5 flex-1">
                         {signatories.map((g) => (
                             <div key={g.label} className="flex justify-between items-start text-sm group">
-                                <div>
-                                    <span className="text-slate-700 font-bold block">{g.label}</span>
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Owner: {g.owner}</span>
+                                <div className="min-w-0 flex-1 pr-4">
+                                    <span className="text-slate-800 font-black uppercase text-xs block truncate">{g.label}</span>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Auth: {g.owner}</span>
                                 </div>
-                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-lg border transition-all ${
-                                    g.status === 'Complete' ? 'bg-green-50 text-green-700 border-green-200' : 
+                                <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-lg border transition-all ${
+                                    g.status === 'Complete' ? 'bg-green-50 text-green-700 border-green-200 shadow-sm' : 
                                     g.status === 'In Progress' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
-                                    'bg-slate-50 text-slate-400 border-slate-200 group-hover:border-slate-300'
+                                    'bg-white text-slate-400 border-slate-200 group-hover:border-slate-300'
                                 }`}>{g.status}</span>
                             </div>
                         ))}
@@ -128,26 +125,26 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                         )}
                     </div>
                     <div className="mt-8 pt-6 border-t border-slate-50">
-                         <button className="w-full py-3 bg-nexus-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-nexus-700 shadow-lg shadow-nexus-500/20 active:scale-95 transition-all">Initiate Closure Request</button>
+                         <button className="w-full py-4 bg-nexus-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-nexus-700 shadow-lg shadow-nexus-500/20 active:scale-95 transition-all">Initiate Closure Request</button>
                     </div>
                 </div>
 
-                <div className="p-8 bg-slate-900 text-white rounded-[2rem] shadow-2xl relative overflow-hidden group">
+                <div className="p-8 bg-slate-900 text-white rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/5">
                     <div className="relative z-10">
-                        <h3 className="font-black text-[10px] uppercase tracking-widest text-nexus-400 mb-6 flex items-center gap-2">
+                        <h3 className={`font-black text-[10px] uppercase tracking-widest mb-6 flex items-center gap-2 text-nexus-400`}>
                              <FileCheck size={16} /> Sustainment Strategy
                         </h3>
                         <p className="text-xs text-slate-400 leading-relaxed font-medium uppercase tracking-tight mb-8">
-                            Post-program benefit realization ownership period.
+                            Authorized post-program benefit realization ownership period.
                         </p>
                         <div className="space-y-6">
                             <div>
-                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Benefit Owner</p>
-                                <p className="text-base font-bold group-hover:text-nexus-400 transition-colors">DIRECTOR OF OPERATIONS</p>
+                                <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Asset Custodian</p>
+                                <p className="text-base font-bold group-hover:text-nexus-400 transition-colors uppercase">DIRECTOR OF OPERATIONS</p>
                             </div>
                             <div>
-                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Measurement Lifecycle</p>
-                                <p className="text-lg font-black font-mono tracking-tight">{sustainmentPeriod}</p>
+                                <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Measurement Lifecycle</p>
+                                <p className="text-lg font-black font-mono tracking-tight text-white">{sustainmentPeriod}</p>
                             </div>
                         </div>
                     </div>

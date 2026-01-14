@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -61,7 +62,7 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
             <div className="relative pt-12 pb-10 overflow-x-auto scrollbar-hide">
                 <div className="flex min-w-[1000px] justify-between relative z-10 px-20">
                     <div className={`absolute top-4 left-20 right-20 h-1 bg-slate-100 -z-10 rounded-full shadow-inner`}></div>
-                    {programStageGates.map((gate, idx) => (
+                    {programStageGates.map((gate) => (
                         <div key={gate.id} className="flex flex-col items-center group cursor-pointer relative">
                             <div className={`w-10 h-10 rounded-xl border-4 flex items-center justify-center bg-white mb-4 transition-all group-hover:scale-110 shadow-lg ${
                                 gate.status === 'Approved' ? 'border-green-500' : 
@@ -110,81 +111,86 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
                                 <CheckCircle size={14} className="text-green-500"/> Certified Criteria
                             </h4>
                             <ul className="space-y-4">
-                                {(gate.criteria || []).map(crit => (
-                                    <li key={crit.id} className={`flex items-start gap-4 p-4 ${theme.colors.background} rounded-2xl border ${theme.colors.border} group/item hover:border-nexus-200 transition-all`}>
-                                        {crit.status === 'Met' ? <CheckCircle size={18} className="text-green-500 mt-0.5 shrink-0"/> : 
-                                         crit.status === 'Not Met' ? <XCircle size={18} className="text-red-500 mt-0.5 shrink-0"/> :
-                                         <AlertTriangle size={18} className="text-yellow-500 mt-0.5 shrink-0"/>
-                                        }
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-bold ${theme.colors.text.primary}`}>{crit.description}</p>
-                                            {crit.notes && <p className={`text-[11px] ${theme.colors.text.secondary} mt-1.5 leading-relaxed font-medium italic`}>"{crit.notes}"</p>}
+                                {gate.criteria.map(c => (
+                                    <li key={c.id} className="flex items-start gap-3">
+                                        <div className={`mt-0.5 ${c.status === 'Met' ? 'text-green-500' : 'text-slate-300'}`}>
+                                            <CheckCircle size={14}/>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium text-slate-700">{c.description}</p>
+                                            {c.notes && <p className="text-xs text-slate-500 italic mt-0.5">{c.notes}</p>}
                                         </div>
                                     </li>
                                 ))}
-                                {(!gate.criteria || gate.criteria.length === 0) && (
-                                    <div className="p-4 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center text-[10px] font-black uppercase text-slate-300 tracking-widest">No Criteria Defined</div>
-                                )}
+                                {gate.criteria.length === 0 && <li className="text-xs text-slate-400 italic">No specific criteria defined for this gate.</li>}
                             </ul>
                         </div>
-                        
-                        <div className="flex flex-col h-full">
+                        <div>
                             <h4 className={`text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2`}>
-                                <FileText size={14} className="text-nexus-600"/> Decision Ledger
+                                <FileText size={14} className="text-blue-500"/> Decision Summary
                             </h4>
-                            <div className={`${theme.colors.background} border ${theme.colors.border} rounded-2xl p-6 flex-1 shadow-inner relative overflow-hidden`}>
-                                <div className="absolute top-0 right-0 p-12 bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
-                                <p className={`text-sm text-slate-600 italic font-medium leading-relaxed relative z-10`}>
-                                    "{gate.decisionNotes || 'The board has not yet committed formal decision notes for this gate review.'}"
+                            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 min-h-[120px] relative overflow-hidden group">
+                                <p className="text-sm text-slate-600 leading-relaxed italic relative z-10">
+                                    {gate.decisionNotes || 'Pending formal review session outcomes...'}
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
             ))}
-            
             {programStageGates.length === 0 && (
-                <EmptyGrid 
-                    title="Governance Timeline Neutral"
-                    description="The program stage-gate calendar is currently unpopulated. Establish review gates to control investment progression."
-                    icon={Target}
-                    actionLabel="Schedule Gate Review"
-                    onAdd={() => setIsPanelOpen(true)}
-                />
+                <div className="flex-1 flex flex-col justify-center">
+                    <EmptyGrid 
+                        title="Stage Gate Lifecycle Not Defined"
+                        description="Initialize the program phase gates to enable structured performance reporting."
+                        icon={Target}
+                        actionLabel="Define Stage Gate"
+                        onAdd={() => setIsPanelOpen(true)}
+                    />
+                </div>
             )}
         </div>
 
         <SidePanel
             isOpen={isPanelOpen}
             onClose={() => setIsPanelOpen(false)}
-            title="Provision Stage Gate"
+            title="Schedule New Stage Gate"
             width="md:w-[500px]"
-            footer={<><Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button><Button onClick={handleSave} icon={Save}>Commit Milestone</Button></>}
+            footer={
+                <>
+                    <Button variant="secondary" onClick={() => setIsPanelOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSave} icon={Save}>Schedule Gate</Button>
+                </>
+            }
         >
             <div className="space-y-6">
                 <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Review Identity</label>
-                    <Input value={newGate.name} onChange={e => setNewGate({...newGate, name: e.target.value})} placeholder="e.g. FY25 Capital Approval" />
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Gate Designation</label>
+                    <Input value={newGate.name} onChange={e => setNewGate({...newGate, name: e.target.value})} placeholder="e.g. Critical Design Review" />
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Gate Classification</label>
-                        <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold bg-white focus:ring-2 focus:ring-nexus-500 outline-none`} value={newGate.type} onChange={e => setNewGate({...newGate, type: e.target.value})}>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Gate Type</label>
+                        <select 
+                            className={`w-full p-3 border border-slate-300 rounded-xl text-sm bg-slate-50 font-bold focus:ring-2 focus:ring-nexus-500 outline-none`}
+                            value={newGate.type} 
+                            onChange={e => setNewGate({...newGate, type: e.target.value})}
+                        >
                             <option>Funding</option><option>Technical</option><option>Business</option>
                         </select>
                     </div>
                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Planned Baseline</label>
-                        <Input type="date" value={newGate.plannedDate} onChange={e => setNewGate({...newGate, plannedDate: e.target.value})} />
+                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Planned Target</label>
+                         <Input type="date" value={newGate.plannedDate} onChange={e => setNewGate({...newGate, plannedDate: e.target.value})} />
                     </div>
                 </div>
                 <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Success Criteria Summary</label>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Scope & Objective</label>
                     <textarea 
-                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none bg-slate-50/50 font-medium`}
-                        value={newGate.description} 
-                        onChange={e => setNewGate({...newGate, description: e.target.value})} 
-                        placeholder="Define what MUST be met for successful passage..."
+                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none bg-slate-50 font-medium`}
+                        value={newGate.description}
+                        onChange={e => setNewGate({...newGate, description: e.target.value})}
+                        placeholder="Define the criteria for entry and exit of this gate..."
                     />
                 </div>
             </div>

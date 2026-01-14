@@ -3,12 +3,10 @@ import { Project } from '../../types';
 import { formatCompactCurrency, formatCurrency, formatDate } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ScatterChart, Scatter, ZAxis, ReferenceLine, Cell } from 'recharts';
-import { DollarSign, TrendingUp, Lock, Unlock, AlertCircle, Calendar } from 'lucide-react';
+import { DollarSign, TrendingUp, Lock, Unlock, Calendar } from 'lucide-react';
 import { usePortfolioFinancialsLogic } from '../../hooks/domain/usePortfolioFinancialsLogic';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { useNavigate } from 'react-router-dom';
-import { useData } from '../../context/DataContext';
-// Added missing Button and Badge imports from common UI library
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 
@@ -18,7 +16,6 @@ interface PortfolioFinancialsProps {
 
 const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) => {
   const theme = useTheme();
-  const { state } = useData();
   const navigate = useNavigate();
   const { 
       scatterData, 
@@ -137,7 +134,7 @@ const PortfolioFinancials: React.FC<PortfolioFinancialsProps> = ({ projects }) =
                       {fundingGates.map((gate, idx) => (
                           <div key={idx} className="flex-1 relative z-10 flex flex-col items-center text-center group cursor-pointer">
                               <div className={`w-14 h-14 rounded-2xl border-4 flex items-center justify-center bg-white mb-4 shadow-xl transition-all group-hover:scale-110 group-hover:-translate-y-1 ${
-                                  gate.status === 'Approved' || gate.status === 'Released' ? 'border-green-500 text-green-600' :
+                                  gate.status === 'Approved' || gate.status === 'Released' ? 'border-green-50 text-green-600' :
                                   gate.status === 'Conditional' || gate.status === 'Pending' ? 'border-amber-400 text-amber-500 shadow-amber-500/10' :
                                   gate.status === 'Rejected' ? 'border-red-500 text-red-500 shadow-red-500/10' :
                                   'border-slate-200 text-slate-300'

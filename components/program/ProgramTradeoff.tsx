@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProgramTradeoffLogic } from '../../hooks/domain/useProgramTradeoffLogic';
-import { Scale, TrendingUp, AlertTriangle, Target, DollarSign } from 'lucide-react';
+import { Scale, TrendingUp, Target, DollarSign } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ZAxis, ReferenceLine, Cell } from 'recharts';
@@ -34,7 +34,7 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
           <div className="h-full flex items-center justify-center p-8">
               <EmptyGrid 
                 title="Trade-off Model Isolated"
-                description="Synthesize cost-benefit scenarios to analyze delivery trade-offs. Predictive modeling is required for program balancing."
+                description="Synthesize cost-benefit scenarios to analyze delivery trade-offs. Predictive modeling is required for program rebalancing."
                 icon={Scale}
                 actionLabel="Initialize Modeling Scenario"
                 onAdd={handleCreateScenario}
@@ -54,7 +54,6 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
         </div>
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
-            {/* Impact Matrix */}
             <div className={`lg:col-span-2 ${theme.colors.surface} p-8 rounded-[2.5rem] border ${theme.colors.border} shadow-sm h-[450px] flex flex-col`}>
                 <div className="flex justify-between items-center mb-8 border-b border-slate-50 pb-4">
                     <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
@@ -80,7 +79,6 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
                 </div>
             </div>
 
-            {/* Scenario Workbench */}
             <div className="space-y-6">
                 <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-[200px]`}>
                     <div className={`p-4 border-b ${theme.colors.border} bg-slate-50/50 flex justify-between items-center`}>

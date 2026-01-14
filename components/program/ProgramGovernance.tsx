@@ -66,7 +66,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
         : `${theme.colors.surface} ${theme.colors.text.primary}`;
 
       return (
-        <div className={`p-4 rounded-xl border shadow-sm text-center w-64 flex-shrink-0 ${cardClasses} ${isPrimary ? 'border-nexus-700' : theme.colors.border} relative group`}>
+        <div className={`p-4 rounded-xl border shadow-sm text-center w-64 flex-shrink-0 ${cardClasses} ${isPrimary ? 'border-nexus-700 shadow-xl' : theme.colors.border} relative group`}>
             <button 
                 onClick={() => handleDeleteRole(role.id)} 
                 className={`absolute top-2 right-2 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${isPrimary ? 'text-white/50 hover:text-white' : `${theme.colors.text.tertiary} hover:${theme.colors.text.primary}`}`}
@@ -81,7 +81,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 scrollbar-thin`}>
         <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
                 <Gavel className="text-nexus-600" size={24}/>
@@ -98,13 +98,13 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                         <Users size={14} className="text-blue-500"/> Governance Structure
                     </h3>
                     
-                    <div className="w-full overflow-x-auto pb-4">
+                    <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
                     <div className="flex flex-col items-center min-w-[800px]">
                         <div className="flex gap-12 items-start z-10">
                             <RoleCard role={steering} />
                             <div className="flex flex-col items-center space-y-8">
                                 <RoleCard role={sponsor} isPrimary />
-                                <div className={`h-8 w-0.5 ${theme.colors.background}`}></div>
+                                <div className={`h-8 w-0.5 ${theme.colors.border} bg-slate-200`}></div>
                                 <RoleCard role={programMgr} />
                             </div>
                         </div>
@@ -113,7 +113,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
                             <h4 className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest mb-4 text-center border-t ${theme.colors.border} pt-4`}>Extended Governance Team</h4>
                             <div className="grid grid-cols-3 gap-4">
                                 {governanceRoles.filter(r => !['Sponsor', 'Steering Committee', 'Program Manager'].includes(r.role)).map(role => (
-                                    <div key={role.id} className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl relative group`}>
+                                    <div key={role.id} className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl relative group shadow-sm`}>
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <p className="font-black text-xs uppercase tracking-tight text-slate-700">{role.role}</p>
@@ -152,7 +152,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
             <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                     <Calendar size={14} className="text-green-500"/> Governance Cadence

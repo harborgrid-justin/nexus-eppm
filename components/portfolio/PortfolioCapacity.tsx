@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-// Added RefreshCw and TrendingUp to the main lucide-react import to fix "Cannot find name" errors
 import { LayoutGrid, BarChart2, Activity, Filter, Layers, RefreshCw, TrendingUp } from 'lucide-react';
 import { usePortfolioCapacityLogic } from '../../hooks/domain/usePortfolioCapacityLogic';
 import { CapacityHeatmap } from './capacity/CapacityHeatmap';
@@ -23,7 +22,7 @@ const PortfolioCapacity: React.FC = () => {
                     description="No active resources found in the organization pool to analyze demand patterns."
                     icon={Activity}
                     actionLabel="Provision Resources"
-                    onAdd={() => {}} // Navigation to resource pool
+                    onAdd={() => {}} 
                 />
             </div>
         );

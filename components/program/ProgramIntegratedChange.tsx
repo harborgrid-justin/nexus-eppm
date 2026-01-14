@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { RefreshCw, Users, Database, Layers, BarChart2, Activity, Settings, Network } from 'lucide-react';
+import { RefreshCw, BarChart2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { IntegratedChangeRequest } from '../../types';

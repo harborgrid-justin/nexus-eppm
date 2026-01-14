@@ -6,6 +6,7 @@ import ProgramBenefits from './ProgramBenefits';
 import ProgramRoadmap from './ProgramRoadmap';
 import ProgramTradeoff from './ProgramTradeoff';
 import ProgramGovernance from './ProgramGovernance';
+// Fixed: ProgramStageGates is now a default export, import matches.
 import ProgramStageGates from './ProgramStageGates';
 import ProgramArchitecture from './ProgramArchitecture';
 import ProgramScope from './ProgramScope';

@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 const PortfolioOptimization: React.FC = () => {
     const theme = useTheme();
     const navigate = useNavigate();
-    const { state, dispatch } = useData();
+    const { state } = useData();
     const [decisions, setDecisions] = useState<Record<string, string>>({});
     const [aiAdvice, setAiAdvice] = useState<string | null>(null);
     const [isAiLoading, setIsAiLoading] = useState(false);
@@ -25,7 +25,6 @@ const PortfolioOptimization: React.FC = () => {
              const evm = calculateEVM(p, projectBudgetItems);
              const progress = calculateProjectProgress(p);
              
-             // Dynamic Action Engine
              let recAction = 'Maintain';
              const criticalThreshold = state.governance?.scheduling?.autoLevelingThreshold / 100 || 0.85;
              

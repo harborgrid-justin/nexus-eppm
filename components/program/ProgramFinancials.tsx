@@ -1,15 +1,13 @@
-
 import React, { useState, useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { TrendingUp, Lock, Unlock, DollarSign, PieChart as PieIcon, Edit2, Save, FileText, Activity } from 'lucide-react';
+import { TrendingUp, Lock, Unlock, DollarSign, Edit2, Save, FileText, Activity } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import StatCard from '../shared/StatCard';
 import { formatCurrency, formatCompactCurrency } from '../../utils/formatters';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
-// FIX: Added missing Card component import
 import { Card } from '../ui/Card';
 import { ProgramBudgetAllocation } from '../../types';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -35,7 +33,7 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
           name: p.code || 'N/A',
           Allocated: p.budget || 0,
           Spent: p.spent || 0,
-          Forecast: (p.spent / (new Date().getMonth() + 1 || 1)) * 12 // Simple projection
+          Forecast: (p.spent / (new Date().getMonth() + 1 || 1)) * 12 
       }));
   }, [projects]);
 
@@ -90,7 +88,6 @@ const ProgramFinancials: React.FC<ProgramFinancialsProps> = ({ programId }) => {
             <StatCard title="Strategic Health" value={burnRatio > 1 ? 'Overrun' : 'Within Cap'} icon={Activity} trend={burnRatio < 1 ? 'up' : 'down'} />
         </div>
 
-        {/* FIX: Replaced div with Card component as per existing usage patterns */}
         <Card className={`${theme.layout.cardPadding} h-[400px] flex flex-col shadow-sm`}>
             <div className="flex justify-between items-center mb-8 border-b border-slate-50 pb-4">
                 <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-400">Budget Deployment vs. Linear Forecast</h3>
