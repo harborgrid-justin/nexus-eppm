@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useGeminiAnalysis } from '../../hooks/useGeminiAnalysis';
@@ -8,7 +7,8 @@ import { ProgramKPIs } from './ProgramKPIs';
 import { ProgramVisuals } from './ProgramVisuals';
 import { NarrativeField } from '../common/NarrativeField';
 import { useTheme } from '../../context/ThemeContext';
-import { Sparkles, Loader2, Target, Lightbulb, Briefcase, Plus, FileText, Layers } from 'lucide-react';
+import { useI18n } from '../../context/I18nContext';
+import { Sparkles, Target, Lightbulb, Briefcase, Plus, FileText, Layers, Activity } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -19,6 +19,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   const { generateProgramReport, report, isGenerating, reset } = useGeminiAnalysis();
   const { dispatch } = useData();
   const theme = useTheme();
+  const { t } = useI18n();
   const { canEditProject } = usePermissions();
   
   const [isReportOpen, setIsReportOpen] = React.useState(false);
@@ -28,7 +29,6 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     return (aggregateMetrics.totalSpent / aggregateMetrics.totalBudget) * 100;
   }, [aggregateMetrics]);
 
-  // Handlers for direct mutation
   const handleUpdate = (field: string, value: string) => {
     if (!program) return;
     dispatch({
@@ -47,13 +47,12 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   };
 
   const handleAddProject = () => {
-      const newProjectId = generateId('P');
       dispatch({
           type: 'PROJECT_IMPORT',
           payload: [{
-              id: newProjectId,
+              id: generateId('P'),
               programId: programId,
-              name: 'New Initiative',
+              name: t('program.new_initiative', 'New Initiative'),
               code: `PRJ-${Date.now()}`,
               status: 'Planned',
               health: 'Good',
@@ -77,7 +76,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
   };
 
   const programInsight = useMemo(() => {
-    if (!program || projects.length === 0) return null;
+    if (!program || projects.length === 0) return t('program.insights.pending', "Analyzing portfolio performance and burn rates...");
     
     const totalBudget = program.budget || aggregateMetrics.totalBudget;
     const totalSpent = aggregateMetrics.totalSpent;
@@ -87,36 +86,30 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
     const warningCount = projects.filter(p => p.health === 'Warning').length;
     
     if (criticalCount > 0) {
-        return `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated; immediate governance review recommended.`;
+        return t('program.insights.critical', `Attention: ${criticalCount} component project(s) are in critical health. Program delivery risk is elevated; immediate governance review recommended.`);
     }
     
     if (totalBudget > 0 && (totalSpent / totalBudget) > 0.95) {
-        return `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority. Funding re-alignment may be required for upcoming phases.`;
+        return t('program.insights.budget', `Financial Alert: Program has utilized ${((totalSpent / totalBudget) * 100).toFixed(1)}% of total budget authority. Funding re-alignment may be required.`);
     }
 
     if (warningCount > 3) {
-        return `Trend Warning: ${warningCount} projects reporting warning status. Aggregated schedule drift may impact strategic roadmap milestones.`;
+        return t('program.insights.warning', `Trend Warning: ${warningCount} projects reporting warning status. Aggregated schedule drift may impact strategic roadmap milestones.`);
     }
 
-    return `Operational Stability: Program is tracking within established performance parameters. Available fiscal authority remains healthy at ${formatCompactCurrency(remaining)}.`;
-  }, [program, projects, aggregateMetrics]);
+    return t('program.insights.stable', `Operational Stability: Program is tracking within established performance parameters. Available fiscal authority remains healthy at ${formatCompactCurrency(remaining)}.`);
+  }, [program, projects, aggregateMetrics, t]);
 
   if (!program) return null;
 
   return (
     <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} flex flex-col ${theme.layout.gridGap} animate-in fade-in`}>
-        {/* AI Sidecar */}
         <SidePanel 
             isOpen={isReportOpen} 
             onClose={() => { setIsReportOpen(false); reset(); }} 
             width="max-w-3xl" 
-            title={
-                <span className="flex items-center gap-2 font-black uppercase text-sm tracking-widest text-slate-900">
-                    <FileText size={18} className="text-nexus-600" /> 
-                    Enterprise Status Report (AI)
-                </span>
-            } 
-            footer={<Button onClick={() => setIsReportOpen(false)}>Close Briefing</Button>}
+            title={<span className="flex items-center gap-2 font-black uppercase text-sm tracking-widest text-slate-900"><FileText size={18} className="text-nexus-600" /> {t('program.status_report', 'Enterprise Status Report (AI)')}</span>} 
+            footer={<Button onClick={() => setIsReportOpen(false)}>{t('common.close', 'Close Briefing')}</Button>}
         >
             {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-32 space-y-6">
@@ -125,130 +118,72 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                         <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-nexus-500 animate-pulse" size={24}/>
                     </div>
                     <div className="text-center">
-                        <p className="text-slate-800 font-bold uppercase tracking-widest text-xs">Synthesizing Program Artifacts...</p>
-                        <p className="text-slate-400 text-[10px] mt-2 font-medium uppercase tracking-widest">Integrating Budget, Risk, and Schedule Ledger</p>
+                        <p className="text-slate-800 font-bold uppercase tracking-widest text-xs">{t('common.analyzing', 'Synthesizing Program Artifacts...')}</p>
                     </div>
                 </div>
             ) : (
                 report && (
                     <div className="animate-in fade-in duration-700 bg-white">
-                        <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-200 flex justify-between items-center">
-                            <div>
-                                <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Report Date</h4>
-                                <p className="text-bold text-slate-800">{new Date().toLocaleDateString()}</p>
-                            </div>
-                            <div className="text-right">
-                                <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Source Entity</h4>
-                                <p className="text-font-bold text-slate-800">{program.name}</p>
-                            </div>
-                        </div>
-                        <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">
-                            {report}
-                        </div>
+                        <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">{report}</div>
                     </div>
                 )
             )}
         </SidePanel>
 
-        {/* Toolbar */}
         <div className="flex justify-between items-center border-b border-slate-100 pb-4">
             <div>
-                 <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                    <Layers className="text-nexus-600" size={24}/>
-                    Program Dashboard
-                </h2>
-                <p className="text-sm text-slate-500 font-medium">Integrated control center for component project performance.</p>
+                 <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3"><Layers className="text-nexus-600" size={24}/>{t('program.dashboard', 'Program Dashboard')}</h2>
+                 <p className="text-sm text-slate-500 font-medium">{t('program.dashboard_desc', 'Integrated control center for component project performance.')}</p>
             </div>
-             <Button 
-                variant="primary" 
-                onClick={handleGenerateReport}
-                disabled={isGenerating}
-                icon={Sparkles}
-                className="shadow-xl shadow-nexus-500/10"
-            >
-                {isGenerating ? "Synthesizing..." : "Generate Status Report"}
-            </Button>
+             <Button variant="primary" onClick={handleGenerateReport} disabled={isGenerating} icon={Sparkles}>{isGenerating ? t('common.analyzing_short', 'Synthesizing...') : t('program.gen_report', 'Generate Status Report')}</Button>
         </div>
         
-        {/* Top KPIs */}
-        <ProgramKPIs 
-            program={program} 
-            projectCount={projects.length} 
-            spent={aggregateMetrics.totalSpent} 
-            total={aggregateMetrics.totalBudget} 
-            riskCount={programRisks.length} 
-        />
+        <ProgramKPIs program={program} projectCount={projects.length} spent={aggregateMetrics.totalSpent} total={aggregateMetrics.totalBudget} riskCount={programRisks.length} />
         
-        {/* Main Content Grid */}
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
-            
-            {/* Left Column: Strategic Narrative (The Cage) */}
             <div className={`lg:col-span-2 flex flex-col ${theme.layout.gridGap}`}>
                 <Card className="p-8 border-l-4 border-l-nexus-500">
-                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
-                        <Target size={14} className="text-nexus-600"/> Executive Strategy
-                    </h3>
+                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}><Target size={14} className="text-nexus-600"/>{t('program.strategy_cage', 'Executive Strategy')}</h3>
                     <div className="space-y-8">
                          <NarrativeField 
-                            label="Business Case & Strategic Mandate"
+                            label={t('program.business_case', 'Business Case & Strategic Mandate')}
                             value={program.businessCase}
-                            placeholderLabel="Define the overarching strategic mandate and justification for this project."
+                            placeholderLabel={t('program.business_case_placeholder', 'Define the overarching strategic mandate and justification for this project.')}
                             onSave={(val) => handleUpdate('businessCase', val)}
                             isReadOnly={!canEditProject()}
                         />
                         <NarrativeField 
-                            label="Benefits Realization Strategy"
+                            label={t('program.benefits_strategy', 'Benefits Realization Strategy')}
                             value={program.benefits}
-                            placeholderLabel="How will value be delivered and measured? Outline key KPIs."
+                            placeholderLabel={t('program.benefits_strategy_placeholder', 'How will value be delivered and measured? Outline key KPIs.')}
                             onSave={(val) => handleUpdate('benefits', val)}
                             isReadOnly={!canEditProject()}
                         />
                     </div>
                 </Card>
-
-                {/* Visuals */}
                 <ProgramVisuals projects={projects} />
             </div>
 
-            {/* Right Column: Execution & Quick Actions */}
             <div className={`flex flex-col ${theme.layout.gridGap}`}>
                  <Card className="p-6">
-                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}>
-                        <Briefcase size={14} className="text-green-600"/> Component Initiatives
-                    </h3>
+                    <h3 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b pb-3`}><Briefcase size={14} className="text-green-600"/>{t('program.components', 'Component Initiatives')}</h3>
                     <div className="space-y-3">
                         {projects.length > 0 ? projects.map(p => (
                             <div key={p.id} className="p-3 bg-slate-50 rounded-lg border border-slate-100 hover:border-nexus-300 transition-colors group cursor-pointer">
-                                <div className="flex justify-between items-start mb-1">
-                                    <span className="font-bold text-sm text-slate-800 group-hover:text-nexus-700">{p.name}</span>
-                                    <span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
-                                </div>
-                                <div className="flex justify-between text-xs text-slate-500">
-                                    <span className="font-mono">{p.code}</span>
-                                    <span>{(p.progress || 0).toFixed(0)}%</span>
-                                </div>
+                                <div className="flex justify-between items-start mb-1"><span className="font-bold text-sm text-slate-800 group-hover:text-nexus-700">{p.name}</span><span className={`w-2 h-2 rounded-full ${p.health === 'Good' ? 'bg-green-500' : p.health === 'Warning' ? 'bg-yellow-500' : 'bg-red-500'}`}></span></div>
+                                <div className="flex justify-between text-xs text-slate-500"><span className="font-mono">{p.code}</span><span>{(p.spent/p.budget*100).toFixed(0)}%</span></div>
                             </div>
-                        )) : (
-                            <div className="text-center p-6 text-slate-400 text-sm italic border-2 border-dashed border-slate-100 rounded-xl">
-                                No active projects.
-                            </div>
+                        )) : <div className="text-center p-6 text-slate-400 text-sm italic border-2 border-dashed border-slate-100 rounded-xl">{t('program.no_projects', 'No active projects.')}</div>}
+                        {canEditProject() && (
+                            <button onClick={handleAddProject} className="w-full py-3 mt-2 border-2 border-dashed border-nexus-200 rounded-xl text-nexus-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-nexus-50 transition-all">
+                                <Plus size={14}/> {t('program.add_initiative', 'Add Initiative')}
+                            </button>
                         )}
-                        <button 
-                            onClick={handleAddProject}
-                            className="w-full py-3 mt-2 border-2 border-dashed border-nexus-200 rounded-xl text-nexus-600 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-nexus-50 transition-all"
-                        >
-                            <Plus size={14}/> Add Initiative
-                        </button>
                     </div>
                  </Card>
 
                  <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
-                     <div className="relative z-10">
-                         <h4 className="font-bold flex items-center gap-2 mb-2"><Lightbulb size={18} className="text-yellow-400"/> Program Insight</h4>
-                         <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                             {programInsight || "Analyzing portfolio performance and burn rates..."}
-                         </p>
-                     </div>
+                     <div className="relative z-10"><h4 className="font-bold flex items-center gap-2 mb-2"><Lightbulb size={18} className="text-yellow-400"/> {t('program.ai_insight', 'Program Insight')}</h4><p className="text-xs text-slate-300 leading-relaxed font-medium">{programInsight}</p></div>
                      <Target size={120} className="absolute -right-8 -bottom-8 text-white/5 rotate-12"/>
                  </div>
             </div>

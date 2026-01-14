@@ -22,11 +22,11 @@ export const ExchangeDashboard: React.FC = () => {
     const { containerRef, isVisible } = useLazyLoad();
 
     return (
-        <div className="h-full overflow-y-auto space-y-6 pr-2 scrollbar-thin animate-in fade-in duration-500">
+        <div className="h-full overflow-y-auto space-y-6 p-1 scrollbar-thin animate-in fade-in duration-500">
             <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
                 <StatCard title="Portfolio Ingestion" value="1.2M" subtext="24h Volume" icon={Activity} trend="up" />
                 <StatCard title="API Integrity" value="99.8%" subtext="14 Faults Logged" icon={CheckCircle} />
-                <StatCard title="Active Sockets" value={`${services.filter(s => s.status === 'Operational').length}/${services.length || 12}`} subtext="Healthy Handshake" icon={Server} />
+                <StatCard title="Active Sockets" value={`${services.filter(s => s.status === 'Operational').length}/${services.length || 1}`} subtext="Healthy Handshake" icon={Server} />
                 <StatCard title="Sync Latency" value="142ms" subtext="Avg Payload Wait" icon={Zap} trend="down" />
             </div>
 
@@ -39,7 +39,7 @@ export const ExchangeDashboard: React.FC = () => {
                             </h3>
                             {isPending && <span className="text-[10px] text-nexus-500 animate-pulse font-bold">Querying Log Lake...</span>}
                         </div>
-                        <div className={`${theme.colors.background} p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight`}>
+                        <div className={`${theme.colors.background} p-1 rounded-lg flex text-[10px] font-black uppercase tracking-tight border ${theme.colors.border}`}>
                             {['24h', '7d', '30d'].map(r => (
                                 <button key={r} onClick={() => changeMetricRange(r)} className={`px-2 py-1 rounded transition-all ${metricRange === r ? `${theme.colors.surface} shadow-sm text-nexus-700` : `${theme.colors.text.secondary}`}`}>{r}</button>
                             ))}
@@ -77,7 +77,7 @@ export const ExchangeDashboard: React.FC = () => {
                         {services.length > 0 ? services.map((node, i) => {
                             const Icon = getServiceIcon(node.name);
                             return (
-                                <div key={i} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl hover:shadow-sm transition-all group cursor-default`}>
+                                <div key={i} className={`flex items-center justify-between p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl hover:shadow-sm transition-all group cursor-default shadow-sm`}>
                                     <div className="flex items-center gap-4">
                                         <div className={`p-2 rounded-xl transition-colors ${theme.colors.surface} border shadow-sm ${theme.colors.text.tertiary} group-hover:text-nexus-600 ${theme.colors.border}`}>
                                             <Icon size={18} />
@@ -94,11 +94,11 @@ export const ExchangeDashboard: React.FC = () => {
                                 </div>
                             );
                         }) : (
-                            <div className={`flex flex-col items-center justify-center h-full ${theme.colors.text.tertiary} border-2 border-dashed ${theme.colors.border} rounded-xl p-4`}>
-                                <Server size={32} className="mb-2 opacity-30"/>
-                                <p className="text-xs font-medium text-center">No external services monitored.</p>
-                                <button onClick={handleAddService} className="mt-4 text-xs font-bold text-nexus-600 bg-nexus-50 px-3 py-1.5 rounded-lg hover:bg-nexus-100 transition-colors">
-                                    Register Service Endpoint
+                            <div className={`flex flex-col items-center justify-center h-full nexus-empty-pattern border-2 border-dashed ${theme.colors.border} rounded-xl p-6`}>
+                                <Server size={32} className="mb-2 opacity-30 text-slate-400"/>
+                                <p className="text-xs font-black uppercase text-slate-400 tracking-widest text-center">No service endpoints configured.</p>
+                                <button onClick={handleAddService} className="mt-4 px-4 py-2 text-xs font-black uppercase tracking-widest text-nexus-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                                    <Plus size={14} className="inline mr-1.5"/> Provision Node
                                 </button>
                             </div>
                         )}

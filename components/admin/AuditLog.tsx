@@ -15,14 +15,14 @@ const AuditLog: React.FC = () => {
     const deferredSearchTerm = useDeferredValue(searchTerm);
 
     const logs = useMemo(() => {
-        const allLogs = state.governance.auditLog || [];
+        const allLogs = state.governance?.auditLog || [];
         if (!deferredSearchTerm) return allLogs;
         
         const term = deferredSearchTerm.toLowerCase();
         return allLogs.filter(log => 
-            log.user.toLowerCase().includes(term) ||
-            log.action.toLowerCase().includes(term) ||
-            log.details.toLowerCase().includes(term)
+            String(log.user).toLowerCase().includes(term) ||
+            String(log.action).toLowerCase().includes(term) ||
+            String(log.details).toLowerCase().includes(term)
         );
     }, [state.governance.auditLog, deferredSearchTerm]);
 
@@ -49,7 +49,7 @@ const AuditLog: React.FC = () => {
     });
 
     return (
-        <div className={`h-full flex flex-col ${theme.layout.sectionSpacing}`}>
+        <div className={`h-full flex flex-col ${theme.layout.sectionSpacing} p-6`}>
             <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm shrink-0`}>
                 <div className="flex items-center gap-4">
                     <div className="p-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-500/20">
@@ -121,17 +121,17 @@ const AuditLog: React.FC = () => {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className={`w-7 h-7 rounded-full ${theme.colors.background} flex items-center justify-center text-[10px] font-black shrink-0 border ${theme.colors.border} text-slate-500`}>
-                                                {log.user.charAt(0).toUpperCase()}
+                                                {String(log.user).charAt(0).toUpperCase()}
                                             </div>
-                                            <span className={`text-sm font-bold ${theme.colors.text.primary} truncate`} title={log.user}>{log.user}</span>
+                                            <span className={`text-sm font-bold ${theme.colors.text.primary} truncate`} title={log.user}>{String(log.user)}</span>
                                         </div>
                                         <div>
                                             <span className={`text-[10px] font-black ${theme.colors.text.secondary} uppercase tracking-tighter ${theme.colors.background} px-2 py-0.5 rounded border ${theme.colors.border} truncate inline-block max-w-full`}>
-                                                {log.action}
+                                                {String(log.action)}
                                             </span>
                                         </div>
                                         <div className={`text-sm ${theme.colors.text.secondary} font-medium truncate`} title={log.details}>
-                                            {log.details}
+                                            {String(log.details)}
                                         </div>
                                         <div className="text-right">
                                             <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-green-600">

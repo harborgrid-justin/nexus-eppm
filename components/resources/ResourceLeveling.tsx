@@ -5,7 +5,6 @@ import { Sliders, Check, AlertTriangle, RefreshCw, BarChart2 } from 'lucide-reac
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Card } from '../ui/Card';
-import { getDaysDiff } from '../../utils/dateUtils';
 
 interface ResourceLevelingProps {
     overAllocatedResources: Resource[] | undefined;
@@ -164,7 +163,7 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                         </div>
                     )) : (
                         <div className="col-span-full">
-                            <Card className="p-12 flex flex-col items-center justify-center text-center bg-green-50 border-green-200 border-dashed">
+                            <Card className="p-12 flex flex-col items-center justify-center text-center bg-green-50 border-green-200 border-dashed" >
                                 <Check size={48} className="text-green-500 mb-4" />
                                 <h3 className="text-xl font-black text-green-900 tracking-tight">Resource Pool Optimized</h3>
                                 <p className="text-sm text-green-700 mt-2 max-w-sm">No over-allocation conflicts identified across the project portfolio. Demand remains within capacity guardrails.</p>

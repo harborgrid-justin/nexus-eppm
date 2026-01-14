@@ -15,6 +15,7 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
+// FIX: Explicitly extending React.Component to ensure props and setState are correctly inherited and recognized by the TypeScript compiler
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
@@ -26,10 +27,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // FIX: Successfully access this.props within the class lifecycle method
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
+  // FIX: handleRetry defined as an arrow function to preserve 'this' context for calling this.setState
   public handleRetry = () => {
+    // FIX: Successfully access this.setState to clear the error state and trigger a re-render
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -42,6 +46,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
+            {/* FIX: Correctly access this.props.name in the render method */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -64,6 +69,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
+    // FIX: Correctly access this.props.children to continue normal component rendering when no error is present
     return this.props.children;
   }
 }

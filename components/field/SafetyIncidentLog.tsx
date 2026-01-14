@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { Plus, Search } from 'lucide-react';
@@ -40,15 +39,15 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
           date: new Date().toISOString().split('T')[0],
           type: 'Near Miss',
           description: '',
-          location: 'Site',
+          location: 'Site Location TBD',
           status: 'Open',
-          reportedBy: 'User'
+          reportedBy: 'System User'
       };
       dispatch({ type: 'FIELD_ADD_INCIDENT', payload: newIncident });
   };
 
   return (
-    <div className={`h-full flex flex-col ${theme.colors.background}/50`}>
+    <div className={`h-full flex flex-col ${theme.colors.background}/50 animate-in fade-in duration-300`}>
        <IncidentStats 
             daysWithoutIncident={daysWithoutIncident} 
             totalIncidents={incidents.length} 
@@ -56,18 +55,18 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
        />
 
        <div className="flex-1 overflow-hidden p-6 pt-0 flex flex-col">
-           <div className={theme.layout.panelContainer}>
-               <div className={`p-4 ${theme.layout.headerBorder} flex justify-between items-center ${theme.colors.surface}`}>
-                   <div className="flex items-center gap-4">
-                       <h3 className={`text-sm font-black uppercase tracking-widest text-slate-500`}>Incident Registry</h3>
+           <div className={`${theme.layout.panelContainer} shadow-md`}>
+               <div className={`p-5 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center ${theme.colors.surface} gap-4`}>
+                   <div className="flex items-center gap-6">
+                       <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>Occupational Safety Registry</h3>
                        <div className="relative">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input type="text" placeholder="Filter log..." className="pl-9 pr-4 py-1.5 text-xs font-bold border border-slate-300 rounded-md w-48 nexus-focus-ring" />
+                            <input type="text" placeholder="Search incidents..." className="pl-9 pr-4 py-2 text-xs font-bold border border-slate-200 rounded-xl w-64 nexus-focus-ring bg-slate-50" />
                        </div>
                    </div>
-                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident}>Report Incident</Button>
+                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident} className="shadow-lg shadow-red-500/20 font-bold uppercase tracking-widest text-[10px]">Report Critical Incident</Button>
                </div>
-               <div className="flex-1 overflow-auto">
+               <div className="flex-1 overflow-auto scrollbar-thin">
                    <IncidentList incidents={incidents} onAdd={handleAddIncident} />
                </div>
            </div>

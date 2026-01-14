@@ -108,7 +108,7 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <WeatherWidget weather={activeLog.weather} onAdjust={() => {}} />
                     
-                    <Card className="p-6 border-l-4 border-l-amber-500">
+                    <Card className="p-6 border-l-4 border-l-amber-500 shadow-sm" >
                          <NarrativeField 
                             label="Site Safety & Critical Observations"
                             value={activeLog.notes}
@@ -120,15 +120,17 @@ const DailyLog: React.FC<DailyLogProps> = ({ projectId }) => {
 
                 <WorkforceGrid logs={activeLog.workLogs} onAdd={handleAddWork} />
                 
-                <div className={`p-4 rounded-xl bg-slate-900 text-white flex justify-between items-center shadow-lg relative overflow-hidden`}>
-                    <div className="flex items-center gap-3 relative z-10">
-                        <ShieldAlert size={20} className="text-nexus-400" />
+                <div className={`p-6 rounded-[2rem] bg-slate-900 text-white flex justify-between items-center shadow-xl relative overflow-hidden border border-white/5`}>
+                    <div className="flex items-center gap-4 relative z-10">
+                        <div className="p-3 bg-white/10 rounded-2xl border border-white/10 shadow-inner">
+                            <ShieldAlert size={24} className="text-nexus-400" />
+                        </div>
                         <div>
-                            <p className="text-xs font-bold">Field Compliance Audit</p>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-widest">Digital Signature Required</p>
+                            <p className="text-base font-black uppercase tracking-tight">Field Compliance Registry</p>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Authorized Digital Signature Required</p>
                         </div>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-500 relative z-10 uppercase">Auth: {activeLog.submittedBy}</span>
+                    <span className="text-[10px] font-mono text-slate-500 relative z-10 uppercase font-black bg-white/5 px-3 py-1 rounded-full border border-white/5 tracking-tighter">AUTHENTICATED_BY: {activeLog.submittedBy}</span>
                     <div className="absolute right-0 bottom-0 opacity-5 pointer-events-none transform translate-x-1/4 translate-y-1/4">
                         <Clipboard size={160} />
                     </div>

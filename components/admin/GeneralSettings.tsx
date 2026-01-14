@@ -55,7 +55,7 @@ const GeneralSettings: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 max-w-5xl h-full flex flex-col animate-nexus-in">
+        <div className="space-y-8 max-w-5xl h-full flex flex-col animate-nexus-in p-6">
             <div className="flex-1 overflow-y-auto pr-4 space-y-8 scrollbar-thin">
                 
                 {/* 1. Organization Identity Section */}

@@ -12,7 +12,6 @@ import { Input } from '../ui/Input';
 import { useData } from '../../context/DataContext';
 import { generateId } from '../../utils/formatters';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
-// FIX: Added missing import for Card component
 import { Card } from '../ui/Card';
 
 interface StakeholderDashboardProps {
@@ -34,7 +33,7 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
         gapCount: stakeholders.filter(s => s.engagement.current !== s.engagement.desired).length,
     }), [stakeholders]);
 
-    // Use live issues bound to stakeholders if possible, or top project concerns
+    // Aggregate real high-priority issues from state to show as stakeholder concerns
     const stakeholderConcerns = useMemo(() => 
         (issues || [])
             .filter(i => i.priority === 'High' || i.priority === 'Critical')
@@ -69,7 +68,7 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
             </div>
             
             <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap} flex-1 min-h-0`}>
-                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`}>
+                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`} >
                     <div className="flex justify-between items-center mb-8">
                         <div>
                              <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Power / Interest Matrix</h3>
@@ -90,7 +89,7 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
                     </div>
                 </Card>
 
-                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`}>
+                <Card className={`p-8 h-[450px] flex flex-col shadow-sm border-slate-200`} >
                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-8">Active Concerns & Escalations</h3>
                     <div className="flex-1 overflow-y-auto pr-2 space-y-4 scrollbar-thin">
                         {stakeholderConcerns.length > 0 ? stakeholderConcerns.map((issue) => (
@@ -105,7 +104,7 @@ export const StakeholderDashboard: React.FC<StakeholderDashboardProps> = ({ stak
                             <FieldPlaceholder 
                                 label="No high-priority stakeholder concerns." 
                                 placeholderLabel="All salience concerns are currently mitigated."
-                                onAdd={() => {}} // CRUD to log new issue
+                                onAdd={() => {}} 
                                 icon={MessageSquare}
                             />
                         )}

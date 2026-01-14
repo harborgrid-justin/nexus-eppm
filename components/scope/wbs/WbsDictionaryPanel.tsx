@@ -1,11 +1,12 @@
 import React from 'react';
 import { WBSNode } from '../../../types';
-import { Save, Layers, Info, ShieldCheck } from 'lucide-react';
+import { Save, Layers, Info, ShieldCheck, Plus, BookOpen } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { NarrativeField } from '../../common/NarrativeField';
 import { EmptyGrid } from '../../common/EmptyGrid';
 import { useTheme } from '../../../context/ThemeContext';
+import { useI18n } from '../../../context/I18nContext';
 
 interface WbsDictionaryPanelProps {
     selectedNode: WBSNode | null;
@@ -18,24 +19,27 @@ interface WbsDictionaryPanelProps {
 
 export const WbsDictionaryPanel: React.FC<WbsDictionaryPanelProps> = ({ selectedNode, editedNode, setEditedNode, canEdit, onSave }) => {
     const theme = useTheme();
+    const { t } = useI18n();
 
     if (!selectedNode || !editedNode) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center bg-white">
                 <EmptyGrid 
-                    title="No Element Selected"
-                    description="Select a node from the WBS hierarchy to inspect or define its dictionary parameters."
+                    title={t('scope.wbs.no_selection', 'No Element Selected')}
+                    description={t('scope.wbs.no_selection_desc', 'Select a node from the WBS hierarchy to inspect or define its dictionary parameters.')}
                     icon={Layers}
                 />
             </div>
         );
     }
 
+    const isUnpopulated = !editedNode.description || editedNode.description.length < 5;
+
     return (
         <div className="flex-1 flex flex-col bg-white animate-nexus-in">
             <div className={`p-6 border-b ${theme.colors.border} flex justify-between items-center bg-slate-50/30`}>
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm text-nexus-600">
+                    <div className={`p-3 bg-white rounded-xl border border-slate-200 shadow-sm text-nexus-600`}>
                         <Layers size={24}/>
                     </div>
                     <div>
@@ -43,7 +47,7 @@ export const WbsDictionaryPanel: React.FC<WbsDictionaryPanelProps> = ({ selected
                         <p className="text-xs text-slate-500 font-mono font-bold mt-1">Code: {editedNode.wbsCode}</p>
                     </div>
                 </div>
-                {canEdit && <Button icon={Save} onClick={onSave} className="shadow-lg shadow-nexus-500/20">Save Dictionary</Button>}
+                {canEdit && <Button icon={Save} onClick={onSave} className="shadow-lg shadow-nexus-500/20">{t('common.save_dictionary', 'Save Dictionary')}</Button>}
             </div>
             
             <div className="flex-1 overflow-y-auto p-10 space-y-10 scrollbar-thin">
@@ -68,13 +72,22 @@ export const WbsDictionaryPanel: React.FC<WbsDictionaryPanelProps> = ({ selected
                     </div>
                 </div>
 
-                <NarrativeField 
-                    label="Scope Description & Deliverables"
-                    value={editedNode.description}
-                    placeholderLabel="No physical scope defined for this node. Descriptions are required for earned value baseline."
-                    onSave={(val) => setEditedNode({...editedNode, description: val})}
-                    isReadOnly={!canEdit}
-                />
+                <div className="space-y-4">
+                    <NarrativeField 
+                        label={t('scope.wbs.description', 'Scope Description & Deliverables')}
+                        value={editedNode.description}
+                        placeholderLabel={t('scope.wbs.description_placeholder', 'No physical scope defined for this node. Descriptions are required for earned value baseline.')}
+                        onSave={(val) => setEditedNode({...editedNode, description: val})}
+                        isReadOnly={!canEdit}
+                    />
+                    {isUnpopulated && canEdit && (
+                        <div className="flex justify-center">
+                            <Button variant="ghost" size="sm" icon={BookOpen} onClick={() => setEditedNode({...editedNode, description: 'Enter scope description here...'})}>
+                                {t('scope.wbs.add_description', 'Define Physical Scope')}
+                            </Button>
+                        </div>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-nexus-200 transition-colors">

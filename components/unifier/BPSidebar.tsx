@@ -3,6 +3,7 @@ import { BPDefinition } from '../../types/unifier';
 import { FieldPlaceholder } from '../common/FieldPlaceholder';
 import { Settings, Plus } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useI18n } from '../../context/I18nContext';
 
 interface Props {
   definitions: BPDefinition[];
@@ -13,11 +14,14 @@ interface Props {
 
 export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect, onProvision }) => {
     const theme = useTheme();
+    const { t } = useI18n();
 
     return (
         <div className={`w-72 border-r ${theme.colors.border} flex flex-col overflow-hidden h-full ${theme.colors.background}/50`}>
-            <div className={`p-4 border-b ${theme.colors.border} font-bold text-[10px] uppercase ${theme.colors.text.tertiary} tracking-wider ${theme.colors.surface}`}>Business Automation Catalog</div>
-            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            <div className={`p-4 border-b ${theme.colors.border} font-bold text-[10px] uppercase ${theme.colors.text.tertiary} tracking-wider ${theme.colors.surface}`}>
+                {t('unifier.sidebar_title', 'Business Automation Catalog')}
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
                 {definitions.length > 0 ? (
                     definitions.map(def => (
                         <button 
@@ -37,16 +41,17 @@ export const BPSidebar: React.FC<Props> = ({ definitions, selectedId, onSelect, 
                 ) : (
                     <div className="p-2">
                         <FieldPlaceholder 
-                            label="No Processes Registered" 
+                            label={t('unifier.no_processes', "No Processes Registered")} 
                             onAdd={onProvision} 
                             icon={Settings}
+                            placeholderLabel={t('unifier.provision_bp', "Configure uDesigner")}
                         />
                     </div>
                 )}
             </div>
             <div className={`p-4 ${theme.colors.surface} border-t ${theme.colors.border}`}>
                 <p className={`text-[9px] ${theme.colors.text.tertiary} leading-relaxed font-medium uppercase tracking-tight`}>
-                    Business Processes (BPs) drive financial and document workflows across the enterprise.
+                    {t('unifier.sidebar_note', 'Business Processes (BPs) drive financial and document workflows across the enterprise.')}
                 </p>
             </div>
         </div>

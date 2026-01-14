@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AlertTriangle, ShieldCheck, TrendingDown, List, Plus } from 'lucide-react';
 import StatCard from '../shared/StatCard';
@@ -27,7 +26,7 @@ const RiskDashboard: React.FC = () => {
           <div className="h-full flex items-center justify-center p-8 bg-slate-50">
               <EmptyGrid 
                 title="Risk Register Isolated"
-                description="Identify and register project threats to enable qualitative and quantitative analysis."
+                description="Identify and register project threats to enable qualitative and quantitative analysis. Centralized risk management is required for strategic governance."
                 icon={AlertTriangle}
                 actionLabel="Identify First Risk"
                 onAdd={handleAddRisk}
@@ -59,7 +58,7 @@ const RiskDashboard: React.FC = () => {
 
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm flex flex-col h-[350px]`}>
-                <h3 className={`${theme.typography.h3} mb-4`}>Risk Exposure by Category</h3>
+                <h3 className={`${theme.typography.h3} mb-4 uppercase text-[10px] font-black text-slate-400 tracking-widest`}>Risk Exposure by Category</h3>
                 <div className="flex-1 min-h-0">
                     <CustomBarChart
                         data={categoryData}
@@ -72,7 +71,7 @@ const RiskDashboard: React.FC = () => {
             </div>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm h-[350px] overflow-hidden flex flex-col`}>
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className={`${theme.typography.h3}`}>Top 5 Risks by Score</h3>
+                    <h3 className={`${theme.typography.h3} uppercase text-[10px] font-black text-slate-400 tracking-widest`}>Top 5 Risks by Score</h3>
                     <button onClick={handleAddRisk} className="text-xs font-bold text-nexus-600 hover:underline flex items-center gap-1">
                         <Plus size={12}/> Add Risk
                     </button>
@@ -86,7 +85,7 @@ const RiskDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-slate-800 line-clamp-1" title={risk.description}>{risk.description}</p>
-                                    <p className="text-xs text-slate-500">{risk.category} / {risk.ownerId}</p>
+                                    <p className="text-xs text-slate-500 uppercase font-black tracking-tighter mt-0.5">{risk.category} / {risk.ownerId}</p>
                                 </div>
                             </li>
                         ))}

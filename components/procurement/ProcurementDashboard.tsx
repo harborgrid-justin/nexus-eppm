@@ -1,8 +1,7 @@
-
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import StatCard from '../shared/StatCard';
-import { DollarSign, Briefcase, AlertTriangle, CheckCircle, BarChart2, Activity, ShieldCheck } from 'lucide-react';
+import { DollarSign, Briefcase, AlertTriangle, CheckCircle, Activity, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { formatCompactCurrency } from '../../utils/formatters';
 import { CustomBarChart } from '../charts/CustomBarChart';
