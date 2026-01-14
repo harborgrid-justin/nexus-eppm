@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Table, BarChart2, Download, Layers } from 'lucide-react';
+import { Table, BarChart2, Download, Layers, Activity, Filter, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { usePivotAnalyticsLogic } from '../../hooks/domain/usePivotAnalyticsLogic';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -35,18 +34,21 @@ const PivotAnalytics: React.FC = () => {
     const availableAggregateFields = ['Budget', 'Spent', 'Count'];
 
     return (
-        <div className={`h-full flex flex-col ${theme.layout.pagePadding}`}>
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <div>
-                    <h2 className={theme.typography.h2}>Ad-Hoc Analytics Engine</h2>
-                    <p className={theme.typography.small}>Multidimensional analysis of portfolio performance.</p>
-                </div>
-                <div className="flex gap-2">
-                    <div className={`flex ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border}`}>
-                        <button onClick={() => setViewMode('Table')} className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'Table' ? `${theme.colors.surface} shadow text-nexus-700` : `${theme.colors.text.secondary}`}`}><Table size={14} className="inline mr-1"/> Table</button>
-                        <button onClick={() => setViewMode('Chart')} className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'Chart' ? `${theme.colors.surface} shadow text-nexus-700` : `${theme.colors.text.secondary}`}`}><BarChart2 size={14} className="inline mr-1"/> Chart</button>
+        <div className={`h-full flex flex-col ${theme.layout.pagePadding} bg-slate-50/50 animate-in fade-in duration-500`}>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 border-b border-slate-100 pb-6">
+                <div className="flex items-center gap-5">
+                    <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-900/20"><Activity size={28}/></div>
+                    <div>
+                        <h2 className={`text-2xl font-black ${theme.colors.text.primary} uppercase tracking-tighter`}>Multidimensional Analytics Engine</h2>
+                        <p className={`text-sm ${theme.colors.text.secondary} font-medium mt-1`}>Dynamic ad-hoc pivot engine for high-density portfolio introspection.</p>
                     </div>
-                    <Button variant="outline" size="sm" icon={Download} disabled={!hasData}>Export</Button>
+                </div>
+                <div className="flex gap-4 items-center">
+                    <div className={`flex ${theme.colors.background} p-1.5 rounded-2xl border ${theme.colors.border} shadow-inner`}>
+                        <button onClick={() => setViewMode('Table')} className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'Table' ? `${theme.colors.surface} shadow-md text-nexus-700` : `${theme.colors.text.tertiary} hover:text-nexus-600`}`}><Table size={14} className="inline mr-2"/> Ledger</button>
+                        <button onClick={() => setViewMode('Chart')} className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${viewMode === 'Chart' ? `${theme.colors.surface} shadow-md text-nexus-700` : `${theme.colors.text.tertiary} hover:text-nexus-600`}`}><BarChart2 size={14} className="inline mr-2"/> Heatmap</button>
+                    </div>
+                    <Button variant="outline" size="md" icon={Download} disabled={!hasData} className="font-bold uppercase tracking-widest text-[10px] h-10">Export Dataset</Button>
                 </div>
             </div>
 
@@ -59,14 +61,14 @@ const PivotAnalytics: React.FC = () => {
                 onRecalculate={() => {}}
             />
 
-            <div className={`flex-1 ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
+            <div className={`flex-1 ${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col relative`}>
                 {!hasData ? (
-                    <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="flex-1 flex flex-col items-center justify-center p-12">
                          <EmptyGrid 
-                            title="Analytics Buffer Empty"
-                            description="Adjust your pivot dimensions above to generate a multidimensional result set from the project ledger."
+                            title="Analytics Buffer Neutral"
+                            description="Configure your multidimensional pivot axes to generate a results set from the enterprise graph."
                             icon={Layers}
-                            actionLabel="Define Dimensions"
+                            actionLabel="Define Search Axes"
                             onAdd={() => {}}
                         />
                     </div>

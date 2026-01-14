@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { History, User, Zap, MessageSquare, Clock, X, Terminal, CheckCircle } from 'lucide-react';
@@ -38,36 +37,38 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-y-0 right-0 w-80 ${theme.colors.surface} border-l ${theme.colors.border} shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-300`}>
-      <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center ${theme.colors.background}`}>
-        <h3 className={`text-xs font-black uppercase tracking-widest ${theme.colors.text.tertiary} flex items-center gap-2`}>
-          <History size={14} className="text-nexus-600" /> Live Project Pulse
+    <div className={`fixed inset-y-0 right-0 w-96 ${theme.colors.surface} border-l ${theme.colors.border} shadow-2xl z-[60] flex flex-col animate-in slide-in-from-right duration-500`}>
+      <div className={`p-6 border-b ${theme.colors.border} flex justify-between items-center bg-slate-50/50`}>
+        <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.colors.text.tertiary} flex items-center gap-3`}>
+          <History size={16} className="text-nexus-600" /> Operational Pulse
         </h3>
-        <button onClick={onClose} className={`p-1 hover:${theme.colors.background} rounded-full text-slate-400`}><X size={16} /></button>
+        <button onClick={onClose} className={`p-2 hover:${theme.colors.background} rounded-full text-slate-400 transition-all active:scale-90`}><X size={20} /></button>
       </div>
       
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto scrollbar-thin bg-white">
         {auditLogs.length > 0 ? (
-            <div className="p-4 space-y-6">
+            <div className="p-8 space-y-8">
                 {auditLogs.slice(0, 50).map((log, idx) => (
-                    <div key={`${log.date}-${idx}`} className="relative pl-6 border-l border-slate-100 group">
-                        <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-slate-200 border-2 border-white group-hover:bg-nexus-500 transition-colors"></div>
-                        <div className="text-xs">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className={`font-bold ${theme.colors.text.primary} truncate max-w-[120px]`}>{log.user}</span>
-                            <span className={`text-[10px] ${theme.colors.text.tertiary} font-mono`}>{getTimeString(log.date)}</span>
+                    <div key={`${log.date}-${idx}`} className="relative pl-8 border-l-2 border-slate-100 group">
+                        <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-slate-200 group-hover:border-nexus-500 transition-all duration-300 flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-slate-300 rounded-full group-hover:bg-nexus-500 transition-colors"></div>
                         </div>
-                        <p className={`${theme.colors.text.secondary} leading-relaxed`}>
-                            <span className={`font-semibold ${theme.colors.text.secondary}`}>{log.action}</span> - {log.details}
+                        <div className="text-sm">
+                        <div className="flex justify-between items-center mb-1.5">
+                            <span className={`text-[11px] font-black uppercase tracking-tight ${theme.colors.text.primary} truncate max-w-[150px]`}>{log.user}</span>
+                            <span className={`text-[9px] font-mono font-bold ${theme.colors.text.tertiary}`}>{getTimeString(log.date)}</span>
+                        </div>
+                        <p className={`text-xs ${theme.colors.text.secondary} leading-relaxed font-medium`}>
+                            <span className={`font-black text-slate-800 uppercase text-[10px] tracking-tight`}>{log.action}</span> • {log.details}
                         </p>
                         {log.action.includes('Approved') && (
-                            <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-bold border border-green-100">
-                                <CheckCircle size={8} /> DECISION
+                            <div className="mt-2.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-green-50 text-green-700 text-[9px] font-black border border-green-100 uppercase tracking-widest shadow-sm">
+                                <CheckCircle size={10} /> Authorized
                             </div>
                         )}
-                        {log.action.includes('Alert') && (
-                            <div className="mt-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-50 text-red-700 text-[9px] font-bold border border-red-100">
-                                <Zap size={8} /> CRITICAL
+                        {log.action.includes('Alert') || log.action.includes('Failed') && (
+                            <div className="mt-2.5 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 text-red-700 text-[9px] font-black border border-red-100 uppercase tracking-widest shadow-sm">
+                                <Zap size={10} /> Critical
                             </div>
                         )}
                         </div>
@@ -75,18 +76,20 @@ export const ActivitySidecar: React.FC<ActivitySidecarProps> = ({ isOpen, onClos
                 ))}
             </div>
         ) : (
-            <div className="p-6 h-full flex flex-col justify-center">
+            <div className="p-10 h-full flex flex-col justify-center">
                 <EmptyGrid 
-                    title="No Live Activity"
-                    description="The project pulse is currently silent. Actions taken in the workspace will appear here in real-time."
+                    title="System Silence"
+                    description="No organizational actions detected in the current transaction buffer."
                     icon={Terminal}
                 />
             </div>
         )}
       </div>
 
-      <div className={`p-4 border-t ${theme.colors.border} ${theme.colors.background}`}>
-         <button className={`w-full py-2 text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>View Full Audit Ledger</button>
+      <div className={`p-6 border-t ${theme.colors.border} bg-slate-50/50`}>
+         <button className={`w-full py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-nexus-600 hover:border-nexus-300 transition-all shadow-sm active:scale-95`}>
+            Archive Strategy Registry
+         </button>
       </div>
     </div>
   );
