@@ -139,7 +139,7 @@ const ProgramDashboard: React.FC<{ programId: string }> = ({ programId }) => {
                             </div>
                             <div className="text-right">
                                 <h4 className="font-black text-xs text-slate-400 uppercase tracking-widest">Source Entity</h4>
-                                <p className="font-bold text-slate-800">{program.name}</p>
+                                <p className="text-font-bold text-slate-800">{program.name}</p>
                             </div>
                         </div>
                         <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap font-medium">
