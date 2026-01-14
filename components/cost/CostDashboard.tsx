@@ -10,9 +10,11 @@ import { CostKPIs } from './dashboard/CostKPIs';
 import { CostForecastChart } from './dashboard/CostForecastChart';
 import { useTheme } from '../../context/ThemeContext';
 import { useI18n } from '../../context/I18nContext';
+import { useData } from '../../context/DataContext';
 
 const CostDashboard: React.FC = () => {
   const { project, financials, budgetItems, risks, purchaseOrders, nonConformanceReports } = useProjectWorkspace();
+  const { state } = useData();
   const evm = useEVM(project, budgetItems);
   const theme = useTheme();
   const { t } = useI18n();
@@ -41,10 +43,13 @@ const CostDashboard: React.FC = () => {
 
   const dynamicInsight = useMemo(() => {
       if (!evm || !project) return null;
-      if (evm.cpi < 0.85) return { type: 'critical', title: 'Critical Cost Variance', msg: `Current CPI (${evm.cpi.toFixed(2)}) indicates significant spend inefficiency. Immediate corrective action required to avoid $${(eac - project.budget).toLocaleString()} projected overrun.` };
+      
+      const criticalThreshold = state.governance?.scheduling?.autoLevelingThreshold / 100 || 0.85;
+
+      if (evm.cpi < criticalThreshold) return { type: 'critical', title: 'Critical Cost Variance', msg: `Current CPI (${evm.cpi.toFixed(2)}) indicates significant spend inefficiency. Immediate corrective action required to avoid $${(eac - project.budget).toLocaleString()} projected overrun.` };
       if (evm.cpi < 0.95) return { type: 'warning', title: 'Fiscal Warning', msg: `Project spend is trending above baseline. Recommend review of non-labor expenses and subcontractor commitments.` };
       return { type: 'good', title: 'Fiscal Integrity Optimal', msg: 'Cost performance is tracking within 5% of the approved measurement baseline. Cash flow remains positive against released funding.' };
-  }, [evm, eac, project]);
+  }, [evm, eac, project, state.governance]);
 
   const chartData = useMemo(() => {
     if (!project || !evm || !today || budgetItems.length === 0) return [];
@@ -57,13 +62,13 @@ const CostDashboard: React.FC = () => {
         const pct = i / 12;
         const curve = (1 - Math.cos(pct * Math.PI)) / 2;
         const pv = (project.originalBudget * curve) * Math.pow(1.03, (i * 30 / 365));
-        let ev = curDate <= today ? evm.ev * pct : undefined;
-        let ac = curDate <= today ? (evm.ac * pct) + (costOfQuality * pct) : undefined;
+        let evVal = curDate <= today ? evm.ev * pct : undefined;
+        let acVal = curDate <= today ? (evm.ac * pct) + (costOfQuality * pct) : undefined;
         data.push({ 
             date: curDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), 
             PV: Math.round(pv), 
-            EV: ev ? Math.round(ev) : undefined, 
-            AC: ac ? Math.round(ac) : undefined, 
+            EV: evVal ? Math.round(evVal) : undefined, 
+            AC: acVal ? Math.round(acVal) : undefined, 
             Forecast: i > 6 ? eac * curve : undefined 
         });
     }
@@ -122,7 +127,7 @@ const CostDashboard: React.FC = () => {
             <CostForecastChart chartData={chartData} isPending={isPending} />
             <div className="absolute top-8 right-8 p-4 bg-white/80 backdrop-blur border border-slate-200 rounded-xl shadow-xl z-10 max-w-xs animate-in slide-in-from-right-4">
                  <h4 className="font-bold text-xs text-slate-800 flex items-center gap-2 mb-2"><Lightbulb size={14} className="text-yellow-500"/> Predictive Analytics</h4>
-                 <p className="text-[10px] text-slate-500 leading-relaxed">Based on current burn rate, there is an <strong>82% probability</strong> that the project will require contingency drawdown in Phase 3.</p>
+                 <p className="text-[10px] text-slate-500 leading-relaxed uppercase tracking-tight">Based on current burn rate, there is an <strong>82% probability</strong> that the project will require contingency drawdown in Phase 3.</p>
             </div>
         </div>
     </div>

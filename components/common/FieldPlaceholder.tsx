@@ -11,10 +11,6 @@ interface FieldPlaceholderProps {
   placeholderLabel?: string;
 }
 
-/**
- * Standardized empty state for narrative fields and small containers.
- * Uses the nexus-empty-pattern (radial dots on light grey).
- */
 export const FieldPlaceholder: React.FC<FieldPlaceholderProps> = ({ 
     label, 
     placeholderLabel,

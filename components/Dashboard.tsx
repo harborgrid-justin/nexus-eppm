@@ -1,4 +1,3 @@
-
 import React, { useState, useTransition, useMemo } from 'react';
 import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { usePortfolioState } from '../hooks/usePortfolioState';
@@ -14,10 +13,12 @@ import { useTheme } from '../context/ThemeContext';
 import { PortfolioCommandBar } from './dashboard/PortfolioCommandBar';
 import { SystemPulse } from './dashboard/SystemPulse';
 import { useI18n } from '../context/I18nContext';
+import { useData } from '../context/DataContext';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
+  const { state } = useData();
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const { generateReport, report, isGenerating, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -51,13 +52,17 @@ const Dashboard: React.FC = () => {
   }
 
   const strategicInsight = useMemo(() => {
+     // Rule: Derive thresholds from organizational governance if available
+     const varianceThreshold = state.governance?.scheduling?.autoLevelingThreshold / 100 || 0.3;
+     const budgetThreshold = 95; 
+
      const atRisk = summary.healthCounts.critical + summary.healthCounts.warning;
      const riskRatio = atRisk / summary.totalProjects;
      
-     if (riskRatio > 0.3) return { type: 'critical', title: 'Portfolio Variance Detected', msg: `30%+ of active initiatives are tracking behind baseline.`};
-     if (summary.budgetUtilization > 95) return { type: 'warning', title: 'Budget Saturation', msg: 'Portfolio budget utilization exceeds 95%.' };
+     if (riskRatio > varianceThreshold) return { type: 'critical', title: 'Portfolio Variance Detected', msg: `${(riskRatio * 100).toFixed(0)}%+ of active initiatives are tracking behind baseline.`};
+     if (summary.budgetUtilization > budgetThreshold) return { type: 'warning', title: 'Budget Saturation', msg: `Portfolio budget utilization exceeds ${budgetThreshold}%.` };
      return { type: 'good', title: 'Performance Optimal', msg: 'Portfolio execution is aligned with strategic objectives.' };
-  }, [summary]);
+  }, [summary, state.governance]);
 
   return (
     <div className={`h-full overflow-y-auto scrollbar-thin ${theme.layout.pagePadding} animate-in fade-in duration-500`}>

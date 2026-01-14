@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Target, ArrowDown, Folder, CheckSquare, Plus, Edit2, Trash2, X, Save, Shield, Briefcase, AlertTriangle } from 'lucide-react';
@@ -81,7 +80,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative scrollbar-thin`}>
         <div className="flex items-center gap-2 mb-4">
             <Target className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Strategic Alignment Matrix</h2>
@@ -91,33 +90,33 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             {/* Layer 1: Corporate Strategy */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
-                    <h3 className={`${theme.typography.label} ${theme.colors.text.secondary}`}>1. Organizational Strategy</h3>
-                    <button onClick={handleAddGoal} className={`text-xs flex items-center gap-1 ${theme.colors.surface} hover:bg-slate-200 px-2 py-1 rounded ${theme.colors.text.secondary} font-medium transition-colors border ${theme.colors.border}`}>
-                        <Plus size={12}/> Add Goal
+                    <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>1. Organizational Strategy</h3>
+                    <button onClick={handleAddGoal} className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1 bg-white hover:bg-slate-50 px-3 py-1 rounded-xl text-slate-500 border border-slate-200 transition-all shadow-sm`}>
+                        <Plus size={12}/> New Mandate
                     </button>
                 </div>
                 {strategicGoals.length > 0 ? (
                     <div className={`grid grid-cols-1 md:grid-cols-2 ${theme.layout.gridGap}`}>
                         {strategicGoals.map(goal => (
-                            <div key={goal.id} className="p-5 bg-slate-800 text-white rounded-xl shadow-lg relative group">
-                                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleEditGoal(goal)} className="p-1 hover:bg-slate-700 rounded"><Edit2 size={14}/></button>
-                                    <button onClick={() => handleDeleteGoal(goal.id)} className="p-1 hover:bg-red-900 rounded"><Trash2 size={14}/></button>
+                            <div key={goal.id} className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl relative group overflow-hidden border border-white/5">
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleEditGoal(goal)} className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white"><Edit2 size={14}/></button>
+                                    <button onClick={() => handleDeleteGoal(goal.id)} className="p-1.5 hover:bg-red-900/50 rounded-lg text-slate-400 hover:text-red-400"><Trash2 size={14}/></button>
                                 </div>
-                                <h4 className="font-bold text-lg pr-12">{goal.name}</h4>
-                                <p className="text-sm text-slate-300 mt-2">{goal.description}</p>
-                                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-slate-300">
-                                    <ArrowDown size={24} />
+                                <h4 className="font-black text-lg pr-12 uppercase tracking-tight">{goal.name}</h4>
+                                <p className="text-xs text-slate-400 mt-3 leading-relaxed font-medium">{goal.description}</p>
+                                <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-white/5 pointer-events-none">
+                                    <ArrowDown size={64} />
                                 </div>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <EmptyGrid 
-                        title="No Strategic Goals Defined" 
-                        description="Define organizational goals to align your program and project portfolio with the corporate strategy."
+                        title="Strategic Portfolio Isolated" 
+                        description="Define the overarching corporate mandates that drive organizational project investment."
                         icon={Target}
-                        actionLabel="Define Corporate Goal"
+                        actionLabel="Define Corporate Mandate"
                         onAdd={handleAddGoal}
                     />
                 )}
@@ -126,9 +125,9 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             {/* Layer 2: Program Objectives */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
-                    <h3 className={`${theme.typography.label} ${theme.colors.text.secondary}`}>2. Program Objectives</h3>
-                    <button onClick={handleAddObj} className="text-xs flex items-center gap-1 bg-nexus-50 hover:bg-nexus-100 px-2 py-1 rounded text-nexus-700 font-medium transition-colors">
-                        <Plus size={12}/> Add Objective
+                    <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400`}>2. Program Objectives</h3>
+                    <button onClick={handleAddObj} className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-1 bg-nexus-50 hover:bg-nexus-100 px-3 py-1 rounded-xl text-nexus-700 border border-nexus-100 transition-all shadow-sm`}>
+                        <Plus size={12}/> Establish Objective
                     </button>
                 </div>
                 {programObjectives.length > 0 ? (
@@ -136,63 +135,75 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         {programObjectives.map(obj => {
                             const parentGoal = strategicGoals.find(g => g.id === obj.linkedStrategicGoalId);
                             return (
-                                <div key={obj.id} className="p-5 bg-nexus-50 border-2 border-nexus-200 rounded-xl shadow-sm relative group">
-                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleEditObj(obj)} className="p-1 hover:bg-nexus-100 rounded text-slate-600"><Edit2 size={14}/></button>
-                                        <button onClick={() => handleDeleteObj(obj.id)} className="p-1 hover:bg-red-100 rounded text-red-500"><Trash2 size={14}/></button>
+                                <div key={obj.id} className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm relative group hover:border-nexus-300 transition-all">
+                                    <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => handleEditObj(obj)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-nexus-600"><Edit2 size={14}/></button>
+                                        <button onClick={() => handleDeleteObj(obj.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500"><Trash2 size={14}/></button>
                                     </div>
-                                    <div className="text-xs font-bold text-nexus-600 uppercase mb-1 flex items-center gap-1">
-                                        <Target size={12}/> Supports: {parentGoal?.name || 'Unlinked'}
+                                    <div className="text-[10px] font-black text-nexus-600 uppercase mb-3 flex items-center gap-1.5">
+                                        <div className="w-1.5 h-1.5 bg-nexus-600 rounded-full animate-pulse"></div> Supports: {parentGoal?.name || 'ROOT STRATEGY'}
                                     </div>
-                                    <p className="font-medium text-slate-800 pr-12">{obj.description}</p>
-                                    <div className="mt-2 flex flex-wrap gap-1">
+                                    <p className="font-bold text-slate-800 pr-12 text-sm leading-relaxed">{obj.description}</p>
+                                    <div className="mt-4 flex flex-wrap gap-1.5">
                                         {obj.linkedProjectIds.map(pid => (
-                                            <span key={pid} className="text-[10px] bg-white border border-nexus-100 px-1.5 py-0.5 rounded text-slate-500">{projects.find(p=>p.id===pid)?.name || pid}</span>
+                                            <span key={pid} className="text-[9px] font-black uppercase bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg text-slate-500 tracking-tight">{projects.find(p=>p.id===pid)?.code || pid}</span>
                                         ))}
+                                        {obj.linkedProjectIds.length === 0 && <span className="text-[9px] font-bold text-slate-300 uppercase italic">No active projects linked</span>}
                                     </div>
-                                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-nexus-300">
-                                        <ArrowDown size={24} />
+                                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-slate-200 pointer-events-none">
+                                        <ArrowDown size={40} />
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
                 ) : (
-                    <FieldPlaceholder 
-                        label="No actionable program objectives identified." 
-                        onAdd={handleAddObj} 
-                        icon={Shield}
-                    />
+                    <div className="p-4">
+                        <FieldPlaceholder 
+                            label="No program objectives defined to bridge strategy and execution." 
+                            onAdd={handleAddObj} 
+                            icon={Shield}
+                            placeholderLabel="Establish Objective"
+                        />
+                    </div>
                 )}
             </div>
 
             {/* Layer 3: Project Deliverables */}
             <div>
-                <h3 className={`${theme.typography.label} ${theme.colors.text.secondary} mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
+                <h3 className={`text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution Topology</h3>
                 {projects.length > 0 ? (
                     <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap} pb-20`}>
                         {projects.map(proj => {
                             const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
                             return (
-                                <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Folder size={16} className={theme.colors.text.tertiary}/>
-                                        <h4 className={`font-bold text-sm ${theme.colors.text.primary} truncate`}>{proj.name}</h4>
+                                <div key={proj.id} className={`${theme.components.card} p-5 flex flex-col justify-between h-full border border-slate-200 transition-all ${!linkedObj ? 'bg-slate-50/50 border-dashed opacity-70' : 'hover:border-nexus-300'}`}>
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className={`p-1.5 rounded-lg border ${linkedObj ? 'bg-white text-nexus-600 border-nexus-100' : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                                                <Briefcase size={14} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className={`font-black text-xs ${theme.colors.text.primary} truncate uppercase tracking-tight`}>{proj.name}</h4>
+                                                <p className="text-[9px] font-mono text-slate-400 font-bold">{proj.code}</p>
+                                            </div>
+                                        </div>
                                     </div>
+                                    
                                     {linkedObj ? (
-                                        <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto truncate">
-                                            <CheckSquare size={12} className="shrink-0"/> Aligned to Objective
+                                        <div className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase text-green-700 bg-green-50 px-3 py-1.5 rounded-xl border border-green-100 shadow-sm truncate">
+                                            <CheckSquare size={12} className="shrink-0"/> Strategically Aligned
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col gap-2 mt-auto">
-                                            <div className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded flex items-center gap-1">
-                                                <AlertTriangle size={12} className="shrink-0"/> No strategic link
+                                        <div className="mt-6 flex flex-col gap-2">
+                                            <div className="text-[10px] font-black uppercase text-red-600 bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 flex items-center gap-2">
+                                                <AlertTriangle size={12} className="shrink-0"/> Logic Drift Detected
                                             </div>
                                             <button 
                                                 onClick={handleAddObj}
-                                                className="text-[10px] font-black uppercase text-nexus-600 hover:text-nexus-700 flex items-center gap-1 transition-colors"
+                                                className="text-[9px] font-black uppercase text-nexus-600 hover:text-nexus-800 flex items-center justify-center gap-1.5 py-1 transition-all"
                                             >
-                                                <Plus size={10}/> Link to Objective
+                                                <Plus size={10}/> Map to Objective
                                             </button>
                                         </div>
                                     )}
@@ -201,9 +212,9 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         })}
                     </div>
                 ) : (
-                    <FieldPlaceholder 
-                        label="No active project components identified for this program." 
-                        onAdd={() => {}} 
+                    <EmptyGrid 
+                        title="Execution Stream Null" 
+                        description="No project components identified for the current strategic branch."
                         icon={Briefcase}
                     />
                 )}

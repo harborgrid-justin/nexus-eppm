@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Plus, Database, LucideIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -32,7 +31,7 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
       </div>
       
       <div className="relative z-10 max-w-sm text-center">
-          <h3 className={`${theme.typography.h1} mb-3 uppercase tracking-tighter`}>
+          <h3 className={`text-xl font-black text-slate-900 mb-3 uppercase tracking-tighter`}>
             {title}
           </h3>
           <p className={`text-sm ${theme.colors.text.secondary} mb-10 font-medium leading-relaxed`}>

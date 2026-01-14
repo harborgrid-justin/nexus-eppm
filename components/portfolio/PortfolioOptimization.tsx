@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -26,10 +25,13 @@ const PortfolioOptimization: React.FC = () => {
              const evm = calculateEVM(p, projectBudgetItems);
              const progress = calculateProjectProgress(p);
              
+             // Dynamic Action Engine
              let recAction = 'Maintain';
-             if (evm.cpi < 0.8) recAction = 'Descope';
-             else if (evm.cpi < 0.95) recAction = 'Review';
-             else if (evm.cpi > 1.1) recAction = 'Accelerate';
+             const criticalThreshold = state.governance?.scheduling?.autoLevelingThreshold / 100 || 0.85;
+             
+             if (evm.cpi < criticalThreshold) recAction = 'Descope / Review';
+             else if (evm.cpi < 0.95) recAction = 'Efficiency Audit';
+             else if (evm.cpi > 1.1) recAction = 'Accelerate Capital';
 
              return { 
                  ...p, 
@@ -39,17 +41,16 @@ const PortfolioOptimization: React.FC = () => {
                  variance: evm.cv
              };
         });
-    }, [state.projects, state.budgetItems]);
+    }, [state.projects, state.budgetItems, state.governance]);
 
     const handleAskAi = async () => {
         setIsAiLoading(true);
         try {
-            // Constraint derived from total budget plus a 10% tolerance for modeling
             const totalBudget = state.projects.reduce((s, p) => s + p.budget, 0);
             const advice = await generatePortfolioOptimization(state.projects, totalBudget * 1.1); 
             setAiAdvice(advice);
         } catch (e) {
-            setAiAdvice("Unable to generate optimization advice at this time.");
+            setAiAdvice("The AI advisor encountered a timeout while processing the portfolio matrix.");
         } finally {
             setIsAiLoading(false);
         }
@@ -70,19 +71,19 @@ const PortfolioOptimization: React.FC = () => {
     }
 
     return (
-        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in`}>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-500 scrollbar-thin`}>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-4">
                 <div>
                     <h2 className={theme.typography.h2}>Portfolio Review & Optimization</h2>
-                    <p className={theme.typography.small}>Continuous monitoring and decision workbench.</p>
+                    <p className={theme.typography.small}>Continuous monitoring and multidimensional decision workbench.</p>
                 </div>
-                <div className="flex gap-2">
-                    <button onClick={handleAskAi} disabled={isAiLoading} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 text-slate-700">
-                        {isAiLoading ? <RefreshCw className="animate-spin" size={16} /> : <Sparkles size={16} className="text-purple-600"/>} 
-                        {isAiLoading ? 'Analyzing...' : 'Ask AI Advisor'}
+                <div className="flex gap-3">
+                    <button onClick={handleAskAi} disabled={isAiLoading} className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50 text-slate-700">
+                        {isAiLoading ? <RefreshCw className="animate-spin" size={14} /> : <Sparkles size={14} className="text-purple-600"/>} 
+                        {isAiLoading ? 'Synthesizing...' : 'Consult AI Advisor'}
                     </button>
-                    <button className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg text-sm font-bold flex items-center gap-2 shadow-md hover:brightness-110 active:scale-95 transition-all`}>
-                        <RefreshCw size={16} /> Run Model
+                    <button className={`px-8 py-2.5 ${theme.colors.primary} text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-nexus-500/20 hover:brightness-110 active:scale-95 transition-all`}>
+                        <RefreshCw size={14} /> Run Balancing Solver
                     </button>
                 </div>
             </div>
@@ -96,11 +97,13 @@ const PortfolioOptimization: React.FC = () => {
             {aiAdvice && <AiAdvisor advice={aiAdvice} onClear={() => setAiAdvice(null)} />}
             
             {projectRows.length > 0 ? (
-                <DecisionWorkbench 
-                    projects={projectRows}
-                    decisions={decisions}
-                    onDecision={setDecisions}
-                />
+                <div className="animate-nexus-in">
+                    <DecisionWorkbench 
+                        projects={projectRows}
+                        decisions={decisions}
+                        onDecision={setDecisions}
+                    />
+                </div>
             ) : (
                 <div className="flex-1">
                     <EmptyGrid 

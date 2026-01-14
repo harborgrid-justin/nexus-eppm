@@ -1,4 +1,4 @@
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -15,8 +15,8 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// Use React.Component explicitly to ensure correct inheritance of props and setState
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// Added Component to imports and extending it directly to fix TS errors with this.props and this.setState
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
     error: undefined,

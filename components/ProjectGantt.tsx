@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
@@ -16,6 +15,7 @@ import { useGanttCalendar } from '../hooks/gantt/useGanttCalendar';
 import { EmptyGrid } from './common/EmptyGrid';
 import { useContainerSize } from '../hooks/useContainerSize';
 import { ConfigService } from '../services/ConfigService';
+import { useNavigate } from 'react-router-dom';
 
 const ROW_HEIGHT = 44;
 
@@ -23,6 +23,7 @@ const ProjectGantt: React.FC = () => {
   const { project: initialProject } = useProjectWorkspace();
   const { state } = useData();
   const theme = useTheme();
+  const navigate = useNavigate();
   
   const {
     project, viewMode, setViewMode, selectedTask, setSelectedTask, isTraceLogicOpen,
@@ -80,9 +81,9 @@ const ProjectGantt: React.FC = () => {
       {!hasTasks ? (
           <EmptyGrid 
             title="Schedule Repository Empty"
-            description="The master schedule logic network is currently unpopulated."
+            description="The master schedule logic network is currently unpopulated for this project partition."
             icon={Network}
-            onAdd={() => {}} 
+            onAdd={() => navigate('/dataExchange?view=import')} 
             actionLabel="Initialize Schedule"
           />
       ) : (

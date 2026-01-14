@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Users, Loader2 } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
@@ -15,6 +14,7 @@ import { ModuleNavigation } from './common/ModuleNavigation';
 import { Resource } from '../types/index';
 import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
 import { useTheme } from '../context/ThemeContext';
+import { EmptyGrid } from './common/EmptyGrid';
 
 const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
@@ -49,9 +49,12 @@ const ResourceManagement: React.FC = () => {
   if (!project) return (
     <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full ${theme.colors.background}`}>
         <PageHeader title="Resource Management" subtitle="Staffing and allocation hub" icon={Users} />
-        <div className="flex-1 nexus-empty-pattern border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400 m-6">
-            <Loader2 size={48} className="mb-4 animate-spin opacity-20 text-nexus-600" />
-            <p className="font-black uppercase tracking-widest text-[10px]">Mounting Resource Context...</p>
+        <div className="flex-1 flex items-center justify-center">
+             <EmptyGrid 
+                title="Project Context Required" 
+                description="Select a project from the portfolio list to manage its resource plan and staffing assignments."
+                icon={Users}
+            />
         </div>
     </div>
   );
@@ -61,8 +64,15 @@ const ResourceManagement: React.FC = () => {
       <div className={`${theme.layout.pagePadding} pb-0`}>
         <PageHeader 
           title="Resource Management" 
-          subtitle="Plan, staff, and manage your project and enterprise resources."
+          subtitle={`Plan, staff, and manage resources for ${project.code}: ${project.name}`}
           icon={Users}
+          actions={
+              overAllocatedResources.length > 0 && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm">
+                      <AlertTriangle size={14}/> {overAllocatedResources.length} Conflicts
+                  </div>
+              )
+          }
         />
       </div>
 
@@ -86,4 +96,5 @@ const ResourceManagement: React.FC = () => {
     </div>
   );
 };
+import { AlertTriangle } from 'lucide-react';
 export default ResourceManagement;

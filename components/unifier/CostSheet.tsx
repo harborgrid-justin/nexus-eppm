@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,11 +15,11 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
   const { state } = useData();
   const theme = useTheme();
   
-  if (!projectId || projectId === 'UNSET') {
+  if (!projectId || projectId === 'UNSET' || !state.projects.some(p => p.id === projectId)) {
       return (
         <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
              <div className="h-full flex flex-col justify-center p-8">
-                <EmptyGrid title="Context Required" description="Select project." icon={LayoutTemplate} />
+                <EmptyGrid title="Financial Context Required" description="Select an active project initiative to initialize the cost breakdown structure." icon={LayoutTemplate} />
              </div>
         </div>
       );
@@ -29,7 +28,10 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
   const { columns, rows } = state.unifier.costSheet;
 
   const computedRows = useMemo(() => {
-    return rows.map(row => {
+    // Logic: Filter rows belonging to specific project if partition logic exists, otherwise show global
+    const projectRows = rows.filter(r => !r.projectId || r.projectId === projectId);
+    
+    return projectRows.map(row => {
       const newRow = { ...row };
       columns.filter(c => c.type === 'Formula').forEach(col => {
         if(col.formula) {
@@ -38,15 +40,7 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
       });
       return newRow;
     });
-  }, [rows, columns]);
-
-  const totals = useMemo(() => {
-      const t: Record<string, number> = {};
-      columns.forEach(c => {
-          t[c.id] = computedRows.reduce((sum, r) => sum + (Number(r[c.id]) || 0), 0);
-      });
-      return t;
-  }, [computedRows, columns]);
+  }, [rows, columns, projectId]);
 
   return (
     <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
@@ -57,19 +51,19 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
                 </div>
                 <div>
                     <h3 className={`font-bold ${theme.colors.text.primary}`}>Master Cost Sheet</h3>
-                    <p className={`text-xs ${theme.colors.text.secondary}`}>CBS & Variance</p>
+                    <p className={`text-xs ${theme.colors.text.secondary}`}>CBS & Variance Controls</p>
                 </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-                <Button variant="outline" size="sm" icon={Calculator}>Recalculate</Button>
-                <Button variant="primary" size="sm" icon={RefreshCw}>Refresh</Button>
+                <Button variant="outline" size="sm" icon={Calculator}>Recalculate Totals</Button>
+                <Button variant="primary" size="sm" icon={RefreshCw}>Synchronize ERP</Button>
             </div>
         </div>
         
         <div className="flex-1 overflow-auto bg-white relative">
             {computedRows.length === 0 ? (
                  <div className="h-full flex flex-col justify-center p-8">
-                    <EmptyGrid title="Cost Sheet Empty" description="Initialize CBS." icon={FileSpreadsheet} />
+                    <EmptyGrid title="Cost Breakdown Structure Empty" description="Initialize the CBS for this project to start tracking actuals against budget." icon={FileSpreadsheet} />
                  </div>
             ) : (
                 <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0">
