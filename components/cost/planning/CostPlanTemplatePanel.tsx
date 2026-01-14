@@ -38,12 +38,12 @@ export const CostPlanTemplatePanel: React.FC<CostPlanTemplatePanelProps> = ({ is
                 </div>
                 <div className="space-y-4">
                     {templates.map(t => (
-                        <div key={t.id} onClick={() => setSelectedTemplate(t.id)} className={`p-6 rounded-2xl border-2 transition-all cursor-pointer ${selectedTemplate === t.id ? 'bg-nexus-50 border-nexus-500' : 'bg-white border-slate-100 hover:border-nexus-300'}`}>
-                            <h4 className="font-black text-slate-900 text-base">{t.name}</h4>
-                            <p className="text-sm font-medium text-slate-500">{t.description}</p>
+                        <div key={t.id} onClick={() => setSelectedTemplate(t.id)} className={`p-6 rounded-2xl border-2 transition-all cursor-pointer ${selectedTemplate === t.id ? 'bg-nexus-50 border-nexus-500' : `${theme.colors.surface} border-slate-100 hover:border-nexus-300`}`}>
+                            <h4 className={`font-black ${theme.colors.text.primary} text-base`}>{t.name}</h4>
+                            <p className={`text-sm font-medium ${theme.colors.text.secondary}`}>{t.description}</p>
                         </div>
                     ))}
-                    {templates.length === 0 && <div className="text-center text-slate-400 p-8 italic">No Cost Strategy templates defined.</div>}
+                    {templates.length === 0 && <div className={`text-center ${theme.colors.text.tertiary} p-8 italic`}>No Cost Strategy templates defined.</div>}
                 </div>
             </div>
         </SidePanel>

@@ -20,8 +20,6 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
       const passed = assuranceReviews.filter(r => r.status === 'Pass').length;
       const passRate = (passed / totalReviews) * 100;
       
-      // Simple mock logic for velocity since we don't have start/end times on reviews
-      // Assuming a standard turnaround for passed items vs conditional
       const velocity = passed > 0 ? "3.2 Days" : "N/A";
       const trend = passRate > 80 ? "-5% Defects" : "+2% Defects"; 
 
@@ -38,12 +36,12 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             {/* Standards */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Book size={18} className="text-nexus-500"/> Program Standards</h3>
                 </div>
                 <div className="flex-1 overflow-auto p-4 space-y-3">
                     {qualityStandards.map(std => (
-                        <div key={std.id} className="p-3 border border-slate-200 rounded-lg hover:shadow-sm transition-shadow">
+                        <div key={std.id} className={`p-3 border ${theme.colors.border} rounded-lg hover:shadow-sm transition-shadow`}>
                             <div className="flex justify-between items-start mb-1">
                                 <h4 className="font-bold text-sm text-slate-900">{std.category} Standard</h4>
                                 <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
@@ -59,16 +57,16 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
 
             {/* Assurance Reviews */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><ClipboardList size={18} className="text-green-500"/> Assurance Log</h3>
                 </div>
                 <div className="flex-1 overflow-auto">
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Review Date</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Type / Scope</th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Status</th>
+                                <th className={theme.components.table.header}>Review Date</th>
+                                <th className={theme.components.table.header}>Type / Scope</th>
+                                <th className={theme.components.table.header}>Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">

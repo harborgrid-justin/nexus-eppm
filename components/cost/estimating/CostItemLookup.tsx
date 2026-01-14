@@ -35,37 +35,37 @@ export const CostItemLookup: React.FC<CostItemLookupProps> = ({ isOpen, onClose,
                   <input 
                     type="text" 
                     placeholder="Search cost items..." 
-                    className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm"
+                    className={`w-full pl-9 pr-4 py-2 border ${theme.colors.border} rounded-lg text-sm focus:ring-2 focus:ring-nexus-500 outline-none`}
                     value={lookupSearch}
                     onChange={e => setLookupSearch(e.target.value)}
                   />
               </div>
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className={`border ${theme.colors.border} rounded-lg overflow-hidden`}>
                   <table className="min-w-full divide-y divide-slate-200">
                       <thead className={`${theme.colors.background}`}>
                           <tr>
-                              <th className="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase">Item</th>
-                              <th className="px-4 py-2 text-left text-xs font-bold text-slate-500 uppercase">Unit</th>
-                              <th className="px-4 py-2 text-right text-xs font-bold text-slate-500 uppercase">Rate</th>
-                              <th className="w-10"></th>
+                              <th className={theme.components.table.header}>Item</th>
+                              <th className={theme.components.table.header}>Unit</th>
+                              <th className={`${theme.components.table.header} text-right`}>Rate</th>
+                              <th className="w-10 px-4 py-3"></th>
                           </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 bg-white">
                           {costBook.filter(i => i.description.toLowerCase().includes(lookupSearch.toLowerCase())).map(item => (
                               <tr key={item.id} className={`hover:${theme.colors.background} cursor-pointer`} onClick={() => onAddItem(item)}>
-                                  <td className="px-4 py-2 text-sm text-slate-800">
+                                  <td className="px-6 py-3 text-sm text-slate-800">
                                       {item.description}
-                                      <span className="ml-2 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{item.type}</span>
+                                      <span className="ml-2 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 border border-slate-200">{item.type}</span>
                                   </td>
-                                  <td className="px-4 py-2 text-sm text-slate-600 font-mono">{item.unit}</td>
-                                  <td className="px-4 py-2 text-sm text-slate-900 font-bold text-right">{formatCurrency(item.rate)}</td>
-                                  <td className="px-4 py-2 text-right">
+                                  <td className="px-6 py-3 text-sm text-slate-600 font-mono">{item.unit}</td>
+                                  <td className="px-6 py-3 text-sm text-slate-900 font-bold text-right">{formatCurrency(item.rate)}</td>
+                                  <td className="px-6 py-3 text-right">
                                       <Plus size={16} className="text-nexus-600"/>
                                   </td>
                               </tr>
                           ))}
                           {costBook.length === 0 && (
-                              <tr><td colSpan={4} className="p-4 text-center text-slate-400 text-sm">No items in cost book.</td></tr>
+                              <tr><td colSpan={4} className="p-8 text-center text-slate-400 text-sm italic">No items in cost book.</td></tr>
                           )}
                       </tbody>
                   </table>

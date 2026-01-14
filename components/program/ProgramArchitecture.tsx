@@ -27,13 +27,13 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Standards Library */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Layers size={18} className="text-blue-500"/> Standards Baseline</h3>
                     <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Define Standard</Button>
                 </div>
                 <div className="flex-1 overflow-auto p-4 space-y-3">
                     {architectureStandards.map(std => (
-                        <div key={std.id} className="p-4 border border-slate-200 rounded-lg hover:shadow-sm transition-shadow">
+                        <div key={std.id} className={`p-4 border ${theme.colors.border} rounded-lg hover:shadow-sm transition-shadow`}>
                             <div className="flex justify-between items-start mb-1">
                                 <div className="flex items-center gap-2">
                                     {std.category === 'Security' ? <ShieldCheck size={16} className="text-nexus-500"/> : 
@@ -64,7 +64,7 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
 
             {/* Architectural Reviews */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="p-4 border-b border-slate-200 bg-slate-50">
+                <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background}`}>
                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><CheckCircle size={18} className="text-purple-500"/> Review Gates</h3>
                 </div>
                 <div className="flex-1 overflow-auto">
@@ -72,9 +72,9 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-white">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Milestone / Gate</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                                    <th className={theme.components.table.header}>Milestone / Gate</th>
+                                    <th className={theme.components.table.header}>Date</th>
+                                    <th className={theme.components.table.header}>Status</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-100">

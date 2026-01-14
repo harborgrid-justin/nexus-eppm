@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import StatCard from '../../shared/StatCard';

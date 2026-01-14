@@ -8,6 +8,7 @@ import { CheckCircle, FileDiff } from 'lucide-react';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useData } from '../../../context/DataContext';
 import { EmptyGrid } from '../../common/EmptyGrid';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface ChangeOrderListProps {
     orders: ChangeOrder[];
@@ -18,10 +19,11 @@ interface ChangeOrderListProps {
 export const ChangeOrderList: React.FC<ChangeOrderListProps> = ({ orders, onSelect, onAdd }) => {
     const { canApproveBudget, canEditProject } = usePermissions();
     const { dispatch } = useData();
+    const theme = useTheme();
 
     const columns = useMemo<Column<ChangeOrder>[]>(() => [
-        { key: 'id', header: 'ID', render: (co) => <span className="font-mono text-xs font-bold text-slate-400">{co.id}</span>, sortable: true },
-        { key: 'title', header: 'Subject Area', render: (co) => <div><div className="font-bold text-slate-800">{co.title}</div><div className="text-[10px] uppercase font-black text-slate-400">{co.category}</div></div>, sortable: true },
+        { key: 'id', header: 'ID', render: (co) => <span className={`font-mono text-xs font-bold ${theme.colors.text.tertiary}`}>{co.id}</span>, sortable: true },
+        { key: 'title', header: 'Subject Area', render: (co) => <div><div className={`font-bold ${theme.colors.text.primary}`}>{co.title}</div><div className={`text-[10px] uppercase font-black ${theme.colors.text.secondary}`}>{co.category}</div></div>, sortable: true },
         { key: 'priority', header: 'Severity', render: (co) => <Badge variant={co.priority === 'Critical' ? 'danger' : 'neutral'}>{co.priority}</Badge>, sortable: true },
         { key: 'amount', header: 'Fiscal Impact', align: 'right', render: (co) => <span className="font-mono font-black text-nexus-700">{formatCurrency(co.amount)}</span>, sortable: true },
         { key: 'scheduleImpactDays', header: 'Schedule delta', align: 'center', render: (co) => <span className={`font-mono font-bold ${co.scheduleImpactDays > 0 ? 'text-red-500' : 'text-slate-400'}`}>{co.scheduleImpactDays > 0 ? `+${co.scheduleImpactDays}d` : '0d'}</span> },
@@ -39,7 +41,7 @@ export const ChangeOrderList: React.FC<ChangeOrderListProps> = ({ orders, onSele
                 )}
             </div>
         ) }
-      ], [canApproveBudget, dispatch]);
+      ], [canApproveBudget, dispatch, theme]);
 
     if (orders.length === 0) {
         return (

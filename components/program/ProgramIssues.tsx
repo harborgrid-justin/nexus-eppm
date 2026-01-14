@@ -110,7 +110,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
             <Button size="sm" icon={Plus} onClick={() => handleOpenPanel()}>Log Issue</Button>
         </div>
 
-        <div className="flex gap-4 items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+        <div className={`flex gap-4 items-center ${theme.colors.surface} p-3 rounded-xl border ${theme.colors.border} shadow-sm`}>
             <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                 <input 
@@ -118,7 +118,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                     placeholder="Search issues..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 pr-4 py-2 w-full text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-nexus-500"
+                    className={`pl-9 pr-4 py-2 w-full text-sm border ${theme.colors.border} rounded-lg focus:outline-none focus:ring-1 focus:ring-nexus-500 ${theme.colors.background}`}
                 />
             </div>
             <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <select 
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="text-sm border border-slate-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-nexus-500"
+                    className={`text-sm border ${theme.colors.border} rounded-lg py-2 px-3 focus:outline-none focus:ring-1 focus:ring-nexus-500 ${theme.colors.background}`}
                 >
                     <option value="All">All Status</option>
                     <option value="Open">Open</option>

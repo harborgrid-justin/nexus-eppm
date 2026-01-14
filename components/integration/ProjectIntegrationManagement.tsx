@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useData } from '../../context/DataContext';
@@ -25,18 +26,15 @@ const ProjectIntegrationManagement: React.FC = () => {
     if (!project) return { scopeCreep: 0, stagnantTasks: 0 };
     return {
         scopeCreep: calculateScopeCreep(project.originalBudget, changeOrders),
-        // FIX: Removed redundant .filter() call on Task object 't'. Correctly filtering project tasks array directly.
         stagnantTasks: project.tasks.filter(t => checkTaskStagnation(t)).length
     };
   }, [project, changeOrders]);
 
-  // FIX: Dynamically determine next board meeting info from governance state
   const boardMeetingInfo = useMemo(() => {
     const boardEvent = state.governanceEvents.find(e => e.type === 'Steering Committee');
     return boardEvent ? `${boardEvent.name} is scheduled for ${boardEvent.nextDate}.` : 'No upcoming board meetings scheduled.';
   }, [state.governanceEvents]);
 
-  // FIX: Dynamically calculate contingency threshold exposure
   const exposureInfo = useMemo(() => {
       if (!financials || !project) return '';
       const threshold = project.originalBudget * 0.15;
@@ -57,7 +55,7 @@ const ProjectIntegrationManagement: React.FC = () => {
   }
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.colors.background} scrollbar-thin animate-in fade-in duration-500`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.colors.background}/50 scrollbar-thin animate-in fade-in duration-500`}>
       <ProjectHeader 
         project={project} 
         onCreateReflection={() => dispatch({ type: 'PROJECT_CREATE_REFLECTION', payload: { sourceProjectId: project.id } })} 

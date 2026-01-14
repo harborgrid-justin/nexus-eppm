@@ -20,21 +20,21 @@ export const ChangeOrderDetails: React.FC<ChangeOrderDetailsProps> = ({ co, isRe
                         value={co.description}
                         disabled={isReadOnly}
                         onChange={(e) => onChange('description', e.target.value)}
-                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-nexus-500"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none`}
                     />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6">
-                    <div className={`${theme.components.card} p-4`}>
+                    <div className={`${theme.components.card} p-5`}>
                         <h3 className="font-bold text-slate-800 mb-4 text-sm">Classification</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs text-slate-500 block mb-1">Category</label>
+                                <label className="text-xs text-slate-500 block mb-1 font-bold uppercase">Category</label>
                                 <select 
                                     value={co.category || 'Client Request'} 
                                     onChange={(e) => onChange('category', e.target.value)}
                                     disabled={isReadOnly}
-                                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                                    className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500`}
                                 >
                                     <option>Client Request</option>
                                     <option>Design Error</option>
@@ -44,16 +44,16 @@ export const ChangeOrderDetails: React.FC<ChangeOrderDetailsProps> = ({ co, isRe
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs text-slate-500 block mb-1">Priority</label>
+                                <label className="text-xs text-slate-500 block mb-1 font-bold uppercase">Priority</label>
                                 <div className="flex gap-2">
                                     {['Low', 'Medium', 'High', 'Critical'].map(p => (
                                         <button
                                             key={p}
                                             onClick={() => onChange('priority', p)}
                                             disabled={isReadOnly}
-                                            className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+                                            className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${
                                                 co.priority === p 
-                                                ? `${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.border} ${theme.colors.semantic.info.text}` 
+                                                ? `${theme.colors.semantic.info.bg} ${theme.colors.semantic.info.border} ${theme.colors.semantic.info.text} font-bold shadow-sm` 
                                                 : `${theme.colors.surface} ${theme.colors.border} ${theme.colors.text.secondary} hover:${theme.colors.background}`
                                             }`}
                                         >
@@ -65,14 +65,14 @@ export const ChangeOrderDetails: React.FC<ChangeOrderDetailsProps> = ({ co, isRe
                         </div>
                     </div>
 
-                    <div className={`${theme.components.card} p-4`}>
+                    <div className={`${theme.components.card} p-5`}>
                         <h3 className="font-bold text-slate-800 mb-4 text-sm">Justification</h3>
                         <textarea 
                             value={co.justification || ''}
                             onChange={(e) => onChange('justification', e.target.value)}
                             disabled={isReadOnly}
                             placeholder="Reason for change..."
-                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 resize-none"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 resize-none focus:ring-2 focus:ring-nexus-500 outline-none`}
                         />
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { FieldPlaceholder } from './FieldPlaceholder';
 import { useTheme } from '../../context/ThemeContext';
@@ -15,10 +16,6 @@ interface NarrativeFieldProps {
   isReadOnly?: boolean;
 }
 
-/**
- * A standardized interactive wrapper for narrative text areas.
- * Supports read/edit modes to transform static pages into data entry cages.
- */
 export const NarrativeField: React.FC<NarrativeFieldProps> = ({ 
   value, 
   label, 
@@ -50,7 +47,7 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
   if (!value && !isEditing) {
     return (
         <div className={`space-y-2 ${className}`}>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className={`block text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest ml-1`}>
                 {label}
             </label>
             <FieldPlaceholder 
@@ -64,7 +61,7 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
   return (
     <div className={`space-y-2 group ${className}`}>
       <div className="flex justify-between items-end">
-          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+          <label className={`block text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest ml-1`}>
             {label}
           </label>
           {!isEditing && !isReadOnly && (
@@ -81,7 +78,7 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
       {isEditing ? (
           <div className="animate-in fade-in zoom-in-95 duration-200">
               <textarea 
-                  className={`w-full p-4 rounded-xl border ${theme.colors.border} bg-white text-sm leading-relaxed focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none resize-y min-h-[120px] shadow-inner`}
+                  className={`w-full p-4 rounded-xl border ${theme.colors.border} ${theme.colors.surface} ${theme.colors.text.primary} text-sm leading-relaxed focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none resize-y min-h-[120px] shadow-inner`}
                   value={localValue}
                   onChange={(e) => setLocalValue(e.target.value)}
                   autoFocus
@@ -93,7 +90,7 @@ export const NarrativeField: React.FC<NarrativeFieldProps> = ({
           </div>
       ) : (
         <div 
-            className={`p-4 rounded-xl border border-slate-200 bg-white text-sm leading-relaxed ${theme.colors.text.primary} hover:border-nexus-300 transition-colors relative`}
+            className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.surface} text-sm leading-relaxed ${theme.colors.text.primary} hover:border-nexus-300 transition-colors relative`}
             onDoubleClick={() => !isReadOnly && setIsEditing(true)}
         >
           {asHtml ? (

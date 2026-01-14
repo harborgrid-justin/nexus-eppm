@@ -77,7 +77,7 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
             {/* Scenario Details */}
             <div className="space-y-6">
                 <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
                         <h3 className="font-bold text-slate-800">Scenarios</h3>
                         <button onClick={handleCreateScenario} className="text-xs text-nexus-600 font-bold hover:underline">+ Add</button>
                     </div>

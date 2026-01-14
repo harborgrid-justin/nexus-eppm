@@ -1,16 +1,18 @@
 
 import React from 'react';
 import { Sliders, ShieldCheck } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 export const LevelingSettings: React.FC = () => {
+    const theme = useTheme();
     return (
         <div className="max-w-3xl space-y-6 animate-in fade-in">
-            <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl">
+            <div className={`p-6 ${theme.colors.background} border ${theme.colors.border} rounded-2xl`}>
                 <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-6">
                     <Sliders size={18} className="text-nexus-600"/> Resource Leveling Engine Configuration
                 </h3>
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className={`${theme.colors.surface} flex items-center justify-between p-4 border ${theme.colors.border} rounded-xl shadow-sm`}>
                         <div>
                             <p className="text-sm font-bold text-slate-800">Automatic Leveling</p>
                             <p className="text-xs text-slate-500">Enable CPM-based automatic resolution of over-allocations.</p>
@@ -19,13 +21,13 @@ export const LevelingSettings: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Priority Resolution Strategy</label>
-                        <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white font-medium text-slate-700 outline-none focus:ring-2 focus:ring-nexus-500">
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white font-medium text-slate-700 outline-none focus:ring-2 focus:ring-nexus-500`}>
                             <option>Critical Path First (Total Float Heuristic)</option>
                             <option>Lowest Resource Rate First</option>
                             <option>WBS Priority (Manual Override)</option>
                         </select>
                     </div>
-                    <div className="p-4 bg-indigo-900 rounded-xl text-white relative overflow-hidden">
+                    <div className="p-4 bg-indigo-900 rounded-xl text-white relative overflow-hidden shadow-md">
                         <div className="relative z-10">
                             <h4 className="font-bold flex items-center gap-2 mb-2 text-sm">
                                 <ShieldCheck size={16} className="text-nexus-400"/> Governance Guardrails

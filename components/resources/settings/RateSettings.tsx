@@ -2,19 +2,21 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { useTheme } from '../../../context/ThemeContext';
 
 export const RateSettings: React.FC = () => {
+    const theme = useTheme();
     return (
         <div className="space-y-6 animate-in fade-in">
-            <div className="flex justify-between items-center bg-slate-900 p-6 rounded-2xl text-white">
+            <div className="flex justify-between items-center bg-slate-900 p-6 rounded-2xl text-white shadow-lg">
                 <div>
                     <h3 className="text-lg font-bold">Standard Labor Rate Tables</h3>
                     <p className="text-xs text-slate-400">Manage multi-tiered rates for global resource pooling.</p>
                 </div>
-                <Button size="sm" icon={Plus}>Update Effective Rates</Button>
+                <Button size="sm" icon={Plus} className="bg-white/10 hover:bg-white/20 border-white/10 text-white">Update Effective Rates</Button>
             </div>
             
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl overflow-hidden shadow-sm`}>
                 <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                         <tr>

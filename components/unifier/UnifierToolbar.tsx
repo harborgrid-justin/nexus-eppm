@@ -14,7 +14,7 @@ interface Props {
 export const UnifierToolbar: React.FC<Props> = ({ title, onCreate, onRefresh, disabled }) => {
   const theme = useTheme();
   return (
-    <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 gap-3`}>
+    <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center ${theme.colors.background}/50 gap-3`}>
         <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className={`p-2 ${theme.colors.surface} rounded-lg border ${theme.colors.border} shadow-sm ${theme.colors.text.tertiary}`}>
                 <Briefcase size={16}/>

@@ -29,27 +29,27 @@ const ProgramVendors: React.FC<ProgramVendorsProps> = ({ programId }) => {
         </div>
 
         <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[400px]`}>
-            <div className="p-4 border-b border-slate-200 bg-slate-50">
-                <h3 className="font-bold text-slate-800 flex items-center gap-2"><Award size={18} className="text-nexus-500"/> Vendor Performance Scorecard</h3>
+            <div className={`p-4 border-b ${theme.colors.border} bg-slate-50`}>
+                <h3 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2`}><Award size={18} className="text-nexus-500"/> Vendor Performance Scorecard</h3>
             </div>
             <div className="flex-1 overflow-x-auto">
                 {programVendors.length > 0 ? (
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Vendor Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Strategic Alignment</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Total Value</th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Active Contracts</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Performance Score</th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Issues</th>
+                                <th className={theme.components.table.header}>Vendor Name</th>
+                                <th className={theme.components.table.header}>Strategic Alignment</th>
+                                <th className={theme.components.table.header + " text-right"}>Total Value</th>
+                                <th className={theme.components.table.header + " text-center"}>Active Contracts</th>
+                                <th className={theme.components.table.header}>Performance Score</th>
+                                <th className={theme.components.table.header + " text-center"}>Issues</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">
                             {programVendors.map(vendor => (
                                 <tr key={vendor.vendorId} className="hover:bg-slate-50">
                                     <td className="px-6 py-4">
-                                        <div className="font-bold text-sm text-slate-900">{vendor.name}</div>
+                                        <div className={`font-bold text-sm ${theme.colors.text.primary}`}>{vendor.name}</div>
                                         <div className="text-xs text-slate-500 font-mono">{vendor.vendorId}</div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -72,7 +72,7 @@ const ProgramVendors: React.FC<ProgramVendorsProps> = ({ programId }) => {
                                                     style={{width: `${vendor.avgPerformanceScore}%`}}
                                                 ></div>
                                             </div>
-                                            <span className="text-xs font-bold">{vendor.avgPerformanceScore}/100</span>
+                                            <span className={`text-xs font-bold ${theme.colors.text.primary}`}>{vendor.avgPerformanceScore}/100</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">

@@ -43,7 +43,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
 
         {/* Stakeholder Register */}
         <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
                 <h3 className="font-bold text-slate-800 flex items-center gap-2"><Shield size={18} className="text-blue-500"/> Stakeholder Register</h3>
                 <Button size="sm" icon={Plus} onClick={() => handleOpenStakeholderPanel()}>Add Stakeholder</Button>
             </div>
@@ -52,11 +52,11 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Stakeholder</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Influence / Interest</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Engagement Level</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                                <th className={theme.components.table.header}>Stakeholder</th>
+                                <th className={theme.components.table.header}>Category</th>
+                                <th className={theme.components.table.header}>Influence / Interest</th>
+                                <th className={theme.components.table.header}>Engagement Level</th>
+                                <th className={theme.components.table.header}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">
@@ -107,7 +107,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
 
         {/* Communication Plan */}
         <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[300px]`}>
-            <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
                 <h3 className="font-bold text-slate-800 flex items-center gap-2"><Volume2 size={18} className="text-green-500"/> Communication Strategy</h3>
                 <Button size="sm" icon={Plus} onClick={() => handleOpenCommPanel()}>Add Item</Button>
             </div>
@@ -116,12 +116,12 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                     <table className="min-w-full divide-y divide-slate-200">
                         <thead className="bg-white">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Audience</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Content / Information</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Frequency</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Channel</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                                <th className={theme.components.table.header}>Audience</th>
+                                <th className={theme.components.table.header}>Content / Information</th>
+                                <th className={theme.components.table.header}>Frequency</th>
+                                <th className={theme.components.table.header}>Channel</th>
+                                <th className={theme.components.table.header}>Owner</th>
+                                <th className={theme.components.table.header}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-slate-100">

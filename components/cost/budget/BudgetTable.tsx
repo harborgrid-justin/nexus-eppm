@@ -24,12 +24,12 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
             <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
                 <thead className={`${theme.colors.background}/80 sticky top-0 z-10 backdrop-blur-sm`}>
                 <tr>
-                    <th className="px-6 py-4 text-left text-[10px] font-bold uppercase">Category (CBS)</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-bold uppercase">Planned</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-bold uppercase text-blue-600 bg-blue-50/30">Committed</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-bold uppercase text-nexus-600 bg-nexus-50/30">Invoiced</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-bold uppercase">Exposure</th>
-                    <th className="px-6 py-4 text-right text-[10px] font-bold uppercase">Available</th>
+                    <th className={theme.components.table.header}>Category (CBS)</th>
+                    <th className={`${theme.components.table.header} text-right`}>Planned</th>
+                    <th className={`${theme.components.table.header} text-right text-blue-600 bg-blue-50/30`}>Committed</th>
+                    <th className={`${theme.components.table.header} text-right text-nexus-600 bg-nexus-50/30`}>Invoiced</th>
+                    <th className={`${theme.components.table.header} text-right`}>Exposure</th>
+                    <th className={`${theme.components.table.header} text-right`}>Available</th>
                 </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-50">

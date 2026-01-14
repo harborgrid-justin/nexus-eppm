@@ -32,7 +32,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
             {/* Operational Readiness */}
             <div className="lg:col-span-2">
                 <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-full`}>
-                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-center`}>
                         <h3 className="font-bold text-slate-800 flex items-center gap-2"><RefreshCw size={18} className="text-orange-500"/> Operational Readiness Checklist</h3>
                     </div>
                     {transitionItems.length > 0 ? (
@@ -40,11 +40,11 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-white">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Category</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Action Item</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Owner ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
+                                        <th className={theme.components.table.header}>Category</th>
+                                        <th className={theme.components.table.header}>Action Item</th>
+                                        <th className={theme.components.table.header}>Owner ID</th>
+                                        <th className={theme.components.table.header}>Due Date</th>
+                                        <th className={theme.components.table.header}>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-slate-100">
@@ -98,7 +98,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
                     </ul>
                 </div>
 
-                <div className="p-6 bg-slate-800 text-white rounded-xl shadow-md">
+                <div className="p-6 bg-slate-900 text-white rounded-xl shadow-md">
                     <h3 className="font-bold mb-2">Sustainment Plan</h3>
                     <p className="text-xs text-slate-300 mb-4">Post-program value realization ownership.</p>
                     <div className="text-sm font-medium">

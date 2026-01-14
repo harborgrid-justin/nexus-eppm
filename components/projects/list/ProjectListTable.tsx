@@ -8,7 +8,7 @@ import { ProgressBar } from '../../common/ProgressBar';
 import DataTable from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
-import { GitBranch, User, Plus } from 'lucide-react';
+import { GitBranch, User } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 interface ProjectListTableProps {
@@ -46,7 +46,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
               <span className={`text-sm font-bold ${theme.colors.text.primary} truncate group-hover:text-nexus-600 transition-colors`}>{p.name || 'Untitled Project'}</span>
               {p.isReflection && <GitBranch size={12} className="text-purple-500" title="Reflection Sandbox" />}
           </div>
-          <span className={`text-[10px] font-mono font-black text-slate-400 uppercase tracking-tighter truncate`}>{p.code || 'NO_CODE'}</span>
+          <span className={`text-[10px] font-mono font-black ${theme.colors.text.tertiary} uppercase tracking-tighter truncate`}>{p.code || 'NO_CODE'}</span>
         </div>
       )
     },
@@ -64,7 +64,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
                     {formatInitials(name)}
                   </div>
               ) : (
-                  <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 shrink-0">
+                  <div className={`w-8 h-8 rounded-xl ${theme.colors.background} border ${theme.colors.border} flex items-center justify-center text-slate-300 shrink-0`}>
                     <User size={14}/>
                   </div>
               )}
@@ -86,7 +86,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
         const prog = calculateProjectProgress(p);
         return (
           <div className="w-full pr-8">
-            <div className="flex justify-between items-end text-[10px] font-black uppercase mb-1.5">
+            <div className={`flex justify-between items-end text-[10px] font-black uppercase mb-1.5`}>
                 <span className={theme.colors.text.tertiary}>Cumulative</span>
                 <span className="text-slate-900 font-mono">{prog}%</span>
             </div>
@@ -104,7 +104,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
       render: (p) => (
         <div className="text-right overflow-hidden pr-4">
           <div className={`text-sm font-black ${theme.colors.text.primary} font-mono`}>{formatCompactCurrency(p.budget || 0)}</div>
-          <div className={`text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5`}>
+          <div className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-tighter mt-0.5`}>
               {formatCompactCurrency(p.spent || 0)} <span className="font-normal opacity-60 italic">consumed</span>
           </div>
         </div>

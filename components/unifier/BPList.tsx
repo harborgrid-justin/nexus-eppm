@@ -4,6 +4,7 @@ import { BPRecord, BPDefinition } from '../../types/unifier';
 import { BPRecordRow } from './BPRecordRow';
 import { EmptyGrid } from '../common/EmptyGrid';
 import { Briefcase } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   records: BPRecord[];
@@ -13,10 +14,12 @@ interface Props {
 }
 
 export const BPList: React.FC<Props> = ({ records, activeDefinition, onEdit, onCreate }) => {
+  const theme = useTheme();
+
   if (!activeDefinition) {
       return (
           <div className="flex-1 flex items-center justify-center nexus-empty-pattern">
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Select a Process Schema...</p>
+              <p className={`text-slate-400 font-bold uppercase tracking-widest text-xs`}>Select a Process Schema...</p>
           </div>
       );
   }
@@ -34,19 +37,19 @@ export const BPList: React.FC<Props> = ({ records, activeDefinition, onEdit, onC
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-white animate-nexus-in">
+    <div className={`flex-1 overflow-auto ${theme.colors.surface} animate-nexus-in`}>
       <table className="min-w-full divide-y divide-slate-200 border-separate border-spacing-0" role="grid">
-        <thead className="bg-slate-50 sticky top-0 z-20 shadow-sm">
+        <thead className={`${theme.colors.background} sticky top-0 z-20 shadow-sm`}>
           <tr>
-            <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200">ID Ref</th>
-            <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200">Subject</th>
-            <th className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200">Workflow Node</th>
+            <th className={theme.components.table.header}>ID Ref</th>
+            <th className={theme.components.table.header}>Subject</th>
+            <th className={theme.components.table.header}>Workflow Node</th>
             {activeDefinition.fields.slice(0, 2).map(f => (
-              <th key={f.key} className="px-6 py-3 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-200">{String(f.label)}</th>
+              <th key={f.key} className={theme.components.table.header}>{String(f.label)}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className={`divide-y ${theme.colors.border.replace('border-','divide-')}`}>
           {records.map(r => (
             <BPRecordRow 
                 key={r.id} 

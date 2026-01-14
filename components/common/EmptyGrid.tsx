@@ -28,15 +28,15 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
           <Icon size={400} />
       </div>
 
-      <div className={`w-24 h-24 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-8 border ${theme.colors.border} ${theme.colors.text.tertiary} rotate-3 hover:rotate-0 transition-transform duration-500 relative z-10`}>
+      <div className={`w-24 h-24 ${theme.colors.surface} rounded-3xl flex items-center justify-center shadow-xl mb-8 border ${theme.colors.border} ${theme.colors.text.tertiary} rotate-3 hover:rotate-0 transition-transform duration-500 relative z-10`}>
         <Icon size={40} strokeWidth={1} />
       </div>
       
       <div className="relative z-10 max-w-sm text-center">
-          <h3 className="text-2xl font-bold text-slate-900 mb-3 uppercase tracking-tighter">
+          <h3 className={`text-2xl font-bold ${theme.colors.text.primary} mb-3 uppercase tracking-tighter`}>
             {title}
           </h3>
-          <p className="text-sm text-slate-500 mb-10 font-medium leading-relaxed">
+          <p className={`text-sm ${theme.colors.text.secondary} mb-10 font-medium leading-relaxed`}>
             {description}
           </p>
           

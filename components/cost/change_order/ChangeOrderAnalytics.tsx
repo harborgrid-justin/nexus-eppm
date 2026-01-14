@@ -36,15 +36,15 @@ export const ChangeOrderAnalytics: React.FC<ChangeOrderAnalyticsProps> = ({ orde
 
     if (orders.length === 0) {
         return (
-            <div className="h-full flex items-center justify-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 m-4">
+            <div className={`h-full flex items-center justify-center ${theme.colors.text.tertiary} bg-slate-50 rounded-xl border border-dashed border-slate-200 m-4`}>
                 <p>No change orders available for analysis.</p>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full overflow-y-auto pb-6">
-            <div className="bg-white p-6 rounded-xl border border-slate-200 h-[400px] shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full overflow-y-auto pb-6 px-6">
+            <div className={`bg-white p-6 rounded-xl border ${theme.colors.border} h-[400px] shadow-sm`}>
                 <h3 className={theme.typography.h3}>Change Volume by Category</h3>
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -57,10 +57,10 @@ export const ChangeOrderAnalytics: React.FC<ChangeOrderAnalyticsProps> = ({ orde
                 </ResponsiveContainer>
             </div>
             
-            <div className="bg-white p-6 rounded-xl border border-slate-200 h-[400px] shadow-sm flex flex-col">
+            <div className={`bg-white p-6 rounded-xl border ${theme.colors.border} h-[400px] shadow-sm flex flex-col`}>
                 <div className="flex justify-between items-center mb-4">
                     <h3 className={theme.typography.h3}>Cumulative Cost Impact</h3>
-                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">
                         Total: {formatCompactCurrency(trendData[trendData.length - 1]?.cumulative || 0)}
                     </span>
                 </div>

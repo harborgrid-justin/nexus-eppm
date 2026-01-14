@@ -7,13 +7,13 @@ export const ResourceTableHeader: React.FC = () => {
   return (
     <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm border-b`}>
       <tr>
-        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Resource Identity</th>
-        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Enterprise Role</th>
-        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Class</th>
-        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Org Calendar</th>
-        <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
-        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Std Rate</th>
-        <th className="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Actions</th>
+        <th className={theme.components.table.header}>Resource Identity</th>
+        <th className={theme.components.table.header}>Enterprise Role</th>
+        <th className={theme.components.table.header}>Class</th>
+        <th className={theme.components.table.header}>Org Calendar</th>
+        <th className={theme.components.table.header}>Status</th>
+        <th className={`${theme.components.table.header} text-right`}>Std Rate</th>
+        <th className={`${theme.components.table.header} text-right`}>Actions</th>
       </tr>
     </thead>
   );
