@@ -8,10 +8,12 @@ import StatCard from '../shared/StatCard';
 import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
 import { CustomLineChart } from '../charts/CustomLineChart';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { useTheme } from '../../context/ThemeContext';
 
 const EarnedValue: React.FC = () => {
   const { project, budgetItems } = useProjectWorkspace();
   const evm = useEVM(project, budgetItems);
+  const theme = useTheme();
   
   // Rule 38: Hydration safety
   const [today, setToday] = useState<Date | null>(null);
@@ -69,9 +71,9 @@ const EarnedValue: React.FC = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 space-y-6">
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6`}>
        {/* Top Level Status */}
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
           <StatCard 
             title="Schedule Performance (SPI)" 
             value={evm.spi.toFixed(2)} 
@@ -103,7 +105,7 @@ const EarnedValue: React.FC = () => {
        </div>
 
        {/* Main S-Curve Chart */}
-       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+       <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
          <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-slate-800 flex items-center gap-2">
                 <TrendingUp size={20} className="text-nexus-600"/> Performance Measurement Baseline (PMB)
@@ -126,8 +128,8 @@ const EarnedValue: React.FC = () => {
        </div>
 
        {/* Forecasting Panel */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+       <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
+           <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
               <h3 className="font-bold text-slate-800 mb-4">Forecasting (EAC)</h3>
               <div className="space-y-4">
                   <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
@@ -147,7 +149,7 @@ const EarnedValue: React.FC = () => {
               </div>
            </div>
 
-           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+           <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
               <h3 className="font-bold text-slate-800 mb-4">Performance Index Trends</h3>
               <div className="h-40 flex items-end gap-2 px-4 pb-2 border-b border-slate-200">
                   <div className="w-1/2 flex flex-col items-center gap-2">

@@ -35,7 +35,7 @@ const ProgramQuality: React.FC<ProgramQualityProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Program Quality Assurance Framework</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             {/* Standards */}
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                 <div className="p-4 border-b border-slate-200 bg-slate-50">

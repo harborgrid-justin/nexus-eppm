@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useTheme } from '../../context/ThemeContext';
@@ -7,6 +8,7 @@ import { FileText, Save, Book, Lock, Calculator, TrendingUp, BarChart2, DollarSi
 import { Button } from '../ui/Button';
 import { SidePanel } from '../ui/SidePanel';
 import { NarrativeField } from '../common/NarrativeField';
+import { CostPlanTemplatePanel } from './planning/CostPlanTemplatePanel';
 
 interface CostPlanEditorProps {
     projectId: string;
@@ -75,16 +77,9 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
     });
 
     const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
-    const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-
+    
     const { canEditProject } = usePermissions();
     const theme = useTheme();
-
-    const templates = [
-        { id: 'gov_standard', name: 'Government Standard (EVM)', description: 'Strict adherence to ANSI/EIA-748 EVMS guidelines with variance thresholds.' },
-        { id: 'agile_lean', name: 'Agile / Lean Costing', description: 'Focus on burn rate, throughput accounting, and iterative funding releases.' },
-        { id: 'construction_fixed', name: 'Construction (Fixed Price)', description: 'Emphasis on committed costs, retainage, and change order management.' }
-    ];
 
     const toggleSection = (id: string) => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -98,9 +93,9 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
         });
     };
 
-    const applyTemplate = () => {
-        if (!selectedTemplate) return;
-        const template = templates.find(t => t.id === selectedTemplate);
+    const applyTemplate = (selectedTemplateId: string | null) => {
+        if (!selectedTemplateId) return;
+        const template = state.standardTemplates.find(t => t.id === selectedTemplateId);
         const templateText = `[Applied from ${template?.name} Template]\n\n`;
         const updated = {
             ...formData,
@@ -215,23 +210,7 @@ const CostPlanEditor: React.FC<CostPlanEditorProps> = ({ projectId }) => {
                 </div>
             </div>
 
-            <SidePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} title="Corporate Strategy Templates" width="md:w-[500px]"
-                footer={<><Button variant="secondary" onClick={() => setIsTemplatePanelOpen(false)}>Cancel</Button><Button onClick={applyTemplate} disabled={!selectedTemplate} icon={Copy}>Apply Policy</Button></>}>
-                <div className="space-y-6">
-                    <p className="text-sm text-slate-600 bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
-                        <AlertTriangle className="text-amber-600 shrink-0" size={18}/>
-                        <span>Applying a template will <strong className="text-amber-900">overwrite</strong> local strategy text.</span>
-                    </p>
-                    <div className="space-y-4">
-                        {templates.map(t => (
-                            <div key={t.id} onClick={() => setSelectedTemplate(t.id)} className={`p-5 rounded-2xl border-2 transition-all cursor-pointer ${selectedTemplate === t.id ? 'bg-nexus-50 border-nexus-500 ring-4 ring-nexus-500/10' : 'bg-white border-slate-100 hover:border-nexus-300'}`}>
-                                <h4 className="font-black text-slate-900 text-sm mb-1">{t.name}</h4>
-                                <p className="text-xs text-slate-500 leading-relaxed">{t.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </SidePanel>
+            <CostPlanTemplatePanel isOpen={isTemplatePanelOpen} onClose={() => setIsTemplatePanelOpen(false)} onApply={applyTemplate} />
         </div>
     );
 };

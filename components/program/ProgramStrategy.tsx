@@ -81,7 +81,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 relative`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 relative`}>
         <div className="flex items-center gap-2 mb-4">
             <Target className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Strategic Alignment Matrix</h2>
@@ -91,13 +91,13 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             {/* Layer 1: Corporate Strategy */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
-                    <h3 className={`${theme.typography.label} text-slate-400`}>1. Organizational Strategy</h3>
-                    <button onClick={handleAddGoal} className="text-xs flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-slate-600 font-medium transition-colors">
+                    <h3 className={`${theme.typography.label} ${theme.colors.text.secondary}`}>1. Organizational Strategy</h3>
+                    <button onClick={handleAddGoal} className={`text-xs flex items-center gap-1 ${theme.colors.surface} hover:bg-slate-200 px-2 py-1 rounded ${theme.colors.text.secondary} font-medium transition-colors border ${theme.colors.border}`}>
                         <Plus size={12}/> Add Goal
                     </button>
                 </div>
                 {strategicGoals.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`grid grid-cols-1 md:grid-cols-2 ${theme.layout.gridGap}`}>
                         {strategicGoals.map(goal => (
                             <div key={goal.id} className="p-5 bg-slate-800 text-white rounded-xl shadow-lg relative group">
                                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,13 +126,13 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
             {/* Layer 2: Program Objectives */}
             <div className="mb-12">
                 <div className={`flex justify-between items-center mb-4 border-b ${theme.colors.border} pb-2`}>
-                    <h3 className={`${theme.typography.label} text-slate-400`}>2. Program Objectives</h3>
+                    <h3 className={`${theme.typography.label} ${theme.colors.text.secondary}`}>2. Program Objectives</h3>
                     <button onClick={handleAddObj} className="text-xs flex items-center gap-1 bg-nexus-50 hover:bg-nexus-100 px-2 py-1 rounded text-nexus-700 font-medium transition-colors">
                         <Plus size={12}/> Add Objective
                     </button>
                 </div>
                 {programObjectives.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className={`grid grid-cols-1 md:grid-cols-2 ${theme.layout.gridGap}`}>
                         {programObjectives.map(obj => {
                             const parentGoal = strategicGoals.find(g => g.id === obj.linkedStrategicGoalId);
                             return (
@@ -168,16 +168,16 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
 
             {/* Layer 3: Project Deliverables */}
             <div>
-                <h3 className={`${theme.typography.label} text-slate-400 mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
+                <h3 className={`${theme.typography.label} ${theme.colors.text.secondary} mb-4 border-b ${theme.colors.border} pb-2`}>3. Project Execution</h3>
                 {projects.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-20">
+                    <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap} pb-20`}>
                         {projects.map(proj => {
                             const linkedObj = programObjectives.find(po => po.linkedProjectIds.includes(proj.id));
                             return (
                                 <div key={proj.id} className={`${theme.components.card} p-4 ${!linkedObj ? 'opacity-70 border-dashed' : ''}`}>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Folder size={16} className="text-slate-400"/>
-                                        <h4 className="font-bold text-sm text-slate-900 truncate">{proj.name}</h4>
+                                        <Folder size={16} className={theme.colors.text.tertiary}/>
+                                        <h4 className={`font-bold text-sm ${theme.colors.text.primary} truncate`}>{proj.name}</h4>
                                     </div>
                                     {linkedObj ? (
                                         <div className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded flex items-center gap-1 mt-auto truncate">

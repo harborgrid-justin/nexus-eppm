@@ -55,29 +55,29 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
   }, [plannedValue, realizedValue]);
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex items-center gap-2 mb-2">
             <Star className="text-nexus-600" size={24}/>
             <h2 className={theme.typography.h2}>Benefits Realization Plan</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
             <StatCard title="Total Planned Value" value={formatCurrency(plannedValue)} icon={DollarSign} />
             <StatCard title="Value Realized" value={formatCurrency(realizedValue)} icon={TrendingUp} trend="up" />
             <StatCard title="Realization Rate" value={`${realizationRate.toFixed(1)}%`} icon={Clock} />
             <StatCard title="Active Benefits" value={programBenefits.length} icon={Star} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
-                <h3 className="font-bold text-slate-800 mb-4">Realization Curve (Planned vs Actual)</h3>
+                <h3 className={`font-bold ${theme.colors.text.primary} mb-4`}>Realization Curve (Planned vs Actual)</h3>
                 <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip formatter={(val: number) => formatCurrency(val)} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                            <XAxis dataKey="month" tick={{fontSize: 12}} />
+                            <YAxis tick={{fontSize: 12}} />
+                            <Tooltip formatter={(val: number) => formatCurrency(val)} contentStyle={theme.charts.tooltip} />
                             <Legend />
                             <Area type="monotone" dataKey="planned" stroke="#94a3b8" fill="#e2e8f0" name="Planned Value" />
                             <Area type="monotone" dataKey="actual" stroke="#22c55e" fill="#dcfce7" name="Realized Value" />
@@ -87,8 +87,8 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
             </div>
 
             <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 className="font-bold text-slate-800">Benefits Register</h3>
+                <div className={`bg-slate-50 px-6 py-4 border-b ${theme.colors.border} flex justify-between items-center`}>
+                    <h3 className={`font-bold ${theme.colors.text.primary}`}>Benefits Register</h3>
                     <Button size="sm" icon={Plus} onClick={() => setIsFormOpen(true)}>Add Benefit</Button>
                 </div>
                 <div className="flex-1 overflow-auto max-h-72">
@@ -96,17 +96,17 @@ const ProgramBenefits: React.FC<ProgramBenefitsProps> = ({ programId }) => {
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-white">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Benefit</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Source</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Target</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Status</th>
+                                    <th className={`px-6 py-3 text-left text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Benefit</th>
+                                    <th className={`px-6 py-3 text-left text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Source</th>
+                                    <th className={`px-6 py-3 text-right text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Target</th>
+                                    <th className={`px-6 py-3 text-right text-xs font-medium ${theme.colors.text.secondary} uppercase`}>Status</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-100">
                                 {programBenefits.map(b => (
                                     <tr key={b.id}>
-                                        <td className="px-6 py-3 text-sm font-medium text-slate-900">{b.description}</td>
-                                        <td className="px-6 py-3 text-xs text-slate-500">{b.componentId}</td>
+                                        <td className={`px-6 py-3 text-sm font-medium ${theme.colors.text.primary}`}>{b.description}</td>
+                                        <td className={`px-6 py-3 text-xs ${theme.colors.text.secondary}`}>{b.componentId}</td>
                                         <td className="px-6 py-3 text-sm text-right font-mono">{b.type === 'Financial' ? formatCurrency(b.value) : b.value}</td>
                                         <td className="px-6 py-3 text-right">
                                             <Badge variant={

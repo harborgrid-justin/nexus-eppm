@@ -15,8 +15,10 @@ import { ImportPanel } from './data/ImportPanel';
 import { ExcelSync } from './data/ExcelSync';
 import { XerParser } from './data/XerParser';
 import { ErpConnector } from './data/ErpConnector';
+import { useTheme } from '../../context/ThemeContext';
 
 const DataExchange: React.FC = () => {
+    const theme = useTheme();
     const {
         activeGroup,
         activeTab,
@@ -43,15 +45,15 @@ const DataExchange: React.FC = () => {
     };
 
     return (
-        <div className="p-[var(--spacing-gutter)] space-y-[var(--spacing-gutter)] flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+        <div className={`${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto`}>
             <PageHeader 
                 title="Data Exchange Hub" 
                 subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."
                 icon={Database}
             />
 
-            <div className="flex flex-col h-full bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
-                <div className="flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b border-border bg-slate-50/50">
+            <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
+                <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b ${theme.colors.border} bg-slate-50/50`}>
                     <ModuleNavigation 
                         groups={navGroups}
                         activeGroup={activeGroup}

@@ -42,7 +42,7 @@ const ExtensionMarketplace: React.FC = () => {
   }, [state.extensions, categoryFilter, deferredSearchTerm]);
 
   return (
-    <div className="p-[var(--spacing-gutter)] space-y-4 flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto">
+    <div className={`${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto`}>
       <PageHeader 
         title="Extension Marketplace" 
         subtitle="Discover and install powerful engines to expand your platform capabilities."

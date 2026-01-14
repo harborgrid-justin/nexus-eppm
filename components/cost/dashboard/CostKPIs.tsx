@@ -3,6 +3,7 @@ import React from 'react';
 import StatCard from '../../shared/StatCard';
 import { DollarSign, ShoppingCart, Coins, Layers } from 'lucide-react';
 import { formatCompactCurrency } from '../../../utils/formatters';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface CostKPIsProps {
     financials: { revisedBudget: number; pendingCOAmount: number };
@@ -16,8 +17,9 @@ interface CostKPIsProps {
 export const CostKPIs: React.FC<CostKPIsProps> = ({ 
     financials, projectBudget, committedCosts, costOfQuality, eac, isPending 
 }) => {
+    const theme = useTheme();
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-4 gap-6 transition-opacity ${isPending ? 'opacity-50' : 'opacity-100'}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap} transition-opacity ${isPending ? 'opacity-50' : 'opacity-100'}`}>
             <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Approved Baseline" icon={DollarSign} />
             <StatCard title="Committed Cost" value={formatCompactCurrency(committedCosts)} subtext="Issued PO Ledger" icon={ShoppingCart} />
             <StatCard title="Cost of Quality" value={formatCompactCurrency(costOfQuality)} subtext="Rework & Defects" icon={Coins} trend="down"/>

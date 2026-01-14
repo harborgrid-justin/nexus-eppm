@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect, useTransition, useDeferredValue } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
@@ -85,7 +86,7 @@ const CostDashboard: React.FC = () => {
   }
 
   return (
-    <div className={`h-full overflow-y-auto p-8 space-y-8 scrollbar-thin animate-in fade-in duration-500`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} scrollbar-thin animate-in fade-in duration-500`}>
         <CostControls 
             includeRisk={includeRisk} 
             setIncludeRisk={(v) => startTransition(() => setIncludeRisk(v))} 

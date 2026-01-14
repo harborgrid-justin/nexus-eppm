@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
-import { Map as MapIcon, Loader2, Calendar } from 'lucide-react';
+import { Map as MapIcon, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { getDaysDiff } from '../../utils/dateUtils';
 import { EmptyGrid } from '../common/EmptyGrid';
@@ -31,7 +31,7 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
       return yr;
   }, [program]);
 
-  if (!program || !today) return <div className="flex h-full items-center justify-center text-slate-400 font-bold uppercase tracking-widest"><Loader2 className="animate-spin mr-2"/> Painting Roadmap...</div>;
+  if (!program || !today) return <div className={`flex h-full items-center justify-center ${theme.colors.text.tertiary} font-bold uppercase tracking-widest`}><Loader2 className="animate-spin mr-2"/> Painting Roadmap...</div>;
 
   if (projects.length === 0) {
       return (
@@ -63,7 +63,7 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-500 scrollbar-thin`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-500 scrollbar-thin`}>
         <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-nexus-900 text-white rounded-2xl shadow-xl border border-slate-700"><MapIcon size={24}/></div>

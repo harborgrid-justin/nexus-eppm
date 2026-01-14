@@ -27,7 +27,7 @@ export const ProjectListCards: React.FC<ProjectListCardsProps> = ({ projects, on
         const managerName = state.resources.find(r => r.id === project.managerId)?.name || 'Unassigned';
         
         return (
-          <div key={project.id} onClick={() => navigate(`/projectWorkspace/${project.id}`)} className={`${theme.components.card} p-4 hover:shadow-md active:scale-[0.98] transition-all cursor-pointer flex flex-col min-w-0 h-full hover:border-nexus-300`}>
+          <div key={project.id} onClick={() => navigate(`/projectWorkspace/${project.id}`)} className={`${theme.components.card} ${theme.layout.cardPadding} hover:shadow-md active:scale-[0.98] transition-all cursor-pointer flex flex-col min-w-0 h-full hover:border-nexus-300`}>
             <div className="flex justify-between items-start mb-4 gap-2">
               <div className="min-w-0 flex-1">
                 <h3 className={`text-sm font-bold ${theme.colors.text.primary} leading-tight truncate`}>{project.name}</h3>

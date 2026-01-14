@@ -51,7 +51,7 @@ const ProgramTradeoff: React.FC<ProgramTradeoffProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Benefit-Risk Tradeoff Analysis</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {/* Impact Matrix */}
             <div className={`lg:col-span-2 ${theme.colors.surface} p-6 rounded-xl border ${theme.colors.border} shadow-sm h-[400px]`}>
                 <h3 className="font-bold text-slate-800 mb-4">Value vs. Exposure Matrix</h3>

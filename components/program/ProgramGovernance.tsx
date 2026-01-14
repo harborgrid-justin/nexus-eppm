@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
-import { Users, Gavel, Calendar, Clock, Plus, Trash2, X } from 'lucide-react';
+import { Users, Gavel, Clock, Plus, Trash2, X, Calendar } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useTheme } from '../../context/ThemeContext';
 import { SidePanel } from '../ui/SidePanel';
@@ -82,7 +82,7 @@ const ProgramGovernance: React.FC<ProgramGovernanceProps> = ({ programId }) => {
   };
 
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-6 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300`}>
         <div className="flex justify-between items-center mb-2">
             <div className="flex items-center gap-2">
                 <Gavel className="text-nexus-600" size={24}/>

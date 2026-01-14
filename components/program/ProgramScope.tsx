@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useProgramScopeLogic } from '../../hooks/domain/useProgramScopeLogic';
 import { Sliders, FileText, CheckCircle, AlertTriangle, ArrowRight, XCircle, Clock, Plus, Edit2, Trash2, Target } from 'lucide-react';

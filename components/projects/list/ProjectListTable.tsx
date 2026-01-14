@@ -113,7 +113,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
   ], [state.resources, theme]);
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div className={`h-full ${theme.colors.surface} flex flex-col`}>
         <DataTable 
             data={projects} 
             columns={columns} 

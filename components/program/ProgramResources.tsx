@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Users, AlertTriangle, Briefcase } from 'lucide-react';
@@ -87,7 +88,7 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Program Resource Management</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             {/* Shared Capabilities Heatmap */}
             <div className={`${theme.colors.surface} ${theme.layout.cardPadding} rounded-xl border ${theme.colors.border} shadow-sm`}>
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Briefcase size={18}/> Shared Capabilities</h3>

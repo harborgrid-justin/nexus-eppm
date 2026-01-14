@@ -136,7 +136,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
             </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             <div className="lg:col-span-2 space-y-4">
                 {filteredIssues.map(issue => (
                     <div key={issue.id} className={`${theme.colors.surface} p-5 rounded-xl border-l-4 shadow-sm ${

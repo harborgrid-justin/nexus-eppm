@@ -28,7 +28,7 @@ const ProgramClosure: React.FC<ProgramClosureProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Transition & Sustainment Planning</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {/* Operational Readiness */}
             <div className="lg:col-span-2">
                 <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col h-full`}>

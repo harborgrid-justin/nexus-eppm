@@ -28,7 +28,7 @@ const RiskRegister: React.FC = () => {
   } = useRiskRegisterLogic();
 
   return (
-    <div className={`p-[var(--spacing-gutter)] space-y-4 h-full flex flex-col ${theme.colors.background}`}>
+    <div className={`${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col ${theme.colors.background}`}>
       {selectedRiskId && (
         <RiskDetailModal 
             riskId={selectedRiskId} 
@@ -44,7 +44,7 @@ const RiskRegister: React.FC = () => {
         actions={<><Button variant="outline" size="sm" icon={Download}>Export</Button><Button variant="primary" size="sm" icon={Plus}>New Risk</Button></>} 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap}`}>
          <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Total EMV</p><p className={`text-xl font-bold font-mono ${theme.colors.text.primary}`}>{formatCurrency(metrics.totalExposure)}</p></div><DollarSign className="text-slate-300"/></div>
          <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Active Risks</p><p className={`text-xl font-bold ${theme.colors.text.primary}`}>{metrics.activeCount}</p></div><Activity className="text-blue-400"/></div>
          <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg p-4 flex items-center justify-between shadow-sm`}><div className="space-y-1"><p className={`text-xs ${theme.colors.text.secondary} uppercase font-bold`}>Critical</p><p className="text-xl font-bold text-red-600">{metrics.criticalCount}</p></div><AlertOctagon className="text-red-400"/></div>

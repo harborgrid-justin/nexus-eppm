@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Truck, Award, DollarSign, AlertTriangle } from 'lucide-react';
@@ -21,7 +22,7 @@ const ProgramVendors: React.FC<ProgramVendorsProps> = ({ programId }) => {
             <h2 className={theme.typography.h2}>Strategic Partner & Contract Management</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`grid grid-cols-1 md:grid-cols-3 ${theme.layout.gridGap}`}>
             <StatCard title="Active Strategic Vendors" value={programVendors.length} icon={Truck} />
             <StatCard title="Total Contract Value" value={formatCompactCurrency(programVendors.reduce((s, v) => s + v.totalContractValue, 0))} icon={DollarSign} />
             <StatCard title="Critical Vendor Issues" value={programVendors.reduce((s, v) => s + v.criticalIssuesCount, 0)} icon={AlertTriangle} trend={programVendors.some(v => v.criticalIssuesCount > 0) ? 'down' : undefined} />

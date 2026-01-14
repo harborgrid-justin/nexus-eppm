@@ -93,7 +93,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
             <h2 className={theme.typography.h2}>Integrated Change Management (OCM + Technical)</h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             {integratedChanges.map(change => (
                 <div key={change.id} className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
                     <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-start">
