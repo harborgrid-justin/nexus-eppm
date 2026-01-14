@@ -51,28 +51,28 @@ export const ProgramChangeRequestForm: React.FC<Props> = ({ isOpen, onClose, onS
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Description</label>
                     <textarea 
-                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.text.primary} placeholder:${theme.colors.text.tertiary}`}
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}
                         placeholder="Detailed explanation of the proposed change..."
                     />
                 </div>
                 
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                    <h4 className="text-sm font-bold text-slate-800 mb-4">Impact Analysis</h4>
+                <div className={`p-4 ${theme.colors.background} border ${theme.colors.border} rounded-xl`}>
+                    <h4 className={`text-sm font-bold ${theme.colors.text.primary} mb-4`}>Impact Analysis</h4>
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Cost Impact ($)</label>
+                            <label className={theme.typography.label + " block mb-1"}>Cost Impact ($)</label>
                             <Input type="number" value={formData.impact?.cost} onChange={e => handleImpactChange('cost', parseFloat(e.target.value))} />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Schedule (Days)</label>
+                            <label className={theme.typography.label + " block mb-1"}>Schedule (Days)</label>
                             <Input type="number" value={formData.impact?.schedule} onChange={e => handleImpactChange('schedule', parseFloat(e.target.value))} />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-slate-500 mb-1">Risk Level</label>
+                            <label className={theme.typography.label + " block mb-1"}>Risk Level</label>
                             <select 
-                                className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                                className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`}
                                 value={formData.impact?.risk}
                                 onChange={e => handleImpactChange('risk', e.target.value)}
                             >
@@ -86,7 +86,7 @@ export const ProgramChangeRequestForm: React.FC<Props> = ({ isOpen, onClose, onS
                      <div>
                         <label className={theme.typography.label + " block mb-1"}>Status</label>
                         <select 
-                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                            className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={formData.status}
                             onChange={e => setFormData({...formData, status: e.target.value as any})}
                         >

@@ -29,36 +29,36 @@ export const DocumentViewerTmpl: React.FC = () => {
             </div>
 
             {/* Meta Sidebar */}
-            <div className="w-96 bg-white border-l border-slate-200 flex flex-col shadow-xl z-10">
-                <div className="p-6 border-b border-slate-100">
+            <div className={`w-96 bg-white border-l ${theme.colors.border} flex flex-col shadow-xl z-10`}>
+                <div className={`p-6 border-b ${theme.colors.border}`}>
                     <div className="flex items-start gap-3">
                         <div className="p-3 bg-red-50 text-red-600 rounded-lg"><FileText size={24}/></div>
                         <div>
-                            <h3 className="font-bold text-lg text-slate-900 leading-tight">Project_Charter_v2.pdf</h3>
-                            <p className="text-xs text-slate-500 mt-1">Updated 2h ago by Mike Ross</p>
+                            <h3 className={`font-bold text-lg ${theme.colors.text.primary} leading-tight`}>Project_Charter_v2.pdf</h3>
+                            <p className={`text-xs ${theme.colors.text.secondary} mt-1`}>Updated 2h ago by Mike Ross</p>
                         </div>
                     </div>
                 </div>
                 
                 <div className="flex-1 p-6 space-y-6 overflow-y-auto">
                     <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase text-slate-400 tracking-wider">Description</label>
-                        <p className="text-sm text-slate-600 leading-relaxed">Signed charter for Phase 1 construction initiation. Includes scope statement and authorized budget limits.</p>
+                        <label className={`text-xs font-bold uppercase ${theme.colors.text.tertiary} tracking-wider`}>Description</label>
+                        <p className={`text-sm ${theme.colors.text.secondary} leading-relaxed`}>Signed charter for Phase 1 construction initiation. Includes scope statement and authorized budget limits.</p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase text-slate-400 tracking-wider">Version</label>
-                            <p className="text-sm font-mono font-bold text-slate-800">2.0 (Draft)</p>
+                            <label className={`text-xs font-bold uppercase ${theme.colors.text.tertiary} tracking-wider`}>Version</label>
+                            <p className={`text-sm font-mono font-bold ${theme.colors.text.primary}`}>2.0 (Draft)</p>
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase text-slate-400 tracking-wider">Size</label>
-                            <p className="text-sm font-mono font-bold text-slate-800">4.2 MB</p>
+                            <label className={`text-xs font-bold uppercase ${theme.colors.text.tertiary} tracking-wider`}>Size</label>
+                            <p className={`text-sm font-mono font-bold ${theme.colors.text.primary}`}>4.2 MB</p>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase text-slate-400 tracking-wider">Tags</label>
+                        <label className={`text-xs font-bold uppercase ${theme.colors.text.tertiary} tracking-wider`}>Tags</label>
                         <div className="flex flex-wrap gap-2">
                             <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">Contract</span>
                             <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-medium border border-slate-200">Legal</span>
@@ -67,7 +67,7 @@ export const DocumentViewerTmpl: React.FC = () => {
                     </div>
                     
                     <div className="pt-6 border-t border-slate-100">
-                        <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider mb-3">Approvals</h4>
+                        <h4 className={`text-xs font-bold uppercase ${theme.colors.text.tertiary} tracking-wider mb-3`}>Approvals</h4>
                         <div className="flex items-center justify-between text-sm p-2 bg-green-50 text-green-700 rounded border border-green-100">
                             <span className="font-bold">Project Manager</span>
                             <span>Signed ✓</span>
@@ -75,7 +75,7 @@ export const DocumentViewerTmpl: React.FC = () => {
                     </div>
                 </div>
                 
-                <div className="p-6 border-t border-slate-200 bg-slate-50">
+                <div className={`p-6 border-t ${theme.colors.border} bg-slate-50`}>
                     <Button className="w-full" icon={Download}>Download Original</Button>
                 </div>
             </div>

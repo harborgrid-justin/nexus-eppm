@@ -52,7 +52,7 @@ const ProgramsRootDashboard: React.FC<ProgramsRootDashboardProps> = ({ onSelectP
   }
 
   return (
-    <div className={`h-full overflow-y-auto p-6 space-y-8 animate-in fade-in duration-300 scrollbar-thin`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} animate-in fade-in duration-300 scrollbar-thin`}>
         <ProgramCommandBar onCreateProgram={handleCreateProgram} />
         <ProgramPortfolioStats metrics={metrics} programCount={state.programs.length} />
         <ProgramListGrid 

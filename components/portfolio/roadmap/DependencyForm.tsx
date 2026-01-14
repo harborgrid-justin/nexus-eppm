@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { ProgramDependency, Project } from '../../../types';
 import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Link, ArrowRight, Save } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface DependencyFormProps {
     isOpen: boolean;
@@ -13,6 +15,7 @@ interface DependencyFormProps {
 }
 
 export const DependencyForm: React.FC<DependencyFormProps> = ({ isOpen, onClose, onSave, projects }) => {
+    const theme = useTheme();
     const [formData, setFormData] = useState<Partial<ProgramDependency>>({
         sourceProjectId: '',
         targetProjectId: '',
@@ -52,9 +55,9 @@ export const DependencyForm: React.FC<DependencyFormProps> = ({ isOpen, onClose,
 
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase mb-1.5 ml-1">Predecessor</label>
+                        <label className={theme.typography.label + " block mb-1.5 ml-1"}>Predecessor</label>
                         <select 
-                            className="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none bg-white`}
                             value={formData.sourceProjectId}
                             onChange={e => setFormData({...formData, sourceProjectId: e.target.value})}
                         >
@@ -64,9 +67,9 @@ export const DependencyForm: React.FC<DependencyFormProps> = ({ isOpen, onClose,
                     </div>
                     <div className="pt-6"><ArrowRight size={20} className="text-slate-300"/></div>
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase mb-1.5 ml-1">Successor</label>
+                        <label className={theme.typography.label + " block mb-1.5 ml-1"}>Successor</label>
                          <select 
-                            className="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none bg-white`}
                             value={formData.targetProjectId}
                             onChange={e => setFormData({...formData, targetProjectId: e.target.value})}
                         >
@@ -77,9 +80,9 @@ export const DependencyForm: React.FC<DependencyFormProps> = ({ isOpen, onClose,
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-slate-400 uppercase mb-1.5 ml-1">Constraint Type</label>
+                    <label className={theme.typography.label + " block mb-1.5 ml-1"}>Constraint Type</label>
                     <select 
-                        className="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none bg-white`}
                         value={formData.type}
                         onChange={e => setFormData({...formData, type: e.target.value as any})}
                     >
@@ -91,9 +94,9 @@ export const DependencyForm: React.FC<DependencyFormProps> = ({ isOpen, onClose,
                 </div>
 
                 <div>
-                    <label className="block text-xs font-black text-slate-400 uppercase mb-1.5 ml-1">Impact Description</label>
+                    <label className={theme.typography.label + " block mb-1.5 ml-1"}>Impact Description</label>
                     <textarea 
-                        className="w-full p-4 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-nexus-500 outline-none h-32 resize-none"
+                        className={`w-full p-4 border ${theme.colors.border} rounded-xl text-sm focus:ring-2 focus:ring-nexus-500 outline-none h-32 resize-none bg-white`}
                         placeholder="e.g. Phase 2 depends on core API release from Platform team..."
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}

@@ -5,6 +5,7 @@ import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Banknote } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface FundingSourcePanelProps {
     isOpen: boolean;
@@ -14,6 +15,7 @@ interface FundingSourcePanelProps {
 }
 
 export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, onClose, onSave, editingSource }) => {
+    const theme = useTheme();
     const [formData, setFormData] = useState<Partial<FundingSource>>({
         name: '',
         type: 'Internal',
@@ -48,7 +50,7 @@ export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, 
         >
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Source Name</label>
+                    <label className={theme.typography.label + " block mb-1"}>Source Name</label>
                     <Input 
                         value={formData.name} 
                         onChange={e => setFormData({...formData, name: e.target.value})} 
@@ -56,9 +58,9 @@ export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, 
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Source Type</label>
+                    <label className={theme.typography.label + " block mb-1"}>Source Type</label>
                     <select 
-                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}
                         value={formData.type}
                         onChange={e => setFormData({...formData, type: e.target.value as any})}
                     >
@@ -69,7 +71,7 @@ export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, 
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Total Authorization ($)</label>
+                    <label className={theme.typography.label + " block mb-1"}>Total Authorization ($)</label>
                     <Input 
                         type="number" 
                         value={formData.totalAuthorized} 
@@ -77,9 +79,9 @@ export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, 
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Description & Restrictions</label>
+                    <label className={theme.typography.label + " block mb-1"}>Description & Restrictions</label>
                     <textarea 
-                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface} ${theme.colors.text.primary} placeholder:${theme.colors.text.tertiary}`}
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}
                         placeholder="Details about funding terms, expiration, and allowed usage..."

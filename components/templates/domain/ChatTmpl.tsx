@@ -28,13 +28,13 @@ export const ChatTmpl: React.FC = () => {
     };
 
     return (
-        <div className="h-full flex bg-white border border-slate-200 rounded-xl overflow-hidden m-4 shadow-lg">
+        <div className={`h-full flex ${theme.colors.surface} border ${theme.colors.border} rounded-xl overflow-hidden m-4 shadow-lg`}>
             {/* Sidebar */}
-            <div className="w-72 bg-slate-50 border-r border-slate-200 flex flex-col">
-                <div className="p-4 border-b border-slate-200">
+            <div className={`w-72 bg-slate-50 border-r ${theme.colors.border} flex flex-col`}>
+                <div className={`p-4 border-b ${theme.colors.border}`}>
                     <div className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                        <input className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:border-nexus-500" placeholder="Find channel..."/>
+                        <input className={`w-full ${theme.colors.surface} border ${theme.colors.border} rounded-lg pl-9 pr-3 py-1.5 text-sm focus:outline-none focus:border-nexus-500`} placeholder="Find channel..."/>
                     </div>
                 </div>
                 
@@ -62,7 +62,7 @@ export const ChatTmpl: React.FC = () => {
 
             {/* Chat Area */}
             <div className="flex-1 flex flex-col bg-white">
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center shadow-sm z-10">
+                <div className={`p-4 border-b border-slate-100 flex justify-between items-center shadow-sm z-10`}>
                     <div>
                         <h3 className="font-bold text-slate-800"># project-alpha</h3>
                         <p className="text-xs text-slate-500">General discussion for Project Alpha initiative.</p>
@@ -95,7 +95,7 @@ export const ChatTmpl: React.FC = () => {
                     ))}
                 </div>
                 
-                <div className="p-4 bg-white border-t border-slate-200">
+                <div className={`p-4 bg-white border-t border-slate-200`}>
                     <div className="flex gap-2">
                         <button className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><Plus size={20}/></button>
                         <Input 

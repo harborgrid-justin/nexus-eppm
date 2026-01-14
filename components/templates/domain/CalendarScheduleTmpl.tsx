@@ -14,9 +14,9 @@ export const CalendarScheduleTmpl: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className={theme.typography.h2}>Team Availability</h2>
-                    <p className="text-sm text-slate-500">Resource allocation and blackout dates.</p>
+                    <p className={`text-sm ${theme.colors.text.secondary}`}>Resource allocation and blackout dates.</p>
                 </div>
-                <div className="flex gap-4 items-center bg-white p-1 rounded-lg border border-slate-200 shadow-sm">
+                <div className={`flex gap-4 items-center ${theme.colors.surface} p-1 rounded-lg border ${theme.colors.border} shadow-sm`}>
                     <Button variant="ghost" size="sm" onClick={() => setCurrentMonth('September')}><ChevronLeft size={16}/></Button>
                     <span className="font-bold text-sm min-w-[120px] text-center">{currentMonth} 2024</span>
                     <Button variant="ghost" size="sm" onClick={() => setCurrentMonth('November')}><ChevronRight size={16}/></Button>

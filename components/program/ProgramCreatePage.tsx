@@ -9,7 +9,6 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { NarrativeField } from '../common/NarrativeField';
-// Added missing Badge component import
 import { Badge } from '../ui/Badge';
 import { 
     Layers, Save, X, Target, DollarSign, 
@@ -92,17 +91,16 @@ const ProgramCreatePage: React.FC = () => {
                 {/* Main Content: The Narrative Cage */}
                 <div className="lg:col-span-3 space-y-8">
                     <Card className="p-8 border-t-4 border-t-nexus-600 shadow-md">
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <div className={`flex items-center justify-between mb-8 pb-4 border-b ${theme.colors.border}`}>
+                             <h3 className={`text-xs font-black ${theme.colors.text.tertiary} uppercase tracking-widest flex items-center gap-2`}>
                                 <Target size={14} className="text-nexus-600"/> Program Charter Parameters
                             </h3>
-                            {/* Correctly using the imported Badge component */}
                             <Badge variant="neutral" className="font-mono">NEW_RECORD_PENDING</Badge>
                         </div>
 
                         <div className="space-y-8">
                             <div className="max-w-2xl">
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Program Designation</label>
+                                <label className={theme.typography.label + " block mb-1.5 ml-1"}>Program Designation</label>
                                 <Input 
                                     value={formData.name} 
                                     onChange={e => handleFieldChange('name', e.target.value)} 
@@ -113,7 +111,7 @@ const ProgramCreatePage: React.FC = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Responsible Portfolio Lead</label>
+                                    <label className={theme.typography.label + " block mb-1.5 ml-1"}>Responsible Portfolio Lead</label>
                                     <select 
                                         className={`w-full p-3.5 border ${theme.colors.border} rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none bg-slate-50/50 hover:bg-white transition-colors`}
                                         value={formData.managerId}
@@ -126,7 +124,7 @@ const ProgramCreatePage: React.FC = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Strategic Categorization</label>
+                                    <label className={theme.typography.label + " block mb-1.5 ml-1"}>Strategic Categorization</label>
                                     <select 
                                         className={`w-full p-3.5 border ${theme.colors.border} rounded-xl text-sm font-bold focus:ring-2 focus:ring-nexus-500 outline-none bg-slate-50/50 hover:bg-white transition-colors`}
                                         value={formData.category}
@@ -160,12 +158,12 @@ const ProgramCreatePage: React.FC = () => {
                 {/* Sidebar: Financials & Lifecycle */}
                 <div className="space-y-6">
                     <Card className={`p-6 ${theme.colors.background} border-slate-200 shadow-sm`}>
-                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <h3 className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest mb-6 flex items-center gap-2`}>
                             <DollarSign size={14} className="text-green-600"/> Fiscal Authority
                         </h3>
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Approved Budget Cap</label>
+                                <label className={theme.typography.label + " block mb-1.5 ml-1"}>Approved Budget Cap</label>
                                 <div className="relative group">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold text-lg group-focus-within:text-nexus-500 transition-colors">$</span>
                                     <input 
@@ -180,16 +178,16 @@ const ProgramCreatePage: React.FC = () => {
                     </Card>
 
                     <Card className="p-6 shadow-sm">
-                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                         <h3 className={`text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest mb-6 flex items-center gap-2`}>
                             <Calendar size={14} className="text-blue-600"/> Lifecycle Dates
                         </h3>
                         <div className="space-y-5">
                              <div>
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Planned Start</label>
+                                <label className={theme.typography.label + " block mb-1.5 ml-1"}>Planned Start</label>
                                 <Input type="date" value={formData.startDate} onChange={e => handleFieldChange('startDate', e.target.value)} className="bg-slate-50/50" />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Target Completion</label>
+                                <label className={theme.typography.label + " block mb-1.5 ml-1"}>Target Completion</label>
                                 <Input type="date" value={formData.endDate} onChange={e => handleFieldChange('endDate', e.target.value)} className="bg-slate-50/50" />
                             </div>
                         </div>

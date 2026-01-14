@@ -16,9 +16,9 @@ export const FundingSourceGrid: React.FC<FundingSourceGridProps> = ({ onEdit, on
     const theme = useTheme();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             {state.fundingSources.map(source => (
-                <div key={source.id} className={`${theme.components.card} p-5 flex flex-col justify-between group hover:border-nexus-300 transition-all`}>
+                <div key={source.id} className={`${theme.components.card} ${theme.layout.cardPadding} flex flex-col justify-between group hover:border-nexus-300 transition-all`}>
                     <div>
                         <div className="flex justify-between items-start mb-2">
                             <div className="p-2 bg-green-50 text-green-600 rounded-lg">

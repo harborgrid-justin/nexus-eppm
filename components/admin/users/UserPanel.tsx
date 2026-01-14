@@ -6,6 +6,7 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Save } from 'lucide-react';
 import { generateId } from '../../../utils/formatters';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface UserPanelProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface UserPanelProps {
 }
 
 export const UserPanel: React.FC<UserPanelProps> = ({ isOpen, onClose, onSave, editingUser }) => {
+    const theme = useTheme();
     const [formData, setFormData] = useState<Partial<User>>({});
 
     useEffect(() => {
@@ -55,19 +57,19 @@ export const UserPanel: React.FC<UserPanelProps> = ({ isOpen, onClose, onSave, e
         >
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                    <label className={theme.typography.label + " block mb-1"}>Full Name</label>
                     <Input value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <label className={theme.typography.label + " block mb-1"}>Email</label>
                     <Input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                    <label className={theme.typography.label + " block mb-1"}>Role</label>
                     <select
                         value={formData.role || 'Viewer'}
                         onChange={e => setFormData({...formData, role: e.target.value as Role})}
-                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}
                     >
                         <option>Viewer</option>
                         <option>Team Member</option>
@@ -77,7 +79,7 @@ export const UserPanel: React.FC<UserPanelProps> = ({ isOpen, onClose, onSave, e
                     </select>
                 </div>
                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Department</label>
+                    <label className={theme.typography.label + " block mb-1"}>Department</label>
                     <Input value={formData.department || ''} onChange={e => setFormData({...formData, department: e.target.value})} />
                 </div>
             </div>

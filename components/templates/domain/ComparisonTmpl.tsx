@@ -8,16 +8,16 @@ export const ComparisonTmpl: React.FC = () => {
     const [mode, setMode] = useState<'Side' | 'Overlay'>('Side');
 
     return (
-        <div className="h-full flex flex-col bg-slate-100">
-            <div className="p-4 border-b bg-white flex justify-between items-center gap-8 shadow-sm z-10 sticky top-0">
+        <div className={`h-full flex flex-col ${theme.colors.background}`}>
+            <div className={`p-4 border-b ${theme.colors.surface} flex justify-between items-center gap-8 shadow-sm z-10 sticky top-0`}>
                 <div className="flex items-center gap-8">
                     <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Baseline 1</p>
-                        <p className="font-bold text-slate-800">Jan 01, 2024</p>
+                        <p className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-widest`}>Baseline 1</p>
+                        <p className={`font-bold ${theme.colors.text.primary}`}>Jan 01, 2024</p>
                     </div>
                     <div className="bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-slate-500">VS</div>
                     <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Current Forecast</p>
+                        <p className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-widest`}>Current Forecast</p>
                         <p className="font-bold text-nexus-600">Live Data</p>
                     </div>
                 </div>
@@ -31,7 +31,7 @@ export const ComparisonTmpl: React.FC = () => {
                 {/* Left Card */}
                 <div className={`flex-1 flex flex-col transition-all ${mode === 'Overlay' ? 'absolute w-2/3 h-2/3 z-0 translate-x-4 translate-y-4 opacity-50' : ''}`}>
                      <Card className="flex-1 p-0 overflow-hidden border-dashed border-2">
-                        <div className="bg-slate-50 p-4 border-b border-slate-200 font-bold text-slate-600 text-sm">Original Plan</div>
+                        <div className={`bg-slate-50 p-4 border-b ${theme.colors.border} font-bold text-slate-600 text-sm`}>Original Plan</div>
                         <div className="p-6 space-y-6">
                             <div className="flex justify-between items-end border-b border-slate-100 pb-2">
                                 <span className="text-sm text-slate-500">Total Budget</span>

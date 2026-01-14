@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { Save } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ProgramFormProps {
     isOpen: boolean;
@@ -16,6 +17,7 @@ interface ProgramFormProps {
 
 export const ProgramForm: React.FC<ProgramFormProps> = ({ isOpen, onClose, program }) => {
     const { state, dispatch } = useData();
+    const theme = useTheme();
     const [formData, setFormData] = useState<Partial<Program>>({});
 
     useEffect(() => {
@@ -79,15 +81,15 @@ export const ProgramForm: React.FC<ProgramFormProps> = ({ isOpen, onClose, progr
         >
             <div className="space-y-6">
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Program Name</label>
+                    <label className={theme.typography.label + " block mb-1"}>Program Name</label>
                     <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Digital Transformation Initiative" />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Program Manager</label>
+                        <label className={theme.typography.label + " block mb-1"}>Program Manager</label>
                         <select 
-                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white"
+                            className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={formData.managerId}
                             onChange={e => setFormData({...formData, managerId: e.target.value})}
                         >
@@ -96,7 +98,7 @@ export const ProgramForm: React.FC<ProgramFormProps> = ({ isOpen, onClose, progr
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Total Budget Authority</label>
+                        <label className={theme.typography.label + " block mb-1"}>Total Budget Authority</label>
                         <Input type="number" value={formData.budget} onChange={e => setFormData({...formData, budget: parseFloat(e.target.value)})} />
                     </div>
                 </div>
@@ -108,29 +110,29 @@ export const ProgramForm: React.FC<ProgramFormProps> = ({ isOpen, onClose, progr
 
                 <div className="grid grid-cols-3 gap-4">
                     <div>
-                         <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
-                         <select className="w-full p-2.5 border rounded-lg text-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
+                         <label className={theme.typography.label + " block mb-1"}>Status</label>
+                         <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as any})}>
                              <option>Planned</option><option>Active</option><option>Closed</option>
                          </select>
                     </div>
                     <div>
-                         <label className="block text-sm font-bold text-slate-700 mb-1">Health</label>
-                         <select className="w-full p-2.5 border rounded-lg text-sm" value={formData.health} onChange={e => setFormData({...formData, health: e.target.value as any})}>
+                         <label className={theme.typography.label + " block mb-1"}>Health</label>
+                         <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.health} onChange={e => setFormData({...formData, health: e.target.value as any})}>
                              <option>Good</option><option>Warning</option><option>Critical</option>
                          </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Category</label>
-                        <select className="w-full p-2.5 border rounded-lg text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                        <label className={theme.typography.label + " block mb-1"}>Category</label>
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                             <option>Strategic</option><option>Operational</option><option>Compliance</option><option>Innovation</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Description & Scope</label>
+                    <label className={theme.typography.label + " block mb-1"}>Description & Scope</label>
                     <textarea 
-                        className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface}`}
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}
                         placeholder="Define the strategic objectives and boundaries..."

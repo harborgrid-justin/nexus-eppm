@@ -37,7 +37,8 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
         },
         {
             key: 'department',
-            header: 'Department'
+            header: 'Department',
+            render: (user) => <span className={theme.colors.text.secondary}>{user.department}</span>
         },
         {
             key: 'status',
