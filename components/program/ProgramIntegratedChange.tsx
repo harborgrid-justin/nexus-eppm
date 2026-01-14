@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -9,6 +8,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { IntegratedChangeRequest } from '../../types';
+import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramIntegratedChangeProps {
   programId: string;
@@ -21,236 +21,114 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
 
   const [selectedChange, setSelectedChange] = useState<IntegratedChangeRequest | null>(null);
   const [panelMode, setPanelMode] = useState<'impact' | 'readiness' | null>(null);
-  
   const [readinessScores, setReadinessScores] = useState<IntegratedChangeRequest['readinessImpact']>([]);
 
-  const openImpactPanel = (change: IntegratedChangeRequest) => {
+  const handleReadinessUpdate = (change: IntegratedChangeRequest) => {
     setSelectedChange(change);
-    setPanelMode('impact');
-  };
-
-  const openReadinessPanel = (change: IntegratedChangeRequest) => {
-    setSelectedChange(change);
-    setReadinessScores(JSON.parse(JSON.stringify(change.readinessImpact))); // Deep copy
+    setReadinessScores(JSON.parse(JSON.stringify(change.readinessImpact))); 
     setPanelMode('readiness');
-  };
-
-  const closePanel = () => {
-    setSelectedChange(null);
-    setPanelMode(null);
-    setReadinessScores([]);
   };
 
   const saveReadiness = () => {
     if (selectedChange) {
         const updatedChange = { ...selectedChange, readinessImpact: readinessScores };
         dispatch({ type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE', payload: updatedChange });
-        closePanel();
+        setPanelMode(null);
+        setSelectedChange(null);
     }
   };
 
-  const updateScore = (groupIndex: number, field: 'awareness' | 'desire' | 'knowledge' | 'ability' | 'reinforcement', value: number) => {
-      const newScores = [...readinessScores];
-      if (newScores[groupIndex]) {
-          newScores[groupIndex] = { ...newScores[groupIndex], [field]: value };
-          setReadinessScores(newScores);
-      }
-  };
-
-  // Helper to generate dynamic impact bullets based on category
-  const getImpactItems = (change: IntegratedChangeRequest | null, category: 'Systems' | 'Process' | 'People') => {
-      if (!change) return [];
-      
-      const impacts = [];
-      const hasArea = (area: string) => change.impactAreas.includes(area as any);
-
-      if (category === 'Systems' && hasArea('Systems')) {
-          impacts.push(`${change.type} Configuration Update`);
-          impacts.push("Integration Interface Adjustments");
-      }
-      if (category === 'Systems' && hasArea('Data')) {
-          impacts.push("Schema Migration / Patch");
-      }
-      
-      if (category === 'Process' && hasArea('Process')) {
-          impacts.push("Standard Operating Procedure (SOP) Revision");
-          impacts.push("Compliance Workflow Trigger");
-      }
-      
-      if (category === 'People' && hasArea('Roles')) {
-          impacts.push("User Role Permissions Update");
-          impacts.push("Training Requirement Identified");
-      }
-
-      if (impacts.length === 0) impacts.push("No direct impact identified in this domain.");
-      return impacts;
-  };
-
   return (
-    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300`}>
+    <div className={`h-full overflow-y-auto ${theme.layout.pagePadding} space-y-8 animate-in fade-in duration-300 scrollbar-thin`}>
         <div className="flex items-center gap-2 mb-2">
             <RefreshCw className="text-nexus-600" size={24}/>
-            <h2 className={theme.typography.h2}>Integrated Change Management (OCM + Technical)</h2>
+            <h2 className={theme.typography.h2}>Integrated Change Control (OCM)</h2>
         </div>
 
-        <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-            {integratedChanges.map(change => (
-                <div key={change.id} className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>
-                    <div className={`p-4 border-b ${theme.colors.border} ${theme.colors.background} flex justify-between items-start`}>
-                        <div>
-                            <h3 className={`font-bold ${theme.colors.text.primary} text-lg`}>{change.title}</h3>
-                            <p className={`text-sm ${theme.colors.text.secondary} mt-1`}>{change.description}</p>
+        {integratedChanges.length > 0 ? (
+            <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
+                {integratedChanges.map(change => (
+                    <div key={change.id} className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col group hover:border-nexus-300 transition-all`}>
+                        <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50 flex justify-between items-start`}>
+                            <div>
+                                <h3 className={`font-black text-slate-800 text-lg uppercase tracking-tight`}>{change.title}</h3>
+                                <p className={`text-xs text-slate-500 mt-1 font-bold`}>{change.description}</p>
+                            </div>
+                            <Badge variant={change.severity === 'High' ? 'danger' : 'warning'}>{change.type}</Badge>
                         </div>
-                        <Badge variant={change.severity === 'High' ? 'danger' : 'warning'}>{change.type}</Badge>
-                    </div>
 
-                    <div className={`p-4 border-b ${theme.colors.border.replace('border-', 'border-slate-')}100 flex gap-2 overflow-x-auto`}>
-                        {change.impactAreas.map(area => (
-                            <span key={area} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-100 whitespace-nowrap">
-                                {area === 'Roles' ? <Users size={12}/> : 
-                                 area === 'Data' ? <Database size={12}/> :
-                                 <Layers size={12}/>
-                                }
-                                {area}
-                            </span>
-                        ))}
-                    </div>
-
-                    <div className="p-4 flex-1">
-                        <h4 className={`text-xs font-bold ${theme.colors.text.secondary} uppercase tracking-wider mb-4 flex items-center gap-2`}>
-                            <BarChart2 size={14}/> ADKAR Readiness Assessment
-                        </h4>
-                        
-                        <div className="h-48 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={change.readinessImpact} layout="vertical" margin={{ left: 40 }}>
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                                    <XAxis type="number" domain={[0, 100]} hide />
-                                    <YAxis type="category" dataKey="stakeholderGroup" width={100} tick={{fontSize: 10}} />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="awareness" fill="#94a3b8" stackId="a" name="Awareness" />
-                                    <Bar dataKey="desire" fill="#facc15" stackId="a" name="Desire" />
-                                    <Bar dataKey="knowledge" fill="#60a5fa" stackId="a" name="Knowledge" />
-                                    <Bar dataKey="ability" fill="#4ade80" stackId="a" name="Ability" />
-                                    <Bar dataKey="reinforcement" fill="#818cf8" stackId="a" name="Reinforcement" />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className={`p-4 ${theme.colors.background} border-t ${theme.colors.border} flex justify-between items-center`}>
-                        <span className={`text-xs ${theme.colors.text.secondary} font-mono`}>ID: {change.id}</span>
-                        <div className="flex gap-2">
-                            <button onClick={() => openImpactPanel(change)} className={`px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded text-xs font-medium hover:${theme.colors.background}`}>View Impact Analysis</button>
-                            <button onClick={() => openReadinessPanel(change)} className="px-3 py-1.5 bg-nexus-600 text-white rounded text-xs font-medium hover:bg-nexus-700">Update Readiness</button>
-                        </div>
-                    </div>
-                </div>
-            ))}
-            
-            {integratedChanges.length === 0 && (
-                 <div className="col-span-2 text-center py-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                     <RefreshCw size={48} className="mx-auto text-slate-300 mb-4" />
-                     <p className="text-slate-500">No integrated change requests found for this program.</p>
-                 </div>
-            )}
-        </div>
-
-        {/* Impact Analysis Panel */}
-        <SidePanel
-            isOpen={panelMode === 'impact' && !!selectedChange}
-            onClose={closePanel}
-            width="md:w-[700px]"
-            title={`Impact Analysis: ${selectedChange?.title}`}
-            footer={<Button onClick={closePanel}>Close</Button>}
-        >
-            {selectedChange && (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                             <h4 className="text-blue-900 font-bold mb-2 flex items-center gap-2"><Settings size={16}/> Systems</h4>
-                             <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
-                                 {getImpactItems(selectedChange, 'Systems').map((item, i) => (
-                                     <li key={i}>{item}</li>
-                                 ))}
-                             </ul>
-                        </div>
-                        <div className="p-4 bg-purple-50 border border-purple-100 rounded-lg">
-                             <h4 className="text-purple-900 font-bold mb-2 flex items-center gap-2"><Activity size={16}/> Processes</h4>
-                             <ul className="text-sm text-purple-800 list-disc list-inside space-y-1">
-                                 {getImpactItems(selectedChange, 'Process').map((item, i) => (
-                                     <li key={i}>{item}</li>
-                                 ))}
-                             </ul>
-                        </div>
-                         <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg">
-                             <h4 className="text-orange-900 font-bold mb-2 flex items-center gap-2"><Network size={16}/> People & Roles</h4>
-                             <ul className="text-sm text-orange-800 list-disc list-inside space-y-1">
-                                 {getImpactItems(selectedChange, 'People').map((item, i) => (
-                                     <li key={i}>{item}</li>
-                                 ))}
-                             </ul>
-                        </div>
-                    </div>
-                    
-                    <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-xl p-6 shadow-sm`}>
-                        <h4 className={`font-bold ${theme.colors.text.primary} mb-4`}>Risk Severity Matrix</h4>
-                        <div className="w-full h-8 bg-gradient-to-r from-green-300 via-yellow-300 to-red-400 rounded-full relative">
-                            <div 
-                                className="absolute top-0 bottom-0 w-1 bg-black border-2 border-white shadow-lg transform -translate-x-1/2" 
-                                style={{left: selectedChange.severity === 'High' ? '85%' : selectedChange.severity === 'Medium' ? '50%' : '15%'}}
-                            >
-                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                                    Current: {selectedChange.severity}
-                                </div>
+                        <div className="p-6 flex-1">
+                            <h4 className={`text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2`}>
+                                <BarChart2 size={14} className="text-nexus-600"/> Readiness Assessment (ADKAR)
+                            </h4>
+                            <div className="h-56 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={change.readinessImpact} layout="vertical" margin={{ left: 40 }}>
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={theme.charts.grid} />
+                                        <XAxis type="number" domain={[0, 100]} hide />
+                                        <YAxis type="category" dataKey="stakeholderGroup" width={100} tick={{fontSize: 10, fontWeight: 'bold'}} />
+                                        <Tooltip contentStyle={theme.charts.tooltip} />
+                                        <Bar dataKey="awareness" fill="#94a3b8" stackId="a" />
+                                        <Bar dataKey="desire" fill="#facc15" stackId="a" />
+                                        <Bar dataKey="knowledge" fill="#60a5fa" stackId="a" />
+                                        <Bar dataKey="ability" fill="#4ade80" stackId="a" />
+                                        <Bar dataKey="reinforcement" fill="#818cf8" stackId="a" />
+                                    </BarChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
-                        <div className={`flex justify-between text-xs ${theme.colors.text.tertiary} mt-2 font-medium`}>
-                            <span>Low Impact</span>
-                            <span>Medium Impact</span>
-                            <span>Critical Impact</span>
+
+                        <div className={`p-6 bg-slate-50/30 border-t ${theme.colors.border} flex justify-between items-center`}>
+                            <span className={`text-[9px] font-mono font-bold text-slate-400 uppercase`}>Record: {change.id}</span>
+                            <button 
+                                onClick={() => handleReadinessUpdate(change)} 
+                                className="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-nexus-600 hover:border-nexus-200 shadow-sm transition-all active:scale-95"
+                            >
+                                Update Assessment
+                            </button>
                         </div>
                     </div>
-                </div>
-            )}
-        </SidePanel>
+                ))}
+            </div>
+        ) : (
+            <div className="flex-1 flex flex-col justify-center">
+                 <EmptyGrid 
+                    title="Change Matrix Neutral"
+                    description="No organizational change artifacts have been synchronized for this program period. Establish an integrated change plan to monitor stakeholder readiness."
+                    icon={RefreshCw}
+                    actionLabel="Submit Impact Analysis"
+                    onAdd={() => {}}
+                />
+            </div>
+        )}
 
-        {/* Readiness Assessment Panel */}
         <SidePanel
             isOpen={panelMode === 'readiness' && !!selectedChange}
-            onClose={closePanel}
-            width="md:w-[700px]"
-            title={`Update Readiness: ${selectedChange?.title}`}
-            footer={
-                <>
-                    <Button variant="secondary" onClick={closePanel}>Cancel</Button>
-                    <Button onClick={saveReadiness}>Save Assessment</Button>
-                </>
-            }
+            onClose={() => setPanelMode(null)}
+            width="md:w-[600px]"
+            title="Stakeholder Readiness Update"
+            footer={<><Button variant="secondary" onClick={() => setPanelMode(null)}>Cancel</Button><Button onClick={saveReadiness}>Save Assessment</Button></>}
         >
-            <div className="space-y-6">
-                <p className={`text-sm ${theme.colors.text.secondary} bg-slate-50 p-3 rounded border ${theme.colors.border}`}>
-                    Adjust the <strong>ADKAR</strong> scores (0-100) for each stakeholder group based on recent surveys, focus groups, and interviews.
-                </p>
-                
+             <div className="space-y-6">
                 {readinessScores.map((group, idx) => (
-                    <div key={group.stakeholderGroup} className={`${theme.colors.surface} p-4 rounded-xl border ${theme.colors.border} shadow-sm`}>
-                        <h4 className={`font-bold ${theme.colors.text.primary} mb-4 border-b border-slate-100 pb-2`}>{group.stakeholderGroup}</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div key={group.stakeholderGroup} className={`p-6 rounded-2xl border border-slate-200 bg-slate-50/50 shadow-inner`}>
+                        <h4 className={`font-black text-slate-800 text-sm uppercase tracking-wider mb-6 border-b border-slate-200 pb-2`}>{group.stakeholderGroup}</h4>
+                        <div className="space-y-6">
                             {(['awareness', 'desire', 'knowledge', 'ability', 'reinforcement'] as const).map((dim) => (
-                                <div key={dim} className="space-y-2">
-                                    <label className={`text-xs font-bold ${theme.colors.text.tertiary} uppercase block`}>{dim}</label>
-                                    <input 
-                                        type="range" 
-                                        min="0" max="100" 
-                                        value={group[dim]} 
-                                        onChange={(e) => updateScore(idx, dim, parseInt(e.target.value))}
-                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-nexus-600"
-                                    />
-                                    <div className={`text-center font-mono font-bold ${group[dim] < 50 ? 'text-red-500' : 'text-slate-700'}`}>
-                                        {group[dim]}
+                                <div key={dim}>
+                                    <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                                        <span>{dim}</span>
+                                        <span className="font-mono text-nexus-600">{group[dim]}%</span>
                                     </div>
+                                    <input 
+                                        type="range" min="0" max="100" value={group[dim]} 
+                                        onChange={(e) => {
+                                            const newScores = [...readinessScores];
+                                            newScores[idx] = { ...newScores[idx], [dim]: parseInt(e.target.value) };
+                                            setReadinessScores(newScores);
+                                        }}
+                                        className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-nexus-600 shadow-inner"
+                                    />
                                 </div>
                             ))}
                         </div>

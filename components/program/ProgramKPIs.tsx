@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Activity, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 import StatCard from '../shared/StatCard';
@@ -15,12 +14,37 @@ interface Props {
 
 export const ProgramKPIs: React.FC<Props> = ({ program, projectCount, spent, total, riskCount }) => {
     const theme = useTheme();
+    const utilizationRate = total > 0 ? (spent / total) * 100 : 0;
+    
     return (
         <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap} mb-6`}>
-            <StatCard title="Health" value={program.health} subtext={`${projectCount} Active Projects`} icon={Activity} trend={program.health === 'Good' ? 'up' : 'down'} />
-            <StatCard title="Budget Consumed" value={formatCompactCurrency(spent)} subtext={`of ${formatCompactCurrency(total)}`} icon={DollarSign} />
-            <StatCard title="Risk Exposure" value={riskCount} subtext="High Severity Risks" icon={AlertTriangle} trend={riskCount > 5 ? 'down' : 'up'} />
-            <StatCard title="Portfolio Burn" value={`${((spent/total)*100).toFixed(1)}%`} subtext="Utilization Rate" icon={TrendingUp} trend="up" />
+            <StatCard 
+                title="Health" 
+                value={program.health || 'Neutral'} 
+                subtext={`${projectCount} Active Projects`} 
+                icon={Activity} 
+                trend={program.health === 'Good' ? 'up' : program.health === 'Critical' ? 'down' : undefined} 
+            />
+            <StatCard 
+                title="Budget Consumed" 
+                value={formatCompactCurrency(spent)} 
+                subtext={`of ${formatCompactCurrency(total)} authority`} 
+                icon={DollarSign} 
+            />
+            <StatCard 
+                title="Risk Exposure" 
+                value={riskCount} 
+                subtext="High Severity Threats" 
+                icon={AlertTriangle} 
+                trend={riskCount > 5 ? 'down' : 'up'} 
+            />
+            <StatCard 
+                title="Portfolio Burn" 
+                value={`${utilizationRate.toFixed(1)}%`} 
+                subtext="Capital Release Rate" 
+                icon={TrendingUp} 
+                trend={utilizationRate > 80 ? 'down' : 'up'} 
+            />
         </div>
     );
 };

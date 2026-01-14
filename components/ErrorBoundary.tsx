@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -15,8 +16,8 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// Added Component to imports and extending it directly to fix TS errors with this.props and this.setState
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// FIX: Explicitly use React.Component to ensure props and state are correctly typed and accessible
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   public state: ErrorBoundaryState = {
     hasError: false,
     error: undefined,
@@ -27,13 +28,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Accessing this.props to retrieve the component name for logging
+    // FIX: Accessing this.props to retrieve the component name for logging
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  // Define handleRetry as an arrow function to preserve 'this' context
+  // FIX: Define handleRetry as an arrow function to preserve 'this' context
   public handleRetry = () => {
-    // Using this.setState to reset the error boundary state
+    // FIX: Using this.setState to reset the error boundary state
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -46,7 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <h2 className="text-xl font-black text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* Accessing this.props.name to display which module failed */}
+            {/* FIX: Accessing this.props.name to display which module failed */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -69,7 +70,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // Accessing this.props.children to render sub-components when no error occurs
+    // FIX: Accessing this.props.children to render sub-components when no error occurs
     return this.props.children;
   }
 }
