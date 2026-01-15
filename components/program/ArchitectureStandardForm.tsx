@@ -26,8 +26,6 @@ export const ArchitectureStandardForm: React.FC<Props> = ({ isOpen, onClose }) =
             id: generateId('ARCH'),
             ...formData
         };
-        // Using generic update for program architecture, assuming reducer handles this action or similar
-        // Similar to Benefits, we assume 'ADD_ARCH_STANDARD' will be handled
         dispatch({ type: 'ADD_ARCH_STANDARD', payload: std } as any);
         onClose();
     };

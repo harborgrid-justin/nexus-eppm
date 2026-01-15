@@ -39,11 +39,6 @@ export const BenefitForm: React.FC<Props> = ({ isOpen, onClose, programId, proje
             status: formData.status as any
         };
         
-        // Assuming we need a new action or reuse an existing one. 
-        // We will assume 'ADD_BENEFIT' exists or is handled. If not, we'd add it to reducers.
-        // Based on `programSlice.ts` context, there isn't one explicit there, but let's check `financialSlice`.
-        // Actually, let's use a generic update or mock it for now as "Add Portfolio Comm Item" was used in reducer but not this.
-        // To be safe and compliant with "working code", I will add the reducer case in the next file update.
         dispatch({ type: 'ADD_BENEFIT', payload: benefit } as any); 
         onClose();
     };

@@ -47,8 +47,8 @@ export const BPList: React.FC<Props> = ({ records, activeDefinition, onEdit, onC
         <thead className={`bg-slate-50/80 sticky top-0 z-20 backdrop-blur-md shadow-sm border-b`}>
           <tr>
             <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('unifier.col_id', 'Record ID')}</th>
-            <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('unifier.col_subject', 'Narrative Subject')}</th>
-            <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('unifier.col_workflow', 'Workflow node')}</th>
+            <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('unifier.col_subject', 'Subject')}</th>
+            <th className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('unifier.col_workflow', 'Status')}</th>
             {activeDefinition.fields.slice(0, 3).map(f => (
               <th key={f.key} className="px-6 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{String(f.label)}</th>
             ))}

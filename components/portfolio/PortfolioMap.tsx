@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -81,4 +82,3 @@ export const PortfolioMap: React.FC = () => {
         </div>
     );
 };
-export default PortfolioMap;

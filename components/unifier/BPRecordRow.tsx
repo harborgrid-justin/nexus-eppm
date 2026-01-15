@@ -15,7 +15,7 @@ export const BPRecordRow: React.FC<Props> = ({ record, fields, onClick }) => {
   const renderCell = (val: any) => {
     if (val === null || val === undefined) return '-';
     if (typeof val === 'number') return val.toLocaleString();
-    if (typeof val === 'object') return '[Binary Object]';
+    if (typeof val === 'object') return '[Object]';
     return String(val);
   };
 

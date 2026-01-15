@@ -31,8 +31,9 @@ export const ExecutiveBriefing: React.FC = () => {
 
     const financialTrend = useMemo(() => {
         // Aggregate real spend data from project budgets and elapsed time
-        const totalBudget = state.projects.reduce((s, p) => s + p.budget, 0);
-        const totalSpent = state.projects.reduce((s, p) => s + p.spent, 0);
+        // Fix: Explicitly type accumulator and ensure values are treated as numbers for arithmetic operations
+        const totalBudget = state.projects.reduce((s: number, p) => s + (Number(p.budget) || 0), 0);
+        const totalSpent = state.projects.reduce((s: number, p) => s + (Number(p.spent) || 0), 0);
         
         // Generate a synthetic trend based on actual totals for visualization
         // In a real app, this would query a historical snapshots table
@@ -45,7 +46,7 @@ export const ExecutiveBriefing: React.FC = () => {
         for(let i=0; i<4; i++) {
             cumulativeBudget += (totalBudget / 4);
             // Simulate S-curve for actuals
-            const increment = (totalSpent / 4) * (i === 0 ? 0.5 : i === 1 ? 1.0 : i === 2 ? 1.5 : 1.0);
+            const increment = (totalSpent / 4) * (i === 0 ? 0.5 : i === 1 ? 1.0 : i === 2 ? 1.5 : i === 1.0);
             cumulativeActual += increment;
             
             trend.push({
