@@ -31,7 +31,7 @@ export const LocationList: React.FC<Props> = ({ onEdit }) => {
     return (
         <div className={`p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 ${theme.layout.gridGap} animate-nexus-in overflow-y-auto h-full scrollbar-thin`}>
             {locations.map(loc => (
-                <div key={loc.id} className={`${theme.components.card} ${theme.layout.cardPadding} hover:border-nexus-300 hover:shadow-xl transition-all group relative overflow-hidden`}>
+                <div key={loc.id} className={`${theme.components.card} ${theme.layout.cardPadding} hover:border-nexus-300 hover:shadow-xl transition-all group relative overflow-hidden bg-white border-slate-200`}>
                     <div className="absolute top-0 right-0 p-8 bg-nexus-500/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex justify-between items-start mb-10 relative z-10">
                         <div className={`p-4 ${theme.colors.background} rounded-2xl ${theme.colors.text.tertiary} group-hover:bg-nexus-50 group-hover:text-nexus-600 transition-colors shadow-inner`}>

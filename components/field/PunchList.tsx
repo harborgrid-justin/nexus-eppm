@@ -6,7 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import DataTable from '../common/DataTable';
-import { PunchItem, Column } from '../../types';
+import { PunchItem, Column } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 
 const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
@@ -31,12 +31,10 @@ const PunchList: React.FC<{ projectId: string }> = ({ projectId }) => {
         dispatch({ type: 'FIELD_UPDATE_PUNCH_ITEM', payload: { ...item, status: nextStatus } });
     };
 
-    // Optimization: Clipboard API for copying IDs
     const copyToClipboard = async (text: string) => {
         if (navigator.clipboard) {
             try {
                 await navigator.clipboard.writeText(text);
-                // In a real app, trigger a toast notification here
             } catch (err) {
                 console.error('Failed to copy', err);
             }

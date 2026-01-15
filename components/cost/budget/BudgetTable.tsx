@@ -20,9 +20,9 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
     };
 
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto h-full bg-white">
             <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
-                <thead className={`${theme.colors.background}/80 sticky top-0 z-10 backdrop-blur-sm`}>
+                <thead className={`${theme.colors.background} sticky top-0 z-10 shadow-sm`}>
                 <tr>
                     <th className={theme.components.table.header}>Category (CBS)</th>
                     <th className={`${theme.components.table.header} text-right`}>Planned</th>
@@ -32,14 +32,14 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
                     <th className={`${theme.components.table.header} text-right`}>Available</th>
                 </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-50">
+                <tbody className={`divide-y ${theme.colors.border.replace('border-', 'divide-')} bg-white`}>
                 {items.map(item => (
-                    <tr key={item.id} onClick={() => onSelectItem(item.id)} className={`hover:${theme.colors.background}/80 cursor-pointer`}>
-                        <td className="px-6 py-4 text-sm font-bold">{item.category}</td>
-                        <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(item.planned)}</td>
-                        <td className="px-6 py-4 text-right text-sm font-bold text-blue-600 bg-blue-50/20 font-mono">{formatCurrency(item.committed)}</td>
-                        <td className="px-6 py-4 text-right text-sm font-bold text-nexus-700 bg-nexus-50/20 font-mono">{formatCurrency(item.actual)}</td>
-                        <td className="px-6 py-4 text-right text-sm font-black font-mono">{formatCurrency(item.totalExposure)}</td>
+                    <tr key={item.id} onClick={() => onSelectItem(item.id)} className={`hover:${theme.colors.background} cursor-pointer transition-colors group`}>
+                        <td className="px-6 py-4 text-sm font-bold text-slate-800">{item.category}</td>
+                        <td className="px-6 py-4 text-right text-sm font-mono text-slate-600">{formatCurrency(item.planned)}</td>
+                        <td className="px-6 py-4 text-right text-sm font-bold text-blue-600 bg-blue-50/20 font-mono group-hover:bg-blue-50/40 transition-colors">{formatCurrency(item.committed)}</td>
+                        <td className="px-6 py-4 text-right text-sm font-bold text-nexus-700 bg-nexus-50/20 font-mono group-hover:bg-nexus-50/40 transition-colors">{formatCurrency(item.actual)}</td>
+                        <td className="px-6 py-4 text-right text-sm font-black font-mono text-slate-700">{formatCurrency(item.totalExposure)}</td>
                         <td className={`px-6 py-4 text-right text-sm font-bold font-mono ${item.remaining < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
                             {formatCurrency(item.remaining)}
                         </td>
@@ -49,10 +49,10 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({ items, onSelectItem })
                 <tfoot className="bg-slate-100 font-black border-t-2 border-slate-200 sticky bottom-0 z-10 shadow-inner">
                     <tr>
                         <td className="px-6 py-4 text-[10px] uppercase tracking-widest text-slate-500">Grand Total</td>
-                        <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(totals.planned)}</td>
+                        <td className="px-6 py-4 text-right text-sm font-mono text-slate-800">{formatCurrency(totals.planned)}</td>
                         <td className="px-6 py-4 text-right text-sm text-blue-700 font-mono bg-blue-50/20">{formatCurrency(totals.committed)}</td>
                         <td className="px-6 py-4 text-right text-sm text-nexus-700 font-mono bg-nexus-50/20">{formatCurrency(totals.actual)}</td>
-                        <td className="px-6 py-4 text-right text-sm font-mono">{formatCurrency(totals.exposure)}</td>
+                        <td className="px-6 py-4 text-right text-sm font-mono text-slate-800">{formatCurrency(totals.exposure)}</td>
                         <td className={`px-6 py-4 text-right text-sm font-mono ${totals.remaining < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(totals.remaining)}</td>
                     </tr>
                 </tfoot>

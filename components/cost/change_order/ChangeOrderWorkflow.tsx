@@ -1,11 +1,10 @@
 
 import React, { useMemo } from 'react';
-import { ChangeOrder, WorkflowDefinition } from '../../../types/index';
-import { CheckCircle, Clock, GitPullRequest, ShieldCheck, History, MoreHorizontal } from 'lucide-react';
+import { ChangeOrder } from '../../../types/index';
+import { CheckCircle, GitPullRequest, ShieldCheck, History, Clock } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useData } from '../../../context/DataContext';
 import { Badge } from '../../ui/Badge';
-import { EmptyGrid } from '../../common/EmptyGrid';
 
 interface ChangeOrderWorkflowProps {
     co: ChangeOrder;
@@ -15,6 +14,7 @@ export const ChangeOrderWorkflow: React.FC<ChangeOrderWorkflowProps> = ({ co }) 
     const theme = useTheme();
     const { state } = useData();
 
+    // Dynamically fetch the relevant workflow based on type
     const workflow = useMemo(() => {
         return state.workflows.find(w => w.trigger === 'ChangeOrder' && w.status === 'Active') || state.workflows[0];
     }, [state.workflows]);
@@ -27,13 +27,15 @@ export const ChangeOrderWorkflow: React.FC<ChangeOrderWorkflowProps> = ({ co }) 
                 {/* 1. Sequential Approval Visualizer */}
                 <div className={`${theme.components.card} p-10 rounded-[3rem] shadow-sm flex flex-col bg-white border-slate-100 relative group`}>
                     <div className="absolute top-0 right-0 p-24 bg-nexus-500/5 rounded-full blur-[100px] pointer-events-none"></div>
-                    <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-[0.2em] mb-12 flex items-center gap-3 border-b border-slate-50 pb-5 relative z-10">
+                    <h3 className={`font-black ${theme.colors.text.primary} text-[10px] uppercase tracking-[0.2em] mb-12 flex items-center gap-3 border-b ${theme.colors.border} pb-5 relative z-10`}>
                         <GitPullRequest size={18} className="text-nexus-600"/> Authorization Hierarchy Path
                     </h3>
                     <div className="space-y-12 flex-1 relative pl-2 z-10">
                         {workflow ? workflow.steps.map((step, i) => {
+                            // Logic to determine if step is complete based on order status and index
+                            // This is a simplified linear interpretation
                             const isApproved = co.status === 'Approved' || (i === 0 && co.status !== 'Draft');
-                            const isCurrent = (co.status === 'Pending Approval' && i === 1);
+                            const isCurrent = (co.status === 'Pending Approval' && i === 1) || (co.status === 'Draft' && i === 0);
                             
                             return (
                                 <div key={step.id || i} className="flex items-start gap-8 relative">
@@ -69,7 +71,7 @@ export const ChangeOrderWorkflow: React.FC<ChangeOrderWorkflowProps> = ({ co }) 
 
                 {/* 2. Audit Trail Log */}
                 <div className={`${theme.components.card} p-10 rounded-[3rem] shadow-sm flex flex-col bg-slate-50/30 border-slate-100 group`}>
-                    <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-[0.2em] mb-12 flex items-center gap-3 border-b border-slate-50 pb-5">
+                    <h3 className={`font-black ${theme.colors.text.primary} text-[10px] uppercase tracking-[0.2em] mb-12 flex items-center gap-3 border-b ${theme.colors.border} pb-5`}>
                         <History size={18} className="text-slate-400"/> Permanent Transaction Audit
                     </h3>
                     <div className="flex-1 overflow-y-auto space-y-6 pr-4 scrollbar-thin scrollbar-thumb-slate-200">

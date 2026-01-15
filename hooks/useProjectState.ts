@@ -26,7 +26,9 @@ export const useProjectState = (projectId: string | null): ProjectWorkspaceData 
         state.nonConformanceReports, 
         state.communicationLogs, 
         state.resources, 
-        state.stakeholders
+        state.stakeholders,
+        state.activityCodes,
+        state.userDefinedFields
     ]);
 
     return projectData;

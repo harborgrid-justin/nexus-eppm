@@ -11,6 +11,18 @@ export const financialReducer = (state: DataState, action: Action): DataState =>
         return { ...state, budgetItems: state.budgetItems.map(b => b.id === action.payload.id ? action.payload : b) };
     case 'DELETE_BUDGET_ITEM':
         return { ...state, budgetItems: state.budgetItems.filter(b => b.id !== action.payload) };
+    
+    case 'ADD_PROJECT_BUDGET_LOG': {
+         const { projectId, logItem } = action.payload;
+         return {
+             ...state,
+             projects: state.projects.map(p => 
+                 p.id === projectId 
+                 ? { ...p, budgetLog: [...(p.budgetLog || []), logItem] }
+                 : p
+             )
+         };
+    }
 
     // Expenses
     case 'ADD_EXPENSE':
@@ -87,6 +99,37 @@ export const financialReducer = (state: DataState, action: Action): DataState =>
         });
 
         return { ...state, budgetItems: updatedBudgetItems, projects: updatedProjects };
+    }
+    
+    case 'ADD_PROJECT_FUNDING': {
+        const { projectId, funding } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => 
+                p.id === projectId 
+                ? { ...p, funding: [...(p.funding || []), funding] }
+                : p
+            )
+        };
+    }
+    
+    case 'COST_ESTIMATE_ADD_OR_UPDATE': {
+        const { projectId, estimate } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                const existing = p.costEstimates || [];
+                const idx = existing.findIndex(e => e.id === estimate.id);
+                let newEstimates;
+                if (idx >= 0) {
+                    newEstimates = existing.map((e, i) => i === idx ? estimate : e);
+                } else {
+                    newEstimates = [...existing, estimate];
+                }
+                return { ...p, costEstimates: newEstimates };
+            })
+        };
     }
 
     default:

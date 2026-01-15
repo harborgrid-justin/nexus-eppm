@@ -31,7 +31,7 @@ export const NetworkPolicyPanel: React.FC<Props> = ({ policies, setPolicies }) =
     };
 
     return (
-        <div className={`${theme.components.card} p-8 rounded-[2.5rem] space-y-8 flex flex-col h-full hover:border-nexus-300 transition-all bg-white shadow-sm relative overflow-hidden group`}>
+        <div className={`${theme.components.card} p-8 rounded-[2.5rem] space-y-8 flex flex-col h-full hover:border-nexus-300 transition-all bg-white shadow-sm relative overflow-hidden group border border-slate-200`}>
             <div className="absolute top-0 right-0 p-8 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-colors"></div>
             <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-400 flex items-center gap-3 relative z-10 border-b border-slate-50 pb-4">
                 <Globe size={16} className="text-purple-600"/> Network Isolation (Firewall)

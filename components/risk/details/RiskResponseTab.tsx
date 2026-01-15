@@ -38,8 +38,8 @@ export const RiskResponseTab: React.FC<RiskResponseTabProps> = ({ risk, setRisk,
       
       <div className="space-y-3">
         {risk.responseActions?.map((action, idx) => (
-          <div key={action.id} className={`flex items-center gap-3 p-3 border rounded-lg transition-all ${'bg-white border-slate-200'}`}>
-             <div className="p-2 bg-slate-100 rounded-full border border-slate-200 text-slate-400">
+          <div key={action.id} className={`flex items-center gap-3 p-3 border rounded-lg transition-all ${theme.colors.background} ${theme.colors.border} hover:shadow-sm`}>
+             <div className="p-2 bg-white rounded-full border border-slate-200 text-slate-400 shadow-sm">
                <Shield size={16}/>
              </div>
              <div className="flex-1 space-y-2">
@@ -51,11 +51,12 @@ export const RiskResponseTab: React.FC<RiskResponseTabProps> = ({ risk, setRisk,
                     updated[idx].description = e.target.value;
                     setRisk({ ...risk, responseActions: updated });
                   }}
-                  className="w-full bg-transparent border-b border-transparent focus:border-nexus-500 outline-none font-medium text-sm"
+                  className="w-full bg-transparent border-b border-transparent focus:border-nexus-500 outline-none font-medium text-sm transition-all"
+                  placeholder="Describe action..."
                 />
-                <div className="flex gap-4 text-xs">
-                   <div className="flex items-center gap-1">
-                      <span className="text-slate-500">Owner:</span>
+                <div className="flex gap-6 text-xs">
+                   <div className="flex items-center gap-2">
+                      <span className="text-slate-500 font-bold uppercase tracking-wide">Owner:</span>
                       <input 
                         disabled={isReadOnly}
                         value={action.ownerId}
@@ -64,11 +65,11 @@ export const RiskResponseTab: React.FC<RiskResponseTabProps> = ({ risk, setRisk,
                             updated[idx].ownerId = e.target.value;
                             setRisk({ ...risk, responseActions: updated });
                         }}
-                        className="bg-transparent border-b border-slate-300 w-24"
+                        className="bg-transparent border-b border-slate-300 w-24 text-slate-800 font-medium focus:border-nexus-500 outline-none"
                       />
                    </div>
-                   <div className="flex items-center gap-1">
-                      <span className="text-slate-500">Due:</span>
+                   <div className="flex items-center gap-2">
+                      <span className="text-slate-500 font-bold uppercase tracking-wide">Due:</span>
                       <input 
                         type="date"
                         disabled={isReadOnly}
@@ -78,20 +79,20 @@ export const RiskResponseTab: React.FC<RiskResponseTabProps> = ({ risk, setRisk,
                             updated[idx].dueDate = e.target.value;
                             setRisk({ ...risk, responseActions: updated });
                         }}
-                        className="bg-transparent border-b border-slate-300"
+                        className="bg-transparent border-b border-slate-300 text-slate-800 font-medium focus:border-nexus-500 outline-none"
                       />
                    </div>
                 </div>
              </div>
              {!isReadOnly && (
-                <button onClick={() => removeAction(action.id)} className="text-slate-400 hover:text-red-500">
+                <button onClick={() => removeAction(action.id)} className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 rounded-full transition-all">
                     <Trash2 size={16}/>
                 </button>
              )}
           </div>
         ))}
         {(!risk.responseActions || risk.responseActions.length === 0) && (
-            <div className="text-center p-8 text-slate-400 italic text-sm">No response actions defined.</div>
+            <div className="text-center p-8 text-slate-400 italic text-sm nexus-empty-pattern rounded-xl border border-slate-200">No response actions defined.</div>
         )}
       </div>
     </div>

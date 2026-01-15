@@ -14,6 +14,20 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             : p
         )
       };
+    case 'PROJECT_CLOSE':
+        return {
+            ...state,
+            projects: state.projects.map(p => 
+                p.id === action.payload 
+                ? { ...p, status: 'Closed' }
+                : p
+            )
+        };
+    case 'PROJECT_IMPORT':
+        return {
+            ...state,
+            projects: [...state.projects, ...action.payload]
+        };
     case 'PROJECT_CREATE_REFLECTION': {
         const source = state.projects.find(p => p.id === action.payload.sourceProjectId);
         if (!source) return state;
@@ -21,10 +35,27 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             ...JSON.parse(JSON.stringify(source)), 
             id: generateId('REFL'), 
             name: `Reflection: ${source.name}`,
+            code: `${source.code}-SIM`,
             isReflection: true,
             sourceProjectId: source.id 
         };
         return { ...state, projects: [...state.projects, reflection] };
+    }
+    case 'PROJECT_MERGE_REFLECTION': {
+        const reflection = state.projects.find(p => p.id === action.payload.reflectionId);
+        if (!reflection || !reflection.sourceProjectId) return state;
+        
+        // Merge logic would go here (complex diffing). For MVP, we just update the source status or log.
+        // Or simply replace the source project data with reflection data (excluding ID)
+        
+        const mergedProject = { ...reflection, id: reflection.sourceProjectId, isReflection: false, sourceProjectId: undefined, name: reflection.name.replace('Reflection: ', '') };
+        
+        return {
+            ...state,
+            projects: state.projects.map(p => 
+                p.id === reflection.sourceProjectId ? mergedProject : p
+            ).filter(p => p.id !== action.payload.reflectionId) // Remove reflection after merge
+        };
     }
     case 'TASK_UPDATE': {
         const { projectId, task } = action.payload;
@@ -33,10 +64,19 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             projects: state.projects.map(p => {
                 if (p.id !== projectId) return p;
                 if (Array.isArray(task)) return { ...p, tasks: task };
-                return { 
-                    ...p, 
-                    tasks: p.tasks.map(t => t.id === task.id ? task : t) 
-                };
+                // Check if task exists, if not add it
+                const exists = p.tasks.some(t => t.id === task.id);
+                if (exists) {
+                    return { 
+                        ...p, 
+                        tasks: p.tasks.map(t => t.id === task.id ? task : t) 
+                    };
+                } else {
+                     return { 
+                        ...p, 
+                        tasks: [...p.tasks, task] 
+                    };
+                }
             })
         };
     }
@@ -99,6 +139,32 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
                     }, {} as any)
                 };
                 return { ...p, baselines: [...(p.baselines || []), baseline] };
+            })
+        };
+    }
+    case 'BASELINE_UPDATE': {
+         const { projectId, baselineId, name, type } = action.payload;
+         return {
+             ...state,
+             projects: state.projects.map(p => {
+                 if (p.id !== projectId) return p;
+                 return {
+                     ...p,
+                     baselines: (p.baselines || []).map(b => b.id === baselineId ? { ...b, name, type: type as any } : b)
+                 };
+             })
+         };
+    }
+    case 'BASELINE_DELETE': {
+        const { projectId, baselineId } = action.payload;
+        return {
+            ...state,
+            projects: state.projects.map(p => {
+                if (p.id !== projectId) return p;
+                return {
+                    ...p,
+                    baselines: (p.baselines || []).filter(b => b.id !== baselineId)
+                };
             })
         };
     }

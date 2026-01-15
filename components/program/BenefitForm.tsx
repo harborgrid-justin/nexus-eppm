@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Benefit, Project } from '../../types';
+import { Benefit, Project } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
+import { Star } from 'lucide-react';
 
 interface Props {
     isOpen: boolean;
@@ -46,27 +47,38 @@ export const BenefitForm: React.FC<Props> = ({ isOpen, onClose, programId, proje
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Define Benefit" footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={handleSave}>Save</Button></>}>
-            <div className="space-y-4">
-                <Input label="Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+        <Modal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={<span className="flex items-center gap-2"><Star className="text-nexus-600"/> Define Strategic Benefit</span>}
+            footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={handleSave}>Log Benefit</Button></>}
+        >
+            <div className="space-y-6 animate-nexus-in">
+                <Input label="Benefit Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} placeholder="e.g. 20% Reduction in OpEx" />
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className={`${theme.typography.label} block mb-1`}>Type</label>
-                        <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as any})}>
+                        <label className={`${theme.typography.label} block mb-1`}>Value Type</label>
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as any})}>
                             <option>Financial</option><option>Non-Financial</option>
                         </select>
                     </div>
                     <div>
-                        <label className={`${theme.typography.label} block mb-1`}>Target Value</label>
+                        <label className={`${theme.typography.label} block mb-1`}>Target Quantity</label>
                         <Input type="number" value={formData.value} onChange={e => setFormData({...formData, value: parseFloat(e.target.value)})} />
                     </div>
                 </div>
-                <div>
-                     <label className={`${theme.typography.label} block mb-1`}>Linked Component</label>
-                     <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.componentId} onChange={e => setFormData({...formData, componentId: e.target.value})}>
-                         <option value={programId}>Program Level</option>
-                         {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                     </select>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                         <label className={`${theme.typography.label} block mb-1`}>Linked Component</label>
+                         <select className={`w-full p-2.5 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.componentId} onChange={e => setFormData({...formData, componentId: e.target.value})}>
+                             <option value={programId}>Program Level</option>
+                             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                         </select>
+                    </div>
+                    <div>
+                        <label className={`${theme.typography.label} block mb-1`}>Metric Unit</label>
+                        <Input value={formData.metric} onChange={e => setFormData({...formData, metric: e.target.value})} placeholder="USD, Hours, %" disabled={formData.type === 'Financial'} />
+                    </div>
                 </div>
             </div>
         </Modal>

@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { TaskStatus } from '../types/index';
@@ -19,8 +20,8 @@ export const usePortfolioState = () => {
       critical: projects.filter(p => p.health === 'Critical').length,
     };
 
-    const totalTasks = projects.reduce((acc, p) => acc + p.tasks.length, 0);
-    const totalDelayedTasks = projects.reduce((acc, p) => acc + p.tasks.filter(t => t.status === TaskStatus.DELAYED).length, 0);
+    const totalTasks = projects.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
+    const totalDelayedTasks = projects.reduce((acc, p) => acc + (p.tasks?.filter(t => t.status === TaskStatus.DELAYED).length || 0), 0);
 
     // Calculate portfolio-wide SPI
     const activeProjectsWithMetrics = projects
@@ -48,9 +49,9 @@ export const usePortfolioState = () => {
   }, [projects, issues, budgetItems]);
   
   const healthDataForChart = useMemo(() => [
-    { name: 'Good', value: summary.healthCounts.good },
-    { name: 'Warning', value: summary.healthCounts.warning },
-    { name: 'Critical', value: summary.healthCounts.critical },
+    { name: 'Good', value: summary.healthCounts.good, color: '#10b981' },
+    { name: 'Warning', value: summary.healthCounts.warning, color: '#f59e0b' },
+    { name: 'Critical', value: summary.healthCounts.critical, color: '#ef4444' },
   ], [summary.healthCounts]);
   
   const budgetDataForChart = useMemo(() => projects.map(p => ({

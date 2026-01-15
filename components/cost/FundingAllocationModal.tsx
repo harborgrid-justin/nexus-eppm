@@ -4,6 +4,8 @@ import { ProjectFunding, FundingSource } from '../../types';
 import { Save, DollarSign, AlertCircle } from 'lucide-react';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
+import { useTheme } from '../../context/ThemeContext';
+import { generateId } from '../../utils/formatters';
 
 interface FundingAllocationModalProps {
   projectId: string;
@@ -13,6 +15,7 @@ interface FundingAllocationModalProps {
 }
 
 const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ projectId, sources, onClose, onSave }) => {
+  const theme = useTheme();
   const [formData, setFormData] = useState<Partial<ProjectFunding>>({
     projectId,
     status: 'Planned',
@@ -28,7 +31,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
     
     // Auto-generate the first transaction ledger entry
     const initialTransaction = {
-        id: `TX-${Date.now()}`,
+        id: generateId('TX'),
         date: new Date().toISOString().split('T')[0],
         type: 'Allocation' as const,
         amount: formData.amount,
@@ -38,7 +41,7 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
 
     const finalFunding = { 
         ...formData, 
-        id: `PF-${Date.now()}`, 
+        id: generateId('PF'), 
         transactions: [initialTransaction] 
     } as ProjectFunding;
 
@@ -65,9 +68,9 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
     >
        <div className="space-y-6">
           <div>
-             <label className="block text-sm font-bold text-slate-700 mb-1">Funding Source</label>
+             <label className={`${theme.typography.label} block mb-1`}>Funding Source</label>
              <select 
-                 className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                 className={`w-full border ${theme.colors.border} rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                  onChange={e => setFormData({...formData, fundingSourceId: e.target.value})}
              >
                  <option value="">-- Select Source --</option>
@@ -77,9 +80,9 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
 
           <div className="grid grid-cols-2 gap-4">
               <div>
-                 <label className="block text-sm font-bold text-slate-700 mb-1">Fiscal Year</label>
+                 <label className={`${theme.typography.label} block mb-1`}>Fiscal Year</label>
                  <select 
-                     className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white"
+                     className={`w-full border ${theme.colors.border} rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                      value={formData.fiscalYear}
                      onChange={e => setFormData({...formData, fiscalYear: e.target.value})}
                  >
@@ -90,9 +93,9 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
                  </select>
               </div>
               <div>
-                 <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
+                 <label className={`${theme.typography.label} block mb-1`}>Status</label>
                  <select 
-                     className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white"
+                     className={`w-full border ${theme.colors.border} rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                      value={formData.status}
                      onChange={e => setFormData({...formData, status: e.target.value as any})}
                  >
@@ -104,12 +107,12 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
           </div>
 
           <div>
-             <label className="block text-sm font-bold text-slate-700 mb-1">Amount</label>
+             <label className={`${theme.typography.label} block mb-1`}>Amount</label>
              <div className="relative">
                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
                  <input 
                      type="number" 
-                     className="w-full border border-slate-300 rounded-lg pl-8 pr-4 py-3 text-lg font-mono font-bold focus:ring-2 focus:ring-nexus-500"
+                     className={`w-full border ${theme.colors.border} rounded-lg pl-8 pr-4 py-3 text-lg font-mono font-bold focus:ring-2 focus:ring-nexus-500 outline-none transition-all`}
                      placeholder="0.00"
                      onChange={e => setFormData({...formData, amount: parseFloat(e.target.value)})}
                  />
@@ -117,9 +120,9 @@ const FundingAllocationModal: React.FC<FundingAllocationModalProps> = ({ project
           </div>
 
           <div>
-             <label className="block text-sm font-bold text-slate-700 mb-1">Restrictions / Notes</label>
+             <label className={`${theme.typography.label} block mb-1`}>Restrictions / Notes</label>
              <textarea 
-                 className="w-full border border-slate-300 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-nexus-500 resize-none"
+                 className={`w-full border ${theme.colors.border} rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-nexus-500 resize-none outline-none`}
                  placeholder="e.g., Cannot be used for software licensing..."
                  value={transactionNote}
                  onChange={e => setTransactionNote(e.target.value)}

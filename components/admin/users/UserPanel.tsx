@@ -55,21 +55,21 @@ export const UserPanel: React.FC<UserPanelProps> = ({ isOpen, onClose, onSave, e
                 <Button onClick={handleSave} icon={Save}>Save User</Button>
             </>}
         >
-            <div className="space-y-6">
+            <div className="space-y-6 animate-nexus-in">
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Full Name</label>
-                    <Input value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    <Input value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Sarah Connor" />
                 </div>
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Email</label>
-                    <Input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} />
+                    <Input type="email" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="email@company.com" />
                 </div>
                 <div>
                     <label className={theme.typography.label + " block mb-1"}>Role</label>
                     <select
                         value={formData.role || 'Viewer'}
                         onChange={e => setFormData({...formData, role: e.target.value as Role})}
-                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm ${theme.colors.surface} ${theme.colors.text.primary} focus:ring-2 focus:ring-nexus-500 outline-none`}
+                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white font-medium focus:ring-2 focus:ring-nexus-500 outline-none`}
                     >
                         <option>Viewer</option>
                         <option>Team Member</option>
@@ -80,7 +80,7 @@ export const UserPanel: React.FC<UserPanelProps> = ({ isOpen, onClose, onSave, e
                 </div>
                  <div>
                     <label className={theme.typography.label + " block mb-1"}>Department</label>
-                    <Input value={formData.department || ''} onChange={e => setFormData({...formData, department: e.target.value})} />
+                    <Input value={formData.department || ''} onChange={e => setFormData({...formData, department: e.target.value})} placeholder="e.g. Engineering" />
                 </div>
             </div>
         </SidePanel>

@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useDeferredValue } from 'react';
 import { Issue, Column } from '../types/index';
 import { Plus, FileWarning, Lock, Search, Edit2, Save } from 'lucide-react';
@@ -20,7 +21,7 @@ const IssueLog: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
   const { canEditProject } = usePermissions();
-  const { dispatch, state } = useData();
+  const { dispatch } = useData();
   
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingIssue, setEditingIssue] = useState<Partial<Issue> | null>(null);
@@ -36,7 +37,7 @@ const IssueLog: React.FC = () => {
   }, [issues, deferredSearch]);
 
   const handleOpenPanel = (issue?: Issue) => {
-      setEditingIssue(issue || { priority: 'Medium', status: 'Open', description: '' });
+      setEditingIssue(issue ? { ...issue } : { priority: 'Medium', status: 'Open', description: '' });
       setIsPanelOpen(true);
   };
 
@@ -69,7 +70,7 @@ const IssueLog: React.FC = () => {
       { key: 'actions', header: '', width: 'w-24', align: 'right', render: (i) => (
           <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               {canEditProject() && (
-                  <button onClick={(e) => { e.stopPropagation(); handleOpenPanel(i); }} className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-nexus-600"><Edit2 size={14}/></button>
+                  <button onClick={(e) => { e.stopPropagation(); handleOpenPanel(i); }} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-nexus-600 transition-colors"><Edit2 size={14}/></button>
               )}
           </div>
       )}
@@ -88,8 +89,8 @@ const IssueLog: React.FC = () => {
         )}
       />
       
-      <div className={`mt-6 flex-1 flex flex-col border ${theme.colors.border} rounded-xl overflow-hidden bg-white shadow-sm`}>
-        <div className={`p-4 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center bg-slate-50/50 gap-3`}>
+      <div className={`mt-8 flex-1 flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-2xl overflow-hidden shadow-sm`}>
+        <div className={`p-5 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center bg-slate-50/50 gap-3`}>
             <Input isSearch placeholder={t('common.filter', 'Filter registry...')} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:w-72" />
         </div>
         
@@ -110,10 +111,37 @@ const IssueLog: React.FC = () => {
 
       <SidePanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} title={editingIssue?.id ? t('issue.edit', 'Edit Issue') : t('issue.new', 'Log New Issue')}
             footer={<><Button variant="secondary" onClick={() => setIsPanelOpen(false)}>{t('common.cancel', 'Cancel')}</Button><Button onClick={() => handleSaveIssue(editingIssue!)} icon={Save}>{t('common.save', 'Save')}</Button></>}>
-            <div className="space-y-6">
+            <div className="space-y-6 animate-nexus-in">
                 <div>
-                    <label className={`${theme.typography.label} mb-1 block`}>{t('issue.desc', 'Description')}</label>
-                    <textarea className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 outline-none resize-none`} value={editingIssue?.description || ''} onChange={e => setEditingIssue({...editingIssue!, description: e.target.value})} />
+                    <label className={theme.typography.label + " block mb-1"}>{t('issue.desc', 'Description')}</label>
+                    <textarea 
+                        className={`w-full p-4 border ${theme.colors.border} rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none transition-all shadow-inner`}
+                        value={editingIssue?.description || ''} 
+                        onChange={e => setEditingIssue({...editingIssue!, description: e.target.value})} 
+                        placeholder="Describe the blocker..."
+                    />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <label className={theme.typography.label + " block mb-1"}>Priority</label>
+                        <select 
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
+                            value={editingIssue?.priority}
+                            onChange={e => setEditingIssue({...editingIssue!, priority: e.target.value as any})}
+                        >
+                            <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className={theme.typography.label + " block mb-1"}>Status</label>
+                         <select 
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
+                            value={editingIssue?.status}
+                            onChange={e => setEditingIssue({...editingIssue!, status: e.target.value})}
+                        >
+                            <option>Open</option><option>In Progress</option><option>Resolved</option><option>Closed</option>
+                        </select>
+                    </div>
                 </div>
             </div>
       </SidePanel>

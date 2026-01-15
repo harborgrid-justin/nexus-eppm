@@ -14,6 +14,7 @@ export const useRiskRegisterLogic = () => {
   const enterpriseRisks = useMemo(() => {
     return state.risks.map(risk => {
         const project = state.projects.find(p => p.id === risk.projectId);
+        // Default probability factor if not set
         const probFactor = [0, 0.1, 0.3, 0.5, 0.7, 0.9][risk.probabilityValue || 3];
         return { 
             ...risk, 

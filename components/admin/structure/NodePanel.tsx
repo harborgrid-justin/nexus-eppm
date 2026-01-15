@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { EPSNode, OBSNode, Resource } from '../../../types';
+import { EPSNode, OBSNode, Resource } from '../../../types/index';
 import { SidePanel } from '../../ui/SidePanel';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
@@ -31,22 +31,22 @@ export const NodePanel: React.FC<NodePanelProps> = ({ isOpen, onClose, editingNo
             title={formData.id ? `Edit ${type} Node` : `Add ${type} Node`}
             footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button onClick={() => onSave(formData)} icon={Save}>Save Node</Button></>}
         >
-            <div className="space-y-6">
+            <div className="space-y-6 animate-nexus-in">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                    <label className={theme.typography.label + " block mb-1"}>Name</label>
                     <Input value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Infrastructure Division" />
                 </div>
                 {type === 'EPS' && (
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Code</label>
+                        <label className={theme.typography.label + " block mb-1"}>Code</label>
                         <Input value={(formData as EPSNode).code || ''} onChange={e => setFormData({...formData, code: e.target.value})} placeholder="e.g. INFRA" />
                     </div>
                 )}
                 {type === 'OBS' && (
                         <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Responsible Manager</label>
+                        <label className={theme.typography.label + " block mb-1"}>Responsible Manager</label>
                         <select 
-                            className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500`}
+                            className={`w-full p-2 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={(formData as OBSNode).managerId || ''}
                             onChange={e => setFormData({...formData, managerId: e.target.value})}
                         >

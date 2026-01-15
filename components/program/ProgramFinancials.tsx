@@ -10,7 +10,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { ProgramBudgetAllocation } from '../../types';
+import { ProgramBudgetAllocation } from '../../types/index';
 import { EmptyGrid } from '../common/EmptyGrid';
 
 interface ProgramFinancialsProps {

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sun, CloudRain, Cloud, Wind, Thermometer, RefreshCw } from 'lucide-react';
 import { Button } from '../../ui/Button';
@@ -20,7 +21,7 @@ export const WeatherWidget: React.FC<WeatherWidgetProps> = ({ weather, onAdjust 
     };
 
     return (
-        <div className={`${theme.components.card} p-8 rounded-[2.5rem] flex flex-col justify-between shadow-sm relative overflow-hidden group`}>
+        <div className={`${theme.components.card} p-8 rounded-[2.5rem] flex flex-col justify-between shadow-sm relative overflow-hidden group bg-white border-slate-200`}>
             <div className="absolute top-0 right-0 p-8 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
             <div className="flex justify-between items-start mb-6 z-10 relative">
                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-b border-slate-50 pb-2">

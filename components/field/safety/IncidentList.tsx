@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SafetyIncident } from '../../../types/index';
 import { useTheme } from '../../../context/ThemeContext';

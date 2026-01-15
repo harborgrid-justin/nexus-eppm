@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
-import { EPSNode, OBSNode } from '../../../types';
+import { EPSNode, OBSNode } from '../../../types/index';
 import { ChevronDown, ChevronRight, Folder, Edit2, Plus, Trash2, Building } from 'lucide-react';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface StructureTreeProps {
     nodes: (EPSNode | OBSNode)[];
@@ -23,11 +24,12 @@ const TreeNode: React.FC<{
     const [isExpanded, setIsExpanded] = useState(true);
     const children = allNodes.filter(n => n.parentId === node.id);
     const hasChildren = children.length > 0;
+    const theme = useTheme();
 
     return (
         <div className="select-none animate-nexus-in">
             <div 
-                className="flex items-center gap-3 p-3 hover:bg-slate-50 border-b border-slate-100 group transition-colors cursor-pointer"
+                className={`flex items-center gap-3 p-3 hover:bg-slate-50 border-b ${theme.colors.border} group transition-colors cursor-pointer`}
                 style={{ paddingLeft: `${level * 24 + 12}px` }} 
                 onClick={() => setIsExpanded(!isExpanded)}
             >

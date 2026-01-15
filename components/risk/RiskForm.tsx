@@ -6,9 +6,10 @@ import { useToast } from '../../context/ToastContext';
 import { SidePanel } from '../ui/SidePanel';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters';
-import { AlertTriangle, DollarSign, Calendar, Shield, Zap, Sparkles, Loader2, Save, X } from 'lucide-react';
+import { AlertTriangle, DollarSign, Sparkles, Loader2, Save, Zap } from 'lucide-react';
 import { suggestRisks } from '../../services/geminiService';
 import { useTheme } from '../../context/ThemeContext';
+import { generateId } from '../../utils/formatters';
 
 interface RiskFormProps {
   isOpen: boolean;
@@ -120,7 +121,7 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
     await new Promise(resolve => setTimeout(resolve, 600));
 
     const risk: Risk = {
-        id: existingRisk?.id || `RISK-${Date.now()}`,
+        id: existingRisk?.id || generateId('RISK'),
         projectId,
         ownerId: formData.ownerId || 'Unassigned',
         description: formData.description,
@@ -160,11 +161,11 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             </>
         }
     >
-        <div className="space-y-6">
-            <div className="space-y-4">
+        <div className="space-y-6 animate-nexus-in">
+            <div className="space-y-6">
                 <div>
                     <div className="flex justify-between items-center mb-1">
-                         <label className="block text-sm font-bold text-slate-700">Description <span className="text-red-500">*</span></label>
+                         <label className={theme.typography.label}>Description <span className="text-red-500">*</span></label>
                          {!existingRisk && (
                              <button onClick={handleAiSuggest} className="text-xs text-purple-600 font-bold flex items-center gap-1 hover:text-purple-800 disabled:opacity-50" disabled={isSuggesting}>
                                  {isSuggesting ? <Loader2 size={12} className="animate-spin"/> : <Sparkles size={12}/>} AI Suggest
@@ -172,17 +173,18 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                          )}
                     </div>
                     <textarea 
-                        className="w-full p-3 border border-slate-300 rounded-xl text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none shadow-sm"
+                        className={`w-full p-4 border ${theme.colors.border} rounded-2xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none shadow-sm bg-slate-50 focus:bg-white transition-all`}
                         value={formData.description}
                         onChange={e => setFormData({...formData, description: e.target.value})}
                         autoFocus
+                        placeholder="Detailed narrative of the potential risk event..."
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">RBS Category</label>
+                        <label className={theme.typography.label + " block mb-1"}>RBS Category</label>
                         <select 
-                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={formData.category}
                             onChange={e => setFormData({...formData, category: e.target.value})}
                         >
@@ -190,9 +192,9 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Owner</label>
+                        <label className={theme.typography.label + " block mb-1"}>Owner</label>
                         <select 
-                            className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={formData.ownerId}
                             onChange={e => setFormData({...formData, ownerId: e.target.value})}
                         >
@@ -203,9 +205,9 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
                 </div>
                 
                 <div>
-                     <label className="block text-sm font-bold text-slate-700 mb-1">Mitigation Plan</label>
+                     <label className={theme.typography.label + " block mb-1"}>Mitigation Plan</label>
                      <textarea 
-                        className="w-full p-3 border border-slate-300 rounded-xl text-sm h-20 resize-none focus:ring-2 focus:ring-nexus-500 shadow-sm"
+                        className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm h-20 resize-none focus:ring-2 focus:ring-nexus-500 shadow-sm outline-none`}
                         value={formData.mitigationPlan}
                         onChange={e => setFormData({...formData, mitigationPlan: e.target.value})}
                         placeholder="Strategy to reduce impact or probability..."
@@ -214,49 +216,49 @@ export const RiskForm: React.FC<RiskFormProps> = ({ isOpen, onClose, onSave, pro
             </div>
 
             <div className="space-y-6">
-                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2">
                         <AlertTriangle size={16} className="text-orange-500"/> Qualitative Analysis (5x5)
                     </h4>
                     <div className="grid grid-cols-2 gap-8">
                         <div>
-                            <label className="text-xs text-slate-500 uppercase font-bold flex justify-between mb-2">Probability <span>{formData.probabilityValue}</span></label>
-                            <input type="range" min="1" max="5" value={formData.probabilityValue} onChange={e => setFormData({...formData, probabilityValue: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"/>
+                            <label className="text-[10px] text-slate-500 uppercase font-black tracking-widest flex justify-between mb-2">Probability <span>{formData.probabilityValue}</span></label>
+                            <input type="range" min="1" max="5" value={formData.probabilityValue} onChange={e => setFormData({...formData, probabilityValue: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 shadow-inner"/>
                         </div>
                         <div>
-                            <label className="text-xs text-slate-500 uppercase font-bold flex justify-between mb-2">Impact <span>{formData.impactValue}</span></label>
-                            <input type="range" min="1" max="5" value={formData.impactValue} onChange={e => setFormData({...formData, impactValue: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600"/>
+                            <label className="text-[10px] text-slate-500 uppercase font-black tracking-widest flex justify-between mb-2">Impact <span>{formData.impactValue}</span></label>
+                            <input type="range" min="1" max="5" value={formData.impactValue} onChange={e => setFormData({...formData, impactValue: parseInt(e.target.value)})} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600 shadow-inner"/>
                         </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between items-center">
+                    <div className="mt-6 pt-4 border-t border-slate-200 flex justify-between items-center">
                         <span className="text-sm font-bold text-slate-600">Calculated Score</span>
-                        <div className={`text-xl font-black ${currentScore >= 15 ? 'text-red-600' : currentScore >= 8 ? 'text-yellow-600' : 'text-green-600'}`}>
-                            {currentScore} <span className="text-xs font-medium text-slate-400 ml-1">/ 25</span>
+                        <div className={`text-2xl font-black ${currentScore >= 15 ? 'text-red-600' : currentScore >= 8 ? 'text-yellow-600' : 'text-green-600'}`}>
+                            {currentScore} <span className="text-xs font-bold text-slate-400 ml-1">/ 25</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <DollarSign size={16} className="text-green-600"/> Financial Exposure
                     </h4>
-                    <div className="mb-3">
-                        <label className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-wider">Potential Cost Impact</label>
+                    <div className="mb-4">
+                        <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-widest">Potential Cost Impact</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                            <input type="number" className="w-full pl-8 p-2.5 border border-slate-300 rounded-lg text-sm font-mono font-bold focus:ring-2 focus:ring-nexus-500 outline-none" value={formData.financialImpact} onChange={e => setFormData({...formData, financialImpact: parseFloat(e.target.value)})}/>
+                            <input type="number" className={`w-full pl-8 p-3 border ${theme.colors.border} rounded-xl text-lg font-mono font-black focus:ring-2 focus:ring-nexus-500 outline-none`} value={formData.financialImpact} onChange={e => setFormData({...formData, financialImpact: parseFloat(e.target.value)})}/>
                         </div>
                     </div>
-                    <div className="flex justify-between items-center text-sm bg-green-50 p-3 rounded-lg text-green-800 border border-green-100">
-                        <span className="font-medium">Expected Monetary Value (EMV):</span>
-                        <span className="font-black font-mono text-lg">{formatCurrency(currentEMV)}</span>
+                    <div className="flex justify-between items-center text-sm bg-green-50 p-4 rounded-xl text-green-800 border border-green-100">
+                        <span className="font-bold">Expected Monetary Value (EMV):</span>
+                        <span className="font-black font-mono text-xl">{formatCurrency(currentEMV)}</span>
                     </div>
                 </div>
 
                 {automationTriggered && (
-                    <div className="p-4 bg-nexus-50 border border-nexus-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="p-4 bg-nexus-50 border border-nexus-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 shadow-sm">
                         <Zap size={18} className="text-nexus-600 shrink-0 mt-0.5"/>
-                        <p className="text-xs text-nexus-800 leading-relaxed"><strong>AI Insight:</strong> {automationTriggered}</p>
+                        <p className="text-xs text-nexus-800 leading-relaxed font-medium"><strong>AI Insight:</strong> {automationTriggered}</p>
                     </div>
                 )}
             </div>

@@ -4,7 +4,7 @@ import { useProgramData } from '../../hooks/useProgramData';
 import { Target, ArrowDown, CheckSquare, Plus, Edit2, Trash2, Shield, Briefcase, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { StrategicGoal, ProgramObjective } from '../../types';
+import { StrategicGoal, ProgramObjective } from '../../types/index';
 import { generateId } from '../../utils/formatters';
 import { StrategicGoalForm } from './StrategicGoalForm';
 import { ProgramObjectiveForm } from './ProgramObjectiveForm';
@@ -17,7 +17,6 @@ interface ProgramStrategyProps {
 
 const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
   const { strategicGoals, programObjectives, projects } = useProgramData(programId);
-  // Fixed: Destructured state from useData to allow access to global strategic goals
   const { state, dispatch } = useData(); 
   const theme = useTheme();
 
@@ -94,13 +93,13 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                 {strategicGoals.length > 0 ? (
                     <div className={`grid grid-cols-1 md:grid-cols-2 ${theme.layout.gridGap}`}>
                         {strategicGoals.map(goal => (
-                            <div key={goal.id} className="p-6 bg-slate-900 text-white rounded-2xl shadow-xl relative group overflow-hidden border border-white/5">
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div key={goal.id} className="p-6 bg-slate-900 text-white rounded-[2rem] shadow-xl relative group overflow-hidden border border-white/5">
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                                     <button onClick={() => handleEditGoal(goal)} className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white"><Edit2 size={14}/></button>
                                     <button onClick={() => handleDeleteGoal(goal.id)} className="p-1.5 hover:bg-red-900/50 rounded-lg text-slate-400 hover:text-red-400"><Trash2 size={14}/></button>
                                 </div>
-                                <h4 className="font-black text-lg pr-12 uppercase tracking-tight">{goal.name}</h4>
-                                <p className="text-xs text-slate-400 mt-3 leading-relaxed font-medium">{goal.description}</p>
+                                <h4 className="font-black text-lg pr-12 uppercase tracking-tight relative z-10">{goal.name}</h4>
+                                <p className="text-xs text-slate-400 mt-3 leading-relaxed font-medium relative z-10">{goal.description}</p>
                                 <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-white/5 pointer-events-none">
                                     <ArrowDown size={64} />
                                 </div>
@@ -130,7 +129,7 @@ const ProgramStrategy: React.FC<ProgramStrategyProps> = ({ programId }) => {
                         {programObjectives.map(obj => {
                             const parentGoal = strategicGoals.find(g => g.id === obj.linkedStrategicGoalId);
                             return (
-                                <div key={obj.id} className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm relative group hover:border-nexus-300 transition-all">
+                                <div key={obj.id} className="p-6 bg-white border border-slate-200 rounded-[2rem] shadow-sm relative group hover:border-nexus-300 transition-all">
                                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={() => handleEditObj(obj)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-nexus-600"><Edit2 size={14}/></button>
                                         <button onClick={() => handleDeleteObj(obj.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500"><Trash2 size={14}/></button>

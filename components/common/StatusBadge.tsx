@@ -29,15 +29,16 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
 
   if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'approved', 'pass', 'valid', 'issued', 'released', 'solvent'].includes(s)) {
       colors = getSemanticColor('success');
-  } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {
+  } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary', 'draft'].includes(s)) {
       colors = getSemanticColor('warning');
-  } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted'].includes(s)) {
-      colors = getSemanticColor('danger');
-  } else if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
-      colors = 'bg-slate-50 text-slate-500 border-slate-200 shadow-inner';
-  } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      colors = 'bg-slate-900 text-slate-200 border-slate-700 shadow-2xl';
-  } else if (['info', 'new', 'allocation'].includes(s)) {
+  } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted', 'closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
+      // Differentiating 'closed' as neutral/dark vs error
+      if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
+          colors = 'bg-slate-100 text-slate-500 border-slate-200';
+      } else {
+          colors = getSemanticColor('danger');
+      }
+  } else if (['info', 'new', 'allocation', 'planned'].includes(s)) {
       colors = getSemanticColor('info');
   }
 
