@@ -1,8 +1,9 @@
+
 import React, { useState, useRef, useCallback, useMemo } from 'react';
 import GanttToolbar from './scheduling/GanttToolbar';
 import ResourceUsageProfile from './scheduling/ResourceUsageProfile';
 import ScheduleLog from './scheduling/ScheduleLog';
-import { List, X, Calendar, Loader2, Network } from 'lucide-react';
+import { List, X, Network } from 'lucide-react';
 import { useGantt, DAY_WIDTH } from '../hooks/useGantt';
 import { GanttTaskList } from './scheduling/gantt/GanttTaskList';
 import { GanttTimeline } from './scheduling/gantt/GanttTimeline';
@@ -14,13 +15,12 @@ import { useGanttData } from '../hooks/gantt/useGanttData';
 import { useGanttCalendar } from '../hooks/gantt/useGanttCalendar';
 import { EmptyGrid } from './common/EmptyGrid';
 import { useContainerSize } from '../hooks/useContainerSize';
-import { ConfigService } from '../services/ConfigService';
 import { useNavigate } from 'react-router-dom';
 
 const ROW_HEIGHT = 44;
 
 const ProjectGantt: React.FC = () => {
-  const { project: initialProject } = useProjectWorkspace();
+  const { project: workspaceProject } = useProjectWorkspace();
   const { state } = useData();
   const theme = useTheme();
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const ProjectGantt: React.FC = () => {
     timelineHeaders, projectStart, projectEnd, getStatusColor, handleMouseDown,
     taskFilter, setTaskFilter, isScheduling, runSchedule, scheduleLog, scheduleStats,
     isLogOpen, setIsLogOpen, dataDate
-  } = useGantt(initialProject as any);
+  } = useGantt(workspaceProject);
 
   const [showTaskList, setShowTaskList] = useState(true);
   const { flatRenderList, taskRowMap } = useGanttData(project, expandedNodes);
@@ -62,8 +62,6 @@ const ProjectGantt: React.FC = () => {
     return project.baselines.find(b => b.id === activeBaselineId)?.taskBaselines || null;
   }, [activeBaselineId, project.baselines]);
 
-  const hasTasks = project.tasks && project.tasks.length > 0;
-
   return (
     <div className={`flex flex-col h-full bg-white rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1`}>
       <ScheduleLog isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} log={scheduleLog} stats={scheduleStats} />
@@ -78,9 +76,9 @@ const ProjectGantt: React.FC = () => {
         isScheduling={isScheduling} onViewLog={() => setIsLogOpen(true)} dataDate={dataDate} 
       />
       
-      {!hasTasks ? (
+      {!project.tasks?.length ? (
           <EmptyGrid 
-            title="Schedule Repository Empty"
+            title="Schedule Repository Neutral"
             description="The master schedule logic network is currently unpopulated for this project partition."
             icon={Network}
             onAdd={() => navigate('/dataExchange?view=import')} 
@@ -133,7 +131,7 @@ const ProjectGantt: React.FC = () => {
             <div className={`h-8 border-t ${theme.colors.border} bg-slate-900 text-white flex items-center px-4 justify-between text-[9px] font-black uppercase tracking-widest`}>
                 <div className="flex gap-6">
                     <span>Baseline: {activeBaselineId || 'LATEST'}</span>
-                    <span>Engine: NEXUS_CPM_v{ConfigService.appVersion}</span>
+                    <span>Engine: NEXUS_CPM_v1.3</span>
                 </div>
                 <div className="flex gap-4">
                     <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div> {project.tasks.filter(t=>t.critical).length} Critical</span>

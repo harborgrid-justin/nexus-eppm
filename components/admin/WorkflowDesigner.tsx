@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Plus, GitPullRequest } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -24,7 +25,7 @@ const WorkflowDesigner: React.FC = () => {
         <div className="h-full flex flex-col space-y-6 animate-nexus-in">
             <div className={`p-4 rounded-xl border ${theme.colors.border} bg-white flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm`}>
                 <div className="flex items-center gap-4">
-                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">{t('admin.active_wf', 'Active Definition')}:</label>
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Active Pipeline Logic:</label>
                     {workflows.length > 0 ? (
                         <select 
                             value={activeWorkflowId || ''} 
@@ -34,15 +35,13 @@ const WorkflowDesigner: React.FC = () => {
                             {workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
                         </select>
                     ) : (
-                        <span className="text-sm text-slate-400 italic">{t('admin.no_wf', 'No workflows defined.')}</span>
+                        <span className="text-sm text-slate-400 italic">No automation threads mapped.</span>
                     )}
                 </div>
-                <div className="flex gap-2">
-                    <Button size="sm" icon={Plus} onClick={() => handleOpenWorkflowPanel()}>{t('admin.new_wf', 'New Workflow')}</Button>
-                </div>
+                <Button size="sm" icon={Plus} onClick={() => handleOpenWorkflowPanel()}>Establish Workflow</Button>
             </div>
             
-            <div className="flex-1 overflow-hidden relative rounded-2xl border border-slate-200 bg-slate-50/30">
+            <div className="flex-1 overflow-hidden relative rounded-[2.5rem] border border-slate-200 bg-slate-50/30 nexus-empty-pattern shadow-inner">
                 {activeWorkflow ? (
                     <WorkflowCanvas 
                         workflow={activeWorkflow}
@@ -52,23 +51,16 @@ const WorkflowDesigner: React.FC = () => {
                     />
                 ) : (
                     <EmptyGrid 
-                        title={t('admin.wf_null', 'Automation Logic Neutral')} 
-                        description={t('admin.wf_null_desc', 'Construct an approval chain to manage enterprise budget and schedule pivots.')} 
+                        title="Workflow Ledger Neutral" 
+                        description="Define an approval sequence to automate cross-tenant business processes like Change Orders and Baseline commits." 
                         icon={GitPullRequest} 
-                        actionLabel={t('admin.create_wf', 'Establish Workflow')}
+                        actionLabel="Initialize Workflow Engine"
                         onAdd={() => handleOpenWorkflowPanel()}
                     />
                 )}
             </div>
-            
-            <WorkflowPanel 
-                isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} 
-                workflow={editingWorkflow} onSave={handleSaveWorkflow} onDelete={handleDeleteWorkflow}
-            />
-            <StepPanel 
-                isOpen={isStepPanelOpen} onClose={() => setIsStepPanelOpen(false)} 
-                step={editingStep} onSave={(step) => handleSaveStep(step, editingStepIndex)}
-            />
+            <WorkflowPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} workflow={editingWorkflow} onSave={handleSaveWorkflow} onDelete={handleDeleteWorkflow} />
+            <StepPanel isOpen={isStepPanelOpen} onClose={() => setIsStepPanelOpen(false)} step={editingStep} onSave={(step) => handleSaveStep(step, editingStepIndex)} />
         </div>
     );
 };

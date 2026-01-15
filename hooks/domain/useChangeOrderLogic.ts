@@ -1,3 +1,4 @@
+
 import { useMemo, useState, useTransition } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { usePermissions } from '../usePermissions';
@@ -28,7 +29,6 @@ export const useChangeOrderLogic = () => {
     const stats = useMemo(() => {
         const approved = enrichedOrders.filter(co => co.status === 'Approved');
         const pending = enrichedOrders.filter(co => co.status === 'Pending Approval');
-        
         return {
             totalVolume: enrichedOrders.length,
             approvedAmount: approved.reduce((sum, co) => sum + co.amount, 0),
@@ -39,25 +39,11 @@ export const useChangeOrderLogic = () => {
     }, [enrichedOrders]);
 
     const filteredOrders = useMemo(() => {
-        return enrichedOrders.filter(co =>
-            co.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            co.id.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        return enrichedOrders.filter(co => co.title.toLowerCase().includes(searchTerm.toLowerCase()) || co.id.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [enrichedOrders, searchTerm]);
 
-    const handleViewChange = (mode: 'list' | 'board' | 'analytics') => {
-        startTransition(() => setViewMode(mode));
-    };
-
-    const handleCreate = () => {
-        setIsCreating(true);
-        setSelectedCoId(null);
-    };
-
-    const handleCloseModal = () => {
-        setIsCreating(false);
-        setSelectedCoId(null);
-    };
+    const handleCreate = () => { setIsCreating(true); setSelectedCoId(null); };
+    const handleCloseModal = () => { setIsCreating(false); setSelectedCoId(null); };
 
     const selectedOrder = useMemo(() => {
         if (selectedCoId) return filteredOrders.find(co => co.id === selectedCoId);
@@ -71,20 +57,9 @@ export const useChangeOrderLogic = () => {
     }, [selectedCoId, isCreating, filteredOrders, projectId, user]);
 
     return {
-        viewMode,
-        isPending,
-        searchTerm,
-        selectedCoId,
-        isCreating,
-        enrichedOrders,
-        filteredOrders,
-        selectedOrder,
-        canCreate,
-        stats,
-        handleViewChange,
-        setSearchTerm,
-        setSelectedCoId,
-        handleCreate,
-        handleCloseModal
+        viewMode, isPending, searchTerm, selectedCoId, isCreating, enrichedOrders,
+        filteredOrders, selectedOrder, canCreate, stats,
+        handleViewChange: (m: 'list' | 'board' | 'analytics') => startTransition(() => setViewMode(m)),
+        setSearchTerm, setSelectedCoId, handleCreate, handleCloseModal
     };
 };

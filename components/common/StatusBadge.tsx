@@ -10,23 +10,15 @@ interface StatusBadgeProps {
 }
 
 const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({ 
-  status, 
-  className = '',
-  customColorClass
+  status, className = '', customColorClass
 }) => {
   const theme = useTheme();
-  const baseClasses = "inline-flex items-center px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all";
+  const baseClasses = "inline-flex items-center px-4 py-1 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all";
   
-  const displayStatus = (status === null || status === undefined) ? '-' : String(status);
+  const displayStatus = (status === null || status === undefined) ? 'UNSET' : String(status);
   const s = displayStatus.toLowerCase();
   
-  if (customColorClass) {
-      return (
-        <span className={`${baseClasses} ${customColorClass} ${className}`}>
-            {displayStatus}
-        </span>
-      );
-  }
+  if (customColorClass) return <span className={`${baseClasses} ${customColorClass} ${className}`}>{displayStatus}</span>;
 
   const getSemanticColor = (type: 'success' | 'warning' | 'danger' | 'info' | 'neutral') => {
       const t = theme.colors.semantic[type];
@@ -42,9 +34,9 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
   } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted'].includes(s)) {
       colors = getSemanticColor('danger');
   } else if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
-      colors = 'bg-slate-50 text-slate-500 border-slate-200';
+      colors = 'bg-slate-50 text-slate-500 border-slate-200 shadow-inner';
   } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      colors = 'bg-slate-900 text-slate-200 border-slate-700';
+      colors = 'bg-slate-900 text-slate-200 border-slate-700 shadow-2xl';
   } else if (['info', 'new', 'allocation'].includes(s)) {
       colors = getSemanticColor('info');
   }

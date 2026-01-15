@@ -12,15 +12,10 @@ interface BadgeProps {
 export const Badge: React.FC<BadgeProps> = ({ variant = 'neutral', children, icon: Icon, className = '' }) => {
   const theme = useTheme();
   const colors = theme.colors.semantic[variant];
-
-  const content = (typeof children === 'string' || typeof children === 'number') 
-    ? String(children) 
-    : children;
-
   return (
-    <span className={`${theme.components.badge.base} ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
-      {Icon && <Icon className="w-3 h-3 mr-1" />}
-      {content}
+    <span className={`inline-flex items-center px-3 py-0.5 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm ${colors.bg} ${colors.text} ${colors.border} ${className}`}>
+      {Icon && <Icon className="w-3 h-3 mr-1.5" />}
+      {children}
     </span>
   );
 };

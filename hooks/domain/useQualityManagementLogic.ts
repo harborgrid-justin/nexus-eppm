@@ -1,3 +1,4 @@
+
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -51,11 +52,7 @@ export const useQualityManagementLogic = () => {
     };
 
     return {
-        activeGroup,
-        activeView,
-        isPending,
-        navGroups,
-        handleGroupChange,
-        handleViewChange
+        activeGroup, activeView, isPending, navGroups,
+        handleGroupChange, handleViewChange
     };
 };

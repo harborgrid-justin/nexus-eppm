@@ -45,11 +45,7 @@ export const AdminContent: React.FC<AdminContentProps> = ({ activeView }) => {
       case 'globalChange': return <GlobalChangeWorkbench />;
       default: return (
         <div className="p-12">
-            <EmptyGrid 
-                title="View Not Configured" 
-                description="The requested administrative module is not currently routed. Select a valid category from the navigation group."
-                icon={Settings}
-            />
+            <EmptyGrid title="View Not Routed" description="The requested admin module is currently initializing in this environment partition." icon={Settings} />
         </div>
       );
     }

@@ -1,5 +1,5 @@
 
-import { DataState, Action } from '../../types/index';
+import { DataState, Action, TaskStatus } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 
@@ -16,12 +16,18 @@ export const applyGovernanceRules = (state: DataState, action: Action, alerts: S
   });
 
   // Rule 44: Gate Skipping
-  if (action.type === 'TASK_UPDATE' && action.payload.task.status === 'In Progress') {
-      const project = state.projects.find(p => p.id === action.payload.projectId);
-      if (project && project.status === 'Planned') {
-           alerts.push(createAlert('Blocker', 'Governance', 'Gate Skipping', 
-               `Task started in ${project.code} before project moved to Execution phase.`, { type: 'Project', id: project.id }));
-      }
+  // Handle task payload whether it's a single object or an array of objects
+  if (action.type === 'TASK_UPDATE') {
+      const taskArray = Array.isArray(action.payload.task) ? action.payload.task : [action.payload.task];
+      taskArray.forEach(task => {
+          if (task.status === TaskStatus.IN_PROGRESS) {
+              const project = state.projects.find(p => p.id === action.payload.projectId);
+              if (project && project.status === 'Planned') {
+                   alerts.push(createAlert('Blocker', 'Governance', 'Gate Skipping', 
+                       `Task started in ${project.code} before project moved to Execution phase.`, { type: 'Project', id: project.id }));
+              }
+          }
+      });
   }
 
   // Rule 45: Missing Charter

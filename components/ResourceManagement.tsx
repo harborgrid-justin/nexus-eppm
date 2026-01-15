@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, Loader2, AlertTriangle } from 'lucide-react';
+import { Users, AlertTriangle } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
@@ -22,13 +22,8 @@ const ResourceManagement: React.FC = () => {
   const theme = useTheme();
   
   const {
-      activeGroup,
-      activeView,
-      isPending,
-      navStructure,
-      handleGroupChange,
-      handleViewChange,
-      overAllocatedResources
+      activeGroup, activeView, isPending, navStructure,
+      handleGroupChange, handleViewChange, overAllocatedResources
   } = useResourceManagementLogic();
 
   const renderContent = () => {
@@ -53,7 +48,7 @@ const ResourceManagement: React.FC = () => {
         <div className="flex-1 flex items-center justify-center">
              <EmptyGrid 
                 title="Project Context Required" 
-                description="Select a project from the portfolio list to manage its resource plan and staffing assignments."
+                description="Select a project initiative from the global portfolio to manage its staffing and allocation plan."
                 icon={Users}
             />
         </div>
@@ -70,7 +65,7 @@ const ResourceManagement: React.FC = () => {
           actions={
               overAllocatedResources.length > 0 && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm">
-                      <AlertTriangle size={14}/> {overAllocatedResources.length} Conflicts
+                      <AlertTriangle size={14}/> {overAllocatedResources.length} Conflicts Detected
                   </div>
               )
           }

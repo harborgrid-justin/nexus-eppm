@@ -1,3 +1,4 @@
+
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -57,11 +58,7 @@ export const useCostManagementLogic = () => {
   };
 
   return {
-      activeGroup,
-      activeView,
-      isPending,
-      navGroups,
-      handleGroupChange,
-      handleItemChange
+      activeGroup, activeView, isPending, navGroups,
+      handleGroupChange, handleItemChange
   };
 };

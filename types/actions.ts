@@ -1,39 +1,43 @@
 
-import { DataState, StagingRecord } from './state';
-import { Project, Task } from './project';
-import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal, StrategicDriver, ProgramDependency, GovernanceDecision } from './program';
+import { Project, Task, WBSNode, Baseline } from './project';
+import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal, StrategicDriver, ProgramDependency, GovernanceDecision, TradeoffScenario } from './program';
 import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
 import { Risk, Issue, IssueCode } from './risk';
-import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding } from './finance';
-import { QualityReport, NonConformanceReport } from './quality';
-import { Document, ActivityCode, UserDefinedField, Integration, Extension, StandardTemplate, DataJob, WorkflowDefinition, EtlMapping, QualityStandard, GlobalChangeRule } from './common';
+import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding, BudgetLogItem } from './finance';
+import { QualityReport, NonConformanceReport, QualityStandard } from './common';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
-import { ServiceStatus, PipelineStage } from './business';
-import { KanbanTask, TeamEvent, ActivityItem } from './collaboration';
+import { ServiceStatus } from './business';
+import { KanbanTask, ActivityItem } from './collaboration';
 
 export type Action =
+    // Project & Schedule
     | { type: 'PROJECT_IMPORT'; payload: Project[] }
     | { type: 'PROJECT_UPDATE'; payload: { projectId: string; updatedData: Partial<Project> } }
-    | { type: 'PROJECT_ADD_STAKEHOLDER'; payload: ProgramStakeholder }
-    | { type: 'TASK_UPDATE'; payload: { projectId: string; task: Task } }
     | { type: 'PROJECT_CLOSE'; payload: string }
-    | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: CostEstimate } }
-    | { type: 'ADD_PROJECT_FUNDING'; payload: { projectId: string; funding: ProjectFunding } }
-    | { type: 'ADD_PROJECT_BUDGET_LOG'; payload: { projectId: string; logItem: any } }
     | { type: 'PROJECT_CREATE_REFLECTION'; payload: { sourceProjectId: string } }
     | { type: 'PROJECT_MERGE_REFLECTION'; payload: { reflectionId: string } }
+    | { type: 'TASK_UPDATE'; payload: { projectId: string; task: Task | Task[] } }
     | { type: 'BASELINE_SET'; payload: { projectId: string; name: string; type: string } }
     | { type: 'BASELINE_UPDATE'; payload: { projectId: string; baselineId: string; name: string; type: string } }
     | { type: 'BASELINE_DELETE'; payload: { projectId: string; baselineId: string } }
-    | { type: 'WBS_ADD_NODE'; payload: { projectId: string; parentId: string | null; newNode: any } }
-    | { type: 'WBS_UPDATE_NODE'; payload: { projectId: string; nodeId: string; updatedData: any } }
+    | { type: 'WBS_ADD_NODE'; payload: { projectId: string; parentId: string | null; newNode: WBSNode } }
+    | { type: 'WBS_UPDATE_NODE'; payload: { projectId: string; nodeId: string; updatedData: Partial<WBSNode> } }
     | { type: 'WBS_REPARENT'; payload: { projectId: string; nodeId: string; newParentId: string | null } }
-    | { type: 'WBS_UPDATE_SHAPE'; payload: { projectId: string; nodeId: string; shape: any } }
-    | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' | 'defense' }
+    
+    // Program & Portfolio
     | { type: 'ADD_PROGRAM'; payload: Program }
     | { type: 'UPDATE_PROGRAM'; payload: Program }
     | { type: 'DELETE_PROGRAM'; payload: string }
+    | { type: 'PROGRAM_ADD_OBJECTIVE'; payload: any }
+    | { type: 'PROGRAM_UPDATE_OBJECTIVE'; payload: any }
+    | { type: 'PROGRAM_DELETE_OBJECTIVE'; payload: string }
+    | { type: 'PROGRAM_UPDATE_GATE'; payload: any }
+    | { type: 'ADD_STRATEGIC_DRIVER'; payload: StrategicDriver }
+    | { type: 'GOVERNANCE_ADD_DECISION'; payload: GovernanceDecision }
+    | { type: 'GOVERNANCE_UPDATE_DECISION'; payload: GovernanceDecision }
+    | { type: 'GOVERNANCE_DELETE_DECISION'; payload: string }
+    | { type: 'UPDATE_PORTFOLIO_SCENARIO'; payload: any }
     | { type: 'PROGRAM_ADD_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_UPDATE_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_DELETE_STAKEHOLDER'; payload: string }
@@ -41,24 +45,84 @@ export type Action =
     | { type: 'PROGRAM_UPDATE_COMM_ITEM'; payload: ProgramCommunicationItem }
     | { type: 'PROGRAM_DELETE_COMM_ITEM'; payload: string }
     | { type: 'PROGRAM_UPDATE_ALLOCATION'; payload: ProgramBudgetAllocation }
-    /* Updated: Allowing union of gate types to support both Funding and Stage gates via unified update action. */
-    | { type: 'PROGRAM_UPDATE_GATE'; payload: ProgramStageGate | ProgramFundingGate }
-    | { type: 'PROGRAM_ADD_OBJECTIVE'; payload: any }
-    | { type: 'PROGRAM_UPDATE_OBJECTIVE'; payload: any }
-    | { type: 'PROGRAM_DELETE_OBJECTIVE'; payload: string }
     | { type: 'PROGRAM_ADD_RISK'; payload: ProgramRisk }
     | { type: 'PROGRAM_DELETE_RISK'; payload: string }
     | { type: 'PROGRAM_ADD_ISSUE'; payload: ProgramIssue }
     | { type: 'PROGRAM_UPDATE_ISSUE'; payload: ProgramIssue }
     | { type: 'PROGRAM_DELETE_ISSUE'; payload: string }
-    | { type: 'PROGRAM_ADD_TRADEOFF'; payload: any }
+    | { type: 'PROGRAM_ADD_TRADEOFF'; payload: TradeoffScenario }
     | { type: 'PROGRAM_DELETE_TRADEOFF'; payload: string }
-    | { type: 'ADD_PROGRAM_CHANGE_REQUEST'; payload: any }
-    | { type: 'UPDATE_PROGRAM_CHANGE_REQUEST'; payload: any }
+    | { type: 'ADD_PROGRAM_CHANGE_REQUEST'; payload: ProgramChangeRequest }
+    | { type: 'UPDATE_PROGRAM_CHANGE_REQUEST'; payload: ProgramChangeRequest }
     | { type: 'DELETE_PROGRAM_CHANGE_REQUEST'; payload: string }
-    | { type: 'ADD_STRATEGIC_DRIVER'; payload: StrategicDriver }
     | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
     | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string }
+    | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: StrategicGoal }
+    | { type: 'GOVERNANCE_ADD_STRATEGIC_GOAL'; payload: StrategicGoal }
+    | { type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL'; payload: string }
+    | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
+    
+    // Resources
+    | { type: 'RESOURCE_ADD'; payload: Resource }
+    | { type: 'RESOURCE_UPDATE'; payload: Resource }
+    | { type: 'RESOURCE_DELETE'; payload: string }
+    | { type: 'RESOURCE_REQUEST_ADD'; payload: ResourceRequest }
+    | { type: 'RESOURCE_REQUEST_UPDATE'; payload: ResourceRequest }
+    | { type: 'SUBMIT_TIMESHEET'; payload: Timesheet }
+    
+    // Financials
+    | { type: 'ADD_BUDGET_ITEM'; payload: BudgetLineItem }
+    | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetLineItem }
+    | { type: 'DELETE_BUDGET_ITEM'; payload: string }
+    | { type: 'ADD_PROJECT_BUDGET_LOG'; payload: { projectId: string; logItem: BudgetLogItem } }
+    | { type: 'TRANSFER_BUDGET'; payload: any }
+    | { type: 'ADD_CHANGE_ORDER'; payload: ChangeOrder }
+    | { type: 'UPDATE_CHANGE_ORDER'; payload: ChangeOrder }
+    | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
+    | { type: 'ADD_EXPENSE'; payload: Expense }
+    | { type: 'UPDATE_EXPENSE'; payload: Expense }
+    | { type: 'DELETE_EXPENSE'; payload: string }
+    | { type: 'ADD_INVOICE'; payload: Invoice }
+    | { type: 'UPDATE_INVOICE'; payload: Invoice }
+    
+    // Risks & Issues
+    | { type: 'ADD_RISK'; payload: Risk }
+    | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
+    | { type: 'DELETE_RISK'; payload: string }
+    | { type: 'ADD_ISSUE'; payload: Issue }
+    | { type: 'UPDATE_ISSUE'; payload: Issue }
+    | { type: 'DELETE_ISSUE'; payload: string }
+    | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: any } }
+    | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
+    
+    // Quality & Field
+    | { type: 'ADD_NCR'; payload: NonConformanceReport }
+    | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
+    | { type: 'FIELD_ADD_LOG'; payload: DailyLogEntry }
+    | { type: 'FIELD_UPDATE_LOG'; payload: DailyLogEntry }
+    | { type: 'FIELD_ADD_INCIDENT'; payload: SafetyIncident }
+    | { type: 'FIELD_UPDATE_INCIDENT'; payload: SafetyIncident }
+    | { type: 'FIELD_DELETE_INCIDENT'; payload: string }
+    | { type: 'FIELD_ADD_PUNCH_ITEM'; payload: PunchItem }
+    | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: PunchItem }
+    | { type: 'ADD_QUALITY_REPORT'; payload: QualityReport }
+    | { type: 'UPDATE_QUALITY_REPORT'; payload: QualityReport }
+    | { type: 'ADD_QUALITY_STANDARD'; payload: any }
+    | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: SafetyIncident }
+    
+    // System & Data
+    | { type: 'SYSTEM_QUEUE_DATA_JOB'; payload: DataJob }
+    | { type: 'SYSTEM_UPDATE_DATA_JOB'; payload: { jobId: string } & Partial<DataJob> }
+    | { type: 'SYSTEM_ADD_INTEGRATION'; payload: Integration }
+    | { type: 'SYSTEM_UPDATE_INTEGRATION'; payload: Integration }
+    | { type: 'SYSTEM_TOGGLE_INTEGRATION'; payload: string }
+    | { type: 'ADMIN_ADD_USER'; payload: any }
+    | { type: 'ADMIN_UPDATE_USER'; payload: any }
+    | { type: 'ADMIN_DELETE_USER'; payload: string }
+    | { type: 'UPDATE_USER'; payload: any }
+    | { type: 'MARK_ALERT_READ'; payload: string }
+    | { type: 'RESET_SYSTEM' }
+    | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' | 'defense' }
     | { type: 'ADMIN_ADD_LOCATION'; payload: Location }
     | { type: 'ADMIN_UPDATE_LOCATION'; payload: Location }
     | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
@@ -68,14 +132,6 @@ export type Action =
     | { type: 'ADMIN_ADD_UDF'; payload: UserDefinedField }
     | { type: 'ADMIN_UPDATE_UDF'; payload: UserDefinedField }
     | { type: 'ADMIN_DELETE_UDF'; payload: string }
-    | { type: 'ADMIN_ADD_USER'; payload: any }
-    | { type: 'ADMIN_UPDATE_USER'; payload: any }
-    | { type: 'ADMIN_DELETE_USER'; payload: string }
-    | { type: 'RESOURCE_ADD'; payload: Resource }
-    | { type: 'RESOURCE_UPDATE'; payload: Resource }
-    | { type: 'RESOURCE_DELETE'; payload: string }
-    | { type: 'RESOURCE_REQUEST_ADD'; payload: ResourceRequest }
-    | { type: 'RESOURCE_REQUEST_UPDATE'; payload: ResourceRequest }
     | { type: 'ADMIN_ADD_FUNDING_SOURCE'; payload: FundingSource }
     | { type: 'ADMIN_UPDATE_FUNDING_SOURCE'; payload: FundingSource }
     | { type: 'ADMIN_DELETE_FUNDING_SOURCE'; payload: string }
@@ -85,9 +141,6 @@ export type Action =
     | { type: 'ADMIN_ADD_ISSUE_CODE'; payload: IssueCode }
     | { type: 'ADMIN_UPDATE_ISSUE_CODE'; payload: IssueCode }
     | { type: 'ADMIN_DELETE_ISSUE_CODE'; payload: string }
-    | { type: 'ADMIN_ADD_EXPENSE_CATEGORY'; payload: ExpenseCategory }
-    | { type: 'ADMIN_UPDATE_EXPENSE_CATEGORY'; payload: ExpenseCategory }
-    | { type: 'ADMIN_DELETE_EXPENSE_CATEGORY'; payload: string }
     | { type: 'ADMIN_ADD_EXPENSE_CATEGORY'; payload: ExpenseCategory }
     | { type: 'ADMIN_UPDATE_EXPENSE_CATEGORY'; payload: ExpenseCategory }
     | { type: 'ADMIN_DELETE_EXPENSE_CATEGORY'; payload: string }
@@ -102,33 +155,17 @@ export type Action =
     | { type: 'ADMIN_DELETE_WORKFLOW'; payload: string }
     | { type: 'ADMIN_ADD_ROLE'; payload: EnterpriseRole }
     | { type: 'ADMIN_UPDATE_ROLE'; payload: EnterpriseRole }
-    | { type: 'SYSTEM_QUEUE_DATA_JOB'; payload: DataJob }
-    | { type: 'SYSTEM_UPDATE_DATA_JOB'; payload: any }
-    | { type: 'SYSTEM_TOGGLE_INTEGRATION'; payload: string }
+    | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
+    | { type: 'SYSTEM_ADD_SERVICE'; payload: ServiceStatus }
+    | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: { id: string, field: string } }
+    | { type: 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE'; payload: any }
     | { type: 'SYSTEM_INSTALL_EXTENSION'; payload: string }
     | { type: 'SYSTEM_ACTIVATE_EXTENSION'; payload: string }
-    | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
-    | { type: 'SYSTEM_ADD_INTEGRATION'; payload: Integration }
-    | { type: 'SYSTEM_UPDATE_INTEGRATION'; payload: Integration }
-    | { type: 'SYSTEM_ADD_SERVICE'; payload: ServiceStatus }
-    | { type: 'MARK_ALERT_READ'; payload: string }
-    | { type: 'UPDATE_SYSTEM_SCHEDULING'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_CURRENCY'; payload: any }
-    | { type: 'GOVERNANCE_ADD_CURRENCY'; payload: any }
-    | { type: 'GOVERNANCE_DELETE_CURRENCY'; payload: string }
-    | { type: 'GOVERNANCE_UPDATE_INFLATION_RATE'; payload: number }
-    | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: any }
-    | { type: 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_GLOBAL_CHANGE_RULES'; payload: GlobalChangeRule[] }
-    | { type: 'GOVERNANCE_SYNC_PARAMETERS', payload: any }
-    | { type: 'GOVERNANCE_ADD_DECISION', payload: GovernanceDecision }
-    | { type: 'GOVERNANCE_UPDATE_DECISION', payload: GovernanceDecision }
-    | { type: 'GOVERNANCE_DELETE_DECISION', payload: string }
-    | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: any } 
-    | { type: 'RESET_SYSTEM' }
-    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any; action: string; user: any } }
+    | { type: 'ADD_BENEFIT'; payload: any }
+    | { type: 'ADD_ARCH_STANDARD'; payload: any }
+    | { type: 'ADD_STAKEHOLDER'; payload: any }
+    | { type: 'PROJECT_ADD_STAKEHOLDER'; payload: any }
+    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any, action: string, user: any } }
     | { type: 'ADD_VENDOR'; payload: any }
     | { type: 'UPDATE_VENDOR'; payload: any }
     | { type: 'DELETE_VENDOR'; payload: string }
@@ -141,68 +178,32 @@ export type Action =
     | { type: 'ADD_MATERIAL_RECEIPT'; payload: any }
     | { type: 'ADD_PROCUREMENT_PLAN'; payload: any }
     | { type: 'UPDATE_PROCUREMENT_PLAN'; payload: any }
-    | { type: 'ADD_QUALITY_REPORT'; payload: any }
-    | { type: 'UPDATE_QUALITY_REPORT'; payload: any }
-    | { type: 'ADD_NCR'; payload: any }
-    | { type: 'UPDATE_NCR'; payload: any }
-    | { type: 'ADD_QUALITY_STANDARD'; payload: any }
+    | { type: 'ADD_SUPPLIER_REVIEW'; payload: any }
     | { type: 'UPLOAD_DOCUMENT'; payload: any }
     | { type: 'DELETE_DOCUMENT'; payload: string }
-    | { type: 'VERSION_DOCUMENT'; payload: { documentId: string; version: string } }
-    | { type: 'ADD_RISK'; payload: any }
-    | { type: 'UPDATE_RISK'; payload: { risk: any } }
-    | { type: 'DELETE_RISK'; payload: string }
-    | { type: 'ADD_ISSUE'; payload: any }
-    | { type: 'UPDATE_ISSUE'; payload: any }
-    | { type: 'DELETE_ISSUE'; payload: string }
-    | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: any } }
-    | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
-    | { type: 'ADD_BUDGET_ITEM'; payload: any }
-    | { type: 'UPDATE_BUDGET_ITEM'; payload: any }
-    | { type: 'DELETE_BUDGET_ITEM'; payload: string }
-    | { type: 'ADD_EXPENSE'; payload: any }
-    | { type: 'UPDATE_EXPENSE'; payload: any }
-    | { type: 'DELETE_EXPENSE'; payload: string }
-    | { type: 'ADD_INVOICE'; payload: any }
-    | { type: 'UPDATE_INVOICE'; payload: any }
-    | { type: 'ADD_CHANGE_ORDER'; payload: any }
-    | { type: 'UPDATE_CHANGE_ORDER'; payload: any }
-    | { type: 'APPROVE_CHANGE_ORDER'; payload: { projectId: string; changeOrderId: string } }
-    | { type: 'TRANSFER_BUDGET'; payload: any }
-    | { type: 'FIELD_ADD_LOG'; payload: any }
-    | { type: 'FIELD_UPDATE_LOG'; payload: any }
-    | { type: 'FIELD_ADD_INCIDENT'; payload: any }
-    | { type: 'FIELD_UPDATE_INCIDENT'; payload: any }
-    | { type: 'FIELD_ADD_PUNCH_ITEM'; payload: any }
+    | { type: 'VERSION_DOCUMENT'; payload: any }
     | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: any }
     | { type: 'ROADMAP_UPDATE_ITEM'; payload: any }
-    | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string; status: string } }
+    | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string, status: string } }
     | { type: 'KANBAN_ADD_TASK'; payload: any }
     | { type: 'ADD_PORTFOLIO_COMM_ITEM'; payload: any }
-    | { type: 'ADD_ACTIVITY'; payload: any }
     | { type: 'ADD_TEAM_EVENT'; payload: any }
-    | { type: 'UPDATE_PORTFOLIO_SCENARIO'; payload: any }
-    | { type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL'; payload: string }
-    | { type: 'GOVERNANCE_ADD_STRATEGIC_GOAL'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: any }
-    | { type: 'UPDATE_USER'; payload: any }
-    | { type: 'SUBMIT_TIMESHEET'; payload: any }
     | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: any }
     | { type: 'EXTENSION_UPDATE_CONSTRUCTION'; payload: any }
     | { type: 'EXTENSION_UPDATE_GOVERNMENT'; payload: any }
     | { type: 'UPDATE_PIPELINE_STAGE'; payload: any }
-    | { type: 'STAGING_INIT'; payload: { type: string; data: any[] } }
-    | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string; data: any } }
+    | { type: 'STAGING_INIT'; payload: { type: string, data: any[] } }
+    | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string, data: any } }
     | { type: 'STAGING_COMMIT_SELECTED'; payload: string[] }
     | { type: 'STAGING_CLEAR' }
-    | { type: 'ADD_BENEFIT'; payload: any }
-    | { type: 'ADD_ARCH_STANDARD'; payload: any }
     | { type: 'ADD_ARTICLE'; payload: any }
     | { type: 'UPDATE_ARTICLE'; payload: any }
     | { type: 'DELETE_ARTICLE'; payload: string }
     | { type: 'ADD_REPORT_DEF'; payload: any }
     | { type: 'DELETE_REPORT_DEF'; payload: string }
-    | { type: 'ADD_STAKEHOLDER'; payload: any }
-    | { type: 'ADD_SUPPLIER_REVIEW'; payload: any }
-;
+    | { type: 'ADD_ACTIVITY'; payload: ActivityItem }
+    | { type: 'UPDATE_SYSTEM_SCHEDULING'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: any }
+    | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
+    | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string };

@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useDeferredValue, useTransition, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { usePortfolioState } from '../usePortfolioState';
@@ -18,9 +19,7 @@ export const useProjectListLogic = () => {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (searchParams.get('action') === 'create') {
-      setActiveView('create');
-    }
+    if (searchParams.get('action') === 'create') setActiveView('create');
   }, [searchParams]);
 
   const filteredProjects = useMemo(() => 
@@ -30,36 +29,11 @@ export const useProjectListLogic = () => {
     ), 
   [projects, deferredSearchTerm]);
 
-  const handleCreateProject = (newProject: Project) => {
-    dispatch({ type: 'PROJECT_IMPORT', payload: [newProject] });
-    startTransition(() => {
-        // Remove action from URL after creation
-        navigate('/projectList', { replace: true });
-        setActiveView('list');
-    });
-  };
-
-  const handleSelectProject = (projectId: string) => {
-    navigate(`/projectWorkspace/${projectId}`);
-  };
-
-  const handleViewChange = (viewId: string) => {
-      startTransition(() => {
-          setActiveView(viewId);
-      });
-  };
-
   return {
-      searchTerm,
-      setSearchTerm,
-      deferredSearchTerm,
-      activeGroup,
-      activeView,
-      setActiveView,
-      isPending,
-      filteredProjects,
-      handleCreateProject,
-      handleSelectProject,
-      handleViewChange
+      searchTerm, setSearchTerm, deferredSearchTerm, activeGroup, activeView,
+      setActiveView, isPending, filteredProjects,
+      handleCreateProject: (p: Project) => { dispatch({ type: 'PROJECT_IMPORT', payload: [p] }); setActiveView('list'); },
+      handleSelectProject: (id: string) => navigate(`/projectWorkspace/${id}`),
+      handleViewChange: (vid: string) => startTransition(() => setActiveView(vid))
   };
 };

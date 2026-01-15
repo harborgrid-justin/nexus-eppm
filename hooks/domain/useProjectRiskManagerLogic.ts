@@ -1,3 +1,4 @@
+
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { LayoutDashboard, List, Sigma, FileText, BarChart2, GitBranch } from 'lucide-react';
@@ -46,11 +47,7 @@ export const useProjectRiskManagerLogic = () => {
   };
 
   return {
-    activeGroup,
-    activeView,
-    isPending,
-    navGroups,
-    handleGroupChange,
-    handleItemChange
+    activeGroup, activeView, isPending, navGroups,
+    handleGroupChange, handleItemChange
   };
 };

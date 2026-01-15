@@ -8,13 +8,18 @@ export const applyProgramRules = (state: DataState, action: Action, alerts: Syst
   let programs = [...state.programs];
 
   // Hook: Cross-Project Dependency Break
-  if (action.type === 'TASK_UPDATE' && action.payload.task.status === TaskStatus.DELAYED) {
-      const task = action.payload.task;
-      // Mock check: In real app, check DB for external dependencies
-      if (task.wbsCode === '1.2') { 
-          alerts.push(createAlert('Critical', 'Schedule', 'Program Interlock Broken', 
-            `Delay in ${task.name} impacts downstream Project P1002.`, { type: 'Program', id: 'PRG-001' }));
-      }
+  // Handle task payload whether it's a single object or an array of objects
+  if (action.type === 'TASK_UPDATE') {
+      const taskArray = Array.isArray(action.payload.task) ? action.payload.task : [action.payload.task];
+      taskArray.forEach(task => {
+          if (task.status === TaskStatus.DELAYED) {
+              // Mock check: In real app, check DB for external dependencies
+              if (task.wbsCode === '1.2') { 
+                  alerts.push(createAlert('Critical', 'Schedule', 'Program Interlock Broken', 
+                    `Delay in ${task.name} impacts downstream Project P1002.`, { type: 'Program', id: 'PRG-001' }));
+              }
+          }
+      });
   }
 
   // Hook: Program Budget Cap Breach

@@ -1,3 +1,4 @@
+
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { LayoutDashboard, FileText, List, Layers } from 'lucide-react';
@@ -27,7 +28,6 @@ export const useScopeManagementLogic = () => {
     const newGroup = navStructure.find(g => g.id === groupId);
     if (newGroup?.items.length) {
       startTransition(() => {
-        // Preserve parent project tab
         const newParams = new URLSearchParams(searchParams);
         newParams.set('scopeGroup', groupId);
         newParams.set('view', newGroup.items[0].id);
@@ -45,11 +45,7 @@ export const useScopeManagementLogic = () => {
   };
 
   return {
-      activeGroup,
-      activeView,
-      isPending,
-      navStructure,
-      handleGroupChange,
-      handleViewChange
+      activeGroup, activeView, isPending, navStructure,
+      handleGroupChange, handleViewChange
   };
 };

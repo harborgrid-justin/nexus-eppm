@@ -1,3 +1,4 @@
+
 import { useMemo, useState, useTransition } from 'react';
 import { 
     LayoutDashboard, History, Grid, FileCode, UploadCloud, 
@@ -48,11 +49,7 @@ export const useDataExchangeLogic = () => {
     };
 
     return {
-        activeGroup,
-        activeTab,
-        isPending,
-        navGroups,
-        handleGroupChange,
-        handleItemChange
+        activeGroup, activeTab, isPending, navGroups,
+        handleGroupChange, handleItemChange
     };
 };

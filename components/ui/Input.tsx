@@ -17,22 +17,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '',
   const inputElement = (
     <div className="relative w-full group">
       {IconToRender && (
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-nexus-500 transition-colors pointer-events-none">
-          <IconToRender size={16} strokeWidth={2.5} />
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nexus-600 transition-colors pointer-events-none">
+          <IconToRender size={16} />
         </div>
       )}
       <input
         ref={ref}
         id={id}
         className={`
-          w-full ${theme.colors.surface} ${theme.colors.border} border rounded-lg transition-all
-          focus:outline-none focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 
-          ${theme.colors.text.primary} placeholder:text-text-tertiary font-medium
-          disabled:bg-background disabled:text-text-tertiary
-          h-10 text-sm
-          ${IconToRender ? 'pl-11' : 'pl-4'} 
-          pr-4 
-          ${className}
+          w-full ${theme.colors.surface} border-2 border-slate-200 rounded-xl transition-all
+          focus:outline-none focus:ring-8 focus:ring-nexus-500/5 focus:border-nexus-500 
+          ${theme.colors.text.primary} placeholder:text-slate-300 font-bold text-sm h-11
+          ${IconToRender ? 'pl-11' : 'px-4'} pr-4 ${className}
         `}
         {...props}
       />
@@ -41,14 +37,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '',
 
   if (label) {
     return (
-      <div>
-        <label htmlFor={id} className={`block text-sm font-medium ${theme.colors.text.primary} mb-1`}>{label}</label>
+      <div className="space-y-1.5">
+        <label htmlFor={id} className={`block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1`}>{label}</label>
         {inputElement}
       </div>
     );
   }
-  
   return inputElement;
 });
-
 Input.displayName = 'Input';

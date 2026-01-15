@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ShieldAlert, BarChart2, List, Download, Plus, DollarSign, Activity, AlertOctagon, Loader2, ArrowUpRight, LayoutGrid } from 'lucide-react';
+import { ShieldAlert, BarChart2, List, Download, Plus, DollarSign, Activity, AlertOctagon, ArrowUpRight, LayoutGrid } from 'lucide-react';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { PageHeader } from './common/PageHeader';
@@ -35,9 +35,14 @@ const RiskRegister: React.FC = () => {
       
       <PageHeader 
         title={t('risk.registry_title', 'Enterprise Risk Register')} 
-        subtitle={t('risk.registry_subtitle', 'Centralized governance of uncertainty.')} 
+        subtitle={t('risk.registry_subtitle', 'Centralized governance of project uncertainty.')} 
         icon={ShieldAlert} 
-        actions={<><Button variant="outline" size="sm" icon={Download}>{t('common.export', 'Export')}</Button><Button variant="primary" size="sm" icon={Plus}>{t('risk.new', 'New Risk')}</Button></>} 
+        actions={
+          <>
+            <Button variant="outline" size="sm" icon={Download}>{t('common.export', 'Export')}</Button>
+            <Button variant="primary" size="sm" icon={Plus} onClick={() => setSelectedRiskId('NEW')}>{t('risk.new', 'New Risk')}</Button>
+          </>
+        } 
       />
 
       <div className={`mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
@@ -51,7 +56,7 @@ const RiskRegister: React.FC = () => {
         <div className={`p-4 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/50`}>
             <div className={`flex ${theme.colors.background} p-1 rounded-lg border ${theme.colors.border} shadow-inner`}>
                 {['list', 'matrix', 'analytics'].map(m => (
-                    <button key={m} onClick={() => handleViewChange(m as any)} className={`px-4 py-1.5 text-xs font-bold rounded-md flex items-center gap-2 capitalize transition-all ${viewMode === m ? `${theme.colors.surface} text-nexus-700 shadow-sm` : `${theme.colors.text.tertiary} hover:${theme.colors.text.secondary}`}`}>
+                    <button key={m} onClick={() => handleViewChange(m as any)} className={`px-4 py-1.5 text-xs font-bold rounded-md flex items-center gap-2 capitalize transition-all ${viewMode === m ? `${theme.colors.surface} text-nexus-700 shadow-sm font-black` : `${theme.colors.text.tertiary} hover:${theme.colors.text.secondary}`}`}>
                         {m === 'list' ? <List size={14}/> : m === 'matrix' ? <LayoutGrid size={14}/> : <BarChart2 size={14}/>} {m}
                     </button>
                 ))}
@@ -65,7 +70,7 @@ const RiskRegister: React.FC = () => {
             />
         </div>
         
-        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-60' : 'opacity-100'}`}>
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-60' : 'opacity-100'}`}>
            {filteredRisks.length > 0 ? (
                <>
                 {viewMode === 'list' && <RiskListView risks={filteredRisks} onSelectRisk={setSelectedRiskId} />}
@@ -74,8 +79,8 @@ const RiskRegister: React.FC = () => {
                </>
            ) : (
                 <EmptyGrid 
-                    title={t('risk.empty', 'No Risks Identified')} 
-                    description={t('risk.empty_desc', 'The risk registry is currently clear of threats.')}
+                    title={t('risk.empty', 'Risk Inventory Neutral')} 
+                    description={t('risk.empty_desc', 'The risk registry for this partition is currently clear of threats.')}
                     icon={ShieldAlert}
                     onAdd={() => setSelectedRiskId('NEW')}
                     actionLabel={t('risk.init_action', 'Identify Risk')}

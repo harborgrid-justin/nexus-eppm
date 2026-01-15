@@ -1,3 +1,4 @@
+
 import { useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FileText, Users, BarChart2, Sliders, ScrollText, Box } from 'lucide-react';
@@ -54,12 +55,7 @@ export const useResourceManagementLogic = () => {
   };
 
   return {
-      activeGroup,
-      activeView,
-      isPending,
-      navStructure,
-      handleGroupChange,
-      handleViewChange,
-      overAllocatedResources
+      activeGroup, activeView, isPending, navStructure,
+      handleGroupChange, handleViewChange, overAllocatedResources
   };
 };

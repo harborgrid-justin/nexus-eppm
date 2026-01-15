@@ -1,16 +1,16 @@
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Project, Task, TaskStatus } from '../types/index';
 import { useData } from '../context/DataContext';
 import { Scheduler } from '../services/SchedulingEngine';
-import { useGanttTimeline, DAY_WIDTH as BASE_DAY_WIDTH } from './gantt/useGanttTimeline';
+import { useGanttTimeline, DAY_WIDTH } from './gantt/useGanttTimeline';
 import { useGanttDrag } from './gantt/useGanttDrag';
 
-export const DAY_WIDTH = BASE_DAY_WIDTH;
+// Re-export DAY_WIDTH for consumption by components
+export { DAY_WIDTH };
 
 export const useGantt = (initialProject: Project | undefined) => {
   const { state, dispatch } = useData();
-  
   const [project, setProject] = useState<Project | undefined>(initialProject);
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -19,9 +19,9 @@ export const useGantt = (initialProject: Project | undefined) => {
   const [activeBaselineId, setActiveBaselineId] = useState<string | null>(initialProject?.baselines?.[0]?.id || null);
   const [showResources, setShowResources] = useState(false);
   
-  // Scheduling State
+  // Scheduling Logic State
   const [isScheduling, setIsScheduling] = useState(false);
-  const [scheduleLog, setScheduleLog] = useState<string>('');
+  const [scheduleLog, setScheduleLog] = useState('');
   const [scheduleStats, setScheduleStats] = useState<any>(null);
   const [isLogOpen, setIsLogOpen] = useState(false);
   const [dataDate, setDataDate] = useState(new Date(initialProject?.dataDate || Date.now()));
@@ -40,24 +40,16 @@ export const useGantt = (initialProject: Project | undefined) => {
     switch(viewMode) {
       case 'day': return 100;
       case 'week': return 50;
-      case 'month': return 20;
+      case 'month': return 25;
+      default: return 50;
     }
   }, [viewMode]);
 
   const safeProject = useMemo(() => project || { 
-      id: 'UNSET',
-      name: 'Uninitialized',
-      tasks: [], 
-      startDate: new Date().toISOString(), 
-      endDate: new Date().toISOString() 
+      id: 'UNSET', tasks: [], startDate: new Date().toISOString(), endDate: new Date().toISOString() 
   } as unknown as Project, [project]);
 
-  const {
-      timelineHeaders,
-      projectStart,
-      projectEnd
-  } = useGanttTimeline(safeProject, viewMode, dayWidth);
-  
+  const { timelineHeaders, projectStart, projectEnd } = useGanttTimeline(safeProject, viewMode, dayWidth);
   const { ganttContainerRef, handleMouseDown } = useGanttDrag(dispatch, safeProject, dayWidth);
 
   const [expandedNodes, setExpandedNodes] = useState(new Set<string>(project?.wbs?.map(w => w.id) || []));
@@ -65,8 +57,7 @@ export const useGantt = (initialProject: Project | undefined) => {
   const toggleNode = (id: string) => {
     setExpandedNodes(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
@@ -84,11 +75,11 @@ export const useGantt = (initialProject: Project | undefined) => {
     if(!project) return;
     setIsScheduling(true);
     try {
-        const result = await Scheduler.schedule(project, { dataDate, useRetainedLogic: true, honorConstraints: true });
+        const result = await Scheduler.schedule(project, { dataDate, useRetainedLogic: true });
         setScheduleLog(result.log);
         setScheduleStats(result.stats);
         if (result.success) {
-          dispatch({ type: 'PROJECT_UPDATE', payload: { projectId: project.id, updatedData: { tasks: result.tasks } }});
+          dispatch({ type: 'TASK_UPDATE', payload: { projectId: project.id, task: result.tasks } });
           setProject(p => p ? ({...p, tasks: result.tasks}) : undefined);
         }
     } finally {
@@ -97,35 +88,12 @@ export const useGantt = (initialProject: Project | undefined) => {
   }, [project, dataDate, dispatch]);
   
   return {
-    project: safeProject,
-    viewMode,
-    setViewMode,
-    selectedTask,
-    setSelectedTask,
-    isTraceLogicOpen,
-    setIsTraceLogicOpen,
-    showCriticalPath,
-    setShowCriticalPath,
-    activeBaselineId,
-    setActiveBaselineId,
-    showResources,
-    setShowResources,
-    ganttContainerRef,
-    expandedNodes,
-    toggleNode,
-    timelineHeaders,
-    projectStart,
-    projectEnd,
-    getStatusColor,
-    handleMouseDown,
-    taskFilter,
-    setTaskFilter,
-    isScheduling,
-    runSchedule,
-    scheduleLog,
-    scheduleStats,
-    isLogOpen,
-    setIsLogOpen,
-    dataDate
+    project: safeProject, viewMode, setViewMode, selectedTask, setSelectedTask,
+    isTraceLogicOpen, setIsTraceLogicOpen, showCriticalPath, setShowCriticalPath,
+    activeBaselineId, setActiveBaselineId, showResources, setShowResources,
+    ganttContainerRef, expandedNodes, toggleNode, timelineHeaders,
+    projectStart, projectEnd, getStatusColor, handleMouseDown,
+    taskFilter, setTaskFilter, isScheduling, runSchedule,
+    scheduleLog, scheduleStats, isLogOpen, setIsLogOpen, dataDate
   };
 };

@@ -19,11 +19,7 @@ const DocumentControl: React.FC = () => {
   const theme = useTheme();
   
   const {
-    searchTerm,
-    setSearchTerm,
-    deferredSearchTerm,
-    docs,
-    canUpload
+    searchTerm, setSearchTerm, deferredSearchTerm, docs, canUpload
   } = useDocumentControlLogic();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,9 +44,7 @@ const DocumentControl: React.FC = () => {
       }
   };
 
-  const triggerUpload = () => {
-      fileInputRef.current?.click();
-  };
+  const triggerUpload = () => fileInputRef.current?.click();
 
   const storageMetrics = useMemo(() => {
     const totalLimitGB = state.governance.billing.storageLimitGB || 10;
@@ -71,74 +65,51 @@ const DocumentControl: React.FC = () => {
   }, [state.documents, state.governance.billing.storageLimitGB]);
 
   return (
-    <div className={`p-[var(--spacing-gutter)] flex flex-col h-full`}>
+    <div className={`p-[var(--spacing-gutter)] flex flex-col h-full bg-slate-50/30`}>
        <PageHeader
-            title="Document Control"
-            subtitle="Central repository for all project specifications, drawings, and reports."
+            title="Document Repository"
+            subtitle="Authoritative storage for all project specifications and drawings."
             icon={Folder}
             actions={canUpload ? (
                 <>
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        className="hidden" 
-                        onChange={handleFileUpload} 
-                    />
-                    <button 
-                        onClick={triggerUpload}
-                        className={`px-4 py-2 ${theme.colors.primary} text-white rounded-lg flex items-center gap-2 hover:brightness-110 shadow-sm text-sm font-medium`}
-                    >
-                        <Upload size={16} /> <span className="hidden sm:inline">Upload Document</span>
+                    <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+                    <button onClick={triggerUpload} className={`px-4 py-2 ${theme.colors.primary} text-white rounded-xl flex items-center gap-2 hover:brightness-110 shadow-lg shadow-nexus-500/20 text-xs font-black uppercase tracking-widest`}>
+                        <Upload size={16} /> Upload Artifact
                     </button>
                 </>
               ) : (
-                <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
-                    <Lock size={14} /> Upload Restricted
+                <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200 uppercase font-black tracking-widest">
+                    <Lock size={14} /> Repository Locked
                 </div>
               )}
        />
 
-       <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-lg flex-1 overflow-hidden flex flex-col shadow-sm`}>
+       <div className={`${theme.colors.surface} border ${theme.colors.border} rounded-3xl flex-1 overflow-hidden flex flex-col shadow-sm mt-6`}>
           <div className={`p-4 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center gap-4 bg-white z-10`}>
              <div className="flex gap-4 w-full md:w-auto items-center">
                  <div className="relative flex-1 md:flex-none">
                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                         type="text" 
-                        placeholder="Search files..." 
-                        className={`pl-9 pr-10 py-1.5 text-sm border ${theme.colors.border} rounded-md w-full md:w-64 focus:outline-none focus:ring-1 focus:ring-nexus-500 transition-all ${theme.colors.background} ${theme.colors.text.primary}`}
+                        placeholder="Search partition..." 
+                        className={`pl-9 pr-10 py-2 text-sm border ${theme.colors.border} rounded-xl w-full md:w-64 focus:outline-none focus:ring-4 focus:ring-nexus-500/5 transition-all bg-slate-50`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    {searchTerm !== deferredSearchTerm && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                            <Loader2 size={12} className="animate-spin text-slate-300"/>
-                        </div>
-                    )}
                  </div>
-                 <button className={`flex items-center gap-1.5 px-3 py-1.5 ${theme.colors.surface} border ${theme.colors.border} rounded-md text-sm text-slate-600 hover:bg-slate-50`}>
+                 <button className={`flex items-center gap-1.5 px-4 py-2 border ${theme.colors.border} rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-50 shadow-sm`}>
                     <Filter size={14} /> Filter
                  </button>
              </div>
              
-             <DocumentStats 
-                usedGB={storageMetrics.usedGB}
-                limitGB={storageMetrics.limit}
-                percent={storageMetrics.percent}
-             />
+             <DocumentStats usedGB={storageMetrics.usedGB} limitGB={storageMetrics.limit} percent={storageMetrics.percent} />
           </div>
 
-          <div className={`flex-1 overflow-auto p-6 transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'} bg-slate-50/50`}>
-             <h3 className={`text-xs font-black ${theme.colors.text.tertiary} mb-4 uppercase tracking-widest`}>File Registry</h3>
-             <DocumentGrid 
-                docs={docs} 
-                canUpload={canUpload} 
-                triggerUpload={triggerUpload} 
-             />
+          <div className={`flex-1 overflow-auto p-8 transition-opacity duration-300 ${searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'} nexus-empty-pattern`}>
+             <DocumentGrid docs={docs} canUpload={canUpload} triggerUpload={triggerUpload} />
           </div>
        </div>
     </div>
   );
 };
-
 export default DocumentControl;

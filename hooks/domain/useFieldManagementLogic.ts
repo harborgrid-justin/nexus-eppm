@@ -44,11 +44,7 @@ export const useFieldManagementLogic = () => {
   };
 
   return {
-      activeGroup,
-      activeView,
-      isPending,
-      navGroups,
-      handleGroupChange,
-      handleItemChange
+      activeGroup, activeView, isPending, navGroups,
+      handleGroupChange, handleItemChange
   };
 };

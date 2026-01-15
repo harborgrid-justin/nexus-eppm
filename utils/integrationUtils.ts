@@ -1,5 +1,4 @@
 
-// Re-export domain specific integration logic
 export * from './integrations/cost';
 export * from './integrations/schedule';
 export * from './integrations/risk';
@@ -9,9 +8,7 @@ export * from './integrations/resource';
 export * from './integrations/stakeholder';
 export * from './integrations/program';
 
-// Communication specific logic (kept here or could be moved to integrations/communication.ts)
 export const checkOpenRFIsForTask = (taskId: string, communicationLogs: any[]): { blocked: boolean, count: number } => {
-  // Mock logic
   const count = communicationLogs.filter(log => log.linkedTaskId === taskId && log.type === 'RFI' && log.status === 'Open').length;
   return { blocked: count > 0, count: count };
 };
