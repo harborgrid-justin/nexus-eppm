@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '../ui/Card';
 import { CustomBarChart } from '../charts/CustomBarChart';
@@ -21,7 +22,7 @@ export const ProgramVisuals: React.FC<{ projects: any[] }> = ({ projects }) => {
     return (
         <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
             <Card className={`${theme.layout.cardPadding} h-[400px] flex flex-col`}>
-                <h3 className={`font-black text-[10px] uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2`}>
+                <h3 className={`font-black text-[10px] uppercase tracking-widest ${theme.colors.text.tertiary} mb-6 flex items-center gap-2`}>
                     <BarChart2 size={14} className="text-nexus-600"/> Financial Comparison Matrix
                 </h3>
                 <div className="flex-1 min-h-0">
@@ -40,24 +41,24 @@ export const ProgramVisuals: React.FC<{ projects: any[] }> = ({ projects }) => {
                 </div>
             </Card>
             <Card className={`${theme.layout.cardPadding} h-[400px] flex flex-col`}>
-                <h3 className={`font-black text-[10px] uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2`}>
+                <h3 className={`font-black text-[10px] uppercase tracking-widest ${theme.colors.text.tertiary} mb-6 flex items-center gap-2`}>
                     <Calendar size={14} className="text-nexus-600"/> Execution Summary Feed
                 </h3>
                 <div className="flex-1 flex flex-col justify-start space-y-4 overflow-y-auto pr-2 scrollbar-thin">
                     {sortedProjects.length > 0 ? sortedProjects.map(p => (
                         <div key={p.id} className="group cursor-pointer">
                             <div className="flex justify-between text-xs mb-1.5">
-                                <span className={`font-bold text-slate-700 group-hover:text-nexus-600 transition-colors`}>{p.name}</span>
+                                <span className={`font-bold ${theme.colors.text.primary} group-hover:text-nexus-600 transition-colors`}>{p.name}</span>
                                 <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
-                                    p.health === 'Good' ? 'bg-green-50 text-green-700 border-green-200' : 
-                                    p.health === 'Warning' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 
-                                    'bg-red-50 text-red-700 border-red-200'
+                                    p.health === 'Good' ? `${theme.colors.semantic.success.bg} ${theme.colors.semantic.success.text} ${theme.colors.semantic.success.border}` : 
+                                    p.health === 'Warning' ? `${theme.colors.semantic.warning.bg} ${theme.colors.semantic.warning.text} ${theme.colors.semantic.warning.border}` : 
+                                    `${theme.colors.semantic.danger.bg} ${theme.colors.semantic.danger.text} ${theme.colors.semantic.danger.border}`
                                 }`}>{p.health}</span>
                             </div>
-                            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200 shadow-inner">
+                            <div className={`w-full ${theme.colors.background} h-1.5 rounded-full overflow-hidden border ${theme.colors.border} shadow-inner`}>
                                 <div className="bg-nexus-600 h-full transition-all duration-700 shadow-sm" style={{ width: `${(p.spent/p.budget*100) || 0}%` }}></div>
                             </div>
-                            <div className={`flex justify-between text-[9px] text-slate-400 mt-1.5 font-mono uppercase tracking-tighter`}>
+                            <div className={`flex justify-between text-[9px] ${theme.colors.text.tertiary} mt-1.5 font-mono uppercase tracking-tighter`}>
                                 <span>{p.startDate}</span>
                                 <span>{p.endDate}</span>
                             </div>

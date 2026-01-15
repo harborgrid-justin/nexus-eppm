@@ -106,7 +106,7 @@ const RequirementsTraceability: React.FC = () => {
                     </div>
                 </div>
                 {canEditProject() ? (
-                    <button onClick={() => handleOpenPanel()} className={`flex items-center gap-2 px-3 py-2 ${theme.colors.accentBg} text-white rounded-lg text-sm font-medium hover:bg-nexus-700 shadow-sm`}>
+                    <button onClick={() => handleOpenPanel()} className={`flex items-center gap-2 px-3 py-2 ${theme.colors.accent} text-white rounded-lg text-sm font-medium hover:brightness-110 shadow-sm`}>
                         <Plus size={14}/> Add Requirement
                     </button>
                 ) : (
@@ -129,7 +129,7 @@ const RequirementsTraceability: React.FC = () => {
                                 <th className={`${theme.components.table.header} text-right`}>Actions</th>
                             </tr>
                         </thead>
-                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}`}>
+                        <tbody className={`${theme.colors.surface} divide-y ${theme.colors.border.replace('border-', 'divide-')}50`}>
                             {filteredReqs.map(req => (
                                 <tr key={req.id} className={`hover:${theme.colors.background} transition-colors group`}>
                                     <td className={`px-6 py-4 whitespace-nowrap text-sm font-mono ${theme.colors.text.tertiary}`}>{req.id}</td>
@@ -174,7 +174,7 @@ const RequirementsTraceability: React.FC = () => {
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
                         <textarea 
-                            className="w-full p-3 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none"
+                            className={`w-full p-3 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none`}
                             value={editingReq?.description}
                             onChange={e => setEditingReq({...editingReq, description: e.target.value})}
                         />
@@ -186,14 +186,14 @@ const RequirementsTraceability: React.FC = () => {
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1">Verification Method</label>
-                            <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingReq?.verificationMethod} onChange={e => setEditingReq({...editingReq, verificationMethod: e.target.value})}>
+                            <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white`} value={editingReq?.verificationMethod} onChange={e => setEditingReq({...editingReq, verificationMethod: e.target.value})}>
                                 <option>Test</option><option>Inspection</option><option>Analysis</option><option>Demonstration</option>
                             </select>
                         </div>
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
-                        <select className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white" value={editingReq?.status} onChange={e => setEditingReq({...editingReq, status: e.target.value})}>
+                        <select className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white`} value={editingReq?.status} onChange={e => setEditingReq({...editingReq, status: e.target.value})}>
                             <option>Draft</option><option>Active</option><option>Verified</option>
                         </select>
                     </div>

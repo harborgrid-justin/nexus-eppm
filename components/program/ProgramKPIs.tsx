@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Activity, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 import StatCard from '../shared/StatCard';

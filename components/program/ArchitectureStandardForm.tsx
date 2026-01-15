@@ -5,6 +5,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface Props {
 
 export const ArchitectureStandardForm: React.FC<Props> = ({ isOpen, onClose }) => {
     const { dispatch } = useData();
+    const theme = useTheme();
     const [formData, setFormData] = useState({
         title: '',
         category: 'Technology',
@@ -36,21 +38,21 @@ export const ArchitectureStandardForm: React.FC<Props> = ({ isOpen, onClose }) =
                 <Input label="Title" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                         <label className="block text-sm font-bold mb-1">Category</label>
-                         <select className="w-full p-2 border rounded" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                         <label className={`${theme.typography.label} block mb-1`}>Category</label>
+                         <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                              <option>Technology</option><option>Data</option><option>Security</option><option>Application</option>
                          </select>
                     </div>
                     <div>
-                         <label className="block text-sm font-bold mb-1">Status</label>
-                         <select className="w-full p-2 border rounded" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                         <label className={`${theme.typography.label} block mb-1`}>Status</label>
+                         <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
                              <option>Baseline</option><option>Proposed</option><option>Retired</option>
                          </select>
                     </div>
                 </div>
                 <div>
-                     <label className="block text-sm font-bold mb-1">Description</label>
-                     <textarea className="w-full p-2 border rounded h-24" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                     <label className={`${theme.typography.label} block mb-1`}>Description</label>
+                     <textarea className={`w-full p-2 border ${theme.colors.border} rounded h-24`} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                 </div>
             </div>
         </Modal>

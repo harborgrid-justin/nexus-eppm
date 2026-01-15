@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Briefcase, GitBranch, GitMerge, Share2 } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -48,7 +49,7 @@ export const ProjectHeader: React.FC<Props> = ({ project, onCreateReflection, on
       <div className="flex gap-2 flex-wrap shrink-0">
         <button 
             onClick={handleShare} 
-            className={`px-4 py-2 bg-white border ${theme.colors.border} ${theme.colors.text.secondary} rounded-xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95`}
+            className={`px-4 py-2 ${theme.colors.surface} border ${theme.colors.border} ${theme.colors.text.secondary} rounded-xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 active:scale-95`}
         >
             <Share2 size={14}/> Share Hub
         </button>

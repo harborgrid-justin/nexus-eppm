@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { WBSNode } from '../../../types';
 import { Save, Layers, Info, ShieldCheck, Plus, BookOpen } from 'lucide-react';
@@ -89,16 +90,16 @@ export const WbsDictionaryPanel: React.FC<WbsDictionaryPanelProps> = ({ selected
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-nexus-200 transition-colors">
+                <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t ${theme.colors.border.replace('border-','border-t-')}100`}>
+                    <div className={`p-4 rounded-2xl bg-slate-50 border ${theme.colors.border} group hover:border-nexus-200 transition-colors`}>
                         <span className="text-[10px] font-black text-slate-400 uppercase block mb-1">Responsibility</span>
                         <span className="text-sm font-bold text-slate-700">Project Manager</span>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-nexus-200 transition-colors">
+                    <div className={`p-4 rounded-2xl bg-slate-50 border ${theme.colors.border} group hover:border-nexus-200 transition-colors`}>
                         <span className="text-[10px] font-black text-slate-400 uppercase block mb-1">Account Code</span>
                         <span className="text-sm font-mono font-bold text-slate-700">GL-4920</span>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group hover:border-nexus-200 transition-colors">
+                    <div className={`p-4 rounded-2xl bg-slate-50 border ${theme.colors.border} group hover:border-nexus-200 transition-colors`}>
                         <span className="text-[10px] font-black text-slate-400 uppercase block mb-1">Quality Standards</span>
                         <span className="text-sm font-bold text-slate-700">ISO-9001</span>
                     </div>

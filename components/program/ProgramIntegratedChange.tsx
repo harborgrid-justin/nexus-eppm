@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -82,7 +83,7 @@ const ProgramIntegratedChange: React.FC<ProgramIntegratedChangeProps> = ({ progr
                             <span className={`text-[9px] font-mono font-bold text-slate-400 uppercase`}>Record: {change.id}</span>
                             <button 
                                 onClick={() => handleReadinessUpdate(change)} 
-                                className="px-6 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-nexus-600 hover:border-nexus-200 shadow-sm transition-all active:scale-95"
+                                className={`px-6 py-2 bg-white border ${theme.colors.border} rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:text-nexus-600 hover:border-nexus-200 shadow-sm transition-all active:scale-95`}
                             >
                                 Update Assessment
                             </button>

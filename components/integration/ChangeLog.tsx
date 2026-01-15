@@ -4,7 +4,6 @@ import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FileDiff, Filter, Search, Download } from 'lucide-react';
 import DataTable from '../common/DataTable';
-// Corrected import path for Column and ChangeOrder from types
 import { ChangeOrder, Column } from '../../types';
 import { Badge } from '../ui/Badge';
 import { formatCurrency } from '../../utils/formatters';

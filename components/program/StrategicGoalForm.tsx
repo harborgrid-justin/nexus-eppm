@@ -5,6 +5,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Target } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface StrategicGoalFormProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface StrategicGoalFormProps {
 }
 
 export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, onClose, onSave, goal }) => {
+  const theme = useTheme();
   const [formData, setFormData] = useState<Partial<StrategicGoal>>({
     name: '',
     description: '',
@@ -47,7 +49,7 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
     >
         <div className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Goal Name</label>
+                <label className={`${theme.typography.label} block mb-1`}>Goal Name</label>
                 <Input 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
@@ -55,9 +57,9 @@ export const StrategicGoalForm: React.FC<StrategicGoalFormProps> = ({ isOpen, on
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Description & KPIs</label>
+                <label className={`${theme.typography.label} block mb-1`}>Description & KPIs</label>
                 <textarea 
-                    className="w-full p-4 border border-slate-300 rounded-lg text-sm h-48 focus:ring-2 focus:ring-nexus-500 outline-none"
+                    className={`w-full p-4 border ${theme.colors.border} rounded-lg text-sm h-48 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface}`}
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
                     placeholder="Describe the goal and how success will be measured..."

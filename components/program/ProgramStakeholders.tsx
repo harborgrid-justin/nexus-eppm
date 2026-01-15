@@ -72,7 +72,7 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                                             s.category === 'Operational' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-50 text-slate-700 border-slate-200'
                                         }`}>{s.category}</span>
                                     </td>
-                                    <td className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-tighter">
+                                    <td className={`px-6 py-4 text-xs font-black ${theme.colors.text.tertiary} uppercase tracking-tighter`}>
                                         INF: {s.influence} / INT: {s.interest}
                                     </td>
                                     <td className="px-6 py-4">
@@ -181,13 +181,13 @@ const ProgramStakeholders: React.FC<ProgramStakeholdersProps> = ({ programId }) 
                     <div className="grid grid-cols-2 gap-6">
                          <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Strategic Domain</label>
-                            <select className="w-full p-3 border border-slate-300 rounded-xl text-sm font-bold bg-slate-50" value={editingStakeholder?.category} onChange={e => setEditingStakeholder && setEditingStakeholder({...editingStakeholder!, category: e.target.value as any})}>
+                            <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold bg-slate-50`} value={editingStakeholder?.category} onChange={e => setEditingStakeholder && setEditingStakeholder({...editingStakeholder!, category: e.target.value as any})}>
                                 <option>Strategic</option><option>Operational</option><option>External</option>
                             </select>
                          </div>
                          <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Engagement Level</label>
-                            <select className="w-full p-3 border border-slate-300 rounded-xl text-sm font-bold bg-slate-50" value={editingStakeholder?.engagementLevel} onChange={e => setEditingStakeholder && setEditingStakeholder({...editingStakeholder!, engagementLevel: e.target.value as any})}>
+                            <select className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm font-bold bg-slate-50`} value={editingStakeholder?.engagementLevel} onChange={e => setEditingStakeholder && setEditingStakeholder({...editingStakeholder!, engagementLevel: e.target.value as any})}>
                                 <option>Leading</option><option>Supportive</option><option>Neutral</option><option>Resistant</option>
                             </select>
                          </div>

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Users, AlertTriangle, Briefcase, TrendingUp, ShieldCheck } from 'lucide-react';
@@ -82,17 +83,17 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
             <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm p-8 flex flex-col`}>
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h3 className="font-black text-slate-800 text-sm uppercase tracking-widest flex items-center gap-2">
+                        <h3 className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-widest flex items-center gap-2`}>
                              <TrendingUp size={16} className="text-nexus-600"/> Shared Capabilities
                         </h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Aggregated demand heatmap by role</p>
+                        <p className={`text-[10px] ${theme.colors.text.tertiary} font-bold uppercase mt-1`}>Aggregated demand heatmap by role</p>
                     </div>
                 </div>
                 <div className="space-y-6 flex-1 overflow-y-auto pr-2 scrollbar-thin">
                     {roleDistribution.length > 0 ? roleDistribution.map(role => (
                         <div key={role.role} className="space-y-2 group">
                             <div className="flex justify-between text-xs items-end">
-                                <span className="font-black text-slate-700 uppercase tracking-tight group-hover:text-nexus-700 transition-colors">{role.role}</span>
+                                <span className={`font-black ${theme.colors.text.primary} uppercase tracking-tight group-hover:text-nexus-700 transition-colors`}>{role.role}</span>
                                 <span className={`font-black font-mono ${
                                     role.status === 'Critical' ? 'text-red-600' : 
                                     role.status === 'Overloaded' ? 'text-orange-500' : 'text-green-600'
@@ -109,7 +110,7 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                                     style={{ width: `${Math.min((role.demand / role.capacity) * 100, 100)}%` }}
                                 ></div>
                             </div>
-                            <div className="flex justify-between text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                            <div className={`flex justify-between text-[9px] ${theme.colors.text.tertiary} font-bold uppercase tracking-widest`}>
                                 <span>Projected Demand: {role.demand}h</span>
                                 <span>Regional Cap: {role.capacity}h</span>
                             </div>
@@ -138,13 +139,13 @@ const ProgramResources: React.FC<ProgramResourcesProps> = ({ programId }) => {
                     {criticalResources.length > 0 ? (
                         <div className="space-y-4">
                             {criticalResources.map(res => (
-                                <div key={res.id} className="flex items-start gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-red-300 transition-all cursor-default group">
+                                <div key={res.id} className={`flex items-start gap-4 p-4 ${theme.colors.background} border ${theme.colors.border} rounded-2xl shadow-sm hover:border-red-300 transition-all cursor-default group`}>
                                     <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center font-black text-white shadow-lg group-hover:scale-105 transition-transform">
                                         {res.name.charAt(0)}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-black text-slate-800 text-sm uppercase tracking-tight truncate">{res.name}</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">{res.role}</p>
+                                        <p className={`font-black ${theme.colors.text.primary} text-sm uppercase tracking-tight truncate`}>{res.name}</p>
+                                        <p className={`text-[10px] ${theme.colors.text.tertiary} font-bold uppercase mt-0.5`}>{res.role}</p>
                                         <div className="mt-3 flex items-center gap-3">
                                              <div className="flex-1 bg-slate-100 h-1.5 rounded-full overflow-hidden">
                                                  <div className="bg-red-500 h-full" style={{ width: `${Math.min(100, (res.allocated/res.capacity)*100)}%` }}></div>

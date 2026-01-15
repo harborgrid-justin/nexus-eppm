@@ -25,14 +25,14 @@ export const ChangeSummary: React.FC<ChangeSummaryProps> = ({
              <h3 className={`font-bold ${theme.colors.text.primary} flex items-center gap-2`}><FileText size={18} /> Change Summary</h3>
            </div>
             <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm transition-all hover:border-emerald-200">
+              <div className={`flex items-center justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm transition-all hover:border-emerald-200`}>
                  <div className="flex items-center gap-3">
                     <div className={`p-2 ${theme.colors.surface} rounded-lg text-emerald-600 shadow-sm`}><CheckCircle size={18}/></div>
                     <span className="font-bold text-emerald-900 text-sm">Approved Changes</span>
                  </div>
                  <span className="font-mono font-black text-emerald-700">{formatCurrency(approvedCOAmount)}</span>
               </div>
-              <div className="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-100 shadow-sm transition-all hover:border-amber-200">
+              <div className={`flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-100 shadow-sm transition-all hover:border-amber-200`}>
                  <div className="flex items-center gap-3">
                     <div className={`p-2 ${theme.colors.surface} rounded-lg text-amber-600 shadow-sm`}><Clock size={18}/></div>
                     <span className="font-bold text-amber-900 text-sm">Pending Approval</span>

@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState, useEffect } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Map as MapIcon, Loader2 } from 'lucide-react';
@@ -74,31 +75,31 @@ const ProgramRoadmap: React.FC<ProgramRoadmapProps> = ({ programId }) => {
             <div className={`flex items-center gap-4 text-[10px] font-black uppercase px-6 ${theme.colors.surface} border ${theme.colors.border} py-3 rounded-2xl shadow-sm`}>
                 <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-nexus-500 rounded-full shadow-[0_0_8px_#0ea5e9]"></div> Active</span>
                 <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></div> Delay Vector</span>
-                <div className="w-px h-4 bg-slate-200 mx-2"></div>
-                <span className="text-slate-400">Context: {programId}</span>
+                <div className={`w-px h-4 ${theme.colors.border} mx-2`}></div>
+                <span className={`${theme.colors.text.tertiary}`}>Context: {programId}</span>
             </div>
         </div>
 
         <div className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex-1 min-h-[400px] relative`}>
             <div className={`flex border-b ${theme.colors.border} ${theme.colors.background}`}>
-                <div className={`w-64 border-r ${theme.colors.border} p-5 font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] bg-slate-50/50`}>Component Track</div>
+                <div className={`w-64 border-r ${theme.colors.border} p-5 font-black ${theme.colors.text.tertiary} text-[10px] uppercase tracking-[0.2em] bg-slate-50/50`}>Component Track</div>
                 <div className="flex-1 flex">
                     {years.map(y => (
-                        <div key={y} className={`flex-1 border-r ${theme.colors.border} p-3 text-center font-black text-slate-400 text-sm`}>{y}</div>
+                        <div key={y} className={`flex-1 border-r ${theme.colors.border} p-3 text-center font-black ${theme.colors.text.tertiary} text-sm`}>{y}</div>
                     ))}
                 </div>
             </div>
 
             <div className="overflow-y-auto scrollbar-thin">
                 {projects.map(proj => (
-                    <div key={proj.id} className={`flex border-b border-slate-50 min-h-[80px] group hover:${theme.colors.background}/50 transition-colors`}>
+                    <div key={proj.id} className={`flex border-b ${theme.colors.border} min-h-[80px] group hover:${theme.colors.background}/50 transition-colors`}>
                         <div className={`w-64 border-r ${theme.colors.border} p-5 shrink-0 bg-white group-hover:bg-slate-50/50 transition-colors`}>
-                            <h4 className={`font-black text-sm text-slate-800 uppercase tracking-tight truncate`}>{proj.name}</h4>
-                            <p className={`text-[10px] text-slate-400 font-mono mt-1 font-bold`}>{proj.code}</p>
+                            <h4 className={`font-black text-sm ${theme.colors.text.primary} uppercase tracking-tight truncate`}>{proj.name}</h4>
+                            <p className={`text-[10px] ${theme.colors.text.tertiary} font-mono mt-1 font-bold`}>{proj.code}</p>
                         </div>
                         <div className="flex-1 relative my-auto h-full px-4">
                             <div className="absolute inset-0 flex pointer-events-none opacity-30">
-                                {years.map((_, i) => <div key={i} className={`flex-1 border-r border-dashed border-slate-200`}></div>)}
+                                {years.map((_, i) => <div key={i} className={`flex-1 border-r border-dashed ${theme.colors.border}`}></div>)}
                             </div>
                             
                             <div 

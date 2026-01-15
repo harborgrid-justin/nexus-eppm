@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { Server, ShieldCheck, Database, Layers, CheckCircle, Plus, Settings } from 'lucide-react';
@@ -74,7 +75,7 @@ const ProgramArchitecture: React.FC<ProgramArchitectureProps> = ({ programId }) 
                 </div>
             </div>
 
-            <div className={`${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[400px]`}>
+            <div className={`${theme.colors.surface} rounded-[2rem] border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col min-h-[400px]`}>
                 <div className={`p-6 border-b ${theme.colors.border} bg-slate-50/50`}>
                     <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
                         <CheckCircle size={18} className="text-purple-500"/> Technical Review Gates (TRG)

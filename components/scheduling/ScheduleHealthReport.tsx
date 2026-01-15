@@ -1,10 +1,9 @@
 
 import React, { useMemo } from 'react';
-import { Project, Task } from '../../types';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { ShieldCheck, ShieldAlert, Activity, Info, BarChart } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
-import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 
 const ScheduleHealthReport: React.FC = () => {
   const { project } = useProjectWorkspace();
@@ -138,37 +137,4 @@ const ScheduleHealthReport: React.FC = () => {
                 </table>
             </div>
             
-            <div className={`mt-8 grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
-                 <div className="p-6 bg-indigo-900 text-white rounded-xl shadow-lg">
-                    <h3 className="font-bold flex items-center gap-2 mb-4"><Info size={18}/> Master Scheduler Recommendation</h3>
-                    <ul className="text-indigo-100 text-sm leading-relaxed list-disc list-inside space-y-2">
-                        {recommendations.map((rec, i) => <li key={i}>{rec}</li>)}
-                    </ul>
-                 </div>
-                 <div className={`${theme.components.card} p-6`}>
-                    <h3 className={`${theme.typography.h3} mb-4 flex items-center gap-2`}><BarChart size={18}/> Logic Type Distribution</h3>
-                    <div className="flex items-end gap-2 h-32">
-                        <div className="flex-1 bg-nexus-500 rounded-t-md relative group">
-                            <div className="h-full"></div>
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold">88% FS</span>
-                        </div>
-                        <div className="flex-1 bg-yellow-400 rounded-t-md h-[12%] relative">
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-yellow-600">8% SS</span>
-                        </div>
-                        <div className="flex-1 bg-orange-400 rounded-t-md h-[4%] relative">
-                            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-orange-600">4% FF</span>
-                        </div>
-                    </div>
-                    <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-                        <span>Finish-Start</span>
-                        <span>Start-Start</span>
-                        <span>Finish-Finish</span>
-                    </div>
-                 </div>
-            </div>
-        </div>
-    </div>
-  );
-};
-
-export default ScheduleHealthReport;
+            <div className={`mt-8 grid grid-cols-1 lg:grid-cols-2

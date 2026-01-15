@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { useWbsManager } from '../../hooks/index';
+import { useWbsManager } from '../../hooks/useWbsManager';
 import { WBSNode } from '../../types/index';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -14,7 +15,7 @@ interface WBSManagerProps {
 }
 
 const WBSManager: React.FC<WBSManagerProps> = ({ projectId }) => {
-  const { state, dispatch } = useData();
+  const { dispatch } = useData();
   const { canEditProject } = usePermissions();
   
   const {

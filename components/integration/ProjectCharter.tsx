@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -32,7 +33,7 @@ const ProjectCharter: React.FC = () => {
 
   return (
     <div className={`space-y-8 animate-in fade-in duration-500`}>
-        <div className="flex justify-between items-start border-b border-slate-100 pb-6">
+        <div className={`flex justify-between items-start border-b ${theme.colors.border} pb-6`}>
             <div>
                 <h2 className={theme.typography.h1}>Project Charter</h2>
                 <p className={theme.typography.body}>Authorizing document for corporate investment.</p>
@@ -78,7 +79,7 @@ const ProjectCharter: React.FC = () => {
                         <div className="space-y-6">
                             <h4 className={`text-[10px] font-black text-slate-400 uppercase tracking-widest`}>Authorized Budgetary Ceilings</h4>
                             <div className="space-y-4">
-                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 group hover:border-nexus-200 transition-colors">
+                                <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border} group hover:border-nexus-200 transition-colors`}>
                                     <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Approved Funding</span>
                                     <span className={`text-2xl font-black text-slate-900 font-mono`}>{formatCurrency(project.budget || 0)}</span>
                                 </div>

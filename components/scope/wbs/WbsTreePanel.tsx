@@ -4,6 +4,7 @@ import WBSNodeComponent from '../WBSNodeComponent';
 import { Plus, Loader2 } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { WBSNode } from '../../../types';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface WbsManagerProps {
     selectedNode: WBSNode | null;
@@ -32,6 +33,7 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
     } = managerProps;
 
     const [isPending, startTransition] = useTransition();
+    const theme = useTheme();
 
     const renderNode = (node: WBSNode, level: number) => {
         const isOpen = openNodes.has(node.id);
@@ -60,8 +62,8 @@ export const WbsTreePanel: React.FC<WbsTreePanelProps> = ({ wbsTree, managerProp
     };
 
     return (
-        <div className="w-1/3 min-w-[350px] border-r border-border bg-slate-50 flex flex-col">
-            <div className="p-4 border-b border-border flex justify-between items-center bg-white shadow-sm">
+        <div className={`w-1/3 min-w-[350px] border-r ${theme.colors.border} bg-slate-50 flex flex-col`}>
+            <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center bg-white shadow-sm`}>
                 <h3 className="font-black text-slate-700 text-xs uppercase tracking-widest">WBS Hierarchy</h3>
                 <div className="flex gap-2">
                     {isPending && <Loader2 className="animate-spin text-nexus-500 self-center" size={14}/>}

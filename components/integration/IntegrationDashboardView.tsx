@@ -22,23 +22,5 @@ export const IntegrationDashboardView: React.FC<IntegrationDashboardViewProps> =
       <StatCard title="Open Risks" value={riskProfile.openRisks} subtext={`${riskProfile.highImpactRisks} critical threats`} icon={AlertTriangle} />
       <StatCard title="Quality Pass Rate" value={formatPercentage(qualityProfile.passRate)} subtext="Last 30 days avg" icon={ShieldCheck} trend={qualityProfile.passRate >= 95 ? 'up' : undefined} />
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-       <div className="bg-white border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div><p className="text-[10px] font-bold text-slate-400 uppercase">Scope Creep</p><p className="text-xl font-bold">{phase2Metrics.scopeCreep.toFixed(1)}%</p></div>
-          <div className="p-2 bg-orange-50 rounded-xl text-orange-500"><AlertOctagon size={22} /></div>
-       </div>
-       <div className="bg-white border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div><p className="text-[10px] font-bold text-slate-400 uppercase">Risk EMV</p><p className="text-xl font-bold">{formatCompactCurrency(riskProfile.exposure)}</p></div>
-          <div className="p-2 bg-red-50 rounded-xl text-red-500"><ShieldCheck size={22} /></div>
-       </div>
-       <div className="bg-white border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div><p className="text-[10px] font-bold text-slate-400 uppercase">Solvency</p><p className="text-xl font-bold">{financials.solvency}</p></div>
-          <div className="p-2 bg-blue-50 rounded-xl text-blue-500"><Anchor size={22} /></div>
-       </div>
-       <div className="bg-white border p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div><p className="text-[10px] font-bold text-slate-400 uppercase">SPI</p><p className="text-xl font-bold">{financials.evm.spi.toFixed(2)}</p></div>
-          <div className="p-2 bg-purple-50 rounded-xl text-purple-500"><Zap size={22} /></div>
-       </div>
-    </div>
   </div>
 );

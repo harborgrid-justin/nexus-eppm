@@ -6,6 +6,7 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { generateId } from '../../utils/formatters';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
     isOpen: boolean;
@@ -16,6 +17,7 @@ interface Props {
 
 export const BenefitForm: React.FC<Props> = ({ isOpen, onClose, programId, projects }) => {
     const { dispatch } = useData();
+    const theme = useTheme();
     const [formData, setFormData] = useState<Partial<Benefit>>({
         description: '',
         type: 'Financial',
@@ -49,19 +51,19 @@ export const BenefitForm: React.FC<Props> = ({ isOpen, onClose, programId, proje
                 <Input label="Description" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold mb-1">Type</label>
-                        <select className="w-full p-2 border rounded" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as any})}>
+                        <label className={`${theme.typography.label} block mb-1`}>Type</label>
+                        <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.type} onChange={e => setFormData({...formData, type: e.target.value as any})}>
                             <option>Financial</option><option>Non-Financial</option>
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold mb-1">Target Value</label>
+                        <label className={`${theme.typography.label} block mb-1`}>Target Value</label>
                         <Input type="number" value={formData.value} onChange={e => setFormData({...formData, value: parseFloat(e.target.value)})} />
                     </div>
                 </div>
                 <div>
-                     <label className="block text-sm font-bold mb-1">Linked Component</label>
-                     <select className="w-full p-2 border rounded" value={formData.componentId} onChange={e => setFormData({...formData, componentId: e.target.value})}>
+                     <label className={`${theme.typography.label} block mb-1`}>Linked Component</label>
+                     <select className={`w-full p-2 border ${theme.colors.border} rounded`} value={formData.componentId} onChange={e => setFormData({...formData, componentId: e.target.value})}>
                          <option value={programId}>Program Level</option>
                          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                      </select>

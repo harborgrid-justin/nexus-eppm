@@ -172,7 +172,7 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Gate Type</label>
                         <select 
-                            className={`w-full p-3 border border-slate-300 rounded-xl text-sm bg-slate-50 font-bold focus:ring-2 focus:ring-nexus-500 outline-none`}
+                            className={`w-full p-3 border ${theme.colors.border} rounded-xl text-sm bg-slate-50 font-bold focus:ring-2 focus:ring-nexus-500 outline-none`}
                             value={newGate.type} 
                             onChange={e => setNewGate({...newGate, type: e.target.value})}
                         >
@@ -187,7 +187,7 @@ const ProgramStageGates: React.FC<ProgramStageGatesProps> = ({ programId }) => {
                 <div>
                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Scope & Objective</label>
                     <textarea 
-                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none bg-slate-50 font-medium`}
+                        className={`w-full p-4 border ${theme.colors.border} rounded-xl text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none resize-none bg-slate-50 font-medium`}
                         value={newGate.description}
                         onChange={e => setNewGate({...newGate, description: e.target.value})}
                         placeholder="Define the criteria for entry and exit of this gate..."

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useDeferredValue } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -88,7 +89,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
 
         <div className={`grid grid-cols-1 lg:grid-cols-3 ${theme.layout.gridGap}`}>
             <div className="lg:col-span-2 space-y-4">
-                <div className={`flex gap-4 items-center bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-6`}>
+                <div className={`flex gap-4 items-center bg-white p-3 rounded-2xl border ${theme.colors.border} shadow-sm mb-6`}>
                     <div className="relative flex-1">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                         <input 
@@ -99,7 +100,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                             className={`pl-10 pr-4 py-2 w-full text-sm border-0 focus:ring-0 outline-none bg-transparent font-medium`}
                         />
                     </div>
-                    <div className="h-6 w-px bg-slate-200"></div>
+                    <div className={`h-6 w-px ${theme.colors.border}`}></div>
                     <select 
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
@@ -113,7 +114,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 </div>
 
                 {filteredIssues.map(issue => (
-                    <div key={issue.id} className={`bg-white p-6 rounded-[2rem] border-l-8 shadow-sm transition-all group relative border-y border-r border-slate-200 hover:border-nexus-300 ${
+                    <div key={issue.id} className={`bg-white p-6 rounded-[2rem] border-l-8 shadow-sm transition-all group relative border-y border-r ${theme.colors.border} hover:border-nexus-300 ${
                         issue.priority === 'Critical' ? 'border-l-red-500' : issue.priority === 'High' ? 'border-l-orange-500' : 'border-l-yellow-400'
                     }`}>
                         <div className="absolute top-6 right-6 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -123,13 +124,13 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
 
                         <div className="flex justify-between items-start mb-4 pr-16">
                             <div>
-                                <h3 className="font-black text-slate-900 text-lg uppercase tracking-tight leading-tight">{issue.title}</h3>
-                                <p className="text-[10px] text-slate-400 font-mono font-bold mt-1 uppercase tracking-tighter">{issue.id} • Owner: {issue.ownerId}</p>
+                                <h3 className={`font-black ${theme.colors.text.primary} text-lg uppercase tracking-tight leading-tight`}>{issue.title}</h3>
+                                <p className={`text-[10px] ${theme.colors.text.tertiary} font-mono font-bold mt-1 uppercase tracking-tighter`}>{issue.id} • Owner: {issue.ownerId}</p>
                             </div>
                             <Badge variant={issue.status === 'Escalated' ? 'danger' : issue.status === 'Resolved' ? 'success' : 'warning'}>{issue.status}</Badge>
                         </div>
                         
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium mb-6">{issue.description}</p>
+                        <p className={`text-sm ${theme.colors.text.secondary} leading-relaxed font-medium mb-6`}>{issue.description}</p>
                         
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-start gap-3">
                             <ShieldAlert size={16} className="text-slate-400 mt-0.5 shrink-0"/> 
@@ -168,16 +169,16 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
 
             <div className="space-y-6">
                 <div className={`${theme.colors.surface} p-8 rounded-[2rem] border ${theme.colors.border} shadow-sm flex flex-col`}>
-                    <h3 className="font-black text-slate-800 text-[10px] uppercase tracking-widest mb-8 flex items-center gap-2 border-b border-slate-50 pb-4">
+                    <h3 className={`font-black ${theme.colors.text.primary} text-[10px] uppercase tracking-widest mb-8 flex items-center gap-2 border-b border-slate-50 pb-4`}>
                         <ArrowUpRight size={18} className="text-nexus-600"/> Authorization Hierarchy
                     </h3>
                     <div className="relative pl-6 space-y-10">
-                        <div className="absolute left-1.5 top-2 bottom-2 w-px bg-slate-200"></div>
+                        <div className={`absolute left-1.5 top-2 bottom-2 w-px ${theme.colors.border}`}></div>
                         {escalationPath.map((node, i) => (
                             <div key={i} className="relative group">
                                 <div className={`absolute -left-6 top-1.5 w-3 h-3 rounded-full border-2 border-white shadow-sm transition-all group-hover:scale-125 ${i === 0 ? 'bg-nexus-500 shadow-nexus-500/20' : 'bg-slate-300'}`}></div>
                                 <h4 className={`text-xs font-black uppercase tracking-tight ${i === 0 ? 'text-nexus-700' : 'text-slate-700'}`}>{node.role}</h4>
-                                <p className="text-[10px] text-slate-400 leading-relaxed font-bold mt-1">{node.responsibilities}</p>
+                                <p className={`text-[10px] ${theme.colors.text.tertiary} leading-relaxed font-bold mt-1`}>{node.responsibilities}</p>
                             </div>
                         ))}
                     </div>
@@ -205,7 +206,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 <div>
                     <label className={theme.typography.label + " block mb-1.5 ml-1"}>Narrative Summary</label>
                     <textarea 
-                        className={`w-full p-4 border border-slate-300 rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none bg-slate-50/30 transition-all shadow-inner`}
+                        className={`w-full p-4 border ${theme.colors.border} rounded-xl text-sm h-32 focus:ring-4 focus:ring-nexus-500/10 focus:border-nexus-500 outline-none resize-none bg-slate-50/30 transition-all shadow-inner`}
                         value={currentIssue.description} 
                         onChange={e => setCurrentIssue({...currentIssue, description: e.target.value})} 
                     />
@@ -222,7 +223,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                 </div>
                 <div>
                     <label className={theme.typography.label + " block mb-3 ml-1"}>Impacted Project Partitions</label>
-                    <div className="space-y-2 border border-slate-200 rounded-2xl p-4 bg-slate-50/50 max-h-48 overflow-y-auto scrollbar-thin shadow-inner">
+                    <div className={`space-y-2 border ${theme.colors.border} rounded-2xl p-4 bg-slate-50/50 max-h-48 overflow-y-auto scrollbar-thin shadow-inner`}>
                         {projects.map(p => (
                             <label key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${currentIssue.impactedProjectIds?.includes(p.id) ? 'bg-white border-nexus-300 shadow-sm' : 'border-transparent hover:bg-white/50'}`}>
                                 <input 
@@ -236,7 +237,7 @@ const ProgramIssues: React.FC<ProgramIssuesProps> = ({ programId }) => {
                                 />
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-black text-slate-800 uppercase truncate">{p.name}</p>
-                                    <p className="text-[9px] text-slate-400 font-mono font-bold mt-0.5">{p.code}</p>
+                                    <p className={`text-[9px] ${theme.colors.text.tertiary} font-mono font-bold mt-0.5`}>{p.code}</p>
                                 </div>
                             </label>
                         ))}

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useProgramTradeoffLogic } from '../../hooks/domain/useProgramTradeoffLogic';
 import { Scale, TrendingUp, Target, DollarSign } from 'lucide-react';

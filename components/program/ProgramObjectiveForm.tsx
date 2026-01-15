@@ -4,6 +4,7 @@ import { ProgramObjective, StrategicGoal, Project } from '../../types';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Layers } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ProgramObjectiveFormProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ProgramObjectiveFormProps {
 }
 
 export const ProgramObjectiveForm: React.FC<ProgramObjectiveFormProps> = ({ isOpen, onClose, onSave, objective, strategicGoals, projects }) => {
+  const theme = useTheme();
   const [formData, setFormData] = useState<Partial<ProgramObjective>>({
     description: '',
     linkedStrategicGoalId: '',
@@ -48,18 +50,18 @@ export const ProgramObjectiveForm: React.FC<ProgramObjectiveFormProps> = ({ isOp
     >
         <div className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Objective Description</label>
+                <label className={`${theme.typography.label} block mb-1`}>Objective Description</label>
                 <textarea 
-                    className="w-full p-4 border border-slate-300 rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none"
+                    className={`w-full p-4 border ${theme.colors.border} rounded-lg text-sm h-32 focus:ring-2 focus:ring-nexus-500 outline-none ${theme.colors.surface}`}
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
                     placeholder="e.g. Deliver integrated ticketing system by Q4..."
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Supports Strategic Goal</label>
+                <label className={`${theme.typography.label} block mb-1`}>Supports Strategic Goal</label>
                 <select 
-                    className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500"
+                    className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500`}
                     value={formData.linkedStrategicGoalId}
                     onChange={e => setFormData({...formData, linkedStrategicGoalId: e.target.value})}
                 >
@@ -68,10 +70,10 @@ export const ProgramObjectiveForm: React.FC<ProgramObjectiveFormProps> = ({ isOp
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Linked Projects (Execution)</label>
-                <div className="border border-slate-200 rounded-lg max-h-64 overflow-y-auto p-2 bg-slate-50">
+                <label className={`${theme.typography.label} block mb-2`}>Linked Projects (Execution)</label>
+                <div className={`border ${theme.colors.border} rounded-lg max-h-64 overflow-y-auto p-2 bg-slate-50`}>
                     {projects.map(p => (
-                        <label key={p.id} className="flex items-center gap-3 p-3 hover:bg-white rounded cursor-pointer border border-transparent hover:border-slate-100 transition-colors">
+                        <label key={p.id} className={`flex items-center gap-3 p-3 hover:bg-white rounded cursor-pointer border border-transparent hover:border-slate-100 transition-colors`}>
                             <input 
                                 type="checkbox"
                                 className="rounded text-nexus-600 focus:ring-nexus-500 h-4 w-4"
