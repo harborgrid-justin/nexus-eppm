@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -60,7 +61,7 @@ export const CostSheet: React.FC<CostSheetProps> = ({ projectId }) => {
             </div>
         </div>
         
-        <div className="flex-1 overflow-auto bg-white relative">
+        <div className="flex-1 overflow-auto bg-white relative text-slate-800">
             {computedRows.length === 0 ? (
                  <div className="h-full flex flex-col justify-center p-8">
                     <EmptyGrid title="Cost Breakdown Structure Empty" description="Initialize the CBS for this project to start tracking actuals against budget." icon={FileSpreadsheet} />

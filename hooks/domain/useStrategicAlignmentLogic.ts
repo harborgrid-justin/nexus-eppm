@@ -5,8 +5,8 @@ import { useData } from '../../context/DataContext';
 export const useStrategicAlignmentLogic = () => {
     const { state } = useData();
     const boardData = useMemo(() => {
-        const drivers = state.strategicDrivers.length > 0 
-            ? state.strategicDrivers.map(d => d.name)
+        const drivers = state.strategicGoals.length > 0 
+            ? state.strategicGoals.map(d => d.name)
             : ['Innovation & Growth', 'Operational Efficiency', 'Regulatory & Compliance', 'Keep the Lights On'];
             
         const groups: Record<string, typeof state.projects> = {};
@@ -22,7 +22,7 @@ export const useStrategicAlignmentLogic = () => {
             id: driver, title: driver, projects: groups[driver] || [],
             totalBudget: (groups[driver] || []).reduce((sum, p) => sum + p.budget, 0)
         }));
-    }, [state.projects, state.strategicDrivers]);
+    }, [state.projects, state.strategicGoals]);
 
     const totalPortfolioBudget = useMemo(() => state.projects.reduce((s, p) => s + p.budget, 0), [state.projects]);
     return { boardData, totalPortfolioBudget };

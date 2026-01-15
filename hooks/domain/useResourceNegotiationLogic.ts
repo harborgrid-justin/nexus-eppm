@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,7 +12,6 @@ export const useResourceNegotiationLogic = () => {
     const [viewMode, setViewMode] = useState<'manager' | 'requester'>('manager');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    // Derived State from Global Store
     const requests = useMemo(() => state.resourceRequests || [], [state.resourceRequests]);
     
     const filteredRequests = useMemo(() => {
@@ -25,7 +25,6 @@ export const useResourceNegotiationLogic = () => {
         requests.find(r => r.id === selectedReqId), 
     [requests, selectedReqId]);
 
-    // Predictive Impact Engine
     const impactData = useMemo(() => {
         if (!selectedReq) return null;
         
@@ -73,7 +72,7 @@ export const useResourceNegotiationLogic = () => {
             role: data.role,
             quantity: Number(data.quantity) || 1,
             startDate: data.startDate || new Date().toISOString().split('T')[0],
-            endDate: data.endDate || new Date(Date.now() + 2592000000).toISOString().split('T')[0], // +30 days
+            endDate: data.endDate || new Date(Date.now() + 2592000000).toISOString().split('T')[0], 
             status: 'Pending',
             notes: data.notes
         };

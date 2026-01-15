@@ -1,14 +1,30 @@
 
 import { Project, Task, WBSNode, Baseline } from './project';
-import { Program, ProgramRisk, ProgramIssue, ProgramStakeholder, ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, ProgramStageGate, IntegratedChangeRequest, StrategicGoal, StrategicDriver, ProgramDependency, GovernanceDecision, TradeoffScenario } from './program';
+import { 
+    Program, ProgramRisk, ProgramIssue, ProgramStakeholder, 
+    ProgramCommunicationItem, ProgramBudgetAllocation, ProgramFundingGate, 
+    ProgramStageGate, IntegratedChangeRequest, StrategicGoal, 
+    StrategicDriver, ProgramDependency, GovernanceDecision, 
+    TradeoffScenario, ProgramChangeRequest, Benefit,
+    ProgramOutcome, ProgramQualityStandard, ProgramAssuranceReview,
+    ProgramTransitionItem, ProgramArchitectureStandard, ProgramArchitectureReview,
+    ProgramObjective
+} from './program';
 import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
-import { Risk, Issue, IssueCode } from './risk';
-import { BudgetLineItem, Expense, ChangeOrder, FundingSource, ExpenseCategory, CostBookItem, Invoice, CostReport, CostEstimate, ProjectFunding, BudgetLogItem } from './finance';
-import { QualityReport, NonConformanceReport, QualityStandard } from './common';
+import { Risk, Issue, IssueCode, PortfolioRisk } from './risk';
+import { 
+    BudgetLineItem, Expense, ChangeOrder, FundingSource, 
+    ExpenseCategory, CostBookItem, Invoice, CostReport, 
+    CostEstimate, ProjectFunding, BudgetLogItem 
+} from './finance';
+import { QualityStandard, DataJob, Integration, ActivityCode, WorkflowDefinition, EtlMapping, GlobalChangeRule } from './common';
+import { QualityReport, NonConformanceReport } from './quality';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
-import { ServiceStatus } from './business';
-import { KanbanTask, ActivityItem } from './collaboration';
+import { ServiceStatus, SystemAlert, OrganizationProfile, SecurityPolicy, KnowledgeArticle, PipelineStage, SchedulingLogic } from './business';
+import { DailyLogEntry, SafetyIncident, WorkLog, DelayLog, PunchItem } from './field';
+import { KanbanTask, ActivityItem, TeamEvent } from './collaboration';
+import { ReportDefinition } from './analytics';
 
 export type Action =
     // Project & Schedule
@@ -29,22 +45,24 @@ export type Action =
     | { type: 'ADD_PROGRAM'; payload: Program }
     | { type: 'UPDATE_PROGRAM'; payload: Program }
     | { type: 'DELETE_PROGRAM'; payload: string }
-    | { type: 'PROGRAM_ADD_OBJECTIVE'; payload: any }
-    | { type: 'PROGRAM_UPDATE_OBJECTIVE'; payload: any }
+    | { type: 'PROGRAM_ADD_OBJECTIVE'; payload: ProgramObjective }
+    | { type: 'PROGRAM_UPDATE_OBJECTIVE'; payload: ProgramObjective }
     | { type: 'PROGRAM_DELETE_OBJECTIVE'; payload: string }
-    | { type: 'PROGRAM_UPDATE_GATE'; payload: any }
+    | { type: 'PROGRAM_UPDATE_GATE'; payload: ProgramStageGate | ProgramFundingGate }
     | { type: 'ADD_STRATEGIC_DRIVER'; payload: StrategicDriver }
     | { type: 'GOVERNANCE_ADD_DECISION'; payload: GovernanceDecision }
     | { type: 'GOVERNANCE_UPDATE_DECISION'; payload: GovernanceDecision }
     | { type: 'GOVERNANCE_DELETE_DECISION'; payload: string }
     | { type: 'UPDATE_PORTFOLIO_SCENARIO'; payload: any }
+    | { type: 'PROGRAM_UPDATE_ALLOCATION'; payload: ProgramBudgetAllocation }
     | { type: 'PROGRAM_ADD_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_UPDATE_STAKEHOLDER'; payload: ProgramStakeholder }
     | { type: 'PROGRAM_DELETE_STAKEHOLDER'; payload: string }
     | { type: 'PROGRAM_ADD_COMM_ITEM'; payload: ProgramCommunicationItem }
     | { type: 'PROGRAM_UPDATE_COMM_ITEM'; payload: ProgramCommunicationItem }
     | { type: 'PROGRAM_DELETE_COMM_ITEM'; payload: string }
-    | { type: 'PROGRAM_UPDATE_ALLOCATION'; payload: ProgramBudgetAllocation }
+    | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
+    | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string }
     | { type: 'PROGRAM_ADD_RISK'; payload: ProgramRisk }
     | { type: 'PROGRAM_DELETE_RISK'; payload: string }
     | { type: 'PROGRAM_ADD_ISSUE'; payload: ProgramIssue }
@@ -55,13 +73,10 @@ export type Action =
     | { type: 'ADD_PROGRAM_CHANGE_REQUEST'; payload: ProgramChangeRequest }
     | { type: 'UPDATE_PROGRAM_CHANGE_REQUEST'; payload: ProgramChangeRequest }
     | { type: 'DELETE_PROGRAM_CHANGE_REQUEST'; payload: string }
-    | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
-    | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string }
-    | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_ADD_STRATEGIC_GOAL'; payload: StrategicGoal }
+    | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL'; payload: string }
-    | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
-    
+
     // Resources
     | { type: 'RESOURCE_ADD'; payload: Resource }
     | { type: 'RESOURCE_UPDATE'; payload: Resource }
@@ -69,7 +84,8 @@ export type Action =
     | { type: 'RESOURCE_REQUEST_ADD'; payload: ResourceRequest }
     | { type: 'RESOURCE_REQUEST_UPDATE'; payload: ResourceRequest }
     | { type: 'SUBMIT_TIMESHEET'; payload: Timesheet }
-    
+    | { type: 'ADD_TEAM_EVENT'; payload: TeamEvent }
+
     // Financials
     | { type: 'ADD_BUDGET_ITEM'; payload: BudgetLineItem }
     | { type: 'UPDATE_BUDGET_ITEM'; payload: BudgetLineItem }
@@ -85,8 +101,23 @@ export type Action =
     | { type: 'ADD_INVOICE'; payload: Invoice }
     | { type: 'UPDATE_INVOICE'; payload: Invoice }
     
+    // Procurement
+    | { type: 'ADD_VENDOR'; payload: Vendor }
+    | { type: 'UPDATE_VENDOR'; payload: Vendor }
+    | { type: 'DELETE_VENDOR'; payload: string }
+    | { type: 'ADD_CONTRACT'; payload: Contract }
+    | { type: 'UPDATE_CONTRACT'; payload: Contract }
+    | { type: 'ADD_PURCHASE_ORDER'; payload: PurchaseOrder }
+    | { type: 'UPDATE_PURCHASE_ORDER'; payload: PurchaseOrder }
+    | { type: 'ADD_SOLICITATION'; payload: Solicitation }
+    | { type: 'UPDATE_SOLICITATION'; payload: Solicitation }
+    | { type: 'ADD_MATERIAL_RECEIPT'; payload: MaterialReceipt }
+    | { type: 'ADD_PROCUREMENT_PLAN'; payload: ProcurementPlan }
+    | { type: 'UPDATE_PROCUREMENT_PLAN'; payload: ProcurementPlan }
+    | { type: 'ADD_SUPPLIER_REVIEW'; payload: SupplierPerformanceReview }
+
     // Risks & Issues
-    | { type: 'ADD_RISK'; payload: Risk }
+    | { type: 'ADD_RISK'; payload: Risk | PortfolioRisk }
     | { type: 'UPDATE_RISK'; payload: { risk: Risk } }
     | { type: 'DELETE_RISK'; payload: string }
     | { type: 'ADD_ISSUE'; payload: Issue }
@@ -95,9 +126,7 @@ export type Action =
     | { type: 'PROJECT_UPDATE_RISK_PLAN'; payload: { projectId: string; plan: any } }
     | { type: 'UPDATE_RBS_NODE_PARENT'; payload: { nodeId: string; newParentId: string | null } }
     
-    // Quality & Field
-    | { type: 'ADD_NCR'; payload: NonConformanceReport }
-    | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
+    // Field & Quality
     | { type: 'FIELD_ADD_LOG'; payload: DailyLogEntry }
     | { type: 'FIELD_UPDATE_LOG'; payload: DailyLogEntry }
     | { type: 'FIELD_ADD_INCIDENT'; payload: SafetyIncident }
@@ -105,17 +134,35 @@ export type Action =
     | { type: 'FIELD_DELETE_INCIDENT'; payload: string }
     | { type: 'FIELD_ADD_PUNCH_ITEM'; payload: PunchItem }
     | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: PunchItem }
+    | { type: 'ADD_NCR'; payload: NonConformanceReport }
+    | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
+    | { type: 'ADD_QUALITY_STANDARD'; payload: QualityStandard | ProgramQualityStandard }
     | { type: 'ADD_QUALITY_REPORT'; payload: QualityReport }
     | { type: 'UPDATE_QUALITY_REPORT'; payload: QualityReport }
-    | { type: 'ADD_QUALITY_STANDARD'; payload: any }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: SafetyIncident }
-    
+
+    // Strategy & Roadmap
+    | { type: 'ROADMAP_UPDATE_ITEM'; payload: RoadmapItem }
+    | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string; status: string } }
+    | { type: 'KANBAN_ADD_TASK'; payload: Partial<KanbanTask> }
+    | { type: 'ADD_PORTFOLIO_COMM_ITEM'; payload: ProgramCommunicationItem }
+    | { type: 'ADD_ACTIVITY'; payload: ActivityItem }
+    | { type: 'ADD_BENEFIT'; payload: any }
+    | { type: 'ADD_ARCH_STANDARD'; payload: ProgramArchitectureStandard }
+    | { type: 'ADD_ARTICLE'; payload: KnowledgeArticle }
+    | { type: 'UPDATE_ARTICLE'; payload: KnowledgeArticle }
+    | { type: 'DELETE_ARTICLE'; payload: string }
+
     // System & Data
     | { type: 'SYSTEM_QUEUE_DATA_JOB'; payload: DataJob }
     | { type: 'SYSTEM_UPDATE_DATA_JOB'; payload: { jobId: string } & Partial<DataJob> }
     | { type: 'SYSTEM_ADD_INTEGRATION'; payload: Integration }
     | { type: 'SYSTEM_UPDATE_INTEGRATION'; payload: Integration }
     | { type: 'SYSTEM_TOGGLE_INTEGRATION'; payload: string }
+    | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
+    | { type: 'SYSTEM_ADD_SERVICE'; payload: ServiceStatus }
+    | { type: 'SYSTEM_INSTALL_EXTENSION'; payload: string }
+    | { type: 'SYSTEM_ACTIVATE_EXTENSION'; payload: string }
     | { type: 'ADMIN_ADD_USER'; payload: any }
     | { type: 'ADMIN_UPDATE_USER'; payload: any }
     | { type: 'ADMIN_DELETE_USER'; payload: string }
@@ -123,9 +170,6 @@ export type Action =
     | { type: 'MARK_ALERT_READ'; payload: string }
     | { type: 'RESET_SYSTEM' }
     | { type: 'LOAD_DEMO_PROJECT'; payload: 'construction' | 'software' | 'defense' }
-    | { type: 'ADMIN_ADD_LOCATION'; payload: Location }
-    | { type: 'ADMIN_UPDATE_LOCATION'; payload: Location }
-    | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
     | { type: 'ADMIN_ADD_ACTIVITY_CODE'; payload: ActivityCode }
     | { type: 'ADMIN_UPDATE_ACTIVITY_CODE'; payload: ActivityCode }
     | { type: 'ADMIN_DELETE_ACTIVITY_CODE'; payload: string }
@@ -155,55 +199,23 @@ export type Action =
     | { type: 'ADMIN_DELETE_WORKFLOW'; payload: string }
     | { type: 'ADMIN_ADD_ROLE'; payload: EnterpriseRole }
     | { type: 'ADMIN_UPDATE_ROLE'; payload: EnterpriseRole }
-    | { type: 'SYSTEM_SAVE_ETL_MAPPINGS'; payload: EtlMapping[] }
-    | { type: 'SYSTEM_ADD_SERVICE'; payload: ServiceStatus }
     | { type: 'GOVERNANCE_UPDATE_NOTIFICATION_PREFERENCE'; payload: { id: string, field: string } }
     | { type: 'GOVERNANCE_ADD_NOTIFICATION_PREFERENCE'; payload: any }
-    | { type: 'SYSTEM_INSTALL_EXTENSION'; payload: string }
-    | { type: 'SYSTEM_ACTIVATE_EXTENSION'; payload: string }
-    | { type: 'ADD_BENEFIT'; payload: any }
-    | { type: 'ADD_ARCH_STANDARD'; payload: any }
-    | { type: 'ADD_STAKEHOLDER'; payload: any }
-    | { type: 'PROJECT_ADD_STAKEHOLDER'; payload: any }
-    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any, action: string, user: any } }
-    | { type: 'ADD_VENDOR'; payload: any }
-    | { type: 'UPDATE_VENDOR'; payload: any }
-    | { type: 'DELETE_VENDOR'; payload: string }
-    | { type: 'ADD_CONTRACT'; payload: any }
-    | { type: 'UPDATE_CONTRACT'; payload: any }
-    | { type: 'ADD_PURCHASE_ORDER'; payload: any }
-    | { type: 'UPDATE_PURCHASE_ORDER'; payload: any }
-    | { type: 'ADD_SOLICITATION'; payload: any }
-    | { type: 'UPDATE_SOLICITATION'; payload: any }
-    | { type: 'ADD_MATERIAL_RECEIPT'; payload: any }
-    | { type: 'ADD_PROCUREMENT_PLAN'; payload: any }
-    | { type: 'UPDATE_PROCUREMENT_PLAN'; payload: any }
-    | { type: 'ADD_SUPPLIER_REVIEW'; payload: any }
-    | { type: 'UPLOAD_DOCUMENT'; payload: any }
-    | { type: 'DELETE_DOCUMENT'; payload: string }
-    | { type: 'VERSION_DOCUMENT'; payload: any }
-    | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: any }
-    | { type: 'ROADMAP_UPDATE_ITEM'; payload: any }
-    | { type: 'KANBAN_MOVE_TASK'; payload: { taskId: string, status: string } }
-    | { type: 'KANBAN_ADD_TASK'; payload: any }
-    | { type: 'ADD_PORTFOLIO_COMM_ITEM'; payload: any }
-    | { type: 'ADD_TEAM_EVENT'; payload: any }
-    | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: any }
-    | { type: 'EXTENSION_UPDATE_CONSTRUCTION'; payload: any }
-    | { type: 'EXTENSION_UPDATE_GOVERNMENT'; payload: any }
-    | { type: 'UPDATE_PIPELINE_STAGE'; payload: any }
+    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: SecurityPolicy }
+    | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: Partial<OrganizationProfile> }
+    | { type: 'UPDATE_SYSTEM_SCHEDULING'; payload: SchedulingLogic }
     | { type: 'STAGING_INIT'; payload: { type: string, data: any[] } }
     | { type: 'STAGING_UPDATE_RECORD'; payload: { id: string, data: any } }
     | { type: 'STAGING_COMMIT_SELECTED'; payload: string[] }
     | { type: 'STAGING_CLEAR' }
-    | { type: 'ADD_ARTICLE'; payload: any }
-    | { type: 'UPDATE_ARTICLE'; payload: any }
-    | { type: 'DELETE_ARTICLE'; payload: string }
-    | { type: 'ADD_REPORT_DEF'; payload: any }
+    | { type: 'ADD_REPORT_DEF'; payload: ReportDefinition }
     | { type: 'DELETE_REPORT_DEF'; payload: string }
-    | { type: 'ADD_ACTIVITY'; payload: ActivityItem }
-    | { type: 'UPDATE_SYSTEM_SCHEDULING'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_ORG_PROFILE'; payload: any }
-    | { type: 'GOVERNANCE_UPDATE_SECURITY_POLICY'; payload: any }
-    | { type: 'ADD_PROGRAM_DEPENDENCY'; payload: ProgramDependency }
-    | { type: 'DELETE_PROGRAM_DEPENDENCY'; payload: string };
+    | { type: 'UNIFIER_UPDATE_BP_RECORD'; payload: { record: any, action: string, user: any } }
+    | { type: 'EXTENSION_UPDATE_FINANCIAL'; payload: any }
+    | { type: 'EXTENSION_UPDATE_CONSTRUCTION'; payload: any }
+    | { type: 'EXTENSION_UPDATE_GOVERNMENT'; payload: any }
+    | { type: 'UPDATE_PIPELINE_STAGE'; payload: PipelineStage }
+    | { type: 'UPLOAD_DOCUMENT'; payload: any }
+    | { type: 'DELETE_DOCUMENT'; payload: any }
+    | { type: 'VERSION_DOCUMENT'; payload: any }
+    | { type: 'ADD_STAKEHOLDER'; payload: any };

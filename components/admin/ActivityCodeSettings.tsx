@@ -31,12 +31,12 @@ export const ActivityCodeSettings: React.FC = () => {
             scope: editingCode.scope || scope,
             values: editingCode.values || []
         };
-        dispatch({ type: editingCode.id ? 'ADMIN_UPDATE_ACTIVITY_CODE' : 'ADMIN_ADD_ACTIVITY_CODE', payload });
+        dispatch({ type: 'ADMIN_ADD_ACTIVITY_CODE', payload });
         setIsPanelOpen(false);
     };
 
     return (
-        <div className={`h-full flex ${theme.colors.surface} border-l border-slate-200 overflow-hidden`}>
+        <div className={`h-full flex bg-white border-l border-slate-200 overflow-hidden`}>
             <ActivityCodeRegistry 
                 codes={filteredCodes} activeScope={scope} setActiveScope={setScope} 
                 selectedId={selectedId} onSelect={setSelectedId} onAdd={() => { setEditingCode(null); setIsPanelOpen(true); }} 
@@ -56,4 +56,3 @@ export const ActivityCodeSettings: React.FC = () => {
         </div>
     );
 };
-export default ActivityCodeSettings;

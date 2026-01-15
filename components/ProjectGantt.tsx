@@ -78,7 +78,7 @@ const ProjectGantt: React.FC = () => {
       
       {!project.tasks?.length ? (
           <EmptyGrid 
-            title="Schedule Repository Neutral"
+            title="Schedule Registry Neutral"
             description="The master schedule logic network is currently unpopulated for this project partition."
             icon={Network}
             onAdd={() => navigate('/dataExchange?view=import')} 
@@ -143,4 +143,5 @@ const ProjectGantt: React.FC = () => {
     </div>
   );
 };
+
 export default ProjectGantt;

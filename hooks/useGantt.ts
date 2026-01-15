@@ -6,7 +6,6 @@ import { Scheduler } from '../services/SchedulingEngine';
 import { useGanttTimeline, DAY_WIDTH } from './gantt/useGanttTimeline';
 import { useGanttDrag } from './gantt/useGanttDrag';
 
-// Re-export DAY_WIDTH for consumption by components
 export { DAY_WIDTH };
 
 export const useGantt = (initialProject: Project | undefined) => {
@@ -36,7 +35,7 @@ export const useGantt = (initialProject: Project | undefined) => {
     }
   }, [initialProject, activeBaselineId]);
 
-  const dayWidth = useMemo(() => {
+  const currentDayWidth = useMemo(() => {
     switch(viewMode) {
       case 'day': return 100;
       case 'week': return 50;
@@ -49,8 +48,8 @@ export const useGantt = (initialProject: Project | undefined) => {
       id: 'UNSET', tasks: [], startDate: new Date().toISOString(), endDate: new Date().toISOString() 
   } as unknown as Project, [project]);
 
-  const { timelineHeaders, projectStart, projectEnd } = useGanttTimeline(safeProject, viewMode, dayWidth);
-  const { ganttContainerRef, handleMouseDown } = useGanttDrag(dispatch, safeProject, dayWidth);
+  const { timelineHeaders, projectStart, projectEnd } = useGanttTimeline(safeProject, viewMode, currentDayWidth);
+  const { ganttContainerRef, handleMouseDown } = useGanttDrag(dispatch, safeProject, currentDayWidth);
 
   const [expandedNodes, setExpandedNodes] = useState(new Set<string>(project?.wbs?.map(w => w.id) || []));
   

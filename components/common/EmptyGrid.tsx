@@ -27,7 +27,7 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
           <Icon size={400} />
       </div>
 
-      <div className={`w-24 h-24 ${theme.colors.surface} rounded-3xl flex items-center justify-center shadow-xl mb-8 border ${theme.colors.border} ${theme.colors.text.tertiary} rotate-3 hover:rotate-0 transition-transform duration-500 relative z-10`}>
+      <div className={`w-24 h-24 ${theme.colors.surface} rounded-3xl flex items-center justify-center shadow-xl mb-8 border border-slate-200 ${theme.colors.text.tertiary} rotate-3 hover:rotate-0 transition-transform duration-500 relative z-10 bg-white`}>
         <Icon size={40} strokeWidth={1} />
       </div>
       
@@ -44,7 +44,7 @@ export const EmptyGrid: React.FC<EmptyGridProps> = ({
                 onClick={onAdd} 
                 icon={Plus} 
                 size="lg" 
-                className="shadow-2xl shadow-nexus-500/20 px-10 font-bold uppercase tracking-widest text-xs h-12"
+                className="shadow-2xl shadow-nexus-500/20 px-10 font-black uppercase tracking-widest text-xs h-12"
             >
               {actionLabel}
             </Button>

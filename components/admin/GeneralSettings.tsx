@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
-import { Building2, Globe, Save, Upload, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Building2, Globe, Save, RotateCcw, ShieldCheck } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useTheme } from '../../context/ThemeContext';
@@ -34,7 +34,7 @@ const GeneralSettings: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <Building2 size={16} className="text-nexus-600"/><h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Legal Identity</h3>
                     </div>
-                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 p-8 ${theme.components.card}`}>
+                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 p-8 ${theme.components.card} bg-white rounded-2xl border ${theme.colors.border}`}>
                         <Input label="Entity Name" value={orgData.name} onChange={e => handleFieldChange('name', e.target.value)} className="bg-slate-50 font-bold" />
                         <Input label="Organization Code" value={orgData.shortName} onChange={e => handleFieldChange('shortName', e.target.value)} className="bg-slate-50 font-mono" />
                         <Input label="Tax Identifier" value={orgData.taxId} onChange={e => handleFieldChange('taxId', e.target.value)} className="bg-slate-50" />
@@ -48,7 +48,7 @@ const GeneralSettings: React.FC = () => {
                     <div className="flex items-center gap-2">
                         <Globe size={16} className="text-nexus-600"/><h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Localization Basis</h3>
                     </div>
-                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 p-8 ${theme.components.card}`}>
+                    <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 p-8 ${theme.components.card} bg-white rounded-2xl border ${theme.colors.border}`}>
                         <select className="w-full p-2.5 border rounded-lg bg-slate-50 text-sm font-bold" value={orgData.timezone} onChange={e => handleFieldChange('timezone', e.target.value)}>
                             <option value="UTC">UTC (Universal)</option>
                             <option value="EST">EST (New York)</option>

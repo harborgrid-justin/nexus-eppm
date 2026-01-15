@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { Plus, Search } from 'lucide-react';
+import { Plus, ShieldAlert } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Button } from '../ui/Button';
 import { SafetyIncident } from '../../types';
@@ -48,7 +48,7 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
   };
 
   return (
-    <div className={`h-full flex flex-col ${theme.colors.background}/50 animate-in fade-in duration-300`}>
+    <div className={`h-full flex flex-col bg-slate-50/30 animate-in fade-in duration-300`}>
        <IncidentStats 
             daysWithoutIncident={daysWithoutIncident} 
             totalIncidents={incidents.length} 
@@ -56,12 +56,16 @@ const SafetyIncidentLog: React.FC<SafetyIncidentLogProps> = ({ projectId }) => {
        />
 
        <div className="flex-1 overflow-hidden p-6 pt-0 flex flex-col">
-           <div className={`${theme.layout.panelContainer} shadow-md`}>
-               <div className={`p-5 ${theme.layout.headerBorder} flex flex-col sm:flex-row justify-between items-center ${theme.colors.surface} gap-4`}>
-                   <div className="flex items-center gap-6">
-                       <h3 className={`text-[10px] font-black uppercase tracking-widest ${theme.colors.text.tertiary}`}>Occupational Safety Registry</h3>
+           <div className={`flex-1 flex flex-col bg-white rounded-[2.5rem] border ${theme.colors.border} shadow-sm overflow-hidden`}>
+               <div className={`p-6 border-b ${theme.colors.border} flex flex-col sm:flex-row justify-between items-center bg-slate-50/50 gap-4`}>
+                   <div className="flex items-center gap-4">
+                       <div className="p-3 bg-red-600 text-white rounded-2xl shadow-lg shadow-red-500/20"><ShieldAlert size={24}/></div>
+                       <div>
+                           <h3 className={`font-black text-sm uppercase tracking-tighter text-slate-800`}>Occupational Safety Registry</h3>
+                           <p className="text-xs text-slate-500 font-medium">HSE compliance and incident monitoring thread.</p>
+                       </div>
                    </div>
-                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident}>Report Critical Incident</Button>
+                   <Button size="sm" icon={Plus} variant="danger" onClick={handleAddIncident} className="shadow-lg shadow-red-500/10 font-black uppercase text-[10px] tracking-widest px-8">Report Critical Incident</Button>
                </div>
                <div className="flex-1 overflow-auto scrollbar-thin">
                    <IncidentList incidents={incidents} onAdd={handleAddIncident} />

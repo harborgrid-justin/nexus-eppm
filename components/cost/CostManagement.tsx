@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
+import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { DollarSign, Loader2 } from 'lucide-react';
 import CostDashboard from './CostDashboard';
 import CostPlanEditor from './CostPlanEditor';

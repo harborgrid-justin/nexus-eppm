@@ -30,7 +30,7 @@ const WorkflowDesigner: React.FC = () => {
                         <select 
                             value={activeWorkflowId || ''} 
                             onChange={e => setActiveWorkflowId(e.target.value)} 
-                            className={`font-black text-lg bg-transparent border-b-2 border-dashed border-slate-200 hover:border-nexus-500 focus:outline-none transition-colors outline-none cursor-pointer ${theme.colors.text.primary}`}
+                            className={`font-black text-lg bg-transparent border-b-2 border-dashed border-slate-200 hover:border-nexus-50 focus:outline-none transition-colors outline-none cursor-pointer text-slate-900`}
                         >
                             {workflows.map(wf => <option key={wf.id} value={wf.id}>{wf.name}</option>)}
                         </select>

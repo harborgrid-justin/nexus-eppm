@@ -25,9 +25,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '',
         ref={ref}
         id={id}
         className={`
-          w-full ${theme.colors.surface} border-2 border-slate-200 rounded-xl transition-all
+          w-full bg-white border-2 border-slate-200 rounded-xl transition-all
           focus:outline-none focus:ring-8 focus:ring-nexus-500/5 focus:border-nexus-500 
-          ${theme.colors.text.primary} placeholder:text-slate-300 font-bold text-sm h-11
+          text-slate-900 placeholder:text-slate-300 font-bold text-sm h-11
           ${IconToRender ? 'pl-11' : 'px-4'} pr-4 ${className}
         `}
         {...props}
