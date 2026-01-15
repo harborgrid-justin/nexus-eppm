@@ -9,7 +9,7 @@ const isWeekend = (date: Date, calendar: Calendar): boolean => {
 };
 
 const isHoliday = (date: Date, calendar: Calendar): boolean => {
-  return calendar.holidays.includes(toISODateString(date));
+  return calendar.holidays.includes(date.toISOString().split('T')[0]);
 };
 
 export const addWorkingDays = (startDate: Date, duration: number, calendar: Calendar): Date => {
@@ -32,19 +32,24 @@ export const addWorkingDays = (startDate: Date, duration: number, calendar: Cale
 export const getWorkingDaysDiff = (start: string | Date, end: string | Date, calendar: Calendar): number => {
   let startDate = new Date(start);
   let endDate = new Date(end);
-  let days = 0;
   
-  if (startDate > endDate) return 0; // Or negative logic
+  // Normalize to start of day
+  startDate.setHours(0,0,0,0);
+  endDate.setHours(0,0,0,0);
 
-  while (startDate < endDate) {
-    if (!isWeekend(startDate, calendar) && !isHoliday(startDate, calendar)) {
+  if (startDate > endDate) return 0; // Simple handling, could extend for negative
+
+  let days = 0;
+  let curr = new Date(startDate);
+
+  while (curr < endDate) {
+    curr.setDate(curr.getDate() + 1);
+    if (!isWeekend(curr, calendar) && !isHoliday(curr, calendar)) {
       days++;
     }
-    startDate.setDate(startDate.getDate() + 1);
   }
   return days;
 };
-
 
 export const getDaysDiff = (start: string | Date, end: string | Date): number => {
   const startDate = new Date(start);
@@ -56,10 +61,12 @@ export const toISODateString = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
 
-export const maxDate = (date1: Date, date2: Date): Date => {
-  return date1 > date2 ? date1 : date2;
+export const maxDate = (dates: Date[]): Date => {
+  if (dates.length === 0) return new Date();
+  return new Date(Math.max(...dates.map(d => d.getTime())));
 };
 
-export const minDate = (date1: Date, date2: Date): Date => {
-  return date1 < date2 ? date1 : date2;
+export const minDate = (dates: Date[]): Date => {
+  if (dates.length === 0) return new Date();
+  return new Date(Math.min(...dates.map(d => d.getTime())));
 };

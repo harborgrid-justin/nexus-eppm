@@ -131,11 +131,8 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
 
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
-        document.body.style.cursor = type === 'move' ? 'grabbing' : 'col-resize';
+        document.body.style.cursor = type === 'move' ? 'grabbing' : 'ew-resize';
     }, [handleMouseMove, handleMouseUp]);
 
-    return {
-        ganttContainerRef,
-        handleMouseDown
-    };
+    return { ganttContainerRef, handleMouseDown };
 };

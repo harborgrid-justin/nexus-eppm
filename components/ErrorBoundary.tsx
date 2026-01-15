@@ -1,3 +1,4 @@
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -13,13 +14,13 @@ interface ErrorBoundaryState {
 
 // Explicitly extend Component to resolve inheritance introspection errors
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = {
+    hasError: false,
+    error: undefined,
+  };
   
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: undefined,
-    };
   }
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {

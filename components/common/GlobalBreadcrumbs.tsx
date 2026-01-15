@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Home, ChevronRight, Briefcase, Globe, User, ShieldCheck } from 'lucide-react';
 import { useData } from '../../context/DataContext';
