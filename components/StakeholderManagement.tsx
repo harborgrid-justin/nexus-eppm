@@ -45,7 +45,6 @@ const StakeholderManagement: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <Button variant="primary" icon={Plus} size="md" onClick={() => {}}>Identify Stakeholder</Button>
                 </div>
             }
         />
@@ -59,11 +58,11 @@ const StakeholderManagement: React.FC = () => {
                     description="Identify project stakeholders to start tracking influence, interest, and engagement strategies. Salience mapping is required for risk assessment."
                     icon={ShieldCheck}
                     actionLabel="Register Stakeholder"
-                    onAdd={() => {}}
+                    onAdd={() => setActiveTab('dashboard')} 
                 />
             </div>
         ) : (
-            <div className="flex-1 overflow-y-auto animate-nexus-in bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-8 scrollbar-thin">
+            <div className={`flex-1 overflow-y-auto animate-nexus-in ${theme.colors.surface} rounded-[2.5rem] border ${theme.colors.border} shadow-sm p-8 scrollbar-thin`}>
                 {activeTab === 'dashboard' && <StakeholderDashboard stakeholders={stakeholders} />}
                 {activeTab === 'engagement' && <EngagementMatrix stakeholders={stakeholders} />}
                 {activeTab === 'financial' && <FinancialAuthority stakeholders={stakeholders} />}

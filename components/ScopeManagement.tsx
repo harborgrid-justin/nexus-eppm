@@ -12,6 +12,7 @@ import { useScopeManagementLogic } from '../hooks/domain/useScopeManagementLogic
 import ScopeDashboard from './scope/ScopeDashboard';
 import ScopeStatement from './scope/ScopeStatement';
 import WBSManager from './scope/WBSManager';
+import RequirementsTraceability from './scope/RequirementsTraceability';
 
 const ScopeManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
@@ -28,9 +29,9 @@ const ScopeManagement: React.FC = () => {
 
   // Handle case where project is undefined
   if (!project) return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full bg-slate-50/30`}>
+    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full ${theme.colors.background}`}>
         <PageHeader title="Scope Management" subtitle="Deliverable and requirements hub" icon={Sliders} />
-        <div className="flex-1 nexus-empty-pattern border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400">
+        <div className={`flex-1 nexus-empty-pattern border-2 border-dashed ${theme.colors.border} rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400`}>
             <Loader2 size={48} className="mb-4 animate-spin opacity-20" />
             <p className="font-black uppercase tracking-widest text-[10px]">Initializing Scope Registry...</p>
         </div>
@@ -42,6 +43,7 @@ const ScopeManagement: React.FC = () => {
       case 'dashboard': return <ScopeDashboard />;
       case 'statement': return <ScopeStatement projectId={project.id} />;
       case 'wbs': return <WBSManager projectId={project.id} />;
+      case 'requirements': return <RequirementsTraceability />;
       default: return <ScopeDashboard />;
     }
   };

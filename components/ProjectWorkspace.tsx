@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { Network, GanttChartSquare, GitBranch, Briefcase } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';

@@ -53,7 +53,6 @@ const ProjectGantt: React.FC = () => {
     const top = e.currentTarget.scrollTop;
     onScroll(top);
     setScrollTop(top);
-    // Synced scrolling for List and Timeline panels
     if (e.target === listRef.current && timelineRef.current) timelineRef.current.scrollTop = top;
     else if (e.target === timelineRef.current && listRef.current) listRef.current.scrollTop = top;
   }, [onScroll]);
@@ -64,7 +63,7 @@ const ProjectGantt: React.FC = () => {
   }, [activeBaselineId, project.baselines]);
 
   return (
-    <div className={`flex flex-col h-full bg-white rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1`}>
+    <div className={`flex flex-col h-full ${theme.colors.surface} rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex-1`}>
       <ScheduleLog isOpen={isLogOpen} onClose={() => setIsLogOpen(false)} log={scheduleLog} stats={scheduleStats} />
       <GanttToolbar 
         project={project} 
@@ -87,9 +86,14 @@ const ProjectGantt: React.FC = () => {
           />
       ) : (
           <div className="flex flex-1 overflow-hidden relative flex-col">
-            <button className={`md:hidden absolute bottom-20 left-4 z-30 p-3 ${theme.colors.primary} text-white rounded-full shadow-lg`} onClick={() => setShowTaskList(!showTaskList)}>{showTaskList ? <X size={20} /> : <List size={20} />}</button>
+            <button 
+                className={`md:hidden absolute bottom-20 left-4 z-30 p-3 bg-nexus-600 text-white rounded-full shadow-lg`} 
+                onClick={() => setShowTaskList(!showTaskList)}
+            >
+                {showTaskList ? <X size={20} /> : <List size={20} />}
+            </button>
             
-            <div ref={containerRef} className="flex flex-1 overflow-hidden relative bg-slate-50/20">
+            <div ref={containerRef} className={`flex flex-1 overflow-hidden relative ${theme.colors.background}/20`}>
               <GanttTaskList 
                 ref={listRef} 
                 renderList={flatRenderList} 

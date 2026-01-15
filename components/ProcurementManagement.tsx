@@ -99,7 +99,7 @@ const ProcurementManagement: React.FC = () => {
         );
         case 'planning': return <ProcurementPlanning projectId={projectId} />;
         case 'sourcing': return <ProcurementSourcing projectId={projectId} />;
-        case 'execution': return <ProcurementExecution />;
+        case 'execution': return <ProcurementExecution projectId={projectId} />;
         case 'performance': return <SupplierPerformance projectId={projectId} />;
         default: return <ProcurementDashboard />;
     }

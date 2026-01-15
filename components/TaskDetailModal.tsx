@@ -11,6 +11,7 @@ import { Input } from './ui/Input';
 import { Badge } from './ui/Badge';
 import { FieldPlaceholder } from './common/FieldPlaceholder';
 import { formatCurrency, generateId } from '../utils/formatters';
+import { useTheme } from '../context/ThemeContext';
 
 interface TaskDetailModalProps {
   task: Task;
@@ -20,6 +21,7 @@ interface TaskDetailModalProps {
 
 const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClose }) => {
   const { state, dispatch } = useData();
+  const theme = useTheme();
   const { canEditProject } = usePermissions();
   const isReadOnly = !canEditProject();
   const [activeTab, setActiveTab] = useState<'general' | 'schedule' | 'steps' | 'notebook'>('general');
@@ -59,7 +61,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
          <div className="flex flex-col">
             <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">ID: {localTask.id} • WBS: {localTask.wbsCode}</span>
             <div className="flex items-center gap-3">
-                <span className="text-xl font-black text-slate-900 uppercase tracking-tighter">{localTask.name}</span>
+                <span className={`text-xl font-black ${theme.colors.text.primary} uppercase tracking-tighter`}>{localTask.name}</span>
                 {localTask.critical && <Badge variant="danger">Critical Path</Badge>}
             </div>
          </div>
@@ -67,7 +69,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
        footer={<><Button variant="secondary" onClick={onClose}>{isReadOnly ? 'Close' : 'Cancel'}</Button>{!isReadOnly && <Button variant="primary" onClick={saveChanges}>Commit Changes</Button>}</>}
     >
        <div className="space-y-6">
-          <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-hide" role="tablist">
+          <div className={`flex border-b ${theme.colors.border} overflow-x-auto scrollbar-hide`} role="tablist">
               {[ 
                   { id: 'general', label: 'General', icon: FileText }, 
                   { id: 'schedule', label: 'Schedule', icon: Calendar }, 
@@ -92,7 +94,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Activity Narrative</label>
                                 <textarea 
-                                    className="w-full h-32 p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-nexus-500 outline-none resize-none shadow-inner"
+                                    className={`w-full h-32 p-3 border ${theme.colors.border} rounded-xl text-sm focus:ring-2 focus:ring-nexus-500 outline-none resize-none shadow-inner ${theme.colors.background}`}
                                     value={localTask.description || ''}
                                     disabled={isReadOnly}
                                     onChange={e => updateField('description', e.target.value)}
@@ -103,7 +105,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Effort Type</label>
                                     <select 
-                                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-slate-50 font-bold"
+                                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-slate-50 font-bold`}
                                         value={localTask.effortType}
                                         disabled={isReadOnly}
                                         onChange={e => updateField('effortType', e.target.value as any)}
@@ -112,9 +114,9 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Status</label>
+                                    <label className="block text--[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Status</label>
                                     <select 
-                                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-slate-50 font-bold"
+                                        className={`w-full p-2.5 border ${theme.colors.border} rounded-lg text-sm bg-slate-50 font-bold`}
                                         value={localTask.status}
                                         disabled={isReadOnly}
                                         onChange={e => handleStatusChange(e.target.value as TaskStatus)}
@@ -137,14 +139,14 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-2 italic">Drives Earned Value (EV) calculation.</p>
                             </div>
                             
-                            <div className="bg-white p-4 rounded-xl border border-slate-200">
+                            <div className={`${theme.colors.surface} p-4 rounded-xl border ${theme.colors.border}`}>
                                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Resource Assignments</h4>
                                 {localTask.assignments.length > 0 ? (
                                     <div className="space-y-2">
                                         {localTask.assignments.map(a => (
-                                            <div key={a.resourceId} className="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-100 text-xs">
-                                                <span className="font-bold text-slate-700">{state.resources.find(r => r.id === a.resourceId)?.name || a.resourceId}</span>
-                                                <span className="font-mono bg-white px-1.5 rounded border border-slate-200">{a.units}%</span>
+                                            <div key={a.resourceId} className={`flex justify-between items-center p-2 ${theme.colors.background} rounded border ${theme.colors.border} text-xs`}>
+                                                <span className={`font-bold ${theme.colors.text.secondary}`}>{state.resources.find(r => r.id === a.resourceId)?.name || a.resourceId}</span>
+                                                <span className={`font-mono ${theme.colors.surface} px-1.5 rounded border ${theme.colors.border}`}>{a.units}%</span>
                                             </div>
                                         ))}
                                     </div>
@@ -160,28 +162,28 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
              {activeTab === 'schedule' && (
                 <div className="space-y-8 animate-nexus-in">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border}`}>
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Early Start</label>
                             <p className="text-sm font-mono font-bold mt-1">{localTask.startDate}</p>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border}`}>
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Early Finish</label>
                             <p className="text-sm font-mono font-bold mt-1">{localTask.endDate}</p>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border}`}>
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Float</label>
                             <p className={`text-sm font-mono font-bold mt-1 ${localTask.totalFloat! <= 0 ? 'text-red-600' : 'text-green-600'}`}>{localTask.totalFloat || 0}d</p>
                         </div>
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className={`p-4 ${theme.colors.background} rounded-xl border ${theme.colors.border}`}>
                             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Duration</label>
                             <p className="text-sm font-mono font-bold mt-1">{localTask.duration}d</p>
                         </div>
                     </div>
                     
-                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                        <div className="p-3 bg-slate-50 border-b border-slate-200 font-bold text-[10px] text-slate-500 uppercase tracking-widest">Logical Relationships</div>
+                    <div className={`${theme.colors.surface} rounded-xl border ${theme.colors.border} overflow-hidden shadow-sm`}>
+                        <div className={`p-3 bg-slate-50 border-b ${theme.colors.border} font-bold text-[10px] text-slate-500 uppercase tracking-widest`}>Logical Relationships</div>
                         <table className="w-full text-xs">
-                            <thead className="bg-white">
+                            <thead className={`${theme.colors.surface}`}>
                                 <tr className="text-slate-400 border-b border-slate-100">
                                     <th className="p-3 text-left font-bold">Activity ID</th>
                                     <th className="p-3 text-left font-bold">Description</th>
@@ -219,7 +221,7 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                     {localTask.steps && localTask.steps.length > 0 ? (
                         <div className="space-y-3">
                             {localTask.steps.map(step => (
-                                <div key={step.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${step.completed ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200 shadow-sm'}`}>
+                                <div key={step.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all ${step.completed ? 'bg-green-50 border-green-200' : `${theme.colors.surface} ${theme.colors.border} shadow-sm`}`}>
                                     <div className="flex items-center gap-4">
                                         <button 
                                             onClick={() => toggleStep(step.id)} 
@@ -255,13 +257,13 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, project, onClos
                     {localTask.notebooks && localTask.notebooks.length > 0 ? (
                         <div className="space-y-6">
                             {localTask.notebooks.map((entry, idx) => (
-                                <div key={entry.id} className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm group hover:border-nexus-300 transition-all">
+                                <div key={entry.id} className={`p-6 ${theme.colors.surface} border ${theme.colors.border} rounded-2xl shadow-sm group hover:border-nexus-300 transition-all`}>
                                     <div className="flex justify-between items-center mb-4">
                                         <h4 className="font-black text-slate-800 uppercase tracking-tight text-sm">{entry.topic}</h4>
                                         <div className="text-[9px] font-bold text-slate-400 uppercase">Last Sync: {entry.lastUpdated.split('T')[0]}</div>
                                     </div>
                                     <textarea 
-                                        className="w-full h-32 p-4 bg-slate-50 rounded-xl text-sm leading-relaxed focus:bg-white focus:ring-2 focus:ring-nexus-500 outline-none resize-none border border-slate-100 transition-all shadow-inner"
+                                        className={`w-full h-32 p-4 ${theme.colors.background} rounded-xl text-sm leading-relaxed focus:bg-white focus:ring-2 focus:ring-nexus-500 outline-none resize-none border border-slate-100 transition-all shadow-inner`}
                                         value={entry.content}
                                         disabled={isReadOnly}
                                         onChange={e => {

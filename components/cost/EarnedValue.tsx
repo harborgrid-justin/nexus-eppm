@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';
@@ -85,102 +84,107 @@ const EarnedValue: React.FC = () => {
        {/* Top Level Status */}
        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
           <StatCard 
-            title="Schedule Performance (SPI)" 
-            value={evm.spi.toFixed(2)} 
-            subtext={evm.status} 
-            trend={evm.spi >= 1 ? 'up' : 'down'} 
-            icon={evm.spi >= 1 ? CheckCircle : AlertTriangle}
+            title="Schedule Performance (SPI)"
+            value={evm.spi.toFixed(2)}
+            subtext={evm.status}
+            icon={TrendingUp}
+            trend={evm.spi >= 1 ? 'up' : 'down'}
           />
           <StatCard 
-            title="Cost Performance (CPI)" 
-            value={evm.cpi.toFixed(2)} 
-            subtext={evm.costStatus} 
-            trend={evm.cpi >= 1 ? 'up' : 'down'} 
-            icon={evm.cpi >= 1 ? CheckCircle : AlertTriangle}
-          />
-          <StatCard 
-            title="Schedule Variance (SV)" 
-            value={formatCompactCurrency(evm.sv)} 
-            subtext="Earned - Planned" 
-            trend={evm.sv >= 0 ? 'up' : 'down'} 
+            title="Cost Performance (CPI)"
+            value={evm.cpi.toFixed(2)}
+            subtext={evm.costStatus}
             icon={BarChart2}
+            trend={evm.cpi >= 1 ? 'up' : 'down'}
           />
           <StatCard 
-            title="Cost Variance (CV)" 
-            value={formatCompactCurrency(evm.cv)} 
-            subtext="Earned - Actual" 
-            trend={evm.cv >= 0 ? 'up' : 'down'} 
-            icon={BarChart2}
+            title="Cost Variance (CV)"
+            value={formatCompactCurrency(evm.cv)}
+            subtext="EV - AC"
+            icon={evm.cv >= 0 ? CheckCircle : AlertTriangle}
+            trend={evm.cv >= 0 ? 'up' : 'down'}
+          />
+          <StatCard 
+            title="Estimate at Completion (EAC)"
+            value={formatCompactCurrency(evm.eac)}
+            subtext={`Variance: ${formatCompactCurrency(evm.vac)}`}
+            icon={Activity}
           />
        </div>
 
-       {/* Main S-Curve Chart */}
-       <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-         <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <TrendingUp size={20} className="text-nexus-600"/> Performance Measurement Baseline (PMB)
-            </h3>
-            <div className="flex gap-4 text-sm text-slate-600">
-                <span><strong>BAC:</strong> {formatCompactCurrency(evm.bac)}</span>
-                <span><strong>EAC:</strong> {formatCompactCurrency(evm.eac)}</span>
-            </div>
-         </div>
-         <CustomLineChart 
-            data={chartData}
-            xAxisKey="date"
-            dataKeys={[
-                { key: 'pv', color: '#94a3b8' },
-                { key: 'ev', color: '#22c55e' },
-                { key: 'ac', color: '#ef4444' }
-            ]}
-            height={300}
-         />
+       {/* S-Curve Chart */}
+       <div className={`${theme.components.card} ${theme.layout.cardPadding} h-96 flex flex-col`}>
+          <h3 className={`${theme.typography.h3} mb-6`}>Performance S-Curve</h3>
+          <div className="flex-1 min-h-0">
+             <CustomLineChart 
+                data={chartData}
+                xAxisKey="date"
+                dataKeys={[
+                    { key: 'pv', color: '#94a3b8' }, // Gray
+                    { key: 'ev', color: '#22c55e' }, // Green
+                    { key: 'ac', color: '#ef4444' }, // Red
+                ]}
+                height={300}
+             />
+          </div>
+          <div className="flex justify-center gap-6 mt-4 text-xs font-medium text-slate-500">
+             <div className="flex items-center gap-2"><div className="w-3 h-1 bg-slate-400"></div> Planned Value (PV)</div>
+             <div className="flex items-center gap-2"><div className="w-3 h-1 bg-green-500"></div> Earned Value (EV)</div>
+             <div className="flex items-center gap-2"><div className="w-3 h-1 bg-red-500"></div> Actual Cost (AC)</div>
+          </div>
        </div>
 
-       {/* Forecasting Panel */}
-       <div className={`grid grid-cols-1 lg:grid-cols-2 ${theme.layout.gridGap}`}>
+       {/* Indices Details */}
+       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-              <h3 className="font-bold text-slate-800 mb-4">Forecasting (EAC)</h3>
-              <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                      <span className="text-sm text-slate-600">Estimate at Completion</span>
-                      <span className="font-mono font-bold text-slate-900">{formatCurrency(evm.eac)}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                      <span className="text-sm text-slate-600">Estimate to Complete</span>
-                      <span className="font-mono font-bold text-nexus-700">{formatCurrency(evm.etc)}</span>
-                  </div>
-                  <div className={`flex justify-between items-center p-3 rounded-lg ${evm.vac >= 0 ? 'bg-green-50 border border-green-100' : 'bg-red-50 border border-red-100'}`}>
-                      <span className="text-sm font-bold">Variance at Completion (VAC)</span>
-                      <span className={`font-mono font-bold ${evm.vac >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                          {evm.vac > 0 ? '+' : ''}{formatCurrency(evm.vac)}
-                      </span>
-                  </div>
-              </div>
+               <h3 className={`${theme.typography.h3} mb-4`}>Performance Indices</h3>
+               <div className="space-y-4">
+                   <div>
+                       <div className="flex justify-between text-sm mb-1">
+                           <span>Schedule Efficiency (SPI)</span>
+                           <span className="font-bold">{evm.spi.toFixed(2)}</span>
+                       </div>
+                       <div className="w-full bg-slate-100 rounded-full h-2">
+                           <div className={`h-2 rounded-full ${evm.spi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${Math.min(evm.spi * 100, 100)}%` }}></div>
+                       </div>
+                   </div>
+                   <div>
+                       <div className="flex justify-between text-sm mb-1">
+                           <span>Cost Efficiency (CPI)</span>
+                           <span className="font-bold">{evm.cpi.toFixed(2)}</span>
+                       </div>
+                       <div className="w-full bg-slate-100 rounded-full h-2">
+                           <div className={`h-2 rounded-full ${evm.cpi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${Math.min(evm.cpi * 100, 100)}%` }}></div>
+                       </div>
+                   </div>
+                   <div>
+                       <div className="flex justify-between text-sm mb-1">
+                           <span>To Complete Efficiency (TCPI)</span>
+                           <span className="font-bold">{evm.tcpi.toFixed(2)}</span>
+                       </div>
+                       <div className="w-full bg-slate-100 rounded-full h-2">
+                           <div className={`h-2 rounded-full ${evm.tcpi <= 1 ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${Math.min(evm.tcpi * 100, 100)}%` }}></div>
+                       </div>
+                   </div>
+               </div>
            </div>
-
+           
            <div className={`${theme.components.card} ${theme.layout.cardPadding}`}>
-              <h3 className="font-bold text-slate-800 mb-4">Performance Index Trends</h3>
-              <div className="h-40 flex items-end gap-2 px-4 pb-2 border-b border-slate-200">
-                  <div className="w-1/2 flex flex-col items-center gap-2">
-                      <div className="relative w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div className={`absolute top-0 left-0 h-full ${evm.spi >= 1 ? 'bg-green-500' : 'bg-yellow-500'}`} style={{width: `${Math.min(evm.spi * 100, 100)}%`}}></div>
-                      </div>
-                      <span className="text-xs font-bold text-slate-600">SPI: {evm.spi.toFixed(2)}</span>
-                  </div>
-                  <div className="w-1/2 flex flex-col items-center gap-2">
-                      <div className="relative w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div className={`absolute top-0 left-0 h-full ${evm.cpi >= 1 ? 'bg-green-500' : 'bg-red-500'}`} style={{width: `${Math.min(evm.cpi * 100, 100)}%`}}></div>
-                      </div>
-                      <span className="text-xs font-bold text-slate-600">CPI: {evm.cpi.toFixed(2)}</span>
-                  </div>
-              </div>
-              <div className="mt-4 text-xs text-slate-500 text-center">
-                  TCPI (Required Efficiency): <strong>{evm.tcpi.toFixed(2)}</strong>
-                  <p className="mt-1 opacity-70">
-                      {evm.tcpi > 1 ? "Performance must improve to meet budget." : "Project can perform less efficiently and still meet budget."}
-                  </p>
-              </div>
+               <h3 className={`${theme.typography.h3} mb-4`}>Forecast Values</h3>
+               <div className="space-y-4 text-sm">
+                   <div className="flex justify-between border-b border-slate-100 pb-2">
+                       <span className="text-slate-500">Estimate to Complete (ETC)</span>
+                       <span className="font-mono font-bold">{formatCurrency(evm.etc)}</span>
+                   </div>
+                   <div className="flex justify-between border-b border-slate-100 pb-2">
+                       <span className="text-slate-500">Estimate at Completion (EAC)</span>
+                       <span className="font-mono font-bold">{formatCurrency(evm.eac)}</span>
+                   </div>
+                   <div className="flex justify-between border-b border-slate-100 pb-2">
+                       <span className="text-slate-500">Variance at Completion (VAC)</span>
+                       <span className={`font-mono font-bold ${evm.vac >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(evm.vac)}</span>
+                   </div>
+               </div>
            </div>
        </div>
     </div>

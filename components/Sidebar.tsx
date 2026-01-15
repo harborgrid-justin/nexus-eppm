@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -73,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-      <div className={`fixed inset-y-0 left-0 z-50 ${theme.colors.primary} text-slate-400 flex flex-col h-full border-r border-white/5 flex-shrink-0 select-none md:relative md:translate-x-0 transition-all duration-500 ease-in-out ${sidebarWidth} shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 z-50 bg-slate-900 text-slate-400 flex flex-col h-full border-r border-white/5 flex-shrink-0 select-none md:relative md:translate-x-0 transition-all duration-500 ease-in-out ${sidebarWidth} shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <SidebarHeader isCollapsed={isCollapsed} />
         
         <button onClick={onToggleCollapse} className="hidden md:flex absolute top-14 -right-4 w-8 h-8 bg-slate-900 border border-white/10 rounded-full items-center justify-center text-slate-500 hover:text-white z-50 transition-all hover:bg-black shadow-2xl active:scale-90" title={isCollapsed ? "Expand Viewport" : "Maximize Space"}>

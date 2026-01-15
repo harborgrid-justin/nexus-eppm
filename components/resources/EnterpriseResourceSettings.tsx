@@ -32,7 +32,7 @@ const EnterpriseResourceSettings: React.FC = () => {
             requiredSkills: editingRole.requiredSkills || []
         } as EnterpriseRole;
 
-        dispatch({ type: editingRole.id ? 'UPDATE_ROLE' : 'ADD_ROLE', payload: roleToSave });
+        dispatch({ type: editingRole.id ? 'ADMIN_UPDATE_ROLE' : 'ADMIN_ADD_ROLE', payload: roleToSave });
         setIsPanelOpen(false);
     };
 

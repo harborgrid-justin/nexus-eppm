@@ -2,25 +2,27 @@
 import React, { useState, useMemo, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, Layers, Lock, ShieldCheck, ArrowRightLeft, DollarSign, Wallet } from 'lucide-react';
-import { formatCompactCurrency, formatCurrency } from '../../utils/formatters';
+import { Banknote, Plus, PieChart as PieChartIcon, TrendingUp, Layers, Lock, ShieldCheck, ArrowRightLeft, DollarSign, Wallet, Unlock } from 'lucide-react';
+import { formatCompactCurrency, formatCurrency, formatDate } from '../../utils/formatters';
 import { CustomPieChart } from '../charts/CustomPieChart';
-import { ResponsiveContainer, ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Bar } from 'recharts';
+import { ResponsiveContainer, ComposedChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Bar } from 'recharts';
 import FundingAllocationModal from './FundingAllocationModal';
-import { getDaysDiff } from '../../utils/dateUtils';
 import StatCard from '../shared/StatCard';
 import { ProjectFunding as ProjectFundingType } from '../../types/index';
 import { EmptyGrid } from '../common/EmptyGrid';
+import { useTheme } from '../../context/ThemeContext';
+import { Badge } from '../ui/Badge';
 
 const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
 
 export const ProjectFunding: React.FC = () => {
     const { state, dispatch } = useData();
-    const { project, financials } = useProjectWorkspace();
+    const { project } = useProjectWorkspace();
     const projectId = project.id;
     const [viewMode, setViewMode] = useState<'reconciliation' | 'sources'>('reconciliation');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const theme = useTheme();
 
     const handleViewChange = (mode: 'reconciliation' | 'sources') => {
         startTransition(() => {

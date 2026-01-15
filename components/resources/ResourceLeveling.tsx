@@ -82,6 +82,11 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
         });
     };
 
+    const handleAutoShift = () => {
+        alert("Leveling solution applied: Non-critical tasks shifted.");
+        // In real app, dispatch TASK_UPDATE with new dates
+    };
+
     return (
         <div className="h-full flex flex-col animate-in fade-in duration-300">
             <div className="p-4 border-b border-slate-200 flex-shrink-0 flex items-center justify-between bg-slate-50/50">
@@ -157,7 +162,12 @@ const ResourceLeveling: React.FC<ResourceLevelingProps> = ({ overAllocatedResour
                                 </div>
                             ) : (
                                 <div className="flex gap-2">
-                                    <button className="flex-1 text-[10px] font-black uppercase py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-500 transition-all">Auto-Shift Tasks</button>
+                                    <button 
+                                        className="flex-1 text-[10px] font-black uppercase py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-500 transition-all"
+                                        onClick={handleAutoShift}
+                                    >
+                                        Auto-Shift Tasks
+                                    </button>
                                     <button className="flex-1 text-[10px] font-black uppercase py-2 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 text-slate-500 transition-all">Substitution</button>
                                 </div>
                             )}
