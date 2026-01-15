@@ -25,21 +25,22 @@ const EarnedValue: React.FC = () => {
     if (!project || !evm || !today) return [];
 
     const startDate = new Date(project.startDate);
-    const endDate = new Date(project.endDate);
-    const bac = project.originalBudget;
-    const totalDays = getDaysDiff(startDate, endDate);
+    const totalDays = getDaysDiff(startDate, new Date(project.endDate));
     if (totalDays <= 0) return [];
 
     const data = [];
+    const bac = project.originalBudget;
     
-    // Generate S-Curve Points
-    for (let i = 0; i <= totalDays; i += 30) {
+    // Generate 12 data points for the S-Curve
+    for (let i = 0; i <= 10; i++) {
+      const percentTime = i / 10;
       const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const percentTime = i / totalDays;
+      date.setDate(date.getDate() + (totalDays * percentTime));
       
       // S-Curve Approximation for PV
-      const curveFactor = percentTime < 0.5 ? 2 * percentTime * percentTime : -1 + (4 - 2 * percentTime) * percentTime;
+      // Ease-in-out cubic function for realistic project burn
+      const t = percentTime;
+      const curveFactor = t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
       const pv = bac * curveFactor;
       
       const point: any = { 
@@ -48,10 +49,20 @@ const EarnedValue: React.FC = () => {
           bac: project.originalBudget 
       };
 
+      // Only plot EV and AC for past dates
       if (date <= today) {
-          const timeRatio = i / getDaysDiff(startDate, today);
-          point.ev = evm.ev * timeRatio; 
-          point.ac = evm.ac * timeRatio; 
+          // Interpolate current EV/AC to fit the curve up to today
+          // This creates a smooth line from start to current status
+          const currentProgressRatio = (i / 10) / (getDaysDiff(startDate, today) / totalDays);
+          // Simple clamping for visualization demo
+          if (percentTime <= (getDaysDiff(startDate, today) / totalDays)) {
+              point.ev = evm.ev * (percentTime / (getDaysDiff(startDate, today) / totalDays));
+              point.ac = evm.ac * (percentTime / (getDaysDiff(startDate, today) / totalDays));
+          } else {
+             // For the specific 'Today' point
+             point.ev = evm.ev;
+             point.ac = evm.ac;
+          }
       }
 
       data.push(point);
@@ -59,7 +70,6 @@ const EarnedValue: React.FC = () => {
     return data;
   }, [project, evm, today]);
 
-  // FIX: Replaced simple text fallback with professional EmptyGrid component when EVM data is unavailable
   if (!project || !today || !evm || evm.bac === 0) {
       return (
           <EmptyGrid 

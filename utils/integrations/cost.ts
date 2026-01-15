@@ -1,3 +1,4 @@
+
 import { Project } from '../../types/project';
 import { BudgetLineItem, ChangeOrder, EVMMetrics } from '../../types/finance';
 import { PurchaseOrder } from '../../types/procurement';
@@ -31,19 +32,42 @@ export const calculateEVM = (project: Project, budgetItems: BudgetLineItem[]): E
   const totalProjectDays = getDaysDiff(projectStart, new Date(project.endDate));
   const daysElapsed = getDaysDiff(projectStart, today);
 
+  // 1. Budget at Completion (BAC)
   const bac = project.originalBudget;
+  
+  // 2. Actual Cost (AC)
   const ac = project.spent;
+
+  // 3. Planned Value (PV)
+  // Standard linear distribution approximation for the baseline
   const schedulePercent = totalProjectDays > 0 ? Math.min(1, Math.max(0, daysElapsed / totalProjectDays)) : 0;
-  const pv = bac * schedulePercent;
+  // Apply a slight S-curve weighting for realism if mid-project
+  const curveFactor = schedulePercent < 0.5 ? 2 * schedulePercent * schedulePercent : -1 + (4 - 2 * schedulePercent) * schedulePercent;
+  const pv = bac * curveFactor;
+
+  // 4. Earned Value (EV)
   const percentComplete = calculateProjectProgress(project);
   const ev = bac * (percentComplete / 100);
-  const sv = ev - pv;
-  const cv = ev - ac;
+
+  // 5. Variances
+  const sv = ev - pv; // Schedule Variance
+  const cv = ev - ac; // Cost Variance
+
+  // 6. Performance Indices
   const spi = pv > 0 ? (ev / pv) : 1;
   const cpi = ac > 0 ? (ev / ac) : 1;
-  const eac = cpi > 0 ? (bac / cpi) : bac;
-  const etc = eac - ac;
+
+  // 7. Forecasting
+  // EAC = BAC / CPI (Typical formula assuming current variance continues)
+  // Guard against divide by zero or extreme early project CPI
+  const validCpi = cpi === 0 ? 0.1 : cpi; // Avoid infinity
+  const eac = validCpi > 0 ? (bac / validCpi) : bac;
+  
+  const etc = Math.max(0, eac - ac);
   const vac = bac - eac;
+
+  // 8. To Complete Performance Index (TCPI)
+  // (BAC - EV) / (BAC - AC) -> Efficiency needed to finish on budget
   const workRemaining = bac - ev;
   const fundsRemaining = bac - ac;
   const tcpi = fundsRemaining > 0 ? (workRemaining / fundsRemaining) : 0;
