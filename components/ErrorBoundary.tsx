@@ -11,15 +11,13 @@ interface ErrorBoundaryState {
   error?: Error | string | unknown;
 }
 
-// Explicitly extend React.Component to resolve inheritance introspection errors
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined,
-  };
-  
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+    };
   }
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {

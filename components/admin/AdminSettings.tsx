@@ -1,11 +1,11 @@
+
 import React from 'react';
 import { Settings, RefreshCw, Database } from 'lucide-react';
-import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation } from '../common/ModuleNavigation';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { useAdminSettingsLogic } from '../../hooks/domain/useAdminSettingsLogic';
 import { useTheme } from '../../context/ThemeContext';
 import { AdminContent } from './AdminContent';
+import { TabbedLayout } from '../layout/standard/TabbedLayout';
 
 const AdminSettings: React.FC = () => {
   const theme = useTheme();
@@ -15,9 +15,8 @@ const AdminSettings: React.FC = () => {
   } = useAdminSettingsLogic();
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Enterprise Administration" 
+    <TabbedLayout
+        title="Enterprise Administration"
         subtitle="Configure global system logic and enterprise data definitions."
         icon={Settings}
         actions={
@@ -39,17 +38,12 @@ const AdminSettings: React.FC = () => {
                 </button>
             </div>
         }
-      />
-      
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
-            <ModuleNavigation 
-                groups={navGroups} activeGroup={activeGroup} activeItem={activeView}
-                onGroupChange={handleGroupChange} onItemChange={handleItemChange}
-                className="bg-transparent border-0 shadow-none"
-            />
-        </div>
-        
+        navGroups={navGroups}
+        activeGroup={activeGroup}
+        activeItem={activeView}
+        onGroupChange={handleGroupChange}
+        onItemChange={handleItemChange}
+    >
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
             <ErrorBoundary name="Admin Settings">
                 <div className="h-full overflow-y-auto">
@@ -57,8 +51,7 @@ const AdminSettings: React.FC = () => {
                 </div>
             </ErrorBoundary>
         </div>
-      </div>
-    </div>
+    </TabbedLayout>
   );
 };
 

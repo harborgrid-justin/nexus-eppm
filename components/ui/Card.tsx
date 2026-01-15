@@ -6,21 +6,23 @@ interface CardProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
+  noPadding?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', onClick }) => {
+export const Card: React.FC<CardProps> = ({ children, className = '', onClick, noPadding = false }) => {
   const theme = useTheme();
   
   return (
     <div 
       onClick={onClick}
       className={`
-        ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm
-        ${onClick ? `cursor-pointer hover:shadow-md hover:border-slate-300 transition-all duration-200` : ''} 
+        bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)]
+        ${onClick ? `cursor-pointer hover:border-[var(--color-focusRing)] transition-colors duration-300` : ''} 
+        shadow-[var(--shadow-sm)]
         ${className}
       `}
+      style={{
+          padding: noPadding ? '0' : 'var(--spacing-cardPadding)'
+      }}
     >
-      {children}
-    </div>
-  );
-};
+      
