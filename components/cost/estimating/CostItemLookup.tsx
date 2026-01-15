@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Plus, Book, Database } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';

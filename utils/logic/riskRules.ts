@@ -72,45 +72,50 @@ export const applyRiskRules = (state: DataState, action: Action, alerts: SystemA
 
   // Rule 34: Auto Risk Escalation (with Audit)
   if ((action.type === 'UPDATE_RISK' || action.type === 'ADD_RISK')) {
-      const risk: Risk = 'risk' in action.payload ? action.payload.risk : action.payload;
+      const payload = 'risk' in action.payload ? action.payload.risk : action.payload;
       
-      // Check if already escalated to prevent duplicates
-      const alreadyEscalated = state.programRisks.some(pr => pr.description.includes(risk.id));
+      // Check if it is a Project Risk (has projectId) and perform escalation logic
+      if ('projectId' in payload) {
+        const risk = payload as Risk;
+        
+        // Check if already escalated to prevent duplicates
+        const alreadyEscalated = state.programRisks.some(pr => pr.description.includes(risk.id));
 
-      if (risk.score >= 20 && !risk.isEscalated && !alreadyEscalated) {
-          const proj = state.projects.find(p => p.id === risk.projectId);
-          if (proj?.programId) {
-              const pRisk: ProgramRisk = {
-                  id: generateId('PR'),
-                  programId: proj.programId,
-                  description: `[Escalated from ${risk.id}] ${risk.description}`,
-                  category: risk.category,
-                  probability: risk.probability,
-                  impact: risk.impact,
-                  score: risk.score,
-                  ownerId: risk.ownerId,
-                  status: 'Open',
-                  mitigationPlan: 'Escalated review required',
-                  probabilityValue: risk.probabilityValue,
-                  impactValue: risk.impactValue,
-                  financialImpact: risk.financialImpact,
-                  strategy: risk.strategy,
-                  responseActions: risk.responseActions,
-                  isEscalated: true
-              };
-              newProgramRisks.push(pRisk);
-              
-              // Audit the System Action
-              newAuditLogs.push({
-                  date: new Date().toISOString(),
-                  user: 'System Rule Engine',
-                  action: 'AUTO_ESCALATION',
-                  details: `Risk ${risk.id} score (${risk.score}) exceeded threshold. Escalated to Program.`
-              });
+        if (risk.score >= 20 && !risk.isEscalated && !alreadyEscalated) {
+            const proj = state.projects.find(p => p.id === risk.projectId);
+            if (proj?.programId) {
+                const pRisk: ProgramRisk = {
+                    id: generateId('PR'),
+                    programId: proj.programId,
+                    description: `[Escalated from ${risk.id}] ${risk.description}`,
+                    category: risk.category,
+                    probability: risk.probability,
+                    impact: risk.impact,
+                    score: risk.score,
+                    ownerId: risk.ownerId,
+                    status: 'Open',
+                    mitigationPlan: 'Escalated review required',
+                    probabilityValue: risk.probabilityValue,
+                    impactValue: risk.impactValue,
+                    financialImpact: risk.financialImpact,
+                    strategy: risk.strategy,
+                    responseActions: risk.responseActions,
+                    isEscalated: true
+                };
+                newProgramRisks.push(pRisk);
+                
+                // Audit the System Action
+                newAuditLogs.push({
+                    date: new Date().toISOString(),
+                    user: 'System Rule Engine',
+                    action: 'AUTO_ESCALATION',
+                    details: `Risk ${risk.id} score (${risk.score}) exceeded threshold. Escalated to Program.`
+                });
 
-              alerts.push(createAlert('Critical', 'Risk', 'Risk Escalated', 
-                `Risk ${risk.id} escalated to Program level due to high severity.`, { type: 'Program', id: proj.programId }));
-          }
+                alerts.push(createAlert('Critical', 'Risk', 'Risk Escalated', 
+                    `Risk ${risk.id} escalated to Program level due to high severity.`, { type: 'Program', id: proj.programId }));
+            }
+        }
       }
   }
 

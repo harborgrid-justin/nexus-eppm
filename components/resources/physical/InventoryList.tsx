@@ -2,7 +2,6 @@
 import React from 'react';
 import { usePhysicalResources } from '../../../hooks/usePhysicalResources';
 import DataTable from '../../common/DataTable';
-// Corrected import path for Column and Resource from types
 import { Resource, Column } from '../../../types';
 import { Badge } from '../../ui/Badge';
 

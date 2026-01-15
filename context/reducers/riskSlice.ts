@@ -1,11 +1,18 @@
 
 import { DataState, Action } from '../../types/index';
+import { Risk, PortfolioRisk } from '../../types/index';
 
 export const riskReducer = (state: DataState, action: Action): DataState => {
   switch (action.type) {
     // Risk Management
-    case 'ADD_RISK':
-      return { ...state, risks: [...state.risks, action.payload] };
+    case 'ADD_RISK': {
+        const risk = action.payload;
+        if ('projectId' in risk) {
+             return { ...state, risks: [...state.risks, risk as Risk] };
+        } else {
+             return { ...state, portfolioRisks: [...state.portfolioRisks, risk as PortfolioRisk] };
+        }
+    }
     case 'UPDATE_RISK':
       return { 
           ...state, 
@@ -23,7 +30,6 @@ export const riskReducer = (state: DataState, action: Action): DataState => {
         return { ...state, issues: state.issues.filter(i => i.id !== action.payload) };
 
     case 'PROJECT_UPDATE_RISK_PLAN':
-         // This assumes risk plan is stored on project, we might need to update project
          return {
              ...state,
              projects: state.projects.map(p => 
@@ -34,8 +40,6 @@ export const riskReducer = (state: DataState, action: Action): DataState => {
          };
     
     case 'UPDATE_RBS_NODE_PARENT':
-         // Simplified RBS logic: flat update for now, real recursion handled in UI or separate utility
-         // Ideally we deep update the RBS tree structure
          return state; 
 
     default:

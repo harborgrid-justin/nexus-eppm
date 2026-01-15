@@ -10,14 +10,14 @@ import {
     ProgramTransitionItem, ProgramArchitectureStandard, ProgramArchitectureReview,
     ProgramObjective
 } from './program';
-import { Resource, ResourceRequest, Timesheet, EnterpriseRole } from './resource';
+import { Resource, ResourceRequest, Timesheet, EnterpriseRole, EnterpriseSkill } from './resource';
 import { Risk, Issue, IssueCode, PortfolioRisk } from './risk';
 import { 
     BudgetLineItem, Expense, ChangeOrder, FundingSource, 
     ExpenseCategory, CostBookItem, Invoice, CostReport, 
     CostEstimate, ProjectFunding, BudgetLogItem 
 } from './finance';
-import { QualityStandard, DataJob, Integration, ActivityCode, WorkflowDefinition, EtlMapping, GlobalChangeRule } from './common';
+import { QualityStandard, DataJob, Integration, ActivityCode, UserDefinedField, WorkflowDefinition, EtlMapping, GlobalChangeRule, Extension, StandardTemplate } from './common';
 import { QualityReport, NonConformanceReport } from './quality';
 import { GlobalCalendar } from './calendar';
 import { EPSNode, OBSNode, Location } from './structure';
@@ -25,6 +25,10 @@ import { ServiceStatus, SystemAlert, OrganizationProfile, SecurityPolicy, Knowle
 import { DailyLogEntry, SafetyIncident, WorkLog, DelayLog, PunchItem } from './field';
 import { KanbanTask, ActivityItem, TeamEvent } from './collaboration';
 import { ReportDefinition } from './analytics';
+import { RoadmapItem } from './strategy';
+import { Contract, Solicitation, ProcurementPlan, ProcurementPackage, SupplierPerformanceReview, ProcurementClaim, MakeOrBuyAnalysis, Vendor, PurchaseOrder, MaterialReceipt } from './procurement';
+import { Stakeholder } from './project_subtypes';
+import { UnifierState } from './unifier';
 
 export type Action =
     // Project & Schedule
@@ -76,6 +80,7 @@ export type Action =
     | { type: 'GOVERNANCE_ADD_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_UPDATE_STRATEGIC_GOAL'; payload: StrategicGoal }
     | { type: 'GOVERNANCE_DELETE_STRATEGIC_GOAL'; payload: string }
+    | { type: 'GOVERNANCE_UPDATE_INTEGRATED_CHANGE'; payload: IntegratedChangeRequest }
 
     // Resources
     | { type: 'RESOURCE_ADD'; payload: Resource }
@@ -100,6 +105,8 @@ export type Action =
     | { type: 'DELETE_EXPENSE'; payload: string }
     | { type: 'ADD_INVOICE'; payload: Invoice }
     | { type: 'UPDATE_INVOICE'; payload: Invoice }
+    | { type: 'ADD_PROJECT_FUNDING'; payload: { projectId: string; funding: ProjectFunding } }
+    | { type: 'COST_ESTIMATE_ADD_OR_UPDATE'; payload: { projectId: string; estimate: CostEstimate } }
     
     // Procurement
     | { type: 'ADD_VENDOR'; payload: Vendor }
@@ -136,7 +143,7 @@ export type Action =
     | { type: 'FIELD_UPDATE_PUNCH_ITEM'; payload: PunchItem }
     | { type: 'ADD_NCR'; payload: NonConformanceReport }
     | { type: 'UPDATE_NCR'; payload: NonConformanceReport }
-    | { type: 'ADD_QUALITY_STANDARD'; payload: QualityStandard | ProgramQualityStandard }
+    | { type: 'ADD_QUALITY_STANDARD'; payload: QualityStandard }
     | { type: 'ADD_QUALITY_REPORT'; payload: QualityReport }
     | { type: 'UPDATE_QUALITY_REPORT'; payload: QualityReport }
     | { type: 'SYSTEM_LOG_SAFETY_INCIDENT'; payload: SafetyIncident }
@@ -182,6 +189,9 @@ export type Action =
     | { type: 'ADMIN_ADD_CALENDAR'; payload: GlobalCalendar }
     | { type: 'ADMIN_UPDATE_CALENDAR'; payload: GlobalCalendar }
     | { type: 'ADMIN_DELETE_CALENDAR'; payload: string }
+    | { type: 'ADMIN_ADD_LOCATION'; payload: Location }
+    | { type: 'ADMIN_UPDATE_LOCATION'; payload: Location }
+    | { type: 'ADMIN_DELETE_LOCATION'; payload: string }
     | { type: 'ADMIN_ADD_ISSUE_CODE'; payload: IssueCode }
     | { type: 'ADMIN_UPDATE_ISSUE_CODE'; payload: IssueCode }
     | { type: 'ADMIN_DELETE_ISSUE_CODE'; payload: string }
@@ -218,4 +228,5 @@ export type Action =
     | { type: 'UPLOAD_DOCUMENT'; payload: any }
     | { type: 'DELETE_DOCUMENT'; payload: any }
     | { type: 'VERSION_DOCUMENT'; payload: any }
-    | { type: 'ADD_STAKEHOLDER'; payload: any };
+    | { type: 'ADD_STAKEHOLDER'; payload: Stakeholder }
+    | { type: 'PROJECT_ADD_STAKEHOLDER'; payload: Stakeholder };

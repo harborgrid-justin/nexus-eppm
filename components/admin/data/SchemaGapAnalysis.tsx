@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { Database, AlertTriangle, CheckCircle, Search, RefreshCw, Eye, GitBranch, Layers, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useSchemaGapAnalysisLogic } from '../../../hooks/domain/useSchemaGapAnalysisLogic';
 import { Button } from '../../ui/Button';
 import { Badge } from '../../ui/Badge';
+import { useData } from '../../../context/DataContext';
 
 export const SchemaGapAnalysis: React.FC = () => {
     const theme = useTheme();
+    const { dispatch } = useData();
     const {
         dataModel,
         searchTerm,
@@ -14,6 +17,24 @@ export const SchemaGapAnalysis: React.FC = () => {
         generating,
         handleGenerateEndpoint
     } = useSchemaGapAnalysisLogic();
+
+    const handleReIndex = () => {
+        // Simulate a system job
+        dispatch({
+            type: 'SYSTEM_QUEUE_DATA_JOB',
+            payload: {
+                id: `REINDEX-${Date.now()}`,
+                type: 'System',
+                format: 'JSON',
+                status: 'In Progress',
+                submittedBy: 'Admin',
+                timestamp: new Date().toLocaleString(),
+                details: 'Full schema re-indexing initiated.',
+                progress: 0
+            }
+        });
+        alert("Schema Re-Index job queued in background.");
+    };
 
     return (
         <div className="h-full flex flex-col space-y-8 bg-slate-50/50 p-1 animate-in fade-in duration-500 scrollbar-thin">
@@ -51,7 +72,10 @@ export const SchemaGapAnalysis: React.FC = () => {
                         className={`pl-12 pr-4 py-4 w-full border ${theme.colors.border} rounded-3xl text-sm font-black focus:ring-8 focus:ring-nexus-500/5 focus:border-nexus-500 outline-none transition-all ${theme.colors.surface} ${theme.colors.text.primary} shadow-sm uppercase tracking-tight`}
                     />
                 </div>
-                <button className="px-6 py-4 bg-white border border-slate-200 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 hover:border-nexus-300 transition-all shadow-sm active:scale-95">
+                <button 
+                    onClick={handleReIndex}
+                    className="px-6 py-4 bg-white border border-slate-200 rounded-3xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 hover:border-nexus-300 transition-all shadow-sm active:scale-95"
+                >
                     <RefreshCw size={14} className="inline mr-2"/> Re-Index Schema
                 </button>
             </div>

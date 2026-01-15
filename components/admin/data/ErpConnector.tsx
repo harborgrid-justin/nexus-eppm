@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { Database, Lock, CheckCircle, XCircle, RefreshCw, Unlock, ShieldCheck, Landmark } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
@@ -8,7 +9,7 @@ import { EmptyGrid } from '../../common/EmptyGrid';
 
 export const ErpConnector: React.FC = () => {
     const theme = useTheme();
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const transactions = state.extensionData.erpTransactions || [];
 
     const latestChangeOrder = useMemo(() => {
@@ -18,8 +19,23 @@ export const ErpConnector: React.FC = () => {
 
     const gateStatus = latestChangeOrder?.status === 'Approved' ? 'Open' : 'Locked';
 
+    const handlePoll = () => {
+        // Trigger a mock poll action
+        const mockTransaction = {
+             id: `ERP-TX-${Date.now()}`,
+             type: 'POLL_SYNC',
+             amount: 0,
+             status: 'Success',
+             response: 'Heartbeat Check OK - No new records.'
+        };
+        dispatch({ 
+             type: 'EXTENSION_UPDATE_FINANCIAL', 
+             payload: { erpTransactions: [mockTransaction, ...transactions] } 
+        });
+    };
+
     return (
-        <div className="h-full p-10 overflow-y-auto scrollbar-thin bg-slate-50/30 animate-in fade-in duration-500">
+        <div className={`h-full p-10 overflow-y-auto scrollbar-thin ${theme.colors.background}/30 animate-in fade-in duration-500`}>
             <div className="max-w-7xl mx-auto space-y-12">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
@@ -100,7 +116,10 @@ export const ErpConnector: React.FC = () => {
                         <h4 className={`font-black ${theme.colors.text.primary} text-xs uppercase tracking-[0.2em] flex items-center gap-2`}>
                             <Landmark size={16} className="text-nexus-600" /> Recent Integration Transactions
                         </h4>
-                        <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 transition-all shadow-sm">
+                        <button 
+                            onClick={handlePoll}
+                            className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-nexus-600 transition-all shadow-sm active:scale-95"
+                        >
                              <RefreshCw size={12} className="inline mr-2"/> Poll Hub
                         </button>
                     </div>

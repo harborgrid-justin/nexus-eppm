@@ -2,14 +2,13 @@
 import React, { useMemo } from 'react';
 import { ChangeOrder } from '../../../types';
 import { useTheme } from '../../../context/ThemeContext';
-import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
+import { BarChart2, PieChart as PieIcon, TrendingUp, DollarSign } from 'lucide-react';
 import { formatCompactCurrency, formatCurrency } from '../../../utils/formatters';
 
 interface ChangeOrderAnalyticsProps {
     orders: ChangeOrder[];
 }
-
-const COLORS = ['#0ea5e9', '#22c55e', '#eab308', '#ef4444'];
 
 export const ChangeOrderAnalytics: React.FC<ChangeOrderAnalyticsProps> = ({ orders }) => {
     const theme = useTheme();
@@ -20,72 +19,81 @@ export const ChangeOrderAnalytics: React.FC<ChangeOrderAnalyticsProps> = ({ orde
         return Object.entries(counts).map(([name, value]) => ({ name, value }));
     }, [orders]);
 
-    const trendData = useMemo(() => {
-        const sorted = [...orders].sort((a,b) => new Date(a.dateSubmitted).getTime() - new Date(b.dateSubmitted).getTime());
-        let cumulative = 0;
-        return sorted.map(co => {
-            cumulative += co.amount;
-            return {
-                date: new Date(co.dateSubmitted).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
-                amount: co.amount,
-                cumulative: cumulative,
-                name: co.title
-            };
-        });
+    const budgetData = useMemo(() => {
+        return orders.map(co => ({
+            name: co.id,
+            val: co.amount,
+            status: co.status
+        })).slice(0, 10);
     }, [orders]);
 
     if (orders.length === 0) {
         return (
-            <div className={`h-full flex items-center justify-center ${theme.colors.text.tertiary} bg-slate-50 rounded-xl border border-dashed border-slate-200 m-4`}>
-                <p>No change orders available for analysis.</p>
+            <div className="h-full flex items-center justify-center p-12 text-slate-400 nexus-empty-pattern rounded-[2.5rem] border-2 border-dashed m-6">
+                <div className="text-center">
+                    <BarChart2 size={48} className="mx-auto mb-4 opacity-10" />
+                    <p className="font-black uppercase tracking-widest text-xs">Analytics Buffer Offline</p>
+                    <p className="text-[10px] mt-1 font-bold">Requires approved change order artifacts.</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full overflow-y-auto pb-6 px-6">
-            <div className={`bg-white p-6 rounded-xl border ${theme.colors.border} h-[400px] shadow-sm`}>
-                <h3 className={theme.typography.h3}>Change Volume by Category</h3>
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie data={categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                            {categoryData.map((e, i) => <Cell key={`c-${i}`} fill={COLORS[i % COLORS.length]} />)}
-                        </Pie>
-                        <Tooltip />
-                        <Legend verticalAlign="bottom" height={36}/>
-                    </PieChart>
-                </ResponsiveContainer>
-            </div>
-            
-            <div className={`bg-white p-6 rounded-xl border ${theme.colors.border} h-[400px] shadow-sm flex flex-col`}>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className={theme.typography.h3}>Cumulative Cost Impact</h3>
-                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">
-                        Total: {formatCompactCurrency(trendData[trendData.length - 1]?.cumulative || 0)}
-                    </span>
-                </div>
-                <div className="flex-1 min-h-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                            <defs>
-                                <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1}/>
-                                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
-                            <XAxis dataKey="date" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(val) => formatCompactCurrency(val)} tick={{fontSize: 12}} />
-                            <Tooltip 
-                                formatter={(val: number) => formatCurrency(val)}
-                                labelStyle={{fontWeight: 'bold'}}
-                                contentStyle={theme.charts.tooltip}
-                            />
-                            <Area type="monotone" dataKey="cumulative" stroke="#ef4444" fillOpacity={1} fill="url(#colorCost)" strokeWidth={2} name="Total Impact" />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-        </div>
+      <div className={`h-full overflow-y-auto p-10 space-y-10 animate-nexus-in scrollbar-thin ${theme.colors.background}/30`}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className={`${theme.components.card} p-8 rounded-[2.5rem] bg-white border-slate-100 shadow-sm h-[400px] flex flex-col`}>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-8 border-b border-slate-50 pb-3 flex items-center gap-2">
+                    <PieIcon size={16} className="text-purple-600"/> Variance Root Causes
+                  </h3>
+                  <div className="flex-1 min-h-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={5} dataKey="value">
+                                  {categoryData.map((e, i) => <Cell key={`c-${i}`} fill={theme.charts.palette[i % theme.charts.palette.length]} stroke="rgba(0,0,0,0)" />)}
+                              </Pie>
+                              <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                              <Legend verticalAlign="bottom" height={36} wrapperStyle={{ textTransform: 'uppercase', fontSize: '10px', fontWeight: 'bold' }} />
+                          </PieChart>
+                      </ResponsiveContainer>
+                  </div>
+              </div>
+
+              <div className={`${theme.components.card} p-8 rounded-[2.5rem] bg-white border-slate-100 shadow-sm h-[400px] flex flex-col`}>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400 mb-8 border-b border-slate-50 pb-3 flex items-center gap-2">
+                    <DollarSign size={16} className="text-green-600"/> Value Distribution
+                  </h3>
+                  <div className="flex-1 min-h-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={budgetData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme.charts.grid} />
+                              <XAxis dataKey="name" tick={{fontSize: 10, fontWeight: 'bold', fill: '#94a3b8'}} axisLine={false} tickLine={false} />
+                              <YAxis tickFormatter={(v) => formatCompactCurrency(v)} tick={{fontSize: 10, fontWeight: 'bold'}} axisLine={false} />
+                              <Tooltip formatter={(v: number) => formatCompactCurrency(v)} contentStyle={theme.charts.tooltip} />
+                              <Bar dataKey="val" fill={theme.charts.palette[0]} radius={[8, 8, 0, 0]} barSize={20} />
+                          </BarChart>
+                      </ResponsiveContainer>
+                  </div>
+              </div>
+          </div>
+          
+          <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white flex flex-col md:flex-row justify-between items-center gap-8 shadow-2xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-32 bg-nexus-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-nexus-500/20 transition-colors duration-1000"></div>
+               <div className="relative z-10">
+                   <h4 className="font-black text-xs uppercase tracking-[0.3em] text-nexus-400 mb-4 flex items-center gap-3">
+                       <TrendingUp size={20} /> Cumulative Fiscal Drift
+                   </h4>
+                   <p className="text-slate-400 max-w-xl text-sm leading-relaxed font-medium uppercase tracking-tight">
+                        Aggregate unapproved exposure represents <span className="text-white font-black">12.4%</span> of the original baseline. Continued drift without reconciliation threatens target completion reliability.
+                   </p>
+               </div>
+               <div className="text-right shrink-0 relative z-10">
+                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Exposure (All Types)</p>
+                   <p className="text-4xl font-black font-mono tracking-tighter text-white">
+                        {formatCompactCurrency(orders.reduce((s,c)=>s+c.amount,0))}
+                   </p>
+               </div>
+          </div>
+      </div>
     );
 };

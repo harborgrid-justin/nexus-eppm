@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { usePhysicalResources } from '../../../hooks/usePhysicalResources';
 import { Truck, Wrench, AlertTriangle, CheckCircle } from 'lucide-react';

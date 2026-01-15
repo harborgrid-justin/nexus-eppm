@@ -26,8 +26,10 @@ export const FundingSourcePanel: React.FC<FundingSourcePanelProps> = ({ isOpen, 
     useEffect(() => {
         if (editingSource) {
             setFormData(editingSource);
+        } else {
+             setFormData({ name: '', type: 'Internal', totalAuthorized: 0, description: '' });
         }
-    }, [editingSource]);
+    }, [editingSource, isOpen]);
 
     const handleSubmit = () => {
         if (formData.name && formData.totalAuthorized !== undefined) {

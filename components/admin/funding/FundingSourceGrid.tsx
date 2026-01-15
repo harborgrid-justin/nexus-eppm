@@ -25,10 +25,10 @@ export const FundingSourceGrid: React.FC<FundingSourceGridProps> = ({ onEdit, on
                                 <DollarSign size={20} />
                             </div>
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => onEdit(source)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-nexus-600`}>
+                                <button onClick={() => onEdit(source)} className={`p-1.5 hover:${theme.colors.background} rounded ${theme.colors.text.tertiary} hover:text-nexus-600 transition-colors`}>
                                     <Edit2 size={14} />
                                 </button>
-                                <button onClick={() => onDelete(source.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.tertiary} hover:text-red-500`}>
+                                <button onClick={() => onDelete(source.id)} className={`p-1.5 hover:bg-red-50 rounded ${theme.colors.text.tertiary} hover:text-red-500 transition-colors`}>
                                     <Trash2 size={14} />
                                 </button>
                             </div>

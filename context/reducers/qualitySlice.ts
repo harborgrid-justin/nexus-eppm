@@ -13,12 +13,10 @@ export const qualitySlice = (state: DataState, action: Action): DataState => {
     case 'UPDATE_NCR':
         return { ...state, nonConformanceReports: state.nonConformanceReports.map(n => n.id === action.payload.id ? action.payload : n) };
 
-    // This handles adding to the global quality standards list in state, though payload might be typed ProgramQualityStandard
-    // In a real app, we'd map types carefully. Here we assume structural compatibility or cast if needed.
     case 'ADD_QUALITY_STANDARD': 
         return { 
             ...state, 
-            programQualityStandards: [...state.programQualityStandards, action.payload] 
+            qualityStandards: [...state.qualityStandards, action.payload] 
         };
 
     default:

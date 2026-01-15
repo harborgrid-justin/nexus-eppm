@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Layers, Target, DollarSign, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +29,7 @@ export const ProgramCommandBar: React.FC<ProgramCommandBarProps> = ({ onCreatePr
               </button>
 
               <button 
-                onClick={() => navigate('/portfolio?tab=framework')}
+                onClick={() => navigate('/portfolio?view=framework')}
                 className={`p-6 rounded-[2rem] border border-dashed border-purple-300 bg-purple-50/20 hover:bg-purple-50 hover:shadow-xl hover:border-purple-400 transition-all flex items-center gap-6 group text-left relative overflow-hidden`}
               >
                   <div className="w-12 h-12 rounded-2xl bg-white border border-purple-200 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
@@ -42,7 +43,7 @@ export const ProgramCommandBar: React.FC<ProgramCommandBarProps> = ({ onCreatePr
               </button>
 
               <button 
-                onClick={() => navigate('/portfolio?tab=financials')}
+                onClick={() => navigate('/portfolio?view=financials')}
                 className={`p-6 rounded-[2rem] border border-dashed border-emerald-300 bg-emerald-50/20 hover:bg-emerald-50 hover:shadow-xl hover:border-emerald-400 transition-all flex items-center gap-6 group text-left relative overflow-hidden`}
               >
                   <div className="w-12 h-12 rounded-2xl bg-white border border-emerald-200 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">

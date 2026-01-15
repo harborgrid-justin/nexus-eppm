@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Activity, User, MoreHorizontal, ArrowRight, Layers, Target, DollarSign, TrendingUp } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
@@ -99,7 +100,7 @@ export const ProgramListGrid: React.FC<ProgramListGridProps> = ({ programs, proj
                                         <div className="px-4 py-2 bg-white rounded-xl border border-slate-200 shadow-sm font-black group-hover:border-nexus-200 transition-colors">{projectsInProgram.length} Projects</div>
                                         <StatusBadge status={program.health} variant="health" className="scale-110 shadow-sm" />
                                     </div>
-                                    <button className="text-[10px] font-black text-nexus-600 uppercase tracking-[0.3em] flex items-center gap-3 group-hover:translate-x-2 transition-all">
+                                    <button onClick={() => onSelectProgram(program.id)} className="text-[10px] font-black text-nexus-600 uppercase tracking-[0.3em] flex items-center gap-3 group-hover:translate-x-2 transition-all">
                                         <TrendingUp size={16}/> HUB <ArrowRight size={16}/>
                                     </button>
                                 </div>

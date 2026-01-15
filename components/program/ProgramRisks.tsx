@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useProgramData } from '../../hooks/useProgramData';
 import { useData } from '../../context/DataContext';
@@ -242,4 +243,3 @@ export const ProgramRisks: React.FC<ProgramRisksProps> = ({ programId }) => {
     </div>
   );
 };
-export default ProgramRisks;

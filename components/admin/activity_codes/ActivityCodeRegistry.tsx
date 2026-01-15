@@ -1,6 +1,5 @@
 
 import React from 'react';
-// Added missing ChevronRight import to satisfy usage on line 79
 import { Plus, Edit2, Trash2, Tag, Globe, Briefcase, ChevronRight } from 'lucide-react';
 import { ActivityCode, ActivityCodeScope } from '../../../types/index';
 import { useTheme } from '../../../context/ThemeContext';
@@ -78,7 +77,6 @@ export const ActivityCodeRegistry: React.FC<Props> = ({ codes, activeScope, setA
                             </div>
                             <div className="flex justify-between items-end mt-4 pt-3 border-t border-slate-50">
                                 <Badge variant="neutral" className="scale-75 origin-left">{code.values.length} Values</Badge>
-                                {/* ChevronRight is now correctly imported from lucide-react */}
                                 <ChevronRight size={14} className={`transition-transform duration-300 ${selectedId === code.id ? 'text-nexus-700 translate-x-1' : 'text-slate-200'}`}/>
                             </div>
                         </div>
