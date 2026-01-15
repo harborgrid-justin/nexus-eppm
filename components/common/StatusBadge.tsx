@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { StatusVariant } from '../../types/ui';
 import { useTheme } from '../../context/ThemeContext';
 
 interface StatusBadgeProps {
   status: any;
-  variant?: StatusVariant;
+  variant?: 'health' | 'status' | 'priority' | 'custom' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
   className?: string;
   customColorClass?: string;
 }
@@ -16,7 +15,7 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
   customColorClass
 }) => {
   const theme = useTheme();
-  const baseClasses = "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border";
+  const baseClasses = "inline-flex items-center px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border shadow-sm transition-all";
   
   const displayStatus = (status === null || status === undefined) ? '-' : String(status);
   const s = displayStatus.toLowerCase();
@@ -45,7 +44,7 @@ const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({
   } else if (['draft', 'planned', 'proposed', 'estimated'].includes(s)) {
       colors = 'bg-slate-50 text-slate-500 border-slate-200';
   } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      colors = 'bg-slate-900 text-slate-200 border-slate-700 shadow-sm';
+      colors = 'bg-slate-900 text-slate-200 border-slate-700';
   } else if (['info', 'new', 'allocation'].includes(s)) {
       colors = getSemanticColor('info');
   }

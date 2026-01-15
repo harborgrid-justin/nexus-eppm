@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Filter, Plus, X } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -26,27 +27,27 @@ export const LogicFilter: React.FC = () => {
     };
 
     return (
-        <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.surface} shadow-sm`}>
-            <div className="flex justify-between items-center mb-4">
-                <h4 className={`text-xs font-black uppercase tracking-widest ${theme.colors.text.tertiary} flex items-center gap-2`}>
-                    <Filter size={14}/> {t('common.filters', 'Logic Filters')}
+        <div className={`p-5 rounded-2xl border ${theme.colors.border} ${theme.colors.surface} shadow-sm bg-white`}>
+            <div className="flex justify-between items-center mb-5">
+                <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.colors.text.tertiary} flex items-center gap-2`}>
+                    <Filter size={14} className="text-nexus-600"/> {t('common.filters', 'Predicate Logic Gates')}
                 </h4>
-                <button onClick={addFilter} className="text-nexus-600 hover:text-nexus-700 text-xs font-bold flex items-center gap-1">
-                    <Plus size={14}/> {t('common.add', 'Add')}
+                <button onClick={addFilter} className="text-nexus-600 hover:text-nexus-800 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 px-3 py-1 bg-nexus-50 border border-nexus-100 rounded-lg shadow-sm transition-all active:scale-95">
+                    <Plus size={12}/> {t('common.add', 'Append')}
                 </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
                 {filters.map((f, idx) => (
                     <div key={f.id} className="flex items-center gap-2 animate-nexus-in">
-                        {idx > 0 && <span className="text-[10px] font-black text-slate-400 uppercase w-8 text-center">{t('common.and', 'AND')}</span>}
-                        <select className={`flex-1 text-xs border ${theme.colors.border} rounded-lg p-1.5 bg-slate-50 focus:bg-white outline-none`}>
-                            <option>Status</option><option>Priority</option><option>Cost Code</option>
+                        {idx > 0 && <span className="text-[9px] font-black text-slate-300 uppercase w-8 text-center">AND</span>}
+                        <select className={`flex-1 text-xs font-bold border ${theme.colors.border} rounded-xl p-2 bg-slate-50 focus:bg-white outline-none focus:ring-4 focus:ring-nexus-500/5 transition-all text-slate-700`}>
+                            <option>Status</option><option>Priority</option><option>Cost Code</option><option>Physical %</option>
                         </select>
-                        <select className={`w-24 text-xs border ${theme.colors.border} rounded-lg p-1.5 bg-slate-50 focus:bg-white outline-none`}>
-                            <option>Equals</option><option>Contains</option><option>Exists</option>
+                        <select className={`w-28 text-xs font-bold border ${theme.colors.border} rounded-xl p-2 bg-slate-50 focus:bg-white outline-none focus:ring-4 focus:ring-nexus-500/5 transition-all text-slate-700`}>
+                            <option>Equals</option><option>Contains</option><option>Exists</option><option>Greater Than</option>
                         </select>
-                        <input type="text" className={`flex-1 text-xs border ${theme.colors.border} rounded-lg p-1.5 bg-slate-50 focus:bg-white outline-none`} defaultValue={f.value} />
-                        <button onClick={() => removeFilter(f.id)} className="text-slate-400 hover:text-red-500 p-1"><X size={14}/></button>
+                        <input type="text" className={`flex-1 text-xs font-black border ${theme.colors.border} rounded-xl p-2 bg-slate-50 focus:bg-white outline-none focus:ring-4 focus:ring-nexus-500/5 transition-all text-slate-900 shadow-inner`} defaultValue={f.value} placeholder="Value..." />
+                        <button onClick={() => removeFilter(f.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><X size={14}/></button>
                     </div>
                 ))}
             </div>

@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Project } from '../../../types/index';
@@ -7,7 +8,7 @@ import { ProgressBar } from '../../common/ProgressBar';
 import DataTable from '../../common/DataTable';
 import { calculateProjectProgress } from '../../../utils/calculations';
 import { formatCompactCurrency, formatInitials } from '../../../utils/formatters';
-import { GitBranch, User } from 'lucide-react';
+import { GitBranch, User, Activity } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 interface ProjectListTableProps {
@@ -30,28 +31,28 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
   const columns = useMemo(() => [
     {
       key: 'health', 
-      header: 'Status', 
+      header: 'Integrity', 
       width: 'w-24', 
       sortable: true,
-      render: (p: Project) => p.health ? <StatusBadge status={p.health} variant="health" /> : <div className="w-16 h-6 bg-slate-100 rounded-full animate-pulse shadow-inner" />
+      render: (p: Project) => p.health ? <StatusBadge status={p.health} variant="health" /> : <div className="w-16 h-6 bg-slate-50 rounded-full animate-pulse shadow-inner" />
     },
     {
       key: 'name', 
-      header: 'Project Name', 
+      header: 'Designation / Node ID', 
       sortable: true,
       render: (p: Project) => (
         <div className="flex flex-col min-w-0 overflow-hidden py-1">
-          <div className="flex items-center gap-2">
-              <span className={`text-sm font-black ${theme.colors.text.primary} truncate group-hover:text-nexus-600 transition-colors uppercase tracking-tight`}>{p.name || 'Untitled Project'}</span>
-              {p.isReflection && <GitBranch size={12} className="text-purple-500" title="Reflection Sandbox" />}
+          <div className="flex items-center gap-2.5">
+              <span className={`text-sm font-black ${theme.colors.text.primary} truncate group-hover:text-nexus-700 transition-colors uppercase tracking-tight`}>{p.name || 'Untitled Artifact'}</span>
+              {p.isReflection && <div className="p-1 bg-purple-50 rounded border border-purple-100"><GitBranch size={10} className="text-purple-500" title="Reflection Sandbox" /></div>}
           </div>
-          <span className={`text-[10px] font-mono font-bold ${theme.colors.text.tertiary} uppercase tracking-tighter truncate`}>{p.code || 'NO_CODE'}</span>
+          <span className={`text-[10px] font-mono font-bold text-slate-400 uppercase tracking-tighter truncate mt-0.5`}>Ref: {p.code || 'UNbaselined'}</span>
         </div>
       )
     },
     {
       key: 'managerId', 
-      header: 'Manager', 
+      header: 'Primary Custodian', 
       width: 'w-56', 
       sortable: true,
       render: (p: Project) => {
@@ -63,7 +64,7 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
                     {formatInitials(name)}
                   </div>
               ) : (
-                  <div className={`w-8 h-8 rounded-xl ${theme.colors.background} border ${theme.colors.border} flex items-center justify-center text-slate-300 shrink-0`}>
+                  <div className={`w-8 h-8 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-300 shrink-0 shadow-inner`}>
                     <User size={14}/>
                   </div>
               )}
@@ -76,14 +77,14 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
     },
     {
       key: 'progress', 
-      header: 'Execution Progress', 
+      header: 'Delivery Maturity', 
       width: 'w-64',
       render: (p: Project) => {
         const prog = calculateProjectProgress(p);
         return (
-          <div className="w-full pr-8">
-            <div className={`flex justify-between items-end text-[10px] font-black uppercase mb-1.5`}>
-                <span className={theme.colors.text.tertiary}>Physical %</span>
+          <div className="w-full pr-10">
+            <div className={`flex justify-between items-end text-[9px] font-black uppercase mb-1.5 tracking-widest`}>
+                <span className="text-slate-400">Physical Progress</span>
                 <span className="text-slate-900 font-mono">{prog}%</span>
             </div>
             <ProgressBar value={prog} colorClass={p.health === 'Critical' ? 'bg-red-500' : p.health === 'Warning' ? 'bg-amber-500' : 'bg-nexus-600'} size="sm" />
@@ -93,15 +94,15 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
     },
     {
       key: 'budget', 
-      header: 'Capital Authority', 
+      header: 'Capital Authorized', 
       width: 'w-40', 
       align: 'right', 
       sortable: true,
       render: (p: Project) => (
-        <div className="text-right overflow-hidden pr-4">
-          <div className={`text-sm font-black ${theme.colors.text.primary} font-mono`}>{formatCompactCurrency(p.budget || 0)}</div>
-          <div className={`text-[10px] font-bold ${theme.colors.text.tertiary} uppercase tracking-tighter mt-0.5`}>
-              {formatCompactCurrency(p.spent || 0)} <span className="font-normal opacity-60 italic lowercase">consumed</span>
+        <div className="text-right overflow-hidden pr-6">
+          <div className={`text-sm font-black ${theme.colors.text.primary} font-mono tracking-tighter`}>{formatCompactCurrency(p.budget || 0)}</div>
+          <div className={`text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1`}>
+              {formatCompactCurrency(p.spent || 0)} <span className="font-normal opacity-60 lowercase italic">consumed</span>
           </div>
         </div>
       )
@@ -109,13 +110,13 @@ export const ProjectListTable: React.FC<ProjectListTableProps> = ({
   ], [state.resources, theme]);
 
   return (
-    <div className={`h-full ${theme.colors.surface} flex flex-col`}>
+    <div className={`h-full bg-white flex flex-col`}>
         <DataTable 
             data={projects} 
             columns={columns} 
             onRowClick={(p) => navigate(`/projectWorkspace/${p.id}`)} 
             keyField="id" 
-            emptyMessage="The project database is unpopulated for this partition. Provision a new initiative to begin." 
+            emptyMessage="The project database is unpopulated for this partition node." 
             selectable={selectable}
             selectedIds={selectedIds}
             onSelectionChange={onSelectionChange}

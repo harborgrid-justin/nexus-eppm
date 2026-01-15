@@ -1,5 +1,5 @@
 
-import React, { ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -16,31 +16,32 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // Fix: Explicitly initialize state and call super(props) to ensure this.props and this.setState are available to the TS compiler
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: undefined,
-    };
-  }
+// Fix: Use Component directly from react and explicitly type the class to resolve property access issues
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  // Fix: Explicitly declare and initialize state as a class property to resolve "Property 'state' does not exist" errors
+  public override state: ErrorBoundaryState = {
+    hasError: false,
+    error: undefined,
+  };
+
+  // Removed constructor to rely on class property initialization for better TypeScript inference
 
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Fix: Properly accessing inherited this.props from React.Component
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Fix: Accessing this.props which is inherited from Component
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   public handleRetry = () => {
-    // Fix: Properly accessing inherited this.setState from React.Component
+    // Fix: Accessing this.setState which is inherited from Component
     this.setState({ hasError: false, error: undefined });
   };
 
-  public render() {
+  public override render() {
+    // Fix: Accessing this.state which is inherited from Component
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -49,7 +50,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* Fix: Accessing this.props.name via inheritance from React.Component */}
+            {/* Fix: Accessing this.props.name via inheritance from Component */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -72,7 +73,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       );
     }
 
-    // Fix: Accessing this.props.children via inheritance from React.Component
+    // Fix: Accessing this.props.children via inheritance from Component
     return this.props.children;
   }
 }

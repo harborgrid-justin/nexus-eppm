@@ -34,10 +34,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
 
     const items = [
         ...state.projects.map(p => ({ id: p.id, label: p.name, type: 'Project', icon: Briefcase, action: () => onNavigate('projectWorkspace', p.id) })),
-        { id: 'nav-portfolio', label: 'Portfolio Overview', type: 'Navigation', icon: Command, action: () => onNavigate('portfolio') },
-        { id: 'nav-admin', label: 'System Settings', type: 'Admin', icon: Settings, action: () => onNavigate('admin') },
-        { id: 'nav-resources', label: 'Enterprise Resource Pool', type: 'Navigation', icon: Users, action: () => onNavigate('resources') },
-        { id: 'nav-ai', label: 'AI Strategy Report', type: 'AI', icon: Sparkles, action: () => onNavigate('portfolio') },
+        { id: 'nav-portfolio', label: 'Executive Portfolio Overview', type: 'Navigation', icon: Command, action: () => onNavigate('portfolio') },
+        { id: 'nav-admin', label: 'Enterprise System Settings', type: 'Admin', icon: Settings, action: () => onNavigate('admin') },
+        { id: 'nav-resources', label: 'Global Resource Pool', type: 'Navigation', icon: Users, action: () => onNavigate('resources') },
+        { id: 'nav-ai', label: 'AI Strategy Advisor', type: 'AI', icon: Sparkles, action: () => onNavigate('portfolio') },
     ];
 
     return items.filter(item => item.label.toLowerCase().includes(term));
@@ -64,35 +64,35 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
 
   return (
     <div 
-        className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4 bg-slate-900/40 backdrop-blur-[2px] animate-in fade-in duration-200"
+        className="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh] p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={onClose}
         role="dialog"
         aria-label="Command Palette"
         aria-modal="true"
     >
       <div 
-        className={`w-full max-w-2xl ${theme.colors.surface} rounded-2xl shadow-2xl border ${theme.colors.border} overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[600px]`}
+        className={`w-full max-w-2xl bg-white rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[600px]`}
         onKeyDown={handleKeyDown}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={`flex items-center px-4 py-4 border-b ${theme.colors.border} ${theme.colors.surface}`}>
-          <Search size={20} className="text-slate-400 mr-3 shrink-0" aria-hidden="true" />
+        <div className={`flex items-center px-6 py-5 border-b border-slate-100 bg-white`}>
+          <Search size={22} className="text-slate-300 mr-4 shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
-            className={`flex-1 bg-transparent border-none outline-none text-lg font-medium ${theme.colors.text.primary} placeholder:text-slate-400`}
-            placeholder="Type a command or search..."
+            className={`flex-1 bg-transparent border-none outline-none text-lg font-bold text-slate-900 placeholder:text-slate-300`}
+            placeholder="Type a command or search entities..."
             value={query}
             onChange={e => setQuery(e.target.value)}
             aria-label="Search commands"
           />
-          {isStale && <Loader2 size={16} className="animate-spin text-slate-400 mr-2" />}
-          <div className="flex items-center gap-2 ml-2">
-              <kbd className={`hidden sm:inline-flex items-center justify-center px-2 py-1 text-[10px] font-bold ${theme.colors.text.tertiary} ${theme.colors.background} border ${theme.colors.border} rounded uppercase select-none`}>ESC</kbd>
+          {isStale && <Loader2 size={18} className="animate-spin text-nexus-500 mr-4" />}
+          <div className="flex items-center gap-2">
+              <kbd className={`hidden sm:inline-flex items-center justify-center px-2 py-1 text-[10px] font-black text-slate-400 bg-slate-50 border border-slate-200 rounded uppercase shadow-inner`}>ESC</kbd>
           </div>
         </div>
 
-        <div className={`flex-1 overflow-y-auto p-2 scrollbar-thin ${theme.colors.surface}`} role="listbox">
+        <div className={`flex-1 overflow-y-auto p-3 scrollbar-thin bg-white`} role="listbox">
           {filteredItems.length > 0 ? (
             <div className="space-y-1">
               {filteredItems.map((item, idx) => (
@@ -101,28 +101,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                   onClick={() => { item.action(); onClose(); }}
                   role="option"
                   aria-selected={selectedIndex === idx}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${
                     selectedIndex === idx 
-                        ? `${theme.colors.background} ring-1 ring-nexus-500/20 bg-nexus-50/50` 
-                        : `hover:${theme.colors.background}`
+                        ? `bg-nexus-50 border border-nexus-100 shadow-md ring-4 ring-nexus-500/5` 
+                        : `hover:bg-slate-50 border border-transparent`
                   }`}
                   onMouseEnter={() => setSelectedIndex(idx)}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-lg transition-all ${
-                        selectedIndex === idx ? `bg-white shadow-sm text-nexus-600` : `${theme.colors.background} text-slate-400`
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className={`p-2.5 rounded-xl transition-all ${
+                        selectedIndex === idx ? `bg-white shadow-sm text-nexus-600` : `bg-slate-100 text-slate-400`
                     }`}>
-                        <item.icon size={18} />
+                        <item.icon size={20} />
                     </div>
                     <div className="min-w-0">
-                        <p className={`text-sm font-bold truncate ${selectedIndex === idx ? 'text-slate-900' : 'text-slate-700'}`}>
+                        <p className={`text-sm font-black truncate uppercase tracking-tight ${selectedIndex === idx ? 'text-slate-900' : 'text-slate-600'}`}>
                             {item.label}
                         </p>
-                        <p className={`text-[10px] ${theme.colors.text.tertiary} uppercase tracking-widest font-bold`}>{item.type}</p>
+                        <p className={`text-[10px] text-slate-400 uppercase tracking-[0.15em] font-bold mt-0.5`}>{item.type}</p>
                     </div>
                   </div>
                   {selectedIndex === idx && (
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-nexus-600 animate-in fade-in slide-in-from-left-2 duration-200">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-nexus-600 animate-in fade-in slide-in-from-left-2 duration-200">
                         Jump <ChevronRight size={14} />
                     </div>
                   )}
@@ -130,28 +130,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
               ))}
             </div>
           ) : (
-            <div className={`py-12 text-center ${theme.colors.text.tertiary}`}>
+            <div className={`py-16 text-center text-slate-300 flex flex-col items-center justify-center nexus-empty-pattern h-full`}>
                 {query ? (
                     <>
-                        <Search size={32} className="mx-auto mb-3 opacity-20"/>
-                        <p className="text-sm font-medium">No results for "{query}"</p>
+                        <Search size={48} className="mb-4 opacity-10"/>
+                        <p className="text-sm font-black uppercase tracking-widest italic">No record matches identified</p>
                     </>
                 ) : (
                     <>
-                        <Command size={32} className="mx-auto mb-3 opacity-20"/>
-                        <p className="text-sm font-medium">Type to search...</p>
+                        <Command size={48} className="mb-4 opacity-10"/>
+                        <p className="text-sm font-black uppercase tracking-widest">Type to search the enterprise graph</p>
                     </>
                 )}
             </div>
           )}
         </div>
         
-        <div className={`px-4 py-3 ${theme.colors.background} border-t ${theme.colors.border} flex justify-between items-center text-[10px] ${theme.colors.text.tertiary} font-medium select-none`}>
-             <div className="flex gap-4">
-                <span className="flex items-center gap-1"><kbd className="font-sans px-1 bg-white border rounded">↑</kbd> <kbd className="font-sans px-1 bg-white border rounded">↓</kbd> Navigate</span>
-                <span className="flex items-center gap-1"><kbd className="font-sans px-1 bg-white border rounded">↵</kbd> Select</span>
+        <div className={`px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-black select-none uppercase tracking-[0.2em]`}>
+             <div className="flex gap-6">
+                <span className="flex items-center gap-2"><kbd className="px-1.5 py-0.5 bg-white border rounded shadow-inner">↑↓</kbd> Navigate</span>
+                <span className="flex items-center gap-2"><kbd className="px-1.5 py-0.5 bg-white border rounded shadow-inner">↵</kbd> Select</span>
              </div>
-             <div className="uppercase tracking-widest font-bold text-nexus-400">Nexus Hub</div>
+             <div className="text-nexus-500 font-mono tracking-tighter">NEXUS_HUB_v1.3</div>
         </div>
       </div>
     </div>

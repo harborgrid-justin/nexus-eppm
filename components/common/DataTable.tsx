@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Skeleton } from '../ui/Skeleton';
 import { Column } from '../../types/ui';
@@ -22,7 +22,7 @@ interface DataTableProps<T> {
 }
 
 function DataTable<T>({ 
-  data, columns, onRowClick, keyField, emptyMessage = "No records found.", isLoading = false
+  data, columns, onRowClick, keyField, emptyMessage = "No records committed to this partition.", isLoading = false
 }: DataTableProps<T>) {
   const theme = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,30 +44,30 @@ function DataTable<T>({
     containerHeight: containerHeight - 48
   });
 
-  if (isLoading) return <div className="p-8"><Skeleton height={400} /></div>;
+  if (isLoading) return <div className="p-8 space-y-4"><Skeleton height={40} className="w-full" /><Skeleton height={300} className="w-full rounded-2xl" /></div>;
 
   return (
-    <div className={`flex flex-col h-full w-full overflow-hidden border ${theme.colors.border} rounded-2xl bg-white shadow-sm`}>
+    <div className={`flex flex-col h-full w-full overflow-hidden border ${theme.colors.border} rounded-[2rem] bg-white shadow-sm transition-all`}>
       <div 
         ref={containerRef}
         className="flex-1 overflow-y-auto scrollbar-thin relative" 
         onScroll={(e) => onScroll(e.currentTarget.scrollTop)}
-        style={{ 
-          contain: 'strict',
-          willChange: 'scroll-position'
-        }}
+        style={{ contain: 'strict', willChange: 'scroll-position' }}
       >
         <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0">
-          <thead className={`${theme.colors.background} sticky top-0 z-20 shadow-sm`}>
+          <thead className={`bg-slate-50/80 backdrop-blur-md sticky top-0 z-20 shadow-sm`}>
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className={`px-6 py-4 text-left text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-widest border-b ${theme.colors.background}`}>
-                  {col.header}
+                <th key={col.key} className={`px-6 py-5 text-left text-[10px] font-black ${theme.colors.text.tertiary} uppercase tracking-[0.2em] border-b ${theme.colors.border}`}>
+                  <div className="flex items-center gap-2">
+                    {col.header}
+                    {col.sortable && <div className="flex flex-col -space-y-1"><ChevronUp size={10}/><ChevronDown size={10}/></div>}
+                  </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="relative" style={{ height: `${totalHeight}px`, contain: 'layout' }}>
+          <tbody className="relative bg-white" style={{ height: `${totalHeight}px`, contain: 'layout' }}>
             {virtualItems.map(({ index, offsetTop }) => {
               const item = data[index];
               if (!item) return null;
@@ -75,12 +75,14 @@ function DataTable<T>({
                 <tr 
                   key={String((item as any)[keyField])}
                   onClick={() => onRowClick?.(item)}
-                  className={`absolute left-0 w-full hover:${theme.colors.background}/50 cursor-pointer transition-colors border-b border-slate-50 will-change-transform`}
+                  className={`absolute left-0 w-full hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-50 will-change-transform group`}
                   style={{ height: `${ROW_HEIGHT}px`, transform: `translateY(${offsetTop}px)` }}
                 >
                   {columns.map((col) => (
-                    <td key={col.key} className={`px-6 py-4 whitespace-nowrap text-sm ${theme.colors.text.secondary} font-medium`}>
-                      {col.render ? col.render(item) : String((item as any)[col.key])}
+                    <td key={col.key} className={`px-6 py-4 whitespace-nowrap text-sm ${theme.colors.text.secondary} font-medium border-b border-slate-50`}>
+                      <div className="truncate">
+                        {col.render ? col.render(item) : String((item as any)[col.key])}
+                      </div>
                     </td>
                   ))}
                 </tr>
@@ -88,8 +90,8 @@ function DataTable<T>({
             })}
             {data.length === 0 && !isLoading && (
               <div className="absolute inset-0 nexus-empty-pattern flex flex-col items-center justify-center p-12 text-slate-400">
-                <AlertCircle size={40} className="opacity-20 mb-3" />
-                <p className="font-bold uppercase tracking-widest text-xs">{emptyMessage}</p>
+                <AlertCircle size={48} className="opacity-10 mb-4" strokeWidth={1}/>
+                <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-300">{emptyMessage}</p>
               </div>
             )}
           </tbody>
