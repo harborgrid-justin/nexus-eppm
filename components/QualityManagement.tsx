@@ -10,15 +10,12 @@ import DefectTracking from './quality/DefectTracking';
 import { QualityStandards } from './quality/QualityStandards';
 import SupplierQuality from './quality/SupplierQuality';
 import CostOfQuality from './quality/CostOfQuality'; 
-import { useTheme } from '../context/ThemeContext';
-import { PageHeader } from './common/PageHeader';
-import { ModuleNavigation } from './common/ModuleNavigation';
 import { useQualityManagementLogic } from '../hooks/domain/useQualityManagementLogic';
+import { TabbedLayout } from './layout/standard/TabbedLayout';
 
 const QualityManagement: React.FC = () => {
   const { project, qualityReports } = useProjectWorkspace();
   const projectId = project.id;
-  const theme = useTheme();
   
   const {
       activeGroup,
@@ -51,31 +48,22 @@ const QualityManagement: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
+    <TabbedLayout
         title="Quality Management"
         subtitle="Ensure project deliverables meet standards and requirements."
         icon={ShieldCheck}
-      />
-
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden ${theme.layout.headerBorder} bg-slate-50/50`}>
-            <ModuleNavigation 
-                groups={navGroups}
-                activeGroup={activeGroup}
-                activeItem={activeView}
-                onGroupChange={handleGroupChange}
-                onItemChange={handleViewChange}
-                className="bg-transparent border-0 shadow-none"
-            />
-        </div>
+        navGroups={navGroups}
+        activeGroup={activeGroup}
+        activeItem={activeView}
+        onGroupChange={handleGroupChange}
+        onItemChange={handleViewChange}
+    >
         <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
             <ErrorBoundary name="Quality Module">
                 {renderContent()}
             </ErrorBoundary>
         </div>
-      </div>
-    </div>
+    </TabbedLayout>
   );
 };
 

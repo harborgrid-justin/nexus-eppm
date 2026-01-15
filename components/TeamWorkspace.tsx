@@ -1,8 +1,5 @@
 
-import React, { useState, useMemo, useTransition } from 'react';
-import { useTheme } from '../context/ThemeContext';
-import { PageHeader } from './common/PageHeader';
-import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import React, { useMemo, useTransition } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { CheckSquare, ListTodo, Clock, LayoutGrid } from 'lucide-react';
 import MyTasks from './team/MyTasks';
@@ -11,9 +8,10 @@ import { useTeamWorkspaceLogic } from '../hooks/domain/useTeamWorkspaceLogic';
 import { useData } from '../context/DataContext';
 import { KanbanBoard } from './common/KanbanBoard';
 import { TaskStatus } from '../types';
+import { TabbedLayout } from './layout/standard/TabbedLayout';
+import { NavGroup } from './common/ModuleNavigation';
 
 const TeamWorkspace: React.FC = () => {
-  const theme = useTheme();
   const { state, dispatch } = useData();
   const { activeTab, setActiveTab } = useTeamWorkspaceLogic();
   const [isPending, startTransition] = useTransition();
@@ -27,7 +25,6 @@ const TeamWorkspace: React.FC = () => {
   ], []);
 
   // Filter tasks assigned to current user (Mock user ID 'U-001' or from Auth)
-  // In a real implementation, this comes from useAuth().user.id
   const myTasks = useMemo(() => {
      return state.projects.flatMap(p => p.tasks).slice(0, 15); // Mock: Showing first 15 for demo
   }, [state.projects]);
@@ -51,24 +48,16 @@ const TeamWorkspace: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full`}>
-      <PageHeader 
-        title="Team Workspace" 
-        subtitle="Manage your assignments, track time, and update progress." 
-        icon={CheckSquare} 
-      />
-      
-      <div className={theme.layout.panelContainer}>
-        <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10 bg-slate-50/50`}>
-           <ModuleNavigation 
-                groups={navGroups}
-                activeGroup="work"
-                activeItem={activeTab}
-                onGroupChange={() => {}}
-                onItemChange={handleItemChange}
-                className="bg-transparent border-0 shadow-none"
-            />
-        </div>
+    <TabbedLayout
+        title="Team Workspace"
+        subtitle="Manage your assignments, track time, and update progress."
+        icon={CheckSquare}
+        navGroups={navGroups}
+        activeGroup="work"
+        activeItem={activeTab}
+        onGroupChange={() => {}}
+        onItemChange={handleItemChange}
+    >
         <div className={`flex-1 overflow-hidden relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
           <ErrorBoundary name="Team Workspace">
              {activeTab === 'tasks' && <MyTasks />}
@@ -76,8 +65,7 @@ const TeamWorkspace: React.FC = () => {
              {activeTab === 'timesheet' && <Timesheet />}
           </ErrorBoundary>
         </div>
-      </div>
-    </div>
+    </TabbedLayout>
   );
 };
 

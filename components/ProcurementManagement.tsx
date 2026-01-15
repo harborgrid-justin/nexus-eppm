@@ -10,12 +10,11 @@ import ProcurementSourcing from './procurement/ProcurementSourcing';
 import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
 import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListChecks } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
-import { PageHeader } from './common/PageHeader';
 import { EmptyGrid } from './common/EmptyGrid';
+import { TabbedLayout } from './layout/standard/TabbedLayout';
+import { NavGroup } from './common/ModuleNavigation';
 
 const ProcurementManagement: React.FC = () => {
-  const theme = useTheme();
   const { project } = useProjectWorkspace();
 
   const [activeGroup, setActiveGroup] = useState('overview');
@@ -34,7 +33,7 @@ const ProcurementManagement: React.FC = () => {
 
   const projectId = project.id;
   
-  const navStructure = useMemo(() => [
+  const navStructure: NavGroup[] = useMemo(() => [
     { id: 'overview', label: 'Overview', items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
     ]},
@@ -70,32 +69,32 @@ const ProcurementManagement: React.FC = () => {
       });
   };
 
-  const activeGroupItems = useMemo(() => {
-    return navStructure.find(g => g.id === activeGroup)?.items || [];
-  }, [activeGroup, navStructure]);
-
   const renderContent = () => {
     switch (activeView) {
         case 'dashboard': return <ProcurementDashboard />;
         case 'vendors': return <VendorRegistry projectId={projectId} />;
         case 'contracts': return <ContractLifecycle projectId={projectId} />;
         case 'makebuy': return (
-            <EmptyGrid 
-                title="Make-or-Buy Analysis Undefined" 
-                description="Conduct strategic analysis to determine whether deliverables should be manufactured internally or outsourced."
-                icon={Scale}
-                actionLabel="Start Analysis"
-                onAdd={() => {}}
-            />
+            <div className="h-full flex items-center justify-center p-12">
+                <EmptyGrid 
+                    title="Make-or-Buy Analysis Undefined" 
+                    description="Conduct strategic analysis to determine whether deliverables should be manufactured internally or outsourced."
+                    icon={Scale}
+                    actionLabel="Start Analysis"
+                    onAdd={() => {}}
+                />
+            </div>
         );
         case 'criteria': return (
-            <EmptyGrid 
-                title="Source Selection Criteria" 
-                description="Define weighted technical and financial criteria for evaluating vendor solicitations."
-                icon={ListChecks}
-                actionLabel="Define Criteria"
-                onAdd={() => {}}
-            />
+            <div className="h-full flex items-center justify-center p-12">
+                <EmptyGrid 
+                    title="Source Selection Criteria" 
+                    description="Define weighted technical and financial criteria for evaluating vendor solicitations."
+                    icon={ListChecks}
+                    actionLabel="Define Criteria"
+                    onAdd={() => {}}
+                />
+            </div>
         );
         case 'planning': return <ProcurementPlanning projectId={projectId} />;
         case 'sourcing': return <ProcurementSourcing projectId={projectId} />;
@@ -106,54 +105,22 @@ const ProcurementManagement: React.FC = () => {
   };
 
   return (
-    <div className={`${theme.layout.pagePadding} flex flex-col h-full`}>
-       <PageHeader 
-         title="Procurement Management"
-         subtitle="End-to-end procurement lifecycle from planning to performance."
-         icon={ShoppingCart}
-       />
-
-       <div className={`${theme.components.card} flex-1 flex flex-col overflow-hidden`}>
-          <div className={`flex-shrink-0 border-b ${theme.colors.border} z-10`}>
-            <div className={`px-4 pt-3 pb-2 space-x-2 border-b ${theme.colors.border} overflow-x-auto scrollbar-hide flex whitespace-nowrap`}>
-                {navStructure.map(group => (
-                    <button
-                        key={group.id}
-                        onClick={() => handleGroupChange(group.id)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-                            activeGroup === group.id
-                            ? `${theme.colors.primary} text-white shadow-sm`
-                            : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                        }`}
-                    >
-                        {group.label}
-                    </button>
-                ))}
-            </div>
-            <nav className="flex space-x-2 px-4 overflow-x-auto scrollbar-hide">
-                {activeGroupItems.map(item => (
-                <button
-                    key={item.id}
-                    onClick={() => handleViewChange(item.id)}
-                    className={`flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
-                    activeView === item.id
-                        ? 'border-nexus-600 text-nexus-600'
-                        : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
-                    }`}
-                >
-                    <item.icon size={16} />
-                    <span>{item.label}</span>
-                </button>
-                ))}
-            </nav>
-          </div>
-          <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-             <ErrorBoundary name="Procurement Module">
+    <TabbedLayout
+        title="Procurement Management"
+        subtitle="End-to-end procurement lifecycle from planning to performance."
+        icon={ShoppingCart}
+        navGroups={navStructure}
+        activeGroup={activeGroup}
+        activeItem={activeView}
+        onGroupChange={handleGroupChange}
+        onItemChange={handleViewChange}
+    >
+        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            <ErrorBoundary name="Procurement Module">
                 {renderContent()}
-             </ErrorBoundary>
-          </div>
-       </div>
-    </div>
+            </ErrorBoundary>
+        </div>
+    </TabbedLayout>
   );
 };
 

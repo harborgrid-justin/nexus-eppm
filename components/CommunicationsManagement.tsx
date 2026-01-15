@@ -5,9 +5,10 @@ import { useData } from '../context/DataContext';
 import { MessageCircle, Plus, Mail, Users, Phone, Lock, MessageSquare, FileText, ChevronRight } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
-import { PageHeader } from './common/PageHeader';
 import { Button } from './ui/Button';
 import { EmptyGrid } from './common/EmptyGrid';
+import { PageLayout } from './layout/standard/PageLayout';
+import { PanelContainer } from './layout/standard/PanelContainer';
 
 const CommunicationsManagement: React.FC = () => {
   const { project, communicationLogs } = useProjectWorkspace();
@@ -25,35 +26,26 @@ const CommunicationsManagement: React.FC = () => {
     }
   };
 
-  const getParticipantNames = (ids: string[] = []) => {
-      if (!ids || !Array.isArray(ids)) return 'None';
-      return ids.map(id => state.resources.find(r => r.id === id)?.name || id).join(', ');
-  };
-
   const hasLogs = communicationLogs && communicationLogs.length > 0;
 
   if (!project) return null;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.colors.background}`}>
-       <div className={`${theme.layout.pagePadding} pb-0`}>
-           <PageHeader
-                title="Communication Registry"
-                subtitle={`Consolidated formal engagements for ${project.code}: ${project.name}`}
-                icon={MessageCircle}
-                actions={canEditProject() ? (
-                    <Button variant="primary" icon={Plus} size="md" onClick={() => {}}>Record Engagement</Button>
-                ) : (
-                    <div className={`flex items-center gap-2 text-[10px] font-black uppercase ${theme.colors.text.tertiary} ${theme.colors.background} px-4 py-2 rounded-xl border ${theme.colors.border} shadow-sm`}>
-                       <Lock size={14}/> Read Only Archive
-                    </div>
-                )}
-           />
-       </div>
-
-       <div className={`flex-1 flex flex-col m-6 md:m-8 mt-4 overflow-hidden relative`}>
+    <PageLayout
+        title="Communication Registry"
+        subtitle={`Consolidated formal engagements for ${project.code}: ${project.name}`}
+        icon={MessageCircle}
+        actions={canEditProject() ? (
+            <Button variant="primary" icon={Plus} size="md" onClick={() => {}}>Record Engagement</Button>
+        ) : (
+            <div className={`flex items-center gap-2 text-[10px] font-black uppercase ${theme.colors.text.tertiary} ${theme.colors.background} px-4 py-2 rounded-xl border ${theme.colors.border} shadow-sm`}>
+               <Lock size={14}/> Read Only Archive
+            </div>
+        )}
+    >
+        <PanelContainer>
           {!hasLogs ? (
-              <div className="flex-1 flex h-full">
+              <div className="flex-1 flex h-full items-center justify-center p-8">
                   <EmptyGrid 
                     title="Engagement Stream Inactive" 
                     description="No formal communication artifacts (RFIs, Meeting Minutes, Transmittals) have been synchronized for this project period."
@@ -63,7 +55,7 @@ const CommunicationsManagement: React.FC = () => {
                   />
               </div>
           ) : (
-            <div className="flex-1 overflow-auto scrollbar-thin bg-white rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <div className="flex-1 overflow-auto scrollbar-thin bg-white">
                 <div className="min-w-[800px]">
                     <table className="min-w-full divide-y divide-slate-100 border-separate border-spacing-0" role="grid">
                         <thead className={`bg-slate-50/80 sticky top-0 z-10 backdrop-blur-md shadow-sm`}>
@@ -110,8 +102,8 @@ const CommunicationsManagement: React.FC = () => {
                 </div>
             </div>
           )}
-       </div>
-    </div>
+        </PanelContainer>
+    </PageLayout>
   );
 };
 
