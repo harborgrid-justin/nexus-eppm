@@ -102,9 +102,8 @@ export const useGanttDrag = (dispatch: React.Dispatch<Action>, project: Project,
         dragState.current = {
             task: null, type: 'move', startX: 0, originalStart: new Date(), originalEnd: new Date(), originalProgress: 0, currentDeltaX: 0, targetElement: null
         };
-    }, [dispatch, project.id, dayWidth, handleMouseMove]);
+    }, [dispatch, project.id, dayWidth]);
 
-    // CRITICAL FIX: Purge window listeners on unmount to prevent memory leaks
     useEffect(() => {
         return () => {
             if (rafId.current) cancelAnimationFrame(rafId.current);

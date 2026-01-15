@@ -53,6 +53,7 @@ const ProjectGantt: React.FC = () => {
     const top = e.currentTarget.scrollTop;
     onScroll(top);
     setScrollTop(top);
+    // Synced scrolling for List and Timeline panels
     if (e.target === listRef.current && timelineRef.current) timelineRef.current.scrollTop = top;
     else if (e.target === timelineRef.current && listRef.current) listRef.current.scrollTop = top;
   }, [onScroll]);

@@ -45,16 +45,13 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
         const reflection = state.projects.find(p => p.id === action.payload.reflectionId);
         if (!reflection || !reflection.sourceProjectId) return state;
         
-        // Merge logic would go here (complex diffing). For MVP, we just update the source status or log.
-        // Or simply replace the source project data with reflection data (excluding ID)
-        
         const mergedProject = { ...reflection, id: reflection.sourceProjectId, isReflection: false, sourceProjectId: undefined, name: reflection.name.replace('Reflection: ', '') };
         
         return {
             ...state,
             projects: state.projects.map(p => 
                 p.id === reflection.sourceProjectId ? mergedProject : p
-            ).filter(p => p.id !== action.payload.reflectionId) // Remove reflection after merge
+            ).filter(p => p.id !== action.payload.reflectionId) 
         };
     }
     case 'TASK_UPDATE': {
@@ -63,20 +60,19 @@ export const projectReducer = (state: DataState, action: Action): DataState => {
             ...state,
             projects: state.projects.map(p => {
                 if (p.id !== projectId) return p;
+                
+                // Bulk update via Engine
                 if (Array.isArray(task)) return { ...p, tasks: task };
-                // Check if task exists, if not add it
-                const exists = p.tasks.some(t => t.id === task.id);
-                if (exists) {
-                    return { 
-                        ...p, 
-                        tasks: p.tasks.map(t => t.id === task.id ? task : t) 
-                    };
-                } else {
-                     return { 
-                        ...p, 
-                        tasks: [...p.tasks, task] 
-                    };
+                
+                // Single update via Drag/Drop
+                const updatedTasks = p.tasks.map(t => t.id === task.id ? task : t);
+                
+                // If new, add it
+                if (!p.tasks.find(t => t.id === task.id)) {
+                    updatedTasks.push(task);
                 }
+
+                return { ...p, tasks: updatedTasks };
             })
         };
     }
