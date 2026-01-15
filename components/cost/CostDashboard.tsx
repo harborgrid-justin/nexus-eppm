@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect, useTransition, useDeferredValue } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useEVM } from '../../hooks/useEVM';

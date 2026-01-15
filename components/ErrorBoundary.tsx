@@ -16,32 +16,31 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-// Fix: Use explicitly typed React.Component and remove override on state to avoid property access errors
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  // Fix: Property 'state' initialization without override to resolve "containing class does not extend another class" confusion in some TS environments
-  public state: ErrorBoundaryState = {
-    hasError: false,
-    error: undefined,
-  };
+  // Initialize state in constructor to satisfy strict type checking
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+    };
+  }
 
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  // Fix: Using standard lifecycle without override to satisfy strict compiler checks
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Fix: Access props via this context
+    // Accessing props via this context
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   public handleRetry = () => {
-    // Fix: Access setState via this context
+    // Using setState to reset error state
     this.setState({ hasError: false, error: undefined });
   };
 
-  // Fix: Standard render implementation
   public render() {
-    // Fix: Access state via this context
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">
@@ -50,7 +49,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2 uppercase tracking-tighter">Module Runtime Error</h2>
           <p className="text-slate-500 text-sm max-w-sm mb-8 font-medium leading-relaxed">
-            {/* Fix: Access props correctly via this.props */}
             The <span className="font-bold text-slate-800">{this.props.name || 'sub-module'}</span> encountered an unhandled exception and has been isolated to protect the enterprise environment.
           </p>
           <div className="flex gap-3">
@@ -73,7 +71,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // Fix: Access children via this.props
     return this.props.children;
   }
 }

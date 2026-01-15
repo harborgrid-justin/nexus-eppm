@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { TradeoffScenario } from '../../types';

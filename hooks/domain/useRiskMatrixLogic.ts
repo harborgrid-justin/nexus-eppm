@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { Risk } from '../../types';

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { Integration } from '../../types';

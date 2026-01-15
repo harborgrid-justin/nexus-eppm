@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useDeferredValue, useTransition } from 'react';
 import { useData } from '../../context/DataContext';
 import { Risk } from '../../types';

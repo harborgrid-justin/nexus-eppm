@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../usePermissions';

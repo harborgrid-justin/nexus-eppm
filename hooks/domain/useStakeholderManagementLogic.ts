@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { EnrichedStakeholder, EngagementLevel } from '../../types/index';

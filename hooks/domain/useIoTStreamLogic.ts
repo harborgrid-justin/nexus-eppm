@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import { Resource } from '../../types';

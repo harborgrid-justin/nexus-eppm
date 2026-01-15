@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { ShieldAlert, TrendingUp, Activity, Layers, AlertTriangle, PieChart, Target } from 'lucide-react';

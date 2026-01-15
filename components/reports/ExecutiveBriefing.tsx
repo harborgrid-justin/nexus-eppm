@@ -31,12 +31,10 @@ export const ExecutiveBriefing: React.FC = () => {
 
     const financialTrend = useMemo(() => {
         // Aggregate real spend data from project budgets and elapsed time
-        // Fix: Explicitly type accumulator and ensure values are treated as numbers for arithmetic operations
-        const totalBudget = state.projects.reduce((s: number, p) => s + (Number(p.budget) || 0), 0);
-        const totalSpent = state.projects.reduce((s: number, p) => s + (Number(p.spent) || 0), 0);
+        // Ensuring numeric types for arithmetic operations to prevent compiler errors
+        const totalBudget: number = state.projects.reduce((s: number, p) => s + (Number(p.budget) || 0), 0);
+        const totalSpent: number = state.projects.reduce((s: number, p) => s + (Number(p.spent) || 0), 0);
         
-        // Generate a synthetic trend based on actual totals for visualization
-        // In a real app, this would query a historical snapshots table
         const trend = [];
         const months = ['Q1', 'Q2', 'Q3', 'Q4'];
         let cumulativeBudget = 0;
@@ -45,8 +43,9 @@ export const ExecutiveBriefing: React.FC = () => {
         // Simple linear distribution for demo purpose based on live totals
         for(let i=0; i<4; i++) {
             cumulativeBudget += (totalBudget / 4);
-            // Simulate S-curve for actuals
-            const increment = (totalSpent / 4) * (i === 0 ? 0.5 : i === 1 ? 1.0 : i === 2 ? 1.5 : i === 1.0);
+            // Simulate S-curve for actuals by applying a deterministic multiplier
+            const varianceFactor: number = (i === 0 ? 0.5 : i === 1 ? 1.0 : i === 2 ? 1.5 : 1.0);
+            const increment: number = (totalSpent / 4) * varianceFactor;
             cumulativeActual += increment;
             
             trend.push({

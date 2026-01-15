@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useTransition } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
@@ -65,48 +66,37 @@ export const useUnifierLogic = () => {
   };
 
   const handleCreate = () => {
-    setEditingRecord(undefined);
-    setIsFormOpen(true);
+      setEditingRecord(undefined);
+      setIsFormOpen(true);
   };
 
-  const handleEdit = (rec: BPRecord) => {
-    setEditingRecord(rec);
-    setIsFormOpen(true);
+  const handleEdit = (record: BPRecord) => {
+      setEditingRecord(record);
+      setIsFormOpen(true);
   };
 
   const handleSaveRecord = (record: BPRecord, action: string) => {
-     if (!user) return;
-     dispatch({ 
-         type: 'UNIFIER_UPDATE_BP_RECORD', 
-         payload: { record, action, user } 
-     });
-     setIsFormOpen(false);
-  };
-
-  const handleSelectBP = (id: string) => {
-    startTransition(() => {
-        setSelectedBP(id);
-    });
+      dispatch({ type: 'UNIFIER_UPDATE_BP_RECORD', payload: { record, action, user } });
+      setIsFormOpen(false);
   };
 
   return {
-      activeGroup,
-      activeTab,
-      selectedBP,
-      isFormOpen,
-      editingRecord,
-      isPending,
-      projectId,
-      definitions, 
-      activeDefinition,
-      records,
-      navGroups,
-      handleGroupChange,
-      handleTabChange,
-      handleCreate,
-      handleEdit,
-      handleSaveRecord,
-      setSelectedBP: handleSelectBP,
-      setIsFormOpen
+    activeGroup,
+    activeTab,
+    selectedBP,
+    isFormOpen,
+    editingRecord,
+    projectId,
+    definitions,
+    activeDefinition,
+    records,
+    navGroups,
+    handleGroupChange,
+    handleTabChange,
+    handleCreate,
+    handleEdit,
+    handleSaveRecord,
+    setSelectedBP,
+    setIsFormOpen
   };
 };

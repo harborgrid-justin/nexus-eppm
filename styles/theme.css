@@ -1,13 +1,14 @@
-
 :root {
   --nexus-grid-bg: #f1f5f9;
   --nexus-empty-fill: #f8fafc;
+  --nexus-empty-dot: #e2e8f0;
 }
 
 .nexus-empty-pattern {
   background-color: var(--nexus-empty-fill);
-  background-image: radial-gradient(#e2e8f0 0.8px, transparent 0.8px);
+  background-image: radial-gradient(var(--nexus-empty-dot) 0.8px, transparent 0.8px);
   background-size: 24px 24px;
+  border: 2px dashed var(--nexus-empty-dot);
 }
 
 .nexus-table-row:hover {
@@ -30,4 +31,25 @@
 
 .nexus-input-base {
   @apply bg-white border-slate-200 rounded-lg text-sm transition-all focus:ring-2 focus:ring-nexus-500 focus:border-nexus-500 outline-none;
+}
+
+/* Scrollbar Styling for Enterprise High-Density Views */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }

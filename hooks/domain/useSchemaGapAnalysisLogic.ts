@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -133,7 +132,114 @@ export const useSchemaGapAnalysisLogic = () => {
                 { name: 'Project Stakeholder', status: stakeholders.length > 0 ? 'Live' : 'Gap', records: stakeholders.length },
             ]
         },
-        // ... (Other groups remain mostly unchanged, just ensured strict types)
+        {
+            name: 'Financial Control (Unifier)',
+            icon: DollarSign,
+            description: 'Business processes, cost sheets, and cash flow governance.',
+            entities: [
+                { name: 'Cost Code (CBS)', status: costSheetRows.length > 0 ? 'Live' : 'Gap', records: costSheetRows.length },
+                { name: 'Business Process (BP)', status: bpDefs.length > 0 ? 'Live' : 'Gap', records: bpDefs.length },
+                { name: 'Workflow Logic', status: bpDefs.some(d => d.workflow?.length) ? 'Live' : 'Gap', records: bpDefs.reduce((acc, d) => acc + (d.workflow?.length || 0), 0) },
+                { name: 'Process Record', status: bpRecords.length > 0 ? 'Live' : 'Gap', records: bpRecords.length },
+                { name: 'Budget Line Item', status: budgetItems.length > 0 ? 'Live' : 'Gap', records: budgetItems.length },
+                { name: 'Budget Transaction', status: budgetItems.some(b => !!b.actual) ? 'Live' : 'Gap', records: budgetItems.filter(b => !!b.actual).length },
+                { name: 'Expense Record', status: expenses.length > 0 ? 'Live' : 'Gap', records: expenses.length },
+                { name: 'Change Order (PCR)', status: changeOrders.length > 0 ? 'Live' : 'Gap', records: changeOrders.length },
+                { name: 'Purchase Order (PO)', status: purchaseOrders.length > 0 ? 'Live' : 'Gap', records: purchaseOrders.length },
+                { name: 'Invoice Artifact', status: invoices.length > 0 ? 'Live' : 'Gap', records: invoices.length },
+                { name: 'Funding Source', status: fundingSources.length > 0 ? 'Live' : 'Gap', records: fundingSources.length },
+                { name: 'Cost Book Reference', status: costBook.length > 0 ? 'Live' : 'Gap', records: costBook.length },
+                { name: 'Cost Report', status: costReports.length > 0 ? 'Live' : 'Gap', records: costReports.length },
+                { name: 'Fiscal Meeting', status: costMeetings.length > 0 ? 'Live' : 'Gap', records: costMeetings.length },
+                { name: 'Financial Alert', status: costAlerts.length > 0 ? 'Live' : 'Gap', records: costAlerts.length },
+            ]
+        },
+        {
+            name: 'Strategic Portfolio Layer',
+            icon: Target,
+            description: 'Programs, strategic goals, and investment scenarios.',
+            entities: [
+                { name: 'Program', status: programs.length > 0 ? 'Live' : 'Gap', records: programs.length },
+                { name: 'Strategic Mandate', status: strategicGoals.length > 0 ? 'Live' : 'Gap', records: strategicGoals.length },
+                { name: 'Strategic Driver', status: strategicDrivers.length > 0 ? 'Live' : 'Gap', records: strategicDrivers.length },
+                { name: 'What-If Scenario', status: scenarios.length > 0 ? 'Live' : 'Gap', records: scenarios.length },
+                { name: 'Benefit Target', status: benefits.length > 0 ? 'Live' : 'Gap', records: benefits.length },
+                { name: 'ESG Metric', status: esg.length > 0 ? 'Live' : 'Gap', records: esg.length },
+                { name: 'Portfolio Risk', status: portRisks.length > 0 ? 'Live' : 'Gap', records: portRisks.length },
+                { name: 'Governance Decision', status: govDecisions.length > 0 ? 'Live' : 'Gap', records: govDecisions.length },
+                { name: 'Program Objective', status: progObjs.length > 0 ? 'Live' : 'Gap', records: progObjs.length },
+                { name: 'Program Outcome', status: progOutcomes.length > 0 ? 'Live' : 'Gap', records: progOutcomes.length },
+                { name: 'Inter-Project Logic', status: progDeps.length > 0 ? 'Live' : 'Gap', records: progDeps.length },
+                { name: 'Program Change (PCR)', status: progCRs.length > 0 ? 'Live' : 'Gap', records: progCRs.length },
+                { name: 'Integrated Change (OCM)', status: intChanges.length > 0 ? 'Live' : 'Gap', records: intChanges.length },
+                { name: 'Program Risk', status: progRisks.length > 0 ? 'Live' : 'Gap', records: progRisks.length },
+                { name: 'Program Issue', status: progIssues.length > 0 ? 'Live' : 'Gap', records: progIssues.length },
+                { name: 'Strategic Communication', status: progComm.length > 0 ? 'Live' : 'Gap', records: progComm.length },
+                { name: 'Program Allotment', status: progAlloc.length > 0 ? 'Live' : 'Gap', records: progAlloc.length },
+                { name: 'Funding Gate', status: progFundingGates.length > 0 ? 'Live' : 'Gap', records: progFundingGates.length },
+                { name: 'Stage Gate Milestone', status: progGates.length > 0 ? 'Live' : 'Gap', records: progGates.length },
+                { name: 'Architecture Standard', status: archStds.length > 0 ? 'Live' : 'Gap', records: archStds.length },
+                { name: 'Transition Handover', status: progTrans.length > 0 ? 'Live' : 'Gap', records: progTrans.length },
+                { name: 'Trade-off Scenario', status: tradeoffScenarios.length > 0 ? 'Live' : 'Gap', records: tradeoffScenarios.length },
+            ]
+        },
+        {
+            name: 'Risk & Quality Governance',
+            icon: Shield,
+            description: 'NCRs, inspections, and probabilistic risk analysis.',
+            entities: [
+                { name: 'Risk Identifier', status: risks.length > 0 ? 'Live' : 'Gap', records: risks.length },
+                { name: 'Risk Response Step', status: risks.some(r => r.responseActions?.length) ? 'Live' : 'Gap', records: risks.reduce((acc, r) => acc + (r.responseActions?.length || 0), 0) },
+                { name: 'Issue / Impediment', status: issues.length > 0 ? 'Live' : 'Gap', records: issues.length },
+                { name: 'RBS Node', status: rbs.length > 0 ? 'Live' : 'Gap', records: countTreeNodes(rbs) },
+                { name: 'Quality Standard', status: qualityStandards.length > 0 ? 'Live' : 'Gap', records: qualityStandards.length },
+                { name: 'Non-Conformance (NCR)', status: ncrs.length > 0 ? 'Live' : 'Gap', records: ncrs.length },
+                { name: 'Inspection Report', status: qualityReports.length > 0 ? 'Live' : 'Gap', records: qualityReports.length },
+                { name: 'Material Receipt', status: state.materialReceipts?.length > 0 ? 'Live' : 'Gap', records: state.materialReceipts?.length || 0 },
+                { name: 'Site Safety Incident', status: state.safetyIncidents?.length > 0 ? 'Live' : 'Gap', records: state.safetyIncidents?.length || 0 },
+            ]
+        },
+        {
+            name: 'Resource & Procurement',
+            icon: Users,
+            description: 'Human capital, supply chain, and workforce management.',
+            entities: [
+                { name: 'Enterprise Resource', status: resources.length > 0 ? 'Live' : 'Gap', records: resources.length },
+                { name: 'Resource Request', status: state.resourceRequests?.length > 0 ? 'Live' : 'Gap', records: state.resourceRequests?.length || 0 },
+                { name: 'Competency / Skill', status: skills.length > 0 ? 'Live' : 'Gap', records: skills.length },
+                { name: 'Enterprise Role', status: roles.length > 0 ? 'Live' : 'Gap', records: roles.length },
+                { name: 'Timesheet Record', status: timesheets.length > 0 ? 'Live' : 'Gap', records: timesheets.length },
+                { name: 'System User', status: state.users?.length > 0 ? 'Live' : 'Gap', records: state.users?.length || 0 },
+                { name: 'Vendor / Partner', status: vendors.length > 0 ? 'Live' : 'Gap', records: vendors.length },
+                { name: 'Contract Agreement', status: contracts.length > 0 ? 'Live' : 'Gap', records: contracts.length },
+                { name: 'Bid Solicitation', status: solicitations.length > 0 ? 'Live' : 'Gap', records: solicitations.length },
+                { name: 'Procurement Package', status: procPkgs.length > 0 ? 'Live' : 'Gap', records: procPkgs.length },
+                { name: 'Procurement Plan', status: procPlans.length > 0 ? 'Live' : 'Gap', records: procPlans.length },
+                { name: 'Performance Review', status: supReviews.length > 0 ? 'Live' : 'Gap', records: supReviews.length },
+                { name: 'Supply Chain Claim', status: claims.length > 0 ? 'Live' : 'Gap', records: claims.length },
+                { name: 'Make-or-Buy Case', status: makeBuy.length > 0 ? 'Live' : 'Gap', records: makeBuy.length },
+            ]
+        },
+        {
+            name: 'System Architecture',
+            icon: Settings,
+            description: 'Metadata, schemas, and administration controls.',
+            entities: [
+                { name: 'EPS Node', status: eps.length > 1 ? 'Live' : 'Gap', records: eps.length },
+                { name: 'OBS Node', status: obs.length > 1 ? 'Live' : 'Gap', records: obs.length },
+                { name: 'Global Location', status: locations.length > 0 ? 'Live' : 'Gap', records: locations.length },
+                { name: 'Work Calendar', status: calendars.length > 0 ? 'Live' : 'Gap', records: calendars.length },
+                { name: 'Activity Code', status: actCodes.length > 0 ? 'Live' : 'Gap', records: actCodes.length },
+                { name: 'User Defined Field', status: udfs.length > 0 ? 'Live' : 'Gap', records: udfs.length },
+                { name: 'Automation Workflow', status: workflows.length > 0 ? 'Live' : 'Gap', records: workflows.length },
+                { name: 'Data Sync Job', status: dataJobs.length > 0 ? 'Live' : 'Gap', records: dataJobs.length },
+                { name: 'Audit Log Entry', status: auditLog.length > 0 ? 'Live' : 'Gap', records: auditLog.length },
+                { name: 'Handshake Alert', status: alerts.length > 0 ? 'Live' : 'Gap', records: alerts.length },
+                { name: 'System Integration', status: integrations.length > 0 ? 'Live' : 'Gap', records: integrations.length },
+                { name: 'Platform Extension', status: extensions.length > 0 ? 'Live' : 'Gap', records: extensions.length },
+                { name: 'Report Definition', status: state.reportDefinitions?.length > 0 ? 'Live' : 'Gap', records: state.reportDefinitions?.length || 0 },
+            ]
+        }
         ];
     }, [state]);
 

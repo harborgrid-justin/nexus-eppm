@@ -1,4 +1,3 @@
-
 import React, { useState, useTransition, useMemo } from 'react';
 import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
 import { usePortfolioState } from '../../hooks/usePortfolioState';
@@ -14,10 +13,12 @@ import { useTheme } from '../../context/ThemeContext';
 import { PortfolioCommandBar } from './PortfolioCommandBar';
 import { SystemPulse } from './SystemPulse';
 import { useI18n } from '../../context/I18nContext';
+import { useData } from '../../context/DataContext';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
+  const { state } = useData();
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const { generateReport, report, isGenerating, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -40,10 +41,10 @@ const Dashboard: React.FC = () => {
               <div className="flex-1 flex items-center justify-center">
                   <EmptyGrid 
                     title={t('portfolio.not_init', 'Portfolio Not Initialized')}
-                    description={t('portfolio.not_init_desc', 'Your executive dashboard requires a defined Enterprise Project Structure (EPS) and active programs to generate insights. Establish your first strategic portfolio to activate real-time analytics.')}
+                    description={t('portfolio.not_init_desc', 'Your executive dashboard requires a defined Enterprise Project Structure (EPS) and active programs.')}
                     icon={Globe}
                     actionLabel={t('portfolio.provision', 'Provision Strategic Portfolio')}
-                    onAdd={() => navigate('/getting-started?action=wizard')}
+                    onAdd={() => navigate('/getting-started')}
                   />
               </div>
           </div>
@@ -51,13 +52,17 @@ const Dashboard: React.FC = () => {
   }
 
   const strategicInsight = useMemo(() => {
+     // Rule: Derive thresholds from organizational governance if available
+     const varianceThreshold = state.governance?.scheduling?.autoLevelingThreshold / 100 || 0.3;
+     const budgetThreshold = 95; 
+
      const atRisk = summary.healthCounts.critical + summary.healthCounts.warning;
      const riskRatio = atRisk / summary.totalProjects;
      
-     if (riskRatio > 0.3) return { type: 'critical', title: 'Portfolio Variance Detected', msg: `30%+ of active initiatives are tracking behind baseline. Recommend immediate review of ${summary.healthCounts.critical} critical projects.`};
-     if (summary.budgetUtilization > 95) return { type: 'warning', title: 'Budget Saturation', msg: 'Portfolio budget utilization exceeds 95%. New initiatives may require capital re-allocation.' };
-     return { type: 'good', title: 'Performance Optimal', msg: 'Portfolio execution is aligned with strategic objectives. Schedule Performance Index (SPI) remains healthy across major programs.' };
-  }, [summary]);
+     if (riskRatio > varianceThreshold) return { type: 'critical', title: 'Portfolio Variance Detected', msg: `${(riskRatio * 100).toFixed(0)}%+ of active initiatives are tracking behind baseline.`};
+     if (summary.budgetUtilization > budgetThreshold) return { type: 'warning', title: 'Budget Saturation', msg: `Portfolio budget utilization exceeds ${budgetThreshold}%.` };
+     return { type: 'good', title: 'Performance Optimal', msg: 'Portfolio execution is aligned with strategic objectives.' };
+  }, [summary, state.governance]);
 
   return (
     <div className={`h-full overflow-y-auto scrollbar-thin ${theme.layout.pagePadding} animate-in fade-in duration-500`}>
@@ -74,7 +79,7 @@ const Dashboard: React.FC = () => {
                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">{t('common.analyzing', 'Synthesizing Executive Summary...')}</p>
              </div>
            ) : (
-             report && <div className="prose prose-sm max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">{report}</div>
+             report && <div className="prose prose-sm max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap font-medium">{report}</div>
            )}
       </SidePanel>
 

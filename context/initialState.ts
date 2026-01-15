@@ -1,4 +1,3 @@
-
 import { DataState } from '../types/index';
 
 export const initialState: DataState = {
@@ -77,8 +76,8 @@ export const initialState: DataState = {
           loginRetries: 5
       },
       organization: {
-          name: 'New Enterprise',
-          shortName: 'ORG',
+          name: 'Nexus Deployment',
+          shortName: 'NEX',
           taxId: '',
           fiscalYearStart: 'January',
           timezone: 'UTC',
