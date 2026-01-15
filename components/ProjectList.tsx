@@ -2,20 +2,20 @@
 import React, { useMemo, useState } from 'react';
 import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2, Download, Trash2, X } from 'lucide-react';
 import { PageHeader } from './common/PageHeader';
-import { usePermissions } from '../../hooks/usePermissions';
-import ProjectWizard from './ProjectWizard';
-import { ProjectListTable } from './list/ProjectListTable';
-import { EpsTreeView } from './list/EpsTreeView';
-import { EmptyGrid } from '../common/EmptyGrid';
-import { ModuleNavigation, NavGroup } from '../common/ModuleNavigation';
-import { useProjectListLogic } from '../../hooks/domain/useProjectListLogic';
-import { useTheme } from '../../context/ThemeContext';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { ExportService } from '../../services/ExportService';
-import { useData } from '../../context/DataContext';
-import { useToast } from '../../context/ToastContext';
-import { ProjectListCards } from './list/ProjectListCards';
+import { usePermissions } from '../hooks/usePermissions';
+import ProjectWizard from './projects/ProjectWizard';
+import { ProjectListTable } from './projects/list/ProjectListTable';
+import { ProjectListCards } from './projects/list/ProjectListCards';
+import { EpsTreeView } from './projects/list/EpsTreeView';
+import { EmptyGrid } from './common/EmptyGrid';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
+import { useProjectListLogic } from '../hooks/domain/useProjectListLogic';
+import { useTheme } from '../context/ThemeContext';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import { ExportService } from '../services/ExportService';
+import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
 
 const ProjectList: React.FC = () => {
   const { canEditProject } = usePermissions();

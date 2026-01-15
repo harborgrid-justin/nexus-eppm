@@ -14,16 +14,11 @@ interface ErrorBoundaryState {
 
 // Explicitly extend React.Component to resolve inheritance introspection errors
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  public state: ErrorBoundaryState;
-
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    // Initialize component state baseline
-    this.state = {
-      hasError: false,
-      error: undefined,
-    };
-  }
+  
+  public state: ErrorBoundaryState = {
+    hasError: false,
+    error: undefined,
+  };
 
   public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     // Update state so the next render will show the fallback UI.
