@@ -35,7 +35,7 @@ export const TeamCalendar: React.FC = () => {
     const handleAddEvent = () => {
         const newEvent = {
             id: Date.now(),
-            date: new Date().toISOString(),
+            date: new Date().toISOString().split('T')[0],
             title: 'New Event',
             type: 'Meeting' as const,
             duration: 1

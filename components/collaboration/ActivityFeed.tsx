@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { ActivityItem } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 // Simple time-ago formatter if date-fns isn't available
 const timeAgo = (dateStr: string) => {
@@ -36,7 +37,7 @@ export const ActivityFeed: React.FC = () => {
     const handlePost = () => {
         if (!input.trim() || !user) return;
         const newPost: ActivityItem = {
-            id: Date.now(),
+            id: generateId('ACT'),
             userId: user.id,
             userName: user.name,
             userAvatar: user.avatar,
