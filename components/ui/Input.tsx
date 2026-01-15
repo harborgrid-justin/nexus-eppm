@@ -10,39 +10,40 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({ className = '', icon: Icon, isSearch, label, ...props }, ref) => {
-  const theme = useTheme();
   const IconToRender = isSearch ? Search : Icon;
   const id = props.id || props.name;
 
-  const inputElement = (
-    <div className="relative w-full group">
-      {IconToRender && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nexus-600 transition-colors pointer-events-none">
-          <IconToRender size={16} />
-        </div>
+  return (
+    <div className="relative w-full group space-y-1.5">
+      {label && (
+        <label htmlFor={id} className={`block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1`}>
+            {label}
+        </label>
       )}
-      <input
-        ref={ref}
-        id={id}
-        className={`
-          w-full bg-white border-2 border-slate-200 rounded-xl transition-all
-          focus:outline-none focus:ring-8 focus:ring-nexus-500/5 focus:border-nexus-500 
-          text-slate-900 placeholder:text-slate-300 font-bold text-sm h-11
-          ${IconToRender ? 'pl-11' : 'px-4'} pr-4 ${className}
-        `}
-        {...props}
-      />
+      
+      <div className="relative">
+          {IconToRender && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-nexus-600 transition-colors pointer-events-none">
+              <IconToRender size={16} />
+            </div>
+          )}
+          <input
+            ref={ref}
+            id={id}
+            className={`
+              w-full bg-white border border-slate-200 transition-all shadow-sm
+              focus:outline-none focus:ring-4 focus:ring-[var(--color-focusRing)]/20 focus:border-[var(--color-focusRing)]
+              text-slate-900 placeholder:text-slate-300 font-bold text-sm
+              ${IconToRender ? 'pl-10' : 'px-4'} pr-4 ${className}
+            `}
+            style={{ 
+                height: 'var(--input-height-lg)', 
+                borderRadius: 'var(--input-radius)' 
+            }}
+            {...props}
+          />
+      </div>
     </div>
   );
-
-  if (label) {
-    return (
-      <div className="space-y-1.5">
-        <label htmlFor={id} className={`block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1`}>{label}</label>
-        {inputElement}
-      </div>
-    );
-  }
-  return inputElement;
 });
 Input.displayName = 'Input';

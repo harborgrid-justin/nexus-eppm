@@ -15,6 +15,22 @@ interface ThemeContextType {
   components: any;
   typography: any;
   charts: any;
+  shadows: Record<string, string>;
+  borderRadius: Record<string, string>;
+  transitions: Record<string, string>;
+  zIndex: Record<string, string>;
+  spacing: Record<string, string>;
+  
+  // New Categories
+  status: Record<string, string>;
+  priority: Record<string, string>;
+  schedule: Record<string, string>;
+  inputs: Record<string, string>;
+  effects: {
+      opacity: Record<string, string>;
+      blur: Record<string, string>;
+      gradients: Record<string, string>;
+  };
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
@@ -52,6 +68,23 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       isDark,
       toggleDark,
       mode: (isDark ? 'dark' : 'light') as 'light' | 'dark',
+      shadows: tokens.shadows,
+      borderRadius: tokens.borderRadius,
+      transitions: tokens.transitions,
+      zIndex: tokens.zIndex,
+      spacing: tokens.spacing[density],
+      
+      // New Exposures
+      status: tokens.status,
+      priority: tokens.priority,
+      schedule: tokens.schedule,
+      inputs: tokens.inputs,
+      effects: {
+          opacity: tokens.opacity,
+          blur: tokens.blur,
+          gradients: tokens.gradients
+      },
+
       colors: { 
           ...activeColors, 
           primary: 'bg-primary text-text-inverted', 
@@ -99,7 +132,13 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       charts: { 
         grid: isDark ? tokens.charts.grid : '#e2e8f0', 
         tooltip: { backgroundColor: isDark ? '#0f172a' : '#fff', borderColor: isDark ? '#1e293b' : '#e2e8f0' }, 
-        palette: ['#0ea5e9', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#f97316', '#06b6d4', '#84cc16', '#6366f1', '#d946ef', '#f43f5e'] 
+        // Extended Palette
+        palette: [
+            tokens.charts.palette1, tokens.charts.palette2, tokens.charts.palette3, 
+            tokens.charts.palette4, tokens.charts.palette5, tokens.charts.palette6,
+            tokens.charts.palette7, tokens.charts.palette8, tokens.charts.palette9,
+            tokens.charts.palette10, tokens.charts.palette11, tokens.charts.palette12
+        ] 
       }
     };
   }, [activeColors, density, isDark, tokens]);
@@ -112,7 +151,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     Object.entries(spacing).forEach(([k, v]) => root.style.setProperty(`--spacing-${k}`, v as string));
     
     // Inject Color Variables
-    Object.entries(activeColors).forEach(([k, v]) => root.style.setProperty(`--color-${k}`, v as string));
+    Object.entries(activeColors).forEach(([k, v]) => {
+        if (typeof v === 'string') root.style.setProperty(`--color-${k}`, v);
+    });
     
     // Inject Layout Variables
     Object.entries(tokens.layout).forEach(([k, v]) => root.style.setProperty(`--layout-${k}`, v as string));
@@ -128,6 +169,14 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Inject Chart Variables
     Object.entries(tokens.charts).forEach(([k, v]) => root.style.setProperty(`--chart-${k}`, v as string));
+
+    // Inject New Semantic Categories
+    Object.entries(tokens.status).forEach(([k, v]) => root.style.setProperty(`--status-${k}`, v as string));
+    Object.entries(tokens.priority).forEach(([k, v]) => root.style.setProperty(`--priority-${k}`, v as string));
+    Object.entries(tokens.schedule).forEach(([k, v]) => root.style.setProperty(`--schedule-${k}`, v as string));
+    
+    // Inject Effects
+    Object.entries(tokens.opacity).forEach(([k, v]) => root.style.setProperty(`--opacity-${k}`, v as string));
     
     // Inject Typography Variables
     root.style.setProperty('--font-sans', tokens.typography.fontSans);

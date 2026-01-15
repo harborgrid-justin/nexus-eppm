@@ -50,22 +50,35 @@ export const RiskMatrixView: React.FC<RiskMatrixViewProps> = ({ risks, onSelectR
                                 const score = prob * imp;
                                 const cellRisks = risks.filter(r => r.probabilityValue === prob && r.impactValue === imp);
                                 
-                                let bgClass = 'bg-green-500/10 hover:bg-green-500/30';
-                                let borderClass = 'border-green-500/20';
+                                let style: React.CSSProperties = { 
+                                    backgroundColor: 'var(--priority-low)', 
+                                    opacity: 0.1,
+                                    borderColor: 'transparent'
+                                };
+
                                 if (score >= 15) {
-                                    bgClass = 'bg-red-500/10 hover:bg-red-500/30 shadow-[inset_0_0_20px_rgba(239,68,68,0.1)]';
-                                    borderClass = 'border-red-500/30';
+                                    style = { backgroundColor: 'var(--priority-critical)', opacity: 0.2, borderColor: 'var(--priority-critical)' };
                                 } else if (score >= 8) {
-                                    bgClass = 'bg-amber-500/10 hover:bg-amber-500/30 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]';
-                                    borderClass = 'border-amber-500/30';
+                                    style = { backgroundColor: 'var(--priority-medium)', opacity: 0.2, borderColor: 'var(--priority-medium)' };
+                                } else {
+                                     style = { backgroundColor: 'var(--status-active)', opacity: 0.15, borderColor: 'var(--status-active)' };
                                 }
 
                                 return (
                                     <div 
                                         key={`${prob}-${imp}`} 
-                                        className={`${bgClass} border ${borderClass} rounded-2xl relative transition-all duration-300 cursor-pointer overflow-hidden flex items-center justify-center group/cell hover:scale-[1.03] hover:z-20 hover:shadow-2xl`}
-                                        onMouseEnter={() => setHoveredCell(`${prob}-${imp}`)}
-                                        onMouseLeave={() => setHoveredCell(null)}
+                                        className={`rounded-2xl relative transition-all duration-300 cursor-pointer overflow-hidden flex items-center justify-center group/cell hover:scale-[1.03] hover:z-20 hover:shadow-2xl border-2`}
+                                        style={style}
+                                        onMouseEnter={() => {
+                                            setHoveredCell(`${prob}-${imp}`);
+                                            // Dynamic hover effect
+                                            (document.getElementById(`cell-${prob}-${imp}`) as HTMLDivElement).style.opacity = '0.5';
+                                        }}
+                                        onMouseLeave={() => {
+                                            setHoveredCell(null);
+                                            (document.getElementById(`cell-${prob}-${imp}`) as HTMLDivElement).style.opacity = style.opacity as string;
+                                        }}
+                                        id={`cell-${prob}-${imp}`}
                                     >
                                         <div className="absolute inset-0 flex flex-wrap content-start p-2 gap-2 overflow-y-auto scrollbar-none">
                                             {cellRisks.map(r => (
@@ -80,7 +93,7 @@ export const RiskMatrixView: React.FC<RiskMatrixViewProps> = ({ risks, onSelectR
                                             ))}
                                         </div>
                                         {cellRisks.length === 0 && (
-                                            <div className="text-[10px] font-mono font-black text-slate-300 opacity-20">{score}</div>
+                                            <div className="text-[10px] font-mono font-black text-slate-400 opacity-50">{score}</div>
                                         )}
                                     </div>
                                 );

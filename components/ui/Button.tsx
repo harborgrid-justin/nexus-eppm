@@ -22,7 +22,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const theme = useTheme();
   
-  const baseClasses = "inline-flex items-center justify-center font-black uppercase tracking-[0.1em] transition-all duration-300 focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.96] rounded-xl";
+  const baseClasses = "inline-flex items-center justify-center font-black uppercase tracking-[0.1em] transition-all duration-300 focus:outline-none focus:ring-4 active:scale-[0.96] rounded-xl";
 
   const variants = {
     primary: `${theme.colors.primary} hover:brightness-110 focus:ring-nexus-500/20 shadow-xl shadow-nexus-500/10 border border-white/5`,
@@ -34,13 +34,28 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const sizes = {
-    sm: "px-4 py-2 text-[10px]",
-    md: "px-6 py-2.5 text-[11px]",
-    lg: "px-10 py-4 text-[12px]"
+    sm: "px-4 text-[10px]",
+    md: "px-6 text-[11px]",
+    lg: "px-10 text-[12px]"
   };
 
+  const heightStyle = {
+      sm: 'var(--input-height-sm)',
+      md: 'var(--input-height-md)',
+      lg: 'var(--input-height-lg)'
+  }[size];
+
   return (
-    <button className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`} disabled={disabled || isLoading} {...props}>
+    <button 
+        className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`} 
+        disabled={disabled || isLoading} 
+        style={{ 
+            height: heightStyle,
+            opacity: (disabled || isLoading) ? 'var(--opacity-disabled)' : 1,
+            cursor: (disabled || isLoading) ? 'not-allowed' : 'pointer'
+        }}
+        {...props}
+    >
       {isLoading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : Icon ? (

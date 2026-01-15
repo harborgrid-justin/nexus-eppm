@@ -12,38 +12,39 @@ interface StatusBadgeProps {
 const StatusBadgeComponent: React.FC<StatusBadgeProps> = ({ 
   status, className = '', customColorClass
 }) => {
-  const theme = useTheme();
-  const baseClasses = "inline-flex items-center px-4 py-1 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all";
-  
   const displayStatus = (status === null || status === undefined) ? 'UNSET' : String(status);
   const s = displayStatus.toLowerCase();
   
-  if (customColorClass) return <span className={`${baseClasses} ${customColorClass} ${className}`}>{displayStatus}</span>;
+  if (customColorClass) return <span className={`inline-flex items-center px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm transition-all ${customColorClass} ${className}`}>{displayStatus}</span>;
 
-  const getSemanticColor = (type: 'success' | 'warning' | 'danger' | 'info' | 'neutral') => {
-      const t = theme.colors.semantic[type];
-      return `${t.bg} ${t.text} ${t.border}`;
+  let style: React.CSSProperties = {
+      backgroundColor: 'var(--color-surface)',
+      color: 'var(--color-textSecondary)',
+      borderColor: 'var(--color-border)',
   };
 
-  let colors = getSemanticColor('neutral');
-
+  // Map to new Semantic Tokens
   if (['active', 'open', 'in progress', 'running', 'good', 'healthy', 'on track', 'approved', 'pass', 'valid', 'issued', 'released', 'solvent'].includes(s)) {
-      colors = getSemanticColor('success');
-  } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary', 'draft'].includes(s)) {
-      colors = getSemanticColor('warning');
-  } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted', 'closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-      // Differentiating 'closed' as neutral/dark vs error
-      if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
-          colors = 'bg-slate-100 text-slate-500 border-slate-200';
-      } else {
-          colors = getSemanticColor('danger');
-      }
-  } else if (['info', 'new', 'allocation', 'planned'].includes(s)) {
-      colors = getSemanticColor('info');
+      style = { backgroundColor: 'var(--status-active)', color: '#fff', borderColor: 'transparent' };
+  } else if (['warning', 'at risk', 'behind', 'pending', 'review', 'in review', 'submitted', 'conditional', 'probationary'].includes(s)) {
+      style = { backgroundColor: 'var(--status-review)', color: '#fff', borderColor: 'transparent' };
+  } else if (['critical', 'poor', 'off track', 'non-compliant', 'rejected', 'failed', 'error', 'down', 'insolvent', 'blocked', 'blacklisted', 'high'].includes(s)) {
+      style = { backgroundColor: 'var(--priority-critical)', color: '#fff', borderColor: 'transparent' };
+  } else if (['closed', 'completed', 'archived', 'resolved', 'final'].includes(s)) {
+      style = { backgroundColor: 'var(--status-completed)', color: '#fff', borderColor: 'transparent' };
+  } else if (['info', 'new', 'allocation', 'planned', 'draft'].includes(s)) {
+      style = { backgroundColor: 'var(--status-planned)', color: '#fff', borderColor: 'transparent' };
+  } else if (['medium'].includes(s)) {
+      style = { backgroundColor: 'var(--priority-medium)', color: '#fff', borderColor: 'transparent' };
+  } else if (['low'].includes(s)) {
+      style = { backgroundColor: 'var(--priority-low)', color: '#fff', borderColor: 'transparent' };
   }
 
   return (
-    <span className={`${baseClasses} ${colors} ${className}`}>
+    <span 
+        className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border shadow-sm transition-all ${className}`}
+        style={style}
+    >
       {displayStatus}
     </span>
   );
