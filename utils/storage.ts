@@ -11,7 +11,8 @@ const STORAGE_KEY = 'NEXUS_PPM_STORE_V1';
 export const loadPersistedState = (defaultState: DataState): DataState => {
   try {
     const serializedState = localStorage.getItem(STORAGE_KEY);
-    if (serializedState === null) {
+    // Ensure we don't try to parse an empty string or null
+    if (!serializedState || serializedState === 'undefined' || serializedState === 'null') {
       return defaultState;
     }
     const parsedState = JSON.parse(serializedState);

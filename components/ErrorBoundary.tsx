@@ -22,22 +22,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     };
   }
 
-  public static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log exception to enterprise telemetry
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
-  public handleRetry = () => {
+  handleRetry = () => {
     // Reset state to attempt re-initialization of child partition
     this.setState({ hasError: false, error: undefined });
   };
 
-  public render() {
+  render() {
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">

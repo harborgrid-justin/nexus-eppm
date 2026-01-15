@@ -1,140 +1,133 @@
 
 import React, { useMemo } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
-import { ShieldCheck, ShieldAlert, Activity, Info, BarChart } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Activity, BarChart2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { Badge } from '../ui/Badge';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const ScheduleHealthReport: React.FC = () => {
   const { project } = useProjectWorkspace();
   const theme = useTheme();
 
   const metrics = useMemo(() => {
-    if (!project) return null;
+    if (!project || !project.tasks) return [];
     const tasks = project.tasks.filter(t => t.type !== 'Summary');
     const total = tasks.length;
-    if (total === 0) return null;
+    if (total === 0) return [];
 
-    // DCMA Check Logic
-    const missingPred = tasks.filter(t => t.dependencies.length === 0 && !t.wbsCode.includes('.1')).length;
-    const missingSucc = tasks.filter(t => !project.tasks.some(other => other.dependencies.some(d => d.targetId === t.id))).length;
-    const highLag = tasks.filter(t => t.dependencies.some(d => d.lag > 5)).length;
-    const negLag = tasks.filter(t => t.dependencies.some(d => d.lag < 0)).length;
-    const constraints = tasks.filter(t => !!t.primaryConstraint).length;
-    const highFloat = tasks.filter(t => (t.totalFloat || 0) > 44).length; // 2 months
-    const nonFS = tasks.filter(t => t.dependencies.some(d => d.type !== 'FS')).length;
-
-    return [
-      { id: 1, label: 'Logic (Missing Pred/Succ)', value: missingPred + missingSucc, limit: 0.05, count: missingPred + missingSucc },
-      { id: 2, label: 'Lags (> 5 days)', value: highLag, limit: 0.05, count: highLag },
-      { id: 3, label: 'Negative Lags', value: negLag, limit: 0, count: negLag },
-      { id: 4, label: 'Relationship Types (Non-FS)', value: nonFS, limit: 0.1, count: nonFS },
-      { id: 5, label: 'Hard Constraints', value: constraints, limit: 0.05, count: constraints },
-      { id: 6, label: 'High Float (> 44 days)', value: highFloat, limit: 0.05, count: highFloat },
-      { id: 7, label: 'Long Durations (> 44 days)', value: tasks.filter(t => t.duration > 44).length, limit: 0.05, count: tasks.filter(t => t.duration > 44).length }
+    // DCMA 14-Point Assessment Logic (Simplified for Demo)
+    const checks = [
+      { id: 1, label: 'Logic (Missing Links)', fn: (t: any) => t.dependencies.length === 0, limit: 0.05 },
+      { id: 2, label: 'Negative Lags', fn: (t: any) => t.dependencies.some((d: any) => d.lag < 0), limit: 0 },
+      { id: 3, label: 'High Float (>44d)', fn: (t: any) => (t.totalFloat || 0) > 44, limit: 0.05 },
+      { id: 4, label: 'Hard Constraints', fn: (t: any) => !!t.primaryConstraint, limit: 0.05 },
+      { id: 5, label: 'High Duration (>44d)', fn: (t: any) => t.duration > 44, limit: 0.05 },
+      { id: 6, label: 'Invalid Dates', fn: (t: any) => new Date(t.endDate) < new Date(t.startDate), limit: 0 },
+      { id: 7, label: 'Resource Missing', fn: (t: any) => !t.assignments || t.assignments.length === 0, limit: 0 }
     ];
+
+    return checks.map(c => {
+        const count = tasks.filter(c.fn).length;
+        const pct = count / total;
+        return {
+            ...c,
+            count,
+            pct: Math.round(pct * 100),
+            passed: pct <= c.limit
+        };
+    });
   }, [project]);
 
-  const recommendations = useMemo(() => {
-      if (!metrics) return ["No data to analyze."];
-      const recs = [];
-      const logicMetric = metrics.find(m => m.id === 1);
-      const floatMetric = metrics.find(m => m.id === 6);
-      const lagMetric = metrics.find(m => m.id === 2);
-      
-      if (logicMetric && logicMetric.count > 0) {
-          recs.push(`Fix ${logicMetric.count} tasks with missing predecessors/successors to ensure network integrity.`);
-      }
-      if (floatMetric && floatMetric.count > 5) {
-          recs.push(`High float on ${floatMetric.count} tasks indicates loose path logic. Review lags and constraints.`);
-      }
-      if (lagMetric && lagMetric.count > 2) {
-          recs.push(`Reduce long lags on ${lagMetric.count} dependencies to improve schedule transparency.`);
-      }
-      
-      if (recs.length === 0) return ["Schedule logic appears sound. Continue monitoring critical path."];
-      return recs;
-  }, [metrics]);
+  if (!project) return null;
 
-  if (!project || !metrics) return <div>No tasks to analyze.</div>;
-
-  const overallScore = metrics.reduce((sum, m) => sum + (m.count === 0 ? 1 : 0), 0) / metrics.length * 100;
+  const score = metrics.length > 0 
+    ? Math.round((metrics.filter(m => m.passed).length / metrics.length) * 100)
+    : 0;
 
   return (
-    <div className={`h-full flex flex-col ${theme.colors.background}`}>
-        <div className={`p-6 border-b ${theme.colors.border} ${theme.colors.surface}`}>
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2 className={`${theme.typography.h2} flex items-center gap-2`}>
-                        <Activity className="text-nexus-600" /> DCMA 14-Point Schedule Health
-                    </h2>
-                    <p className={theme.typography.small}>Validation of network logic quality and schedule stability.</p>
-                </div>
-                <div className="text-right">
-                    <p className={theme.typography.label}>Schedule Quality Score</p>
-                    <div className="flex items-center gap-3">
-                        <div className="text-3xl font-black text-slate-900">{overallScore.toFixed(0)}%</div>
-                        <Badge variant={overallScore > 85 ? 'success' : overallScore > 70 ? 'warning' : 'danger'}>
-                            {overallScore > 85 ? 'Healthy' : 'Needs Review'}
-                        </Badge>
-                    </div>
-                </div>
+    <div className={`h-full flex flex-col ${theme.colors.background} animate-in fade-in`}>
+        <div className={`p-6 border-b ${theme.colors.border} ${theme.colors.surface} flex justify-between items-center`}>
+            <div>
+                <h2 className={`${theme.typography.h2} flex items-center gap-2`}>
+                    <Activity className="text-nexus-600" /> DCMA Schedule Health
+                </h2>
+                <p className={theme.typography.small}>14-Point Assessment & Logic Integrity</p>
             </div>
-            
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap}`}>
-                <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.semantic.info.bg}/50`}>
-                    <p className={`${theme.typography.label} ${theme.colors.semantic.info.text}`}>Critical Path Length</p>
-                    <p className="text-lg font-bold">142 Days</p>
-                </div>
-                <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.semantic.warning.bg}/50`}>
-                    <p className={`${theme.typography.label} ${theme.colors.semantic.warning.text}`}>Dangling Activities</p>
-                    <p className="text-lg font-bold">{metrics[0].count}</p>
-                </div>
-                <div className={`p-4 rounded-xl border ${theme.colors.border} bg-purple-50`}>
-                    <p className={`${theme.typography.label} text-purple-600`}>Constraint Impact</p>
-                    <p className="text-lg font-bold">{metrics[4].count > 0 ? 'High' : 'Low'}</p>
-                </div>
-                <div className={`p-4 rounded-xl border ${theme.colors.border} ${theme.colors.semantic.success.bg}/50`}>
-                    <p className={`${theme.typography.label} ${theme.colors.semantic.success.text}`}>Status updates</p>
-                    <p className="text-lg font-bold">Current</p>
+            <div className="flex items-center gap-4">
+                <div className="text-right">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">Quality Score</p>
+                    <p className={`text-3xl font-black ${score >= 90 ? 'text-green-600' : score >= 75 ? 'text-yellow-500' : 'text-red-500'}`}>{score}%</p>
                 </div>
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 {/* Chart */}
+                 <div className={`${theme.components.card} p-6 h-80 flex flex-col`}>
+                     <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><BarChart2 size={16}/> Compliance Profile</h3>
+                     <div className="flex-1 min-h-0">
+                         <ResponsiveContainer width="100%" height="100%">
+                             <BarChart data={metrics} layout="vertical" margin={{ left: 20 }}>
+                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                 <XAxis type="number" domain={[0, 100]} hide />
+                                 <YAxis dataKey="label" type="category" width={140} tick={{fontSize: 10}} />
+                                 <Tooltip />
+                                 <Bar dataKey="pct" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
+                             </BarChart>
+                         </ResponsiveContainer>
+                     </div>
+                 </div>
+
+                 {/* KPI Grid */}
+                 <div className="grid grid-cols-2 gap-4">
+                     <div className={`p-4 rounded-xl border ${theme.colors.border} bg-green-50/50 flex flex-col justify-center items-center`}>
+                         <ShieldCheck className="text-green-600 mb-2" size={32}/>
+                         <span className="text-2xl font-black text-slate-900">{metrics.filter(m => m.passed).length}</span>
+                         <span className="text-xs font-bold text-green-700 uppercase">Checks Passed</span>
+                     </div>
+                     <div className={`p-4 rounded-xl border ${theme.colors.border} bg-red-50/50 flex flex-col justify-center items-center`}>
+                         <ShieldAlert className="text-red-600 mb-2" size={32}/>
+                         <span className="text-2xl font-black text-slate-900">{metrics.filter(m => !m.passed).length}</span>
+                         <span className="text-xs font-bold text-red-700 uppercase">Checks Failed</span>
+                     </div>
+                 </div>
+            </div>
+
+            {/* Detailed Table */}
             <div className={`${theme.components.card} overflow-hidden`}>
-                <table className="min-w-full divide-y divide-slate-200">
-                    <thead className="bg-slate-50">
+                <div className="p-4 border-b border-slate-100 bg-slate-50 font-bold text-xs text-slate-500 uppercase tracking-widest">
+                    Assessment Detail
+                </div>
+                <table className="min-w-full divide-y divide-slate-100">
+                    <thead className="bg-white">
                         <tr>
-                            <th className={theme.components.table.header}>Metric Component</th>
-                            <th className={`${theme.components.table.header} text-center`}>Count</th>
+                            <th className={theme.components.table.header}>Check</th>
                             <th className={`${theme.components.table.header} text-center`}>Threshold</th>
-                            <th className={theme.components.table.header}>Compliance</th>
+                            <th className={`${theme.components.table.header} text-center`}>Actual</th>
+                            <th className={`${theme.components.table.header} text-right`}>Status</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {metrics.map(m => {
-                            const isCompliant = m.count <= (project.tasks.length * m.limit);
-                            return (
-                                <tr key={m.id} className="hover:bg-slate-50 transition-colors">
-                                    <td className={theme.components.table.cell}>
-                                        <div className="flex items-center gap-3">
-                                            {isCompliant ? <ShieldCheck className="text-green-500" size={18}/> : <ShieldAlert className="text-red-500" size={18}/>}
-                                            <span className="font-medium text-slate-700">{m.label}</span>
-                                        </div>
-                                    </td>
-                                    <td className={`${theme.components.table.cell} text-center font-mono font-bold text-slate-900`}>{m.count}</td>
-                                    <td className={`${theme.components.table.cell} text-center text-xs`}>{m.limit * 100}% of activities</td>
-                                    <td className={theme.components.table.cell}>
-                                        <Badge variant={isCompliant ? 'success' : 'danger'}>
-                                            {isCompliant ? 'Passed' : 'Triggered'}
-                                        </Badge>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                    <tbody className="divide-y divide-slate-50">
+                        {metrics.map(m => (
+                            <tr key={m.id} className="hover:bg-slate-50">
+                                <td className="px-6 py-4 text-sm font-medium text-slate-700">{m.label}</td>
+                                <td className="px-6 py-4 text-center text-xs text-slate-500">&le; {m.limit * 100}%</td>
+                                <td className="px-6 py-4 text-center text-sm font-bold">
+                                    {m.count} <span className="text-slate-400 font-normal">({m.pct}%)</span>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                    <Badge variant={m.passed ? 'success' : 'danger'}>{m.passed ? 'Pass' : 'Fail'}</Badge>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
-            
-            <div className={`mt-8 grid grid-cols-1 lg:grid-cols-2
+        </div>
+    </div>
+  );
+};
+
+export default ScheduleHealthReport;
