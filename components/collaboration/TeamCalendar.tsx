@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalIcon, Filter, Plus, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalIcon, Plus, CalendarDays } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { Button } from '../ui/Button';

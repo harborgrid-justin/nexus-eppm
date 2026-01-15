@@ -1,9 +1,8 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
-import { Radio, Activity, MapPin, AlertTriangle, Cpu, Info, Zap, ShieldCheck } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { ResponsiveContainer, LineChart, Line, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
+import { Radio, Activity, MapPin, AlertTriangle, Zap, ShieldCheck } from 'lucide-react';
+import { ResponsiveContainer, YAxis, CartesianGrid, AreaChart, Area } from 'recharts';
 
 interface StreamPoint {
     i: number;
@@ -12,7 +11,6 @@ interface StreamPoint {
 
 export const IoTStream: React.FC = () => {
     const { state } = useData();
-    const theme = useTheme();
     const [chartData, setChartData] = useState<StreamPoint[]>([]);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

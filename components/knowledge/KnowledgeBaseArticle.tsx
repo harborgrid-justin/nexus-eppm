@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BookOpen, Calendar, User, Tag, Share2, Printer, ThumbsUp, Eye } from 'lucide-react';
+import { BookOpen, Calendar, User, Share2, ThumbsUp, Eye } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { Badge } from '../ui/Badge';

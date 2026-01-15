@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Server, Cpu, HardDrive, Activity, Wifi, RefreshCw } from 'lucide-react';
+import { Cpu, Server, Activity, Wifi, RefreshCw } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { useData } from '../../context/DataContext';
 

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, Share2, MoreHorizontal, CheckCircle, FileText, AlertTriangle, User, Send } from 'lucide-react';
+import { MessageSquare, ThumbsUp, Share2, CheckCircle, FileText, AlertTriangle, User, Send } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';

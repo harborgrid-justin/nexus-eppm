@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { GitBranch, Box, CheckCircle, XCircle, Loader2, PlayCircle, Server, Terminal } from 'lucide-react';
+import { GitBranch, Box, CheckCircle, XCircle, Loader2, PlayCircle, Terminal } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
-import { Card } from '../ui/Card';
 
 export const DeploymentPipeline: React.FC = () => {
     const theme = useTheme();
