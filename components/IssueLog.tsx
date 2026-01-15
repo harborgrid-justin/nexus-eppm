@@ -14,7 +14,8 @@ import { useData } from '../context/DataContext';
 import { generateId } from '../utils/formatters';
 import { EmptyGrid } from './common/EmptyGrid';
 import DataTable from './common/DataTable';
-import { PageHeader } from './common/PageHeader';
+import { PageLayout } from './layout/standard/PageLayout';
+import { PanelContainer } from './layout/standard/PanelContainer';
 
 const IssueLog: React.FC = () => {
   const { project, issues } = useProjectWorkspace();
@@ -77,9 +78,8 @@ const IssueLog: React.FC = () => {
   ], [theme, t, canEditProject]);
 
   return (
-    <div className={`h-full flex flex-col ${theme.layout.pagePadding} ${theme.colors.background}`}>
-      <PageHeader 
-        title={t('issue.title', 'Project Impediment Log')} 
+    <PageLayout
+        title={t('issue.title', 'Project Impediment Log')}
         subtitle={t('issue.subtitle', 'Track and resolve active constraints impacting project delivery.')}
         icon={FileWarning}
         actions={canEditProject() ? (
@@ -87,27 +87,30 @@ const IssueLog: React.FC = () => {
         ) : (
             <Badge variant="neutral" icon={Lock}>{t('common.locked', 'Registry Locked')}</Badge>
         )}
-      />
-      
-      <div className={`mt-8 flex-1 flex flex-col ${theme.colors.surface} border ${theme.colors.border} rounded-2xl overflow-hidden shadow-sm`}>
-        <div className={`p-5 border-b ${theme.colors.border} flex flex-col md:flex-row justify-between items-center bg-slate-50/50 gap-3`}>
-            <Input isSearch placeholder={t('common.filter', 'Filter registry...')} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:w-72" />
-        </div>
-        
-        <div className="flex-1 overflow-hidden">
-           {filteredIssues.length > 0 ? (
-               <DataTable data={filteredIssues} columns={columns} keyField="id" onRowClick={(i) => canEditProject() && handleOpenPanel(i)} />
-           ) : (
-               <EmptyGrid 
-                    title={t('issue.empty', 'Clear Impediment Log')}
-                    description={t('issue.empty_desc', 'This project currently has zero unresolved issues.')}
-                    onAdd={canEditProject() ? () => handleOpenPanel() : undefined}
-                    actionLabel={t('issue.log_action', 'Log Impediment')}
-                    icon={FileWarning}
-               />
-           )}
-        </div>
-      </div>
+    >
+        <PanelContainer
+            header={
+                <div className="p-4 flex flex-col md:flex-row justify-between items-center bg-slate-50/50">
+                    <Input isSearch placeholder={t('common.filter', 'Filter registry...')} value={search} onChange={e => setSearch(e.target.value)} className="w-full md:w-72" />
+                </div>
+            }
+        >
+            <div className="flex-1 overflow-hidden">
+               {filteredIssues.length > 0 ? (
+                   <DataTable data={filteredIssues} columns={columns} keyField="id" onRowClick={(i) => canEditProject() && handleOpenPanel(i)} />
+               ) : (
+                   <div className="h-full flex flex-col justify-center items-center">
+                       <EmptyGrid 
+                            title={t('issue.empty', 'Clear Impediment Log')}
+                            description={t('issue.empty_desc', 'This project currently has zero unresolved issues.')}
+                            onAdd={canEditProject() ? () => handleOpenPanel() : undefined}
+                            actionLabel={t('issue.log_action', 'Log Impediment')}
+                            icon={FileWarning}
+                       />
+                   </div>
+               )}
+            </div>
+        </PanelContainer>
 
       <SidePanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} title={editingIssue?.id ? t('issue.edit', 'Edit Issue') : t('issue.new', 'Log New Issue')}
             footer={<><Button variant="secondary" onClick={() => setIsPanelOpen(false)}>{t('common.cancel', 'Cancel')}</Button><Button onClick={() => handleSaveIssue(editingIssue!)} icon={Save}>{t('common.save', 'Save')}</Button></>}>
@@ -145,7 +148,7 @@ const IssueLog: React.FC = () => {
                 </div>
             </div>
       </SidePanel>
-    </div>
+    </PageLayout>
   );
 };
 export default IssueLog;

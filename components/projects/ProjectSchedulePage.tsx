@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,13 +10,15 @@ import { useVirtualScroll } from '../../hooks/useVirtualScroll';
 import { Task, TaskStatus } from '../../types';
 import { generateId } from '../../utils/formatters';
 import { EmptyGrid } from '../common/EmptyGrid';
-import { GanttChartSquare } from 'lucide-react';
+import { GanttChartSquare, Calendar, Play, Download, ArrowLeft } from 'lucide-react';
 import { ScheduleContextMenu, ScheduleAction } from './schedule/ScheduleContextMenu';
-import { ScheduleHeader } from './schedule/ScheduleHeader';
 import { ScheduleToolbar } from './schedule/ScheduleToolbar';
 import { useGanttData } from '../../hooks/gantt/useGanttData';
 import { useGanttCalendar } from '../../hooks/gantt/useGanttCalendar';
 import { useToast } from '../../context/ToastContext';
+import { PageLayout } from '../layout/standard/PageLayout';
+import { PanelContainer } from '../layout/standard/PanelContainer';
+import { Button } from '../ui/Button';
 
 const ROW_HEIGHT = 44;
 
@@ -24,7 +26,7 @@ export const ProjectSchedulePage: React.FC = () => {
     const { projectId } = useParams();
     const navigate = useNavigate();
     const { state, dispatch } = useData();
-    const { success, error: toastError, info } = useToast();
+    const { success, info } = useToast();
     const theme = useTheme();
 
     const activeProject = useMemo(() => 
@@ -82,9 +84,7 @@ export const ProjectSchedulePage: React.FC = () => {
 
     const updateProjectTasks = (newTasks: Task[]) => {
         if(!project) return;
-        dispatch({ type: 'TASK_UPDATE', payload: { projectId: project.id, task: newTasks } }); // Assuming payload structure matches reducer expect
-        // Note: The generic TASK_UPDATE might expect a single task. We might need a bulk update action.
-        // For now, updating the project object directly via PROJECT_UPDATE
+        dispatch({ type: 'TASK_UPDATE', payload: { projectId: project.id, task: newTasks } }); 
         dispatch({ type: 'PROJECT_UPDATE', payload: { projectId: project.id, updatedData: { tasks: newTasks } } });
     };
 
@@ -161,62 +161,92 @@ export const ProjectSchedulePage: React.FC = () => {
          );
     }
 
-    return (
-        <div className={`h-full flex flex-col ${theme.colors.background} relative`}>
-            {contextMenu && (
-                <ScheduleContextMenu 
-                    contextMenu={contextMenu} 
-                    onClose={() => setContextMenu(null)}
-                    onAction={handleMenuAction}
-                    hasClipboard={!!clipboardTask}
-                />
-            )}
-
-            <ScheduleHeader 
-                projects={state.projects} activeProjectId={activeProject?.id || ''} 
-                onProjectChange={(e) => navigate(`/schedule/${e.target.value}`)}
-                onBack={() => navigate('/projectList')} viewMode={viewMode} setViewMode={setViewMode}
-                runSchedule={runSchedule} isScheduling={isScheduling}
-            />
-
-            <ScheduleToolbar 
-                showCriticalPath={showCriticalPath} setShowCriticalPath={setShowCriticalPath}
-                activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
-                baselines={project.baselines}
-            />
-
-            <div className="flex-1 flex overflow-hidden relative">
-                <div 
-                    ref={containerRef} 
-                    className="flex-1 flex overflow-hidden relative nexus-empty-pattern" 
-                    onContextMenu={(e) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task: null }); }}
-                >
-                     <GanttTaskList 
-                        ref={listRef} renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes}
-                        selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask}
-                        virtualItems={virtualItems} totalHeight={totalHeight} rowHeight={ROW_HEIGHT} onScroll={handleScroll}
-                        onRowContextMenu={(e, task) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task }); }}
-                    />
-                    <GanttTimeline 
-                        ref={timelineRef} timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap}
-                        projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT}
-                        showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask}
-                        projectTasks={project.tasks || []} calendar={projectCalendar} ganttContainerRef={containerRef} 
-                        getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask}
-                        virtualItems={virtualItems} totalHeight={totalHeight} onScroll={handleScroll}
-                        onTimelineContextMenu={(e, task) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task }); }}
-                    />
-                </div>
+    const headerActions = (
+        <div className="flex items-center gap-3">
+             <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                {['day', 'week', 'month'].map((mode) => (
+                    <button
+                        key={mode}
+                        onClick={() => setViewMode(mode as any)}
+                        className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${viewMode === mode ? 'bg-white shadow text-nexus-700' : 'text-slate-500 hover:text-slate-900'}`}
+                    >
+                        {mode}
+                    </button>
+                ))}
             </div>
-            
-            <div className={`h-8 ${theme.colors.surface} border-t ${theme.colors.border} flex items-center justify-between px-4 text-[10px] text-slate-500 font-medium z-40 select-none`}>
-                 <div>Data Date: <span className="font-bold text-slate-800">{new Date().toLocaleDateString()}</span></div>
-                 <div className="flex gap-4">
-                     <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> Critical: {project.tasks?.filter(t=>t.critical).length}</span>
-                     <span>Total: {project.tasks?.length || 0}</span>
-                 </div>
-            </div>
+            <select 
+                className={`hidden md:block bg-slate-50 border ${theme.colors.border} text-sm font-bold text-slate-700 rounded-lg py-1.5 px-3 focus:ring-2 focus:ring-nexus-500 outline-none w-64`}
+                value={activeProject?.id || ''}
+                onChange={(e) => navigate(`/schedule/${e.target.value}`)}
+            >
+                {state.projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.code}: {p.name}</option>
+                ))}
+            </select>
+            <Button variant="outline" size="sm" icon={Download} className="hidden sm:flex">Export</Button>
+            <Button onClick={runSchedule} isLoading={isScheduling} icon={Play} size="sm">Schedule (F9)</Button>
+             <button onClick={() => navigate('/projectList')} className={`p-2 rounded-full hover:bg-slate-100 text-slate-500`}>
+                <ArrowLeft size={20} />
+            </button>
         </div>
+    );
+
+    return (
+        <PageLayout
+            title="Master Schedule"
+            subtitle="Real-time Critical Path Method (CPM) Explorer"
+            icon={Calendar}
+            actions={headerActions}
+        >
+            <PanelContainer
+                header={
+                    <ScheduleToolbar 
+                        showCriticalPath={showCriticalPath} setShowCriticalPath={setShowCriticalPath}
+                        activeBaselineId={activeBaselineId} setActiveBaselineId={setActiveBaselineId}
+                        baselines={project.baselines}
+                    />
+                }
+            >
+                <div className="flex-1 flex overflow-hidden relative">
+                     {contextMenu && (
+                        <ScheduleContextMenu 
+                            contextMenu={contextMenu} 
+                            onClose={() => setContextMenu(null)}
+                            onAction={handleMenuAction}
+                            hasClipboard={!!clipboardTask}
+                        />
+                    )}
+                    <div 
+                        ref={containerRef} 
+                        className="flex-1 flex overflow-hidden relative nexus-empty-pattern" 
+                        onContextMenu={(e) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task: null }); }}
+                    >
+                         <GanttTaskList 
+                            ref={listRef} renderList={flatRenderList} showTaskList={showTaskList} expandedNodes={expandedNodes}
+                            selectedTask={selectedTask} toggleNode={toggleNode} setSelectedTask={setSelectedTask}
+                            virtualItems={virtualItems} totalHeight={totalHeight} rowHeight={ROW_HEIGHT} onScroll={handleScroll}
+                            onRowContextMenu={(e, task) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task }); }}
+                        />
+                        <GanttTimeline 
+                            ref={timelineRef} timelineHeaders={timelineHeaders} renderList={flatRenderList} taskRowMap={taskRowMap}
+                            projectStart={projectStart} projectEnd={projectEnd} dayWidth={DAY_WIDTH} rowHeight={ROW_HEIGHT}
+                            showCriticalPath={showCriticalPath} baselineMap={baselineMap} selectedTask={selectedTask}
+                            projectTasks={project.tasks || []} calendar={projectCalendar} ganttContainerRef={containerRef} 
+                            getStatusColor={getStatusColor} handleMouseDown={handleMouseDown} setSelectedTask={setSelectedTask}
+                            virtualItems={virtualItems} totalHeight={totalHeight} onScroll={handleScroll}
+                            onTimelineContextMenu={(e, task) => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, task }); }}
+                        />
+                    </div>
+                </div>
+                 <div className={`h-8 ${theme.colors.surface} border-t ${theme.colors.border} flex items-center justify-between px-4 text-[10px] text-slate-500 font-medium z-40 select-none bg-white`}>
+                     <div>Data Date: <span className="font-bold text-slate-800">{new Date().toLocaleDateString()}</span></div>
+                     <div className="flex gap-4">
+                         <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> Critical: {project.tasks?.filter(t=>t.critical).length}</span>
+                         <span>Total: {project.tasks?.length || 0}</span>
+                     </div>
+                </div>
+            </PanelContainer>
+        </PageLayout>
     );
 };
 
