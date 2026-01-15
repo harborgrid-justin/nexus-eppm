@@ -1,15 +1,13 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Globe, PieChart, Briefcase, ChevronRight, Zap } from 'lucide-react';
+import { Globe, PieChart, Briefcase, ChevronRight } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useI18n } from '../../context/I18nContext';
-import { useData } from '../../context/DataContext';
 
 export const PortfolioCommandBar: React.FC = () => {
     const navigate = useNavigate();
     const theme = useTheme();
-    const { state } = useData();
     const { t } = useI18n();
     
     return (

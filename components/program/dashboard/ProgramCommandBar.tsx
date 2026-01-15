@@ -3,6 +3,7 @@ import React from 'react';
 import { Layers, Target, DollarSign, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
+import { useI18n } from '../../../context/I18nContext';
 
 interface ProgramCommandBarProps {
     onCreateProgram: () => void;
@@ -11,6 +12,7 @@ interface ProgramCommandBarProps {
 export const ProgramCommandBar: React.FC<ProgramCommandBarProps> = ({ onCreateProgram }) => {
     const navigate = useNavigate();
     const theme = useTheme();
+    const { t } = useI18n();
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

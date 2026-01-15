@@ -1,7 +1,7 @@
 
 import React from 'react';
 import StatCard from '../../shared/StatCard';
-import { DollarSign, TrendingUp, Layers, ShieldAlert, Activity } from 'lucide-react';
+import { DollarSign, Layers, ShieldAlert, Activity } from 'lucide-react';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import { useTheme } from '../../../context/ThemeContext';
 

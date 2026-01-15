@@ -1,21 +1,22 @@
+
 import React, { useState } from 'react';
 import { 
   Users, Shield, Scale, BookOpen, ArrowRight, Layers, Plus, Edit2, Trash2
 } from 'lucide-react';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { useTheme } from '../../context/ThemeContext';
-import { useData } from '../../context/DataContext';
-import { Project, ScoringCriterion } from '../../types/index';
-import { StatusBadge } from '../common/StatusBadge';
-import { SidePanel } from '../ui/SidePanel';
-import { PORTFOLIO_CATEGORIES } from '../../constants/index';
-import { usePortfolioData } from '../../hooks/usePortfolioData';
+import { Card } from './ui/Card';
+import { Button } from './ui/Button';
+import { useTheme } from '../context/ThemeContext';
+import { useData } from '../context/DataContext';
+import { Project, ScoringCriterion } from '../types/index';
+import { StatusBadge } from './common/StatusBadge';
+import { SidePanel } from './ui/SidePanel';
+import { PORTFOLIO_CATEGORIES } from '../constants/index';
+import { usePortfolioData } from '../hooks/usePortfolioData';
 
 const PortfolioStrategyFramework: React.FC = () => {
   const theme = useTheme();
-  const { dispatch, state: { governance } } = useData(); // Keep useData for dispatch and governance
-  const { projects, strategicGoals } = usePortfolioData(); // Use dedicated hook for portfolio data
+  const { dispatch, state: { governance } } = useData(); 
+  const { projects, strategicGoals } = usePortfolioData(); 
   
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);

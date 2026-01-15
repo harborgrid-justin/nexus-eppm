@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { TradeoffScenario } from '../../types';
@@ -6,7 +7,6 @@ import { generateId } from '../../utils/formatters';
 export const useProgramTradeoffLogic = (programId: string) => {
     const { state, dispatch } = useData();
     const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
-    const [isCreating, setIsCreating] = useState(false);
 
     // Filter scenarios for this program - assuming we add programId to TradeoffScenario later, 
     // but for now relying on global list or implicit context if needed.

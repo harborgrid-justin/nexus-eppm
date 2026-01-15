@@ -2,7 +2,6 @@
 import { DataState, Action, TaskStatus } from '../../types/index';
 import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
-import { getDaysDiff } from '../dateUtils';
 
 export const applyProjectRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
   const projects = [...state.projects];

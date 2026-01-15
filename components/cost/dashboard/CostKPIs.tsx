@@ -1,3 +1,4 @@
+
 import React from 'react';
 import StatCard from '../../shared/StatCard';
 import { DollarSign, ShoppingCart, Coins, Layers, Activity } from 'lucide-react';

@@ -4,6 +4,7 @@ import { SystemAlert } from '../../types/business';
 import { createAlert } from './common';
 
 export const applyProcurementRules = (state: DataState, action: Action, alerts: SystemAlert[]) => {
+    const today = new Date();
 
     // Rule 35: Active Contract with Blacklisted Vendor
     state.contracts.forEach(c => {
@@ -17,7 +18,6 @@ export const applyProcurementRules = (state: DataState, action: Action, alerts: 
     });
 
     // Rule 36: Contract Expiry Imminent
-    const today = new Date();
     state.contracts.forEach(c => {
         if (c.status === 'Active') {
             const endDate = new Date(c.endDate);
@@ -69,9 +69,6 @@ export const applyProcurementRules = (state: DataState, action: Action, alerts: 
         }
     });
 
-    // Rule 41: Material Shortage (Physical)
-    // Checked via Inventory logic in components mostly, but can alert here
-    
     // Rule 42: Claims Open too long
     state.claims.forEach(cl => {
         if (cl.status === 'Open') {
