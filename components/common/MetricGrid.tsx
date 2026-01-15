@@ -1,11 +1,21 @@
-
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
-export const MetricGrid: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface MetricGridProps {
+    children: React.ReactNode;
+    columns?: 2 | 3 | 4;
+}
+
+export const MetricGrid: React.FC<MetricGridProps> = ({ children, columns = 4 }) => {
     const theme = useTheme();
+    const columnClass = {
+        2: 'grid-cols-1 sm:grid-cols-2',
+        3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+        4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+    }[columns];
+
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap} animate-nexus-in`}>
+        <div className={`grid ${columnClass} ${theme.layout.gridGap} animate-nexus-in`}>
             {children}
         </div>
     );

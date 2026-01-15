@@ -1,12 +1,11 @@
-
 import React from 'react';
 import StatCard from '../../shared/StatCard';
-import { DollarSign, ShoppingCart, Coins, Layers } from 'lucide-react';
+import { DollarSign, ShoppingCart, Coins, Layers, Activity } from 'lucide-react';
 import { formatCompactCurrency } from '../../../utils/formatters';
 import { useTheme } from '../../../context/ThemeContext';
 
 interface CostKPIsProps {
-    financials: { revisedBudget: number; pendingCOAmount: number };
+    financials: { revisedBudget: number; pendingCOAmount: number; budgetUtilization: number };
     projectBudget: number;
     committedCosts: number;
     costOfQuality: number;
@@ -19,11 +18,33 @@ export const CostKPIs: React.FC<CostKPIsProps> = ({
 }) => {
     const theme = useTheme();
     return (
-        <div className={`grid grid-cols-1 md:grid-cols-4 ${theme.layout.gridGap} transition-opacity ${isPending ? 'opacity-50' : 'opacity-100'}`}>
-            <StatCard title="Revised Budget" value={formatCompactCurrency(financials.revisedBudget)} subtext="Approved Baseline" icon={DollarSign} />
-            <StatCard title="Committed Cost" value={formatCompactCurrency(committedCosts)} subtext="Issued PO Ledger" icon={ShoppingCart} />
-            <StatCard title="Cost of Quality" value={formatCompactCurrency(costOfQuality)} subtext="Rework & Defects" icon={Coins} trend="down"/>
-            <StatCard title="EAC (Forecast)" value={formatCompactCurrency(eac)} subtext={`Target: ${formatCompactCurrency(projectBudget)}`} icon={Layers} trend={projectBudget >= eac ? 'up' : 'down'} />
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${theme.layout.gridGap} transition-all duration-700 ${isPending ? 'opacity-40 blur-[2px]' : 'opacity-100'}`}>
+            <StatCard 
+                title="Authorization Basis" 
+                value={formatCompactCurrency(financials.revisedBudget)} 
+                subtext={`Pending: ${formatCompactCurrency(financials.pendingCOAmount)}`} 
+                icon={DollarSign} 
+            />
+            <StatCard 
+                title="Thread Commitments" 
+                value={formatCompactCurrency(committedCosts)} 
+                subtext={`${financials.budgetUtilization.toFixed(1)}% Saturation`} 
+                icon={ShoppingCart} 
+            />
+            <StatCard 
+                title="Friction (CoQ)" 
+                value={formatCompactCurrency(costOfQuality)} 
+                subtext="Rework & NCR impact" 
+                icon={Coins} 
+                trend="down"
+            />
+            <StatCard 
+                title="EAC Projection" 
+                value={formatCompactCurrency(eac)} 
+                subtext={`Limit: ${formatCompactCurrency(projectBudget)}`} 
+                icon={Activity} 
+                trend={projectBudget >= eac ? 'up' : 'down'} 
+            />
         </div>
     );
 };

@@ -1,5 +1,5 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryProps {
@@ -16,10 +16,12 @@ interface ErrorBoundaryState {
  * Enterprise Error Boundary
  * Provides a fallback UI and diagnostic information when sub-modules fail.
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+// Explicitly using React.Component with generics to fix "Property does not exist" errors in certain TypeScript environments
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   // Initialize state in constructor to satisfy strict type checking
   constructor(props: ErrorBoundaryProps) {
     super(props);
+    // Fixed: state property is correctly typed via React.Component generics
     this.state = {
       hasError: false,
       error: undefined,
@@ -32,15 +34,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Accessing props via this context
+    // Fixed: props property is correctly typed via React.Component generics
     console.error(`[Nexus Error] ${this.props.name || 'Component'}:`, error, errorInfo);
   }
 
   public handleRetry = () => {
     // Using setState to reset error state
+    // Fixed: setState method is correctly typed via React.Component generics
     this.setState({ hasError: false, error: undefined });
   };
 
   public render() {
+    // Fixed: state and props properties are recognized correctly
     if (this.state.hasError) {
       return (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 m-6 nexus-empty-pattern shadow-inner min-h-[400px]">

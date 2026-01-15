@@ -10,7 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { 
     PanelLeftClose, PanelLeftOpen, Globe, PieChart, LayoutTemplate, 
     ShieldAlert, Briefcase, Users, CheckSquare, FileText, Database, 
-    Settings, Palette 
+    Settings, Palette, Target
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
@@ -32,34 +32,34 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { t } = useI18n();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
-  const sidebarWidth = isCollapsed ? 'w-16' : 'w-64';
+  const sidebarWidth = isCollapsed ? 'w-20' : 'w-72';
 
   const filteredNavStructure = useMemo(() => {
     const structure = [
         {
-            id: 'strategy', label: t('nav.strategy', 'Strategy'), 
+            id: 'strategy', label: t('nav.strategy', 'Strategic Planning'), 
             items: [
-                { id: 'portfolio', label: t('nav.portfolio', 'Portfolio'), icon: Globe, permission: 'project:read' }, 
-                { id: 'programs', label: t('nav.programs', 'Programs'), icon: PieChart, permission: 'project:read' },
-                { id: 'unifier', label: t('nav.unifier', 'Unifier'), icon: LayoutTemplate, permission: 'financials:read' },
-                { id: 'enterpriseRisks', label: t('nav.enterpriseRisks', 'Global Risk'), icon: ShieldAlert, permission: 'project:read' },
+                { id: 'portfolio', label: t('nav.portfolio', 'Investment Board'), icon: Globe, permission: 'project:read' }, 
+                { id: 'programs', label: t('nav.programs', 'Program Hub'), icon: PieChart, permission: 'project:read' },
+                { id: 'unifier', label: t('nav.unifier', 'Unifier Automation'), icon: LayoutTemplate, permission: 'financials:read' },
+                { id: 'enterpriseRisks', label: t('nav.enterpriseRisks', 'Global Heatmap'), icon: ShieldAlert, permission: 'project:read' },
             ]
         },
         {
-            id: 'execution', label: t('nav.execution', 'Execution'),
+            id: 'execution', label: t('nav.execution', 'Execution Control'),
             items: [
-                { id: 'projectList', label: t('nav.projects', 'Projects'), icon: Briefcase, permission: 'project:read' },
-                { id: 'resources', label: t('nav.resources', 'Resources'), icon: Users, permission: 'resource:read' },
-                { id: 'myWork', label: t('nav.myWork', 'Work'), icon: CheckSquare, permission: 'app:access' },
-                { id: 'reports', label: t('nav.reports', 'Reports'), icon: FileText, permission: 'project:read' },
+                { id: 'projectList', label: t('nav.projects', 'Project Ledger'), icon: Briefcase, permission: 'project:read' },
+                { id: 'resources', label: t('nav.resources', 'Global Resource Pool'), icon: Users, permission: 'resource:read' },
+                { id: 'myWork', label: t('nav.myWork', 'Personal Workspace'), icon: CheckSquare, permission: 'app:access' },
+                { id: 'reports', label: t('nav.reports', 'Intelligence Hub'), icon: FileText, permission: 'project:read' },
             ]
         },
         {
-            id: 'config', label: t('nav.system', 'System'),
+            id: 'config', label: t('nav.system', 'Infrastructure'),
             items: [
-                { id: 'dataExchange', label: t('nav.data_exchange', 'Exchange'), icon: Database, permission: 'system:configure' },
-                { id: 'admin', label: t('nav.admin', 'Admin'), icon: Settings, permission: 'admin:access' },
-                { id: 'design-system', label: t('nav.design_system', 'Design System'), icon: Palette, permission: 'app:access' },
+                { id: 'dataExchange', label: t('nav.data_exchange', 'ETL Orchestrator'), icon: Database, permission: 'system:configure' },
+                { id: 'admin', label: t('nav.admin', 'Admin Terminal'), icon: Settings, permission: 'admin:access' },
+                { id: 'design-system', label: t('nav.design_system', 'Pattern Library'), icon: Palette, permission: 'app:access' },
             ]
         }
     ];
@@ -73,12 +73,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-      <div className={`fixed inset-y-0 left-0 z-50 ${theme.colors.primary} text-slate-300 flex flex-col h-full border-r border-slate-800 flex-shrink-0 select-none md:relative md:translate-x-0 transition-all duration-300 ease-in-out ${sidebarWidth} shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 z-50 ${theme.colors.primary} text-slate-400 flex flex-col h-full border-r border-white/5 flex-shrink-0 select-none md:relative md:translate-x-0 transition-all duration-500 ease-in-out ${sidebarWidth} shadow-2xl ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <SidebarHeader isCollapsed={isCollapsed} />
-        <button onClick={onToggleCollapse} className="hidden md:flex absolute top-3.5 -right-3.5 w-7 h-7 bg-slate-800 border border-slate-700 rounded-full items-center justify-center text-slate-400 hover:text-white z-50 transition-all hover:bg-slate-700 shadow-lg" title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
-            {isCollapsed ? <PanelLeftOpen size={14}/> : <PanelLeftClose size={14}/>}
+        
+        <button onClick={onToggleCollapse} className="hidden md:flex absolute top-14 -right-4 w-8 h-8 bg-slate-900 border border-white/10 rounded-full items-center justify-center text-slate-500 hover:text-white z-50 transition-all hover:bg-black shadow-2xl active:scale-90" title={isCollapsed ? "Expand Viewport" : "Maximize Space"}>
+            {isCollapsed ? <PanelLeftOpen size={16}/> : <PanelLeftClose size={16}/>}
         </button>
-        <div className="flex-1 overflow-y-auto py-2 space-y-4 scrollbar-hide">
+
+        <div className="flex-1 overflow-y-auto py-6 space-y-8 scrollbar-hide">
             <SidebarNav 
                 activeTab={activeTab} 
                 setActiveTab={setActiveTab} 
@@ -87,12 +89,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                 navStructure={filteredNavStructure} 
             />
         </div>
-        <div className="flex-shrink-0 bg-slate-950/30">
+
+        <div className="flex-shrink-0 bg-black/20 backdrop-blur-md">
              {!isCollapsed && <SidebarPinned setActiveTab={setActiveTab} onClose={onClose} />}
              <SidebarFooter user={user} onProfileOpen={() => setIsProfileOpen(true)} onLogout={logout} isCollapsed={isCollapsed} />
         </div>
       </div>
-      {isOpen && <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-300" onClick={onClose} />}
+      {isOpen && <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-40 md:hidden animate-in fade-in duration-300" onClick={onClose} />}
     </>
   );
 };
