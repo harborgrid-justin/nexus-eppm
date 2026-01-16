@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useTransition } from 'react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { ErrorBoundary } from './ErrorBoundary';
 import ProcurementDashboard from './procurement/ProcurementDashboard';
 import VendorRegistry from './procurement/VendorRegistry';
 import ContractLifecycle from './procurement/ContractLifecycle';
@@ -11,8 +10,7 @@ import ProcurementExecution from './procurement/ProcurementExecution';
 import SupplierPerformance from './procurement/SupplierPerformance';
 import { ShoppingCart, FileText, DollarSign, Award, Users, Briefcase, LayoutDashboard, Scale, ListChecks } from 'lucide-react';
 import { EmptyGrid } from './common/EmptyGrid';
-import { TabbedLayout } from './layout/standard/TabbedLayout';
-import { NavGroup } from './common/ModuleNavigation';
+import { ModuleNavigation, NavGroup } from './common/ModuleNavigation';
 
 const ProcurementManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
@@ -105,22 +103,21 @@ const ProcurementManagement: React.FC = () => {
   };
 
   return (
-    <TabbedLayout
-        title="Procurement Management"
-        subtitle="End-to-end procurement lifecycle from planning to performance."
-        icon={ShoppingCart}
-        navGroups={navStructure}
-        activeGroup={activeGroup}
-        activeItem={activeView}
-        onGroupChange={handleGroupChange}
-        onItemChange={handleViewChange}
-    >
-        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-            <ErrorBoundary name="Procurement Module">
-                {renderContent()}
-            </ErrorBoundary>
+    <div className="flex flex-col h-full bg-white">
+        <div className="flex-shrink-0 border-b border-slate-100">
+             <ModuleNavigation 
+                groups={navStructure}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={handleViewChange}
+                className="bg-transparent border-0 shadow-none"
+             />
         </div>
-    </TabbedLayout>
+        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            {renderContent()}
+        </div>
+    </div>
   );
 };
 

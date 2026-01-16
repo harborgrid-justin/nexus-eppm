@@ -5,8 +5,8 @@ import { PageHeader } from '../../common/PageHeader';
 import { LucideIcon } from 'lucide-react';
 
 interface PageLayoutProps {
-  title: string;
-  subtitle?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
   icon?: LucideIcon;
   actions?: React.ReactNode;
   children: React.ReactNode;

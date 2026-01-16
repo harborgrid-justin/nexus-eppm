@@ -2,7 +2,6 @@
 import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { ErrorBoundary } from './ErrorBoundary';
 import QualityDashboard from './quality/QualityDashboard';
 import QualityPlanEditor from './quality/QualityPlanEditor';
 import QualityControlLog from './quality/QualityControlLog';
@@ -11,11 +10,12 @@ import { QualityStandards } from './quality/QualityStandards';
 import SupplierQuality from './quality/SupplierQuality';
 import CostOfQuality from './quality/CostOfQuality'; 
 import { useQualityManagementLogic } from '../hooks/domain/useQualityManagementLogic';
-import { TabbedLayout } from './layout/standard/TabbedLayout';
+import { ModuleNavigation } from './common/ModuleNavigation';
+import { EmptyGrid } from './common/EmptyGrid';
 
 const QualityManagement: React.FC = () => {
   const { project, qualityReports } = useProjectWorkspace();
-  const projectId = project.id;
+  const projectId = project?.id;
   
   const {
       activeGroup,
@@ -26,6 +26,8 @@ const QualityManagement: React.FC = () => {
       handleViewChange
   } = useQualityManagementLogic();
   
+  if (!project) return <EmptyGrid title="Context Missing" description="No project selected" icon={ShieldCheck} />;
+
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
@@ -48,22 +50,21 @@ const QualityManagement: React.FC = () => {
   };
 
   return (
-    <TabbedLayout
-        title="Quality Management"
-        subtitle="Ensure project deliverables meet standards and requirements."
-        icon={ShieldCheck}
-        navGroups={navGroups}
-        activeGroup={activeGroup}
-        activeItem={activeView}
-        onGroupChange={handleGroupChange}
-        onItemChange={handleViewChange}
-    >
-        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-            <ErrorBoundary name="Quality Module">
-                {renderContent()}
-            </ErrorBoundary>
+    <div className="flex flex-col h-full bg-white">
+        <div className="flex-shrink-0 border-b border-slate-100">
+             <ModuleNavigation 
+                groups={navGroups}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={handleViewChange}
+                className="bg-transparent border-0 shadow-none"
+             />
         </div>
-    </TabbedLayout>
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            {renderContent()}
+        </div>
+    </div>
   );
 };
 

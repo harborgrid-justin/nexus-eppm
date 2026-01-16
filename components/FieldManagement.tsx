@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { HardHat } from 'lucide-react';
-import { ErrorBoundary } from './ErrorBoundary';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useFieldManagementLogic } from '../hooks/domain/useFieldManagementLogic';
-import { TabbedLayout } from './layout/standard/TabbedLayout';
+import { ModuleNavigation } from './common/ModuleNavigation';
+import { EmptyGrid } from './common/EmptyGrid';
 
 // Sub-components
 import DailyLog from './field/DailyLog';
@@ -13,7 +13,7 @@ import PunchList from './field/PunchList';
 
 const FieldManagement: React.FC = () => {
   const { project } = useProjectWorkspace();
-  const projectId = project.id;
+  const projectId = project?.id;
   
   const {
       activeGroup,
@@ -23,6 +23,8 @@ const FieldManagement: React.FC = () => {
       handleGroupChange,
       handleItemChange
   } = useFieldManagementLogic();
+  
+  if (!projectId) return <EmptyGrid title="Context Missing" description="No project selected" icon={HardHat} />;
 
   const renderContent = () => {
     switch (activeView) {
@@ -34,22 +36,21 @@ const FieldManagement: React.FC = () => {
   };
 
   return (
-    <TabbedLayout
-        title="Field Management"
-        subtitle="Site operations, safety compliance, and daily reporting."
-        icon={HardHat}
-        navGroups={navGroups}
-        activeGroup={activeGroup}
-        activeItem={activeView}
-        onGroupChange={handleGroupChange}
-        onItemChange={handleItemChange}
-    >
-        <div className={`flex-1 overflow-hidden relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
-          <ErrorBoundary name="Field Module">
-            {renderContent()}
-          </ErrorBoundary>
+    <div className="flex flex-col h-full bg-white">
+        <div className="flex-shrink-0 border-b border-slate-100">
+             <ModuleNavigation 
+                groups={navGroups}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={handleItemChange}
+                className="bg-transparent border-0 shadow-none"
+             />
         </div>
-    </TabbedLayout>
+        <div className={`flex-1 overflow-hidden relative ${isPending ? 'opacity-70' : 'opacity-100'} transition-opacity duration-200`}>
+            {renderContent()}
+        </div>
+    </div>
   );
 };
 export default FieldManagement;

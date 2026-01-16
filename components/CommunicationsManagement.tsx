@@ -7,7 +7,6 @@ import { useTheme } from '../context/ThemeContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { Button } from './ui/Button';
 import { EmptyGrid } from './common/EmptyGrid';
-import { PageLayout } from './layout/standard/PageLayout';
 import { PanelContainer } from './layout/standard/PanelContainer';
 
 const CommunicationsManagement: React.FC = () => {
@@ -30,20 +29,28 @@ const CommunicationsManagement: React.FC = () => {
 
   if (!project) return null;
 
+  // We are already inside a PanelContainer provided by ProjectWorkspace via PageLayout
+  // So we just need to render the content.
+  // Actually, we moved ProjectWorkspace to use PageLayout, which puts content in a PanelContainer.
+  // But wait, PageLayout -> PanelContainer structure.
+  // CommunicationManagement should just fill the space.
+
   return (
-    <PageLayout
-        title="Communication Registry"
-        subtitle={`Consolidated formal engagements for ${project.code}: ${project.name}`}
-        icon={MessageCircle}
-        actions={canEditProject() ? (
-            <Button variant="primary" icon={Plus} size="md" onClick={() => {}}>Record Engagement</Button>
-        ) : (
-            <div className={`flex items-center gap-2 text-[10px] font-black uppercase ${theme.colors.text.tertiary} ${theme.colors.background} px-4 py-2 rounded-xl border ${theme.colors.border} shadow-sm`}>
-               <Lock size={14}/> Read Only Archive
-            </div>
-        )}
-    >
-        <PanelContainer>
+    <div className="flex flex-col h-full bg-white">
+        <div className={`p-4 border-b ${theme.colors.border} flex justify-between items-center bg-slate-50/50 flex-shrink-0`}>
+             <h3 className="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase tracking-widest">
+                <MessageSquare size={16} className="text-nexus-600"/> Communication Registry
+             </h3>
+             {canEditProject() ? (
+                <Button variant="primary" icon={Plus} size="sm" onClick={() => {}}>Record Engagement</Button>
+            ) : (
+                <div className={`flex items-center gap-2 text-[10px] font-black uppercase ${theme.colors.text.tertiary} ${theme.colors.background} px-4 py-2 rounded-xl border ${theme.colors.border} shadow-sm`}>
+                   <Lock size={14}/> Read Only Archive
+                </div>
+            )}
+        </div>
+
+        <div className="flex-1 overflow-hidden relative">
           {!hasLogs ? (
               <div className="flex-1 flex h-full items-center justify-center p-8">
                   <EmptyGrid 
@@ -102,8 +109,8 @@ const CommunicationsManagement: React.FC = () => {
                 </div>
             </div>
           )}
-        </PanelContainer>
-    </PageLayout>
+        </div>
+    </div>
   );
 };
 

@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { Sliders, Loader2 } from 'lucide-react';
-import { ErrorBoundary } from './ErrorBoundary';
+import { Sliders } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
 import { useScopeManagementLogic } from '../hooks/domain/useScopeManagementLogic';
-import { TabbedLayout } from './layout/standard/TabbedLayout';
 import { EmptyGrid } from './common/EmptyGrid';
+import { ModuleNavigation } from './common/ModuleNavigation';
 
 // Sub-components
 import ScopeDashboard from './scope/ScopeDashboard';
@@ -25,7 +24,6 @@ const ScopeManagement: React.FC = () => {
       handleViewChange
   } = useScopeManagementLogic();
 
-  // Handle case where project is undefined
   if (!project) return (
       <div className="h-full flex items-center justify-center p-8">
           <EmptyGrid 
@@ -47,22 +45,21 @@ const ScopeManagement: React.FC = () => {
   };
 
   return (
-    <TabbedLayout
-        title="Project Scope Management"
-        subtitle="Define, validate, and control project deliverables through the Work Breakdown Structure."
-        icon={Sliders}
-        navGroups={navStructure}
-        activeGroup={activeGroup}
-        activeItem={activeView}
-        onGroupChange={handleGroupChange}
-        onItemChange={handleViewChange}
-    >
-        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'} flex flex-col`}>
-          <ErrorBoundary name="Scope Module">
-            {renderContent()}
-          </ErrorBoundary>
+    <div className="flex flex-col h-full bg-white">
+        <div className="flex-shrink-0 border-b border-slate-100">
+             <ModuleNavigation 
+                groups={navStructure}
+                activeGroup={activeGroup}
+                activeItem={activeView}
+                onGroupChange={handleGroupChange}
+                onItemChange={handleViewChange}
+                className="bg-transparent border-0 shadow-none"
+             />
         </div>
-    </TabbedLayout>
+        <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            {renderContent()}
+        </div>
+    </div>
   );
 };
 export default ScopeManagement;

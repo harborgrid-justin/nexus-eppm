@@ -1,6 +1,6 @@
 
-import React, { Suspense } from 'react';
-import { Network, GanttChartSquare, GitBranch, Briefcase } from 'lucide-react';
+import React, { Suspense, useMemo } from 'react';
+import { Network, GanttChartSquare, GitBranch, Briefcase, Share2, GitMerge } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ModuleNavigation } from './common/ModuleNavigation';
 import { useTheme } from '../context/ThemeContext';
@@ -12,10 +12,15 @@ import { EmptyGrid } from './common/EmptyGrid';
 import { useNavigate } from 'react-router-dom';
 import { ProjectContent } from './project/ProjectContent';
 import { PanelContainer } from './layout/standard/PanelContainer';
+import { PageLayout } from './layout/standard/PageLayout';
+import { Button } from './ui/Button';
+import { formatInitials } from '../utils/formatters';
+import { useData } from '../context/DataContext';
 
 const ProjectWorkspace: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
+  const { dispatch } = useData();
   const navigate = useNavigate();
   
   const {
@@ -37,15 +42,80 @@ const ProjectWorkspace: React.FC = () => {
       );
   }
 
+  const { project } = projectData;
+
+  const handleShare = async () => {
+      if (navigator.share) {
+          try {
+              await navigator.share({
+                  title: `Nexus Project: ${project.name}`,
+                  text: `Check out the status of ${project.name} on Nexus PPM.`,
+                  url: window.location.href
+              });
+          } catch (error) {
+              console.log('Error sharing:', error);
+          }
+      } else {
+          navigator.clipboard.writeText(window.location.href);
+          alert("Share link copied to system clipboard.");
+      }
+  };
+
+  // Custom Title Component for PageLayout
+  const ProjectTitle = (
+      <div className="flex items-center gap-4">
+           <div className={`w-12 h-12 rounded-xl ${theme.colors.primary} flex items-center justify-center text-white font-black text-lg shadow-lg border border-white/10 shrink-0`}>
+               {formatInitials(project.name)}
+           </div>
+           <div>
+               <h1 className={`${theme.typography.h1} leading-none mb-1`}>{project.name}</h1>
+               <div className="flex items-center gap-2">
+                   <span className="text-[10px] font-mono font-bold text-slate-400 uppercase bg-slate-100 px-1.5 rounded">{project.code}</span>
+                   {project.isReflection && (
+                       <span className="flex items-center gap-1 text-[10px] font-bold text-purple-600 bg-purple-50 px-2 rounded-full border border-purple-100">
+                           <GitBranch size={10}/> Sandbox Reflection
+                       </span>
+                   )}
+               </div>
+           </div>
+      </div>
+  );
+
+  const ProjectActions = (
+      <>
+        <Button variant="ghost" size="sm" onClick={handleShare} icon={Share2}>Share</Button>
+        {!project.isReflection && (
+            <Button 
+                onClick={() => dispatch({ type: 'PROJECT_CREATE_REFLECTION', payload: { sourceProjectId: project.id } })} 
+                variant="outline" 
+                size="sm" 
+                icon={GitBranch}
+            >
+                Branch Reflection
+            </Button>
+        )}
+        {project.isReflection && (
+            <Button 
+                onClick={() => dispatch({ type: 'PROJECT_MERGE_REFLECTION', payload: { reflectionId: project.id } })} 
+                variant="primary" 
+                size="sm" 
+                icon={GitMerge}
+            >
+                Commit Merge
+            </Button>
+        )}
+      </>
+  );
+
   return (
     <ProjectWorkspaceProvider value={projectData}>
-        <div className={`h-full w-full flex flex-col ${theme.colors.background} p-4 md:p-6`}>
-            {projectData.project.isReflection && (
-                <div className={`${theme.colors.semantic.warning.bg} ${theme.colors.semantic.warning.text} px-4 py-2 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm mb-4 rounded-xl border ${theme.colors.semantic.warning.border}`}>
-                    <GitBranch size={16} /> {t('project.sandbox_warning', 'Sandbox Mode: Simulation Project')}
-                </div>
-            )}
-            
+        <PageLayout
+            title={ProjectTitle}
+            subtitle={`${project.category || 'General'} • Managed by ${project.managerId}`}
+            actions={ProjectActions}
+            // We pass null icon because we handle it in custom title
+            icon={undefined} 
+        >
             <PanelContainer 
                 header={
                     <div className="relative">
@@ -58,7 +128,7 @@ const ProjectWorkspace: React.FC = () => {
                             className="bg-transparent border-0 shadow-none"
                         />
                         {activeArea === 'schedule' && (
-                            <div className={`absolute top-1/2 right-6 -translate-y-1/2 flex ${theme.colors.surface} p-1 rounded-lg border ${theme.colors.border} z-30 shadow-md`}>
+                            <div className={`hidden md:flex absolute top-1/2 right-6 -translate-y-1/2 ${theme.colors.surface} p-1 rounded-lg border ${theme.colors.border} z-30 shadow-md`}>
                                 <button onClick={() => setScheduleView('gantt')} className={`p-2 rounded-md transition-all ${scheduleView === 'gantt' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} title="Gantt"><GanttChartSquare size={18} /></button>
                                 <button onClick={() => setScheduleView('network')} className={`p-2 rounded-md transition-all ${scheduleView === 'network' ? 'bg-slate-100 text-nexus-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`} title="Network"><Network size={18} /></button>
                             </div>
@@ -76,7 +146,7 @@ const ProjectWorkspace: React.FC = () => {
                     </ErrorBoundary>
                 </div>
             </PanelContainer>
-        </div>
+        </PageLayout>
     </ProjectWorkspaceProvider>
   );
 };

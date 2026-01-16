@@ -2,7 +2,6 @@
 import React from 'react';
 import { Users, AlertTriangle } from 'lucide-react';
 import { useProjectWorkspace } from '../context/ProjectWorkspaceContext';
-import { ErrorBoundary } from './ErrorBoundary';
 import ResourcePool from './resources/ResourcePool';
 import ResourceCapacity from './resources/ResourceCapacity';
 import ResourceLeveling from './resources/ResourceLeveling';
@@ -13,7 +12,7 @@ import PhysicalResources from './resources/PhysicalResources';
 import { Resource } from '../types/index';
 import { useResourceManagementLogic } from '../hooks/domain/useResourceManagementLogic';
 import { EmptyGrid } from './common/EmptyGrid';
-import { TabbedLayout } from './layout/standard/TabbedLayout';
+import { ModuleNavigation } from './common/ModuleNavigation';
 
 const ResourceManagement: React.FC = () => {
   const { project, assignedResources } = useProjectWorkspace();
@@ -50,29 +49,28 @@ const ResourceManagement: React.FC = () => {
   };
 
   return (
-    <TabbedLayout
-        title="Resource Management"
-        subtitle={`Plan, staff, and manage resources for ${project.code}: ${project.name}`}
-        icon={Users}
-        actions={
-            overAllocatedResources.length > 0 && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm">
-                    <AlertTriangle size={14}/> {overAllocatedResources.length} Conflicts Detected
+    <div className="flex flex-col h-full bg-white">
+         <div className="flex-shrink-0 border-b border-slate-100 flex items-center justify-between pr-4 bg-slate-50/50">
+             <div className="flex-1">
+                 <ModuleNavigation 
+                    groups={navStructure}
+                    activeGroup={activeGroup}
+                    activeItem={activeView}
+                    onGroupChange={handleGroupChange}
+                    onItemChange={handleViewChange}
+                    className="bg-transparent border-0 shadow-none"
+                 />
+             </div>
+             {overAllocatedResources.length > 0 && (
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                    <AlertTriangle size={14}/> {overAllocatedResources.length} Conflicts
                 </div>
-            )
-        }
-        navGroups={navStructure}
-        activeGroup={activeGroup}
-        activeItem={activeView}
-        onGroupChange={handleGroupChange}
-        onItemChange={handleViewChange}
-    >
-        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-          <ErrorBoundary name="Resource Module">
-            {renderContent()}
-          </ErrorBoundary>
+             )}
         </div>
-    </TabbedLayout>
+        <div className={`flex-1 overflow-hidden transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+            {renderContent()}
+        </div>
+    </div>
   );
 };
 
