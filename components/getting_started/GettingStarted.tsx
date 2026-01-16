@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useData } from '../../context/DataContext';
 import { useTheme } from '../../context/ThemeContext';
-import { PageHeader } from '../common/PageHeader';
 import { 
     Rocket, Layers, PieChart, Briefcase, CheckCircle, 
     Circle, ArrowRight, ShieldCheck, Database,
-    Lock, AlertTriangle
+    Lock, AlertTriangle, PlayCircle, Settings, Users
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -16,13 +15,15 @@ import { useNavigate } from 'react-router-dom';
 import { SystemHealthCheck } from './SystemHealthCheck';
 import { IndustrySeeder } from './IndustrySeeder';
 import { TeamOnboarding } from './TeamOnboarding';
+import { TabbedLayout } from '../layout/standard/TabbedLayout';
+import { NavGroup } from '../common/ModuleNavigation';
 
 export const GettingStarted: React.FC = () => {
     const { state, dispatch } = useData();
     const theme = useTheme();
     const navigate = useNavigate();
     const [isWizardOpen, setIsWizardOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'setup' | 'config' | 'team'>('setup');
+    const [activeTab, setActiveTab] = useState('setup');
 
     // Calculate Setup Progress based on actual Data Provider state
     const checks = [
@@ -49,7 +50,6 @@ export const GettingStarted: React.FC = () => {
     ];
 
     const progress = Math.round((checks.filter(c => c.done).length / checks.length) * 100);
-
     const securityLabel = state.governance.security.mfa ? 'MFA Enabled' : 'Standard Auth';
     const securityColor = state.governance.security.mfa ? 'text-green-600' : 'text-yellow-600';
     const SecurityIcon = state.governance.security.mfa ? ShieldCheck : Lock;
@@ -61,36 +61,36 @@ export const GettingStarted: React.FC = () => {
         }
     };
 
+    const navGroups: NavGroup[] = useMemo(() => [
+        { id: 'onboarding', label: 'Onboarding', items: [
+            { id: 'setup', label: 'Setup & Progress', icon: PlayCircle },
+            { id: 'config', label: 'Environment Config', icon: Settings },
+            { id: 'team', label: 'Team Onboarding', icon: Users }
+        ]}
+    ], []);
+
+    const handleItemChange = (itemId: string) => setActiveTab(itemId);
+
     return (
-        <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} ${theme.layout.sectionSpacing} h-full flex flex-col`}>
-            {isWizardOpen && <SetupWizard onClose={() => setIsWizardOpen(false)} onComplete={() => setIsWizardOpen(false)} />}
-            
-            <PageHeader 
-                title="Getting Started" 
-                subtitle="Day Zero Configuration & Onboarding Hub"
-                icon={Rocket}
-                actions={
-                    <div className="flex gap-2">
-                        <Button variant="secondary" onClick={() => navigate('/portfolio')}>Go to Portfolio</Button>
-                        <Button onClick={() => setIsWizardOpen(true)} icon={Rocket} className="bg-nexus-600 text-white">Re-launch Wizard</Button>
-                    </div>
-                }
-            />
-
-            {/* Navigation Tabs */}
-            <div className="flex gap-4 border-b border-slate-200 mb-6">
-                <button onClick={() => setActiveTab('setup')} className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${activeTab === 'setup' ? 'border-nexus-600 text-nexus-600' : 'border-transparent text-slate-500'}`}>
-                    Setup & Progress
-                </button>
-                <button onClick={() => setActiveTab('config')} className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${activeTab === 'config' ? 'border-nexus-600 text-nexus-600' : 'border-transparent text-slate-500'}`}>
-                    Environment Config
-                </button>
-                <button onClick={() => setActiveTab('team')} className={`pb-2 px-1 text-sm font-bold border-b-2 transition-colors ${activeTab === 'team' ? 'border-nexus-600 text-nexus-600' : 'border-transparent text-slate-500'}`}>
-                    Team Onboarding
-                </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
+        <TabbedLayout
+            title="Getting Started"
+            subtitle="Day Zero Configuration & Onboarding Hub"
+            icon={Rocket}
+            actions={
+                <div className="flex gap-2">
+                    <Button variant="secondary" onClick={() => navigate('/portfolio')}>Go to Portfolio</Button>
+                    <Button onClick={() => setIsWizardOpen(true)} icon={Rocket} className="bg-nexus-600 text-white">Re-launch Wizard</Button>
+                </div>
+            }
+            navGroups={navGroups}
+            activeGroup="onboarding"
+            activeItem={activeTab}
+            onGroupChange={() => {}}
+            onItemChange={handleItemChange}
+        >
+            <div className="flex-1 overflow-y-auto p-6">
+                {isWizardOpen && <SetupWizard onClose={() => setIsWizardOpen(false)} onComplete={() => setIsWizardOpen(false)} />}
+                
                 {activeTab === 'setup' && (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-left-4">
                         {/* Progress Card */}
@@ -212,6 +212,6 @@ export const GettingStarted: React.FC = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </TabbedLayout>
     );
 };

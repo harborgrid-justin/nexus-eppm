@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Palette, Box, LayoutTemplate, Scale, Zap, Type, 
@@ -7,7 +8,6 @@ import {
   Menu, X, ChevronRight, Settings2
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { PageHeader } from './common/PageHeader';
 import { useI18n } from '../context/I18nContext';
 
 import { DesignIntro } from './design/DesignIntro';
@@ -32,6 +32,8 @@ import { DesignWorkflow } from './design/DesignWorkflow';
 import { DesignFinance } from './design/DesignFinance';
 import { DesignLegal } from './design/DesignLegal';
 import { DesignThemeEditor } from './design/DesignThemeEditor';
+import { PageLayout } from './layout/standard/PageLayout';
+import { PanelContainer } from './layout/standard/PanelContainer';
 
 const CATEGORIES = [
   { id: 'intro', key: 'design.cat.intro', icon: Sparkles, component: DesignIntro },
@@ -67,9 +69,8 @@ const DesignSystem: React.FC = () => {
   const ActiveComponent = CATEGORIES.find(c => c.id === activeComponentId)?.component || DesignIntro;
 
   return (
-    <div className={`${theme.layout.pageContainer} ${theme.layout.pagePadding} h-full flex flex-col`}>
-      <PageHeader 
-        title={t('design.title', 'Nexus Design System')} 
+    <PageLayout
+        title={t('design.title', 'Nexus Design System')}
         subtitle={t('design.subtitle', 'Foundational atomic components and enterprise patterns for the PPM workspace.')}
         icon={Palette}
         actions={
@@ -81,88 +82,86 @@ const DesignSystem: React.FC = () => {
             <Menu size={20} />
           </button>
         }
-      />
-      
-      <div className={`${theme.layout.panelContainer} relative flex-1 min-h-0`}>
-        <div className="flex h-full bg-white overflow-hidden">
-          
-          {/* Mobile Overlay */}
-          {isMobileMenuOpen && (
-            <div 
-              className="fixed inset-0 bg-slate-900/60 z-[60] md:hidden backdrop-blur-sm transition-opacity"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          )}
+    >
+        <PanelContainer className="bg-white">
+            <div className="flex h-full bg-white overflow-hidden">
+                {/* Mobile Overlay */}
+                {isMobileMenuOpen && (
+                    <div 
+                    className="fixed inset-0 bg-slate-900/60 z-[60] md:hidden backdrop-blur-sm transition-opacity"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                )}
 
-          {/* Component Sidebar */}
-          <aside 
-            className={`
-              absolute inset-y-0 left-0 z-[70] w-72 bg-slate-50 border-r border-slate-200 flex flex-col h-full shadow-2xl md:shadow-none transition-transform duration-300 ease-in-out
-              md:relative md:translate-x-0 flex-shrink-0
-              ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}
-          >
-            <div className="p-5 border-b border-slate-200 bg-white flex justify-between items-center shrink-0">
-              <h2 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
-                <Box size={14} className="text-nexus-600" /> {t('design.aside_title', 'Pattern Library')}
-              </h2>
-              <button 
-                onClick={() => setIsMobileMenuOpen(false)} 
-                className="md:hidden p-1 hover:bg-slate-100 rounded-md text-slate-400"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            
-            <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 scrollbar-thin">
-              {CATEGORIES.map(category => {
-                const isActive = activeComponentId === category.id;
-                const label = t(category.key, category.id);
-                return (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      setActiveComponentId(category.id);
-                      setIsMobileMenuOpen(false);
-                    }}
+                {/* Component Sidebar */}
+                <aside 
                     className={`
-                      w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all
-                      ${isActive 
-                        ? `bg-white text-nexus-700 shadow-sm border border-slate-200 ring-4 ring-nexus-500/5` 
-                        : `text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent`
-                      }
+                    absolute inset-y-0 left-0 z-[70] w-72 bg-slate-50 border-r border-slate-200 flex flex-col h-full shadow-2xl md:shadow-none transition-transform duration-300 ease-in-out
+                    md:relative md:translate-x-0 flex-shrink-0
+                    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
                     `}
-                  >
-                    <category.icon size={18} className={`shrink-0 ${isActive ? 'text-nexus-600' : 'opacity-40'}`} />
-                    <span className="truncate flex-1 text-left">{label}</span>
-                    {isActive && <ChevronRight size={14} className="text-nexus-400" />}
-                  </button>
-                );
-              })}
-            </nav>
-            
-            <div className="p-4 bg-slate-100/50 border-t border-slate-200">
-                <div className="p-3 bg-white rounded-lg border border-slate-200 text-[10px] text-slate-400 font-mono flex items-center justify-between">
-                    <span>BUILD: 2024.10.12</span>
-                    <span className="text-green-600 font-bold">STABLE</span>
-                </div>
-            </div>
-          </aside>
+                >
+                    <div className="p-5 border-b border-slate-200 bg-white flex justify-between items-center shrink-0">
+                    <h2 className="font-black text-slate-800 text-[10px] uppercase tracking-widest flex items-center gap-2">
+                        <Box size={14} className="text-nexus-600" /> {t('design.aside_title', 'Pattern Library')}
+                    </h2>
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(false)} 
+                        className="md:hidden p-1 hover:bg-slate-100 rounded-md text-slate-400"
+                    >
+                        <X size={18} />
+                    </button>
+                    </div>
+                    
+                    <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 scrollbar-thin">
+                    {CATEGORIES.map(category => {
+                        const isActive = activeComponentId === category.id;
+                        const label = t(category.key, category.id);
+                        return (
+                        <button
+                            key={category.id}
+                            onClick={() => {
+                            setActiveComponentId(category.id);
+                            setIsMobileMenuOpen(false);
+                            }}
+                            className={`
+                            w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all
+                            ${isActive 
+                                ? `bg-white text-nexus-700 shadow-sm border border-slate-200 ring-4 ring-nexus-500/5` 
+                                : `text-slate-500 hover:bg-white hover:text-slate-900 border border-transparent`
+                            }
+                            `}
+                        >
+                            <category.icon size={18} className={`shrink-0 ${isActive ? 'text-nexus-600' : 'opacity-40'}`} />
+                            <span className="truncate flex-1 text-left">{label}</span>
+                            {isActive && <ChevronRight size={14} className="text-nexus-400" />}
+                        </button>
+                        );
+                    })}
+                    </nav>
+                    
+                    <div className="p-4 bg-slate-100/50 border-t border-slate-200">
+                        <div className="p-3 bg-white rounded-lg border border-slate-200 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+                            <span>BUILD: 2024.10.12</span>
+                            <span className="text-green-600 font-bold">STABLE</span>
+                        </div>
+                    </div>
+                </aside>
 
-          {/* Canvas */}
-          <main className="flex-1 flex flex-col min-w-0 bg-white h-full relative overflow-hidden">
-             <div className="flex-1 h-full overflow-y-auto scrollbar-thin p-6 md:p-10 lg:p-16">
-                <div className="max-w-7xl mx-auto w-full">
-                    <ActiveComponent onNavigate={(id: string) => {
-                      setActiveComponentId(id);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }} />
-                </div>
-             </div>
-          </main>
-        </div>
-      </div>
-    </div>
+                {/* Canvas */}
+                <main className="flex-1 flex flex-col min-w-0 bg-white h-full relative overflow-hidden">
+                    <div className="flex-1 h-full overflow-y-auto scrollbar-thin p-6 md:p-10 lg:p-16">
+                        <div className="max-w-7xl mx-auto w-full">
+                            <ActiveComponent onNavigate={(id: string) => {
+                            setActiveComponentId(id);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }} />
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </PanelContainer>
+    </PageLayout>
   );
 };
 

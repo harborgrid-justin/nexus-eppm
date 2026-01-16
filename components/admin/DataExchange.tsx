@@ -1,9 +1,5 @@
 
 import React from 'react';
-import { PageHeader } from '../common/PageHeader';
-import { ModuleNavigation } from '../common/ModuleNavigation';
-import { ErrorBoundary } from '../ErrorBoundary';
-import { useDataExchangeLogic } from '../../hooks/domain/useDataExchangeLogic';
 import { Database, Loader2 } from 'lucide-react';
 import { ExchangeDashboard } from './data/ExchangeDashboard';
 import { IntegrationDesigner } from './data/IntegrationDesigner';
@@ -15,10 +11,11 @@ import { ImportPanel } from './data/ImportPanel';
 import { ExcelSync } from './data/ExcelSync';
 import { XerParser } from './data/XerParser';
 import { ErpConnector } from './data/ErpConnector';
-import { useTheme } from '../../context/ThemeContext';
+import { ErrorBoundary } from '../ErrorBoundary';
+import { useDataExchangeLogic } from '../../hooks/domain/useDataExchangeLogic';
+import { TabbedLayout } from '../layout/standard/TabbedLayout';
 
 const DataExchange: React.FC = () => {
-    const theme = useTheme();
     const {
         activeGroup,
         activeTab,
@@ -45,33 +42,23 @@ const DataExchange: React.FC = () => {
     };
 
     return (
-        <div className={`${theme.layout.pagePadding} ${theme.layout.sectionSpacing} flex flex-col h-full w-full max-w-[var(--spacing-container)] mx-auto`}>
-            <PageHeader 
-                title="Data Exchange Hub" 
-                subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."
-                icon={Database}
-            />
-
-            <div className={`flex flex-col h-full ${theme.colors.surface} rounded-xl border ${theme.colors.border} shadow-sm overflow-hidden`}>
-                <div className={`flex-shrink-0 z-10 rounded-t-xl overflow-hidden border-b ${theme.colors.border} bg-slate-50/50`}>
-                    <ModuleNavigation 
-                        groups={navGroups}
-                        activeGroup={activeGroup}
-                        activeItem={activeTab}
-                        onGroupChange={handleGroupChange}
-                        onItemChange={handleItemChange}
-                        className="bg-transparent border-0 shadow-none"
-                    />
-                </div>
-                
-                <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
-                    {isPending && <div className="absolute inset-0 flex items-center justify-center z-20"><Loader2 className="animate-spin text-nexus-500" /></div>}
-                    <ErrorBoundary name="Data Exchange">
-                        {renderContent()}
-                    </ErrorBoundary>
-                </div>
+        <TabbedLayout
+            title="Data Exchange Hub"
+            subtitle="Enterprise ETL orchestration, legacy parsing, and ERP connectivity."
+            icon={Database}
+            navGroups={navGroups}
+            activeGroup={activeGroup}
+            activeItem={activeTab}
+            onGroupChange={handleGroupChange}
+            onItemChange={handleItemChange}
+        >
+            <div className={`flex-1 overflow-hidden relative transition-opacity duration-200 ${isPending ? 'opacity-70' : 'opacity-100'}`}>
+                {isPending && <div className="absolute inset-0 flex items-center justify-center z-20"><Loader2 className="animate-spin text-nexus-500" /></div>}
+                <ErrorBoundary name="Data Exchange">
+                    {renderContent()}
+                </ErrorBoundary>
             </div>
-        </div>
+        </TabbedLayout>
     );
 };
 

@@ -11,7 +11,7 @@ import { useTheme } from '../context/ThemeContext';
 import { 
     PanelLeftClose, PanelLeftOpen, Globe, PieChart, LayoutTemplate, 
     ShieldAlert, Briefcase, Users, CheckSquare, FileText, Database, 
-    Settings, Palette, Target
+    Settings, Palette, Target, Network, Box, Grid
 } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
 
@@ -59,6 +59,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             id: 'config', label: t('nav.system', 'Infrastructure'),
             items: [
                 { id: 'dataExchange', label: t('nav.data_exchange', 'ETL Orchestrator'), icon: Database, permission: 'system:configure' },
+                { id: 'integrations', label: 'Integration Hub', icon: Network, permission: 'system:configure' },
+                { id: 'extensions', label: 'Extensions', icon: Box, permission: 'app:access' },
+                { id: 'templates', label: 'Template Gallery', icon: Grid, permission: 'app:access' },
                 { id: 'admin', label: t('nav.admin', 'Admin Terminal'), icon: Settings, permission: 'admin:access' },
                 { id: 'design-system', label: t('nav.design_system', 'Pattern Library'), icon: Palette, permission: 'app:access' },
             ]

@@ -1,3 +1,4 @@
+
 import React, { lazy } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
@@ -29,8 +30,12 @@ const ResourceNegotiationHub = lazy(() => import('./components/resources/Resourc
 const StrategicAlignmentBoard = lazy(() => import('./components/portfolio/StrategicAlignmentBoard'));
 const PivotAnalytics = lazy(() => import('./components/reports/PivotAnalytics'));
 
-// Phase 9
+// Phase 9 & Extensions
 const KnowledgeBaseExplorer = lazy(() => import('./components/knowledge/KnowledgeBaseExplorer').then(module => ({ default: module.KnowledgeBaseExplorer })));
+const ExtensionMarketplace = lazy(() => import('./components/ExtensionMarketplace'));
+const ExtensionEngine = lazy(() => import('./components/ExtensionEngine'));
+const TemplateGallery = lazy(() => import('./components/TemplateGallery'));
+const IntegrationHub = lazy(() => import('./components/IntegrationHub'));
 
 export const routes: RouteObject[] = [
     {
@@ -66,6 +71,12 @@ export const routes: RouteObject[] = [
             
             // New Phase 9 Route
             { path: 'knowledge', element: <KnowledgeBaseExplorer /> },
+
+            // Phase 3 & 4 Routes
+            { path: 'extensions', element: <ExtensionMarketplace /> },
+            { path: 'extensions/:id', element: <ExtensionEngine /> }, // Dynamic route handled by wrapper
+            { path: 'templates', element: <TemplateGallery /> },
+            { path: 'integrations', element: <IntegrationHub /> },
         ]
     },
     { path: '/login', element: <LoginPage /> }

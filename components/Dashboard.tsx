@@ -1,11 +1,10 @@
 
 import React, { useState, useTransition, useMemo } from 'react';
-import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target } from 'lucide-react';
+import { Sparkles, Loader2, Globe, TrendingUp, AlertTriangle, Target, LayoutDashboard } from 'lucide-react';
 import { usePortfolioState } from '../hooks/usePortfolioState';
 import { useGeminiAnalysis } from '../hooks/useGeminiAnalysis';
 import { SidePanel } from './ui/SidePanel';
 import { Button } from './ui/Button';
-import { DashboardHeader } from './dashboard/DashboardHeader';
 import { DashboardKPIs } from './dashboard/DashboardKPIs';
 import { DashboardVisuals } from './dashboard/DashboardVisuals';
 import { EmptyGrid } from './common/EmptyGrid';
@@ -15,11 +14,14 @@ import { PortfolioCommandBar } from './dashboard/PortfolioCommandBar';
 import { SystemPulse } from './dashboard/SystemPulse';
 import { useI18n } from '../context/I18nContext';
 import { useData } from '../context/DataContext';
+import { PageLayout } from './layout/standard/PageLayout';
+import { usePermissions } from '../hooks/usePermissions';
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const { t } = useI18n();
   const { state } = useData();
+  const { hasPermission } = usePermissions();
   const { summary, healthDataForChart, budgetDataForChart, projects } = usePortfolioState();
   const { generateReport, report, isGenerating, reset } = useGeminiAnalysis();
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -30,15 +32,52 @@ const Dashboard: React.FC = () => {
   const handleGenerateReport = () => { setIsReportOpen(true); generateReport(projects); };
   const handleViewChange = (t: 'financial' | 'strategic') => startTransition(() => setViewType(t));
 
+  const actions = (
+      <div className="flex gap-2 items-center">
+        <div className={`${theme.colors.background} p-1 rounded-lg flex border ${theme.colors.border} shadow-inner`}>
+          <button 
+            onClick={() => handleViewChange('financial')} 
+            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'financial' ? `${theme.colors.surface} shadow-sm text-nexus-700 ring-1 ring-black/5` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
+          >
+            {t('common.financial', 'Financial')}
+          </button>
+          <button 
+            onClick={() => handleViewChange('strategic')} 
+            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${viewType === 'strategic' ? `${theme.colors.surface} shadow-sm text-nexus-700 ring-1 ring-black/5` : `${theme.colors.text.secondary} hover:${theme.colors.text.primary}`}`}
+          >
+            {t('common.strategic', 'Strategic')}
+          </button>
+        </div>
+        <div className={`h-6 w-px ${theme.colors.border} mx-1 hidden md:block`}></div>
+        <Button 
+            variant="outline"
+            onClick={handleGenerateReport} 
+            disabled={isGenerating} 
+            icon={Sparkles}
+            className={isGenerating ? "opacity-70 cursor-wait" : ""}
+        >
+            {isGenerating ? t('common.analyzing_short', 'Analyzing...') : t('dashboard.ai_briefing', 'AI Briefing')}
+        </Button>
+        {hasPermission('system:configure') && (
+            <Button 
+                onClick={() => navigate('/getting-started')} 
+                className="bg-nexus-600 text-white shadow-md shadow-nexus-500/20"
+                icon={Globe}
+            >
+                {t('portfolio.provision', 'Provision Portfolio')}
+            </Button>
+        )}
+      </div>
+  );
+
   if (summary.totalProjects === 0) {
       return (
-          <div className={`h-full flex flex-col ${theme.layout.pagePadding} animate-in fade-in duration-500`}>
-              <DashboardHeader 
-                onGenerateReport={handleGenerateReport} 
-                isGenerating={isGenerating} 
-                viewType={viewType} 
-                onViewChange={handleViewChange} 
-              />
+        <PageLayout
+            title={t('dashboard.title', 'Executive Portfolio Overview')}
+            subtitle={t('dashboard.subtitle', 'Consolidated KPIs for organizational investment and delivery.')}
+            icon={LayoutDashboard}
+            actions={actions}
+        >
               <div className="flex-1 flex items-center justify-center">
                   <EmptyGrid 
                     title={t('portfolio.not_init', 'Portfolio Not Initialized')}
@@ -48,7 +87,7 @@ const Dashboard: React.FC = () => {
                     onAdd={() => navigate('/getting-started')}
                   />
               </div>
-          </div>
+        </PageLayout>
       );
   }
 
@@ -66,7 +105,13 @@ const Dashboard: React.FC = () => {
   }, [summary, state.governance]);
 
   return (
-    <div className={`h-full overflow-y-auto scrollbar-thin ${theme.layout.pagePadding} animate-in fade-in duration-500`}>
+    <PageLayout
+        title={t('dashboard.title', 'Executive Portfolio Overview')}
+        subtitle={t('dashboard.subtitle', 'Consolidated KPIs for organizational investment and delivery.')}
+        icon={LayoutDashboard}
+        actions={actions}
+        isScrollable={true}
+    >
       <SidePanel 
         isOpen={isReportOpen} 
         onClose={() => { setIsReportOpen(false); reset(); }} 
@@ -84,8 +129,7 @@ const Dashboard: React.FC = () => {
            )}
       </SidePanel>
 
-      <div className={`flex flex-col ${theme.layout.gridGap}`}>
-        <DashboardHeader onGenerateReport={handleGenerateReport} isGenerating={isGenerating} viewType={viewType} onViewChange={handleViewChange} />
+      <div className={`flex flex-col ${theme.layout.gridGap} pb-20`}>
         
         <div className={`p-5 rounded-2xl border flex items-start gap-4 shadow-sm transition-all duration-500 ${
             strategicInsight.type === 'critical' ? 'bg-red-50 border-red-200' : 
@@ -110,7 +154,7 @@ const Dashboard: React.FC = () => {
 
         <SystemPulse summary={summary} />
       </div>
-    </div>
+    </PageLayout>
   );
 };
 export default Dashboard;

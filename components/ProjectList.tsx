@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
-import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2, X, Download, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, List as ListIcon, Layers, Search, Loader2, X, Download, Trash2, Filter } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import ProjectWizard from './projects/ProjectWizard';
 import { ProjectListTable } from './projects/list/ProjectListTable';
@@ -17,11 +17,13 @@ import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 import { PageLayout } from './layout/standard/PageLayout';
 import { PanelContainer } from './layout/standard/PanelContainer';
+import { useI18n } from '../context/I18nContext';
 
 const ProjectList: React.FC = () => {
   const { canEditProject } = usePermissions();
   const { dispatch } = useData();
   const theme = useTheme();
+  const { t } = useI18n();
   const { success, error } = useToast();
   
   const {
@@ -60,6 +62,7 @@ const ProjectList: React.FC = () => {
           const dataToExport = selectedIds.length > 0 
             ? filteredAndStatusProjects.filter(p => selectedIds.includes(p.id)) 
             : filteredAndStatusProjects;
+          
           await ExportService.exportData(dataToExport, 'project_export', 'CSV');
           success("Export Complete", `${dataToExport.length} projects exported to CSV.`);
       } catch (e) {
@@ -70,8 +73,10 @@ const ProjectList: React.FC = () => {
   };
 
   const handleBulkDelete = () => {
-      if(confirm(`Are you sure you want to delete ${selectedIds.length} projects?`)) {
-          selectedIds.forEach(id => dispatch({ type: 'PROJECT_CLOSE', payload: id }));
+      if(confirm(`Are you sure you want to delete ${selectedIds.length} projects? This action cannot be undone.`)) {
+          selectedIds.forEach(id => {
+              dispatch({ type: 'PROJECT_CLOSE', payload: id }); 
+          });
           success("Projects Archived", `${selectedIds.length} projects have been closed/archived.`);
           setSelectedIds([]);
       }
@@ -81,125 +86,133 @@ const ProjectList: React.FC = () => {
       return <ProjectWizard onClose={() => setActiveView('list')} onSave={handleCreateProject} />;
   }
 
-  const headerContent = (
-      <div className={`p-4 flex flex-col md:flex-row justify-between md:items-center gap-4`}>
-          <div className="flex-1">
-              <ModuleNavigation 
-                  groups={navGroups}
-                  activeGroup={activeGroup}
-                  activeItem={activeView}
-                  onGroupChange={() => {}} 
-                  onItemChange={handleViewChange}
-                  className="bg-transparent border-0 shadow-none p-0"
-              />
-          </div>
-          
-          {activeView === 'list' && (
-              <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <Input 
-                          isSearch 
-                          placeholder="Search projects..." 
-                          value={searchTerm} 
-                          onChange={(e) => setSearchTerm(e.target.value)} 
-                          className="w-full sm:w-64"
-                      />
-                      <select 
-                          value={statusFilter} 
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                          className={`h-10 px-3 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none cursor-pointer`}
-                      >
-                          <option value="All">All Status</option>
-                          <option value="Active">Active</option>
-                          <option value="Planned">Planned</option>
-                          <option value="Closed">Closed</option>
-                      </select>
-                  </div>
-                  <Button 
-                      variant="outline" 
-                      size="md" 
-                      icon={isExporting ? Loader2 : Download} 
-                      onClick={handleExport} 
-                      disabled={isExporting}
-                      className="shrink-0"
-                  >
-                      {isExporting ? 'Exporting...' : 'Export'}
-                  </Button>
-              </div>
-          )}
-      </div>
-  );
+  const headerActions = canEditProject() ? (
+      <Button onClick={() => setActiveView('create')} icon={Plus} className="shadow-lg">New Project</Button>
+  ) : null;
 
   return (
     <PageLayout
-        title="Portfolio Execution"
-        subtitle="Operational oversight of the project landscape and global delivery health."
+        title={t('nav.projects', 'Portfolio Execution')}
+        subtitle={t('project.list_subtitle', 'Operational oversight of the project landscape and global delivery health.')}
         icon={Briefcase}
-        actions={canEditProject() && (
-            <Button onClick={() => setActiveView('create')} icon={Plus} className="shadow-lg">New Project</Button>
-        )}
+        actions={headerActions}
     >
-        <PanelContainer header={headerContent}>
-             <div className={`flex-1 overflow-hidden flex flex-col relative transition-opacity duration-300 ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
-                {(isPending || searchTerm !== deferredSearchTerm) && (
-                    <div className="absolute inset-0 flex items-center justify-center z-50 bg-white/30 backdrop-blur-[1px]">
-                        <Loader2 className="animate-spin text-nexus-500" size={32} />
+      <PanelContainer
+        header={
+            <div className={`flex flex-col md:flex-row justify-between md:items-center gap-4 p-4`}>
+                <div className="flex-1">
+                    <ModuleNavigation 
+                        groups={navGroups}
+                        activeGroup={activeGroup}
+                        activeItem={activeView}
+                        onGroupChange={() => {}} 
+                        onItemChange={handleViewChange}
+                        className="bg-transparent border-0 shadow-none p-0"
+                    />
+                </div>
+                
+                {activeView === 'list' && (
+                    <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <Input 
+                                isSearch 
+                                placeholder="Search projects..." 
+                                value={searchTerm} 
+                                onChange={(e) => setSearchTerm(e.target.value)} 
+                                className="w-full sm:w-64"
+                            />
+                            <div className="relative">
+                                <select 
+                                    value={statusFilter} 
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className={`h-10 pl-3 pr-8 border ${theme.colors.border} rounded-lg text-sm bg-white focus:ring-2 focus:ring-nexus-500 outline-none cursor-pointer appearance-none`}
+                                >
+                                    <option value="All">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Planned">Planned</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                                <Filter size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                            </div>
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            size="md" 
+                            icon={isExporting ? Loader2 : Download} 
+                            onClick={handleExport} 
+                            disabled={isExporting}
+                            className="shrink-0"
+                        >
+                            {isExporting ? 'Exporting...' : 'Export'}
+                        </Button>
                     </div>
                 )}
+            </div>
+        }
+      >
+        <div className={`flex-1 overflow-hidden flex flex-col relative transition-opacity duration-300 ${isPending || searchTerm !== deferredSearchTerm ? 'opacity-70' : 'opacity-100'}`}>
+          {(isPending || searchTerm !== deferredSearchTerm) && (
+             <div className="absolute inset-0 flex items-center justify-center z-50 bg-white/30 backdrop-blur-[1px]">
+                <Loader2 className="animate-spin text-nexus-500" size={32} />
+             </div>
+          )}
 
-                {filteredAndStatusProjects.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center h-full">
-                        <EmptyGrid 
-                            title={deferredSearchTerm ? "No Matches Identified" : "Portfolio Registry Null"} 
-                            description={deferredSearchTerm ? `Search for "${deferredSearchTerm}" returned zero results.` : "The enterprise project database is currently unpopulated or filtered."}
-                            onAdd={deferredSearchTerm ? () => setSearchTerm('') : (canEditProject() ? () => setActiveView('create') : undefined)}
-                            actionLabel={deferredSearchTerm ? "Clear Search" : "Initialize Project"}
-                            icon={deferredSearchTerm ? X : Search}
+          {filteredAndStatusProjects.length === 0 ? (
+             <div className="flex-1 flex flex-col items-center justify-center h-full">
+                 <EmptyGrid 
+                    title={deferredSearchTerm ? "No Matches Identified" : "Portfolio Registry Null"} 
+                    description={deferredSearchTerm 
+                        ? `Search for "${deferredSearchTerm}" returned zero results from the project pool.` 
+                        : "The enterprise project database is currently unpopulated or filtered."}
+                    onAdd={deferredSearchTerm ? () => setSearchTerm('') : (canEditProject() ? () => setActiveView('create') : undefined)}
+                    actionLabel={deferredSearchTerm ? "Clear Search" : "Initialize Project"}
+                    icon={deferredSearchTerm ? X : Search}
+                 />
+             </div>
+          ) : (
+             <div className="flex-1 overflow-hidden flex flex-col">
+                {activeView === 'list' && (
+                   <div className="h-full flex flex-col">
+                     <div className="hidden lg:block flex-1 overflow-hidden">
+                       <ProjectListTable 
+                            projects={filteredAndStatusProjects} 
+                            onSelect={handleSelectProject} 
+                            selectable={true}
+                            selectedIds={selectedIds}
+                            onSelectionChange={setSelectedIds}
                         />
-                    </div>
-                ) : (
-                    <div className="flex-1 overflow-hidden flex flex-col">
-                        {activeView === 'list' && (
-                        <div className="h-full flex flex-col">
-                            <div className="hidden lg:block flex-1 overflow-hidden">
-                                <ProjectListTable 
-                                    projects={filteredAndStatusProjects} 
-                                    onSelect={handleSelectProject} 
-                                    selectable={true}
-                                    selectedIds={selectedIds}
-                                    onSelectionChange={setSelectedIds}
-                                />
-                            </div>
-                            <div className={`lg:hidden flex-1 overflow-y-auto ${theme.colors.background}/50 scrollbar-thin`}>
-                                <ProjectListCards projects={filteredAndStatusProjects} onSelect={handleSelectProject} />
-                            </div>
-                            
-                            {selectedIds.length > 0 && (
-                                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-6 z-50">
-                                    <span className="font-bold text-sm whitespace-nowrap">{selectedIds.length} Selected</span>
-                                    <div className="h-4 w-px bg-white/20"></div>
-                                    <button onClick={handleExport} className="flex items-center gap-2 text-xs font-bold hover:text-nexus-400 transition-colors">
-                                        <Download size={14}/> Export
-                                    </button>
-                                    <button onClick={handleBulkDelete} className="flex items-center gap-2 text-xs font-bold hover:text-red-400 transition-colors">
-                                        <Trash2 size={14}/> Close/Archive
-                                    </button>
-                                    <button onClick={() => setSelectedIds([])} className="ml-2 p-1 hover:bg-white/20 rounded-full">
-                                        <X size={14}/>
-                                    </button>
-                                </div>
-                            )}
+                     </div>
+                     <div className={`lg:hidden flex-1 overflow-y-auto ${theme.colors.background}/50 scrollbar-thin`}>
+                       <ProjectListCards projects={filteredAndStatusProjects} onSelect={handleSelectProject} />
+                     </div>
+                     
+                     {/* Bulk Action Bar */}
+                     {selectedIds.length > 0 && (
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-6 animate-in slide-in-from-bottom-6 z-50">
+                            <span className="font-bold text-sm whitespace-nowrap">{selectedIds.length} Selected</span>
+                            <div className="h-4 w-px bg-white/20"></div>
+                            <button onClick={handleExport} className="flex items-center gap-2 text-xs font-bold hover:text-nexus-400 transition-colors">
+                                <Download size={14}/> Export
+                            </button>
+                            <button onClick={handleBulkDelete} className="flex items-center gap-2 text-xs font-bold hover:text-red-400 transition-colors">
+                                <Trash2 size={14}/> Close/Archive
+                            </button>
+                            <button onClick={() => setSelectedIds([])} className="ml-2 p-1 hover:bg-white/20 rounded-full">
+                                <X size={14}/>
+                            </button>
                         </div>
-                        )}
-                        {activeView === 'eps' && (
-                            <div className="h-full overflow-auto bg-white">
-                                <EpsTreeView projects={filteredAndStatusProjects} onSelect={handleSelectProject} />
-                            </div>
-                        )}
-                    </div>
+                     )}
+                   </div>
+                )}
+                {activeView === 'eps' && (
+                   <div className="h-full overflow-auto bg-white">
+                       <EpsTreeView projects={filteredAndStatusProjects} onSelect={handleSelectProject} />
+                   </div>
                 )}
              </div>
-        </PanelContainer>
+          )}
+        </div>
+      </PanelContainer>
     </PageLayout>
   );
 };
