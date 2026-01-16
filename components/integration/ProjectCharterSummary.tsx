@@ -1,20 +1,23 @@
 
 import React, { useMemo } from 'react';
 import { useData } from '../../context/DataContext';
-import { Project, EVMMetrics } from '../../types';
+import { Project } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import { BookOpen } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface ProjectCharterSummaryProps {
     project: Project;
-    financials: { totalPlanned: number; revisedBudget: number };
+    financials: { revisedBudget: number; };
 }
 
 export const ProjectCharterSummary: React.FC<ProjectCharterSummaryProps> = ({ project, financials }) => {
     const { state } = useData();
     const theme = useTheme();
-    const pmName = useMemo(() => state.resources.find(r => r.id === project.managerId)?.name || 'Unassigned', [project, state.resources]);
+    const pmName = useMemo(() => {
+        if (!project.managerId || project.managerId === 'Unassigned') return 'Unassigned';
+        return state.resources.find(r => r.id === project.managerId)?.name || project.managerId;
+    }, [project, state.resources]);
 
     return (
         <div className={`${theme.colors.surface} rounded-2xl border ${theme.colors.border} shadow-sm overflow-hidden flex flex-col`}>

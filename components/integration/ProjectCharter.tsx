@@ -1,20 +1,27 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useProjectWorkspace } from '../../context/ProjectWorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useData } from '../../context/DataContext';
 import { usePermissions } from '../../hooks/usePermissions';
-import { Target, Shield, Users, Briefcase, Info, UserPlus, Activity, Landmark, ShieldCheck } from 'lucide-react';
+import { Target, Shield, Users, Briefcase, Info, UserPlus, Activity, Landmark, ShieldCheck, Plus, Gavel } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import { NarrativeField } from '../common/NarrativeField';
+import { GovernanceDecisionForm } from '../portfolio/GovernanceDecisionForm';
+import { Stakeholder } from '../../types';
+import { generateId } from '../../utils/formatters';
 
 const ProjectCharter: React.FC = () => {
   const { project, stakeholders, financials } = useProjectWorkspace();
   const { state, dispatch } = useData();
   const theme = useTheme();
   const { canEditProject } = usePermissions();
+
+  const [isDecisionOpen, setIsDecisionOpen] = useState(false);
+  const [isAssigningSponsor, setIsAssigningSponsor] = useState(false);
 
   const sponsor = useMemo(() => 
     stakeholders.find(s => s.role === 'Sponsor' || s.interest === 'High'),
@@ -24,11 +31,39 @@ const ProjectCharter: React.FC = () => {
     state.resources.find(r => r.id === project.managerId),
   [state.resources, project.managerId]);
 
+  // Filter decisions relevant to this project
+  const relevantDecisions = useMemo(() => 
+    state.governanceDecisions.filter(d => 
+        d.notes.includes(project.id) || 
+        d.title.includes(project.name) ||
+        d.title.includes(project.code)
+    ),
+  [state.governanceDecisions, project]);
+
   const handleUpdate = (field: string, value: any) => {
       dispatch({
           type: 'PROJECT_UPDATE',
           payload: { projectId: project.id, updatedData: { [field]: value } }
       });
+  };
+
+  const handleAssignSponsor = (resourceId: string) => {
+      const resource = state.resources.find(r => r.id === resourceId);
+      if (!resource) return;
+
+      const newStakeholder: Stakeholder = {
+          id: generateId('SH'),
+          projectId: project.id,
+          name: resource.name,
+          role: 'Sponsor',
+          interest: 'High',
+          influence: 'High',
+          engagementStrategy: 'Manage Closely',
+          userId: resource.userId
+      };
+
+      dispatch({ type: 'PROJECT_ADD_STAKEHOLDER', payload: newStakeholder });
+      setIsAssigningSponsor(false);
   };
 
   return (
@@ -128,15 +163,29 @@ const ProjectCharter: React.FC = () => {
                             )}
                             <div className="flex-1 min-w-0">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Portfolio Sponsor</p>
-                                <p className={`text-sm font-bold truncate ${sponsor ? 'text-slate-900' : 'text-slate-400 italic'}`}>
-                                    {sponsor?.name || 'Unassigned'}
-                                </p>
-                                {sponsor ? (
-                                    <p className="text-[9px] text-green-600 font-black uppercase mt-0.5">Approved Sign-off</p>
+                                {isAssigningSponsor ? (
+                                    <select 
+                                        className="w-full mt-1 p-1.5 text-xs border rounded bg-white"
+                                        onChange={(e) => handleAssignSponsor(e.target.value)}
+                                        onBlur={() => setIsAssigningSponsor(false)}
+                                        autoFocus
+                                    >
+                                        <option value="">Select Sponsor...</option>
+                                        {state.resources.filter(r => r.type === 'Human').map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                                    </select>
                                 ) : (
-                                    <button className="text-[9px] text-nexus-600 font-black uppercase mt-1 flex items-center gap-1 hover:underline">
-                                        <UserPlus size={10}/> Assign Sponsor
-                                    </button>
+                                    <>
+                                        <p className={`text-sm font-bold truncate ${sponsor ? 'text-slate-900' : 'text-slate-400 italic'}`}>
+                                            {sponsor?.name || 'Unassigned'}
+                                        </p>
+                                        {sponsor ? (
+                                            <p className="text-[9px] text-green-600 font-black uppercase mt-0.5">Approved Sign-off</p>
+                                        ) : canEditProject() && (
+                                            <button onClick={() => setIsAssigningSponsor(true)} className="text-[9px] text-nexus-600 font-black uppercase mt-1 flex items-center gap-1 hover:underline">
+                                                <UserPlus size={10}/> Assign Sponsor
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -181,31 +230,40 @@ const ProjectCharter: React.FC = () => {
                 </div>
                 
                 <Card className="p-6 bg-amber-50/30 border-amber-200">
-                    <h4 className="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <ShieldCheck size={14}/> Governance Decisions
-                    </h4>
+                    <div className="flex justify-between items-center mb-3 border-b border-amber-100 pb-2">
+                        <h4 className="text-[10px] font-black text-amber-800 uppercase tracking-widest flex items-center gap-2">
+                            <Gavel size={14}/> Governance Decisions
+                        </h4>
+                        {canEditProject() && (
+                            <button onClick={() => setIsDecisionOpen(true)} className="p-1 hover:bg-amber-100 rounded text-amber-600 transition-colors">
+                                <Plus size={14} />
+                            </button>
+                        )}
+                    </div>
                     <div className="space-y-3">
-                        {state.governanceDecisions.filter(d => d.notes.includes(project.id) || d.title.includes(project.name)).map(d => (
-                            <div key={d.id} className="text-xs p-2 bg-white border border-amber-100 rounded shadow-sm">
+                        {relevantDecisions.length > 0 ? relevantDecisions.map(d => (
+                            <div key={d.id} className="text-xs p-2 bg-white border border-amber-100 rounded shadow-sm hover:shadow-md transition-all">
                                 <div className="flex justify-between mb-1">
                                     <span className="font-bold text-slate-700">{d.date}</span>
-                                    <span className="text-nexus-600 font-black">{d.decision}</span>
+                                    <span className={`font-black ${d.decision === 'Approved' ? 'text-green-600' : 'text-red-500'}`}>{d.decision}</span>
                                 </div>
-                                <p className="text-slate-500 italic">"{d.notes}"</p>
+                                <p className="text-slate-600 font-medium mb-1">{d.title}</p>
+                                <p className="text-slate-400 italic text-[10px]">"{d.notes}"</p>
                             </div>
-                        ))}
-                        {state.governanceDecisions.filter(d => d.notes.includes(project.id) || d.title.includes(project.name)).length === 0 && (
-                            <p className="text-[10px] text-slate-400 italic text-center py-2">No formal decisions logged in current cycle.</p>
-                        )}
-                        {canEditProject() && (
-                            <button className="w-full py-2 mt-2 border border-dashed border-amber-300 rounded text-[10px] font-black text-amber-700 uppercase tracking-widest hover:bg-amber-50">
-                                Log Board Action
-                            </button>
+                        )) : (
+                            <p className="text-[10px] text-slate-400 italic text-center py-4">No formal decisions logged in current cycle.</p>
                         )}
                     </div>
                 </Card>
             </div>
         </div>
+
+        {isDecisionOpen && (
+            <GovernanceDecisionForm
+                isOpen={isDecisionOpen}
+                onClose={() => setIsDecisionOpen(false)}
+            />
+        )}
     </div>
   );
 };
